@@ -9,6 +9,7 @@ This code is in a prototype stage, so there is no backwards-compatibility guaran
 # Installation
 
     git clone https://github.com/mainnet-cash/mainnet-js.git
+    yarn
 
 # Running tests
 
