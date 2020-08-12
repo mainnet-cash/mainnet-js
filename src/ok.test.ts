@@ -1,5 +1,5 @@
-import { ok } from './ok'
+import { ok } from "./ok";
 
-test('basic', () => {
-    expect(ok()).toBe(true);
+test("basic", () => {
+  expect(ok()).toBe(true);
 });

@@ -1,11 +1,13 @@
 {
   "test": "jest",
   "scripts": {
-    "jest": "npx jest"
+    "jest": "npx jest",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",
     "jest": "^26.3.0",
+    "prettier": "^2.0.5",
     "ts-jest": "^26.2.0",
     "typescript": "^3.9.7"
   }
