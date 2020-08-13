@@ -2,7 +2,7 @@
   "test": "jest",
   "scripts": {
     "pretest": "node util/checkBchd.js",
-    "jest": "npx jest"
+    "test": "npx jest"
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",
