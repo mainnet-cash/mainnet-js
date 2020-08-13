@@ -2,12 +2,14 @@
   "test": "jest",
   "scripts": {
     "pretest": "node util/checkBchd.js",
-    "test": "npx jest"
+    "test": "npx jest",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",
     "dotenv": "^8.2.0",
     "jest": "^26.3.0",
+    "prettier": "^2.0.5",
     "ts-jest": "^26.2.0",
     "typescript": "^3.9.7",
     "unzipper": "^0.10.11"

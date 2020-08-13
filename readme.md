@@ -14,7 +14,7 @@ This code is in a prototype stage, so there is no backwards-compatibility guaran
 # Running tests
 
     npx jest
-    
+
 or (a bit slower):
 
     yarn jest

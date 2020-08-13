@@ -1,14 +1,12 @@
 module.exports = {
-    "roots": [
-        "<rootDir>/src"
-    ],
-    "testMatch": [
+    roots: ["<rootDir>/src"],
+    testMatch: [
         "**/__tests__/**/*.+(ts|tsx|js)",
         "**/?(*.)+(spec|test).+(ts|tsx|js)"
     ],
-    "transform": {
+    transform: {
         "^.+\\.(ts|tsx)$": "ts-jest"
     },
-    "globalSetup": "./jest.node.setup.js",
-    "globalTeardown": "./jest.node.teardown.js"
-}
+    globalSetup: "./jest.node.setup.js",
+    globalTeardown: "./jest.node.teardown.js"
+};
