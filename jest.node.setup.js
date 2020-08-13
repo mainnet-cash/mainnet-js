@@ -12,7 +12,7 @@ module.exports = async function () {
             `--rpcpass=${process.env.REGTEST_PASS}`,
             `--miningaddr=${process.env.REGTEST_ADDRESS}`
         ]
-        global.bchDaemon = spawn('./bin/bchd', bchdArgs, { shell: true });
+        global.bchDaemon = spawn('./bin/bchd', bchdArgs, { shell: false });
         console.log("... OKAY")
     } else {
         console.log("...already running")

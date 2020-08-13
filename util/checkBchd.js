@@ -49,12 +49,13 @@ function getArchitecture() {
 }
 
 function getPlatform() {
-    // these maps are given as [nodejs, bchd url]
+    // TODO not sure about cygwin, or if that should be supported.
+    // these maps are given as [nodejsStr, bchdStr]
     const platforms = new Map([
         ['darwin', 'darwin'],
         ['freebsd', 'freebsd'],
         ['linux', 'linux'],
-        ['cygwin', 'linux'], // not sure what to do here
+        ['cygwin', 'linux'], 
         ['openbsd', 'openbsd'],
         ['sunos', 'solaris'],
         ['win32', 'windows']
@@ -113,10 +114,6 @@ function isBchdVersionLatest() {
     const latestVersion = `bchd version ${process.env.BCHD_LATEST}`
     return installedVersion === latestVersion
 }
-
-
-
-
 
 
 // If there is no window, and there is an object called process, assume nodejs
