@@ -9,4 +9,6 @@ module.exports = {
     "transform": {
         "^.+\\.(ts|tsx)$": "ts-jest"
     },
+    "globalSetup": "./jest.node.setup.js",
+    "globalTeardown": "./jest.node.teardown.js"
 }
