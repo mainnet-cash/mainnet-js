@@ -1,5 +1,5 @@
-import { generateBlock } from './generateBlock'
+import { generateBlock } from "./generateBlock";
 
-test('Generate a block on a Regression Network', () => {
-    expect(generateBlock(1)[0].length).toBe(64);
+test("Generate a block on a Regression Network", () => {
+  expect(generateBlock(1)[0].length).toBe(64);
 });
