@@ -4,3 +4,4 @@ module.exports = async function () {
     global.bchDaemon.kill();
     console.log("stopped bchd")
   };
+  
