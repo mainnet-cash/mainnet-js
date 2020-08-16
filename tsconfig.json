@@ -1,0 +1,7 @@
+// tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "lib": ["es2017", "esnext.bigint", "dom"]
+  }
+}

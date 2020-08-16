@@ -10,6 +10,8 @@ module.exports = async function () {
       `--rpclisten=:${process.env.REGTEST_PORT}`,
       `--rpcuser=${process.env.REGTEST_USER}`,
       `--rpcpass=${process.env.REGTEST_PASS}`,
+      `--rpccert=${process.env.RPC_CERT}`, 
+      `--rpckey=${process.env.RPC_KEY}`,  
       `--miningaddr=${process.env.REGTEST_ADDRESS}`,
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
@@ -17,4 +19,5 @@ module.exports = async function () {
   } else {
     console.log("...already running");
   }
+  
 };
