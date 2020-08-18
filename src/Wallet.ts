@@ -191,14 +191,6 @@ export class Wallet {
     }
 
     const compiler = await authenticationTemplateToCompilerBCH(template);
-    const inputLockingBytecode = compiler.generateBytecode('lock', {
-      keys: { privateKeys: { key: this.privateKey } },
-    });
-
-    if (!inputLockingBytecode.success) {
-      console.log(JSON.stringify(inputLockingBytecode))
-      throw new Error(inputLockingBytecode.toString());
-    }
 
     try {
 
@@ -206,7 +198,6 @@ export class Wallet {
       const utxoTxnHash = input.getOutpoint().getHash_asU8()
       const utxoTxnValue = input.getValue()
       
-
       let outputLockingBytecode = cashAddressToLockingBytecode(output.address)
 
       if (!outputLockingBytecode.hasOwnProperty('bytecode') || !outputLockingBytecode.hasOwnProperty('prefix')) {
@@ -239,7 +230,7 @@ export class Wallet {
         ],
         version: 2,
       });
-
+      
       return result
     } catch (error) {
       throw new Error(error.toString())
