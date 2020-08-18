@@ -32,6 +32,7 @@ async function getBchdBinary(dir) {
   const downloadDir = path.resolve(__dirname, `../${dir}`);
   await downloadZipFile(binaryUrl, downloadDir);
   symlinkBchdExecutibles(downloadDir, bchdExecutibleDir, platform);
+  symlinkBchdCertificates(downloadDir)
 }
 
 function getArchitecture() {
@@ -101,6 +102,27 @@ function symlinkBchdExecutibles(dir, zipDir, platform) {
   }
 }
 
+function symlinkBchdCertificates(dir) {
+  // Create links to bchd certificates
+  
+  for (const e of ['rpc.cert', 'rpc.key']) {
+    const bchdhome = getUserHomeFolder()
+    const target = path.resolve(`${bchdhome}/.bchd/${e}`);
+    const symlink = path.resolve(`${dir}/${e}`);
+
+    // Don't recreate links if they already exist
+    if (!fs.existsSync(symlink)) {
+      // Create a symbolic link to the binary.
+      fs.symlinkSync(target, symlink);
+      // Owner and group have full access, everyone may execute.
+      fs.chmodSync(target, 0o440);
+    }
+  }
+}
+
+function getUserHomeFolder() {
+  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+}
 // assureDirectoryExists, checks for a dir, and creates it if it doesn't exist
 function assureDirectoryExists(dir) {
   if (!fs.existsSync(dir)) {

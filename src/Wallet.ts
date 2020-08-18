@@ -4,6 +4,8 @@ import { instantiateSecp256k1 } from "@bitauth/libauth";
 
 // Unstable?
 import {
+  authenticationTemplateP2pkh,
+  authenticationTemplateP2pkhNonHd,
   authenticationTemplateToCompilerBCH,
   bigIntToBinUint64LE,
   cashAddressToLockingBytecode,
@@ -15,15 +17,8 @@ import {
   WalletImportFormatType,
 } from "@bitauth/libauth";
 
-import { p2pkTemplate } from "./templates/p2pkTemplate"
-
-
 import { GrpcClient } from "grpc-bchrpc-node";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
-
-var grpc = require('grpc');
-
-//import { Transaction }
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -51,6 +46,16 @@ class Amount {
     this.amount = SerializedAmount[0]
     this.unit = SerializedAmount[1]
   }
+
+  public inSatoshi(){
+    switch (this.unit){
+      case 'satoshi':
+        return this.amount
+        break;
+      case 'coin':
+        return this.amount/10e8
+    } 
+  }
 }
 
 export type WIFNetworkType = | 'mainnet' | 'testnet'
@@ -69,7 +74,7 @@ export class Wallet {
     this.name = name;
   }
 
-  public async watchOnly(address:string){
+  public async watchOnly(address: string) {
     this.EcAddress = address
     this.network = address.startsWith("bitcoincash:") ? "mainnet" : "testnet"
     this.isTestnet = this.network === "testnet" ? true : false
@@ -85,7 +90,7 @@ export class Wallet {
       return new Error(result as string)
     } else {
       let resultData: PrivateKey = (result as PrivateKey)
-      
+
       this.privateKey = resultData.privateKey
       this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey)
 
@@ -94,11 +99,11 @@ export class Wallet {
 
       this.client = new GrpcClient(
         {
-          url: `https://${process.env.REGTEST_HOST}:${process.env.REGTEST_PORT}`,
+          url: `${process.env.REGTEST_HOST_IP}:${process.env.REGTEST_GRPC_PORT}`,
           testnet: this.isTestnet,
-          rootCertPath: process.env.RPC_CERT,
-          options:  {
-            'grpc.ssl_target_name_override' : process.env.REGTEST_HOST,
+          rootCertPath: `${process.env.BCHD_BIN_DIRECTORY}/${process.env.REGTEST_RPC_CERT}`,
+          options: {
+            'grpc.ssl_target_name_override': process.env.REGTEST_HOST,
             'grpc.default_authority': process.env.REGTEST_HOST,
             "grpc.max_receive_message_length": -1,
           }
@@ -137,20 +142,25 @@ export class Wallet {
   }
 
   public async balance(address: string): Promise<number> {
-    return await this._getBalance(address) / 10e6;
+    return await this._getBalance(address) / 10e8;
   }
 
   private async _processSendRequest(request: SendRequest) {
     if (this.network && this.privateKey) {
       //build transaction
       // get input
-      const utxo = this._getUnspentOutputs(process.env.REGTEST_ADDRESS)[0]
-      let txn = await this._buildP2pkhTransaction(utxo, request)
-      if(txn.success){
-        return await this._submitTransaction(encodeTransaction(txn.transaction))
-      }
+      const utxos = await this._getUnspentOutputs(process.env.REGTEST_ADDRESS)
+      let utxo = utxos.getOutputsList()[0]
+      console.log(`spending from: ${utxo.getOutpoint().getHash_asB64()}`)
+      
+      let txn = await this._buildP2pkhNonHdTransaction(utxo, request)
 
-      //submit transaction
+      // submit transaction
+      if (txn.success) {
+        return await this._submitTransaction(encodeTransaction(txn.transaction))
+      } else {
+        console.log(JSON.stringify(txn))
+      }
 
     } else {
       throw Error(`Wallet ${this.name} hasn't been set with a private key`)
@@ -158,18 +168,23 @@ export class Wallet {
   }
 
   private async _submitTransaction(transaction: Uint8Array): Promise<Uint8Array> {
-
+    
     const res = await this.client.submitTransaction({ txn: transaction });
     return res.getHash_asU8()
   }
 
   private async _getUnspentOutputs(address: string) {
-    return await this.client.getAddressUtxos({ address: address, includeMempool: true })
-
+    try {
+      return await this.client.getAddressUtxos({ address: address, includeMempool: true })
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 
-  private async _buildP2pkhTransaction(input:UnspentOutput, output:SendRequest) {
-    const template = validateAuthenticationTemplate(p2pkTemplate);
+
+  private async _buildP2pkhNonHdTransaction(input: UnspentOutput, output: SendRequest) {
+    const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
 
     if (typeof template === 'string') {
       throw new Error("Transaction template error")
@@ -177,54 +192,58 @@ export class Wallet {
 
     const compiler = await authenticationTemplateToCompilerBCH(template);
     const inputLockingBytecode = compiler.generateBytecode('lock', {
-      keys: { privateKeys: { owner: this.privateKey } },
+      keys: { privateKeys: { key: this.privateKey } },
     });
 
     if (!inputLockingBytecode.success) {
+      console.log(JSON.stringify(inputLockingBytecode))
       throw new Error(inputLockingBytecode.toString());
     }
 
-    const satoshis = 1000000;
+    try {
 
-    const outputIndex = input.getOutpoint().getIndex()
-    const outputHash = input.getOutpoint().getHash_asU8()
+      const utxoIndex = input.getOutpoint().getIndex()
+      const utxoTxnHash = input.getOutpoint().getHash_asU8()
+      const utxoTxnValue = input.getValue()
+      
 
-    let  outputLockingBytecode = cashAddressToLockingBytecode(output.address) 
-    
-    if (!outputLockingBytecode.hasOwnProperty('bytecode') || outputLockingBytecode.hasOwnProperty('prefix')) {
-      throw new Error(outputLockingBytecode.toString());
-    } 
-    outputLockingBytecode = outputLockingBytecode as { bytecode: Uint8Array; prefix: string }
-    
+      let outputLockingBytecode = cashAddressToLockingBytecode(output.address)
 
-    const result = generateTransaction({
-      inputs: [
-        {
-          outpointIndex: outputIndex,
-          outpointTransactionHash: outputHash,
-          sequenceNumber: 0,
-          unlockingBytecode: {
-            compiler: compiler,
-            data: {
-              keys: { privateKeys: { owner: this.privateKey } },
+      if (!outputLockingBytecode.hasOwnProperty('bytecode') || !outputLockingBytecode.hasOwnProperty('prefix')) {
+        throw new Error(outputLockingBytecode.toString());
+      }
+      outputLockingBytecode = outputLockingBytecode as { bytecode: Uint8Array; prefix: string }
+
+      const result = generateTransaction({
+        inputs: [
+          {
+            outpointIndex: utxoIndex,
+            outpointTransactionHash: utxoTxnHash,
+            sequenceNumber: 0,
+            unlockingBytecode: {
+              compiler,
+              data: {
+                keys: { privateKeys: { key: this.privateKey } },
+              },
+              satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
+              script: 'unlock',
             },
-            satoshis: bigIntToBinUint64LE(BigInt(satoshis)),
-            script: 'unlock',
           },
-        },
-      ],
-      locktime: 0,
-      outputs: [
-        {
-          lockingBytecode: outputLockingBytecode.bytecode,
-          satoshis: bigIntToBinUint64LE(BigInt(output.amount)),
-        },
-      ],
-      version: 2,
-    });
+        ],
+        locktime: 0,
+        outputs: [
+          {
+            lockingBytecode: outputLockingBytecode.bytecode,
+            satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+          },
+        ],
+        version: 2,
+      });
 
-    return result
-
+      return result
+    } catch (error) {
+      throw new Error(error.toString())
+    }
   }
 
 }
