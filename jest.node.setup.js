@@ -1,5 +1,5 @@
 // jest.node.setup.js
-require("dotenv").config();
+require("dotenv").config({ path: '.env.regtest' });
 const { spawn } = require("child_process");
 
 module.exports = async function () {
@@ -7,12 +7,12 @@ module.exports = async function () {
   
   if (global.bchDaemon === undefined) {
     const bchdArgs = [
-      "--regtest",
-      `--rpclisten=:${process.env.REGTEST_PORT}`,
-      `--grpclisten=${process.env.REGTEST_HOST_IP}:${process.env.REGTEST_GRPC_PORT}`,
-      `--rpcuser=${process.env.REGTEST_USER}`,
-      `--rpcpass=${process.env.REGTEST_PASS}`,
-      `--miningaddr=${process.env.REGTEST_ADDRESS}`,
+      `--${process.env.NETWORK}`,
+      `--rpclisten=:${process.env.PORT}`,
+      `--grpclisten=${process.env.HOST_IP}:${process.env.GRPC_PORT}`,
+      `--rpcuser=${process.env.RPC_USER}`,
+      `--rpcpass=${process.env.RPC_PASS}`,
+      `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`
     ];

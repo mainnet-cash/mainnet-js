@@ -106,8 +106,8 @@ function symlinkBchdCertificates(dir) {
   // Create links to bchd certificates
   
   for (const e of ['rpc.cert', 'rpc.key']) {
-    const bchdhome = getUserHomeFolder()
-    const target = path.resolve(`${bchdhome}/.bchd/${e}`);
+    const bchdHome = getBchdDataFolder();
+    const target = path.resolve(`${bchdHome}/${e}`);
     const symlink = path.resolve(`${dir}/${e}`);
 
     // Don't recreate links if they already exist
@@ -120,8 +120,20 @@ function symlinkBchdCertificates(dir) {
   }
 }
 
-function getUserHomeFolder() {
-  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+function getBchdDataFolder() {
+  // FROM BCHD
+  // ; The default is ~/.bchd/data on POSIX OSes, $LOCALAPPDATA/Bchd/data on Windows,
+  // ; ~/Library/Application Support/Bchd/data on Mac OS, and $home/bchd/data on
+  // ; Plan9. 
+  let home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+
+  if(process.platform==='win32'){
+    return `${process.env.LOCALAPPDATA}/Bchd`
+  } else if (process.platform==='darwin'){
+    return `${home}/Library/Application Support/Bchd`
+  }else {
+    return `${home}/.bchd`
+  }
 }
 // assureDirectoryExists, checks for a dir, and creates it if it doesn't exist
 function assureDirectoryExists(dir) {
