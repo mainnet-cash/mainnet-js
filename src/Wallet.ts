@@ -2,17 +2,12 @@
 import {
   instantiateSecp256k1,
   instantiateSha256,
-  instantiateRipemd160,
-  hexToBin,
-  binToBase64
 } from "@bitauth/libauth";
 
 // Unstable?
 import {
-  //authenticationTemplateP2pkh,
   authenticationTemplateP2pkhNonHd,
   authenticationTemplateToCompilerBCH,
-  binToHex,
   bigIntToBinUint64LE,
   cashAddressToLockingBytecode,
   CashAddressNetworkPrefix,
@@ -20,7 +15,6 @@ import {
   decodePrivateKeyWif,
   encodeTransaction,
   generateTransaction,
-  Transaction,
   lockingBytecodeToCashAddress,
   validateAuthenticationTemplate,
   WalletImportFormatType,
@@ -69,24 +63,21 @@ class Amount {
 export type NetworkType = | 'mainnet' | 'testnet'
 export type UnitType = | 'coin' | 'bits' | 'satoshi'
 
-export class Wallet {
-  name: string;
-  network?: NetworkType;
-  isTestnet?: boolean;
-  publicKey?: Uint8Array;
-  publicKeyCompressed?: Uint8Array;
-  privateKey?: Uint8Array;
-  cashaddr?: string;
+
+/**
+ * A class to hold common elements for used by all wallets
+ * @class  BaseWallet
+ */
+export class BaseWallet {
+
   client?: GrpcClient
+  isTestnet?: boolean;
 
-  constructor(name = "") {
-    this.name = name;
-  }
-
-  public async watchOnly(address: string) {
-    this.cashaddr = address
-    this.network = address.startsWith("bitcoincash:") ? "mainnet" : "testnet"
-    this.isTestnet = this.network === "testnet" ? true : false
+  /**
+  * connectClient creates remote procedure client instance interacting with nodes.
+  * @param isTestnet - Whether the client is for a testnet (i.e. true if 'testnet', 'regtest', 'simnet') or mainnet (false)
+  */
+  public async connectClient(isTestnet: boolean) {
     if (this.isTestnet) {
       const url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`
       const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`
@@ -107,8 +98,33 @@ export class Wallet {
       throw Error("This wallet is in a developmental stage (not suitible for mainnet). Please test on a suitable network")
     }
   }
+}
 
-  public async fromWIF(walletImportFormatString: string, network: string) {
+export class Wallet extends BaseWallet {
+  name: string;
+  network?: NetworkType;
+  publicKey?: Uint8Array;
+  publicKeyCompressed?: Uint8Array;
+  privateKey?: Uint8Array;
+  cashaddr?: string;
+  client?: GrpcClient
+
+  constructor(name = "") {
+    super()
+    this.name = name;
+  }
+
+  // Initialize wallet from a cash addr
+  public async watchOnly(address: string) {
+    this.cashaddr = address
+    this.network = address.startsWith("bitcoincash:") ? "mainnet" : "testnet"
+    this.isTestnet = this.network === "testnet" ? true : false
+    super.connectClient(this.isTestnet)
+  }
+
+
+  // Initialize wallet from Wallet Import Format
+  public async fromWIF(walletImportFormatString: string, network: CashAddressNetworkPrefix) {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, walletImportFormatString);
@@ -120,32 +136,14 @@ export class Wallet {
       let resultData: PrivateKey = (result as PrivateKey)
       this.privateKey = resultData.privateKey
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey)
-      // TODO remove hardcoded network
       this.cashaddr = await this._deriveCashAddr(this.privateKey, network) as string
       this.network = resultData.type.startsWith("mainnet") ? "mainnet" : "testnet"
       this.isTestnet = this.network === "testnet" ? true : false
-      if (this.isTestnet) {
-        const url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`
-        const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`
-        const host = `${process.env.HOST}`
-        this.client = new GrpcClient(
-          {
-            url: url,
-            testnet: true,
-            rootCertPath: cert,
-            options: {
-              'grpc.ssl_target_name_override': host,
-              'grpc.default_authority': host,
-              "grpc.max_receive_message_length": -1,
-            }
-          }
-        );
-      } else {
-        throw Error("This wallet is in a developmental stage (not suitible for mainnet). Please test on a suitable network")
-      }
+      this.connectClient(this.isTestnet)
     }
   }
 
+  // Processes an array of send requests
   public async send(requests: Array<any>) {
 
     // Deserialize the request
@@ -161,7 +159,7 @@ export class Wallet {
   }
 
 
-
+  // Gets balance by summing value in all utxos in stats
   private async _getBalance(address: string): Promise<number> {
 
     const res = await this.client.getAddressUtxos({ address: address, includeMempool: true });
@@ -172,24 +170,28 @@ export class Wallet {
     return balance
   }
 
+  // Return address balance in satoshi
   public async balanceSats(address: string): Promise<number> {
     return await this._getBalance(address);
   }
 
+
+  // Return address balance in bitcoin
   public async balance(address: string): Promise<number> {
-    return await this._getBalance(address);
+    return await this._getBalance(address) / 10e8;
   }
 
+  // Process an individual send request
   private async _processSendRequest(request: SendRequest) {
     if (this.network && this.privateKey) {
 
       // get input
-      let utxos = await this.client.getAddressUtxos({address:this.cashaddr, includeMempool:false})
+      let utxos = await this.client.getAddressUtxos({ address: this.cashaddr, includeMempool: false })
       let utxo = utxos.getOutputsList()[101]
 
       // build transaction
       let txn = await this._buildP2pkhNonHdTransaction(utxo, request)
-      
+
       // submit transaction
       if (txn.success) {
         return await this._submitTransaction(encodeTransaction(txn.transaction))
@@ -202,14 +204,18 @@ export class Wallet {
     }
   }
 
+  // Submit a raw transaction 
   private async _submitTransaction(transaction: Uint8Array): Promise<Uint8Array> {
 
     const res = await this.client.submitTransaction({ txn: transaction });
     return res.getHash_asU8()
+
   }
 
 
-  public async _deriveCashAddr(privkey, prefix) {
+  // Given a private key and network, derive cashaddr from the locking code
+  // TODO, is there a more direct way to do this?
+  public async _deriveCashAddr(privkey, network: CashAddressNetworkPrefix) {
     const lockingScript = 'lock';
     const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
     if (typeof template === 'string') {
@@ -224,21 +230,23 @@ export class Wallet {
     } else {
       return lockingBytecodeToCashAddress(
         lockingBytecode.bytecode,
-        CashAddressNetworkPrefix.regtest
+        network
       )
     }
 
   }
 
+  // Build a transaction for a p2pkh transaction for a non HD wallet
   private async _buildP2pkhNonHdTransaction(input: UnspentOutput, output: SendRequest) {
 
-    
+
     const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
 
     const utxoTxnValue = input.getValue()
     const utxoIndex = input.getOutpoint().getIndex()
+
     // TODO,
-    // Figure out why this is the case, prevent the hash from being flipped in the first place
+    // Figure out why this hash is reversed, prevent the hash from being flipped in the first place
     const utxoOutpointTransactionHash = input.getOutpoint().getHash_asU8().reverse()
 
     if (typeof template === 'string') {
@@ -248,8 +256,6 @@ export class Wallet {
     const compiler = await authenticationTemplateToCompilerBCH(template);
 
     try {
-
-
 
       let outputLockingBytecode = cashAddressToLockingBytecode(output.address)
 
