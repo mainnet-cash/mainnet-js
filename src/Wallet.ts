@@ -87,6 +87,25 @@ export class Wallet {
     this.cashaddr = address
     this.network = address.startsWith("bitcoincash:") ? "mainnet" : "testnet"
     this.isTestnet = this.network === "testnet" ? true : false
+    if (this.isTestnet) {
+      const url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`
+      const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`
+      const host = `${process.env.HOST}`
+      this.client = new GrpcClient(
+        {
+          url: url,
+          testnet: true,
+          rootCertPath: cert,
+          options: {
+            'grpc.ssl_target_name_override': host,
+            'grpc.default_authority': host,
+            "grpc.max_receive_message_length": -1,
+          }
+        }
+      );
+    } else {
+      throw Error("This wallet is in a developmental stage (not suitible for mainnet). Please test on a suitable network")
+    }
   }
 
   public async fromWIF(walletImportFormatString: string, network: string) {
@@ -102,7 +121,7 @@ export class Wallet {
       this.privateKey = resultData.privateKey
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey)
       // TODO remove hardcoded network
-      this.cashaddr = await this._deriveCashAddr(this.privateKey, 'regnet') as string
+      this.cashaddr = await this._deriveCashAddr(this.privateKey, network) as string
       this.network = resultData.type.startsWith("mainnet") ? "mainnet" : "testnet"
       this.isTestnet = this.network === "testnet" ? true : false
       if (this.isTestnet) {
@@ -149,7 +168,8 @@ export class Wallet {
     const txns = res.getOutputsList();
 
     const balanceArray: number[] = await Promise.all(txns.map(async (o: UnspentOutput) => { return o.getValue() }));
-    return balanceArray.reduce((a: number, b: number) => a + b, 0);
+    const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
+    return balance
   }
 
   public async balanceSats(address: string): Promise<number> {
@@ -157,18 +177,17 @@ export class Wallet {
   }
 
   public async balance(address: string): Promise<number> {
-    return await this._getBalance(address) / 10e8;
+    return await this._getBalance(address);
   }
 
   private async _processSendRequest(request: SendRequest) {
     if (this.network && this.privateKey) {
-      //build transaction
+
       // get input
-
-      // TODO derive this from the WIF
       let utxos = await this.client.getAddressUtxos({address:this.cashaddr, includeMempool:false})
-      let utxo = utxos.getOutputsList()[50]
+      let utxo = utxos.getOutputsList()[101]
 
+      // build transaction
       let txn = await this._buildP2pkhNonHdTransaction(utxo, request)
       
       // submit transaction
@@ -216,8 +235,11 @@ export class Wallet {
     
     const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
 
+    const utxoTxnValue = input.getValue()
     const utxoIndex = input.getOutpoint().getIndex()
-    const utxoTxnHash = input.getOutpoint().getHash_asU8()
+    // TODO,
+    // Figure out why this is the case, prevent the hash from being flipped in the first place
+    const utxoOutpointTransactionHash = input.getOutpoint().getHash_asU8().reverse()
 
     if (typeof template === 'string') {
       throw new Error("Transaction template error")
@@ -227,7 +249,7 @@ export class Wallet {
 
     try {
 
-      const utxoTxnValue = input.getValue()
+
 
       let outputLockingBytecode = cashAddressToLockingBytecode(output.address)
 
@@ -240,7 +262,7 @@ export class Wallet {
         inputs: [
           {
             outpointIndex: utxoIndex,
-            outpointTransactionHash: utxoTxnHash,
+            outpointTransactionHash: utxoOutpointTransactionHash,
             sequenceNumber: 0,
             unlockingBytecode: {
               compiler,
@@ -256,7 +278,7 @@ export class Wallet {
         outputs: [
           {
             lockingBytecode: outputLockingBytecode.bytecode,
-            satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
+            satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
           },
         ],
         version: 2,
@@ -264,7 +286,7 @@ export class Wallet {
 
       return result
     } catch (error) {
-      throw new Error(error.toString())
+      throw Error(error.toString())
     }
   }
 
