@@ -1,10 +1,10 @@
 // jest.node.setup.js
-require("dotenv").config({ path: '.env.regtest' });
+require("dotenv").config({ path: ".env.regtest" });
 const { spawn } = require("child_process");
 
 module.exports = async function () {
   console.log("starting bchd ...");
-  
+
   if (global.bchDaemon === undefined) {
     const bchdArgs = [
       `--${process.env.NETWORK}`,
@@ -14,12 +14,11 @@ module.exports = async function () {
       `--rpcpass=${process.env.RPC_PASS}`,
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
-      `--txindex`
+      `--txindex`,
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
   } else {
     console.log("...already running");
   }
-  
 };

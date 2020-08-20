@@ -33,7 +33,7 @@ async function getBchdBinary(dir) {
   await downloadZipFile(binaryUrl, downloadDir);
   await symlinkBchdExecutibles(downloadDir, bchdExecutibleDir, platform);
 
-  symlinkBchdCertificates(downloadDir)
+  symlinkBchdCertificates(downloadDir);
 }
 
 function getArchitecture() {
@@ -80,22 +80,18 @@ async function downloadZipFile(url, downloadPath) {
 }
 
 async function checkBchdExecutible() {
-  console.log("bootstrap bchd...")
+  console.log("bootstrap bchd...");
 
-  try{
-    let bchInitial = spawn(
-      './bin/bchd', [], { shell: false }
-    );
+  try {
+    let bchInitial = spawn("./bin/bchd", [], { shell: false });
     setTimeout(function () {
-      console.log('okay');
+      console.log("okay");
       bchInitial.stdio.forEach((s) => s.pause());
       bchInitial.kill();
     }, 1200);
-  
-  } catch (err){
-    throw Error(err)
+  } catch (err) {
+    throw Error(err);
   }
-
 }
 // As all bch zip files include files in platform specific folders.
 // This function creates symlink from the root bin if links don't
@@ -119,13 +115,13 @@ async function symlinkBchdExecutibles(dir, zipDir, platform) {
       fs.chmodSync(binTarget, 0o775);
     }
   }
-  await checkBchdExecutible()
+  await checkBchdExecutible();
 }
 
 function symlinkBchdCertificates(dir) {
   // Create links to bchd certificates
 
-  for (const e of ['rpc.cert', 'rpc.key']) {
+  for (const e of ["rpc.cert", "rpc.key"]) {
     const bchdHome = getBchdDataFolder();
     const target = path.resolve(`${bchdHome}/${e}`);
     const symlink = path.resolve(`${dir}/${e}`);
@@ -144,15 +140,16 @@ function getBchdDataFolder() {
   // FROM bchd.config
   // ; The default is ~/.bchd/data on POSIX OSes, $LOCALAPPDATA/Bchd/data on Windows,
   // ; ~/Library/Application Support/Bchd/data on Mac OS, and $home/bchd/data on
-  // ; Plan9. 
-  let home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+  // ; Plan9.
+  let home =
+    process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 
-  if (process.platform === 'win32') {
-    return `${process.env.LOCALAPPDATA}/Bchd`
-  } else if (process.platform === 'darwin') {
-    return `${home}/Library/Application Support/Bchd`
+  if (process.platform === "win32") {
+    return `${process.env.LOCALAPPDATA}/Bchd`;
+  } else if (process.platform === "darwin") {
+    return `${home}/Library/Application Support/Bchd`;
   } else {
-    return `${home}/.bchd`
+    return `${home}/.bchd`;
   }
 }
 // assureDirectoryExists, checks for a dir, and creates it if it doesn't exist

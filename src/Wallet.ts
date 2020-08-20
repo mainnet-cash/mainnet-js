@@ -1,8 +1,5 @@
 // Stable
-import {
-  instantiateSecp256k1,
-  instantiateSha256,
-} from "@bitauth/libauth";
+import { instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -27,8 +24,8 @@ const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
 interface PrivateKey {
-  privateKey: Uint8Array,
-  type: WalletImportFormatType
+  privateKey: Uint8Array;
+  type: WalletImportFormatType;
 }
 
 class SendRequest {
@@ -36,8 +33,8 @@ class SendRequest {
   amount: Amount;
 
   constructor(SerializedSendRequest) {
-    this.address = SerializedSendRequest[0]
-    this.amount = new Amount(SerializedSendRequest[1])
+    this.address = SerializedSendRequest[0];
+    this.amount = new Amount(SerializedSendRequest[1]);
   }
 }
 
@@ -45,65 +42,61 @@ class Amount {
   amount: number;
   unit: UnitType;
   constructor(SerializedAmount) {
-    this.amount = SerializedAmount[0]
-    this.unit = SerializedAmount[1]
+    this.amount = SerializedAmount[0];
+    this.unit = SerializedAmount[1];
   }
 
   public inSatoshi() {
     switch (this.unit) {
-      case 'satoshi':
-        return this.amount
-      case 'coin':
-        return this.amount / 10e8
+      case "satoshi":
+        return this.amount;
+      case "coin":
+        return this.amount / 10e8;
     }
   }
 }
 
-export type NetworkType = | 'mainnet' | 'testnet'
-export type UnitType = | 'coin' | 'bits' | 'satoshi'
-
+export type NetworkType = "mainnet" | "testnet";
+export type UnitType = "coin" | "bits" | "satoshi";
 
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
  */
 export class BaseWallet {
-
-  client?: GrpcClient
+  client?: GrpcClient;
   isTestnet?: boolean;
   name: string;
-  networkPrefix: CashAddressNetworkPrefix
-  networkType: NetworkType
-
+  networkPrefix: CashAddressNetworkPrefix;
+  networkType: NetworkType;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
-
     this.name = name;
-    this.networkPrefix = networkPrefix
-    this.networkType = this.networkPrefix === CashAddressNetworkPrefix.mainnet ? 'mainnet' : 'testnet'
-    this.isTestnet = this.networkType === "testnet" ? true : false
+    this.networkPrefix = networkPrefix;
+    this.networkType =
+      this.networkPrefix === CashAddressNetworkPrefix.mainnet
+        ? "mainnet"
+        : "testnet";
+    this.isTestnet = this.networkType === "testnet" ? true : false;
     if (this.isTestnet) {
-      const url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`
-      const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`
-      const host = `${process.env.HOST}`
-      this.client = new GrpcClient(
-        {
-          url: url,
-          testnet: true,
-          rootCertPath: cert,
-          options: {
-            'grpc.ssl_target_name_override': host,
-            'grpc.default_authority': host,
-            "grpc.max_receive_message_length": -1,
-          }
-        }
-      );
+      const url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
+      const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
+      const host = `${process.env.HOST}`;
+      this.client = new GrpcClient({
+        url: url,
+        testnet: true,
+        rootCertPath: cert,
+        options: {
+          "grpc.ssl_target_name_override": host,
+          "grpc.default_authority": host,
+          "grpc.max_receive_message_length": -1,
+        },
+      });
     } else {
-      throw Error(process.env.WARNING)
+      throw Error(process.env.WARNING);
     }
   }
 }
-
 
 export class CommonWallet extends BaseWallet {
   name: string;
@@ -112,24 +105,25 @@ export class CommonWallet extends BaseWallet {
   publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
   cashaddr?: string;
-  client?: GrpcClient
+  client?: GrpcClient;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
-    super(name, networkPrefix)
+    super(name, networkPrefix);
     this.name = name;
   }
 
   // Initialize wallet from a cash addr
   public async watchOnly(address: string) {
-    
-    if (address.startsWith("bitcoincash:") && this.networkType === 'testnet') {
-      throw Error("a testnet address cannot be watched from a mainnet Wallet")
-    } else if (!address.startsWith("bitcoincash:") && this.networkType === 'mainnet') {
-      throw Error("a mainnet address cannot be watched from a testnet Wallet")
+    if (address.startsWith("bitcoincash:") && this.networkType === "testnet") {
+      throw Error("a testnet address cannot be watched from a mainnet Wallet");
+    } else if (
+      !address.startsWith("bitcoincash:") &&
+      this.networkType === "mainnet"
+    ) {
+      throw Error("a mainnet address cannot be watched from a testnet Wallet");
     }
-    this.cashaddr = address
+    this.cashaddr = address;
   }
-
 
   // Initialize wallet from Wallet Import Format
   public async fromWIF(walletImportFormatString: string) {
@@ -137,42 +131,53 @@ export class CommonWallet extends BaseWallet {
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, walletImportFormatString);
 
-    const hasError = typeof result === 'string';
+    const hasError = typeof result === "string";
     if (hasError) {
-      return new Error(result as string)
+      return new Error(result as string);
     } else {
-      let resultData: PrivateKey = (result as PrivateKey)
-      this.privateKey = resultData.privateKey
-      this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey)
-      this.cashaddr = await this._deriveCashAddr(this.privateKey, this.networkPrefix) as string
+      let resultData: PrivateKey = result as PrivateKey;
+      this.privateKey = resultData.privateKey;
+      this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+      this.cashaddr = (await this._deriveCashAddr(
+        this.privateKey,
+        this.networkPrefix
+      )) as string;
     }
   }
 
   // Processes an array of send requests
   public async send(requests: Array<any>) {
-
     // Deserialize the request
     const sendRequestList: SendRequest[] = await Promise.all(
-      requests.map(async (rawSendRequest: any) => { return new SendRequest(rawSendRequest) })
+      requests.map(async (rawSendRequest: any) => {
+        return new SendRequest(rawSendRequest);
+      })
     );
 
     // Process the requests
     const sendResponseList: Uint8Array[] = await Promise.all(
-      sendRequestList.map(async (sendRequest: SendRequest) => { return this._processSendRequest(sendRequest) })
+      sendRequestList.map(async (sendRequest: SendRequest) => {
+        return this._processSendRequest(sendRequest);
+      })
     );
-    return sendResponseList
+    return sendResponseList;
   }
-
 
   // Gets balance by summing value in all utxos in stats
   private async _getBalance(address: string): Promise<number> {
-
-    const res = await this.client.getAddressUtxos({ address: address, includeMempool: true });
+    const res = await this.client.getAddressUtxos({
+      address: address,
+      includeMempool: true,
+    });
     const txns = res.getOutputsList();
 
-    const balanceArray: number[] = await Promise.all(txns.map(async (o: UnspentOutput) => { return o.getValue() }));
+    const balanceArray: number[] = await Promise.all(
+      txns.map(async (o: UnspentOutput) => {
+        return o.getValue();
+      })
+    );
     const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
-    return balance
+    return balance;
   }
 
   // Return address balance in satoshi
@@ -180,56 +185,67 @@ export class CommonWallet extends BaseWallet {
     return await this._getBalance(address);
   }
 
-
   // Return address balance in bitcoin
   public async balance(address: string): Promise<number> {
-    return await this._getBalance(address) / 10e8;
+    return (await this._getBalance(address)) / 10e8;
   }
 
   // Process an individual send request
   private async _processSendRequest(request: SendRequest) {
     if (this.networkPrefix && this.privateKey) {
-
       // get input
-      let utxos = await this.client.getAddressUtxos({ address: this.cashaddr, includeMempool: false })
-      let utxo = utxos.getOutputsList()[101]
+      let utxos = await this.client.getAddressUtxos({
+        address: this.cashaddr,
+        includeMempool: false,
+      });
+      let utxo = utxos.getOutputsList()[101];
 
       // build transaction
-      let txn = await this._buildP2pkhNonHdTransaction(utxo, request)
+      let txn = await this._buildP2pkhNonHdTransaction(utxo, request);
 
       // submit transaction
       if (txn.success) {
-        return await this._submitTransaction(encodeTransaction(txn.transaction))
+        return await this._submitTransaction(
+          encodeTransaction(txn.transaction)
+        );
       } else {
-        throw Error(JSON.stringify(txn))
+        throw Error(JSON.stringify(txn));
       }
-
     } else {
-      throw Error(`Wallet ${this.name} hasn't been set with a private key`)
+      throw Error(`Wallet ${this.name} hasn't been set with a private key`);
     }
   }
 
-  // Submit a raw transaction 
-  private async _submitTransaction(transaction: Uint8Array): Promise<Uint8Array> {
-
+  // Submit a raw transaction
+  private async _submitTransaction(
+    transaction: Uint8Array
+  ): Promise<Uint8Array> {
     const res = await this.client.submitTransaction({ txn: transaction });
-    return res.getHash_asU8()
-
+    return res.getHash_asU8();
   }
-
 
   // Given a private key and network, derive cashaddr from the locking code
   // TODO, is there a more direct way to do this?
   // TODO, This can be moved off the Wallet Class
-  public async _deriveCashAddr(privkey, networkPrefix: CashAddressNetworkPrefix) {
-    const lockingScript = 'lock';
-    const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
-    if (typeof template === 'string') {
-      throw new Error("Address template error")
+  public async _deriveCashAddr(
+    privkey,
+    networkPrefix: CashAddressNetworkPrefix
+  ) {
+    const lockingScript = "lock";
+    const template = validateAuthenticationTemplate(
+      authenticationTemplateP2pkhNonHd
+    );
+    if (typeof template === "string") {
+      throw new Error("Address template error");
     }
-    const lockingData: CompilationData<never> = { keys: { privateKeys: { key: privkey } } }
+    const lockingData: CompilationData<never> = {
+      keys: { privateKeys: { key: privkey } },
+    };
     const compiler = await authenticationTemplateToCompilerBCH(template);
-    const lockingBytecode = compiler.generateBytecode(lockingScript, lockingData);
+    const lockingBytecode = compiler.generateBytecode(
+      lockingScript,
+      lockingData
+    );
 
     if (!lockingBytecode.success) {
       throw Error(JSON.stringify(lockingBytecode));
@@ -237,37 +253,48 @@ export class CommonWallet extends BaseWallet {
       return lockingBytecodeToCashAddress(
         lockingBytecode.bytecode,
         networkPrefix
-      )
+      );
     }
   }
 
   // Build a transaction for a p2pkh transaction for a non HD wallet
-  private async _buildP2pkhNonHdTransaction(input: UnspentOutput, output: SendRequest) {
+  private async _buildP2pkhNonHdTransaction(
+    input: UnspentOutput,
+    output: SendRequest
+  ) {
+    const template = validateAuthenticationTemplate(
+      authenticationTemplateP2pkhNonHd
+    );
 
-
-    const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
-
-    const utxoTxnValue = input.getValue()
-    const utxoIndex = input.getOutpoint().getIndex()
+    const utxoTxnValue = input.getValue();
+    const utxoIndex = input.getOutpoint().getIndex();
 
     // TODO,
     // Figure out why this hash is reversed, prevent the hash from being flipped in the first place
-    const utxoOutpointTransactionHash = input.getOutpoint().getHash_asU8().reverse()
+    const utxoOutpointTransactionHash = input
+      .getOutpoint()
+      .getHash_asU8()
+      .reverse();
 
-    if (typeof template === 'string') {
-      throw new Error("Transaction template error")
+    if (typeof template === "string") {
+      throw new Error("Transaction template error");
     }
 
     const compiler = await authenticationTemplateToCompilerBCH(template);
 
     try {
+      let outputLockingBytecode = cashAddressToLockingBytecode(output.address);
 
-      let outputLockingBytecode = cashAddressToLockingBytecode(output.address)
-
-      if (!outputLockingBytecode.hasOwnProperty('bytecode') || !outputLockingBytecode.hasOwnProperty('prefix')) {
+      if (
+        !outputLockingBytecode.hasOwnProperty("bytecode") ||
+        !outputLockingBytecode.hasOwnProperty("prefix")
+      ) {
         throw new Error(outputLockingBytecode.toString());
       }
-      outputLockingBytecode = outputLockingBytecode as { bytecode: Uint8Array; prefix: string }
+      outputLockingBytecode = outputLockingBytecode as {
+        bytecode: Uint8Array;
+        prefix: string;
+      };
 
       // TODO estimate fees, return change
       const result = generateTransaction({
@@ -282,7 +309,7 @@ export class CommonWallet extends BaseWallet {
                 keys: { privateKeys: { key: this.privateKey } },
               },
               satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
-              script: 'unlock',
+              script: "unlock",
             },
           },
         ],
@@ -296,33 +323,28 @@ export class CommonWallet extends BaseWallet {
         version: 2,
       });
 
-      return result
+      return result;
     } catch (error) {
-      throw Error(error.toString())
+      throw Error(error.toString());
     }
   }
-
 }
 
-
 export class RegTestWallet extends CommonWallet {
-
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.regtest)
+    super(name, CashAddressNetworkPrefix.regtest);
   }
 }
 
 export class TestnetWallet extends CommonWallet {
-
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.testnet)
+    super(name, CashAddressNetworkPrefix.testnet);
   }
 }
 
 export class Wallet extends CommonWallet {
-
   constructor(name = "") {
-    throw Error(process.env.WARNING)
-    super(name, CashAddressNetworkPrefix.mainnet)
+    throw Error(process.env.WARNING);
+    super(name, CashAddressNetworkPrefix.mainnet);
   }
 }

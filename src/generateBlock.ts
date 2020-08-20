@@ -6,7 +6,6 @@ export function generateBlock(
   password: string,
   numberOfBlocks: number
 ): string[] {
-
   const bchctlArgs = [
     `--testnet`,
     `--rpcuser=${user}`,
@@ -20,8 +19,7 @@ export function generateBlock(
     bchctlArgs
   );
   if (bchctl.stderr.length > 0) {
-    throw Error(bchctl.stderr.toString())
+    throw Error(bchctl.stderr.toString());
   }
   return JSON.parse(bchctl.stdout.toString());
-
 }
