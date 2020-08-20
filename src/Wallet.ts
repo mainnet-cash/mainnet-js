@@ -53,7 +53,6 @@ class Amount {
     switch (this.unit) {
       case 'satoshi':
         return this.amount
-        break;
       case 'coin':
         return this.amount / 10e8
     }
@@ -65,19 +64,24 @@ export type UnitType = | 'coin' | 'bits' | 'satoshi'
 
 
 /**
- * A class to hold common elements for used by all wallets
+ * A class to hold features used by all wallets
  * @class  BaseWallet
  */
 export class BaseWallet {
 
   client?: GrpcClient
   isTestnet?: boolean;
+  name: string;
+  networkPrefix: CashAddressNetworkPrefix
+  networkType: NetworkType
 
-  /**
-  * connectClient creates remote procedure client instance interacting with nodes.
-  * @param isTestnet - Whether the client is for a testnet (i.e. true if 'testnet', 'regtest', 'simnet') or mainnet (false)
-  */
-  public async connectClient(isTestnet: boolean) {
+
+  constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
+
+    this.name = name;
+    this.networkPrefix = networkPrefix
+    this.networkType = this.networkPrefix === CashAddressNetworkPrefix.mainnet ? 'mainnet' : 'testnet'
+    this.isTestnet = this.networkType === "testnet" ? true : false
     if (this.isTestnet) {
       const url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`
       const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`
@@ -95,36 +99,40 @@ export class BaseWallet {
         }
       );
     } else {
-      throw Error("This wallet is in a developmental stage (not suitible for mainnet). Please test on a suitable network")
+      throw Error(process.env.WARNING)
     }
   }
 }
 
-export class Wallet extends BaseWallet {
+
+export class CommonWallet extends BaseWallet {
   name: string;
-  network?: NetworkType;
+
   publicKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
   cashaddr?: string;
   client?: GrpcClient
 
-  constructor(name = "") {
-    super()
+  constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
+    super(name, networkPrefix)
     this.name = name;
   }
 
   // Initialize wallet from a cash addr
   public async watchOnly(address: string) {
+    
+    if (address.startsWith("bitcoincash:") && this.networkType === 'testnet') {
+      throw Error("a testnet address cannot be watched from a mainnet Wallet")
+    } else if (!address.startsWith("bitcoincash:") && this.networkType === 'mainnet') {
+      throw Error("a mainnet address cannot be watched from a testnet Wallet")
+    }
     this.cashaddr = address
-    this.network = address.startsWith("bitcoincash:") ? "mainnet" : "testnet"
-    this.isTestnet = this.network === "testnet" ? true : false
-    super.connectClient(this.isTestnet)
   }
 
 
   // Initialize wallet from Wallet Import Format
-  public async fromWIF(walletImportFormatString: string, network: CashAddressNetworkPrefix) {
+  public async fromWIF(walletImportFormatString: string) {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, walletImportFormatString);
@@ -136,10 +144,7 @@ export class Wallet extends BaseWallet {
       let resultData: PrivateKey = (result as PrivateKey)
       this.privateKey = resultData.privateKey
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey)
-      this.cashaddr = await this._deriveCashAddr(this.privateKey, network) as string
-      this.network = resultData.type.startsWith("mainnet") ? "mainnet" : "testnet"
-      this.isTestnet = this.network === "testnet" ? true : false
-      this.connectClient(this.isTestnet)
+      this.cashaddr = await this._deriveCashAddr(this.privateKey, this.networkPrefix) as string
     }
   }
 
@@ -183,7 +188,7 @@ export class Wallet extends BaseWallet {
 
   // Process an individual send request
   private async _processSendRequest(request: SendRequest) {
-    if (this.network && this.privateKey) {
+    if (this.networkPrefix && this.privateKey) {
 
       // get input
       let utxos = await this.client.getAddressUtxos({ address: this.cashaddr, includeMempool: false })
@@ -215,7 +220,8 @@ export class Wallet extends BaseWallet {
 
   // Given a private key and network, derive cashaddr from the locking code
   // TODO, is there a more direct way to do this?
-  public async _deriveCashAddr(privkey, network: CashAddressNetworkPrefix) {
+  // TODO, This can be moved off the Wallet Class
+  public async _deriveCashAddr(privkey, networkPrefix: CashAddressNetworkPrefix) {
     const lockingScript = 'lock';
     const template = validateAuthenticationTemplate(authenticationTemplateP2pkhNonHd);
     if (typeof template === 'string') {
@@ -230,10 +236,9 @@ export class Wallet extends BaseWallet {
     } else {
       return lockingBytecodeToCashAddress(
         lockingBytecode.bytecode,
-        network
+        networkPrefix
       )
     }
-
   }
 
   // Build a transaction for a p2pkh transaction for a non HD wallet
@@ -264,6 +269,7 @@ export class Wallet extends BaseWallet {
       }
       outputLockingBytecode = outputLockingBytecode as { bytecode: Uint8Array; prefix: string }
 
+      // TODO estimate fees, return change
       const result = generateTransaction({
         inputs: [
           {
@@ -299,3 +305,24 @@ export class Wallet extends BaseWallet {
 }
 
 
+export class RegTestWallet extends CommonWallet {
+
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.regtest)
+  }
+}
+
+export class TestnetWallet extends CommonWallet {
+
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.testnet)
+  }
+}
+
+export class Wallet extends CommonWallet {
+
+  constructor(name = "") {
+    throw Error(process.env.WARNING)
+    super(name, CashAddressNetworkPrefix.mainnet)
+  }
+}
