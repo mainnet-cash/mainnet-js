@@ -3,6 +3,10 @@
   "scripts": {
     "pretest": "node util/checkBchd.js",
     "test": "npx jest",
+    "test:wallet": "npx jest Wallet",
+    "debug-grpcui-install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
+    "debug-grpcui": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
+    "debug-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
     "format": "prettier --write ."
   },
   "devDependencies": {
@@ -14,5 +18,9 @@
     "typescript": "^3.9.7",
     "unzipper": "^0.10.11"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@bitauth/libauth": "^1.17.1",
+    "grpc-bchrpc-node": "^0.10.2",
+    "grpc-bchrpc-web": "^0.10.1"
+  }
 }

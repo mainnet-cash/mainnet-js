@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { spawnSync } = require("child_process");
+const { spawnSync, spawn } = require("child_process");
 
 const fs = require("fs");
 const path = require("path");
@@ -31,7 +31,9 @@ async function getBchdBinary(dir) {
   const binaryUrl = `https://github.com/gcash/bchd/releases/download/${version}/${bchdExecutibleDir}.zip`;
   const downloadDir = path.resolve(__dirname, `../${dir}`);
   await downloadZipFile(binaryUrl, downloadDir);
-  symlinkBchdExecutibles(downloadDir, bchdExecutibleDir, platform);
+  await symlinkBchdExecutibles(downloadDir, bchdExecutibleDir, platform);
+
+  symlinkBchdCertificates(downloadDir);
 }
 
 function getArchitecture() {
@@ -77,10 +79,24 @@ async function downloadZipFile(url, downloadPath) {
   );
 }
 
+async function checkBchdExecutible() {
+  console.log("bootstrap bchd...");
+
+  try {
+    let bchInitial = spawn("./bin/bchd", [], { shell: false });
+    setTimeout(function () {
+      console.log("okay");
+      bchInitial.stdio.forEach((s) => s.pause());
+      bchInitial.kill();
+    }, 1200);
+  } catch (err) {
+    throw Error(err);
+  }
+}
 // As all bch zip files include files in platform specific folders.
 // This function creates symlink from the root bin if links don't
 // already exist.
-function symlinkBchdExecutibles(dir, zipDir, platform) {
+async function symlinkBchdExecutibles(dir, zipDir, platform) {
   // Get a list of executibles to link specific to the os
   let executibles = ["bchd", "bchctl"].map((b) =>
     platform === "windows" ? b + ".exe" : b
@@ -99,8 +115,43 @@ function symlinkBchdExecutibles(dir, zipDir, platform) {
       fs.chmodSync(binTarget, 0o775);
     }
   }
+  await checkBchdExecutible();
 }
 
+function symlinkBchdCertificates(dir) {
+  // Create links to bchd certificates
+
+  for (const e of ["rpc.cert", "rpc.key"]) {
+    const bchdHome = getBchdDataFolder();
+    const target = path.resolve(`${bchdHome}/${e}`);
+    const symlink = path.resolve(`${dir}/${e}`);
+
+    // Don't recreate links if they already exist
+    if (!fs.existsSync(symlink)) {
+      // Create a symbolic link to the binary.
+      fs.symlinkSync(target, symlink);
+      // Owner and group have full access, everyone may execute.
+      fs.chmodSync(target, 0o440);
+    }
+  }
+}
+
+function getBchdDataFolder() {
+  // FROM bchd.config
+  // ; The default is ~/.bchd/data on POSIX OSes, $LOCALAPPDATA/Bchd/data on Windows,
+  // ; ~/Library/Application Support/Bchd/data on Mac OS, and $home/bchd/data on
+  // ; Plan9.
+  let home =
+    process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+
+  if (process.platform === "win32") {
+    return `${process.env.LOCALAPPDATA}/Bchd`;
+  } else if (process.platform === "darwin") {
+    return `${home}/Library/Application Support/Bchd`;
+  } else {
+    return `${home}/.bchd`;
+  }
+}
 // assureDirectoryExists, checks for a dir, and creates it if it doesn't exist
 function assureDirectoryExists(dir) {
   if (!fs.existsSync(dir)) {
