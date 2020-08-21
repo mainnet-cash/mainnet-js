@@ -228,7 +228,7 @@ export class CommonWallet extends BaseWallet {
   // TODO, is there a more direct way to do this?
   // TODO, This can be moved off the Wallet Class
   public async _deriveCashAddr(
-    privkey,
+    privateKey,
     networkPrefix: CashAddressNetworkPrefix
   ) {
     const lockingScript = "lock";
@@ -239,7 +239,7 @@ export class CommonWallet extends BaseWallet {
       throw new Error("Address template error");
     }
     const lockingData: CompilationData<never> = {
-      keys: { privateKeys: { key: privkey } },
+      keys: { privateKeys: { key: privateKey } },
     };
     const compiler = await authenticationTemplateToCompilerBCH(template);
     const lockingBytecode = compiler.generateBytecode(
@@ -265,20 +265,21 @@ export class CommonWallet extends BaseWallet {
     const template = validateAuthenticationTemplate(
       authenticationTemplateP2pkhNonHd
     );
+    if (typeof template === "string") {
+      throw new Error("Transaction template error");
+    }
 
     const utxoTxnValue = input.getValue();
     const utxoIndex = input.getOutpoint().getIndex();
+    const changeAmount = utxoTxnValue - output.amount.inSatoshi();
 
     // TODO,
-    // Figure out why this hash is reversed, prevent the hash from being flipped in the first place
+    // Figure out why this hash is reversed,
+    // if possible, prevent the hash from being flipped in the first place
     const utxoOutpointTransactionHash = input
       .getOutpoint()
       .getHash_asU8()
       .reverse();
-
-    if (typeof template === "string") {
-      throw new Error("Transaction template error");
-    }
 
     const compiler = await authenticationTemplateToCompilerBCH(template);
 
@@ -296,7 +297,14 @@ export class CommonWallet extends BaseWallet {
         prefix: string;
       };
 
-      // TODO estimate fees, return change
+      // Get the change locking bytecode
+      let changeLockingBytecode = compiler.generateBytecode("lock", {
+        keys: { privateKeys: { key: this.privateKey } },
+      });
+      if (!changeLockingBytecode.success) {
+        throw new Error(changeLockingBytecode.toString());
+      }
+
       const result = generateTransaction({
         inputs: [
           {
@@ -318,6 +326,10 @@ export class CommonWallet extends BaseWallet {
           {
             lockingBytecode: outputLockingBytecode.bytecode,
             satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+          },
+          {
+            lockingBytecode: changeLockingBytecode.bytecode,
+            satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
           },
         ],
         version: 2,
