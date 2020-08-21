@@ -97,22 +97,26 @@ components:
       properties:
         name:
           type: string
-          description: User define 
+          description: User defined string for wallet 
           example: username1
         type:
           type: string
-          description: wallet type
+          description: |
+            Wallet type, either a single wallet with private key (wif) or 
+            a Hierarchical Deterministic wallet determined from a seed.
           enum:
           - wif
           - hd
           example: wif
         wif:
           type: string
-          description: Wallet Import Format string
+          description: |
+            Wallet Import Format string
           example: wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddress:
           type: string
-          description: The address in cashaddr format
+          description: |
+            The address in cashaddr format.
           example: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         network:
           type: string
@@ -129,7 +133,7 @@ components:
       properties:
         name:
           type: string
-          description: User define 
+          description: User defined string for wallet
           example: username1
         type:
           type: string
@@ -146,6 +150,10 @@ components:
           - testnet
           - regtest
           example: testnet
+      required:
+        - name
+        - type 
+        - network
       xml:
         name: Wallet        
     SendRequest:
@@ -169,12 +177,12 @@ components:
           type: string
         transaction:
           type: string
+          description: The hash of the transaction
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid          
   securitySchemes:
     mainnet_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://auth.mainnet.cash
-          scopes:
-            write:wallet: modify your account
-            read:wallet: view your wallet
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
