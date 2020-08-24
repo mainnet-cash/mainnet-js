@@ -24,4 +24,4 @@
 
 package.json
 tsconfig.json
-services/*.ts
+*.ts

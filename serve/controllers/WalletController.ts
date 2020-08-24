@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-import { Controller } from './Controller';
-import * as service from '../services/WalletService';
-export const createWallet = async (request:any, response:any) => {
+import { Controller } from "./Controller";
+import * as service from "../services/WalletService";
+export const createWallet = async (request: any, response: any) => {
   await Controller.handleRequest(request, response, service.createWallet);
 };

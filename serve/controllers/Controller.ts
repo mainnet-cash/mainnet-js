@@ -1,16 +1,17 @@
-import fs = require('fs');
-import path = require('path');
+import fs = require("fs");
+import path = require("path");
 import { config } from "../config";
 
 export class Controller {
-  static sendResponse(response:any, payload:any) {
+  static sendResponse(response: any, payload: any) {
     /**
      * The default response-code is 200. We want to allow to change that. in That case,
      * payload will be an object consisting of a code and a payload. If not customized
      * send 200 and the payload as received in this method.
      */
     response.status(payload.code || 200);
-    const responsePayload = payload.payload !== undefined ? payload.payload : payload;
+    const responsePayload =
+      payload.payload !== undefined ? payload.payload : payload;
     if (responsePayload instanceof Object) {
       response.json(responsePayload);
     } else {
@@ -18,7 +19,7 @@ export class Controller {
     }
   }
 
-  static sendError(response:any, error:any) {
+  static sendError(response: any, error: any) {
     response.status(error.code || 500);
     if (error.error instanceof Object) {
       response.json(error.error);
@@ -38,17 +39,21 @@ export class Controller {
    * @param fieldName
    * @returns {string}
    */
-  static collectFile(request:any, fieldName:any) {
-    let uploadedFileName = '';
+  static collectFile(request: any, fieldName: any) {
+    let uploadedFileName = "";
     if (request.files && request.files.length > 0) {
-      const fileObject = request.files.find((file:any) => file.fieldname === fieldName);
+      const fileObject = request.files.find(
+        (file: any) => file.fieldname === fieldName
+      );
       if (fileObject) {
-        const fileArray = fileObject.originalname.split('.');
+        const fileArray = fileObject.originalname.split(".");
         const extension = fileArray.pop();
         fileArray.push(`_${Date.now()}`);
-        uploadedFileName = `${fileArray.join('')}.${extension}`;
-        fs.renameSync(path.join(config.FILE_UPLOAD_PATH, fileObject.filename),
-          path.join(config.FILE_UPLOAD_PATH, uploadedFileName));
+        uploadedFileName = `${fileArray.join("")}.${extension}`;
+        fs.renameSync(
+          path.join(config.FILE_UPLOAD_PATH, fileObject.filename),
+          path.join(config.FILE_UPLOAD_PATH, uploadedFileName)
+        );
       }
     }
     return uploadedFileName;
@@ -81,27 +86,33 @@ export class Controller {
   //   return requestFiles;
   // }
 
-  static collectRequestParams(request:any) {
-    const requestParams:any = {};
+  static collectRequestParams(request: any) {
+    const requestParams: any = {};
     if (request.openapi.schema.requestBody !== undefined) {
       const { content } = request.openapi.schema.requestBody;
-      if (content['application/json'] !== undefined) {
-        const schema = request.openapi.schema.requestBody.content['application/json'];
+      if (content["application/json"] !== undefined) {
+        const schema =
+          request.openapi.schema.requestBody.content["application/json"];
         if (schema.$ref) {
-          requestParams[schema.$ref.substr(schema.$ref.lastIndexOf('.'))] = request.body;
+          requestParams[schema.$ref.substr(schema.$ref.lastIndexOf("."))] =
+            request.body;
         } else {
           requestParams.body = request.body;
         }
-      } else if (content['multipart/form-data'] !== undefined) {
-        Object.keys(content['multipart/form-data'].schema.properties).forEach(
+      } else if (content["multipart/form-data"] !== undefined) {
+        Object.keys(content["multipart/form-data"].schema.properties).forEach(
           (property) => {
-            const propertyObject = content['multipart/form-data'].schema.properties[property];
-            if (propertyObject.format !== undefined && propertyObject.format === 'binary') {
+            const propertyObject =
+              content["multipart/form-data"].schema.properties[property];
+            if (
+              propertyObject.format !== undefined &&
+              propertyObject.format === "binary"
+            ) {
               requestParams[property] = this.collectFile(request, property);
             } else {
               requestParams[property] = request.body[property];
             }
-          },
+          }
         );
       }
     }
@@ -113,25 +124,30 @@ export class Controller {
     //     requestParams.body = request.body;
     //   }
     // }
-    request.openapi.schema.parameters.forEach((param:any) => {
-      if (param.in === 'path') {
+    request.openapi.schema.parameters.forEach((param: any) => {
+      if (param.in === "path") {
         requestParams[param.name] = request.openapi.pathParams[param.name];
-      } else if (param.in === 'query') {
+      } else if (param.in === "query") {
         requestParams[param.name] = request.query[param.name];
-      } else if (param.in === 'header') {
+      } else if (param.in === "header") {
         requestParams[param.name] = request.headers[param.name];
       }
     });
     return requestParams;
   }
 
-  static async handleRequest(request:any, response:any, serviceOperation:any) {
+  static async handleRequest(
+    request: any,
+    response: any,
+    serviceOperation: any
+  ) {
     try {
-      const serviceResponse = await serviceOperation(this.collectRequestParams(request));
+      const serviceResponse = await serviceOperation(
+        this.collectRequestParams(request)
+      );
       Controller.sendResponse(response, serviceResponse);
     } catch (error) {
       Controller.sendError(response, error);
     }
   }
 }
-

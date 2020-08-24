@@ -13,20 +13,20 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.1
+  version: 0.0.7
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
-- url: http://localhost:3000/v0
+  - url: http://localhost:3000/v1
 tags:
-- description: Everything you need to manage a wallet
-  externalDocs:
-    description: Find out more
-    url: http://mainnet.cash/docs#wallet
-  name: wallet
-- description: Send bitcoin cash
-  name: send
+  - description: Everything you need to manage a wallet
+    externalDocs:
+      description: Find out more
+      url: http://mainnet.cash/docs#wallet
+    name: wallet
+  - description: Send bitcoin cash
+    name: send
 paths:
   /wallet:
     get:
@@ -36,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MethodNotAllowedError'
+                $ref: "#/components/schemas/MethodNotAllowedError"
           description: Method Not Allowed
       x-eov-operation-handler: controllers/DefaultController
     post:
@@ -45,7 +45,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WalletRequest'
+              $ref: "#/components/schemas/WalletRequest"
         description: Request a new new random wallet
         required: true
       responses:
@@ -53,14 +53,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WalletResponse'
+                $ref: "#/components/schemas/WalletResponse"
           description: successful operation
         "405":
           content: {}
           description: Invalid input
       summary: create a new wallet
       tags:
-      - wallet
+        - wallet
       x-codegen-request-body-name: body
       x-eov-operation-handler: controllers/WalletController
   /send:
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MethodNotAllowedError'
+                $ref: "#/components/schemas/MethodNotAllowedError"
           description: Method Not Allowed
       x-eov-operation-handler: controllers/DefaultController
     post:
@@ -80,7 +80,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendRequest'
+              $ref: "#/components/schemas/SendRequest"
         description: place a send request
         required: true
       responses:
@@ -88,7 +88,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendResponse'
+                $ref: "#/components/schemas/SendResponse"
           description: transaction accepted
         "400":
           content: {}
@@ -98,7 +98,7 @@ paths:
           description: Invalid network for given address
       summary: Send some amount to a given address
       tags:
-      - send
+        - send
       x-codegen-request-body-name: body
       x-eov-operation-handler: controllers/SendController
 components:
@@ -116,11 +116,12 @@ components:
           example: username1
           type: string
         type:
-          description: "Wallet type, either a single wallet with private key (wif)\
+          description:
+            "Wallet type, either a single wallet with private key (wif)\
             \ or \na Hierarchical Deterministic wallet determined from a seed.\n"
           enum:
-          - wif
-          - hd
+            - wif
+            - hd
           example: wif
           type: string
         wif:
@@ -136,9 +137,9 @@ components:
         network:
           description: network type
           enum:
-          - mainnet
-          - testnet
-          - regtest
+            - mainnet
+            - testnet
+            - regtest
           example: testnet
           type: string
       type: object
@@ -157,22 +158,22 @@ components:
         type:
           description: wallet type
           enum:
-          - wif
-          - hd
+            - wif
+            - hd
           example: wif
           type: string
         network:
           description: network type
           enum:
-          - mainnet
-          - testnet
-          - regtest
+            - mainnet
+            - testnet
+            - regtest
           example: testnet
           type: string
       required:
-      - name
-      - network
-      - type
+        - name
+        - network
+        - type
       type: object
       xml:
         name: Wallet
@@ -188,8 +189,8 @@ components:
           example: username1
           type: string
       required:
-      - to
-      - wallet
+        - to
+        - wallet
       type: object
       xml:
         name: SendRequest

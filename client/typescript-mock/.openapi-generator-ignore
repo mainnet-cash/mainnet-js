@@ -25,3 +25,4 @@
 # The api uses a deprecated http.ClientResponse, which was moved to http.IncomingMessage in node 8
 # If you need to rebuild this mock api simply find and replace
 api/
+README.md

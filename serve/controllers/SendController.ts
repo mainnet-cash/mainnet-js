@@ -6,10 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-import * as service  from '../services/SendService';
-export const sendRequest = async (request:any, response:any) => {
+const Controller = require("./Controller");
+import * as service from "../services/SendService";
+export const sendRequest = async (request: any, response: any) => {
   await Controller.handleRequest(request, response, service.sendRequest);
 };
-
-

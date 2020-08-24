@@ -1,16 +1,18 @@
-import { logger } from '../logger';
-import * as controllers  from '../controllers';
-import * as Services  from '../services';
+import { logger } from "../logger";
+import * as controllers from "../controllers";
+import * as Services from "../services";
 
 function handleError(err, request, response, next) {
   logger.error(err);
   const code = err.code || 400;
   response.status(code);
   response.error = err;
-  next(JSON.stringify({
-    code,
-    error: err,
-  }));
+  next(
+    JSON.stringify({
+      code,
+      error: err,
+    })
+  );
 }
 
 /**
@@ -36,8 +38,9 @@ function openApiRouter() {
        * If none was applied This is because the path requested is not in the schema.
        * If there's no openapi object, we have nothing to do, and pass on to next middleware.
        */
-      if (request.openapi === undefined
-          || request.openapi.schema === undefined
+      if (
+        request.openapi === undefined ||
+        request.openapi.schema === undefined
       ) {
         next();
         return;
@@ -46,13 +49,23 @@ function openApiRouter() {
       // request.swagger.params.forEach((param) => {
       //   request.swagger.paramValues[param.name] = getValueFromRequest(request, param);
       // });
-      const controllerName = request.openapi.schema['x-openapi-router-controller'];
-      const serviceName = request.openapi.schema['x-openapi-router-service'];
-      if (!controllers[controllerName] || controllers[controllerName] === undefined) {
-        handleError(`request sent to controller '${controllerName}' which has not been defined`,
-          request, response, next);
+      const controllerName =
+        request.openapi.schema["x-openapi-router-controller"];
+      const serviceName = request.openapi.schema["x-openapi-router-service"];
+      if (
+        !controllers[controllerName] ||
+        controllers[controllerName] === undefined
+      ) {
+        handleError(
+          `request sent to controller '${controllerName}' which has not been defined`,
+          request,
+          response,
+          next
+        );
       } else {
-        const apiController = new controllers[controllerName](Services[serviceName]);
+        const apiController = new controllers[controllerName](
+          Services[serviceName]
+        );
         const controllerOperation = request.openapi.schema.operationId;
         await apiController[controllerOperation](request, response, next);
       }
