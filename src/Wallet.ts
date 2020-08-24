@@ -16,12 +16,11 @@ import {
   generatePrivateKey,
   lockingBytecodeToCashAddress,
   validateAuthenticationTemplate,
-  WalletImportFormatType
+  WalletImportFormatType,
 } from "@bitauth/libauth";
 
 import { GrpcClient } from "grpc-bchrpc-node";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
-
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -56,7 +55,7 @@ class Amount {
       case "coin":
         return this.amount / 10e8;
       default:
-        throw Error("Unit of value not defined")
+        throw Error("Unit of value not defined");
     }
   }
 }
@@ -134,7 +133,9 @@ export class CommonWallet extends BaseWallet {
   }
 
   // Initialize wallet from Wallet Import Format
-  public async fromWIF(walletImportFormatString: string): Promise<void | Error> {
+  public async fromWIF(
+    walletImportFormatString: string
+  ): Promise<void | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, walletImportFormatString);
@@ -145,7 +146,7 @@ export class CommonWallet extends BaseWallet {
     } else {
       let resultData: PrivateKey = result as PrivateKey;
       this.privateKey = resultData.privateKey;
-      this.walletType = 'wif'
+      this.walletType = "wif";
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
       this.cashaddr = (await this._deriveCashAddr(
         this.privateKey,
@@ -160,21 +161,26 @@ export class CommonWallet extends BaseWallet {
 
     // nodejs
     if (typeof process !== undefined) {
-      let crypto = require("crypto")
+      let crypto = require("crypto");
       this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
     }
     // window, webworkers, serviceworkers
     else {
-      this.privateKey = generatePrivateKey(() => window.crypto.getRandomValues(new Uint8Array(32)));
+      this.privateKey = generatePrivateKey(() =>
+        window.crypto.getRandomValues(new Uint8Array(32))
+      );
     }
     this.privateKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-    this.privateKeyWif = encodePrivateKeyWif(sha256, this.privateKey, this.networkType)
-    this.walletType = 'wif'
+    this.privateKeyWif = encodePrivateKeyWif(
+      sha256,
+      this.privateKey,
+      this.networkType
+    );
+    this.walletType = "wif";
     this.cashaddr = (await this._deriveCashAddr(
       this.privateKey,
       this.networkPrefix
     )) as string;
-    
   }
 
   // Processes an array of send requests
@@ -195,13 +201,12 @@ export class CommonWallet extends BaseWallet {
     return sendResponseList;
   }
 
-  public getSerializedWallet(){
-    return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`
+  public getSerializedWallet() {
+    return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
   }
 
   // Gets balance by summing value in all utxos in stats
   private async _getBalance(address: string): Promise<number> {
-
     const res = await this.client?.getAddressUtxos({
       address: address,
       includeMempool: true,
@@ -217,15 +222,13 @@ export class CommonWallet extends BaseWallet {
       const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
       return balance;
     } else {
-      return 0
+      return 0;
     }
   }
 
   public toString() {
-    return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`
-
+    return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
   }
-
 
   // Return address balance in satoshi
   public async balanceSats(address: string): Promise<number> {
@@ -242,7 +245,7 @@ export class CommonWallet extends BaseWallet {
     if (this.networkPrefix && this.privateKey) {
       // get input
       if (!this.cashaddr) {
-        throw Error("attempted to send without a cashaddr")
+        throw Error("attempted to send without a cashaddr");
       }
 
       let utxos = await this.client?.getAddressUtxos({
@@ -263,10 +266,14 @@ export class CommonWallet extends BaseWallet {
           throw Error(JSON.stringify(txn));
         }
       } else {
-        throw Error("No single input in the wallet can satisfy this send request")
+        throw Error(
+          "No single input in the wallet can satisfy this send request"
+        );
       }
     } else {
-      throw Error(`Wallet ${this.name} hasn't is missing either a network or private key`);
+      throw Error(
+        `Wallet ${this.name} hasn't is missing either a network or private key`
+      );
     }
   }
 
@@ -278,7 +285,7 @@ export class CommonWallet extends BaseWallet {
       const res = await this.client.submitTransaction({ txn: transaction });
       return res.getHash_asU8();
     } else {
-      throw Error("Wallet node client was not initialized")
+      throw Error("Wallet node client was not initialized");
     }
   }
 
@@ -328,25 +335,21 @@ export class CommonWallet extends BaseWallet {
       throw new Error("Transaction template error");
     }
 
-
     const utxoTxnValue = input.getValue();
     const utxoIndex = input.getOutpoint()?.getIndex();
 
     // TODO,
     // Figure out why this hash is reversed, prevent the hash from being flipped in the first place
     const utxoOutpointTransactionHash = input
-      .getOutpoint()?.getHash_asU8().reverse();
+      .getOutpoint()
+      ?.getHash_asU8()
+      .reverse();
 
-    if (
-      !utxoOutpointTransactionHash ||
-      utxoIndex === undefined
-    ) {
+    if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
       throw new Error("Missing unspent outpoint when building transaction");
     }
 
-    if (
-      !this.privateKey 
-    ) {
+    if (!this.privateKey) {
       throw new Error("Missing signing key when building transaction");
     }
 

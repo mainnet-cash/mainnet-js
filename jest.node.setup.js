@@ -3,7 +3,7 @@ require("dotenv").config({ path: ".env.regtest" });
 const { spawn } = require("child_process");
 
 function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 module.exports = async function () {
@@ -26,10 +26,11 @@ module.exports = async function () {
     console.log("...already running");
   }
   if (global.mainnetServer === undefined) {
-    global.mainnetServer = spawn("npx", ["ts-node", "./serve/index.ts"], { shell: false });
+    global.mainnetServer = spawn("npx", ["ts-node", "./serve/index.ts"], {
+      shell: false,
+    });
   }
-  console.log('Waiting for readiness');
-  await delay(3000)
-  console.log("proceeding...")
-
+  console.log("Waiting for readiness");
+  await delay(3000);
+  console.log("proceeding...");
 };
