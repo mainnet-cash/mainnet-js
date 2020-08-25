@@ -1,4 +1,3 @@
-require("dotenv").config({ path: ".env.regtest" });
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import { RegTestWallet } from "./Wallet";

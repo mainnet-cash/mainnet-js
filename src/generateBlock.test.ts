@@ -1,4 +1,3 @@
-require("dotenv").config({ path: ".env.regtest" });
 import { generateBlock } from "./generateBlock";
 
 test("Generate a block on a Regression Network", () => {

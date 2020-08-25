@@ -1,4 +1,5 @@
 module.exports = {
+  rootDir: "../",
   roots: ["<rootDir>/src", "<rootDir>/serve"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
@@ -8,6 +9,6 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   setupFiles: ["fake-indexeddb/auto"],
-  globalSetup: "./jest.node.setup.js",
-  globalTeardown: "./jest.node.teardown.js",
+  globalSetup: "<rootDir>/jest/node.setup.js",
+  globalTeardown: "<rootDir>/jest/node.teardown.js",
 };
