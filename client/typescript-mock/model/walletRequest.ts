@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * \"A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may \\nbe made prior to release of version\\ \\ 1.\\n\\n**Important:** modifying this library to prematurely operate on mainnet\\n\\ \\ may result in loss of funds\\n\"
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may  be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
  *
  * The version of the OpenAPI document: 0.0.1
  * Contact: hello@mainnet.cash
@@ -10,59 +10,54 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from "../api";
+import { RequestFile } from '../api';
 
 export class WalletRequest {
-  /**
-   * User defined string for wallet
-   */
-  "name": string;
-  /**
-   * wallet type
-   */
-  "type": WalletRequest.TypeEnum;
-  /**
-   * network type
-   */
-  "network": WalletRequest.NetworkEnum;
+    /**
+    * User defined string for wallet
+    */
+    'name': string;
+    /**
+    * wallet type
+    */
+    'type': WalletRequest.TypeEnum;
+    /**
+    * network type
+    */
+    'network': WalletRequest.NetworkEnum;
 
-  static discriminator: string | undefined = undefined;
+    static discriminator: string | undefined = undefined;
 
-  static attributeTypeMap: Array<{
-    name: string;
-    baseName: string;
-    type: string;
-  }> = [
-    {
-      name: "name",
-      baseName: "name",
-      type: "string",
-    },
-    {
-      name: "type",
-      baseName: "type",
-      type: "WalletRequest.TypeEnum",
-    },
-    {
-      name: "network",
-      baseName: "network",
-      type: "WalletRequest.NetworkEnum",
-    },
-  ];
+    static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "name",
+            "baseName": "name",
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "baseName": "type",
+            "type": "WalletRequest.TypeEnum"
+        },
+        {
+            "name": "network",
+            "baseName": "network",
+            "type": "WalletRequest.NetworkEnum"
+        }    ];
 
-  static getAttributeTypeMap() {
-    return WalletRequest.attributeTypeMap;
-  }
+    static getAttributeTypeMap() {
+        return WalletRequest.attributeTypeMap;
+    }
 }
 
 export namespace WalletRequest {
-  export enum TypeEnum {
-    Wif = <any>"wif",
-    Hd = <any>"hd",
-  }
-  export enum NetworkEnum {
-    Mainnet = <any>"mainnet",
-    Testnet = <any>"testnet",
-    Regtest = <any>"regtest",
-  }
+    export enum TypeEnum {
+        Wif = <any> 'wif',
+        Hd = <any> 'hd'
+    }
+    export enum NetworkEnum {
+        Mainnet = <any> 'mainnet',
+        Testnet = <any> 'testnet',
+        Regtest = <any> 'regtest'
+    }
 }

@@ -5,9 +5,6 @@ handle the boilerplate of connecting to the server for you.
 
 | language         | Examples | Tests | Native Signing |
 | :--------------- | :------: | :---: | :------------: |
-| mainnet-node     |    ⍰     |   ⍰   |       👍       |
-| mainnet-browser  |    ⍰     |   ⍰   |       ⍰        |
-| mainnet-worker   |    ⍰     |   ⍰   |       ⍰        |
 | android          |    -     |   -   |       -        |
 | cpp-restsdk      |    -     |   -   |       -        |
 | csharp           |    -     |   -   |       -        |
