@@ -1,0 +1,211 @@
+openapi: 3.0.1
+info:
+  contact:
+    email: hello@mainnet.cash
+  description: |
+    "A developer friendly bitcoin cash wallet api
+
+    This API is currently in active development, breaking changes may \nbe made prior to release of version\
+    \ 1.\n\n**Important:** modifying this library to prematurely operate on mainnet\n\
+    \ may result in loss of funds\n"
+  license:
+    name: MIT Licence
+    url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
+  termsOfService: https://mainnet.cash/terms/
+  title: Mainnet Cash
+  version: 0.0.7
+externalDocs:
+  description: Find out more about mainnet-js
+  url: https://mainnet.cash
+servers:
+  - url: http://localhost:3000/v1
+tags:
+  - description: Everything you need to manage a wallet
+    externalDocs:
+      description: Find out more
+      url: http://mainnet.cash/docs#wallet
+    name: wallet
+  - description: Send bitcoin cash
+    name: send
+paths:
+  /wallet:
+    get:
+      operationId: getWalletNotAllowed
+      responses:
+        "405":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MethodNotAllowedError"
+          description: Method Not Allowed
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: createWallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletRequest"
+        description: Request a new new random wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new wallet
+      tags:
+        - wallet
+      x-codegen-request-body-name: body
+      x-eov-operation-handler: controllers/WalletController
+  /send:
+    get:
+      operationId: getSendNotAllowed
+      responses:
+        "405":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MethodNotAllowedError"
+          description: Method Not Allowed
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: sendRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendRequest"
+        description: place a send request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Send some amount to a given address
+      tags:
+        - send
+      x-codegen-request-body-name: body
+      x-eov-operation-handler: controllers/SendController
+components:
+  schemas:
+    WalletResponse:
+      example:
+        wif: wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        cashaddress: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        name: username1
+        type: wif
+        network: testnet
+      properties:
+        name:
+          description: User defined string for wallet
+          example: username1
+          type: string
+        type:
+          description:
+            "Wallet type, either a single wallet with private key (wif)\
+            \ or \na Hierarchical Deterministic wallet determined from a seed.\n"
+          enum:
+            - wif
+            - hd
+          example: wif
+          type: string
+        wif:
+          description: |
+            Wallet Import Format string
+          example: wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        cashaddress:
+          description: |
+            The address in cashaddr format.
+          example: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+        network:
+          description: network type
+          enum:
+            - mainnet
+            - testnet
+            - regtest
+          example: testnet
+          type: string
+      type: object
+      xml:
+        name: Wallet
+    WalletRequest:
+      example:
+        name: username1
+        type: wif
+        network: testnet
+      properties:
+        name:
+          description: User defined string for wallet
+          example: username1
+          type: string
+        type:
+          description: wallet type
+          enum:
+            - wif
+            - hd
+          example: wif
+          type: string
+        network:
+          description: network type
+          enum:
+            - mainnet
+            - testnet
+            - regtest
+          example: testnet
+          type: string
+      required:
+        - name
+        - network
+        - type
+      type: object
+      xml:
+        name: Wallet
+    SendRequest:
+      example:
+        wallet: regtest:abcd123
+        name: username1
+      properties:
+        wallet:
+          example: regtest:abcd123
+          type: string
+        name:
+          example: username1
+          type: string
+      required:
+        - to
+        - wallet
+      type: object
+      xml:
+        name: SendRequest
+    SendResponse:
+      example:
+        type: type
+        transaction: transaction
+      properties:
+        type:
+          type: string
+        transaction:
+          description: The hash of the transaction
+          type: string
+      type: object
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    MethodNotAllowedError:
+      description: Get method is not allowed, see POST method documentation

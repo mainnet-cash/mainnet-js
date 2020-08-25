@@ -10,8 +10,10 @@ import {
   CashAddressNetworkPrefix,
   CompilationData,
   decodePrivateKeyWif,
+  encodePrivateKeyWif,
   encodeTransaction,
   generateTransaction,
+  generatePrivateKey,
   lockingBytecodeToCashAddress,
   validateAuthenticationTemplate,
   WalletImportFormatType,
@@ -32,7 +34,7 @@ class SendRequest {
   address: string;
   amount: Amount;
 
-  constructor(SerializedSendRequest) {
+  constructor(SerializedSendRequest: any) {
     this.address = SerializedSendRequest[0];
     this.amount = new Amount(SerializedSendRequest[1]);
   }
@@ -41,23 +43,26 @@ class SendRequest {
 class Amount {
   amount: number;
   unit: UnitType;
-  constructor(SerializedAmount) {
+  constructor(SerializedAmount: any) {
     this.amount = SerializedAmount[0];
     this.unit = SerializedAmount[1];
   }
 
-  public inSatoshi() {
+  public inSatoshi(): number | Error {
     switch (this.unit) {
       case "satoshi":
         return this.amount;
       case "coin":
         return this.amount / 10e8;
+      default:
+        throw Error("Unit of value not defined");
     }
   }
 }
 
 export type NetworkType = "mainnet" | "testnet";
 export type UnitType = "coin" | "bits" | "satoshi";
+export type WalletType = "wif" | "hd";
 
 /**
  * A class to hold features used by all wallets
@@ -104,6 +109,8 @@ export class CommonWallet extends BaseWallet {
   publicKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
+  privateKeyWif?: string;
+  walletType?: WalletType;
   cashaddr?: string;
   client?: GrpcClient;
 
@@ -126,7 +133,9 @@ export class CommonWallet extends BaseWallet {
   }
 
   // Initialize wallet from Wallet Import Format
-  public async fromWIF(walletImportFormatString: string) {
+  public async fromWIF(
+    walletImportFormatString: string
+  ): Promise<void | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, walletImportFormatString);
@@ -137,12 +146,41 @@ export class CommonWallet extends BaseWallet {
     } else {
       let resultData: PrivateKey = result as PrivateKey;
       this.privateKey = resultData.privateKey;
+      this.walletType = "wif";
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
       this.cashaddr = (await this._deriveCashAddr(
         this.privateKey,
         this.networkPrefix
       )) as string;
     }
+  }
+
+  public async generateWif(): Promise<void | Error> {
+    const sha256 = await sha256Promise;
+    const secp256k1 = await secp256k1Promise;
+
+    // nodejs
+    if (typeof process !== undefined) {
+      let crypto = require("crypto");
+      this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
+    }
+    // window, webworkers, serviceworkers
+    else {
+      this.privateKey = generatePrivateKey(() =>
+        window.crypto.getRandomValues(new Uint8Array(32))
+      );
+    }
+    this.privateKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.privateKeyWif = encodePrivateKeyWif(
+      sha256,
+      this.privateKey,
+      this.networkType
+    );
+    this.walletType = "wif";
+    this.cashaddr = (await this._deriveCashAddr(
+      this.privateKey,
+      this.networkPrefix
+    )) as string;
   }
 
   // Processes an array of send requests
@@ -163,21 +201,33 @@ export class CommonWallet extends BaseWallet {
     return sendResponseList;
   }
 
+  public getSerializedWallet() {
+    return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
+  }
+
   // Gets balance by summing value in all utxos in stats
   private async _getBalance(address: string): Promise<number> {
-    const res = await this.client.getAddressUtxos({
+    const res = await this.client?.getAddressUtxos({
       address: address,
       includeMempool: true,
     });
-    const txns = res.getOutputsList();
+    const txns = res?.getOutputsList();
 
-    const balanceArray: number[] = await Promise.all(
-      txns.map(async (o: UnspentOutput) => {
-        return o.getValue();
-      })
-    );
-    const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
-    return balance;
+    if (txns) {
+      const balanceArray: number[] = await Promise.all(
+        txns.map(async (o: UnspentOutput) => {
+          return o.getValue();
+        })
+      );
+      const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
+      return balance;
+    } else {
+      return 0;
+    }
+  }
+
+  public toString() {
+    return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
   }
 
   // Return address balance in satoshi
@@ -194,25 +244,37 @@ export class CommonWallet extends BaseWallet {
   private async _processSendRequest(request: SendRequest) {
     if (this.networkPrefix && this.privateKey) {
       // get input
-      let utxos = await this.client.getAddressUtxos({
+      if (!this.cashaddr) {
+        throw Error("attempted to send without a cashaddr");
+      }
+
+      let utxos = await this.client?.getAddressUtxos({
         address: this.cashaddr,
         includeMempool: false,
       });
-      let utxo = utxos.getOutputsList()[101];
+      let utxo = utxos?.getOutputsList()[101];
 
       // build transaction
-      let txn = await this._buildP2pkhNonHdTransaction(utxo, request);
-
-      // submit transaction
-      if (txn.success) {
-        return await this._submitTransaction(
-          encodeTransaction(txn.transaction)
-        );
+      if (utxo) {
+        let txn = await this._buildP2pkhNonHdTransaction(utxo, request);
+        // submit transaction
+        if (txn.success) {
+          return await this._submitTransaction(
+            encodeTransaction(txn.transaction)
+          );
+        } else {
+          throw Error(JSON.stringify(txn));
+        }
       } else {
-        throw Error(JSON.stringify(txn));
+        throw Error(
+          "No single input in the wallet can satisfy this send request"
+        );
       }
     } else {
-      throw Error(`Wallet ${this.name} hasn't been set with a private key`);
+      throw Error(
+        `Wallet ${this.name} hasn't is missing either a network or private key`
+      );
+
     }
   }
 
@@ -220,15 +282,19 @@ export class CommonWallet extends BaseWallet {
   private async _submitTransaction(
     transaction: Uint8Array
   ): Promise<Uint8Array> {
-    const res = await this.client.submitTransaction({ txn: transaction });
-    return res.getHash_asU8();
+    if (this.client) {
+      const res = await this.client.submitTransaction({ txn: transaction });
+      return res.getHash_asU8();
+    } else {
+      throw Error("Wallet node client was not initialized");
+    }
   }
 
   // Given a private key and network, derive cashaddr from the locking code
   // TODO, is there a more direct way to do this?
   // TODO, This can be moved off the Wallet Class
   public async _deriveCashAddr(
-    privateKey,
+    privateKey: Uint8Array,
     networkPrefix: CashAddressNetworkPrefix
   ) {
     const lockingScript = "lock";
@@ -265,21 +331,28 @@ export class CommonWallet extends BaseWallet {
     const template = validateAuthenticationTemplate(
       authenticationTemplateP2pkhNonHd
     );
+
     if (typeof template === "string") {
       throw new Error("Transaction template error");
     }
 
     const utxoTxnValue = input.getValue();
-    const utxoIndex = input.getOutpoint().getIndex();
-    const changeAmount = utxoTxnValue - output.amount.inSatoshi();
+    const utxoIndex = input.getOutpoint()?.getIndex();
+    const amount = output.amount.inSatoshi()
+    const changeAmount = utxoTxnValue - (amount as number);
 
-    // TODO,
-    // Figure out why this hash is reversed,
-    // if possible, prevent the hash from being flipped in the first place
     const utxoOutpointTransactionHash = input
       .getOutpoint()
-      .getHash_asU8()
+      ?.getHash_asU8()
       .reverse();
+
+    if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
+      throw new Error("Missing unspent outpoint when building transaction");
+    }
+
+    if (!this.privateKey) {
+      throw new Error("Missing signing key when building transaction");
+    }
 
     const compiler = await authenticationTemplateToCompilerBCH(template);
 
