@@ -35,7 +35,6 @@ export class WalletDatabase extends Dexie {
       // Make sure we have something in DB:
       if ((await this.wallet.where({ name: name }).count()) === 0) {
         const id = await this.wallet.add({ name: name, wallet: wallet });
-        console.log(`Addded wallet with id ${id}`);
       }
     }).catch(e => {
       throw (e.stack || e);
