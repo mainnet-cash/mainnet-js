@@ -274,6 +274,7 @@ export class CommonWallet extends BaseWallet {
       throw Error(
         `Wallet ${this.name} hasn't is missing either a network or private key`
       );
+
     }
   }
 
@@ -369,7 +370,14 @@ export class CommonWallet extends BaseWallet {
         prefix: string;
       };
 
-      // TODO estimate fees, return change
+      // Get the change locking bytecode
+      let changeLockingBytecode = compiler.generateBytecode("lock", {
+        keys: { privateKeys: { key: this.privateKey } },
+      });
+      if (!changeLockingBytecode.success) {
+        throw new Error(changeLockingBytecode.toString());
+      }
+
       const result = generateTransaction({
         inputs: [
           {
@@ -391,6 +399,10 @@ export class CommonWallet extends BaseWallet {
           {
             lockingBytecode: outputLockingBytecode.bytecode,
             satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+          },
+          {
+            lockingBytecode: changeLockingBytecode.bytecode,
+            satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
           },
         ],
         version: 2,

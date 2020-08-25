@@ -6,6 +6,7 @@ import { generateBlock } from "./generateBlock";
 
 test("Send a transaction on the regression network", async () => {
   // At least 100 blocks must be mined before spending a coinbase transaction
+
   if (!process.env.RPC_USER || !process.env.RPC_PASS) {
     throw Error("Missing env settings for rpc user");
   } else {
@@ -32,4 +33,5 @@ test("Send a transaction on the regression network", async () => {
       expect(bobBalance).toBe(1000);
     }
   }
+
 });
