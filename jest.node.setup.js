@@ -6,18 +6,18 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function pingBchd(){
+async function pingBchd() {
   const readinessArgs = [
     `--rpcuser=${process.env.RPC_USER}`,
     `--rpcpass=${process.env.RPC_PASS}`,
     `--testnet`,
-    "ping"
-  ] 
+    "ping",
+  ];
   let response = await spawnSync(
     `${process.env.BCHD_BIN_DIRECTORY}/bchctl`,
     readinessArgs
   );
-  return response.stderr
+  return response.stderr;
 }
 
 module.exports = async function () {
@@ -44,9 +44,9 @@ module.exports = async function () {
       shell: false,
     });
   }
-  
+
   // ping bchd as a readiness signal, give up and run anyway after 10s
-  for (let i=0; ((await pingBchd()).length > 0)  && i < 5; i++){
+  for (let i = 0; (await pingBchd()).length > 0 && i < 5; i++) {
     console.log("Waiting for readiness");
     await delay(2000);
   }

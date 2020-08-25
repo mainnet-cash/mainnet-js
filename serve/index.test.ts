@@ -35,5 +35,3 @@ test("Create a Testnet wallet form the API", async () => {
   expect(body?.cashaddress?.startsWith("bchtest:")).toBeTruthy();
   expect(body?.wallet?.startsWith("wif:bchtest:3")).toBeTruthy();
 });
-
-

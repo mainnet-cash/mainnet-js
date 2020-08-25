@@ -33,5 +33,4 @@ test("Send a transaction on the regression network", async () => {
       expect(bobBalance).toBe(1000);
     }
   }
-
 });
