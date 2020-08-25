@@ -338,9 +338,9 @@ export class CommonWallet extends BaseWallet {
 
     const utxoTxnValue = input.getValue();
     const utxoIndex = input.getOutpoint()?.getIndex();
+    const amount = output.amount.inSatoshi()
+    const changeAmount = utxoTxnValue - (amount as number);
 
-    // TODO,
-    // Figure out why this hash is reversed, prevent the hash from being flipped in the first place
     const utxoOutpointTransactionHash = input
       .getOutpoint()
       ?.getHash_asU8()
