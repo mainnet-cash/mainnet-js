@@ -19,7 +19,7 @@
   "scripts": {
     "pretest": "node util/checkBchd.js",
     "test": "npx jest --config=jest/node.config.js",
-    "test:browser": "npx jest --config=jest/browser.config.js",
+    "test:browser": "npx jest --config=jest/browser.config.js --detectOpenHandles",
     "debug:grpcui-install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "debug:grpcui": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
     "debug:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",

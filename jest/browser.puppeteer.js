@@ -2,7 +2,8 @@ module.exports = {
 	launch: {
 		dumpio: true,
 		headless: false,
-		args: ['--disable-infobars'],
+		args: [],
 	},
-	browserContext: 'default'
+    browserContext: 'default',
+    userDataDir: './headless-user-data',
 }

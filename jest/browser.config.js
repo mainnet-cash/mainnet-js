@@ -8,5 +8,6 @@ module.exports = {
 		"^.+\\.ts?$": "ts-jest"
 	},
 	globalSetup: '<rootDir>/jest/browser.setup.js',
+	globalTeardown: "<rootDir>/jest/node.teardown.js",
 };
 
