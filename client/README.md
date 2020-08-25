@@ -26,4 +26,4 @@ A list of available clients can be generated with the command:
 
 ## Building a proxy
 
-If your site needs to obtain some data from requests prior to passing them to the API, you may generate code for a proxy using codegen and pass those requests to your self hosted
+If your site needs to obtain some data from requests prior to passing them to the API, you may generate code for a proxy using codegen and pass those requests to your self hosted version of the nodejs server contained in this project.
