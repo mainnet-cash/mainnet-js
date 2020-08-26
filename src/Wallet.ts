@@ -274,7 +274,6 @@ export class CommonWallet extends BaseWallet {
       throw Error(
         `Wallet ${this.name} hasn't is missing either a network or private key`
       );
-
     }
   }
 
@@ -338,7 +337,7 @@ export class CommonWallet extends BaseWallet {
 
     const utxoTxnValue = input.getValue();
     const utxoIndex = input.getOutpoint()?.getIndex();
-    const amount = output.amount.inSatoshi()
+    const amount = output.amount.inSatoshi();
     const changeAmount = utxoTxnValue - (amount as number);
 
     const utxoOutpointTransactionHash = input

@@ -18,7 +18,6 @@ export class WalletDatabase extends Dexie {
       wallet: "++id,name,wallet",
     });
     this.wallet = this.table("wallet");
-
   }
 
   public async addWallet({
@@ -30,28 +29,20 @@ export class WalletDatabase extends Dexie {
   }): Promise<void> {
     // Make sure we have something in DB:
 
-    return this.transaction('rw', this.wallet, async () => {
-
+    return this.transaction("rw", this.wallet, async () => {
       // Make sure we have something in DB:
       if ((await this.wallet.where({ name: name }).count()) === 0) {
         const id = await this.wallet.add({ name: name, wallet: wallet });
       }
-    }).catch(e => {
-      throw (e.stack || e);
+    }).catch((e) => {
+      throw e.stack || e;
     });
-
-
   }
 
-
-
-
   public async getWallets() {
-
-    let wallets = await this.transaction('r', this.wallet, async () => {
+    let wallets = await this.transaction("r", this.wallet, async () => {
       return await this.wallet.where("id").above(0).toArray();
     });
-    return wallets
-
+    return wallets;
   }
 }

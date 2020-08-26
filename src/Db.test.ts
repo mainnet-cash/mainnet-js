@@ -1,11 +1,10 @@
 import { WalletDatabase } from "./Db";
 import { RegTestWallet } from "./Wallet";
-import { Dexie } from "dexie"
-
+import { Dexie } from "dexie";
 
 beforeEach(() => {
   let db = new Dexie("username123");
-  return db.delete()
+  return db.delete();
 });
 
 test("Store and retrieve a Regtest wallet", async () => {
@@ -16,7 +15,7 @@ test("Store and retrieve a Regtest wallet", async () => {
   await w2.generateWif();
   await db.addWallet({ name: w1.name, wallet: w1.getSerializedWallet() });
   await db.addWallet({ name: w2.name, wallet: w2.getSerializedWallet() });
-  let storedWallets = (await db.getWallets())
+  let storedWallets = await db.getWallets();
   let wallet = storedWallets.pop();
   expect(wallet?.name.startsWith("Regtest Wallet")).toBeTruthy();
   expect(wallet?.wallet.startsWith("wif:bchreg:3")).toBeTruthy();

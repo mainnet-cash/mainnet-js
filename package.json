@@ -24,11 +24,11 @@
     "debug:grpcui": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
     "debug:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
     "codegen:list": "npx openapi-generator list",
-    "codegen:server": "npx openapi-generator generate -i swagger/v1/api.yml -g nodejs-express-server -o express",
-    "codegen:typescript-mock": "npx openapi-generator generate -i swagger/v1/api.yml -g typescript-node -o client/typescript-mock",
+    "codegen:server": "npx openapi-generator generate -i swagger/v1/api.yml -g nodejs-express-server -o generated/serve/",
+    "codegen:typescript-mock": "npx openapi-generator generate -i swagger/v1/api.yml -g typescript-node -o generated/client/typescript-mock",
     "format": "prettier --write .",
-    "serve": "npx ts-node ./serve/index.ts",
-    "serve:monitor": "npx nodemon ./serve/index.ts",
+    "serve": "npx ts-node ./generated/serve/index.ts",
+    "serve:monitor": "npx nodemon ./generated/serve/index.ts",
     "build": "npx webpack"
   },
   "devDependencies": {
