@@ -4,4 +4,4 @@ node_modules
 .DS_Store
 bin
 dist/
-serve/*.log
+generated/serve/*.log
