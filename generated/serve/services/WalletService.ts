@@ -1,6 +1,6 @@
 // @ts-ignore
 import { Service } from "./Service";
-import { Wallet, RegTestWallet, TestnetWallet } from "../../src/Wallet";
+import { Wallet, RegTestWallet, TestnetWallet } from "../../../src/Wallet";
 import { WalletRequest } from "../../client/typescript-mock/model/walletRequest";
 import { WalletResponse } from "../../client/typescript-mock/model/walletResponse";
 
