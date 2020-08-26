@@ -2,7 +2,7 @@
 require("dotenv").config({ path: ".env.regtest" });
 
 const { spawn, spawnSync } = require("child_process");
-const http = require('http');
+const http = require("http");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -23,17 +23,19 @@ async function pingBchd() {
 }
 
 async function serverReady() {
-  http.get('http://localhost:3000/openapi', (res) => {
-    let body = "";
-    res.on("data", data => {
-      body += data;
+  http
+    .get("http://localhost:3000/openapi", (res) => {
+      let body = "";
+      res.on("data", (data) => {
+        body += data;
+      });
+      res.on("end", () => {
+        return res.statusCode === 200 ? true : false;
+      });
+    })
+    .on("error", (err) => {
+      return false;
     });
-    res.on("end", () => {
-     return res.statusCode === 200 ?  true : false
-    });
-  }).on("error", (err) => {
-    return false
-  });
 }
 
 module.exports = async function () {
@@ -56,11 +58,15 @@ module.exports = async function () {
     console.log("...already running");
   }
   if (global.mainnetServer === undefined) {
-    global.mainnetServer = spawn("npx", ["ts-node", "./generated/serve/index.ts"], {
-      shell: false,
-    });
+    global.mainnetServer = spawn(
+      "npx",
+      ["ts-node", "./generated/serve/index.ts"],
+      {
+        shell: false,
+      }
+    );
   }
-  // ping express 
+  // ping express
   for (let i = 0; (await serverReady()) || i > 10; i++) {
     console.log("Waiting for express server");
     await delay(1000);
