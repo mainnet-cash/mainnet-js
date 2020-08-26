@@ -1,4 +1,4 @@
 dist/
-client/
-server/
+generated/
+node_modules/
 swagger/
