@@ -1,6 +1,9 @@
 
 const merge = require("deepmerge");
 
+
+var packageJson = require('./package.json');
+
 const baseConfig = {
   entry: "./src/index.ts",
   mode: "development",
@@ -24,7 +27,7 @@ const baseConfig = {
 const nodeConfig = {
   target: "node",
   output: {
-    filename: "mainnet.node.js",
+    filename: `mainnet-node-${packageJson.version}.js`,
     path: __dirname + "/dist",
   },
 };
@@ -32,7 +35,7 @@ const nodeConfig = {
 const browserConfig = {
   target: "web",
   output: {
-    filename: "mainnet.js",
+    filename: `mainnet-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: 'umd',
     library: 'mainnet'
@@ -56,7 +59,7 @@ const browserConfig = {
 const webWorkerConfig = {
   target: "webworker",
   output: {
-    filename: "mainnet.webworker.js",
+    filename: `mainnet-webworker-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: 'umd',
     library: 'mainnet'
@@ -78,7 +81,7 @@ const webWorkerConfig = {
 };
 
 module.exports = [
-  //nodeConfig,
+  nodeConfig,
   browserConfig,
   webWorkerConfig
 ].map((c) => merge(baseConfig, c));

@@ -112,23 +112,23 @@ export async function buildP2pkhNonHdTransaction(
 
 export  async  function getSuitableUtxos(unspentOutputs: UnspentOutput[], amount: number, bestHeight: number) {
     let suitableUtxos: UnspentOutput[] = []
-    let thresholdAmount = 0
+    let neededAmount = 0
     for (const u of unspentOutputs) {
         if (u.getIsCoinbase() && bestHeight) {
             let age = bestHeight - u.getBlockHeight() 
             if (age > 100) {
                 suitableUtxos.push(u)
-                thresholdAmount += u.getValue()
+                neededAmount += u.getValue()
             }
         } else {
             suitableUtxos.push(u)
-            thresholdAmount += u.getValue()
+            neededAmount += u.getValue()
         }
-        if (thresholdAmount > amount) {
+        if (neededAmount > amount) {
             break;
         }
     }
-    if (thresholdAmount > amount) {
+    if (neededAmount > amount) {
         return suitableUtxos
     } else {
         throw Error("Could not find suitable outpoints for given amount")
