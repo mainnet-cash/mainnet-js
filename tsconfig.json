@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "es2017",
     "rootDir": "src",
     "moduleResolution": "node",
     "module": "commonjs",
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
     "sourceMap": true,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "resolveJsonModule": true,

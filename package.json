@@ -8,7 +8,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "homepage": "https://mainnet.cash",
   "main": "dist/mainnet.node.js",
   "types": "index.d.ts",
@@ -19,7 +19,7 @@
   "scripts": {
     "pretest": "node util/checkBchd.js",
     "test": "npx jest --config=jest/node.config.js",
-    "test:browser": "npx jest --config=jest/browser.config.js --detectOpenHandles",
+    "test:browser": "npx jest --config=jest/browser.config.js ",
     "debug:grpcui-install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "debug:grpcui": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
     "debug:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
@@ -59,6 +59,7 @@
     "openapi-sampler": "^1.0.0-beta.15",
     "prettier": "^2.0.5",
     "puppeteer": "^5.2.1",
+    "reload": "^3.1.0",
     "swagger-ui-express": "^4.0.2",
     "ts-jest": "^26.2.0",
     "ts-loader": "^8.0.2",
@@ -74,7 +75,7 @@
     "@bitauth/libauth": "^1.17.1",
     "dexie": "^3.0.2",
     "grpc-bchrpc-node": "^0.10.2",
-    "grpc-bchrpc-web": "^0.10.1"
+    "grpc-bchrpc-browser": "0.0.9"
   },
   "keywords": [
     "bch",

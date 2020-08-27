@@ -1,12 +1,15 @@
 import { WalletDatabase } from "./Db";
-import { RegTestWallet } from "./Wallet";
-import { Dexie } from "dexie";
+import { RegTestWallet } from "./wallet/Wif";
 
 beforeEach(() => {
-  let db = new Dexie("username123");
-  return db.delete();
+  // if(db){
+  //   return db.delete();
+  // }
 });
 
+/**
+ * @jest-environment jsdom
+ */
 test("Store and retrieve a Regtest wallet", async () => {
   const db = new WalletDatabase("username123");
   let w1 = new RegTestWallet("Regtest Wallet 1");

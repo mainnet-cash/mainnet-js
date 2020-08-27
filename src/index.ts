@@ -1,4 +1,4 @@
 export * from "./ok";
-export * from "./generateBlock";
+//export * from "./generateBlock";
 
-export * from "./Wallet";
+export * from "./wallet/Base";

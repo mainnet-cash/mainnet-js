@@ -34,7 +34,7 @@ module.exports = async function globalSetup(globalConfig) {
 		console.log("...already running");
 	}
 	if (global.mainnetServer === undefined) {
-		global.mainnetServer = spawn("npx", ["ts-node", "./serve/index.ts"], {
+		global.mainnetServer = spawn("npx", ["ts-node", "./generated/serve/index.ts"], {
 			shell: false,
 		});
 	}

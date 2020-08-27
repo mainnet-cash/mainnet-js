@@ -1,5 +1,4 @@
-const TerserPlugin = require("terser-webpack-plugin");
-const path = require("path");
+
 const merge = require("deepmerge");
 
 const baseConfig = {
@@ -9,22 +8,17 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-      },
+        use: "ts-loader"
+      }
     ],
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
   devtool: "source-map",
-  // Seems there may be a bug that prevents wasm from minifying 2020-08
-  // optimization: {
-  //     minimize: false,
-  //     minimizer: [],
-  // },
   output: {
     library: "mainnet",
-  },
+  }
 };
 
 const nodeConfig = {
@@ -35,11 +29,13 @@ const nodeConfig = {
   },
 };
 
-const webConfig = {
+const browserConfig = {
   target: "web",
   output: {
     filename: "mainnet.js",
     path: __dirname + "/dist",
+    libraryTarget: 'umd',
+    library: 'mainnet'
   },
   resolve: {
     alias: {
@@ -47,6 +43,7 @@ const webConfig = {
       child_process: false,
       crypto: false,
       fs: false,
+      "grpc-bchrpc-node": "grpc-bchrpc-browser",
       os: false,
       path: false,
       stream: false,
@@ -56,11 +53,13 @@ const webConfig = {
   },
 };
 
-const workerConfig = {
+const webWorkerConfig = {
   target: "webworker",
   output: {
     filename: "mainnet.webworker.js",
     path: __dirname + "/dist",
+    libraryTarget: 'umd',
+    library: 'mainnet'
   },
   resolve: {
     alias: {
@@ -68,6 +67,7 @@ const workerConfig = {
       child_process: false,
       crypto: false,
       fs: false,
+      "grpc-bchrpc-node": "grpc-bchrpc-browser",
       os: false,
       path: false,
       stream: false,
@@ -78,7 +78,7 @@ const workerConfig = {
 };
 
 module.exports = [
-  nodeConfig,
-  //webConfig,
-  //workerConfig
+  //nodeConfig,
+  browserConfig,
+  webWorkerConfig
 ].map((c) => merge(baseConfig, c));

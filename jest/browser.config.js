@@ -1,8 +1,10 @@
 module.exports = {
 	rootDir: "../",
 	preset: 'jest-puppeteer',
-	testMatch: ["**/?(*.)+(spec|test).[t]s"],
+	testMatch: ["**/?(*.)+(spec|test|headless).[t|j]s"],
 	testPathIgnorePatterns: ['/node_modules/', 'dist'], // 
+	testEnvironment: "jsdom",
+	setupFiles: ["fake-indexeddb/auto"],
 	setupFilesAfterEnv: ['<rootDir>/jest/browser.puppeteer.js'],
 	transform: {
 		"^.+\\.ts?$": "ts-jest"

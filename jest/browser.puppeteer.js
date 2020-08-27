@@ -2,8 +2,7 @@ module.exports = {
 	launch: {
 		dumpio: true,
 		headless: false,
-		args: [],
+		args: ["--user-data-dir=/tmp/headless-user-data"],
 	},
     browserContext: 'default',
-    userDataDir: './headless-user-data',
 }
