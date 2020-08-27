@@ -2,7 +2,7 @@
 require("dotenv").config({ path: ".env.regtest" });
 
 const { spawn, spawnSync } = require("child_process");
-const http = require("http");
+const http = require('http');
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,6 +71,11 @@ module.exports = async function () {
     );
   }
   // ping express
+  for (let i = 0; (await serverReady()) || i > 10; i++) {
+    console.log("Waiting for express server");
+    await delay(1000);
+  }
+  // ping express 
   for (let i = 0; (await serverReady()) || i > 10; i++) {
     console.log("Waiting for express server");
     await delay(1000);
