@@ -33506,7 +33506,7 @@ exports.getInputTotal = exports.getSuitableUtxos = exports.buildP2pkhNonHdTransa
 // Unstable?
 const libauth_1 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
 // Build a transaction for a p2pkh transaction for a non HD wallet
-async function buildP2pkhNonHdTransaction(inputs, output, signingKey) {
+async function buildP2pkhNonHdTransaction(inputs, output, signingKey, fee = 0) {
     var _a, _b;
     const template = libauth_1.validateAuthenticationTemplate(libauth_1.authenticationTemplateP2pkhNonHd);
     if (typeof template === "string") {
@@ -33518,8 +33518,11 @@ async function buildP2pkhNonHdTransaction(inputs, output, signingKey) {
     for (const i of inputs) {
         const utxoTxnValue = i.getValue();
         const utxoIndex = (_a = i.getOutpoint()) === null || _a === void 0 ? void 0 : _a.getIndex();
-        const utxoOutpointTransactionHash = (_b = i
-            .getOutpoint()) === null || _b === void 0 ? void 0 : _b.getHash_asU8().reverse();
+        // slice will create a clone of the array
+        let utxoOutpointTransactionHash = (_b = i
+            .getOutpoint()) === null || _b === void 0 ? void 0 : _b.getHash_asU8().slice();
+        // reverse the cloned copy
+        utxoOutpointTransactionHash === null || utxoOutpointTransactionHash === void 0 ? void 0 : utxoOutpointTransactionHash.reverse();
         if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
             throw new Error("Missing unspent outpoint when building transaction");
         }
@@ -33538,7 +33541,7 @@ async function buildP2pkhNonHdTransaction(inputs, output, signingKey) {
         };
         signedInputs.push(newInput);
     }
-    const changeAmount = (await getInputTotal(inputs)) - amount;
+    const changeAmount = ((await getInputTotal(inputs)) - amount) - fee;
     if (!signingKey) {
         throw new Error("Missing signing key when building transaction");
     }
@@ -33580,24 +33583,24 @@ async function buildP2pkhNonHdTransaction(inputs, output, signingKey) {
 exports.buildP2pkhNonHdTransaction = buildP2pkhNonHdTransaction;
 async function getSuitableUtxos(unspentOutputs, amount, bestHeight) {
     let suitableUtxos = [];
-    let neededAmount = 0;
+    let amountRequired = 0;
     for (const u of unspentOutputs) {
         if (u.getIsCoinbase() && bestHeight) {
             let age = bestHeight - u.getBlockHeight();
             if (age > 100) {
                 suitableUtxos.push(u);
-                neededAmount += u.getValue();
+                amountRequired += u.getValue();
             }
         }
         else {
             suitableUtxos.push(u);
-            neededAmount += u.getValue();
+            amountRequired += u.getValue();
         }
-        if (neededAmount > amount) {
+        if (amountRequired > amount) {
             break;
         }
     }
-    if (neededAmount > amount) {
+    if (amountRequired > amount) {
         return suitableUtxos;
     }
     else {
@@ -33619,6 +33622,29 @@ async function getInputTotal(inputs) {
     }
 }
 exports.getInputTotal = getInputTotal;
+
+
+/***/ }),
+
+/***/ "./src/util/randomInt.ts":
+/*!*******************************!*\
+  !*** ./src/util/randomInt.ts ***!
+  \*******************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getRandomInt [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__ */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getRandomInt = void 0;
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
+exports.getRandomInt = getRandomInt;
 
 
 /***/ }),
@@ -33750,6 +33776,7 @@ const libauth_2 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@b
 const Base_1 = __webpack_require__(/*! ./Base */ "./src/wallet/Base.ts");
 const Wif_1 = __webpack_require__(/*! ../transaction/Wif */ "./src/transaction/Wif.ts");
 const cashaddr_1 = __webpack_require__(/*! ../cashaddr */ "./src/cashaddr.ts");
+const randomInt_1 = __webpack_require__(/*! ../util/randomInt */ "./src/util/randomInt.ts");
 const secp256k1Promise = libauth_1.instantiateSecp256k1();
 const sha256Promise = libauth_1.instantiateSha256();
 class WifWallet extends Base_1.BaseWallet {
@@ -33781,6 +33808,7 @@ class WifWallet extends Base_1.BaseWallet {
         else {
             let resultData = result;
             this.privateKey = resultData.privateKey;
+            this.privateKeyWif = walletImportFormatString;
             this.walletType = "wif";
             this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
             this.cashaddr = (await cashaddr_1.deriveCashAddr(this.privateKey, this.networkPrefix));
@@ -33819,7 +33847,7 @@ class WifWallet extends Base_1.BaseWallet {
         return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
     }
     // Gets balance by summing value in all utxos in stats
-    async _getBalance(address) {
+    async getBalance(address) {
         var _a;
         const res = await ((_a = this.client) === null || _a === void 0 ? void 0 : _a.getAddressUtxos({
             address: address,
@@ -33842,11 +33870,11 @@ class WifWallet extends Base_1.BaseWallet {
     }
     // Return address balance in satoshi
     async balanceSats(address) {
-        return await this._getBalance(address);
+        return await this.getBalance(address);
     }
     // Return address balance in bitcoin
     async balance(address) {
-        return (await this._getBalance(address)) / 10e8;
+        return (await this.getBalance(address)) / 10e8;
     }
     // Process an individual send request
     async _processSendRequest(request) {
@@ -33858,23 +33886,26 @@ class WifWallet extends Base_1.BaseWallet {
             }
             let utxos = await ((_a = this.client) === null || _a === void 0 ? void 0 : _a.getAddressUtxos({
                 address: this.cashaddr,
-                includeMempool: false,
+                includeMempool: true,
             }));
             let bestHeight = (_d = (_c = (await ((_b = this.client) === null || _b === void 0 ? void 0 : _b.getBlockchainInfo()))) === null || _c === void 0 ? void 0 : _c.getBestHeight()) !== null && _d !== void 0 ? _d : 0;
             let spendAmount = request.amount.inSatoshi();
             // TODO refactor this
             if (utxos && typeof spendAmount === 'number') {
                 let outputList = (utxos === null || utxos === void 0 ? void 0 : utxos.getOutputsList()) || [];
-                let fundingUtxos = await Wif_1.getSuitableUtxos(outputList, spendAmount, bestHeight);
+                let draftUtxos = await Wif_1.getSuitableUtxos(outputList, spendAmount, bestHeight);
                 // build transaction
-                if (fundingUtxos) {
-                    let txn = await Wif_1.buildP2pkhNonHdTransaction(fundingUtxos, request, this.privateKey);
-                    // submit transaction
-                    if (txn.success) {
-                        return await this._submitTransaction(libauth_2.encodeTransaction(txn.transaction));
+                if (draftUtxos) {
+                    // Build the transaction to get the approximate size
+                    let draftTransaction = await this._buildEncodedTransaction(draftUtxos, request, this.privateKey, 10);
+                    let fee = (draftTransaction.length * 2) + randomInt_1.getRandomInt(1000);
+                    let fundingUtxos = await Wif_1.getSuitableUtxos(outputList, spendAmount + fee, bestHeight);
+                    if (fundingUtxos) {
+                        let encodedTransaction = await this._buildEncodedTransaction(fundingUtxos, request, this.privateKey, fee);
+                        return await this._submitTransaction(encodedTransaction);
                     }
                     else {
-                        throw Error(JSON.stringify(txn));
+                        throw Error("The available inputs couldn't satisfy the request with fees");
                     }
                 }
                 else {
@@ -33887,6 +33918,17 @@ class WifWallet extends Base_1.BaseWallet {
         }
         else {
             throw Error(`Wallet ${this.name} hasn't is missing either a network or private key`);
+        }
+    }
+    // Build encoded transaction 
+    async _buildEncodedTransaction(fundingUtxos, request, privateKey, fee = 0) {
+        let txn = await Wif_1.buildP2pkhNonHdTransaction(fundingUtxos, request, privateKey, fee);
+        // submit transaction
+        if (txn.success) {
+            return libauth_2.encodeTransaction(txn.transaction);
+        }
+        else {
+            throw Error("Error building transaction with fee");
         }
     }
     // Submit a raw transaction

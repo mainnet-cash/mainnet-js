@@ -70,6 +70,7 @@ export class WifWallet extends BaseWallet {
         } else {
             let resultData: PrivateKey = result as PrivateKey;
             this.privateKey = resultData.privateKey;
+            this.privateKeyWif = walletImportFormatString;
             this.walletType = "wif";
             this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
             this.cashaddr = (await deriveCashAddr(
@@ -174,7 +175,7 @@ export class WifWallet extends BaseWallet {
 
             let utxos = await this.client?.getAddressUtxos({
                 address: this.cashaddr,
-                includeMempool: false,
+                includeMempool: true,
             });
 
             let bestHeight = (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0

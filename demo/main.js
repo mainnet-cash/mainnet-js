@@ -17,6 +17,11 @@
         return Console;
     }());
 
+    const hexArray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+    const reduceToHex = (s, c) => s + hexArray[c >>> 4] + hexArray[c & 0x0F]
+    const u8toHex = function(u8) {
+        return u8.reduce(reduceToHex, '')
+    }
 
     var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
         function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -78,8 +83,10 @@
                             const wif = document.getElementById('wif').value
                             console.log('Generating');
                             alice.fromWIF(wif).then(() => {
-                                console.log("Private Key:      " + alice.privateKeyWif)
+                                console.log("Wif:      " + alice.privateKeyWif)
                                 console.log("cashaddr: " + alice.cashaddr)
+                            }).catch((error) => {
+                                console.log(error)
                             })
 
                         };
@@ -89,6 +96,8 @@
                             alice.generateWif().then(() => {
                                 console.log("WIF:      " + alice.privateKeyWif)
                                 console.log("cashaddr: " + alice.cashaddr)
+                            }).catch((error) => {
+                                console.log(error)
                             })
 
                         };
@@ -99,13 +108,21 @@
                             const toAddress = document.getElementById('toAddress').value
                             const sendRequest = [[toAddress, [amount, 'satoshi']]]
                             alice.send(sendRequest).then((resp) => {
-                                console.log(resp)
+                                for (const t of resp){
+                                    let txnHash = t.slice()
+                                    txnHash.reverse()
+                                    console.log("Success! transaction hash is: " +  u8toHex(txnHash))
+                                }
+                            }).catch((error) => {
+                                console.log(error)
                             })
                         };
                         balanceButton = document.getElementById('balance');
                         balanceButton.onclick = function () {
                             alice.getBalance(alice.cashaddr).then((resp) => {
                                 console.log("Balance:  " + resp + " satoshi");
+                            }).catch((error) => {
+                                console.log(error)
                             })
                         };
                     }
