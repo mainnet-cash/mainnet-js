@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "pretest": "node util/checkBchd.js",
-    "test": "npx jest --config=jest/node.config.js",
-    "test:browser": "npx jest --config=jest/browser.config.js ",
+    "test": "npx jest --config jest/node.config.js",
+    "test:browser": "npx jest --config jest/browser.config.js",
     "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "grpcui:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
     "grpcui:regtest": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
@@ -71,7 +71,6 @@
     "unzipper": "^0.10.11",
     "wasm-loader": "^1.3.0",
     "webpack": "^v5.0.0-beta.28",
-    "webpack-cli": "^3.3.12",
     "winston": "^3.2.1"
   },
   "dependencies": {
