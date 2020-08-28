@@ -18,7 +18,7 @@ import {
 } from "../transaction/Wif"
 import { deriveCashAddr } from "../cashaddr";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
-
+import { getRandomInt } from "../util/randomInt"
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
@@ -130,7 +130,7 @@ export class WifWallet extends BaseWallet {
     }
 
     // Gets balance by summing value in all utxos in stats
-    private async _getBalance(address: string): Promise<number> {
+    public async getBalance(address: string): Promise<number> {
         const res = await this.client?.getAddressUtxos({
             address: address,
             includeMempool: true,
@@ -156,12 +156,12 @@ export class WifWallet extends BaseWallet {
 
     // Return address balance in satoshi
     public async balanceSats(address: string): Promise<number> {
-        return await this._getBalance(address);
+        return await this.getBalance(address);
     }
 
     // Return address balance in bitcoin
     public async balance(address: string): Promise<number> {
-        return (await this._getBalance(address)) / 10e8;
+        return (await this.getBalance(address)) / 10e8;
     }
 
     // Process an individual send request
@@ -179,33 +179,48 @@ export class WifWallet extends BaseWallet {
 
             let bestHeight = (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0
             let spendAmount = request.amount.inSatoshi()
+
             // TODO refactor this
             if (utxos && typeof spendAmount === 'number') {
                 let outputList = utxos?.getOutputsList() || []
-                let fundingUtxos = await getSuitableUtxos(outputList, spendAmount, bestHeight);
+                let draftUtxos = await getSuitableUtxos(outputList, spendAmount, bestHeight);
                 // build transaction
-                if (fundingUtxos) {
-                    let txn = await buildP2pkhNonHdTransaction(fundingUtxos, request, this.privateKey);
-                    // submit transaction
-                    if (txn.success) {
+                if (draftUtxos) {
+                    // Build the transaction to get the approximate size
+                    let draftTransaction = await this._buildEncodedTransaction(draftUtxos, request, this.privateKey, 10)
+                    let fee = (draftTransaction.length * 2) + getRandomInt(1000)
+                    let fundingUtxos = await getSuitableUtxos(outputList, spendAmount + fee, bestHeight);
+                    if (fundingUtxos) {
+                        let encodedTransaction = await this._buildEncodedTransaction(fundingUtxos, request, this.privateKey, fee)
                         return await this._submitTransaction(
-                            encodeTransaction(txn.transaction)
+                            encodedTransaction
                         );
                     } else {
-                        throw Error(JSON.stringify(txn));
+                        throw Error("The available inputs couldn't satisfy the request with fees")
                     }
                 } else {
                     throw Error(
                         "The available inputs in the wallet cannot satisfy this send request"
                     );
                 }
-            } else{
+            } else {
                 throw Error("There were no Unspent Outputs or the send amount could not be parsed")
             }
         } else {
             throw Error(
                 `Wallet ${this.name} hasn't is missing either a network or private key`
             );
+        }
+    }
+
+    // Build encoded transaction 
+    private async _buildEncodedTransaction(fundingUtxos, request, privateKey, fee = 0) {
+        let txn = await buildP2pkhNonHdTransaction(fundingUtxos, request, privateKey, fee);
+        // submit transaction
+        if (txn.success) {
+            return encodeTransaction(txn.transaction)
+        } else {
+            throw Error("Error building transaction with fee")
         }
     }
 

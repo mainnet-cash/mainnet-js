@@ -20,16 +20,19 @@
     "pretest": "node util/checkBchd.js",
     "test": "npx jest --config=jest/node.config.js",
     "test:browser": "npx jest --config=jest/browser.config.js ",
-    "debug:grpcui-install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
-    "debug:grpcui": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
-    "debug:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
+    "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
+    "grpcui:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
+    "grpcui:regtest": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
+    "grpcui:testnet": "grpcui -proto pb/bchrpc.proto bchd-testnet.greyh.at:18335",
+    "grpcui:mainnet": "grpcui -proto pb/bchrpc.proto bchd.greyh.at:8335",
     "codegen:list": "npx openapi-generator list",
     "codegen:server": "npx openapi-generator generate -i swagger/v1/api.yml -g nodejs-express-server -o generated/serve/",
     "codegen:typescript-mock": "npx openapi-generator generate -i swagger/v1/api.yml -g typescript-node -o generated/client/typescript-mock",
     "format": "prettier --write .",
     "serve": "npx ts-node ./generated/serve/index.ts",
     "serve:monitor": "npx nodemon ./generated/serve/index.ts",
-    "build": "npx webpack"
+    "build": "npx webpack",
+    "demo": "npx reload --dir=demo/"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^1.0.15-4.3.1",
@@ -74,8 +77,8 @@
   "dependencies": {
     "@bitauth/libauth": "^1.17.1",
     "dexie": "^3.0.2",
-    "grpc-bchrpc-node": "^0.10.2",
-    "grpc-bchrpc-browser": "0.0.9"
+    "grpc-bchrpc-browser": "0.0.11",
+    "grpc-bchrpc-node": "^0.10.2"
   },
   "keywords": [
     "bch",

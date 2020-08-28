@@ -1,6 +1,7 @@
 module.exports = {
 	rootDir: "../",
 	preset: 'jest-puppeteer',
+	roots: ["<rootDir>/src"],
 	testMatch: ["**/?(*.)+(spec|test|headless).[t|j]s"],
 	testPathIgnorePatterns: ['/node_modules/', 'dist'], // 
 	testEnvironment: "jsdom",

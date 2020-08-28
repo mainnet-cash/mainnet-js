@@ -83,5 +83,5 @@ const webWorkerConfig = {
 module.exports = [
   nodeConfig,
   browserConfig,
-  webWorkerConfig
+  //webWorkerConfig
 ].map((c) => merge(baseConfig, c));

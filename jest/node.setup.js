@@ -3,6 +3,7 @@ require("dotenv").config({ path: ".env.regtest" });
 
 const { spawn, spawnSync } = require("child_process");
 const http = require('http');
+const { json } = require("body-parser");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,21 +23,20 @@ async function pingBchd() {
   return response.stderr;
 }
 
-async function serverReady() {
-  http
-    .get("http://localhost:3000/openapi", (res) => {
-      let body = "";
-      res.on("data", (data) => {
-        body += data;
-      });
-      res.on("end", () => {
-        return res.statusCode === 200 ? true : false;
-      });
-    })
-    .on("error", (err) => {
-      return false;
+function serverReady(options) {
+  return new Promise ((resolve, reject) => {
+    let req = http.get("http://localhost:3000/api-doc/");
+
+    req.on('response', res => {
+      resolve(true);
     });
+
+    req.on('error', err => {
+      reject(false);
+    });
+  }); 
 }
+
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,7 +56,7 @@ module.exports = async function () {
       `--addrindex`,
       `--txindex`,
     ];
-    global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
+    //global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
   } else {
     console.log("...already running");
@@ -70,13 +70,9 @@ module.exports = async function () {
       }
     );
   }
+
   // ping express
-  for (let i = 0; (await serverReady()) || i > 10; i++) {
-    console.log("Waiting for express server");
-    await delay(1000);
-  }
-  // ping express 
-  for (let i = 0; (await serverReady()) || i > 10; i++) {
+  for (let i = 0; !(await serverReady()) && i < 10; i++) {
     console.log("Waiting for express server");
     await delay(1000);
   }

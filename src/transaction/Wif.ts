@@ -8,7 +8,6 @@ import {
     bigIntToBinUint64LE,
     cashAddressToLockingBytecode,
     generateTransaction,
-    InputTemplate,
     validateAuthenticationTemplate,
 } from "@bitauth/libauth";
 
@@ -19,7 +18,8 @@ import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 export async function buildP2pkhNonHdTransaction(
     inputs: UnspentOutput[],
     output: SendRequest,
-    signingKey: Uint8Array
+    signingKey: Uint8Array,
+    fee: number = 0
 ) {
     const template = validateAuthenticationTemplate(
         authenticationTemplateP2pkhNonHd
@@ -30,16 +30,20 @@ export async function buildP2pkhNonHdTransaction(
     }
 
     const compiler = await authenticationTemplateToCompilerBCH(template);
+
     const amount = output.amount.inSatoshi();
 
-    let signedInputs:any  = []
+    let signedInputs:any[]  = []
     for(const i of inputs){
         const utxoTxnValue = i.getValue();
         const utxoIndex = i.getOutpoint()?.getIndex();
         const utxoOutpointTransactionHash = i
             .getOutpoint()
-            ?.getHash_asU8()
-            .reverse();
+            ?.getHash_asU8().reverse();
+
+        console.log(utxoTxnValue)
+        console.log(utxoIndex)
+        console.log(i.getOutpoint()?.getHash_asB64())
         if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
             throw new Error("Missing unspent outpoint when building transaction");
         }
@@ -59,8 +63,7 @@ export async function buildP2pkhNonHdTransaction(
         signedInputs.push(newInput)
     }
 
-    
-    const changeAmount = (await getInputTotal(inputs)) - (amount as number);
+    const changeAmount = ((await getInputTotal(inputs)) - (amount as number)) - fee;
 
     if (!signingKey) {
         throw new Error("Missing signing key when building transaction");
@@ -69,13 +72,13 @@ export async function buildP2pkhNonHdTransaction(
 
     try {
         let outputLockingBytecode = cashAddressToLockingBytecode(output.address);
-
         if (
             !outputLockingBytecode.hasOwnProperty("bytecode") ||
             !outputLockingBytecode.hasOwnProperty("prefix")
         ) {
             throw new Error(outputLockingBytecode.toString());
         }
+
         outputLockingBytecode = outputLockingBytecode as {
             bytecode: Uint8Array;
             prefix: string;
@@ -112,23 +115,23 @@ export async function buildP2pkhNonHdTransaction(
 
 export  async  function getSuitableUtxos(unspentOutputs: UnspentOutput[], amount: number, bestHeight: number) {
     let suitableUtxos: UnspentOutput[] = []
-    let neededAmount = 0
+    let amountRequired = 0
     for (const u of unspentOutputs) {
         if (u.getIsCoinbase() && bestHeight) {
             let age = bestHeight - u.getBlockHeight() 
             if (age > 100) {
                 suitableUtxos.push(u)
-                neededAmount += u.getValue()
+                amountRequired += u.getValue()
             }
         } else {
             suitableUtxos.push(u)
-            neededAmount += u.getValue()
+            amountRequired += u.getValue()
         }
-        if (neededAmount > amount) {
+        if (amountRequired > amount) {
             break;
         }
     }
-    if (neededAmount > amount) {
+    if (amountRequired > amount) {
         return suitableUtxos
     } else {
         throw Error("Could not find suitable outpoints for given amount")

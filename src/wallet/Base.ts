@@ -28,9 +28,9 @@ class Amount {
   public inSatoshi(): number | Error {
     switch (this.unit) {
       case "satoshi":
-        return this.amount;
+        return Number(this.amount);
       case "coin":
-        return this.amount / 10e8;
+        return Number(this.amount / 10e8);
       default:
         throw Error("Unit of value not defined");
     }

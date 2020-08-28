@@ -1,5 +1,5 @@
 #/bin/bash
-export $(cat ../.env.regtest | xargs)
+export $(cat .env.regtest | xargs)
 ./bin/bchd \
 --$NETWORK \
 --rpclisten=:$PORT \
