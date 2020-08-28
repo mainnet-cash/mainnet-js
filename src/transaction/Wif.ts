@@ -37,13 +37,12 @@ export async function buildP2pkhNonHdTransaction(
     for(const i of inputs){
         const utxoTxnValue = i.getValue();
         const utxoIndex = i.getOutpoint()?.getIndex();
-        const utxoOutpointTransactionHash = i
+        // slice will create a clone of the array
+        let  utxoOutpointTransactionHash = i
             .getOutpoint()
-            ?.getHash_asU8().reverse();
-
-        console.log(utxoTxnValue)
-        console.log(utxoIndex)
-        console.log(i.getOutpoint()?.getHash_asB64())
+            ?.getHash_asU8().slice();
+        // reverse the cloned copy
+        utxoOutpointTransactionHash?.reverse()
         if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
             throw new Error("Missing unspent outpoint when building transaction");
         }

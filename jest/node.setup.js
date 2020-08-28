@@ -56,7 +56,7 @@ module.exports = async function () {
       `--addrindex`,
       `--txindex`,
     ];
-    //global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
+    global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
   } else {
     console.log("...already running");
