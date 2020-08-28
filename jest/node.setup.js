@@ -23,19 +23,6 @@ async function pingBchd() {
   return response.stderr;
 }
 
-function serverReady(options) {
-  return new Promise ((resolve, reject) => {
-    let req = http.get("http://localhost:3000/api-doc/");
-
-    req.on('response', res => {
-      resolve(true);
-    });
-
-    req.on('error', err => {
-      reject(false);
-    });
-  }); 
-}
 
 
 function delay(ms) {
@@ -71,11 +58,6 @@ module.exports = async function () {
     );
   }
 
-  // ping express
-  for (let i = 0; !(await serverReady()) && i < 10; i++) {
-    console.log("Waiting for express server");
-    await delay(1000);
-  }
 
   // ping bchd as a readiness signal, give up and run anyway after 10s
   for (let i = 0; (await pingBchd()).length > 0 && i < 5; i++) {
