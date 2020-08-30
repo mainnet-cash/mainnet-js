@@ -1,8 +1,5 @@
-
 // Unstable?
-import {
-  CashAddressNetworkPrefix,
-} from "@bitauth/libauth";
+import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
 // This is swapped out by webpack for the web module
 import { GrpcClient } from "grpc-bchrpc-node";
@@ -78,7 +75,7 @@ export class BaseWallet {
           });
           break;
         case CashAddressNetworkPrefix.testnet:
-          url = 'https://bchd-testnet.greyh.at:18335'
+          url = "https://bchd-testnet.greyh.at:18335";
           this.client = new GrpcClient({
             url: url,
             testnet: true,
@@ -89,7 +86,7 @@ export class BaseWallet {
           break;
       }
     } else {
-      url = 'https://bchd.greyh.at:8335'
+      url = "https://bchd.greyh.at:8335";
       this.client = new GrpcClient({
         url: url,
         testnet: false,
@@ -99,6 +96,4 @@ export class BaseWallet {
       });
     }
   }
-  
 }
-

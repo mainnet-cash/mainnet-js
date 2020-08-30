@@ -1,48 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <title>Demo for Testnet Wallet</title>
     <link rel="stylesheet" href="app.css" />
-    <link rel="modulepreload" href="./mainnet-0.0.1-rc.js">
+    <link rel="modulepreload" href="./mainnet-0.0.1-rc.js" />
     <script src="./mainnet-0.0.1-rc.js" type="module"></script>
     <script src="./main.js"></script>
+  </head>
 
-</head>
-
-<body>
-    <h3> </h3>
+  <body>
+    <h3></h3>
     <div>
-        <p>
-            <label for="wif">Wif:</label>
-            <input id="wif" type="text">
-
-        </p>
-        <p>
-            <button id="setWif" type="button">
-                Set Wif
-            </button>
-        </p>
+      <p>
+        <label for="wif">Wif:</label>
+        <input id="wif" type="text" />
+      </p>
+      <p>
+        <button id="setWif" type="button">
+          Set Wif
+        </button>
+      </p>
     </div>
     <div id="consoleArea"></div>
     <button id="generate" type="button">
-        Generate Wif
+      Generate Wif
     </button>
     <button id="balance" type="button">
-        Get Balance
+      Get Balance
     </button>
     <button id="send" type="button">
-        Send
+      Send
     </button>
     <div>
-        <label for="toAddress">To Address</label>
-        <input id="toAddress" type="text">
+      <label for="toAddress">To Address</label>
+      <input id="toAddress" type="text" />
     </div>
     <div>
-        <label for="amount">Amount (satoshi)</label>
-        <input id="amount" type="text">
+      <label for="amount">Amount (satoshi)</label>
+      <input id="amount" type="text" />
     </div>
-
-</body>
-
+  </body>
 </html>

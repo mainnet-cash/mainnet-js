@@ -8,10 +8,15 @@ test("Send a transaction on the regression network", async () => {
 
   if (!process.env.RPC_USER || !process.env.RPC_PASS) {
     throw Error("Missing env settings for rpc user");
-  } else if (!process.env.BCHD_BIN_DIRECTORY){
+  } else if (!process.env.BCHD_BIN_DIRECTORY) {
     throw Error("Missing bchd bin path");
   } else {
-    generateBlock(process.env.RPC_USER, process.env.RPC_PASS, 105, process.env.BCHD_BIN_DIRECTORY);
+    generateBlock(
+      process.env.RPC_USER,
+      process.env.RPC_PASS,
+      105,
+      process.env.BCHD_BIN_DIRECTORY
+    );
 
     // Build Alice's wallet from Wallet Import Format string, send some sats
     const alice = new RegTestWallet("Alice's Mining");

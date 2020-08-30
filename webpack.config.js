@@ -1,8 +1,6 @@
-
 const merge = require("deepmerge");
 
-
-var packageJson = require('./package.json');
+var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
@@ -11,8 +9,8 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader"
-      }
+        use: "ts-loader",
+      },
     ],
   },
   resolve: {
@@ -21,7 +19,7 @@ const baseConfig = {
   devtool: "source-map",
   output: {
     library: "mainnet",
-  }
+  },
 };
 
 const nodeConfig = {
@@ -37,8 +35,8 @@ const browserConfig = {
   output: {
     filename: `mainnet-${packageJson.version}.js`,
     path: __dirname + "/dist",
-    libraryTarget: 'umd',
-    library: 'mainnet'
+    libraryTarget: "umd",
+    library: "mainnet",
   },
   resolve: {
     alias: {
@@ -61,8 +59,8 @@ const webWorkerConfig = {
   output: {
     filename: `mainnet-webworker-${packageJson.version}.js`,
     path: __dirname + "/dist",
-    libraryTarget: 'umd',
-    library: 'mainnet'
+    libraryTarget: "umd",
+    library: "mainnet",
   },
   resolve: {
     alias: {

@@ -2,7 +2,7 @@
 require("dotenv").config({ path: ".env.regtest" });
 
 const { spawn, spawnSync } = require("child_process");
-const http = require('http');
+const http = require("http");
 const { json } = require("body-parser");
 
 function delay(ms) {
@@ -22,8 +22,6 @@ async function pingBchd() {
   );
   return response.stderr;
 }
-
-
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,7 +55,6 @@ module.exports = async function () {
       }
     );
   }
-
 
   // ping bchd as a readiness signal, give up and run anyway after 10s
   for (let i = 0; (await pingBchd()).length > 0 && i < 5; i++) {

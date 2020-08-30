@@ -12,12 +12,9 @@ export function generateBlock(
     `--rpcpass=${password}`,
     `generate`,
     `--skipverify`,
-    numberOfBlocks
+    numberOfBlocks,
   ];
-  const bchctl = spawnSync(
-    `${binDir}/bchctl`,
-    bchctlArgs
-  );
+  const bchctl = spawnSync(`${binDir}/bchctl`, bchctlArgs);
   if (bchctl.stderr.length > 0) {
     throw Error(bchctl.stderr.toString());
   }
