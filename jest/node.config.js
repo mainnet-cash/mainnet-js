@@ -13,4 +13,5 @@ module.exports = {
   globalSetup: "<rootDir>/jest/node.setup.js",
   globalTeardown: "<rootDir>/jest/node.teardown.js",
   verbose: true,
+  testTimeout: 12000
 };
