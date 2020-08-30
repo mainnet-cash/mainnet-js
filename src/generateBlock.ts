@@ -1,10 +1,10 @@
-require("dotenv").config();
 const { spawnSync } = require("child_process");
 
 export function generateBlock(
   user: string,
   password: string,
-  numberOfBlocks: number
+  numberOfBlocks: number,
+  binDir: string
 ): string[] {
   const bchctlArgs = [
     `--testnet`,
@@ -12,10 +12,10 @@ export function generateBlock(
     `--rpcpass=${password}`,
     `generate`,
     `--skipverify`,
-    numberOfBlocks,
+    numberOfBlocks
   ];
   const bchctl = spawnSync(
-    `${process.env.BCHD_BIN_DIRECTORY}/bchctl`,
+    `${binDir}/bchctl`,
     bchctlArgs
   );
   if (bchctl.stderr.length > 0) {

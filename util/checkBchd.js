@@ -130,8 +130,6 @@ function symlinkBchdCertificates(dir) {
     if (!fs.existsSync(symlink)) {
       // Create a symbolic link to the binary.
       fs.symlinkSync(target, symlink);
-      // Owner and group have full access, everyone may execute.
-      fs.chmodSync(target, 0o440);
     }
   }
 }

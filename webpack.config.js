@@ -1,6 +1,8 @@
-const TerserPlugin = require("terser-webpack-plugin");
-const path = require("path");
+
 const merge = require("deepmerge");
+
+
+var packageJson = require('./package.json');
 
 const baseConfig = {
   entry: "./src/index.ts",
@@ -9,37 +11,34 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-      },
+        use: "ts-loader"
+      }
     ],
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
   devtool: "source-map",
-  // Seems there may be a bug that prevents wasm from minifying 2020-08
-  // optimization: {
-  //     minimize: false,
-  //     minimizer: [],
-  // },
   output: {
     library: "mainnet",
-  },
+  }
 };
 
 const nodeConfig = {
   target: "node",
   output: {
-    filename: "mainnet.node.js",
+    filename: `mainnet-node-${packageJson.version}.js`,
     path: __dirname + "/dist",
   },
 };
 
-const webConfig = {
+const browserConfig = {
   target: "web",
   output: {
-    filename: "mainnet.js",
+    filename: `mainnet-${packageJson.version}.js`,
     path: __dirname + "/dist",
+    libraryTarget: 'umd',
+    library: 'mainnet'
   },
   resolve: {
     alias: {
@@ -47,6 +46,7 @@ const webConfig = {
       child_process: false,
       crypto: false,
       fs: false,
+      "grpc-bchrpc-node": "grpc-bchrpc-browser",
       os: false,
       path: false,
       stream: false,
@@ -56,11 +56,13 @@ const webConfig = {
   },
 };
 
-const workerConfig = {
+const webWorkerConfig = {
   target: "webworker",
   output: {
-    filename: "mainnet.webworker.js",
+    filename: `mainnet-webworker-${packageJson.version}.js`,
     path: __dirname + "/dist",
+    libraryTarget: 'umd',
+    library: 'mainnet'
   },
   resolve: {
     alias: {
@@ -68,6 +70,7 @@ const workerConfig = {
       child_process: false,
       crypto: false,
       fs: false,
+      "grpc-bchrpc-node": "grpc-bchrpc-browser",
       os: false,
       path: false,
       stream: false,
@@ -79,6 +82,6 @@ const workerConfig = {
 
 module.exports = [
   nodeConfig,
-  //webConfig,
-  //workerConfig
+  browserConfig,
+  //webWorkerConfig
 ].map((c) => merge(baseConfig, c));
