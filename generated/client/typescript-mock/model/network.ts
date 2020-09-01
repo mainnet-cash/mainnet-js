@@ -11,23 +11,32 @@
  */
 
 import { RequestFile } from './models';
-import { SendRequestItem } from './sendRequestItem';
-import { SerializedWallet } from './serializedWallet';
 
-export class SendRequest extends SerializedWallet {
-    'to'?: Array<SendRequestItem>;
+export class Network {
+    /**
+    * network type
+    */
+    'network'?: Network.NetworkEnum;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "to",
-            "baseName": "to",
-            "type": "Array<SendRequestItem>"
+            "name": "network",
+            "baseName": "network",
+            "type": "Network.NetworkEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequest.attributeTypeMap);
+        return Network.attributeTypeMap;
     }
 }
 
+export namespace Network {
+    export enum NetworkEnum {
+        Mainnet = <any> 'mainnet',
+        Testnet = <any> 'testnet',
+        Regtest = <any> 'regtest',
+        Simtest = <any> 'simtest'
+    }
+}

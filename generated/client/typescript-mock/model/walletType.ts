@@ -11,23 +11,30 @@
  */
 
 import { RequestFile } from './models';
-import { SendRequestItem } from './sendRequestItem';
-import { SerializedWallet } from './serializedWallet';
 
-export class SendRequest extends SerializedWallet {
-    'to'?: Array<SendRequestItem>;
+export class WalletType {
+    /**
+    * Wallet type, either a single wallet with private key (wif) or a Hierarchical Deterministic wallet determined from a seed.
+    */
+    'type'?: WalletType.TypeEnum;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "to",
-            "baseName": "to",
-            "type": "Array<SendRequestItem>"
+            "name": "type",
+            "baseName": "type",
+            "type": "WalletType.TypeEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequest.attributeTypeMap);
+        return WalletType.attributeTypeMap;
     }
 }
 
+export namespace WalletType {
+    export enum TypeEnum {
+        Wif = <any> 'wif',
+        Hd = <any> 'hd'
+    }
+}

@@ -11,23 +11,23 @@
  */
 
 import { RequestFile } from './models';
-import { SendRequestItem } from './sendRequestItem';
-import { SerializedWallet } from './serializedWallet';
+import { TransactionId } from './transactionId';
+import { ZeroBalanceResponse } from './zeroBalanceResponse';
 
-export class SendRequest extends SerializedWallet {
-    'to'?: Array<SendRequestItem>;
+export class SendMaxResponse extends TransactionId {
+    'balance'?: ZeroBalanceResponse;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "to",
-            "baseName": "to",
-            "type": "Array<SendRequestItem>"
+            "name": "balance",
+            "baseName": "balance",
+            "type": "ZeroBalanceResponse"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequest.attributeTypeMap);
+        return super.getAttributeTypeMap().concat(SendMaxResponse.attributeTypeMap);
     }
 }
 

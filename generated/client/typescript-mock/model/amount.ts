@@ -11,23 +11,42 @@
  */
 
 import { RequestFile } from './models';
-import { SendRequestItem } from './sendRequestItem';
-import { SerializedWallet } from './serializedWallet';
 
-export class SendRequest extends SerializedWallet {
-    'to'?: Array<SendRequestItem>;
+export class Amount {
+    'value'?: number;
+    /**
+    * Denomination for amount
+    */
+    'unit'?: Amount.UnitEnum;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "to",
-            "baseName": "to",
-            "type": "Array<SendRequestItem>"
+            "name": "value",
+            "baseName": "value",
+            "type": "number"
+        },
+        {
+            "name": "unit",
+            "baseName": "unit",
+            "type": "Amount.UnitEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequest.attributeTypeMap);
+        return Amount.attributeTypeMap;
     }
 }
 
+export namespace Amount {
+    export enum UnitEnum {
+        Bch = <any> 'bch',
+        Usd = <any> 'usd',
+        Bit = <any> 'bit',
+        Bits = <any> 'bits',
+        Sat = <any> 'sat',
+        Sats = <any> 'sats',
+        Satoshi = <any> 'satoshi',
+        Satoshis = <any> 'satoshis'
+    }
+}

@@ -2,50 +2,40 @@ openapi: 3.0.1
 info:
   contact:
     email: hello@mainnet.cash
-  description: |
-    "A developer friendly bitcoin cash wallet api
-
-    This API is currently in active development, breaking changes may \nbe made prior to release of version\
-    \ 1.\n\n**Important:** modifying this library to prematurely operate on mainnet\n\
-    \ may result in loss of funds\n"
+  description: "A developer friendly bitcoin cash wallet api\n\nThis API is currently\
+    \ in active development, breaking changes may\nbe made prior to official release\
+    \ of version 1.\n\n**Important:** modifying this library to prematurely operate\
+    \ on mainnet\nmay result in loss of funds \n"
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.7
+  version: 0.0.2
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
-  - url: http://localhost:3000/v1
+- url: http://localhost:3000/v1
 tags:
-  - description: Everything you need to manage a wallet
-    externalDocs:
-      description: Find out more
-      url: http://mainnet.cash/docs#wallet
-    name: wallet
-  - description: Send bitcoin cash
-    name: send
+- description: Create a wallet
+  externalDocs:
+    description: Find out more
+    url: http://mainnet.cash/docs#wallet
+  name: wallet
+- description: Send bitcoin cash
+  name: send
+- description: Get wallet information
+  name: info
 paths:
   /wallet:
-    get:
-      operationId: getWalletNotAllowed
-      responses:
-        "405":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MethodNotAllowedError"
-          description: Method Not Allowed
-      x-eov-operation-handler: controllers/DefaultController
     post:
       operationId: createWallet
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WalletRequest"
+              $ref: '#/components/schemas/WalletRequest'
         description: Request a new new random wallet
         required: true
       responses:
@@ -53,34 +43,151 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WalletResponse"
+                $ref: '#/components/schemas/WalletResponse'
           description: successful operation
         "405":
           content: {}
           description: Invalid input
       summary: create a new wallet
       tags:
-        - wallet
-      x-codegen-request-body-name: body
+      - wallet
       x-eov-operation-handler: controllers/WalletController
-  /send:
-    get:
-      operationId: getSendNotAllowed
-      responses:
-        "405":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MethodNotAllowedError"
-          description: Method Not Allowed
-      x-eov-operation-handler: controllers/DefaultController
+  /wallet/balance:
     post:
-      operationId: sendRequest
+      operationId: balance
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SendRequest"
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a wallet balance
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+          description: successful operation
+      summary: Get total balance for wallet
+      tags:
+      - info
+      x-eov-operation-handler: controllers/InfoController
+  /wallet/deposit_address:
+    post:
+      operationId: depositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositAddressResponse'
+          description: successful operation
+      summary: Get a deposit address in cash address format
+      tags:
+      - info
+      x-eov-operation-handler: controllers/InfoController
+  /wallet/deposit_qr:
+    post:
+      operationId: depositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortableNetworkGraphic'
+          description: |
+            A Qr code image data in png format as base64 encoded string.
+            Suitable for inclusion in html using:
+               - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUgA...   ...Jggg==**"\>
+      summary: Get receiving cash address as a qrcode
+      tags:
+      - info
+      x-eov-operation-handler: controllers/InfoController
+  /wallet/max_amount_to_send:
+    post:
+      operationId: maxAmountToSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/SerializedWallet'
+              properties:
+                output_count:
+                  description: |
+                    (optional) if sending all funds to multiple addresses, the
+                    count of the number of address funds will be sent
+                    to may be included.
+                  type: number
+        description: get amount that will be spend with a spend max request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Get maximum spendable amount
+      tags:
+      - info
+      x-eov-operation-handler: controllers/InfoController
+  /wallet/utxo:
+    post:
+      operationId: utxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request detailed list of unspent transaction outputs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtxoResponse'
+          description: successful operation
+      summary: Get detailed information about unspent outputs (utxos)
+      tags:
+      - info
+      x-eov-operation-handler: controllers/InfoController
+  /wallet/send:
+    post:
+      operationId: send
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/SendRequest'
+              type: array
         description: place a send request
         required: true
       responses:
@@ -88,7 +195,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SendResponse"
+                $ref: '#/components/schemas/SendResponse'
           description: transaction accepted
         "400":
           content: {}
@@ -98,114 +205,281 @@ paths:
           description: Invalid network for given address
       summary: Send some amount to a given address
       tags:
-        - send
-      x-codegen-request-body-name: body
+      - send
+      x-eov-operation-handler: controllers/SendController
+  /wallet/send_max:
+    post:
+      operationId: sendMax
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMaxRequest'
+        description: Request to all available funds to a given address
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMaxResponse'
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Send all available funds to a given address
+      tags:
+      - send
       x-eov-operation-handler: controllers/SendController
 components:
   schemas:
-    WalletResponse:
+    Utxo:
+      allOf:
+      - $ref: '#/components/schemas/Outpoint'
+      - $ref: '#/components/schemas/TransactionId'
       example:
-        wif: wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        cashaddress: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        name: username1
-        type: wif
-        network: testnet
+        amount:
+          unit: bch
+          value: 100
+        index: 0.8008281904610115
       properties:
-        name:
-          description: User defined string for wallet
-          example: username1
-          type: string
-        type:
-          description:
-            "Wallet type, either a single wallet with private key (wif)\
-            \ or \na Hierarchical Deterministic wallet determined from a seed.\n"
+        index:
+          type: number
+        amount:
+          $ref: '#/components/schemas/Amount'
+    Network:
+      properties:
+        network:
+          description: network type
           enum:
-            - wif
-            - hd
+          - mainnet
+          - testnet
+          - regtest
+          - simtest
+          example: testnet
+          type: string
+    WalletType:
+      properties:
+        type:
+          description: Wallet type, either a single wallet with private key (wif)
+            or a Hierarchical Deterministic wallet determined from a seed.
+          enum:
+          - wif
+          - hd
           example: wif
           type: string
+    Amount:
+      example:
+        unit: bch
+        value: 100
+      properties:
+        value:
+          example: 100
+          type: number
+        unit:
+          description: Denomination for amount
+          enum:
+          - bch
+          - usd
+          - bit
+          - bits
+          - sat
+          - sats
+          - satoshi
+          - satoshis
+          type: string
+    BalanceResponse:
+      example:
+        bch: 1
+        sat: 100000000
+        usd: 438.02
+      properties:
+        bch:
+          description: Amount in whole Bitcoin Cash
+          example: 1
+          format: float
+          type: number
+        sat:
+          description: Amount in satoshis
+          example: 100000000
+          type: integer
+        usd:
+          description: Amount in United States Dollars
+          example: 438.02
+          type: number
+    ZeroBalanceResponse:
+      example:
+        bch: 0
+        sat: 0
+        usd: 0
+      properties:
+        bch:
+          description: Amount in whole Bitcoin Cash
+          example: 0
+          format: float
+          type: number
+        sat:
+          description: Amount in satoshis
+          example: 0
+          type: integer
+        usd:
+          description: Amount in United States Dollars
+          example: 0
+          type: number
+    Outpoint:
+      properties:
+        utxo_id:
+          description: serialized outpoint
+          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+          type: string
+    TransactionId:
+      properties:
+        transaction:
+          description: The hash of a transaction
+          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          type: string
+    ToCashaddr:
+      properties:
+        cashaddr:
+          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+          type: string
+    Cashaddr:
+      properties:
+        cashaddr:
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+    PortableNetworkGraphic:
+      example:
+        src: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ... ...AAAAABJRU5ErkJggg==
+      properties:
+        src:
+          example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ...
+            ...AAAAABJRU5ErkJggg==
+          type: string
+    SendMaxRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      - $ref: '#/components/schemas/ToCashaddr'
+      required:
+      - cashaddr
+      - wallet_id
+    SerializedWallet:
+      example:
+        wallet_id: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+      properties:
+        wallet_id:
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+          example: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          format: password
+          type: string
+      required:
+      - wallet_id
+    DepositAddressResponse:
+      allOf:
+      - $ref: '#/components/schemas/Cashaddr'
+    UtxoResponse:
+      example:
+        utxos:
+        - amount:
+            unit: bch
+            value: 100
+          index: 0.8008281904610115
+        - amount:
+            unit: bch
+            value: 100
+          index: 0.8008281904610115
+      properties:
+        utxos:
+          items:
+            $ref: '#/components/schemas/Utxo'
+          type: array
+    WalletResponse:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      - $ref: '#/components/schemas/Network'
+      example:
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        wif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        name: username1
+      properties:
         wif:
           description: |
-            Wallet Import Format string
-          example: wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+            The wallet in Wallet Import Format (WIF)
+          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
-        cashaddress:
+        name:
+          description: User defined string for wallet
+          example: username1
+          type: string
+        cashaddr:
           description: |
             The address in cashaddr format.
-          example: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-        network:
-          description: network type
-          enum:
-            - mainnet
-            - testnet
-            - regtest
-          example: testnet
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
       type: object
-      xml:
-        name: Wallet
     WalletRequest:
+      allOf:
+      - $ref: '#/components/schemas/WalletType'
+      - $ref: '#/components/schemas/Network'
       example:
-        name: username1
         type: wif
         network: testnet
+        name: username1
       properties:
         name:
           description: User defined string for wallet
           example: username1
           type: string
-        type:
-          description: wallet type
-          enum:
-            - wif
-            - hd
-          example: wif
-          type: string
-        network:
-          description: network type
-          enum:
-            - mainnet
-            - testnet
-            - regtest
-          example: testnet
-          type: string
       required:
-        - name
-        - network
-        - type
+      - name
+      - network
+      - type
       type: object
-      xml:
-        name: Wallet
     SendRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
       example:
-        wallet: regtest:abcd123
-        name: username1
+        to:
+        - null
+        - null
       properties:
-        wallet:
-          example: regtest:abcd123
-          type: string
-        name:
-          example: username1
-          type: string
+        to:
+          items:
+            $ref: '#/components/schemas/SendRequestItem'
+          type: array
       required:
-        - to
-        - wallet
+      - wallet_id
       type: object
-      xml:
-        name: SendRequest
-    SendResponse:
+    SendRequestItem:
+      allOf:
+      - $ref: '#/components/schemas/ToCashaddr'
+      - $ref: '#/components/schemas/Amount'
+      required:
+      - cashaddr
+      - unit
+      - value
+    SendMaxResponse:
+      allOf:
+      - $ref: '#/components/schemas/TransactionId'
       example:
-        type: type
-        transaction: transaction
+        balance:
+          bch: 0
+          sat: 0
+          usd: 0
       properties:
-        type:
-          type: string
-        transaction:
-          description: The hash of the transaction
-          type: string
+        balance:
+          $ref: '#/components/schemas/ZeroBalanceResponse'
       type: object
-    UnauthorizedError:
-      description: Access token is missing or invalid
-    MethodNotAllowedError:
-      description: Get method is not allowed, see POST method documentation
+    SendResponse:
+      allOf:
+      - $ref: '#/components/schemas/TransactionId'
+      example:
+        balance:
+          bch: 1
+          sat: 100000000
+          usd: 438.02
+      properties:
+        balance:
+          $ref: '#/components/schemas/BalanceResponse'
+      type: object

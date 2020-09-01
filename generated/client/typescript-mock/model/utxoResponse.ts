@@ -11,23 +11,22 @@
  */
 
 import { RequestFile } from './models';
-import { SendRequestItem } from './sendRequestItem';
-import { SerializedWallet } from './serializedWallet';
+import { Utxo } from './utxo';
 
-export class SendRequest extends SerializedWallet {
-    'to'?: Array<SendRequestItem>;
+export class UtxoResponse {
+    'utxos'?: Array<Utxo>;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "to",
-            "baseName": "to",
-            "type": "Array<SendRequestItem>"
+            "name": "utxos",
+            "baseName": "utxos",
+            "type": "Array<Utxo>"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequest.attributeTypeMap);
+        return UtxoResponse.attributeTypeMap;
     }
 }
 

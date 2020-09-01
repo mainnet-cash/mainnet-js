@@ -11,70 +11,32 @@
  */
 
 import { RequestFile } from './models';
-import { Network } from './network';
 import { SerializedWallet } from './serializedWallet';
+import { ToCashaddr } from './toCashaddr';
 
-export class WalletResponse {
-    /**
-    * The wallet in Wallet Import Format (WIF) 
-    */
-    'wif'?: string;
-    /**
-    * User defined string for wallet
-    */
-    'name'?: string;
-    /**
-    * The address in cashaddr format. 
-    */
-    'cashaddr'?: string;
+export class SendMaxRequest {
     /**
     * ID that is returned in `wallet` field of /wallet call 
     */
     'walletId': string;
-    /**
-    * network type
-    */
-    'network'?: WalletResponse.NetworkEnum;
+    'cashaddr': string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
-        {
-            "name": "wif",
-            "baseName": "wif",
-            "type": "string"
-        },
-        {
-            "name": "name",
-            "baseName": "name",
-            "type": "string"
-        },
-        {
-            "name": "cashaddr",
-            "baseName": "cashaddr",
-            "type": "string"
-        },
         {
             "name": "walletId",
             "baseName": "wallet_id",
             "type": "string"
         },
         {
-            "name": "network",
-            "baseName": "network",
-            "type": "WalletResponse.NetworkEnum"
+            "name": "cashaddr",
+            "baseName": "cashaddr",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return WalletResponse.attributeTypeMap;
+        return SendMaxRequest.attributeTypeMap;
     }
 }
 
-export namespace WalletResponse {
-    export enum NetworkEnum {
-        Mainnet = <any> 'mainnet',
-        Testnet = <any> 'testnet',
-        Regtest = <any> 'regtest',
-        Simtest = <any> 'simtest'
-    }
-}

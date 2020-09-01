@@ -1,14 +1,61 @@
+import localVarRequest from 'request';
+
+export * from './amount';
+export * from './balanceResponse';
+export * from './cashaddr';
+export * from './depositAddressResponse';
+export * from './network';
+export * from './outpoint';
+export * from './portableNetworkGraphic';
+export * from './sendMaxRequest';
+export * from './sendMaxResponse';
 export * from './sendRequest';
+export * from './sendRequestItem';
 export * from './sendResponse';
+export * from './serializedWallet';
+export * from './toCashaddr';
+export * from './transactionId';
+export * from './utxo';
+export * from './utxoResponse';
 export * from './walletRequest';
 export * from './walletResponse';
+export * from './walletType';
+export * from './zeroBalanceResponse';
 
-import localVarRequest = require('request');
+import * as fs from 'fs';
 
+export interface RequestDetailedFile {
+    value: Buffer;
+    options?: {
+        filename?: string;
+        contentType?: string;
+    }
+}
+
+export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
+
+
+import { Amount } from './amount';
+import { BalanceResponse } from './balanceResponse';
+import { Cashaddr } from './cashaddr';
+import { DepositAddressResponse } from './depositAddressResponse';
+import { Network } from './network';
+import { Outpoint } from './outpoint';
+import { PortableNetworkGraphic } from './portableNetworkGraphic';
+import { SendMaxRequest } from './sendMaxRequest';
+import { SendMaxResponse } from './sendMaxResponse';
 import { SendRequest } from './sendRequest';
+import { SendRequestItem } from './sendRequestItem';
 import { SendResponse } from './sendResponse';
+import { SerializedWallet } from './serializedWallet';
+import { ToCashaddr } from './toCashaddr';
+import { TransactionId } from './transactionId';
+import { Utxo } from './utxo';
+import { UtxoResponse } from './utxoResponse';
 import { WalletRequest } from './walletRequest';
 import { WalletResponse } from './walletResponse';
+import { WalletType } from './walletType';
+import { ZeroBalanceResponse } from './zeroBalanceResponse';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -23,17 +70,37 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
+        "Amount.UnitEnum": Amount.UnitEnum,
+        "Network.NetworkEnum": Network.NetworkEnum,
+        "SendRequestItem.UnitEnum": SendRequestItem.UnitEnum,
         "WalletRequest.TypeEnum": WalletRequest.TypeEnum,
         "WalletRequest.NetworkEnum": WalletRequest.NetworkEnum,
-        "WalletResponse.TypeEnum": WalletResponse.TypeEnum,
         "WalletResponse.NetworkEnum": WalletResponse.NetworkEnum,
+        "WalletType.TypeEnum": WalletType.TypeEnum,
 }
 
 let typeMap: {[index: string]: any} = {
+    "Amount": Amount,
+    "BalanceResponse": BalanceResponse,
+    "Cashaddr": Cashaddr,
+    "DepositAddressResponse": DepositAddressResponse,
+    "Network": Network,
+    "Outpoint": Outpoint,
+    "PortableNetworkGraphic": PortableNetworkGraphic,
+    "SendMaxRequest": SendMaxRequest,
+    "SendMaxResponse": SendMaxResponse,
     "SendRequest": SendRequest,
+    "SendRequestItem": SendRequestItem,
     "SendResponse": SendResponse,
+    "SerializedWallet": SerializedWallet,
+    "ToCashaddr": ToCashaddr,
+    "TransactionId": TransactionId,
+    "Utxo": Utxo,
+    "UtxoResponse": UtxoResponse,
     "WalletRequest": WalletRequest,
     "WalletResponse": WalletResponse,
+    "WalletType": WalletType,
+    "ZeroBalanceResponse": ZeroBalanceResponse,
 }
 
 export class ObjectSerializer {

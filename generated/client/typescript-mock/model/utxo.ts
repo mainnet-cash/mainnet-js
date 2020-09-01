@@ -11,23 +11,48 @@
  */
 
 import { RequestFile } from './models';
-import { BalanceResponse } from './balanceResponse';
+import { Amount } from './amount';
+import { Outpoint } from './outpoint';
 import { TransactionId } from './transactionId';
 
-export class SendResponse extends TransactionId {
-    'balance'?: BalanceResponse;
+export class Utxo {
+    'index'?: number;
+    'amount'?: Amount;
+    /**
+    * serialized outpoint
+    */
+    'utxoId'?: string;
+    /**
+    * The hash of a transaction
+    */
+    'transaction'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "balance",
-            "baseName": "balance",
-            "type": "BalanceResponse"
+            "name": "index",
+            "baseName": "index",
+            "type": "number"
+        },
+        {
+            "name": "amount",
+            "baseName": "amount",
+            "type": "Amount"
+        },
+        {
+            "name": "utxoId",
+            "baseName": "utxo_id",
+            "type": "string"
+        },
+        {
+            "name": "transaction",
+            "baseName": "transaction",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendResponse.attributeTypeMap);
+        return Utxo.attributeTypeMap;
     }
 }
 

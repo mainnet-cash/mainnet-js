@@ -11,23 +11,42 @@
  */
 
 import { RequestFile } from './models';
-import { SendRequestItem } from './sendRequestItem';
-import { SerializedWallet } from './serializedWallet';
 
-export class SendRequest extends SerializedWallet {
-    'to'?: Array<SendRequestItem>;
+export class BalanceResponse {
+    /**
+    * Amount in whole Bitcoin Cash
+    */
+    'bch'?: number;
+    /**
+    * Amount in satoshis
+    */
+    'sat'?: number;
+    /**
+    * Amount in United States Dollars
+    */
+    'usd'?: number;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "to",
-            "baseName": "to",
-            "type": "Array<SendRequestItem>"
+            "name": "bch",
+            "baseName": "bch",
+            "type": "number"
+        },
+        {
+            "name": "sat",
+            "baseName": "sat",
+            "type": "number"
+        },
+        {
+            "name": "usd",
+            "baseName": "usd",
+            "type": "number"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequest.attributeTypeMap);
+        return BalanceResponse.attributeTypeMap;
     }
 }
 
