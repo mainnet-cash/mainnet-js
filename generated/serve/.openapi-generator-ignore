@@ -22,6 +22,8 @@
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
 
+services/index.ts
+services/*Implementation.ts
 package.json
 tsconfig.json
 *.ts
