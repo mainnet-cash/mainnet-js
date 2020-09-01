@@ -1,8 +1,9 @@
+export * from './infoApi';
+import { InfoApi } from './infoApi';
 export * from './sendApi';
 import { SendApi } from './sendApi';
 export * from './walletApi';
 import { WalletApi } from './walletApi';
-import * as fs from 'fs';
 import * as http from 'http';
 
 export class HttpError extends Error {
@@ -12,14 +13,6 @@ export class HttpError extends Error {
     }
 }
 
-export interface RequestDetailedFile {
-    value: Buffer;
-    options?: {
-        filename?: string;
-        contentType?: string;
-    }
-}
+export { RequestFile } from '../model/models';
 
-export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
-
-export const APIS = [SendApi, WalletApi];
+export const APIS = [InfoApi, SendApi, WalletApi];

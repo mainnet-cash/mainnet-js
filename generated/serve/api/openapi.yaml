@@ -116,7 +116,7 @@ paths:
           description: |
             A Qr code image data in png format as base64 encoded string.
             Suitable for inclusion in html using:
-               - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUgA...   ...Jggg==**"\>
+               - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\>
       summary: Get receiving cash address as a qrcode
       tags:
       - info

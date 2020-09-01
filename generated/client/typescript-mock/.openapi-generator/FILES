@@ -1,5 +1,9 @@
 .gitignore
 api.ts
+api/apis.ts
+api/infoApi.ts
+api/sendApi.ts
+api/walletApi.ts
 git_push.sh
 model/amount.ts
 model/balanceResponse.ts
