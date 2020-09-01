@@ -1,5 +1,5 @@
 import * as mockApi from "../client/typescript-mock/api";
-import {SendRequestItem } from "../client/typescript-mock/model/sendRequestItem"
+import { SendRequestItem } from "../client/typescript-mock/model/sendRequestItem"
 import { Amount } from "../client/typescript-mock/model/amount"
 
 test("Create a Regtest wallet form the API", async () => {
@@ -14,9 +14,8 @@ test("Create a Regtest wallet form the API", async () => {
   const body = result.body;
   expect(resp.statusCode).toBe(200);
   expect(body?.name).toBe(req.name);
-  expect(body?.type).toBe(req.type);
   expect(body?.network).toBe(req.network);
-  expect(body?.cashaddress?.startsWith("bchreg:")).toBeTruthy();
+  expect(body?.cashaddr?.startsWith("bchreg:")).toBeTruthy();
   expect(body?.walletId?.startsWith("wif:bchreg:3")).toBeTruthy();
 });
 
@@ -33,22 +32,27 @@ test("Send from a Regtest wallet with the API", async () => {
     
     let result = await api.createWallet(bobWalletReq);
     const bobResp = result.body;
-    let bobsAddress = bobResp?.cashaddress
-  
-    let sendApi = new mockApi.SendApi("http://localhost:3000/v1")
-    let sendToBobReq = new mockApi.SendRequest();
-    sendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
-    let toBob = new SendRequestItem()
-    toBob.cashaddr = bobsAddress
-    toBob.unit = Amount.UnitEnum.Sats
-    toBob.value = 1000
-    sendToBobReq.to = [toBob]
-    let sendResult = await sendApi.sendRequest(sendToBobReq)
 
-    const resp = sendResult.response;
-    const body = sendResult.body;
-    expect(resp.statusCode).toBe(200);
-    expect(body?.transaction.length).toBe(65);
+      let bobsAddress = bobResp.cashaddr as string
+  
+      let sendApi = new mockApi.SendApi("http://localhost:3000/v1")
+      let sendToBobReq = new mockApi.SendRequest();
+      sendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
+
+      let toBob = new SendRequestItem()
+      toBob.cashaddr = bobsAddress
+      toBob.unit = Amount.UnitEnum.Sats
+      toBob.value = 1000
+      sendToBobReq.to = [toBob]
+      
+      let sendResult = await sendApi.send([sendToBobReq])
+  
+      const resp = sendResult.response;
+      const body = sendResult.body;
+      expect(resp.statusCode).toBe(200);
+      expect((body.transaction as string).length).toBe(65);
+    
+
 
     //let infoApi = new mockApi.InfoApi("http://localhost:3000/v1")
     
@@ -68,9 +72,8 @@ test("Create a Testnet wallet with the API", async () => {
   const body = result.body;
   expect(resp.statusCode).toBe(200);
   expect(body?.name).toBe(req.name);
-  expect(body?.type).toBe(req.type);
   expect(body?.network).toBe(req.network);
-  expect(body?.cashaddress?.startsWith("bchreg:")).toBeTruthy();
+  expect(body?.cashaddr?.startsWith("bchreg:")).toBeTruthy();
   expect(body?.walletId?.startsWith("wif:bchreg:3")).toBeTruthy();
 });
 
@@ -86,8 +89,7 @@ test("Create a Mainnet wallet with the API", async () => {
   const body = result.body;
   expect(resp.statusCode).toBe(200);
   expect(body?.name).toBe(req.name);
-  expect(body?.type).toBe(req.type);
   expect(body?.network).toBe(req.network);
-  expect(body?.cashaddress?.startsWith("bitcoincash:")).toBeTruthy();
+  expect(body?.cashaddr?.startsWith("bitcoincash:")).toBeTruthy();
   expect(body?.walletId?.startsWith("wif:bitcoincash:q")).toBeTruthy();
 });

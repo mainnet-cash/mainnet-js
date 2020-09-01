@@ -3,6 +3,7 @@ import { Service } from "./Service";
 import { Wallet, RegTestWallet, TestnetWallet } from "../../../src/wallet/Wif";
 import { WalletRequest } from "../../client/typescript-mock/model/walletRequest";
 import { WalletResponse } from "../../client/typescript-mock/model/walletResponse";
+import { WalletType } from "../../client/typescript-mock/model/walletType";
 
 /**
  * create a new wallet
@@ -33,17 +34,15 @@ export const createWallet = ({ body }: { body: WalletRequest }) =>
         switch (body.type) {
           case WalletRequest.TypeEnum.Wif:
             await w.generateWif();
-            resp.type = WalletResponse.TypeEnum.Wif;
             resp.wif = w.privateKeyWif;
             break;
           case WalletRequest.TypeEnum.Hd:
             throw Error("Not Implemented");
-            resp.type = WalletResponse.TypeEnum.Hd;
         }
 
         resp.name = w.name;
-        resp.cashaddress = w.cashaddr;
-        resp.wallet = w.getSerializedWallet();
+        resp.cashaddr = w.cashaddr;
+        resp.walletId = w.getSerializedWallet();
         resolve(Service.successResponse({ ...resp }));
       }
     } catch (e) {

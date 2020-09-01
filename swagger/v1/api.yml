@@ -126,7 +126,7 @@ paths:
       operationId: maxAmountToSend
       requestBody:
         content:
-          "application/json":
+          application/json:
             schema:
               allOf:
                 - $ref: "#/components/schemas/SerializedWallet"
@@ -181,7 +181,7 @@ paths:
       operationId: send
       requestBody:
         content:
-          "application/json":
+          application/json:
             schema:
               type: array
               items:
