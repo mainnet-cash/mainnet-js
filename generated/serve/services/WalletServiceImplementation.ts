@@ -25,7 +25,6 @@ export const createWallet = ({ body }: { body: WalletRequest }) =>
           resp.network = WalletResponse.NetworkEnum.Testnet;
           break;
         case WalletRequest.NetworkEnum.Mainnet:
-          throw Error("Not implemented");
           resp.network = WalletResponse.NetworkEnum.Mainnet;
         default:
           throw Error("The wallet network was not understood");
