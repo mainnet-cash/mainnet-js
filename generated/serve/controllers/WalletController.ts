@@ -14,7 +14,35 @@
 
 const Controller = require("./Controller");
 import { WalletService as service } from "../services";
+export const balance = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.balance);
+};
+
 export const createWallet = async (request: any, response: any) => {
   await Controller.handleRequest(request, response, service.createWallet);
+};
+
+export const depositAddress = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.depositAddress);
+};
+
+export const depositQr = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.depositQr);
+};
+
+export const maxAmountToSend = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.maxAmountToSend);
+};
+
+export const send = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.send);
+};
+
+export const sendMax = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.sendMax);
+};
+
+export const utxos = async (request: any, response: any) => {
+  await Controller.handleRequest(request, response, service.utxos);
 };
 

@@ -4,7 +4,5 @@
  * Do not edit the class manually.
  */
 
-export * as InfoController from "./InfoController";
-export * as SendController from "./SendController";
 export * as WalletController from "./WalletController";
 

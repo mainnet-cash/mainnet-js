@@ -72,8 +72,8 @@ paths:
           description: successful operation
       summary: Get total balance for wallet
       tags:
-      - info
-      x-eov-operation-handler: controllers/InfoController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/deposit_address:
     post:
       operationId: depositAddress
@@ -94,8 +94,8 @@ paths:
           description: successful operation
       summary: Get a deposit address in cash address format
       tags:
-      - info
-      x-eov-operation-handler: controllers/InfoController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/deposit_qr:
     post:
       operationId: depositQr
@@ -119,8 +119,8 @@ paths:
                - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\>
       summary: Get receiving cash address as a qrcode
       tags:
-      - info
-      x-eov-operation-handler: controllers/InfoController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -154,8 +154,8 @@ paths:
           description: Invalid network for given address
       summary: Get maximum spendable amount
       tags:
-      - info
-      x-eov-operation-handler: controllers/InfoController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/utxo:
     post:
       operationId: utxos
@@ -176,8 +176,8 @@ paths:
           description: successful operation
       summary: Get detailed information about unspent outputs (utxos)
       tags:
-      - info
-      x-eov-operation-handler: controllers/InfoController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/send:
     post:
       operationId: send
@@ -205,8 +205,8 @@ paths:
           description: Invalid network for given address
       summary: Send some amount to a given address
       tags:
-      - send
-      x-eov-operation-handler: controllers/SendController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/send_max:
     post:
       operationId: sendMax
@@ -229,8 +229,8 @@ paths:
           description: Invalid Request
       summary: Send all available funds to a given address
       tags:
-      - send
-      x-eov-operation-handler: controllers/SendController
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
 components:
   schemas:
     Utxo:
