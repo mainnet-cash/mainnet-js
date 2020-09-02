@@ -75,7 +75,7 @@ paths:
           description: successful operation
       summary: Get total balance for wallet
       tags:
-        - info
+        - wallet
   /wallet/deposit_address:
     post:
       operationId: depositAddress
@@ -96,7 +96,7 @@ paths:
           description: successful operation
       summary: Get a deposit address in cash address format
       tags:
-        - info
+        - wallet
   /wallet/deposit_qr:
     post:
       operationId: depositQr
@@ -120,7 +120,7 @@ paths:
                - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\>
       summary: Get receiving cash address as a qrcode
       tags:
-        - info
+        - wallet
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -154,7 +154,7 @@ paths:
           description: Invalid network for given address
       summary: Get maximum spendable amount
       tags:
-        - info
+        - wallet
   /wallet/utxo:
     post:
       operationId: utxos
@@ -175,7 +175,7 @@ paths:
           description: successful operation
       summary: Get detailed information about unspent outputs (utxos)
       tags:
-        - info
+        - wallet
   /wallet/send:
     post:
       operationId: send
@@ -203,7 +203,7 @@ paths:
           description: Invalid network for given address
       summary: Send some amount to a given address
       tags:
-        - send
+        - wallet
   /wallet/send_max:
     post:
       operationId: sendMax
@@ -226,7 +226,7 @@ paths:
           description: Invalid Request
       summary: Send all available funds to a given address
       tags:
-        - send
+        - wallet
 components:
   schemas:
     Utxo:
