@@ -4,6 +4,7 @@ export * from './amount';
 export * from './balanceResponse';
 export * from './cashaddr';
 export * from './depositAddressResponse';
+export * from './maxAmountToSendRequest';
 export * from './network';
 export * from './outpoint';
 export * from './portableNetworkGraphic';
@@ -39,6 +40,7 @@ import { Amount } from './amount';
 import { BalanceResponse } from './balanceResponse';
 import { Cashaddr } from './cashaddr';
 import { DepositAddressResponse } from './depositAddressResponse';
+import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
 import { Network } from './network';
 import { Outpoint } from './outpoint';
 import { PortableNetworkGraphic } from './portableNetworkGraphic';
@@ -84,6 +86,7 @@ let typeMap: {[index: string]: any} = {
     "BalanceResponse": BalanceResponse,
     "Cashaddr": Cashaddr,
     "DepositAddressResponse": DepositAddressResponse,
+    "MaxAmountToSendRequest": MaxAmountToSendRequest,
     "Network": Network,
     "Outpoint": Outpoint,
     "PortableNetworkGraphic": PortableNetworkGraphic,

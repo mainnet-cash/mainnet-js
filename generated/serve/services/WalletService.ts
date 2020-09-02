@@ -87,14 +87,14 @@ export const depositQr = ({ serializedWallet }) => new Promise(
 /**
 * Get maximum spendable amount
 *
-* uNKNOWNUnderscoreBASEUnderscoreTYPE UNKNOWN_BASE_TYPE get amount that will be spend with a spend max request
+* maxAmountToSendRequest MaxAmountToSendRequest get amount that will be spend with a spend max request
 * returns BalanceResponse
 * */
-export const maxAmountToSend = ({ uNKNOWNUnderscoreBASEUnderscoreTYPE }) => new Promise(
+export const maxAmountToSend = ({ maxAmountToSendRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
-        uNKNOWNUnderscoreBASEUnderscoreTYPE,
+        maxAmountToSendRequest,
       }));
     } catch (e) {
       reject(Service.rejectResponse(

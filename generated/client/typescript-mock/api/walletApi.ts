@@ -17,13 +17,13 @@ import http from 'http';
 /* tslint:disable:no-unused-locals */
 import { BalanceResponse } from '../model/balanceResponse';
 import { DepositAddressResponse } from '../model/depositAddressResponse';
+import { MaxAmountToSendRequest } from '../model/maxAmountToSendRequest';
 import { PortableNetworkGraphic } from '../model/portableNetworkGraphic';
 import { SendMaxRequest } from '../model/sendMaxRequest';
 import { SendMaxResponse } from '../model/sendMaxResponse';
 import { SendRequest } from '../model/sendRequest';
 import { SendResponse } from '../model/sendResponse';
 import { SerializedWallet } from '../model/serializedWallet';
-import { UNKNOWNBASETYPE } from '../model/uNKNOWNBASETYPE';
 import { UtxoResponse } from '../model/utxoResponse';
 import { WalletRequest } from '../model/walletRequest';
 import { WalletResponse } from '../model/walletResponse';
@@ -376,9 +376,9 @@ export class WalletApi {
     /**
      * 
      * @summary Get maximum spendable amount
-     * @param uNKNOWNBASETYPE get amount that will be spend with a spend max request
+     * @param maxAmountToSendRequest get amount that will be spend with a spend max request
      */
-    public async maxAmountToSend (uNKNOWNBASETYPE: UNKNOWN_BASE_TYPE, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: BalanceResponse;  }> {
+    public async maxAmountToSend (maxAmountToSendRequest: MaxAmountToSendRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: BalanceResponse;  }> {
         const localVarPath = this.basePath + '/wallet/max_amount_to_send';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -391,9 +391,9 @@ export class WalletApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'uNKNOWNBASETYPE' is not null or undefined
-        if (uNKNOWNBASETYPE === null || uNKNOWNBASETYPE === undefined) {
-            throw new Error('Required parameter uNKNOWNBASETYPE was null or undefined when calling maxAmountToSend.');
+        // verify required parameter 'maxAmountToSendRequest' is not null or undefined
+        if (maxAmountToSendRequest === null || maxAmountToSendRequest === undefined) {
+            throw new Error('Required parameter maxAmountToSendRequest was null or undefined when calling maxAmountToSend.');
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -407,7 +407,7 @@ export class WalletApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(uNKNOWNBASETYPE, "UNKNOWN_BASE_TYPE")
+            body: ObjectSerializer.serialize(maxAmountToSendRequest, "MaxAmountToSendRequest")
         };
 
         let authenticationPromise = Promise.resolve();

@@ -7,6 +7,7 @@ model/amount.ts
 model/balanceResponse.ts
 model/cashaddr.ts
 model/depositAddressResponse.ts
+model/maxAmountToSendRequest.ts
 model/network.ts
 model/outpoint.ts
 model/portableNetworkGraphic.ts
