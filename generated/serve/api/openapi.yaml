@@ -455,6 +455,7 @@ components:
       - cashaddr
       - unit
       - value
+      type: object
     SendMaxResponse:
       allOf:
       - $ref: '#/components/schemas/TransactionId'
