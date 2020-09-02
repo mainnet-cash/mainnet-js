@@ -23,10 +23,6 @@ tags:
     description: Find out more
     url: http://mainnet.cash/docs#wallet
   name: wallet
-- description: Send bitcoin cash
-  name: send
-- description: Get wallet information
-  name: info
 paths:
   /wallet:
     post:
