@@ -132,7 +132,8 @@ paths:
                     (optional) if sending all funds to multiple addresses, the
                     count of the number of address funds will be sent
                     to may be included.
-                  type: number
+                  format: int32
+                  type: integer
         description: get amount that will be spend with a spend max request
         required: true
       responses:
