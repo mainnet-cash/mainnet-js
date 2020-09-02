@@ -128,7 +128,8 @@ paths:
                 - $ref: "#/components/schemas/SerializedWallet"
               properties:
                 output_count:
-                  type: number
+                  type: integer
+                  format: int32
                   description: |
                     (optional) if sending all funds to multiple addresses, the
                     count of the number of address funds will be sent
