@@ -23,7 +23,3 @@
 #!docs/README.md
 
 services/index.ts
-services/*Implementation.ts
-package.json
-tsconfig.json
-*.ts

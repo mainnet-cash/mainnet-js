@@ -1,9 +1,8 @@
 // @ts-ignore
 import { Service } from "./Service";
-import { Wallet, RegTestWallet, TestnetWallet } from "../../../src/wallet/Wif";
-import { WalletRequest } from "../../client/typescript-mock/model/walletRequest";
-import { WalletResponse } from "../../client/typescript-mock/model/walletResponse";
-import { WalletType } from "../../client/typescript-mock/model/walletType";
+import { Wallet, RegTestWallet, TestnetWallet } from "../src/wallet/Wif";
+import { WalletRequest } from "../generated/client/typescript-mock/model/walletRequest";
+import { WalletResponse } from "../generated/client/typescript-mock/model/walletResponse";
 
 /**
  * create a new wallet

@@ -134,7 +134,7 @@ paths:
                     count of the number of address funds will be sent
                     to may be included.
         description: get amount that will be spend with a spend max request
-        required: true
+        required: true      
       responses:
         "202":
           content:
@@ -413,6 +413,7 @@ components:
         - cashaddr
         - value
         - unit
+      type: object
     SendMaxResponse:
       allOf:
         - $ref: "#/components/schemas/TransactionId"
