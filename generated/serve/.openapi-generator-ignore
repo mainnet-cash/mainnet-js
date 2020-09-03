@@ -23,3 +23,5 @@
 #!docs/README.md
 
 services/index.ts
+package.json
+index.test.ts

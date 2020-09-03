@@ -1,5 +1,5 @@
-// @ts-ignore
-import { Service } from "./Service";
+
+import { Service } from "../generated/serve/services/Service";
 import { Wallet, RegTestWallet, TestnetWallet } from "../src/wallet/Wif";
 import { WalletRequest } from "../generated/client/typescript-mock/model/walletRequest";
 import { WalletResponse } from "../generated/client/typescript-mock/model/walletResponse";
@@ -13,7 +13,7 @@ import { WalletResponse } from "../generated/client/typescript-mock/model/wallet
 export const createWallet = ({ body }: { body: WalletRequest }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let w: Wallet | null;
+      let w;
       let resp = new WalletResponse();
       switch (body.network) {
         case WalletRequest.NetworkEnum.Regtest:
@@ -25,7 +25,9 @@ export const createWallet = ({ body }: { body: WalletRequest }) =>
           resp.network = WalletResponse.NetworkEnum.Testnet;
           break;
         case WalletRequest.NetworkEnum.Mainnet:
+          w = new Wallet(body.name)
           resp.network = WalletResponse.NetworkEnum.Mainnet;
+          break;
         default:
           throw Error("The wallet network was not understood");
       }

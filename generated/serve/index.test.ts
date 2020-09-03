@@ -1,4 +1,5 @@
 import * as mockApi from "../client/typescript-mock/api";
+import { SendRequest } from "../client/typescript-mock/model/sendRequest"
 import { SendRequestItem } from "../client/typescript-mock/model/sendRequestItem"
 import { Amount } from "../client/typescript-mock/model/amount"
 
@@ -33,43 +34,42 @@ test("Send from a Regtest wallet with the API", async () => {
     let result = await api.createWallet(bobWalletReq);
     const bobResp = result.body;
 
-      let bobsAddress = bobResp.cashaddr as string
-  
-      let sendApi = new mockApi.SendApi("http://localhost:3000/v1")
-      let sendToBobReq = new mockApi.SendRequest();
-      sendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
+    let bobsAddress = bobResp.cashaddr as string
 
-      let toBob = new SendRequestItem()
-      toBob.cashaddr = bobsAddress
-      toBob.unit = Amount.UnitEnum.Sats
-      toBob.value = 1000
-      sendToBobReq.to = [toBob]
-      
-      let sendResult = await sendApi.send([sendToBobReq])
-  
-      const resp = sendResult.response;
-      const body = sendResult.body;
-      expect(resp.statusCode).toBe(200);
-      expect((body.transaction as string).length).toBe(65);
+    let sendToBobReq = new SendRequest();
+    sendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
+
+    let toBob = new SendRequestItem()
+    toBob.cashaddr = bobsAddress
+    toBob.unit = Amount.UnitEnum.Sats
+    toBob.value = 1000
+    sendToBobReq.to = [toBob]
     
+    let sendResult = await api.send([sendToBobReq])
+
+    const resp = sendResult.response;
+    const body = sendResult.body;
+    expect(resp.statusCode).toBe(200);
+    expect((body.transaction as string).length).toBe(65);
+  
 
 
     //let infoApi = new mockApi.InfoApi("http://localhost:3000/v1")
-    
   }
 });
 
 test("Create a Testnet wallet with the API", async () => {
   let req = new mockApi.WalletRequest();
-  req.name = "A simple Regtest Wallet";
+  req.name = "A simple Testnet Wallet";
   
   req.type = mockApi.WalletRequest.TypeEnum.Wif;
-  req.network = mockApi.WalletRequest.NetworkEnum.Regtest;
+  req.network = mockApi.WalletRequest.NetworkEnum.Testnet;
 
   let api = new mockApi.WalletApi("http://localhost:3000/v1");
   let result = await api.createWallet(req);
   const resp = result.response;
   const body = result.body;
+  console.log({...body})
   expect(resp.statusCode).toBe(200);
   expect(body?.name).toBe(req.name);
   expect(body?.network).toBe(req.network);
@@ -87,9 +87,10 @@ test("Create a Mainnet wallet with the API", async () => {
   let result = await api.createWallet(req);
   const resp = result.response;
   const body = result.body;
+  
   expect(resp.statusCode).toBe(200);
   expect(body?.name).toBe(req.name);
   expect(body?.network).toBe(req.network);
   expect(body?.cashaddr?.startsWith("bitcoincash:")).toBeTruthy();
-  expect(body?.walletId?.startsWith("wif:bitcoincash:q")).toBeTruthy();
+  expect(body?.walletId?.startsWith("wif:bitcoincash:2")).toBeTruthy();
 });

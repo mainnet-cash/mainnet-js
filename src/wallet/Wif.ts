@@ -269,7 +269,6 @@ export class WifWallet extends BaseWallet {
 
 export class Wallet extends WifWallet {
   constructor(name = "") {
-    throw Error("This wallet is in active development");
     super(name, CashAddressNetworkPrefix.mainnet);
   }
 }

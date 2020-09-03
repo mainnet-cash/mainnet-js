@@ -1,16 +1,16 @@
 import { Service } from "../generated/serve/services/Service";
 
 /**
-* Send some amount to a given address
+* Get detailed information about unspent outputs (utxos)
 *
-* sendRequest List place a send request
-* returns SendResponse
+* serializedWallet SerializedWallet Request detailed list of unspent transaction outputs 
+* returns UtxoResponse
 * */
-export const send = ({ sendRequest }) => new Promise(
+export const utxos = ({ serializedWallet }) => new Promise(
     async (resolve, reject) => {
       try {
         resolve(Service.successResponse({
-          sendRequest,
+          serializedWallet,
         }));
       } catch (e) {
         reject(Service.rejectResponse(

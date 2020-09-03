@@ -327,7 +327,7 @@ components:
         - $ref: "#/components/schemas/SerializedWallet"
         - $ref: "#/components/schemas/ToCashaddr"
       required:
-        - wallet_id
+        - walletId
         - cashaddr
     MaxAmountToSendRequest:
       allOf:
@@ -341,17 +341,17 @@ components:
             count of the number of address funds will be sent
             to may be included.
       required:
-        - wallet_id
+        - walletId
     SerializedWallet:
       properties:
-        wallet_id:
+        walletId:
           type: string
           format: password
           example: "testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
       required:
-        - wallet_id
+        - walletId
     DepositAddressResponse:
       allOf:
         - $ref: "#/components/schemas/Cashaddr"
@@ -408,7 +408,7 @@ components:
           items:
             $ref: "#/components/schemas/SendRequestItem"
       required:
-        - wallet_id
+        - walletId
       type: object
     SendRequestItem:
       allOf:
