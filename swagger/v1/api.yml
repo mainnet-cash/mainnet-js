@@ -265,6 +265,7 @@ components:
             - sats
             - satoshi
             - satoshis
+          example: 'sat'
     BalanceResponse:
       properties:
         bch:
@@ -413,11 +414,11 @@ components:
     SendRequestItem:
       allOf:
         - $ref: "#/components/schemas/ToCashaddr"
-        - $ref: "#/components/schemas/Amount"
+      properties:
+        amount:
+          $ref: "#/components/schemas/Amount"
       required:
         - cashaddr
-        - value
-        - unit
       type: object
     SendMaxResponse:
       allOf:
