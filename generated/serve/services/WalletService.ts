@@ -107,7 +107,7 @@ export const maxAmountToSend = ({ maxAmountToSendRequest }) => new Promise(
 /**
 * Send some amount to a given address
 *
-* sendRequest List place a send request
+* sendRequest SendRequest place a send request
 * returns SendResponse
 * */
 export const send = ({ sendRequest }) => new Promise(

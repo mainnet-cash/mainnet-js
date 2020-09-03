@@ -447,7 +447,7 @@ export class WalletApi {
      * @summary Send some amount to a given address
      * @param sendRequest place a send request
      */
-    public async send (sendRequest: Array<SendRequest>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: SendResponse;  }> {
+    public async send (sendRequest: SendRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: SendResponse;  }> {
         const localVarPath = this.basePath + '/wallet/send';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -476,7 +476,7 @@ export class WalletApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(sendRequest, "Array<SendRequest>")
+            body: ObjectSerializer.serialize(sendRequest, "SendRequest")
         };
 
         let authenticationPromise = Promise.resolve();
