@@ -171,9 +171,7 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/SendRequest"
+              $ref: "#/components/schemas/SendRequest"
         description: place a send request
         required: true
       responses:
