@@ -8,26 +8,32 @@ export class SendRequest {
   address: string;
   amount: Amount;
 
-  constructor(SerializedSendRequest: any) {
-    this.address = SerializedSendRequest[0];
-    this.amount = new Amount(SerializedSendRequest[1]);
+  constructor({address, amount}:{address:string, amount:Amount}) {
+    this.address = address;
+    this.amount = new Amount(amount);
   }
 }
 
 class Amount {
-  amount: number;
-  unit: UnitType;
-  constructor(SerializedAmount: any) {
-    this.amount = SerializedAmount[0];
-    this.unit = SerializedAmount[1];
+  value: number;
+  unit: UnitType.UnitEnum;
+  constructor({value, unit}:{value: number, unit: UnitType.UnitEnum}) {
+    this.value = value;
+    this.unit = unit;
   }
 
   public inSatoshi(): number | Error {
     switch (this.unit) {
-      case "satoshi":
-        return Number(this.amount);
-      case "coin":
-        return Number(this.amount / 10e8);
+      case UnitType.UnitEnum.Satoshi:
+        return Number(this.value);
+      case UnitType.UnitEnum.Sat:
+        return Number(this.value);
+      case UnitType.UnitEnum.Sats:
+        return Number(this.value);        
+      case UnitType.UnitEnum.Satoshis:
+        return Number(this.value);
+      case UnitType.UnitEnum.Bch:
+        return Number(this.value / 10e8);
       default:
         throw Error("Unit of value not defined");
     }
@@ -35,8 +41,36 @@ class Amount {
 }
 
 export type NetworkType = "mainnet" | "testnet";
-export type UnitType = "coin" | "bits" | "satoshi";
-export type WalletType = "wif" | "hd";
+
+export namespace UnitType {
+  export enum UnitEnum {
+      Bch = <any> 'bch',
+      Usd = <any> 'usd',
+      Bit = <any> 'bit',
+      Bits = <any> 'bits',
+      Sat = <any> 'sat',
+      Sats = <any> 'sats',
+      Satoshi = <any> 'satoshi',
+      Satoshis = <any> 'satoshis'
+  }
+}
+
+export namespace WalletType {
+  export enum TypeEnum {
+      Wif = <any> 'wif',
+      Hd = <any> 'hd'
+  }
+}
+
+
+export namespace Network {
+  export enum NetworkEnum {
+      Mainnet = <any> 'mainnet',
+      Testnet = <any> 'testnet',
+      Regtest = <any> 'regtest',
+      Simtest = <any> 'simtest'
+  }
+}
 
 /**
  * A class to hold features used by all wallets

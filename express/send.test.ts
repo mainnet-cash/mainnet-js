@@ -33,7 +33,8 @@ test("Send from a Regtest wallet with the API", async () => {
       const body = sendResult.body;
       expect(resp.statusCode).toBe(200);
       expect((body.transaction as string).length).toBe(65);
- 
+
+  
       //let infoApi = new mockApi.InfoApi("http://localhost:3000/v1")
     }
   });

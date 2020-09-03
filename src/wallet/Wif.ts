@@ -32,13 +32,13 @@ export class WifWallet extends BaseWallet {
   publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
   privateKeyWif?: string;
-  walletType?: WalletType;
+  walletType?: WalletType.TypeEnum;
   cashaddr?: string;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
     super(name, networkPrefix);
     this.name = name;
-    this.walletType = "wif";
+    this.walletType = WalletType.TypeEnum.Wif;
   }
 
   // Initialize wallet from a cash addr
@@ -69,7 +69,7 @@ export class WifWallet extends BaseWallet {
       let resultData: PrivateKey = result as PrivateKey;
       this.privateKey = resultData.privateKey;
       this.privateKeyWif = walletImportFormatString;
-      this.walletType = "wif";
+      this.walletType = WalletType.TypeEnum.Wif;
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
       this.cashaddr = (await deriveCashAddr(
         this.privateKey,
@@ -99,7 +99,7 @@ export class WifWallet extends BaseWallet {
       this.privateKey,
       this.networkType
     );
-    this.walletType = "wif";
+    this.walletType = WalletType.TypeEnum.Wif;
     this.cashaddr = (await deriveCashAddr(
       this.privateKey,
       this.networkPrefix
@@ -284,3 +284,4 @@ export class RegTestWallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.regtest);
   }
 }
+

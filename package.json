@@ -19,6 +19,8 @@
   "scripts": {
     "pretest": "node util/checkBchd.js",
     "test": "npx jest --config jest/node.config.js",
+    "test:wallet": "npx jest Wallet --config jest/node.config.js",
+    "test:server": "npx jest  send --config jest/node.config.js",
     "test:browser": "npx jest --config jest/browser.config.js",
     "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "grpcui:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
