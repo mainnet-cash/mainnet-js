@@ -14,47 +14,20 @@ import { RequestFile } from './models';
 import { Amount } from './amount';
 import { ToCashaddr } from './toCashaddr';
 
-export class SendRequestItem {
-    'cashaddr': string;
-    'value': number;
-    /**
-    * Denomination for amount
-    */
-    'unit': SendRequestItem.UnitEnum;
+export class SendRequestItem extends ToCashaddr {
+    'amount'?: Amount;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "cashaddr",
-            "baseName": "cashaddr",
-            "type": "string"
-        },
-        {
-            "name": "value",
-            "baseName": "value",
-            "type": "number"
-        },
-        {
-            "name": "unit",
-            "baseName": "unit",
-            "type": "SendRequestItem.UnitEnum"
+            "name": "amount",
+            "baseName": "amount",
+            "type": "Amount"
         }    ];
 
     static getAttributeTypeMap() {
-        return SendRequestItem.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(SendRequestItem.attributeTypeMap);
     }
 }
 
-export namespace SendRequestItem {
-    export enum UnitEnum {
-        Bch = <any> 'bch',
-        Usd = <any> 'usd',
-        Bit = <any> 'bit',
-        Bits = <any> 'bits',
-        Sat = <any> 'sat',
-        Sats = <any> 'sats',
-        Satoshi = <any> 'satoshi',
-        Satoshis = <any> 'satoshis'
-    }
-}

@@ -231,7 +231,7 @@ components:
       - $ref: '#/components/schemas/TransactionId'
       example:
         amount:
-          unit: bch
+          unit: sat
           value: 100
         index: 0.8008281904610115
       properties:
@@ -262,7 +262,7 @@ components:
           type: string
     Amount:
       example:
-        unit: bch
+        unit: sat
         value: 100
       properties:
         value:
@@ -279,6 +279,7 @@ components:
           - sats
           - satoshi
           - satoshis
+          example: sat
           type: string
     BalanceResponse:
       example:
@@ -389,11 +390,11 @@ components:
       example:
         utxos:
         - amount:
-            unit: bch
+            unit: sat
             value: 100
           index: 0.8008281904610115
         - amount:
-            unit: bch
+            unit: sat
             value: 100
           index: 0.8008281904610115
       properties:
@@ -448,8 +449,12 @@ components:
       - $ref: '#/components/schemas/SerializedWallet'
       example:
         to:
-        - null
-        - null
+        - amount:
+            unit: sat
+            value: 100
+        - amount:
+            unit: sat
+            value: 100
       properties:
         to:
           items:
@@ -461,11 +466,15 @@ components:
     SendRequestItem:
       allOf:
       - $ref: '#/components/schemas/ToCashaddr'
-      - $ref: '#/components/schemas/Amount'
+      example:
+        amount:
+          unit: sat
+          value: 100
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
       required:
       - cashaddr
-      - unit
-      - value
       type: object
     SendMaxResponse:
       allOf:

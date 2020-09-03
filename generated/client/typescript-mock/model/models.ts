@@ -74,7 +74,6 @@ let primitives = [
 let enumsMap: {[index: string]: any} = {
         "Amount.UnitEnum": Amount.UnitEnum,
         "Network.NetworkEnum": Network.NetworkEnum,
-        "SendRequestItem.UnitEnum": SendRequestItem.UnitEnum,
         "WalletRequest.TypeEnum": WalletRequest.TypeEnum,
         "WalletRequest.NetworkEnum": WalletRequest.NetworkEnum,
         "WalletResponse.NetworkEnum": WalletResponse.NetworkEnum,
