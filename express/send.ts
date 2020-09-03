@@ -3,7 +3,6 @@ import { SendRequest } from "../generated/client/typescript-mock/model/sendReque
 import { SendResponse } from "../generated/client/typescript-mock/model/sendResponse";
 import { walletFromIdString } from "../src/util/walletFromIdString"
 import { balanceResponseFromSatoshi } from "../src/util/balanceObjectFromSatoshi"
-import { BalanceResponse } from "../generated/client/typescript-mock/model/balanceResponse"
 import { binToHex } from "@bitauth/libauth"
 /**
 * Send some amount to a given address
@@ -11,7 +10,7 @@ import { binToHex } from "@bitauth/libauth"
 * sendRequest List place a send request
 * returns SendResponse
 * */
-export const send = ({ sendRequest }) => new Promise(
+export const send = ({ sendRequest }:{sendRequest:SendRequest}) => new Promise(
     async (resolve, reject) => {
         try {
             let resp = new SendResponse();
