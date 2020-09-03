@@ -42,7 +42,7 @@ export class Utxo {
         },
         {
             "name": "utxoId",
-            "baseName": "utxo_id",
+            "baseName": "utxoId",
             "type": "string"
         },
         {

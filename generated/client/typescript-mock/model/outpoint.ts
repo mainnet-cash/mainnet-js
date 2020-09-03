@@ -23,7 +23,7 @@ export class Outpoint {
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
             "name": "utxoId",
-            "baseName": "utxo_id",
+            "baseName": "utxoId",
             "type": "string"
         }    ];
 

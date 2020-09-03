@@ -316,7 +316,7 @@ components:
           type: number
     Outpoint:
       properties:
-        utxo_id:
+        utxoId:
           description: serialized outpoint
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
           type: string
