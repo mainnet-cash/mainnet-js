@@ -56,7 +56,7 @@ export class WalletResponse {
         },
         {
             "name": "walletId",
-            "baseName": "wallet_id",
+            "baseName": "walletId",
             "type": "string"
         },
         {

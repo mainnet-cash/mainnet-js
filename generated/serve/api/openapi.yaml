@@ -350,7 +350,7 @@ components:
       - $ref: '#/components/schemas/ToCashaddr'
       required:
       - cashaddr
-      - wallet_id
+      - walletId
     MaxAmountToSendRequest:
       allOf:
       - $ref: '#/components/schemas/SerializedWallet'
@@ -365,19 +365,19 @@ components:
           format: int32
           type: integer
       required:
-      - wallet_id
+      - walletId
     SerializedWallet:
       example:
-        wallet_id: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        walletId: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
       properties:
-        wallet_id:
+        walletId:
           description: |
             ID that is returned in `wallet` field of /wallet call
           example: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           format: password
           type: string
       required:
-      - wallet_id
+      - walletId
     DepositAddressResponse:
       allOf:
       - $ref: '#/components/schemas/Cashaddr'
@@ -452,7 +452,7 @@ components:
             $ref: '#/components/schemas/SendRequestItem'
           type: array
       required:
-      - wallet_id
+      - walletId
       type: object
     SendRequestItem:
       allOf:

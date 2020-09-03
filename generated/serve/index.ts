@@ -4,22 +4,18 @@
  * Do not edit the class manually.
  */
 
-require("dotenv").config({ path: ".env.regtest" });
-
 import { ExpressServer } from "./expressServer";
 import { logger } from "./logger";
 import { config } from "./config";
 
-let expressServer: any;
-
 const launchServer = async () => {
   try {
-    expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
-    expressServer.launch();
+    this.expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
+    this.expressServer.launch();
     logger.info("Express server running");
   } catch (error) {
     logger.error("Express Server failure", error.message);
-    await expressServer.close();
+    await this.close();
   }
 };
 

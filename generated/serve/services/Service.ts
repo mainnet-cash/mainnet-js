@@ -4,7 +4,7 @@
  * Do not edit the class manually.
  */
 
-export class Service {
+class Service {
   static rejectResponse(error, code = 500) {
     return { error, code };
   }
@@ -13,3 +13,5 @@ export class Service {
     return { payload, code };
   }
 }
+
+module.exports = Service;

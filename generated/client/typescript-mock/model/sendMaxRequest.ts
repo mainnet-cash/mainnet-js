@@ -26,7 +26,7 @@ export class SendMaxRequest {
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
             "name": "walletId",
-            "baseName": "wallet_id",
+            "baseName": "walletId",
             "type": "string"
         },
         {
