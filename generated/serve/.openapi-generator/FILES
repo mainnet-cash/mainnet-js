@@ -6,7 +6,6 @@ controllers/Controller.ts
 controllers/WalletController.ts
 controllers/index.ts
 expressServer.ts
-index.ts
 logger.ts
 services/Service.ts
 services/WalletService.ts

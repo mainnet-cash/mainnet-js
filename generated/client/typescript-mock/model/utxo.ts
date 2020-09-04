@@ -17,15 +17,15 @@ import { TransactionId } from './transactionId';
 
 export class Utxo {
     'index'?: number;
-    'amount'?: Amount;
+    'amount': Amount;
     /**
     * serialized outpoint
     */
-    'utxoId'?: string;
+    'utxoId': string;
     /**
     * The hash of a transaction
     */
-    'transaction'?: string;
+    'transaction': string;
 
     static discriminator: string | undefined = undefined;
 

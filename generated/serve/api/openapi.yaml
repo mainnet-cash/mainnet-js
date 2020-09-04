@@ -237,6 +237,10 @@ components:
           type: number
         amount:
           $ref: '#/components/schemas/Amount'
+      required:
+      - amount
+      - transaction
+      - utxoId
     Network:
       properties:
         network:
