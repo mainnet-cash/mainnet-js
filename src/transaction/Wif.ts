@@ -64,7 +64,7 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   try {
-    let outputLockingBytecode = cashAddressToLockingBytecode(output.address);
+    let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
     if (
       !outputLockingBytecode.hasOwnProperty("bytecode") ||
       !outputLockingBytecode.hasOwnProperty("prefix")

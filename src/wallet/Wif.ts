@@ -64,7 +64,7 @@ export class WifWallet extends BaseWallet {
 
     const hasError = typeof result === "string";
     if (hasError) {
-      return new Error(result as string);
+      throw Error(result as string);
     } else {
       let resultData: PrivateKey = result as PrivateKey;
       this.privateKey = resultData.privateKey;
@@ -128,17 +128,20 @@ export class WifWallet extends BaseWallet {
     return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
   }
 
-  // Gets balance by summing value in all utxos in stats
-  public async getBalance(address: string): Promise<number> {
+  public async getUtxos(address: string): Promise<UnspentOutput[]> {
     const res = await this.client?.getAddressUtxos({
       address: address,
       includeMempool: true,
     });
-    const txns = res?.getOutputsList();
+    return res?.getOutputsList() || [];
+  }
+  // Gets balance by summing value in all utxos in stats
+  public async getBalance(address: string): Promise<number> {
+    const utxos = await this.getUtxos(address);
 
-    if (txns) {
+    if (utxos) {
       const balanceArray: number[] = await Promise.all(
-        txns.map(async (o: UnspentOutput) => {
+        utxos.map(async (o: UnspentOutput) => {
           return o.getValue();
         })
       );
@@ -171,10 +174,7 @@ export class WifWallet extends BaseWallet {
         throw Error("attempted to send without a cashaddr");
       }
 
-      let utxos = await this.client?.getAddressUtxos({
-        address: this.cashaddr,
-        includeMempool: true,
-      });
+      let utxos = await this.getUtxos(this.cashaddr);
 
       let bestHeight =
         (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0;
@@ -182,7 +182,7 @@ export class WifWallet extends BaseWallet {
 
       // TODO refactor this
       if (utxos && typeof spendAmount === "number") {
-        let outputList = utxos?.getOutputsList() || [];
+        let outputList = utxos;
         let draftUtxos = await getSuitableUtxos(
           outputList,
           spendAmount,
@@ -284,4 +284,3 @@ export class RegTestWallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.regtest);
   }
 }
-

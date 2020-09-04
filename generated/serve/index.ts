@@ -3,6 +3,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+require("dotenv").config({ path: ".env.regtest" });
 
 import { ExpressServer } from "./expressServer";
 import { logger } from "./logger";

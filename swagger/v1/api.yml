@@ -224,6 +224,10 @@ components:
       allOf:
         - $ref: "#/components/schemas/Outpoint"
         - $ref: "#/components/schemas/TransactionId"
+      required:
+        - amount
+        - transaction
+        - utxoId
     Network:
       properties:
         network:

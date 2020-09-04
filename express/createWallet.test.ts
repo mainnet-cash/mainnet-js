@@ -1,6 +1,5 @@
 import * as mockApi from "../generated/client/typescript-mock/api";
 
-
 test("Create a Regtest wallet form the API", async () => {
   let req = new mockApi.WalletRequest();
   req.name = "A simple Regtest Wallet";
@@ -17,11 +16,10 @@ test("Create a Regtest wallet form the API", async () => {
   expect(body?.walletId?.startsWith("wif:bchreg:3")).toBeTruthy();
 });
 
-
 test("Create a Testnet wallet with the API", async () => {
   let req = new mockApi.WalletRequest();
   req.name = "A simple Testnet Wallet";
-  
+
   req.type = mockApi.WalletRequest.TypeEnum.Wif;
   req.network = mockApi.WalletRequest.NetworkEnum.Testnet;
 
@@ -36,7 +34,6 @@ test("Create a Testnet wallet with the API", async () => {
   expect(body?.walletId?.startsWith("wif:bchtest:3")).toBeTruthy();
 });
 
-
 test("Create a Mainnet wallet with the API", async () => {
   let req = new mockApi.WalletRequest();
   req.name = "A simple Mainnet Wallet";
@@ -47,7 +44,7 @@ test("Create a Mainnet wallet with the API", async () => {
   let result = await api.createWallet(req);
   const resp = result.response;
   const body = result.body;
-  
+
   expect(resp.statusCode).toBe(200);
   expect(body?.name).toBe(req.name);
   expect(body?.network).toBe(req.network);

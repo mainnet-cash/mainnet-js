@@ -5,11 +5,11 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 import { GrpcClient } from "grpc-bchrpc-node";
 
 export class SendRequest {
-  address: string;
+  cashaddr: string;
   amount: Amount;
 
-  constructor({address, amount}:{address:string, amount:Amount}) {
-    this.address = address;
+  constructor({ cashaddr, amount }: { cashaddr: string; amount: Amount }) {
+    this.cashaddr = cashaddr;
     this.amount = new Amount(amount);
   }
 }
@@ -17,7 +17,7 @@ export class SendRequest {
 class Amount {
   value: number;
   unit: UnitType.UnitEnum;
-  constructor({value, unit}:{value: number, unit: UnitType.UnitEnum}) {
+  constructor({ value, unit }: { value: number; unit: UnitType.UnitEnum }) {
     this.value = value;
     this.unit = unit;
   }
@@ -29,7 +29,7 @@ class Amount {
       case UnitType.UnitEnum.Sat:
         return Number(this.value);
       case UnitType.UnitEnum.Sats:
-        return Number(this.value);        
+        return Number(this.value);
       case UnitType.UnitEnum.Satoshis:
         return Number(this.value);
       case UnitType.UnitEnum.Bch:
@@ -44,31 +44,30 @@ export type NetworkType = "mainnet" | "testnet";
 
 export namespace UnitType {
   export enum UnitEnum {
-      Bch = <any> 'bch',
-      Usd = <any> 'usd',
-      Bit = <any> 'bit',
-      Bits = <any> 'bits',
-      Sat = <any> 'sat',
-      Sats = <any> 'sats',
-      Satoshi = <any> 'satoshi',
-      Satoshis = <any> 'satoshis'
+    Bch = <any>"bch",
+    Usd = <any>"usd",
+    Bit = <any>"bit",
+    Bits = <any>"bits",
+    Sat = <any>"sat",
+    Sats = <any>"sats",
+    Satoshi = <any>"satoshi",
+    Satoshis = <any>"satoshis",
   }
 }
 
 export namespace WalletType {
   export enum TypeEnum {
-      Wif = <any> 'wif',
-      Hd = <any> 'hd'
+    Wif = <any>"wif",
+    Hd = <any>"hd",
   }
 }
 
-
 export namespace Network {
   export enum NetworkEnum {
-      Mainnet = <any> 'mainnet',
-      Testnet = <any> 'testnet',
-      Regtest = <any> 'regtest',
-      Simtest = <any> 'simtest'
+    Mainnet = <any>"mainnet",
+    Testnet = <any>"testnet",
+    Regtest = <any>"regtest",
+    Simtest = <any>"simtest",
   }
 }
 

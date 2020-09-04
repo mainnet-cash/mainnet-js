@@ -1,4 +1,3 @@
-
 import { Service } from "../generated/serve/services/Service";
 import { Wallet, RegTestWallet, TestnetWallet } from "../src/wallet/Wif";
 import { WalletRequest } from "../generated/client/typescript-mock/model/walletRequest";
@@ -25,7 +24,7 @@ export const createWallet = ({ body }: { body: WalletRequest }) =>
           resp.network = WalletResponse.NetworkEnum.Testnet;
           break;
         case WalletRequest.NetworkEnum.Mainnet:
-          w = new Wallet(body.name)
+          w = new Wallet(body.name);
           resp.network = WalletResponse.NetworkEnum.Mainnet;
           break;
         default:
