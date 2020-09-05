@@ -113,9 +113,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: "A Qr code image data encoded string suitable for inclusion\
-            \ in html using:\n   - \\<img src\\=\\\"{response.src}\"\\>          \
-            \      \n"
+          description: "A Qr code image data encoded string in the src field suitable\
+            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
+            \\>                \n"
       summary: Get receiving cash address as a qrcode
       tags:
       - wallet
@@ -353,13 +353,13 @@ components:
           type: string
     ScalableVectorGraphic:
       example:
-        src: data:image/svg+xml;utf8,<svg ... > ... </svg>
+        src: data:image/svg+xml;base64,PD94bWwgdm... ==**
       properties:
         src:
           description: "A Qr code image data in svg format as utf-8 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"data:image/png;base64,<svg>...\
-            \ </svg>\"\\>                \n"
-          example: data:image/svg+xml;utf8,<svg ... > ... </svg>
+            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
+            \ ==**\"\\>                \n"
+          example: data:image/svg+xml;base64,PD94bWwgdm... ==**
           type: string
     SendMaxRequest:
       allOf:
