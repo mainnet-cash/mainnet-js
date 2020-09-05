@@ -4,8 +4,13 @@ import {
   authenticationTemplateToCompilerBCH,
   bigIntToBinUint64LE,
   cashAddressToLockingBytecode,
+  Compiler,
   generateTransaction,
   validateAuthenticationTemplate,
+  TransactionContextCommon,
+  AnyCompilationEnvironment,
+  AuthenticationProgramStateCommon,
+  AuthenticationProgramStateBCH,
 } from "@bitauth/libauth";
 
 import { SendRequest } from "../wallet/Base";
@@ -27,36 +32,7 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   const compiler = await authenticationTemplateToCompilerBCH(template);
-
   const amount = output.amount.inSatoshi();
-
-  let signedInputs: any[] = [];
-  for (const i of inputs) {
-    const utxoTxnValue = i.getValue();
-    const utxoIndex = i.getOutpoint()?.getIndex();
-    // slice will create a clone of the array
-    let utxoOutpointTransactionHash = i.getOutpoint()?.getHash_asU8().slice();
-    // reverse the cloned copy
-    utxoOutpointTransactionHash?.reverse();
-    if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
-      throw new Error("Missing unspent outpoint when building transaction");
-    }
-    let newInput = {
-      outpointIndex: utxoIndex,
-      outpointTransactionHash: utxoOutpointTransactionHash,
-      sequenceNumber: 0,
-      unlockingBytecode: {
-        compiler,
-        data: {
-          keys: { privateKeys: { key: signingKey } },
-        },
-        satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
-        script: "unlock",
-      },
-    };
-    signedInputs.push(newInput);
-  }
-
   const changeAmount = (await getInputTotal(inputs)) - (amount as number) - fee;
 
   if (!signingKey) {
@@ -84,7 +60,7 @@ export async function buildP2pkhNonHdTransaction(
     if (!changeLockingBytecode.success) {
       throw new Error(changeLockingBytecode.toString());
     }
-
+    let signedInputs = prepareInputs(inputs, compiler, signingKey)
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
@@ -105,6 +81,42 @@ export async function buildP2pkhNonHdTransaction(
     throw Error(error.toString());
   }
 }
+
+function prepareInputs(
+  inputs:UnspentOutput[], 
+  compiler:Compiler<TransactionContextCommon, AnyCompilationEnvironment<TransactionContextCommon>, AuthenticationProgramStateBCH>, 
+  signingKey:Uint8Array
+  ){
+  let signedInputs: any[] = [];
+  for (const i of inputs) {
+    const utxoTxnValue = i.getValue();
+    const utxoIndex = i.getOutpoint()?.getIndex();
+    // slice will create a clone of the array
+    let utxoOutpointTransactionHash = i.getOutpoint()?.getHash_asU8().slice();
+    // reverse the cloned copy
+    utxoOutpointTransactionHash?.reverse();
+    if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
+      throw new Error("Missing unspent outpoint when building transaction");
+    }
+    let newInput = {
+      outpointIndex: utxoIndex,
+      outpointTransactionHash: utxoOutpointTransactionHash,
+      sequenceNumber: 0,
+      unlockingBytecode: {
+        compiler,
+        data: {
+          keys: { privateKeys: { key: signingKey } },
+        },
+        satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
+        script: "unlock",
+      },
+    };
+    signedInputs.push(newInput);
+  }
+  return signedInputs
+}
+
+function prepareOutputs(){}
 
 export async function getSuitableUtxos(
   unspentOutputs: UnspentOutput[],

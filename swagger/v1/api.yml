@@ -105,15 +105,14 @@ paths:
           Request for a deposit cash address as a Quick Response code (qrcode)
         required: true
       responses:
-        "200":
+        200:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PortableNetworkGraphic"
+                $ref: "#/components/schemas/ScalableVectorGraphic"
           description: |
-            A Qr code image data in png format as base64 encoded string.
-            Suitable for inclusion in html using:
-               - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\>
+            A Qr code image data encoded string suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>                
       summary: Get receiving cash address as a qrcode
       tags:
         - wallet
@@ -325,6 +324,19 @@ components:
         src:
           type: string
           example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ... ...AAAAABJRU5ErkJggg=="
+          description: |
+            A Qr code image data in png format as base64 encoded string.
+            Suitable for inclusion in html using:
+                - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\> 
+    ScalableVectorGraphic:
+      properties:
+        src:
+          type: string
+          example: "data:image/svg+xml;utf8,<svg ... > ... </svg>"    
+          description: |
+            A Qr code image data in svg format as utf-8 encoded string.
+            Suitable for inclusion in html using:
+                - \<img src\=\"data:image/png;base64,<svg>... </svg>"\>                
     SendMaxRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"

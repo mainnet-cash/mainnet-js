@@ -2,46 +2,11 @@ import * as mockApi from "../generated/client/typescript-mock/api";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
 import { Amount } from "../generated/client/typescript-mock/model/amount";
-import { generateBlock } from "../src/generateBlock";
-import { GrpcClient, Transaction } from "grpc-bchrpc-node";
 
-async function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function getBlockHeight() {
-  let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
-  const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
-  const host = `${process.env.HOST}`;
-  let client = new GrpcClient({
-    url: url,
-    testnet: true,
-    rootCertPath: cert,
-    options: {
-      "grpc.ssl_target_name_override": host,
-      "grpc.default_authority": host,
-      "grpc.max_receive_message_length": -1,
-    },
-  });
-  let blockchainInfo = await client.getBlockchainInfo();
-  return blockchainInfo.getBestHeight();
-}
-
-beforeEach(async () => {
-  for (let i = 0; (await getBlockHeight()) < 100 && i < 15; i++) {
-    console.log("Waiting blocks to be mined");
-    await delay(1000);
-  }
-});
 
 test("Send from a Regtest wallet with the API", async () => {
   try {
-    generateBlock(
-      process.env.RPC_USER || "alice",
-      process.env.RPC_PASS || "password",
-      1,
-      process.env.BCHD_BIN_DIRECTORY || "bin"
-    );
+    
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
