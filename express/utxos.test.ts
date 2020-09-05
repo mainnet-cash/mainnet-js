@@ -1,6 +1,5 @@
 import * as mockApi from "../generated/client/typescript-mock/api";
 
-
 test("Get the unspent transaction outputs for a regtest wallet", async () => {
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");

@@ -60,7 +60,7 @@ export async function buildP2pkhNonHdTransaction(
     if (!changeLockingBytecode.success) {
       throw new Error(changeLockingBytecode.toString());
     }
-    let signedInputs = prepareInputs(inputs, compiler, signingKey)
+    let signedInputs = prepareInputs(inputs, compiler, signingKey);
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
@@ -83,10 +83,14 @@ export async function buildP2pkhNonHdTransaction(
 }
 
 function prepareInputs(
-  inputs:UnspentOutput[], 
-  compiler:Compiler<TransactionContextCommon, AnyCompilationEnvironment<TransactionContextCommon>, AuthenticationProgramStateBCH>, 
-  signingKey:Uint8Array
-  ){
+  inputs: UnspentOutput[],
+  compiler: Compiler<
+    TransactionContextCommon,
+    AnyCompilationEnvironment<TransactionContextCommon>,
+    AuthenticationProgramStateBCH
+  >,
+  signingKey: Uint8Array
+) {
   let signedInputs: any[] = [];
   for (const i of inputs) {
     const utxoTxnValue = i.getValue();
@@ -113,10 +117,10 @@ function prepareInputs(
     };
     signedInputs.push(newInput);
   }
-  return signedInputs
+  return signedInputs;
 }
 
-function prepareOutputs(){}
+function prepareOutputs() {}
 
 export async function getSuitableUtxos(
   unspentOutputs: UnspentOutput[],

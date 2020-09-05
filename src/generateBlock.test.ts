@@ -1,4 +1,4 @@
-import { ok } from "./ok"
+import { ok } from "./ok";
 
 //import { generateBlock } from "./generateBlock";
 

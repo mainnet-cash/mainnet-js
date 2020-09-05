@@ -17,7 +17,7 @@ import {
   getSuitableUtxos,
 } from "../transaction/Wif";
 import { deriveCashAddr } from "../cashaddr";
-import { qrAddress } from "../qr/Qr"
+import { qrAddress } from "../qr/Qr";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 import { getRandomInt } from "../util/randomInt";
 const secp256k1Promise = instantiateSecp256k1();
@@ -129,8 +129,8 @@ export class WifWallet extends BaseWallet {
     return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
   }
 
-  public depositQr(){
-    return 
+  public depositQr() {
+    return;
   }
   public async getUtxos(address: string): Promise<UnspentOutput[]> {
     const res = await this.client?.getAddressUtxos({
@@ -139,7 +139,7 @@ export class WifWallet extends BaseWallet {
     });
     return res?.getOutputsList() || [];
   }
-  
+
   // Gets balance by summing value in all utxos in stats
   public async getBalance(address: string): Promise<number> {
     const utxos = await this.getUtxos(address);
@@ -172,8 +172,8 @@ export class WifWallet extends BaseWallet {
   }
 
   // Process an individual send request
-  // 
-  // 
+  //
+  //
   private async _processSendRequest(request: SendRequest) {
     if (this.networkPrefix && this.privateKey) {
       // get input
@@ -245,7 +245,7 @@ export class WifWallet extends BaseWallet {
     fundingUtxos: UnspentOutput[],
     request: SendRequest,
     privateKey: Uint8Array,
-    fee:number = 0
+    fee: number = 0
   ) {
     let txn = await buildP2pkhNonHdTransaction(
       fundingUtxos,

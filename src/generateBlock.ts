@@ -14,14 +14,13 @@ export function generateBlock(
     `--skipverify`,
     numberOfBlocks,
   ];
-  setGenerateBlock(user, password, binDir)
+  setGenerateBlock(user, password, binDir);
   const bchctl = spawnSync(`${binDir}/bchctl`, bchctlArgs);
   if (bchctl.stderr.length > 0) {
     throw Error(bchctl.stderr.toString());
   }
   return JSON.parse(bchctl.stdout.toString());
 }
-
 
 function setGenerateBlock(
   user: string,
@@ -34,7 +33,7 @@ function setGenerateBlock(
     `--rpcpass=${password}`,
     `setgenerate`,
     `0`,
-    `--skipverify`
+    `--skipverify`,
   ];
   const bchctl = spawnSync(`${binDir}/bchctl`, bchctlArgs);
   if (bchctl.stderr.length > 0) {

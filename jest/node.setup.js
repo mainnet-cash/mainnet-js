@@ -7,7 +7,6 @@ const { json } = require("body-parser");
 
 const { GrpcClient } = require("grpc-bchrpc-node");
 
-
 async function getBlockHeight() {
   let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
   const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
@@ -25,7 +24,6 @@ async function getBlockHeight() {
   let blockchainInfo = await client.getBlockchainInfo();
   return blockchainInfo.getBestHeight();
 }
-
 
 async function pingBchd() {
   const readinessArgs = [
@@ -59,13 +57,7 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-
-function generateBlock(
-  user,
-  password,
-  numberOfBlocks,
-  binDir
-) {
+function generateBlock(user, password, numberOfBlocks, binDir) {
   const bchctlArgs = [
     `--testnet`,
     `--rpcuser=${user}`,
@@ -74,7 +66,7 @@ function generateBlock(
     `--skipverify`,
     numberOfBlocks,
   ];
-  
+
   const bchctl = spawnSync(`${binDir}/bchctl`, bchctlArgs);
   if (bchctl.stderr.length > 0) {
     throw Error(bchctl.stderr.toString());
@@ -82,12 +74,9 @@ function generateBlock(
   return JSON.parse(bchctl.stdout.toString());
 }
 
-
-
-
 module.exports = async function () {
   console.log("starting bchd ...");
-  
+
   if (global.bchDaemon === undefined) {
     const bchdArgs = [
       `--${process.env.NETWORK}`,

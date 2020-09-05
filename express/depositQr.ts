@@ -1,7 +1,7 @@
 import { Service } from "../generated/serve/services/Service";
 import { SerializedWallet } from "../generated/client/typescript-mock/model/serializedWallet";
-import { ScalableNetworkGraphic } from "../generated/client/typescript-mock/model/scalableNetworkGraphic";
-import { qrAddress } from "../src/qr/Qr"
+import { ScalableVectorGraphic } from "../generated/client/typescript-mock/model/scalableVectorGraphic";
+import { qrAddress } from "../src/qr/Qr";
 import { walletFromIdString } from "../src/util/walletFromIdString";
 /**
  * Get a deposit address in cash address format
@@ -12,12 +12,16 @@ import { walletFromIdString } from "../src/util/walletFromIdString";
 export const depositQr = (request) =>
   new Promise(async (resolve, reject) => {
     try {
-      let body = request.body;
+      let body:SerializedWallet = request.body;
       let wallet = await walletFromIdString(body.walletId);
-      if (wallet) {
-        let resp = new ScalableNetworkGraphic();
-        resp.src = qrAddress(wallet.cashaddr)
+      if (wallet && wallet.cashaddr) {
+        let resp = new ScalableVectorGraphic();
+        let svg =  qrAddress(wallet.cashaddr) 
+        let svgB64 = Buffer.from(svg, 'utf8').toString('base64')
+        resp.src = `data:image/svg+xml;base64,${svgB64}`
         resolve(Service.successResponse({ ...resp }));
+      } else {
+        throw Error("Wallet could not be derived");
       }
     } catch (e) {
       console.log(JSON.stringify(e));

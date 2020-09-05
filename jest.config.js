@@ -1,5 +1,5 @@
 module.exports = {
-  rootDir: "../",
+  rootDif: "./",
   roots: ["<rootDir>/src", "<rootDir>/express/"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",

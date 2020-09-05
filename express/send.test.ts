@@ -3,10 +3,8 @@ import { SendRequest } from "../generated/client/typescript-mock/model/sendReque
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
 import { Amount } from "../generated/client/typescript-mock/model/amount";
 
-
 test("Send from a Regtest wallet with the API", async () => {
   try {
-    
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
