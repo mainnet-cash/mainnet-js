@@ -11,6 +11,7 @@ model/maxAmountToSendRequest.ts
 model/network.ts
 model/outpoint.ts
 model/portableNetworkGraphic.ts
+model/scalableVectorGraphic.ts
 model/sendMaxRequest.ts
 model/sendMaxResponse.ts
 model/sendRequest.ts

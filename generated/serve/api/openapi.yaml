@@ -112,11 +112,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PortableNetworkGraphic'
-          description: |
-            A Qr code image data in png format as base64 encoded string.
-            Suitable for inclusion in html using:
-               - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\>
+                $ref: '#/components/schemas/ScalableVectorGraphic'
+          description: "A Qr code image data encoded string suitable for inclusion\
+            \ in html using:\n   - \\<img src\\=\\\"{response.src}\"\\>          \
+            \      \n"
       summary: Get receiving cash address as a qrcode
       tags:
       - wallet
@@ -344,12 +343,23 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
     PortableNetworkGraphic:
-      example:
-        src: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ... ...AAAAABJRU5ErkJggg==
       properties:
         src:
+          description: "A Qr code image data in png format as base64 encoded string.\n\
+            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...\
+            \   ...Jggg==**\"\\> \n"
           example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ...
             ...AAAAABJRU5ErkJggg==
+          type: string
+    ScalableVectorGraphic:
+      example:
+        src: data:image/svg+xml;utf8,<svg ... > ... </svg>
+      properties:
+        src:
+          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
+            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"data:image/png;base64,<svg>...\
+            \ </svg>\"\\>                \n"
+          example: data:image/svg+xml;utf8,<svg ... > ... </svg>
           type: string
     SendMaxRequest:
       allOf:

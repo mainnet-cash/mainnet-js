@@ -12,9 +12,9 @@
 
 import { RequestFile } from './models';
 
-export class PortableNetworkGraphic {
+export class ScalableVectorGraphic {
     /**
-    * A Qr code image data in png format as base64 encoded string. Suitable for inclusion in html using:     - \\<img src\\=\\\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**\"\\>  
+    * A Qr code image data in svg format as utf-8 encoded string. Suitable for inclusion in html using:     - \\<img src\\=\\\"data:image/png;base64,<svg>... </svg>\"\\>                 
     */
     'src'?: string;
 
@@ -28,7 +28,7 @@ export class PortableNetworkGraphic {
         }    ];
 
     static getAttributeTypeMap() {
-        return PortableNetworkGraphic.attributeTypeMap;
+        return ScalableVectorGraphic.attributeTypeMap;
     }
 }
 

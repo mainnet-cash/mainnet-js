@@ -18,7 +18,7 @@ import http from 'http';
 import { BalanceResponse } from '../model/balanceResponse';
 import { DepositAddressResponse } from '../model/depositAddressResponse';
 import { MaxAmountToSendRequest } from '../model/maxAmountToSendRequest';
-import { PortableNetworkGraphic } from '../model/portableNetworkGraphic';
+import { ScalableVectorGraphic } from '../model/scalableVectorGraphic';
 import { SendMaxRequest } from '../model/sendMaxRequest';
 import { SendMaxResponse } from '../model/sendMaxResponse';
 import { SendRequest } from '../model/sendRequest';
@@ -309,7 +309,7 @@ export class WalletApi {
      * @summary Get receiving cash address as a qrcode
      * @param serializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 
      */
-    public async depositQr (serializedWallet: SerializedWallet, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: PortableNetworkGraphic;  }> {
+    public async depositQr (serializedWallet: SerializedWallet, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: ScalableVectorGraphic;  }> {
         const localVarPath = this.basePath + '/wallet/deposit_qr';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -357,12 +357,12 @@ export class WalletApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: PortableNetworkGraphic;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: ScalableVectorGraphic;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "PortableNetworkGraphic");
+                        body = ObjectSerializer.deserialize(body, "ScalableVectorGraphic");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {

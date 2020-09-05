@@ -68,7 +68,7 @@ export const depositAddress = ({ serializedWallet }) => new Promise(
 * Get receiving cash address as a qrcode
 *
 * serializedWallet SerializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 
-* returns PortableNetworkGraphic
+* returns ScalableVectorGraphic
 * */
 export const depositQr = ({ serializedWallet }) => new Promise(
   async (resolve, reject) => {
