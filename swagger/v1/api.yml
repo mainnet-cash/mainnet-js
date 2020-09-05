@@ -111,7 +111,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ScalableVectorGraphic"
           description: |
-            A Qr code image data encoded string suitable for inclusion in html using:
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
                - \<img src\=\"{response.src}"\>                
       summary: Get receiving cash address as a qrcode
       tags:
@@ -332,11 +332,11 @@ components:
       properties:
         src:
           type: string
-          example: "data:image/svg+xml;utf8,<svg ... > ... </svg>"    
+          example: "data:image/svg+xml;base64,PD94bWwgdm... ==**"    
           description: |
             A Qr code image data in svg format as utf-8 encoded string.
             Suitable for inclusion in html using:
-                - \<img src\=\"data:image/png;base64,<svg>... </svg>"\>                
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>                
     SendMaxRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"
