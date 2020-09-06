@@ -2,6 +2,7 @@ import * as mockApi from "../generated/client/typescript-mock/api";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
 import { Amount } from "../generated/client/typescript-mock/model/amount";
+import { bch } from "../src/chain"
 
 test("Send from a Regtest wallet with the API", async () => {
   try {
@@ -30,14 +31,14 @@ test("Send from a Regtest wallet with the API", async () => {
       AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
       AliceSendToBobReq.to = [toBob];
 
-      let sendResult = await api.send(AliceSendToBobReq);
+      let sendResult = await api.send([AliceSendToBobReq]);
 
       const resp = sendResult.response;
       const body = sendResult.body;
       expect(resp.statusCode).toBe(200);
       expect((body.transaction as string).length).toBe(64);
       expect(body.balance?.bch as number).toBeGreaterThan(49);
-      expect(body.balance?.sat as number).toBeGreaterThan(50 * 10e8);
+      expect(body.balance?.sat as number).toBeGreaterThan(50 * bch.subUnits);
     }
   } catch (e) {
     console.log(e);

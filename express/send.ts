@@ -11,14 +11,14 @@ import { binToHex } from "@bitauth/libauth";
  * */
 export const send = (request) =>
   new Promise(async (resolve, reject) => {
+    const sendRequest = request.body
     try {
-      let wallet = await walletFromIdString(request.body.walletId);
+      let wallet = await walletFromIdString(sendRequest.body.walletId);
       if (wallet) {
-        let result = await wallet.send(request.body.to);
+        let result = await wallet.send([sendRequest.body.to]);
         let resp = new SendResponse();
-        resp.transaction = result.map((t) => {
-          return binToHex(t);
-        })[0];
+        resp.transaction =  binToHex(result);
+        
         resp.balance = balanceResponseFromSatoshi(
           await wallet.getBalance(wallet.cashaddr as string)
         );

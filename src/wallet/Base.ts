@@ -1,8 +1,7 @@
-// Unstable?
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-
-// This is swapped out by webpack for the web module
+// This is swapped out by webpack for a web module
 import { GrpcClient } from "grpc-bchrpc-node";
+import { bch } from "../chain";
 
 export class SendRequest {
   cashaddr: string;
@@ -14,7 +13,7 @@ export class SendRequest {
   }
 }
 
-class Amount {
+export class Amount {
   value: number;
   unit: UnitType.UnitEnum;
   constructor({ value, unit }: { value: number; unit: UnitType.UnitEnum }) {
@@ -33,7 +32,7 @@ class Amount {
       case UnitType.UnitEnum.Satoshis:
         return Number(this.value);
       case UnitType.UnitEnum.Bch:
-        return Number(this.value / 10e8);
+        return Number(this.value / bch.subUnits);
       default:
         throw Error("Unit of value not defined");
     }

@@ -12,13 +12,13 @@ import { walletFromIdString } from "../src/util/walletFromIdString";
 export const depositQr = (request) =>
   new Promise(async (resolve, reject) => {
     try {
-      let body:SerializedWallet = request.body;
+      let body: SerializedWallet = request.body;
       let wallet = await walletFromIdString(body.walletId);
       if (wallet && wallet.cashaddr) {
         let resp = new ScalableVectorGraphic();
-        let svg =  qrAddress(wallet.cashaddr) 
-        let svgB64 = Buffer.from(svg, 'utf8').toString('base64')
-        resp.src = `data:image/svg+xml;base64,${svgB64}`
+        let svg = qrAddress(wallet.cashaddr);
+        let svgB64 = Buffer.from(svg, "utf8").toString("base64");
+        resp.src = `data:image/svg+xml;base64,${svgB64}`;
         resolve(Service.successResponse({ ...resp }));
       } else {
         throw Error("Wallet could not be derived");

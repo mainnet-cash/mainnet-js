@@ -5,21 +5,23 @@ import {
   bigIntToBinUint64LE,
   cashAddressToLockingBytecode,
   Compiler,
+  encodeTransaction,
   generateTransaction,
   validateAuthenticationTemplate,
   TransactionContextCommon,
   AnyCompilationEnvironment,
-  AuthenticationProgramStateCommon,
   AuthenticationProgramStateBCH,
 } from "@bitauth/libauth";
+import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 
 import { SendRequest } from "../wallet/Base";
-import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
+import { getRandomInt } from "../util/randomInt";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
   inputs: UnspentOutput[],
-  output: SendRequest,
+  outputs: SendRequest[],
   signingKey: Uint8Array,
   fee: number = 0
 ) {
@@ -32,43 +34,29 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   const compiler = await authenticationTemplateToCompilerBCH(template);
-  const amount = output.amount.inSatoshi();
-  const changeAmount = (await getInputTotal(inputs)) - (amount as number) - fee;
+  const inputAmount = await getInputTotal(inputs);
+  const sendAmount = await sumSendRequestAmounts(outputs);
+  const changeAmount = inputAmount - sendAmount - fee;
 
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
   }
-
+  // Get the change locking bytecode
+  let changeLockingBytecode = compiler.generateBytecode("lock", {
+    keys: { privateKeys: { key: signingKey } },
+  });
+  if (!changeLockingBytecode.success) {
+    throw new Error(changeLockingBytecode.toString());
+  }
   try {
-    let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
-    if (
-      !outputLockingBytecode.hasOwnProperty("bytecode") ||
-      !outputLockingBytecode.hasOwnProperty("prefix")
-    ) {
-      throw new Error(outputLockingBytecode.toString());
-    }
+    let lockedOutputs = prepareOutputs(outputs);
 
-    outputLockingBytecode = outputLockingBytecode as {
-      bytecode: Uint8Array;
-      prefix: string;
-    };
-
-    // Get the change locking bytecode
-    let changeLockingBytecode = compiler.generateBytecode("lock", {
-      keys: { privateKeys: { key: signingKey } },
-    });
-    if (!changeLockingBytecode.success) {
-      throw new Error(changeLockingBytecode.toString());
-    }
     let signedInputs = prepareInputs(inputs, compiler, signingKey);
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
       outputs: [
-        {
-          lockingBytecode: outputLockingBytecode.bytecode,
-          satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
-        },
+        ...lockedOutputs,
         {
           lockingBytecode: changeLockingBytecode.bytecode,
           satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
@@ -82,7 +70,7 @@ export async function buildP2pkhNonHdTransaction(
   }
 }
 
-function prepareInputs(
+export function prepareInputs(
   inputs: UnspentOutput[],
   compiler: Compiler<
     TransactionContextCommon,
@@ -120,15 +108,39 @@ function prepareInputs(
   return signedInputs;
 }
 
-function prepareOutputs() {}
+export function prepareOutputs(outputs: SendRequest[]) {
+  let lockedOutputs: any[] = [];
+  for (const output of outputs) {
+    // TODO move this to transaction/Wif
+    let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
+    if (
+      !outputLockingBytecode.hasOwnProperty("bytecode") ||
+      !outputLockingBytecode.hasOwnProperty("prefix")
+    ) {
+      throw new Error(outputLockingBytecode.toString());
+    }
+
+    outputLockingBytecode = outputLockingBytecode as {
+      bytecode: Uint8Array;
+      prefix: string;
+    };
+    let lockedOutput = {
+      lockingBytecode: outputLockingBytecode.bytecode,
+      satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+    };
+    lockedOutputs.push(lockedOutput);
+  }
+  return lockedOutputs;
+}
 
 export async function getSuitableUtxos(
   unspentOutputs: UnspentOutput[],
-  amount: number,
+  amount: number | undefined,
   bestHeight: number
 ) {
   let suitableUtxos: UnspentOutput[] = [];
   let amountRequired = 0;
+
   for (const u of unspentOutputs) {
     if (u.getIsCoinbase() && bestHeight) {
       let age = bestHeight - u.getBlockHeight();
@@ -140,11 +152,13 @@ export async function getSuitableUtxos(
       suitableUtxos.push(u);
       amountRequired += u.getValue();
     }
-    if (amountRequired > amount) {
+    // if no amount is given, assume it is a max spend request, skip this condition
+    if (typeof amount === "number" && amountRequired > amount) {
       break;
     }
   }
-  if (amountRequired > amount) {
+  // If the amount needed is met, or no amount is given, return
+  if (typeof amount === "undefined" || amountRequired > amount) {
     return suitableUtxos;
   } else {
     throw Error("Could not find suitable outpoints for given amount");
@@ -163,5 +177,52 @@ export async function getInputTotal(inputs: UnspentOutput[]): Promise<number> {
     return balance;
   } else {
     return 0;
+  }
+}
+
+export async function getFeeAmount({
+  utxos,
+  sendRequests,
+  privateKey,
+}: {
+  utxos: UnspentOutput[];
+  sendRequests: SendRequest[];
+  privateKey: Uint8Array;
+}) {
+  // build transaction
+  if (utxos) {
+    // Build the transaction to get the approximate size
+    let draftTransaction = await buildEncodedTransaction(
+      utxos,
+      sendRequests,
+      privateKey,
+      1000
+    );
+    return draftTransaction.length * 2 + getRandomInt(100);
+  } else {
+    throw Error(
+      "The available inputs in the wallet cannot satisfy this send request"
+    );
+  }
+}
+
+// Build encoded transaction
+export async function buildEncodedTransaction(
+  fundingUtxos: UnspentOutput[],
+  sendRequests: SendRequest[],
+  privateKey: Uint8Array,
+  fee: number = 0
+) {
+  let txn = await buildP2pkhNonHdTransaction(
+    fundingUtxos,
+    sendRequests,
+    privateKey,
+    fee
+  );
+  // submit transaction
+  if (txn.success) {
+    return encodeTransaction(txn.transaction);
+  } else {
+    throw Error("Error building transaction with fee");
   }
 }

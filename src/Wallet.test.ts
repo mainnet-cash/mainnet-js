@@ -9,12 +9,14 @@ test("Send a transaction on the regression network", async () => {
     throw Error("Attempted to pass an empty WIF");
   } else {
     await alice.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
-    await alice.send([
-      {
-        cashaddr: "bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj",
-        amount: { value: 1000, unit: "satoshi" },
-      },
-    ]);
+    await alice.send(
+      [
+        {
+          cashaddr: "bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj",
+          amount: { value: 1000, unit: "satoshi" },
+        },
+      ]
+    );
     // Build Bob's wallet from a public address, check his balance.
     const bob = new RegTestWallet("Bob's Receiving");
     bob.watchOnly("bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj");

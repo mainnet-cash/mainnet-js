@@ -6,20 +6,22 @@ import {
   CashAddressNetworkPrefix,
   decodePrivateKeyWif,
   encodePrivateKeyWif,
-  encodeTransaction,
   generatePrivateKey,
   WalletImportFormatType,
 } from "@bitauth/libauth";
 
-import { BaseWallet, SendRequest, WalletType } from "./Base";
+import {bch} from "../chain"
+import { Amount, BaseWallet, SendRequest, UnitType, WalletType } from "./Base";
 import {
-  buildP2pkhNonHdTransaction,
+  buildEncodedTransaction,
   getSuitableUtxos,
+  getFeeAmount,
 } from "../transaction/Wif";
-import { deriveCashAddr } from "../cashaddr";
-import { qrAddress } from "../qr/Qr";
+import { deriveCashaddr } from "../util/deriveCashaddr";
+import { sumUtxoValue } from "../util/sumUtxoValue";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
-import { getRandomInt } from "../util/randomInt";
+
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
@@ -72,7 +74,7 @@ export class WifWallet extends BaseWallet {
       this.privateKeyWif = walletImportFormatString;
       this.walletType = WalletType.TypeEnum.Wif;
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-      this.cashaddr = (await deriveCashAddr(
+      this.cashaddr = (await deriveCashaddr(
         this.privateKey,
         this.networkPrefix
       )) as string;
@@ -88,7 +90,7 @@ export class WifWallet extends BaseWallet {
       let crypto = require("crypto");
       this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
     }
-    // window, webworkers, serviceworkers
+    // window, webworkers, service workers
     else {
       this.privateKey = generatePrivateKey(() =>
         window.crypto.getRandomValues(new Uint8Array(32))
@@ -101,7 +103,7 @@ export class WifWallet extends BaseWallet {
       this.networkType
     );
     this.walletType = WalletType.TypeEnum.Wif;
-    this.cashaddr = (await deriveCashAddr(
+    this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
     )) as string;
@@ -110,19 +112,14 @@ export class WifWallet extends BaseWallet {
   // Processes an array of send requests
   public async send(requests: Array<any>) {
     // Deserialize the request
-    const sendRequestList: SendRequest[] = await Promise.all(
+    const sendRequests: SendRequest[] = await Promise.all(
       requests.map(async (rawSendRequest: any) => {
         return new SendRequest(rawSendRequest);
       })
     );
 
     // Process the requests
-    const sendResponseList: Uint8Array[] = await Promise.all(
-      sendRequestList.map(async (sendRequest: SendRequest) => {
-        return this._processSendRequest(sendRequest);
-      })
-    );
-    return sendResponseList;
+    return await this._processSendRequests(sendRequests);
   }
 
   public getSerializedWallet() {
@@ -143,18 +140,7 @@ export class WifWallet extends BaseWallet {
   // Gets balance by summing value in all utxos in stats
   public async getBalance(address: string): Promise<number> {
     const utxos = await this.getUtxos(address);
-
-    if (utxos) {
-      const balanceArray: number[] = await Promise.all(
-        utxos.map(async (o: UnspentOutput) => {
-          return o.getValue();
-        })
-      );
-      const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
-      return balance;
-    } else {
-      return 0;
-    }
+    return await sumUtxoValue(utxos);
   }
 
   public toString() {
@@ -168,64 +154,82 @@ export class WifWallet extends BaseWallet {
 
   // Return address balance in bitcoin
   public async balance(address: string): Promise<number> {
-    return (await this.getBalance(address)) / 10e8;
+    return (await this.getBalance(address)) / bch.subUnits;
+  }
+
+  public async getMaxAmountToSpend(outputCount = 1): Promise<number> {
+    if (this.networkPrefix && this.privateKey) {
+      if (!this.cashaddr) {
+        throw Error("attempted to send without a cashaddr");
+      }
+      // get inputs
+      let utxos = await this.getUtxos(this.cashaddr);
+
+      // Get current height to assure recently mined coins are not spent.
+      let bestHeight =
+        (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0;
+      let amount = new Amount({ value: 100, unit: UnitType.UnitEnum.Sat });
+
+      // simulate outputs using the sender's address
+      const sendRequest = new SendRequest({
+        cashaddr: this.cashaddr,
+        amount: amount,
+      });
+      let sendRequests = Array(outputCount)
+        .fill(0)
+        .map(() => sendRequest);
+
+      let fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
+      let fee = await getFeeAmount({
+        utxos: fundingUtxos,
+        sendRequests: sendRequests,
+        privateKey: this.privateKey,
+      });
+      let spendableAmount = await sumUtxoValue(fundingUtxos);
+      return spendableAmount - fee;
+    } else {
+      throw Error("Couldn't get network or private key for wallet.");
+    }
   }
 
   // Process an individual send request
   //
   //
-  private async _processSendRequest(request: SendRequest) {
+  private async _processSendRequests(sendRequests: SendRequest[]) {
     if (this.networkPrefix && this.privateKey) {
-      // get input
       if (!this.cashaddr) {
         throw Error("attempted to send without a cashaddr");
       }
-
+      // get input
       let utxos = await this.getUtxos(this.cashaddr);
 
       let bestHeight =
         (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0;
-      let spendAmount = request.amount.inSatoshi();
+      let spendAmount = await sumSendRequestAmounts(sendRequests);
 
       // TODO refactor this
       if (utxos && typeof spendAmount === "number") {
-        let outputList = utxos;
-        let draftUtxos = await getSuitableUtxos(
-          outputList,
-          spendAmount,
+        let fee = await getFeeAmount({
+          utxos: utxos,
+          sendRequests: sendRequests,
+          privateKey: this.privateKey,
+        });
+        let fundingUtxos = await getSuitableUtxos(
+          utxos,
+          spendAmount + fee,
           bestHeight
         );
-        // build transaction
-        if (draftUtxos) {
-          // Build the transaction to get the approximate size
-          let draftTransaction = await this._buildEncodedTransaction(
-            draftUtxos,
-            request,
+        if (fundingUtxos) {
+          let encodedTransaction = await buildEncodedTransaction(
+            fundingUtxos,
+            sendRequests,
             this.privateKey,
-            10
+            fee
           );
-          let fee = draftTransaction.length * 2 + getRandomInt(100);
-          let fundingUtxos = await getSuitableUtxos(
-            outputList,
-            spendAmount + fee,
-            bestHeight
-          );
-          if (fundingUtxos) {
-            let encodedTransaction = await this._buildEncodedTransaction(
-              fundingUtxos,
-              request,
-              this.privateKey,
-              fee
-            );
-            return await this._submitTransaction(encodedTransaction);
-          } else {
-            throw Error(
-              "The available inputs couldn't satisfy the request with fees"
-            );
-          }
+          return await this._submitTransaction(encodedTransaction);
         } else {
           throw Error(
-            "The available inputs in the wallet cannot satisfy this send request"
+            "The available inputs couldn't satisfy the request with fees"
           );
         }
       } else {
@@ -237,27 +241,6 @@ export class WifWallet extends BaseWallet {
       throw Error(
         `Wallet ${this.name} hasn't is missing either a network or private key`
       );
-    }
-  }
-
-  // Build encoded transaction
-  private async _buildEncodedTransaction(
-    fundingUtxos: UnspentOutput[],
-    request: SendRequest,
-    privateKey: Uint8Array,
-    fee: number = 0
-  ) {
-    let txn = await buildP2pkhNonHdTransaction(
-      fundingUtxos,
-      request,
-      privateKey,
-      fee
-    );
-    // submit transaction
-    if (txn.success) {
-      return encodeTransaction(txn.transaction);
-    } else {
-      throw Error("Error building transaction with fee");
     }
   }
 
@@ -273,6 +256,8 @@ export class WifWallet extends BaseWallet {
     }
   }
 }
+
+
 
 export class Wallet extends WifWallet {
   constructor(name = "") {
