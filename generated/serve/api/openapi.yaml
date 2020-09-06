@@ -131,7 +131,7 @@ paths:
         description: get amount that will be spend with a spend max request
         required: true
       responses:
-        "202":
+        "200":
           content:
             application/json:
               schema:
@@ -176,7 +176,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendRequest'
+              items:
+                $ref: '#/components/schemas/SendRequest'
+              type: array
         description: place a send request
         required: true
       responses:
@@ -184,7 +186,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendResponse'
+                items:
+                  $ref: '#/components/schemas/SendResponse'
+                type: array
           description: transaction accepted
         "400":
           content: {}
@@ -203,7 +207,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendMaxRequest'
+              items:
+                $ref: '#/components/schemas/SendMaxRequest'
+              type: array
         description: Request to all available funds to a given address
         required: true
       responses:
@@ -211,7 +217,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendMaxResponse'
+                items:
+                  $ref: '#/components/schemas/SendMaxResponse'
+                type: array
           description: transaction accepted
         "400":
           content: {}

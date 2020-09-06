@@ -107,8 +107,8 @@ export const maxAmountToSend = ({ maxAmountToSendRequest }) => new Promise(
 /**
 * Send some amount to a given address
 *
-* sendRequest SendRequest place a send request
-* returns SendResponse
+* sendRequest List place a send request
+* returns List
 * */
 export const send = ({ sendRequest }) => new Promise(
   async (resolve, reject) => {
@@ -127,8 +127,8 @@ export const send = ({ sendRequest }) => new Promise(
 /**
 * Send all available funds to a given address
 *
-* sendMaxRequest SendMaxRequest Request to all available funds to a given address
-* returns SendMaxResponse
+* sendMaxRequest List Request to all available funds to a given address
+* returns List
 * */
 export const sendMax = ({ sendMaxRequest }) => new Promise(
   async (resolve, reject) => {
