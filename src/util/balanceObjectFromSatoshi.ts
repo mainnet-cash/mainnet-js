@@ -1,4 +1,4 @@
-import {bch} from "../chain"
+import { bch } from "../chain";
 export class BalanceResponse {
   bch?: number;
   sat?: number;

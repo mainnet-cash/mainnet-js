@@ -10,13 +10,21 @@ import {
   WalletImportFormatType,
 } from "@bitauth/libauth";
 
-import {bch} from "../chain"
-import { Amount, BaseWallet, SendRequest, UnitType, WalletType } from "./Base";
+import { bch } from "../chain";
+import {
+  Amount,
+  BaseWallet,
+  SendMaxRequest,
+  SendRequest,
+  UnitType,
+  WalletType,
+} from "./Base";
 import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
 } from "../transaction/Wif";
+import { qrAddress } from "../qr/Qr";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -117,29 +125,41 @@ export class WifWallet extends BaseWallet {
         return new SendRequest(rawSendRequest);
       })
     );
+    return await this._processSendRequests(sendRequests);
+  }
 
-    // Process the requests
-    const sendResponseList: Uint8Array[] = await Promise.all(
-      sendRequests.map(async (sendRequests: SendRequest[]) => {
-        return this._processSendRequests(sendRequests);
-      })
-    );
-    return sendResponseList;
+  public async sendMax(sendMaxRequest: SendMaxRequest) {
+    let maxAmount = await this.getMaxAmountToSpend();
+    let sendRequest = new SendRequest({
+      cashaddr: sendMaxRequest.cashaddr,
+      amount: new Amount({ value: maxAmount, unit: UnitType.UnitEnum.Sat }),
+    });
+    return await this._processSendRequests([sendRequest]);
   }
 
   public getSerializedWallet() {
-    return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
+    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 
   public depositQr() {
-    return;
+    return qrAddress(this.cashaddr as string);
   }
+
   public async getUtxos(address: string): Promise<UnspentOutput[]> {
-    const res = await this.client?.getAddressUtxos({
-      address: address,
-      includeMempool: true,
-    });
-    return res?.getOutputsList() || [];
+    if(this.client){
+      const res = await this.client.getAddressUtxos({
+        address: address,
+        includeMempool: true,
+      });
+      if(res){
+        return res.getOutputsList();
+      }else{
+        throw Error("No Utxo response from server")
+      }
+  
+    }else{
+      throw Error("Attempting to get utxos from wallet without a client")
+    }
   }
 
   // Gets balance by summing value in all utxos in stats
@@ -163,7 +183,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public async getMaxAmountToSpend(outputCount = 1): Promise<number> {
-    if (this.networkPrefix && this.privateKey) {
+    if (this.privateKey) {
       if (!this.cashaddr) {
         throw Error("attempted to send without a cashaddr");
       }
@@ -172,7 +192,7 @@ export class WifWallet extends BaseWallet {
 
       // Get current height to assure recently mined coins are not spent.
       let bestHeight =
-        (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0;
+        (await this.client!.getBlockchainInfo())!.getBestHeight();
       let amount = new Amount({ value: 100, unit: UnitType.UnitEnum.Sat });
 
       // simulate outputs using the sender's address
@@ -201,7 +221,7 @@ export class WifWallet extends BaseWallet {
   //
   //
   private async _processSendRequests(sendRequests: SendRequest[]) {
-    if (this.networkPrefix && this.privateKey) {
+    if (this.privateKey) {
       if (!this.cashaddr) {
         throw Error("attempted to send without a cashaddr");
       }
@@ -209,11 +229,11 @@ export class WifWallet extends BaseWallet {
       let utxos = await this.getUtxos(this.cashaddr);
 
       let bestHeight =
-        (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0;
+        (await this.client!.getBlockchainInfo())!.getBestHeight() ;
       let spendAmount = await sumSendRequestAmounts(sendRequests);
 
       // TODO refactor this
-      if (utxos && typeof spendAmount === "number") {
+      if (utxos && typeof spendAmount === "bigint") {
         let fee = await getFeeAmount({
           utxos: utxos,
           sendRequests: sendRequests,
@@ -221,7 +241,7 @@ export class WifWallet extends BaseWallet {
         });
         let fundingUtxos = await getSuitableUtxos(
           utxos,
-          spendAmount + fee,
+          BigInt(spendAmount) + BigInt(fee),
           bestHeight
         );
         if (fundingUtxos) {
@@ -261,8 +281,6 @@ export class WifWallet extends BaseWallet {
     }
   }
 }
-
-
 
 export class Wallet extends WifWallet {
   constructor(name = "") {

@@ -19,7 +19,7 @@
   "scripts": {
     "pretest": "node util/checkBchd.js",
     "test": "npx jest",
-    "test:deposit": "npx jest deposit",
+    "test:wallet": "npx jest Wallet",
     "test:server": "npx jest send",
     "test:browser": "npx jest --config jest/browser.config.js",
     "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",

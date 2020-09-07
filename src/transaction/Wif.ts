@@ -36,7 +36,7 @@ export async function buildP2pkhNonHdTransaction(
   const compiler = await authenticationTemplateToCompilerBCH(template);
   const inputAmount = await getInputTotal(inputs);
   const sendAmount = await sumSendRequestAmounts(outputs);
-  const changeAmount = inputAmount - sendAmount - fee;
+  const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
 
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -82,11 +82,11 @@ export function prepareInputs(
   let signedInputs: any[] = [];
   for (const i of inputs) {
     const utxoTxnValue = i.getValue();
-    const utxoIndex = i.getOutpoint()?.getIndex();
+    const utxoIndex = i.getOutpoint()!.getIndex();
     // slice will create a clone of the array
-    let utxoOutpointTransactionHash = i.getOutpoint()?.getHash_asU8().slice();
+    let utxoOutpointTransactionHash = i.getOutpoint()!.getHash_asU8()!.slice();
     // reverse the cloned copy
-    utxoOutpointTransactionHash?.reverse();
+    utxoOutpointTransactionHash.reverse();
     if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
       throw new Error("Missing unspent outpoint when building transaction");
     }
@@ -135,25 +135,25 @@ export function prepareOutputs(outputs: SendRequest[]) {
 
 export async function getSuitableUtxos(
   unspentOutputs: UnspentOutput[],
-  amount: number | undefined,
+  amount: BigInt | undefined,
   bestHeight: number
 ) {
   let suitableUtxos: UnspentOutput[] = [];
-  let amountRequired = 0;
+  let amountRequired = 0n;
 
   for (const u of unspentOutputs) {
     if (u.getIsCoinbase() && bestHeight) {
       let age = bestHeight - u.getBlockHeight();
       if (age > 100) {
         suitableUtxos.push(u);
-        amountRequired += u.getValue();
+        amountRequired += BigInt(u.getValue());
       }
     } else {
       suitableUtxos.push(u);
-      amountRequired += u.getValue();
+      amountRequired += BigInt(u.getValue());
     }
     // if no amount is given, assume it is a max spend request, skip this condition
-    if (typeof amount === "number" && amountRequired > amount) {
+    if (typeof amount === "bigint" && amountRequired > amount) {
       break;
     }
   }

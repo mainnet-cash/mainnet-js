@@ -1,5 +1,5 @@
 import * as mockApi from "../generated/client/typescript-mock/api";
-import { bch } from "../src/chain"
+import { bch } from "../src/chain";
 
 test("Get the unspent transaction outputs for a regtest wallet", async () => {
   if (!process.env.PRIVATE_WIF) {
@@ -15,13 +15,13 @@ test("Get the unspent transaction outputs for a regtest wallet", async () => {
     if (body.utxos) {
       const valueArray = await Promise.all(
         body.utxos.map(async (b) => {
-          return b?.amount?.value || 0;
+          return b!.amount!.value || 0;
         })
       );
       const value = valueArray.reduce((a, b) => a + b, 0);
       expect(resp.statusCode).toBe(200);
       expect(value).toBeGreaterThan(490 * bch.subUnits);
-      expect(body?.utxos?.length).toBeGreaterThan(100);
+      expect(body!.utxos!.length).toBeGreaterThan(100);
     } else {
       throw Error("no utxos returned");
     }

@@ -11,18 +11,18 @@ import { binToHex } from "@bitauth/libauth";
  * */
 export const send = (request) =>
   new Promise(async (resolve, reject) => {
-    const sendRequest = request.body
+    const sendRequestJson = request.body;
     try {
-      let wallet = await walletFromIdString(sendRequest.body.walletId);
+      let wallet = await walletFromIdString(sendRequestJson.walletId);
       if (wallet) {
-        let result = await wallet.send([sendRequest.body.to]);
+        let result = await wallet.send(sendRequestJson.to);
         let resp = new SendResponse();
-        resp.transaction =  binToHex(result);
-        
+        resp.transaction = binToHex(result);
+
         resp.balance = balanceResponseFromSatoshi(
           await wallet.getBalance(wallet.cashaddr as string)
         );
-        resolve(Service.successResponse(result));
+        resolve(Service.successResponse(resp));
       } else {
         throw Error("Could not derive wallet");
       }

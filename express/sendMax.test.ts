@@ -1,7 +1,8 @@
 import * as mockApi from "../generated/client/typescript-mock/api";
+import { Amount } from "../generated/client/typescript-mock/model/amount";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import { Amount } from "../generated/client/typescript-mock/model/amount";
+import { SendMaxRequest } from "../generated/client/typescript-mock/api";
 import { bch } from "../src/chain";
 
 test("Send from a Regtest wallet with the API", async () => {
@@ -19,26 +20,29 @@ test("Send from a Regtest wallet with the API", async () => {
       let bobsWalletResp = await api.createWallet(bobWalletReq);
       const bobsWallet = bobsWalletResp.body;
 
-      let bobsAddress = bobsWallet.cashaddr as string;
-
       let toBob = new SendRequestItem();
-      toBob.cashaddr = bobsAddress;
+      toBob.cashaddr = bobsWallet.cashaddr as string;
       toBob.amount = new Amount();
-      toBob.amount.unit = Amount.UnitEnum.Sat;
-      toBob.amount.value = 3000;
+      toBob.amount.unit = Amount.UnitEnum.Bch;
+      toBob.amount.value = 1;
 
       let AliceSendToBobReq = new SendRequest();
       AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
       AliceSendToBobReq.to = [toBob];
 
-      let sendResult = await api.send(AliceSendToBobReq);
+      await api.send(AliceSendToBobReq);
+
+      let BobSendToAliceReq = new SendMaxRequest();
+      BobSendToAliceReq.walletId = bobsWallet.walletId;
+      BobSendToAliceReq.cashaddr = process.env.ADDRESS as string;
+      let sendResult = await api.sendMax(BobSendToAliceReq);
 
       const resp = sendResult.response;
       const body = sendResult.body;
       expect(resp.statusCode).toBe(200);
       expect((body.transaction as string).length).toBe(64);
-      expect(body.balance!.bch as number).toBeGreaterThan(49);
-      expect(body.balance!.sat as number).toBeGreaterThan(50 * bch.subUnits);
+      expect(body.balance!.bch as number).toBe(0);
+      expect(body.balance!.sat as number).toBe(0);
     }
   } catch (e) {
     console.log(e);

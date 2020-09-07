@@ -21,21 +21,29 @@ export class Amount {
     this.unit = unit;
   }
 
-  public inSatoshi(): number | Error {
+  public inSatoshi(): BigInt | Error {
     switch (this.unit) {
       case UnitType.UnitEnum.Satoshi:
-        return Number(this.value);
+        return BigInt(this.value);
       case UnitType.UnitEnum.Sat:
-        return Number(this.value);
+        return BigInt(this.value);
       case UnitType.UnitEnum.Sats:
-        return Number(this.value);
+        return BigInt(this.value);
       case UnitType.UnitEnum.Satoshis:
-        return Number(this.value);
+        return BigInt(this.value);
       case UnitType.UnitEnum.Bch:
-        return Number(this.value / bch.subUnits);
+        return BigInt(this.value * bch.subUnits);
       default:
         throw Error("Unit of value not defined");
     }
+  }
+}
+
+export class SendMaxRequest {
+  cashaddr: string;
+
+  constructor({ cashaddr }) {
+    this.cashaddr = cashaddr;
   }
 }
 
@@ -80,6 +88,7 @@ export class BaseWallet {
   name: string;
   networkPrefix: CashAddressNetworkPrefix;
   networkType: NetworkType;
+  network: Network.NetworkEnum;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix, url = "") {
     this.name = name;
@@ -88,6 +97,19 @@ export class BaseWallet {
       this.networkPrefix === CashAddressNetworkPrefix.mainnet
         ? "mainnet"
         : "testnet";
+    switch (networkPrefix) {
+      case CashAddressNetworkPrefix.mainnet:
+        this.network = Network.NetworkEnum.Mainnet;
+        break;
+      case CashAddressNetworkPrefix.testnet:
+        this.network = Network.NetworkEnum.Testnet;
+        break;
+      case CashAddressNetworkPrefix.regtest:
+        this.network = Network.NetworkEnum.Regtest;
+        break;
+      default:
+        throw Error("could not map cashaddr prefix to network");
+    }
     this.isTestnet = this.networkType === "testnet" ? true : false;
     if (this.isTestnet) {
       switch (this.networkPrefix) {

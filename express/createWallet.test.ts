@@ -10,10 +10,10 @@ test("Create a Regtest wallet form the API", async () => {
   const resp = result.response;
   const body = result.body;
   expect(resp.statusCode).toBe(200);
-  expect(body?.name).toBe(req.name);
-  expect(body?.network).toBe(req.network);
-  expect(body?.cashaddr?.startsWith("bchreg:")).toBeTruthy();
-  expect(body?.walletId?.startsWith("wif:bchreg:3")).toBeTruthy();
+  expect(body!.name).toBe(req.name);
+  expect(body!.network).toBe(req.network);
+  expect(body!.cashaddr!.startsWith("bchreg:")).toBeTruthy();
+  expect(body!.walletId!.startsWith("wif:regtest:3")).toBeTruthy();
 });
 
 test("Create a Testnet wallet with the API", async () => {
@@ -28,10 +28,10 @@ test("Create a Testnet wallet with the API", async () => {
   const resp = result.response;
   const body = result.body;
   expect(resp.statusCode).toBe(200);
-  expect(body?.name).toBe(req.name);
-  expect(body?.network).toBe(req.network);
-  expect(body?.cashaddr?.startsWith("bchtest:")).toBeTruthy();
-  expect(body?.walletId?.startsWith("wif:bchtest:3")).toBeTruthy();
+  expect(body!.name).toBe(req.name);
+  expect(body!.network).toBe(req.network);
+  expect(body!.cashaddr!.startsWith("bchtest:")).toBeTruthy();
+  expect(body!.walletId!.startsWith("wif:testnet:3")).toBeTruthy();
 });
 
 test("Create a Mainnet wallet with the API", async () => {
@@ -46,8 +46,8 @@ test("Create a Mainnet wallet with the API", async () => {
   const body = result.body;
 
   expect(resp.statusCode).toBe(200);
-  expect(body?.name).toBe(req.name);
-  expect(body?.network).toBe(req.network);
-  expect(body?.cashaddr?.startsWith("bitcoincash:")).toBeTruthy();
-  expect(body?.walletId?.startsWith("wif:bitcoincash:2")).toBeTruthy();
+  expect(body!.name).toBe(req.name);
+  expect(body!.network).toBe(req.network);
+  expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
+  expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
 });

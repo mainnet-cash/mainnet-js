@@ -1,22 +1,22 @@
 import { SendRequest } from "../wallet/Base";
 export async function sumSendRequestAmounts(requests: SendRequest[]) {
   if (requests) {
-    const balanceArray: (number | Error)[] = await Promise.all(
-      requests.map(async (r:SendRequest) => {
+    const balanceArray: (BigInt | Error)[] = await Promise.all(
+      requests.map(async (r: SendRequest) => {
         return r.amount.inSatoshi();
       })
     );
-    const balance = balanceArray.reduce(sumBalance, 0);
+    const balance = balanceArray.reduce(sumBalance, 0n);
     return balance;
   } else {
-    return 0;
+    return 0n;
   }
 }
 
-function sumBalance(a: number, b: number | Error) {
+function sumBalance(a: BigInt, b: BigInt | Error) {
   // a is zero or a number
   if (b instanceof Error) {
     throw b;
   }
-  return a + b;
+  return BigInt(a) + BigInt(b);
 }

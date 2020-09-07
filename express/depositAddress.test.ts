@@ -9,7 +9,7 @@ test("Get the deposit address from a regtest wallet", async () => {
   const resp = result.response;
   const body = result.body;
   expect(resp.statusCode).toBe(200);
-  expect(body?.cashaddr).toBe(
+  expect(body!.cashaddr).toBe(
     "bchreg:qp3t43vq3xnxdfuge4l4q4ndehkn48uexghagrwwx5"
   );
 });

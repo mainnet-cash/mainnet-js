@@ -1,4 +1,4 @@
-import { bch } from "../chain"
+import { bch } from "../chain";
 import { balanceResponseFromSatoshi } from "./balanceObjectFromSatoshi";
 
 test("Get balanceResponse from 1 bch in satoshi", async () => {

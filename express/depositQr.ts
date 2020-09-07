@@ -1,7 +1,6 @@
 import { Service } from "../generated/serve/services/Service";
 import { SerializedWallet } from "../generated/client/typescript-mock/model/serializedWallet";
 import { ScalableVectorGraphic } from "../generated/client/typescript-mock/model/scalableVectorGraphic";
-import { qrAddress } from "../src/qr/Qr";
 import { walletFromIdString } from "../src/util/walletFromIdString";
 /**
  * Get a deposit address in cash address format
@@ -16,7 +15,9 @@ export const depositQr = (request) =>
       let wallet = await walletFromIdString(body.walletId);
       if (wallet && wallet.cashaddr) {
         let resp = new ScalableVectorGraphic();
-        let svg = qrAddress(wallet.cashaddr);
+        let svg = wallet.depositQr();
+
+        // Buffer doesn't exist in the browser so this logic is moved here.
         let svgB64 = Buffer.from(svg, "utf8").toString("base64");
         resp.src = `data:image/svg+xml;base64,${svgB64}`;
         resolve(Service.successResponse({ ...resp }));

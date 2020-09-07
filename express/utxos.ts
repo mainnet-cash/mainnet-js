@@ -28,10 +28,10 @@ export const utxos = (request) =>
             let utxo = new Utxo();
             utxo.amount = new Amount();
             utxo.amount.unit = UnitType.UnitEnum.Sat;
-            utxo.amount.value = o?.getValue();
-            let txId = o?.getOutpoint()?.getHash_asU8() || new Uint8Array([]);
+            utxo.amount.value = o!.getValue();
+            let txId = o!.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
             utxo.transaction = binToHex(txId);
-            utxo.index = o?.getOutpoint()?.getIndex();
+            utxo.index = o!.getOutpoint()!.getIndex();
             utxo.utxoId = utxo.transaction + ":" + utxo.index;
             return utxo;
           })
