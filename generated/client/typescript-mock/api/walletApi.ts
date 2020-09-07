@@ -447,7 +447,7 @@ export class WalletApi {
      * @summary Send some amount to a given address
      * @param sendRequest place a send request
      */
-    public async send (sendRequest: Array<SendRequest>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<SendResponse>;  }> {
+    public async send (sendRequest: SendRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: SendResponse;  }> {
         const localVarPath = this.basePath + '/wallet/send';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -476,7 +476,7 @@ export class WalletApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(sendRequest, "Array<SendRequest>")
+            body: ObjectSerializer.serialize(sendRequest, "SendRequest")
         };
 
         let authenticationPromise = Promise.resolve();
@@ -495,12 +495,12 @@ export class WalletApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Array<SendResponse>;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: SendResponse;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Array<SendResponse>");
+                        body = ObjectSerializer.deserialize(body, "SendResponse");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
@@ -516,7 +516,7 @@ export class WalletApi {
      * @summary Send all available funds to a given address
      * @param sendMaxRequest Request to all available funds to a given address
      */
-    public async sendMax (sendMaxRequest: Array<SendMaxRequest>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<SendMaxResponse>;  }> {
+    public async sendMax (sendMaxRequest: SendMaxRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: SendMaxResponse;  }> {
         const localVarPath = this.basePath + '/wallet/send_max';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -545,7 +545,7 @@ export class WalletApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(sendMaxRequest, "Array<SendMaxRequest>")
+            body: ObjectSerializer.serialize(sendMaxRequest, "SendMaxRequest")
         };
 
         let authenticationPromise = Promise.resolve();
@@ -564,12 +564,12 @@ export class WalletApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Array<SendMaxResponse>;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: SendMaxResponse;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Array<SendMaxResponse>");
+                        body = ObjectSerializer.deserialize(body, "SendMaxResponse");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {

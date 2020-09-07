@@ -176,9 +176,7 @@ paths:
         content:
           application/json:
             schema:
-              items:
-                $ref: '#/components/schemas/SendRequest'
-              type: array
+              $ref: '#/components/schemas/SendRequest'
         description: place a send request
         required: true
       responses:
@@ -186,9 +184,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/SendResponse'
-                type: array
+                $ref: '#/components/schemas/SendResponse'
           description: transaction accepted
         "400":
           content: {}
@@ -207,9 +203,7 @@ paths:
         content:
           application/json:
             schema:
-              items:
-                $ref: '#/components/schemas/SendMaxRequest'
-              type: array
+              $ref: '#/components/schemas/SendMaxRequest'
         description: Request to all available funds to a given address
         required: true
       responses:
@@ -217,9 +211,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/SendMaxResponse'
-                type: array
+                $ref: '#/components/schemas/SendMaxResponse'
           description: transaction accepted
         "400":
           content: {}
