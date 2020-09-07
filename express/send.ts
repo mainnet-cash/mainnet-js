@@ -22,7 +22,7 @@ export const send = (request) =>
         resp.balance = balanceResponseFromSatoshi(
           await wallet.getBalance(wallet.cashaddr as string)
         );
-        resolve(Service.successResponse({ ...resp }));
+        resolve(Service.successResponse(result));
       } else {
         throw Error("Could not derive wallet");
       }

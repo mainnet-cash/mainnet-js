@@ -119,7 +119,12 @@ export class WifWallet extends BaseWallet {
     );
 
     // Process the requests
-    return await this._processSendRequests(sendRequests);
+    const sendResponseList: Uint8Array[] = await Promise.all(
+      sendRequests.map(async (sendRequests: SendRequest[]) => {
+        return this._processSendRequests(sendRequests);
+      })
+    );
+    return sendResponseList;
   }
 
   public getSerializedWallet() {
