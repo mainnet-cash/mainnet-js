@@ -27,7 +27,6 @@
     "grpcui:regtest": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
     "grpcui:testnet": "grpcui -proto pb/bchrpc.proto bchd-testnet.greyh.at:18335",
     "grpcui:mainnet": "grpcui -proto pb/bchrpc.proto bchd.greyh.at:8335",
-    "codegen:list": "npx openapi-generator list",
     "format": "prettier --write .",
     "serve": "npx ts-node ./generated/serve/index.ts",
     "serve:monitor": "npx nodemon ./generated/serve/index.ts",
