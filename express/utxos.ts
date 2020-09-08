@@ -1,10 +1,10 @@
 import { binToHex } from "@bitauth/libauth";
 
 import { Service } from "../generated/serve/services/Service";
-import { walletFromIdString } from "../src/util/walletFromIdString";
+import { walletFromIdString } from "../src/wallet/createWallet";
 import { UtxoResponse } from "../generated/client/typescript-mock/model/utxoResponse";
 import { Utxo } from "../generated/client/typescript-mock/model/utxo";
-import { UnitType } from "../src/wallet/Base";
+import { UnitEnum } from "../src/wallet/Base";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 import { Amount } from "../generated/client/typescript-mock/model/amount";
 
@@ -27,7 +27,7 @@ export const utxos = (request) =>
           result.map(async (o: UnspentOutput) => {
             let utxo = new Utxo();
             utxo.amount = new Amount();
-            utxo.amount.unit = UnitType.UnitEnum.Sat;
+            utxo.amount.unit = UnitEnum.Sat;
             utxo.amount.value = o!.getValue();
             let txId = o!.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
             utxo.transaction = binToHex(txId);

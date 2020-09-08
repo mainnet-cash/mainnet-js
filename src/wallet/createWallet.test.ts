@@ -1,4 +1,4 @@
-import { walletFromIdString } from "./walletFromIdString";
+import { walletFromIdString } from "./createWallet";
 
 test("Get a regtest wallet from string id", async () => {
   let w = await walletFromIdString(

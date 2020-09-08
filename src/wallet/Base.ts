@@ -1,7 +1,8 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-// This is swapped out by webpack for a web module
+// GrpcClient is swapped out by webpack for a web module
 import { GrpcClient } from "grpc-bchrpc-node";
 import { bch } from "../chain";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 
 export class SendRequest {
   cashaddr: string;
@@ -15,23 +16,23 @@ export class SendRequest {
 
 export class Amount {
   value: number;
-  unit: UnitType.UnitEnum;
-  constructor({ value, unit }: { value: number; unit: UnitType.UnitEnum }) {
+  unit: UnitEnum;
+  constructor({ value, unit }: { value: number; unit: UnitEnum }) {
     this.value = value;
     this.unit = unit;
   }
 
   public inSatoshi(): BigInt | Error {
     switch (this.unit) {
-      case UnitType.UnitEnum.Satoshi:
+      case UnitEnum.Satoshi:
         return BigInt(this.value);
-      case UnitType.UnitEnum.Sat:
+      case UnitEnum.Sat:
         return BigInt(this.value);
-      case UnitType.UnitEnum.Sats:
+      case UnitEnum.Sats:
         return BigInt(this.value);
-      case UnitType.UnitEnum.Satoshis:
+      case UnitEnum.Satoshis:
         return BigInt(this.value);
-      case UnitType.UnitEnum.Bch:
+      case UnitEnum.Bch:
         return BigInt(this.value * bch.subUnits);
       default:
         throw Error("Unit of value not defined");
@@ -47,35 +48,45 @@ export class SendMaxRequest {
   }
 }
 
+export class SendResponse {
+  transaction?: string;
+  balance?: BalanceResponse;
+
+  constructor({
+    transaction,
+    balance,
+  }: {
+    transaction?: string;
+    balance?: any;
+  }) {
+    this.transaction = transaction;
+    this.balance = new BalanceResponse(balance);
+  }
+}
+
 export type NetworkType = "mainnet" | "testnet";
 
-export namespace UnitType {
-  export enum UnitEnum {
-    Bch = <any>"bch",
-    Usd = <any>"usd",
-    Bit = <any>"bit",
-    Bits = <any>"bits",
-    Sat = <any>"sat",
-    Sats = <any>"sats",
-    Satoshi = <any>"satoshi",
-    Satoshis = <any>"satoshis",
-  }
+export enum UnitEnum {
+  Bch = <any>"bch",
+  Usd = <any>"usd",
+  Bit = <any>"bit",
+  Bits = <any>"bits",
+  Sat = <any>"sat",
+  Sats = <any>"sats",
+  Satoshi = <any>"satoshi",
+  Satoshis = <any>"satoshis",
 }
 
-export namespace WalletType {
-  export enum TypeEnum {
-    Wif = <any>"wif",
-    Hd = <any>"hd",
-  }
+export enum WalletTypeEnum {
+  Wif = "wif",
+  Hd = "hd",
 }
 
-export namespace Network {
-  export enum NetworkEnum {
-    Mainnet = <any>"mainnet",
-    Testnet = <any>"testnet",
-    Regtest = <any>"regtest",
-    Simtest = <any>"simtest",
-  }
+export enum NetworkEnum {
+  Mainnet = <any>"mainnet",
+  Testnet = <any>"testnet",
+  Regtest = <any>"regtest",
+  Simtest = <any>"simtest",
 }
 
 /**
@@ -88,7 +99,7 @@ export class BaseWallet {
   name: string;
   networkPrefix: CashAddressNetworkPrefix;
   networkType: NetworkType;
-  network: Network.NetworkEnum;
+  network: NetworkEnum;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix, url = "") {
     this.name = name;
@@ -99,13 +110,13 @@ export class BaseWallet {
         : "testnet";
     switch (networkPrefix) {
       case CashAddressNetworkPrefix.mainnet:
-        this.network = Network.NetworkEnum.Mainnet;
+        this.network = NetworkEnum.Mainnet;
         break;
       case CashAddressNetworkPrefix.testnet:
-        this.network = Network.NetworkEnum.Testnet;
+        this.network = NetworkEnum.Testnet;
         break;
       case CashAddressNetworkPrefix.regtest:
-        this.network = Network.NetworkEnum.Regtest;
+        this.network = NetworkEnum.Regtest;
         break;
       default:
         throw Error("could not map cashaddr prefix to network");

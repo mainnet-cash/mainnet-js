@@ -1,7 +1,7 @@
 import { Service } from "../generated/serve/services/Service";
-import { walletFromIdString } from "../src/util/walletFromIdString";
+import { walletFromIdString } from "../src/wallet/createWallet";
 import { BalanceResponse } from "../generated/client/typescript-mock/model/balanceResponse";
-import { balanceResponseFromSatoshi } from "../src/util/balanceObjectFromSatoshi";
+
 // @ts-ignore
 import * as core from "express-serve-static-core";
 
@@ -17,10 +17,7 @@ export const balance = (request) =>
       let wallet = await walletFromIdString(request.body.walletId);
       if (wallet) {
         let resp = new BalanceResponse();
-
-        resp = balanceResponseFromSatoshi(
-          await wallet.getBalance(wallet.cashaddr as string)
-        );
+        resp = await wallet.balance();
         resolve(Service.successResponse({ ...resp }));
       } else {
         throw Error("Could not derive wallet");

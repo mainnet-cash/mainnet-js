@@ -1,8 +1,5 @@
 import { Service } from "../generated/serve/services/Service";
-import { SendResponse } from "../generated/client/typescript-mock/model/sendResponse";
-import { walletFromIdString } from "../src/util/walletFromIdString";
-import { balanceResponseFromSatoshi } from "../src/util/balanceObjectFromSatoshi";
-import { binToHex } from "@bitauth/libauth";
+import { walletFromIdString } from "../src/wallet/createWallet";
 import { SendMaxRequest } from "../src/wallet/Base";
 
 /**
@@ -20,21 +17,17 @@ export const sendMax = (request) =>
       if (wallet) {
         let cashaddr = sendRequestJson.cashaddr as string;
         let sendRequest = new SendMaxRequest({ cashaddr: cashaddr });
-        let result = await wallet.sendMax(sendRequest);
-        let resp = new SendResponse();
-        resp.transaction = binToHex(result);
-
-        resp.balance = balanceResponseFromSatoshi(
-          await wallet.getBalance(wallet.cashaddr as string)
-        );
+        let resp = await wallet.sendMax(sendRequest);
         resolve(Service.successResponse(resp));
       } else {
         throw Error("Could not derive wallet");
       }
     } catch (e) {
-      console.log(JSON.stringify(e));
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(
+          e.response.body || "Invalid input",
+          e.status || 500
+        )
       );
     }
   });

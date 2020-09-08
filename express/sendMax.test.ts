@@ -3,9 +3,8 @@ import { Amount } from "../generated/client/typescript-mock/model/amount";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
 import { SendMaxRequest } from "../generated/client/typescript-mock/api";
-import { bch } from "../src/chain";
 
-test("Send from a Regtest wallet with the API", async () => {
+test("Send from Alice to Bob, have Bob send max back", async () => {
   try {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
@@ -13,7 +12,7 @@ test("Send from a Regtest wallet with the API", async () => {
       let api = new mockApi.WalletApi("http://localhost:3000/v1");
 
       let bobWalletReq = new mockApi.WalletRequest();
-      bobWalletReq.name = "A simple Regtest Wallet";
+      bobWalletReq.name = "A Bobs Regtest Wallet";
       bobWalletReq.type = mockApi.WalletRequest.TypeEnum.Wif;
       bobWalletReq.network = mockApi.WalletRequest.NetworkEnum.Regtest;
 

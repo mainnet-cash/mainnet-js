@@ -18,9 +18,7 @@ test("Send a transaction on the regression network", async () => {
     // Build Bob's wallet from a public address, check his balance.
     const bob = new RegTestWallet("Bob's Receiving");
     bob.watchOnly("bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj");
-    const bobBalance = await bob.balanceSats(
-      "bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj"
-    );
-    expect(bobBalance).toBe(1000);
+    const bobBalance = await bob.balance();
+    expect(bobBalance.sat).toBe(1000);
   }
 });

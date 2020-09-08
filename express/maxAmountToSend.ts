@@ -1,5 +1,5 @@
 import { Service } from "../generated/serve/services/Service";
-import { walletFromIdString } from "../src/util/walletFromIdString";
+import { walletFromIdString } from "../src/wallet/createWallet";
 import { BalanceResponse } from "../generated/client/typescript-mock/model/balanceResponse";
 import { balanceResponseFromSatoshi } from "../src/util/balanceObjectFromSatoshi";
 // @ts-ignore
@@ -19,7 +19,7 @@ export const maxAmountToSend = (request) =>
       if (wallet) {
         let resp = new BalanceResponse();
 
-        resp = balanceResponseFromSatoshi(await wallet.getMaxAmountToSpend(1));
+        resp = await wallet.getMaxAmountToSpend(1);
         resolve(Service.successResponse({ ...resp }));
       } else {
         throw Error("Could not derive wallet");

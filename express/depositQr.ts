@@ -1,7 +1,7 @@
 import { Service } from "../generated/serve/services/Service";
 import { SerializedWallet } from "../generated/client/typescript-mock/model/serializedWallet";
 import { ScalableVectorGraphic } from "../generated/client/typescript-mock/model/scalableVectorGraphic";
-import { walletFromIdString } from "../src/util/walletFromIdString";
+import { walletFromIdString } from "../src/wallet/createWallet";
 /**
  * Get a deposit address in cash address format
  *
@@ -20,6 +20,7 @@ export const depositQr = (request) =>
         // Buffer doesn't exist in the browser so this logic is moved here.
         let svgB64 = Buffer.from(svg, "utf8").toString("base64");
         resp.src = `data:image/svg+xml;base64,${svgB64}`;
+
         resolve(Service.successResponse({ ...resp }));
       } else {
         throw Error("Wallet could not be derived");

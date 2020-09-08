@@ -1,7 +1,6 @@
 import { Service } from "../generated/serve/services/Service";
 import { SendResponse } from "../generated/client/typescript-mock/model/sendResponse";
-import { walletFromIdString } from "../src/util/walletFromIdString";
-import { balanceResponseFromSatoshi } from "../src/util/balanceObjectFromSatoshi";
+import { walletFromIdString } from "../src/wallet/createWallet";
 import { binToHex } from "@bitauth/libauth";
 /**
  * Send some amount to a given address
@@ -16,13 +15,7 @@ export const send = (request) =>
       let wallet = await walletFromIdString(sendRequestJson.walletId);
       if (wallet) {
         let result = await wallet.send(sendRequestJson.to);
-        let resp = new SendResponse();
-        resp.transaction = binToHex(result);
-
-        resp.balance = balanceResponseFromSatoshi(
-          await wallet.getBalance(wallet.cashaddr as string)
-        );
-        resolve(Service.successResponse(resp));
+        resolve(Service.successResponse(result));
       } else {
         throw Error("Could not derive wallet");
       }

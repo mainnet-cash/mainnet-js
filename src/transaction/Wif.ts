@@ -23,24 +23,26 @@ export async function buildP2pkhNonHdTransaction(
   inputs: UnspentOutput[],
   outputs: SendRequest[],
   signingKey: Uint8Array,
-  fee: number = 0
+  fee:number = 0,
+  discardChange=false
 ) {
-  const template = validateAuthenticationTemplate(
-    authenticationTemplateP2pkhNonHd
-  );
-
-  if (typeof template === "string") {
-    throw new Error("Transaction template error");
-  }
-
-  const compiler = await authenticationTemplateToCompilerBCH(template);
-  const inputAmount = await getInputTotal(inputs);
-  const sendAmount = await sumSendRequestAmounts(outputs);
-  const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
 
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
   }
+
+  const template = validateAuthenticationTemplate(
+    authenticationTemplateP2pkhNonHd
+  );
+  if (typeof template === "string") {
+    throw new Error("Transaction template error");
+  }
+  
+  const compiler = await authenticationTemplateToCompilerBCH(template);
+  const inputAmount = await getInputTotal(inputs);
+  const sendAmount = await sumSendRequestAmounts(outputs);
+  
+
   // Get the change locking bytecode
   let changeLockingBytecode = compiler.generateBytecode("lock", {
     keys: { privateKeys: { key: signingKey } },
@@ -48,19 +50,24 @@ export async function buildP2pkhNonHdTransaction(
   if (!changeLockingBytecode.success) {
     throw new Error(changeLockingBytecode.toString());
   }
+
   try {
     let lockedOutputs = prepareOutputs(outputs);
+
+    if(discardChange!==true){
+      const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+      lockedOutputs.push({
+        lockingBytecode: changeLockingBytecode.bytecode,
+        satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
+      })  
+    }
 
     let signedInputs = prepareInputs(inputs, compiler, signingKey);
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
       outputs: [
-        ...lockedOutputs,
-        {
-          lockingBytecode: changeLockingBytecode.bytecode,
-          satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
-        },
+        ...lockedOutputs
       ],
       version: 2,
     });
@@ -196,7 +203,7 @@ export async function getFeeAmount({
       utxos,
       sendRequests,
       privateKey,
-      1000
+      888
     );
     return draftTransaction.length * 2 + getRandomInt(100);
   } else {
@@ -211,13 +218,15 @@ export async function buildEncodedTransaction(
   fundingUtxos: UnspentOutput[],
   sendRequests: SendRequest[],
   privateKey: Uint8Array,
-  fee: number = 0
+  fee: number = 0,
+  discardChange=false
 ) {
   let txn = await buildP2pkhNonHdTransaction(
     fundingUtxos,
     sendRequests,
     privateKey,
-    fee
+    fee,
+    discardChange
   );
   // submit transaction
   if (txn.success) {
