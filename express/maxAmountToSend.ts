@@ -1,7 +1,7 @@
 import { Service } from "../generated/serve/services/Service";
 import { walletFromIdString } from "../src/wallet/createWallet";
 import { BalanceResponse } from "../generated/client/typescript-mock/model/balanceResponse";
-import { balanceResponseFromSatoshi } from "../src/util/balanceObjectFromSatoshi";
+
 // @ts-ignore
 import * as core from "express-serve-static-core";
 

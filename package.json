@@ -34,7 +34,6 @@
     "demo": "npx reload --dir=demo/"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^1.0.15-4.3.1",
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.7",
     "@types/express": "^4.17.7",

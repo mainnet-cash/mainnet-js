@@ -193,7 +193,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public async balance() {
-    return balanceResponseFromSatoshi(await this.getBalance());
+    return await balanceResponseFromSatoshi(await this.getBalance());
   }
 
   // Gets balance by summing value in all utxos in stats
@@ -237,7 +237,7 @@ export class WifWallet extends BaseWallet {
     });
     let spendableAmount = await sumUtxoValue(fundingUtxos);
 
-    return balanceResponseFromSatoshi(spendableAmount - fee);
+    return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
 
   public async utxos() {
