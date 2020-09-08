@@ -14,6 +14,17 @@ export class SendRequest {
   }
 }
 
+export class Utxo {
+  "index"?: number;
+  "amount": Amount;
+  "utxoId": string;
+  "transaction": string;
+}
+
+export class UtxoResponse {
+  "utxos"?: Array<Utxo>;
+}
+
 export class Amount {
   value: number;
   unit: UnitEnum;

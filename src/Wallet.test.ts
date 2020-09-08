@@ -12,13 +12,13 @@ test("Send a transaction on the regression network", async () => {
     await alice.send([
       {
         cashaddr: "bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj",
-        amount: { value: 1000, unit: "satoshi" },
+        amount: { value: 1100, unit: "satoshi" },
       },
     ]);
     // Build Bob's wallet from a public address, check his balance.
     const bob = new RegTestWallet("Bob's Receiving");
     bob.watchOnly("bchreg:prc38tlqr6t5fk2nfcacp3w3hcljz4nj3sw247lksj");
     const bobBalance = await bob.balance();
-    expect(bobBalance.sat).toBe(1000);
+    expect(bobBalance.sat).toBe(1100);
   }
 });

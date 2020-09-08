@@ -14,18 +14,17 @@ export const sendMax = (request) =>
 
     try {
       let wallet = await walletFromIdString(sendRequestJson.walletId);
-      if (wallet) {
-        let cashaddr = sendRequestJson.cashaddr as string;
-        let sendRequest = new SendMaxRequest({ cashaddr: cashaddr });
-        let resp = await wallet.sendMax(sendRequest);
-        resolve(Service.successResponse(resp));
-      } else {
+      if (!wallet) {
         throw Error("Could not derive wallet");
       }
+      let cashaddr = sendRequestJson.cashaddr as string;
+      let sendRequest = new SendMaxRequest({ cashaddr: cashaddr });
+      let resp = await wallet.sendMax(sendRequest);
+      resolve(Service.successResponse(resp));
     } catch (e) {
       reject(
         Service.rejectResponse(
-          e.response.body || "Invalid input",
+          e.message || "Invalid input",
           e.status || 500
         )
       );

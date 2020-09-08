@@ -18,6 +18,8 @@ import {
   SendRequest,
   SendResponse,
   UnitEnum,
+  Utxo,
+  UtxoResponse,
   WalletTypeEnum,
 } from "./Base";
 import {
@@ -123,11 +125,14 @@ export class WifWallet extends BaseWallet {
   }
 
   public async send(requests: Array<any>): Promise<SendResponse> {
-    let result = await this.sendRaw(requests);
-    let resp = new SendResponse({});
-    resp.transaction = binToHex(result);
-    resp.balance = await this.balance();
-    return resp;
+    
+        let result = await this.sendRaw(requests);
+        let resp = new SendResponse({});
+        resp.transaction = binToHex(result);
+        resp.balance = await this.balance();
+        return resp;    
+
+    
   }
 
   // Processes an array of send requests
@@ -235,12 +240,31 @@ export class WifWallet extends BaseWallet {
     return balanceResponseFromSatoshi(spendableAmount - fee);
   }
 
+  public async utxos() {
+    if (!this.cashaddr) {
+      throw Error("Attempted to get utxos without an address");
+    }
+    let utxos = await this.getUtxos(this.cashaddr);
+    let resp = new UtxoResponse();
+    resp.utxos = await Promise.all(
+      utxos.map(async (o: UnspentOutput) => {
+        let utxo = new Utxo();
+        utxo.amount = new Amount({ unit: UnitEnum.Sat, value: o.getValue() });
+        let txId = o.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
+        utxo.transaction = binToHex(txId);
+        utxo.index = o.getOutpoint()!.getIndex();
+        utxo.utxoId = utxo.transaction + ":" + utxo.index;
+        return utxo;
+      })
+    );
+    return resp;
+  }
   // Process an individual send request
   //
   //
   private async _processSendRequests(
     sendRequests: SendRequest[],
-    discardChange=true
+    discardChange = true
   ) {
     if (!this.privateKey) {
       throw Error(

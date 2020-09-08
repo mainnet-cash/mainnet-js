@@ -21,23 +21,8 @@ export const utxos = (request) =>
       let wallet = await walletFromIdString(sendParam.walletId);
 
       if (wallet.cashaddr) {
-        let result = await wallet.getUtxos(wallet.cashaddr);
-        let resp = new UtxoResponse();
-        resp.utxos = await Promise.all(
-          result.map(async (o: UnspentOutput) => {
-            let utxo = new Utxo();
-            utxo.amount = new Amount();
-            utxo.amount.unit = UnitEnum.Sat;
-            utxo.amount.value = o!.getValue();
-            let txId = o!.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
-            utxo.transaction = binToHex(txId);
-            utxo.index = o!.getOutpoint()!.getIndex();
-            utxo.utxoId = utxo.transaction + ":" + utxo.index;
-            return utxo;
-          })
-        );
-
-        resolve(Service.successResponse({ ...resp }));
+        let result = await wallet.utxos();
+        resolve(Service.successResponse({ ...result }));
       }
     } catch (e) {
       console.log(JSON.stringify(e));

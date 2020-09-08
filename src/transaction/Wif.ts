@@ -15,7 +15,6 @@ import {
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 
 import { SendRequest } from "../wallet/Base";
-import { getRandomInt } from "../util/randomInt";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
@@ -23,10 +22,9 @@ export async function buildP2pkhNonHdTransaction(
   inputs: UnspentOutput[],
   outputs: SendRequest[],
   signingKey: Uint8Array,
-  fee:number = 0,
-  discardChange=false
+  fee: number = 0,
+  discardChange = false
 ) {
-
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
   }
@@ -37,11 +35,10 @@ export async function buildP2pkhNonHdTransaction(
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
-  
+
   const compiler = await authenticationTemplateToCompilerBCH(template);
   const inputAmount = await getInputTotal(inputs);
   const sendAmount = await sumSendRequestAmounts(outputs);
-  
 
   // Get the change locking bytecode
   let changeLockingBytecode = compiler.generateBytecode("lock", {
@@ -54,21 +51,20 @@ export async function buildP2pkhNonHdTransaction(
   try {
     let lockedOutputs = prepareOutputs(outputs);
 
-    if(discardChange!==true){
-      const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+    if (discardChange !== true) {
+      const changeAmount =
+        BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
       lockedOutputs.push({
         lockingBytecode: changeLockingBytecode.bytecode,
         satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
-      })  
+      });
     }
 
     let signedInputs = prepareInputs(inputs, compiler, signingKey);
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
-      outputs: [
-        ...lockedOutputs
-      ],
+      outputs: [...lockedOutputs],
       version: 2,
     });
     return result;
@@ -142,34 +138,37 @@ export function prepareOutputs(outputs: SendRequest[]) {
 
 export async function getSuitableUtxos(
   unspentOutputs: UnspentOutput[],
-  amount: BigInt | undefined,
+  amountRequired: BigInt | undefined,
   bestHeight: number
 ) {
   let suitableUtxos: UnspentOutput[] = [];
-  let amountRequired = 0n;
-
+  let amountAvailable = 0n;
   for (const u of unspentOutputs) {
     if (u.getIsCoinbase() && bestHeight) {
       let age = bestHeight - u.getBlockHeight();
       if (age > 100) {
         suitableUtxos.push(u);
-        amountRequired += BigInt(u.getValue());
+        amountAvailable += BigInt(u.getValue());
       }
     } else {
       suitableUtxos.push(u);
-      amountRequired += BigInt(u.getValue());
+      amountAvailable += BigInt(u.getValue());
     }
-    // if no amount is given, assume it is a max spend request, skip this condition
-    if (typeof amount === "bigint" && amountRequired > amount) {
+    // if amountRequired is not given, assume it is a max spend request, skip this condition
+    if (amountRequired && amountAvailable > amountRequired) {
       break;
     }
   }
   // If the amount needed is met, or no amount is given, return
-  if (typeof amount === "undefined" || amountRequired > amount) {
+  if (typeof amountRequired === "undefined") {
     return suitableUtxos;
-  } else {
-    throw Error("Could not find suitable outpoints for given amount");
   }
+  else if (amountAvailable < amountRequired){
+    throw Error(`Amount required was not met, ${amountRequired} needed, ${amountAvailable} available`)
+  } else {
+    return suitableUtxos
+  }
+  
 }
 
 // Gets balance by summing value in all utxos in stats
@@ -205,7 +204,7 @@ export async function getFeeAmount({
       privateKey,
       888
     );
-    return draftTransaction.length * 2 + getRandomInt(100);
+    return draftTransaction.length * 2 ;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"
@@ -219,7 +218,7 @@ export async function buildEncodedTransaction(
   sendRequests: SendRequest[],
   privateKey: Uint8Array,
   fee: number = 0,
-  discardChange=false
+  discardChange = false
 ) {
   let txn = await buildP2pkhNonHdTransaction(
     fundingUtxos,
