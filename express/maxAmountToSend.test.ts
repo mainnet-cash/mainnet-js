@@ -3,7 +3,6 @@ import { Amount } from "../generated/client/typescript-mock/model/amount";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
 
-import { bch } from "../src/chain";
 test("Get the deposit address from a regtest wallet", async () => {
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");

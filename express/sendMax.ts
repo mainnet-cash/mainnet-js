@@ -1,6 +1,6 @@
 import { Service } from "../generated/serve/services/Service";
 import { walletFromIdString } from "../src/wallet/createWallet";
-import { SendMaxRequest } from "../src/wallet/Base";
+import { SendMaxRequest } from "../src/wallet/model";
 
 /**
  * Send all available funds to a given address
@@ -23,10 +23,7 @@ export const sendMax = (request) =>
       resolve(Service.successResponse(resp));
     } catch (e) {
       reject(
-        Service.rejectResponse(
-          e.message || "Invalid input",
-          e.status || 500
-        )
+        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
       );
     }
   });

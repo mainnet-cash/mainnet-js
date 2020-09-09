@@ -1,12 +1,5 @@
-import { binToHex } from "@bitauth/libauth";
-
 import { Service } from "../generated/serve/services/Service";
 import { walletFromIdString } from "../src/wallet/createWallet";
-import { UtxoResponse } from "../generated/client/typescript-mock/model/utxoResponse";
-import { Utxo } from "../generated/client/typescript-mock/model/utxo";
-import { UnitEnum } from "../src/wallet/Base";
-import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
-import { Amount } from "../generated/client/typescript-mock/model/amount";
 
 /**
  * Get detailed information about unspent outputs (utxos)

@@ -1,10 +1,10 @@
-import { bch } from "../chain";
+import { bchParam } from "../chain";
 import { balanceResponseFromSatoshi } from "./balanceObjectFromSatoshi";
 
 test("Get balanceResponse from 1 bch in satoshi", async () => {
   let bal = await balanceResponseFromSatoshi(100000000);
   expect(bal.bch).toBe(1);
-  expect(bal.sat).toBe(bch.subUnits);
+  expect(bal.sat).toBe(bchParam.subUnits);
 });
 
 test("Get balanceResponse from 1 satoshi", async () => {

@@ -1,4 +1,4 @@
-import { bch as bchPrarams } from "../chain";
+import { bchParam } from "../chain";
 import { getUsdRate } from "./getUsdRate";
 
 export class BalanceResponse {
@@ -12,18 +12,20 @@ export class BalanceResponse {
   }
 }
 
-export async function balanceResponseFromSatoshi(value: number): Promise<BalanceResponse> {
+export async function balanceResponseFromSatoshi(
+  value: number
+): Promise<BalanceResponse> {
   let response = new BalanceResponse();
   for (let a of ["bch", "sat", "usd"]) {
     switch (a) {
       case "bch":
-        response.bch = value / bchPrarams.subUnits;
+        response.bch = value / bchParam.subUnits;
         break;
       case "sat":
         response.sat = value;
         break;
       case "usd":
-        response.usd = (value /bchPrarams.subUnits) * (await getUsdRate());
+        response.usd = (value / bchParam.subUnits) * (await getUsdRate());
         break;
       default:
         throw Error("Balance response not understood");

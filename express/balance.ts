@@ -2,9 +2,6 @@ import { Service } from "../generated/serve/services/Service";
 import { walletFromIdString } from "../src/wallet/createWallet";
 import { BalanceResponse } from "../generated/client/typescript-mock/model/balanceResponse";
 
-// @ts-ignore
-import * as core from "express-serve-static-core";
-
 /**
  * Get total balance for wallet
  *

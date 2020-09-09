@@ -1,4 +1,4 @@
-import { SendRequest } from "../wallet/Base";
+import { SendRequest } from "../wallet/model";
 export async function sumSendRequestAmounts(requests: SendRequest[]) {
   if (requests) {
     const balanceArray: (BigInt | Error)[] = await Promise.all(

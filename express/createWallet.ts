@@ -1,6 +1,5 @@
 import { Service } from "../generated/serve/services/Service";
 import { createWallet as createWalletFn } from "../src/wallet/createWallet";
-import { WalletRequest } from "../generated/client/typescript-mock/model/walletRequest";
 import { WalletResponse } from "../generated/client/typescript-mock/model/walletResponse";
 
 /**

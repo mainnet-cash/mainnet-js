@@ -14,7 +14,7 @@ import {
 } from "@bitauth/libauth";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 
-import { SendRequest } from "../wallet/Base";
+import { SendRequest } from "../wallet/model";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
@@ -162,13 +162,13 @@ export async function getSuitableUtxos(
   // If the amount needed is met, or no amount is given, return
   if (typeof amountRequired === "undefined") {
     return suitableUtxos;
-  }
-  else if (amountAvailable < amountRequired){
-    throw Error(`Amount required was not met, ${amountRequired} needed, ${amountAvailable} available`)
+  } else if (amountAvailable < amountRequired) {
+    throw Error(
+      `Amount required was not met, ${amountRequired} needed, ${amountAvailable} available`
+    );
   } else {
-    return suitableUtxos
+    return suitableUtxos;
   }
-  
 }
 
 // Gets balance by summing value in all utxos in stats
@@ -204,7 +204,7 @@ export async function getFeeAmount({
       privateKey,
       888
     );
-    return draftTransaction.length * 2 ;
+    return draftTransaction.length * 2;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"

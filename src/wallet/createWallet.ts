@@ -1,4 +1,4 @@
-import { NetworkEnum, WalletTypeEnum } from "./Base";
+import { NetworkEnum, WalletTypeEnum } from "./enum";
 import { RegTestWallet, TestnetWallet, MainnetWallet, WifWallet } from "./Wif";
 
 interface WalletRequest {

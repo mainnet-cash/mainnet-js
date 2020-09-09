@@ -1,5 +1,4 @@
 import { Service } from "../generated/serve/services/Service";
-import { SerializedWallet } from "../generated/client/typescript-mock/model/serializedWallet";
 import { DepositAddressResponse } from "../generated/client/typescript-mock/model/depositAddressResponse";
 import { walletFromIdString } from "../src/wallet/createWallet";
 /**

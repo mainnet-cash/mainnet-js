@@ -1,7 +1,6 @@
 import { Service } from "../generated/serve/services/Service";
-import { SendResponse } from "../generated/client/typescript-mock/model/sendResponse";
 import { walletFromIdString } from "../src/wallet/createWallet";
-import { binToHex } from "@bitauth/libauth";
+
 /**
  * Send some amount to a given address
  *

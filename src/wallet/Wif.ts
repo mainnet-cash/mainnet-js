@@ -12,21 +12,27 @@ import {
 } from "@bitauth/libauth";
 
 import {
+  UnitEnum,
+  WalletTypeEnum,
+} from "./enum"
+
+import { BaseWallet } from "./Base";
+
+import {
   Amount,
-  BaseWallet,
   SendMaxRequest,
   SendRequest,
   SendResponse,
-  UnitEnum,
   Utxo,
   UtxoResponse,
-  WalletTypeEnum,
-} from "./Base";
+} from "./model";
+
 import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
 } from "../transaction/Wif";
+
 import { qrAddress } from "../qr/Qr";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
@@ -125,14 +131,11 @@ export class WifWallet extends BaseWallet {
   }
 
   public async send(requests: Array<any>): Promise<SendResponse> {
-    
-        let result = await this.sendRaw(requests);
-        let resp = new SendResponse({});
-        resp.transaction = binToHex(result);
-        resp.balance = await this.balance();
-        return resp;    
-
-    
+    let result = await this.sendRaw(requests);
+    let resp = new SendResponse({});
+    resp.transaction = binToHex(result);
+    resp.balance = await this.balance();
+    return resp;
   }
 
   // Processes an array of send requests
@@ -239,7 +242,9 @@ export class WifWallet extends BaseWallet {
 
     return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
-
+  /**
+   * Get unspent outputs for the wallet
+   */
   public async utxos() {
     if (!this.cashaddr) {
       throw Error("Attempted to get utxos without an address");
@@ -259,9 +264,12 @@ export class WifWallet extends BaseWallet {
     );
     return resp;
   }
-  // Process an individual send request
-  //
-  //
+
+  /**
+   * _processsSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
+   * @param  {SendRequest[]} sendRequests
+   * @param  {} discardChange=true
+   */
   private async _processSendRequests(
     sendRequests: SendRequest[],
     discardChange = true
