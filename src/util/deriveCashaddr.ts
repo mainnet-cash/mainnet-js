@@ -10,7 +10,7 @@ import {
 // Given a private key and network, derive cashaddr from the locking code
 // TODO, is there a more direct way to do this?
 // TODO, This can be moved off the Wallet Class
-export async function deriveCashAddr(
+export async function deriveCashaddr(
   privateKey: Uint8Array,
   networkPrefix: CashAddressNetworkPrefix
 ) {

@@ -1,6 +1,6 @@
 module.exports = {
-  rootDir: "../",
-  roots: ["<rootDir>/src", "<rootDir>/generated/serve"],
+  rootDir: "./",
+  roots: ["<rootDir>/src", "<rootDir>/express/"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
@@ -13,5 +13,6 @@ module.exports = {
   globalSetup: "<rootDir>/jest/node.setup.js",
   globalTeardown: "<rootDir>/jest/node.teardown.js",
   verbose: true,
-  testTimeout: 12000,
+  maxConcurrency: 1,
+  testTimeout: 15000,
 };

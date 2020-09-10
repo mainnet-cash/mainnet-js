@@ -1,6 +1,6 @@
 # mainnet.js
 
-Interface to interact with Bitcoin Cash (BCH) network (prototype stage)
+A high-level developer friendly interface to interact with Bitcoin Cash (BCH) network (prototype stage)
 
 # Unstable
 
