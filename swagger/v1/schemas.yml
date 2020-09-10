@@ -50,8 +50,6 @@ EscrowAction:
   example: complete
   type: string
 EscrowRequest:
-  allOf:
-    - $ref: "#/SerializedWallet"
   properties:
     buyerAddr:
       $ref: "#/CashaddrFormat" 
@@ -144,10 +142,6 @@ MaxAmountToSendRequest:
         (optional) if sending all funds to multiple addresses, the
         count of the number of address funds will be sent
         to may be included.
-    utxoIds:
-      $ref: "#/UtxoIds"
-      description: |
-        (optional) specify which utxos to spend from
   required:
     - walletId
 RawTransaction:
@@ -181,7 +175,7 @@ SerializedWallet:
       format: password
       example: "testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
       description: |
-        ID that is returned in `wallet` field of /wallet call
+        Serialized wallet returned in `walletId` field of /wallet/create call
   required:
     - walletId
 SendMaxResponse:
