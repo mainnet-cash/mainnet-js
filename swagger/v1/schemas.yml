@@ -144,6 +144,10 @@ MaxAmountToSendRequest:
         (optional) if sending all funds to multiple addresses, the
         count of the number of address funds will be sent
         to may be included.
+    utxoIds:
+      $ref: "#/UtxoIds"
+      description: |
+        (optional) specify which utxos to spend from
   required:
     - walletId
 RawTransaction:
