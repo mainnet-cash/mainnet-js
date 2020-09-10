@@ -77,9 +77,9 @@ EscrowFinalizeRequest:
   properties:
     action: 
       $ref: "#/EscrowAction"
-    signing:
+    signature:
       $ref: "#/SigScriptType"    
-    arbiterSig:
+    counterpartSig:
       $ref: "#/SigScriptType"    
 ToCashaddr:
   properties:
