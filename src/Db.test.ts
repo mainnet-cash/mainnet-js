@@ -20,10 +20,10 @@ test("Store and retrieve a Regtest wallet", async () => {
   await db.addWallet({ name: w2.name, wallet: w2.getSerializedWallet() });
   let storedWallets = await db.getWallets();
   let wallet = storedWallets.pop();
-  expect(wallet?.name.startsWith("Regtest Wallet")).toBeTruthy();
-  expect(wallet?.wallet.startsWith("wif:bchreg:3")).toBeTruthy();
+  expect(wallet!.name.startsWith("Regtest Wallet")).toBeTruthy();
+  expect(wallet!.wallet.startsWith("wif:regtest:3")).toBeTruthy();
 
   let walletB = storedWallets.pop();
-  expect(walletB?.name.startsWith("Regtest Wallet")).toBeTruthy();
-  expect(walletB?.wallet.startsWith("wif:bchreg:3")).toBeTruthy();
+  expect(walletB!.name.startsWith("Regtest Wallet")).toBeTruthy();
+  expect(walletB!.wallet.startsWith("wif:regtest:3")).toBeTruthy();
 });

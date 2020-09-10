@@ -16375,7 +16375,7 @@
               bytecode.length <= 42; /* maximumLength */
             const validVersionPush =
               bytecode[0] === 0 /* OP_0 */ ||
-              (bytecode[0] >= 81 /* OP_1 */ && bytecode[0] <= 96) /* OP_16 */;
+              (bytecode[0] >= 81 /* OP_1 */ && bytecode[0] <= 96); /* OP_16 */
             const correctLengthByte =
               bytecode[1] + 2 /* versionAndLengthBytes */ === bytecode.length;
             return correctLength && validVersionPush && correctLengthByte;
@@ -20807,7 +20807,7 @@
           const isValidCompressedPublicKeyEncoding = (publicKey) =>
             publicKey.length === 33 /* compressedByteLength */ &&
             (publicKey[0] === 2 /* compressedHeaderByteEven */ ||
-              publicKey[0] === 3) /* compressedHeaderByteOdd */;
+              publicKey[0] === 3); /* compressedHeaderByteOdd */
           const isValidPublicKeyEncoding = (publicKey) =>
             isValidCompressedPublicKeyEncoding(publicKey) ||
             isValidUncompressedPublicKeyEncoding(publicKey);

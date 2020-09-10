@@ -1,42 +1,7 @@
-// Unstable?
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-
-// This is swapped out by webpack for the web module
+// GrpcClient is swapped out by webpack for a web module
 import { GrpcClient } from "grpc-bchrpc-node";
-
-export class SendRequest {
-  address: string;
-  amount: Amount;
-
-  constructor(SerializedSendRequest: any) {
-    this.address = SerializedSendRequest[0];
-    this.amount = new Amount(SerializedSendRequest[1]);
-  }
-}
-
-class Amount {
-  amount: number;
-  unit: UnitType;
-  constructor(SerializedAmount: any) {
-    this.amount = SerializedAmount[0];
-    this.unit = SerializedAmount[1];
-  }
-
-  public inSatoshi(): number | Error {
-    switch (this.unit) {
-      case "satoshi":
-        return Number(this.amount);
-      case "coin":
-        return Number(this.amount / 10e8);
-      default:
-        throw Error("Unit of value not defined");
-    }
-  }
-}
-
-export type NetworkType = "mainnet" | "testnet";
-export type UnitType = "coin" | "bits" | "satoshi";
-export type WalletType = "wif" | "hd";
+import { NetworkEnum, NetworkType } from "./enum";
 
 /**
  * A class to hold features used by all wallets
@@ -48,14 +13,28 @@ export class BaseWallet {
   name: string;
   networkPrefix: CashAddressNetworkPrefix;
   networkType: NetworkType;
+  network: NetworkEnum;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix, url = "") {
     this.name = name;
     this.networkPrefix = networkPrefix;
     this.networkType =
       this.networkPrefix === CashAddressNetworkPrefix.mainnet
-        ? "mainnet"
-        : "testnet";
+        ? NetworkType.Mainnet
+        : NetworkType.Testnet;
+    switch (networkPrefix) {
+      case CashAddressNetworkPrefix.mainnet:
+        this.network = NetworkEnum.Mainnet;
+        break;
+      case CashAddressNetworkPrefix.testnet:
+        this.network = NetworkEnum.Testnet;
+        break;
+      case CashAddressNetworkPrefix.regtest:
+        this.network = NetworkEnum.Regtest;
+        break;
+      default:
+        throw Error("could not map cashaddr prefix to network");
+    }
     this.isTestnet = this.networkType === "testnet" ? true : false;
     if (this.isTestnet) {
       switch (this.networkPrefix) {

@@ -1,5 +1,5 @@
 import { ok } from "./ok";
 
-test("basic", () => {
+test("oll korrect", () => {
   expect(ok()).toBe(true);
 });
