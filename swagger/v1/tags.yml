@@ -1,0 +1,12 @@
+wallet:
+  description: Interact with wallets
+  externalDocs:
+    description: Find out more
+    url: /api-doc/#/wallet/
+  name: wallet
+contract:
+  description: Interact with contracts
+  externalDocs:
+    description: Find out more
+    url: /api-doc/#/contract/
+  name: contract  

@@ -15,23 +15,15 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.4
+  version: 0.0.3
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
   - url: http://localhost:3000/v1
 tags:
-  - description: Interact with wallets
-    externalDocs:
-      description: Find out more
-      url: http://mainnet.cash/doc#wallet
-    name: wallet
-  - description: Interact with contracts
-    externalDocs:
-      description: Find out more
-      url: http://mainnet.cash/doc#wallet
-    name: contract    
+  - $ref: 'tags.yml#/wallet'
+  - $ref: 'tags.yml#/contract'
 paths:
   /contract/escrow/create:
     $ref: 'contract.yml#/escrow/create'

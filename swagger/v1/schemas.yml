@@ -38,23 +38,32 @@ Contract:
   properties:
     contractId:
       type: string
-      format: password
-      example: "testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-      description: | 
+      description:  | 
+        serialized contract
   required:
     - contractId
+EscrowAction:
+  description: Action for finalization of contract.
+  enum:
+    - refund
+    - pay
+  example: refund
+  type: string
 EscrowRequest:
   allOf:
     - $ref: "#/SerializedWallet"
   properties:
     arbiter:
-      $ref: "#/CashaddrFormat"
-      example: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"      
+      $ref: "#/PublicKeyHashType"
+      example: "c18d547cafb43e30a993439599bd08321bea17bf" 
+      description: Public key hash of the arbiter      
     sender:
-      $ref: "#/CashaddrFormat"
+      $ref: "#/PublicKeyHashType"
+      description: Public key hash of the sender     
     receiver:
-      $ref: "#/CashaddrFormat" 
-      example: "bchtest:qps3ys43u76rn0ttdv3qg2usm4nm7talhxhl05mlhm"      
+      $ref: "#/PublicKeyHashType" 
+      example: "93439599bd08321bea17bfc18d547cafb43e30a9"
+      description: Public key hash of the receiver     
   required:
     - walletId
 EscrowResponse:
@@ -62,6 +71,19 @@ EscrowResponse:
     - $ref: "#/Contract"
   required:
     - contractId
+EscrowFinalizeRequest:
+  allOf:
+    - $ref: "#/Contract"
+  properties:
+    action: 
+      $ref: "#/EscrowAction"
+    signing:
+      type: array
+      uniqueItems: true
+      minLength: 2
+      maxLength: 2
+      items:
+        $ref: "#/PublicKeyHashType"    
 ToCashaddr:
   properties:
     cashaddr:
@@ -76,6 +98,10 @@ CashaddrFormat:
   type: string
   format: "((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}"
   example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+PublicKeyHashType:
+  type: string
+  format: "[a-z0-9]{40}"
+  example: 8321bea17bfc18d547cafb43e30a993439599bd0
 Network:
   properties:
     network:
@@ -115,6 +141,9 @@ MaxAmountToSendRequest:
         to may be included.
   required:
     - walletId
+RawTransaction:
+  type: string
+  description:     
 ScalableVectorGraphic:
   properties:
     src:

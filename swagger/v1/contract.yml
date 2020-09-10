@@ -29,7 +29,7 @@ escrow:
         content:
           application/json:
             schema:
-              $ref: "schemas.yml#/EscrowRequest"
+              $ref: "schemas.yml#/Contract"
         description: Request a new escrow contract
         required: true
       responses:
@@ -37,7 +37,7 @@ escrow:
           content:
             application/json:
               schema:
-                $ref: "schemas.yml#/EscrowResponse"
+                $ref: "schemas.yml#/UtxoResponse"
           description: successful operation
         "405":
           content: {}
@@ -55,7 +55,7 @@ escrow:
         content:
           application/json:
             schema:
-              $ref: "schemas.yml#/EscrowRequest"
+              $ref: "schemas.yml#/EscrowFinalizeRequest"
         description: 
         required: true
       responses:
