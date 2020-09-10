@@ -16,10 +16,7 @@ export const depositQr = (request) =>
       if (wallet && wallet.cashaddr) {
         let resp = new ScalableVectorGraphic();
         let svg = wallet.depositQr();
-
-        // Buffer doesn't exist in the browser so this logic is moved here.
-        let svgB64 = Buffer.from(svg, "utf8").toString("base64");
-        resp.src = `data:image/svg+xml;base64,${svgB64}`;
+        resp.src = svg;
 
         resolve(Service.successResponse({ ...resp }));
       } else {

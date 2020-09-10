@@ -6,9 +6,11 @@ var QRCode = require("qrcode-svg");
  * @returns string
  */
 export function qrAddress(address: string, size = 256): string {
-  return new QRCode({
+  let svg = new QRCode({
     content: address,
     width: size,
     height: size,
   }).svg();
+  let svgB64 = Buffer.from(svg, "utf8").toString("base64");
+  return `data:image/svg+xml;base64,${svgB64}`;
 }

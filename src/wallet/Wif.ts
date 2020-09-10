@@ -11,10 +11,7 @@ import {
   WalletImportFormatType,
 } from "@bitauth/libauth";
 
-import {
-  UnitEnum,
-  WalletTypeEnum,
-} from "./enum"
+import { UnitEnum, WalletTypeEnum } from "./enum";
 
 import { BaseWallet } from "./Base";
 

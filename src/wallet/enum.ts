@@ -1,9 +1,7 @@
-
-
 export enum NetworkType {
-    Mainnet = "mainnet", 
-    Testnet = "testnet",
-} 
+  Mainnet = "mainnet",
+  Testnet = "testnet",
+}
 
 export enum UnitEnum {
   Bch = <any>"bch",

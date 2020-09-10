@@ -1,8 +1,7 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
 import { GrpcClient } from "grpc-bchrpc-node";
-import { NetworkEnum, NetworkType } from "./enum"
-
+import { NetworkEnum, NetworkType } from "./enum";
 
 /**
  * A class to hold features used by all wallets
