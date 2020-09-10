@@ -78,12 +78,9 @@ EscrowFinalizeRequest:
     action: 
       $ref: "#/EscrowAction"
     signing:
-      type: array
-      uniqueItems: true
-      minLength: 2
-      maxLength: 2
-      items:
-        $ref: "#/PublicKeyHashType"    
+      $ref: "#/SigScriptType"    
+    arbiterSig:
+      $ref: "#/SigScriptType"    
 ToCashaddr:
   properties:
     cashaddr:
@@ -99,6 +96,10 @@ CashaddrFormat:
   format: "((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}"
   example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
 PublicKeyHashType:
+  type: string
+  format: "[a-z0-9]{40}"
+  example: 8321bea17bfc18d547cafb43e30a993439599bd0
+SigScriptType:
   type: string
   format: "[a-z0-9]{40}"
   example: 8321bea17bfc18d547cafb43e30a993439599bd0
