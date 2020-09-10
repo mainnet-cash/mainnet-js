@@ -27,8 +27,8 @@ tags:
 paths:
   /contract/escrow/create:
     $ref: 'contract.yml#/escrow/create'
-  /contract/escrow/coins:
-    $ref: 'contract.yml#/escrow/coins'
+  /contract/escrow/utxos:
+    $ref: 'contract.yml#/escrow/utxos'
   /contract/escrow/finalize:
     $ref: 'contract.yml#/escrow/finalize'
   /wallet/create: 
@@ -43,7 +43,7 @@ paths:
     $ref: 'wallet.yml#/send'
   /wallet/send_max: 
     $ref: 'wallet.yml#/send_max'
-  /wallet/utxo:
-    $ref: 'wallet.yml#/utxo'
+  /wallet/utxos:
+    $ref: 'wallet.yml#/utxos'
 schemas:
   $ref: "schemas.yml"

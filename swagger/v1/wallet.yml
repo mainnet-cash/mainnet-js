@@ -18,7 +18,7 @@ createWallet:
       "405":
         content: {}
         description: Invalid input
-    summary: create a new wallet
+    summary: Create a new wallet
     tags:
       - wallet
 balance:
@@ -161,7 +161,7 @@ send_max:
     summary: Send all available funds to a given address
     tags:
       - wallet
-utxo:
+utxos:
   post:
     operationId: utxos
     requestBody:

@@ -19,18 +19,17 @@ escrow:
         "405":
           content: {}
           description: Invalid input
-      summary: create an escrow contract
+      summary: Create an escrow contract
       tags:
         - contract
-  coins: 
+  utxos: 
     post: 
-      operationId: escrowCoins
+      operationId: escrowUtxos
       requestBody:
         content:
           application/json:
             schema:
               $ref: "schemas.yml#/Contract"
-        description: Request a new escrow contract
         required: true
       responses:
         "200":
@@ -42,7 +41,7 @@ escrow:
         "405":
           content: {}
           description: Invalid input
-      summary: list specific coins in a contract
+      summary: List specific utxos in a contract
       description: |
         Returns all UTXOs that can be spent by the 
         contract. Both confirmed and unconfirmed UTXOs are included.
