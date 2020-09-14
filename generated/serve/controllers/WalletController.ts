@@ -22,10 +22,6 @@ export const createWallet = async (request: any, response: any) => {
   await Controller.handleRequest(request, response, service.createWallet);
 };
 
-export const depositAddress = async (request: any, response: any) => {
-  await Controller.handleRequest(request, response, service.depositAddress);
-};
-
 export const depositQr = async (request: any, response: any) => {
   await Controller.handleRequest(request, response, service.depositQr);
 };

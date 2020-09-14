@@ -12,20 +12,10 @@
 
 import { RequestFile } from './models';
 
-export class ToCashaddr {
-    'cashaddr'?: string;
-
-    static discriminator: string | undefined = undefined;
-
-    static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
-        {
-            "name": "cashaddr",
-            "baseName": "cashaddr",
-            "type": "string"
-        }    ];
-
-    static getAttributeTypeMap() {
-        return ToCashaddr.attributeTypeMap;
-    }
+/**
+* Action for finalization of contract.
+*/
+export enum EscrowAction {
+    Complete = <any> 'complete',
+    Refund = <any> 'refund'
 }
-

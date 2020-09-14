@@ -11,42 +11,17 @@
  */
 
 import { RequestFile } from './models';
+import { Contract } from './contract';
 
-export class ZeroBalanceResponse {
-    /**
-    * Amount in whole Bitcoin Cash
-    */
-    'bch'?: number;
-    /**
-    * Amount in satoshis
-    */
-    'sat'?: number;
-    /**
-    * Amount in United States Dollars
-    */
-    'usd'?: number;
+export class EscrowResponse extends Contract {
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
-        {
-            "name": "bch",
-            "baseName": "bch",
-            "type": "number"
-        },
-        {
-            "name": "sat",
-            "baseName": "sat",
-            "type": "number"
-        },
-        {
-            "name": "usd",
-            "baseName": "usd",
-            "type": "number"
-        }    ];
+    ];
 
     static getAttributeTypeMap() {
-        return ZeroBalanceResponse.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(EscrowResponse.attributeTypeMap);
     }
 }
 

@@ -12,41 +12,32 @@
 
 import { RequestFile } from './models';
 
-export class ZeroBalanceResponse {
-    /**
-    * Amount in whole Bitcoin Cash
-    */
-    'bch'?: number;
-    /**
-    * Amount in satoshis
-    */
-    'sat'?: number;
-    /**
-    * Amount in United States Dollars
-    */
-    'usd'?: number;
+export class EscrowRequest {
+    'buyerAddr'?: string;
+    'arbiterAddr'?: string;
+    'sellerAddr'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "bch",
-            "baseName": "bch",
-            "type": "number"
+            "name": "buyerAddr",
+            "baseName": "buyerAddr",
+            "type": "string"
         },
         {
-            "name": "sat",
-            "baseName": "sat",
-            "type": "number"
+            "name": "arbiterAddr",
+            "baseName": "arbiterAddr",
+            "type": "string"
         },
         {
-            "name": "usd",
-            "baseName": "usd",
-            "type": "number"
+            "name": "sellerAddr",
+            "baseName": "sellerAddr",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return ZeroBalanceResponse.attributeTypeMap;
+        return EscrowRequest.attributeTypeMap;
     }
 }
 

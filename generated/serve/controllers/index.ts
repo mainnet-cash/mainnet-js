@@ -4,5 +4,6 @@
  * Do not edit the class manually.
  */
 
+export * as ContractController from "./ContractController";
 export * as WalletController from "./WalletController";
 

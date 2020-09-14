@@ -2,12 +2,14 @@ import localVarRequest from 'request';
 
 export * from './amount';
 export * from './balanceResponse';
-export * from './cashaddr';
-export * from './depositAddressResponse';
+export * from './contract';
+export * from './escrowAction';
+export * from './escrowFinalizeRequest';
+export * from './escrowRequest';
+export * from './escrowResponse';
 export * from './maxAmountToSendRequest';
 export * from './network';
 export * from './outpoint';
-export * from './portableNetworkGraphic';
 export * from './scalableVectorGraphic';
 export * from './sendMaxRequest';
 export * from './sendMaxResponse';
@@ -39,12 +41,14 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 import { Amount } from './amount';
 import { BalanceResponse } from './balanceResponse';
-import { Cashaddr } from './cashaddr';
-import { DepositAddressResponse } from './depositAddressResponse';
+import { Contract } from './contract';
+import { EscrowAction } from './escrowAction';
+import { EscrowFinalizeRequest } from './escrowFinalizeRequest';
+import { EscrowRequest } from './escrowRequest';
+import { EscrowResponse } from './escrowResponse';
 import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
 import { Network } from './network';
 import { Outpoint } from './outpoint';
-import { PortableNetworkGraphic } from './portableNetworkGraphic';
 import { ScalableVectorGraphic } from './scalableVectorGraphic';
 import { SendMaxRequest } from './sendMaxRequest';
 import { SendMaxResponse } from './sendMaxResponse';
@@ -75,6 +79,7 @@ let primitives = [
 
 let enumsMap: {[index: string]: any} = {
         "Amount.UnitEnum": Amount.UnitEnum,
+        "EscrowAction": EscrowAction,
         "Network.NetworkEnum": Network.NetworkEnum,
         "WalletRequest.TypeEnum": WalletRequest.TypeEnum,
         "WalletRequest.NetworkEnum": WalletRequest.NetworkEnum,
@@ -85,12 +90,13 @@ let enumsMap: {[index: string]: any} = {
 let typeMap: {[index: string]: any} = {
     "Amount": Amount,
     "BalanceResponse": BalanceResponse,
-    "Cashaddr": Cashaddr,
-    "DepositAddressResponse": DepositAddressResponse,
+    "Contract": Contract,
+    "EscrowFinalizeRequest": EscrowFinalizeRequest,
+    "EscrowRequest": EscrowRequest,
+    "EscrowResponse": EscrowResponse,
     "MaxAmountToSendRequest": MaxAmountToSendRequest,
     "Network": Network,
     "Outpoint": Outpoint,
-    "PortableNetworkGraphic": PortableNetworkGraphic,
     "ScalableVectorGraphic": ScalableVectorGraphic,
     "SendMaxRequest": SendMaxRequest,
     "SendMaxResponse": SendMaxResponse,

@@ -12,41 +12,23 @@
 
 import { RequestFile } from './models';
 
-export class ZeroBalanceResponse {
+export class Contract {
     /**
-    * Amount in whole Bitcoin Cash
+    * serialized contract 
     */
-    'bch'?: number;
-    /**
-    * Amount in satoshis
-    */
-    'sat'?: number;
-    /**
-    * Amount in United States Dollars
-    */
-    'usd'?: number;
+    'contractId': string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "bch",
-            "baseName": "bch",
-            "type": "number"
-        },
-        {
-            "name": "sat",
-            "baseName": "sat",
-            "type": "number"
-        },
-        {
-            "name": "usd",
-            "baseName": "usd",
-            "type": "number"
+            "name": "contractId",
+            "baseName": "contractId",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return ZeroBalanceResponse.attributeTypeMap;
+        return Contract.attributeTypeMap;
     }
 }
 

@@ -11,42 +11,48 @@
  */
 
 import { RequestFile } from './models';
+import { Contract } from './contract';
+import { EscrowAction } from './escrowAction';
+import { SerializedWallet } from './serializedWallet';
 
-export class ZeroBalanceResponse {
+export class EscrowFinalizeRequest {
+    'action'?: EscrowAction;
+    'utxoIds'?: Array<string>;
     /**
-    * Amount in whole Bitcoin Cash
+    * Serialized wallet returned in `walletId` field of /wallet/create call 
     */
-    'bch'?: number;
+    'walletId': string;
     /**
-    * Amount in satoshis
+    * serialized contract 
     */
-    'sat'?: number;
-    /**
-    * Amount in United States Dollars
-    */
-    'usd'?: number;
+    'contractId': string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "bch",
-            "baseName": "bch",
-            "type": "number"
+            "name": "action",
+            "baseName": "action",
+            "type": "EscrowAction"
         },
         {
-            "name": "sat",
-            "baseName": "sat",
-            "type": "number"
+            "name": "utxoIds",
+            "baseName": "utxoIds",
+            "type": "Array<string>"
         },
         {
-            "name": "usd",
-            "baseName": "usd",
-            "type": "number"
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
+        },
+        {
+            "name": "contractId",
+            "baseName": "contractId",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return ZeroBalanceResponse.attributeTypeMap;
+        return EscrowFinalizeRequest.attributeTypeMap;
     }
 }
 
