@@ -3,22 +3,43 @@ import { instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
 
 // Unstable?
 import {
+  binToHex,
   CashAddressNetworkPrefix,
   decodePrivateKeyWif,
   encodePrivateKeyWif,
-  encodeTransaction,
   generatePrivateKey,
   WalletImportFormatType,
 } from "@bitauth/libauth";
 
-import { BaseWallet, SendRequest, WalletType } from "./Base";
+import { UnitEnum, WalletTypeEnum } from "./enum";
+
+import { BaseWallet } from "./Base";
+
 import {
-  buildP2pkhNonHdTransaction,
+  Amount,
+  SendMaxRequest,
+  SendRequest,
+  SendResponse,
+  Utxo,
+  UtxoResponse,
+} from "./model";
+
+import {
+  buildEncodedTransaction,
   getSuitableUtxos,
+  getFeeAmount,
 } from "../transaction/Wif";
-import { deriveCashAddr } from "../cashaddr";
+
+import { qrAddress } from "../qr/Qr";
+import { deriveCashaddr } from "../util/deriveCashaddr";
+import {
+  balanceResponseFromSatoshi,
+  BalanceResponse,
+} from "../util/balanceObjectFromSatoshi";
+import { sumUtxoValue } from "../util/sumUtxoValue";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
-import { getRandomInt } from "../util/randomInt";
+
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
@@ -32,13 +53,13 @@ export class WifWallet extends BaseWallet {
   publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
   privateKeyWif?: string;
-  walletType?: WalletType;
+  walletType?: WalletTypeEnum;
   cashaddr?: string;
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
     super(name, networkPrefix);
     this.name = name;
-    this.walletType = "wif";
+    this.walletType = WalletTypeEnum.Wif;
   }
 
   // Initialize wallet from a cash addr
@@ -64,14 +85,14 @@ export class WifWallet extends BaseWallet {
 
     const hasError = typeof result === "string";
     if (hasError) {
-      return new Error(result as string);
+      throw Error(result as string);
     } else {
       let resultData: PrivateKey = result as PrivateKey;
       this.privateKey = resultData.privateKey;
       this.privateKeyWif = walletImportFormatString;
-      this.walletType = "wif";
+      this.walletType = WalletTypeEnum.Wif;
       this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-      this.cashaddr = (await deriveCashAddr(
+      this.cashaddr = (await deriveCashaddr(
         this.privateKey,
         this.networkPrefix
       )) as string;
@@ -87,7 +108,7 @@ export class WifWallet extends BaseWallet {
       let crypto = require("crypto");
       this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
     }
-    // window, webworkers, serviceworkers
+    // window, webworkers, service workers
     else {
       this.privateKey = generatePrivateKey(() =>
         window.crypto.getRandomValues(new Uint8Array(32))
@@ -99,177 +120,219 @@ export class WifWallet extends BaseWallet {
       this.privateKey,
       this.networkType
     );
-    this.walletType = "wif";
-    this.cashaddr = (await deriveCashAddr(
+    this.walletType = WalletTypeEnum.Wif;
+    this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
     )) as string;
   }
 
+  public async send(requests: Array<any>): Promise<SendResponse> {
+    let result = await this.sendRaw(requests);
+    let resp = new SendResponse({});
+    resp.transaction = binToHex(result);
+    resp.balance = await this.balance();
+    return resp;
+  }
+
   // Processes an array of send requests
-  public async send(requests: Array<any>) {
+  public async sendRaw(requests: Array<any>) {
     // Deserialize the request
-    const sendRequestList: SendRequest[] = await Promise.all(
+    const sendRequests: SendRequest[] = await Promise.all(
       requests.map(async (rawSendRequest: any) => {
         return new SendRequest(rawSendRequest);
       })
     );
+    return await this._processSendRequests(sendRequests);
+  }
 
-    // Process the requests
-    const sendResponseList: Uint8Array[] = await Promise.all(
-      sendRequestList.map(async (sendRequest: SendRequest) => {
-        return this._processSendRequest(sendRequest);
-      })
-    );
-    return sendResponseList;
+  public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
+    let result = await this.sendMaxRaw(sendMaxRequest);
+    let resp = new SendResponse({});
+    resp.transaction = binToHex(result);
+    resp.balance = await this.balance();
+    return resp;
+  }
+
+  public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
+    let maxSpendableAmount = await this.getMaxAmountToSpend();
+    if (maxSpendableAmount.sat === undefined) {
+      throw Error("no Max amount to send");
+    }
+    let sendRequest = new SendRequest({
+      cashaddr: sendMaxRequest.cashaddr,
+      amount: new Amount({ value: maxSpendableAmount.sat, unit: UnitEnum.Sat }),
+    });
+    return await this._processSendRequests([sendRequest], true);
   }
 
   public getSerializedWallet() {
-    return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
+    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 
-  // Gets balance by summing value in all utxos in stats
-  public async getBalance(address: string): Promise<number> {
-    const res = await this.client?.getAddressUtxos({
+  public depositAddress() {
+    return this.cashaddr;
+  }
+
+  public depositQr() {
+    return qrAddress(this.cashaddr as string);
+  }
+
+  public async getUtxos(address: string): Promise<UnspentOutput[]> {
+    if (!this.client) {
+      throw Error("Attempting to get utxos from wallet without a client");
+    }
+    const res = await this.client.getAddressUtxos({
       address: address,
       includeMempool: true,
     });
-    const txns = res?.getOutputsList();
-
-    if (txns) {
-      const balanceArray: number[] = await Promise.all(
-        txns.map(async (o: UnspentOutput) => {
-          return o.getValue();
-        })
-      );
-      const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
-      return balance;
-    } else {
-      return 0;
+    if (!res) {
+      throw Error("No Utxo response from server");
     }
+    return res.getOutputsList();
+  }
+
+  public async balance() {
+    return await balanceResponseFromSatoshi(await this.getBalance());
+  }
+
+  // Gets balance by summing value in all utxos in stats
+  public async getBalance(): Promise<number> {
+    const utxos = await this.getUtxos(this.cashaddr!);
+    return await sumUtxoValue(utxos);
   }
 
   public toString() {
     return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
   }
 
-  // Return address balance in satoshi
-  public async balanceSats(address: string): Promise<number> {
-    return await this.getBalance(address);
+  public async getMaxAmountToSpend(outputCount = 1): Promise<BalanceResponse> {
+    if (!this.privateKey) {
+      throw Error("Couldn't get network or private key for wallet.");
+    }
+    if (!this.cashaddr) {
+      throw Error("attempted to send without a cashaddr");
+    }
+    // get inputs
+    let utxos = await this.getUtxos(this.cashaddr);
+
+    // Get current height to assure recently mined coins are not spent.
+    let bestHeight = (await this.client!.getBlockchainInfo())!.getBestHeight();
+    let amount = new Amount({ value: 100, unit: UnitEnum.Sat });
+
+    // simulate outputs using the sender's address
+    const sendRequest = new SendRequest({
+      cashaddr: this.cashaddr,
+      amount: amount,
+    });
+    let sendRequests = Array(outputCount)
+      .fill(0)
+      .map(() => sendRequest);
+
+    let fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
+    let fee = await getFeeAmount({
+      utxos: fundingUtxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey,
+    });
+    let spendableAmount = await sumUtxoValue(fundingUtxos);
+
+    return await balanceResponseFromSatoshi(spendableAmount - fee);
+  }
+  /**
+   * Get unspent outputs for the wallet
+   */
+  public async utxos() {
+    if (!this.cashaddr) {
+      throw Error("Attempted to get utxos without an address");
+    }
+    let utxos = await this.getUtxos(this.cashaddr);
+    let resp = new UtxoResponse();
+    resp.utxos = await Promise.all(
+      utxos.map(async (o: UnspentOutput) => {
+        let utxo = new Utxo();
+        utxo.amount = new Amount({ unit: UnitEnum.Sat, value: o.getValue() });
+        let txId = o.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
+        utxo.transaction = binToHex(txId);
+        utxo.index = o.getOutpoint()!.getIndex();
+        utxo.utxoId = utxo.transaction + ":" + utxo.index;
+        return utxo;
+      })
+    );
+    return resp;
   }
 
-  // Return address balance in bitcoin
-  public async balance(address: string): Promise<number> {
-    return (await this.getBalance(address)) / 10e8;
-  }
-
-  // Process an individual send request
-  private async _processSendRequest(request: SendRequest) {
-    if (this.networkPrefix && this.privateKey) {
-      // get input
-      if (!this.cashaddr) {
-        throw Error("attempted to send without a cashaddr");
-      }
-
-      let utxos = await this.client?.getAddressUtxos({
-        address: this.cashaddr,
-        includeMempool: true,
-      });
-
-      let bestHeight =
-        (await this.client?.getBlockchainInfo())?.getBestHeight() ?? 0;
-      let spendAmount = request.amount.inSatoshi();
-
-      // TODO refactor this
-      if (utxos && typeof spendAmount === "number") {
-        let outputList = utxos?.getOutputsList() || [];
-        let draftUtxos = await getSuitableUtxos(
-          outputList,
-          spendAmount,
-          bestHeight
-        );
-        // build transaction
-        if (draftUtxos) {
-          // Build the transaction to get the approximate size
-          let draftTransaction = await this._buildEncodedTransaction(
-            draftUtxos,
-            request,
-            this.privateKey,
-            10
-          );
-          let fee = draftTransaction.length * 2 + getRandomInt(1000);
-          let fundingUtxos = await getSuitableUtxos(
-            outputList,
-            spendAmount + fee,
-            bestHeight
-          );
-          if (fundingUtxos) {
-            let encodedTransaction = await this._buildEncodedTransaction(
-              fundingUtxos,
-              request,
-              this.privateKey,
-              fee
-            );
-            return await this._submitTransaction(encodedTransaction);
-          } else {
-            throw Error(
-              "The available inputs couldn't satisfy the request with fees"
-            );
-          }
-        } else {
-          throw Error(
-            "The available inputs in the wallet cannot satisfy this send request"
-          );
-        }
-      } else {
-        throw Error(
-          "There were no Unspent Outputs or the send amount could not be parsed"
-        );
-      }
-    } else {
+  /**
+   * _processsSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
+   * @param  {SendRequest[]} sendRequests
+   * @param  {} discardChange=true
+   */
+  private async _processSendRequests(
+    sendRequests: SendRequest[],
+    discardChange = true
+  ) {
+    if (!this.privateKey) {
       throw Error(
-        `Wallet ${this.name} hasn't is missing either a network or private key`
+        `Wallet ${this.name} is missing either a network or private key`
       );
     }
-  }
-
-  // Build encoded transaction
-  private async _buildEncodedTransaction(
-    fundingUtxos,
-    request,
-    privateKey,
-    fee = 0
-  ) {
-    let txn = await buildP2pkhNonHdTransaction(
-      fundingUtxos,
-      request,
-      privateKey,
-      fee
-    );
-    // submit transaction
-    if (txn.success) {
-      return encodeTransaction(txn.transaction);
-    } else {
-      throw Error("Error building transaction with fee");
+    if (!this.cashaddr) {
+      throw Error("attempted to send without a cashaddr");
     }
+    // get input
+    let utxos = await this.getUtxos(this.cashaddr);
+
+    let bestHeight = (await this.client!.getBlockchainInfo())!.getBestHeight();
+    let spendAmount = await sumSendRequestAmounts(sendRequests);
+
+    if (utxos.length === 0) {
+      throw Error(
+        "There were no Unspent Outputs or the send amount could not be parsed"
+      );
+    }
+    if (typeof spendAmount !== "bigint") {
+      throw Error("Couldn't get spend amount when building transaction");
+    }
+
+    let fee = await getFeeAmount({
+      utxos: utxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey,
+    });
+    let fundingUtxos = await getSuitableUtxos(
+      utxos,
+      BigInt(spendAmount) + BigInt(fee),
+      bestHeight
+    );
+    if (fundingUtxos.length === 0) {
+      throw Error(
+        "The available inputs couldn't satisfy the request with fees"
+      );
+    }
+    let encodedTransaction = await buildEncodedTransaction(
+      fundingUtxos,
+      sendRequests,
+      this.privateKey,
+      fee,
+      discardChange
+    );
+    return await this._submitTransaction(encodedTransaction);
   }
 
   // Submit a raw transaction
   private async _submitTransaction(
     transaction: Uint8Array
   ): Promise<Uint8Array> {
-    if (this.client) {
-      const res = await this.client.submitTransaction({ txn: transaction });
-      return res.getHash_asU8();
-    } else {
+    if (!this.client) {
       throw Error("Wallet node client was not initialized");
     }
+    const res = await this.client.submitTransaction({ txn: transaction });
+    return res.getHash_asU8();
   }
 }
 
-export class Wallet extends WifWallet {
+export class MainnetWallet extends WifWallet {
   constructor(name = "") {
-    throw Error("This wallet is in active development");
     super(name, CashAddressNetworkPrefix.mainnet);
   }
 }
