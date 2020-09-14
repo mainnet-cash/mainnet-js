@@ -43,6 +43,8 @@ paths:
     $ref: 'wallet.yml#/createWallet'
   /wallet/balance: 
     $ref: 'wallet.yml#/balance'    
+  /wallet/deposit_address: 
+    $ref: 'wallet.yml#/deposit_address'    
   /wallet/deposit_qr: 
     $ref: 'wallet.yml#/deposit_qr'    
   /wallet/max_amount_to_send: 

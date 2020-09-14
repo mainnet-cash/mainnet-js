@@ -29,12 +29,14 @@
     "grpcui:mainnet": "grpcui -proto pb/bchrpc.proto bchd.greyh.at:8335",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
+    "api:validate": "npx openapi-generator validate -i ./swagger/v1/api.yml",
     "serve": "npx ts-node ./generated/serve/index.ts",
     "serve:monitor": "npx nodemon ./generated/serve/index.ts",
     "build": "npx webpack",
     "demo": "npx reload --dir=demo/"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^1.0.18-4.3.1",
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.7",
     "@types/express": "^4.17.7",
