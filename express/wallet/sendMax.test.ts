@@ -44,6 +44,7 @@ test("Send from Alice to Bob, have Bob send max back", async () => {
       expect(body.balance!.sat as number).toBe(0);
     }
   } catch (e) {
+    console.log(e)
     throw Error(e);
   }
 });

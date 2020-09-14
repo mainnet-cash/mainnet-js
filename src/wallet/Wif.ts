@@ -130,7 +130,7 @@ export class WifWallet extends BaseWallet {
   public async send(requests: Array<any>): Promise<SendResponse> {
     let result = await this.sendRaw(requests);
     let resp = new SendResponse({});
-    resp.transaction = binToHex(result);
+    resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
     return resp;
   }
@@ -149,7 +149,7 @@ export class WifWallet extends BaseWallet {
   public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
     let result = await this.sendMaxRaw(sendMaxRequest);
     let resp = new SendResponse({});
-    resp.transaction = binToHex(result);
+    resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
     return resp;
   }
@@ -253,9 +253,9 @@ export class WifWallet extends BaseWallet {
         let utxo = new Utxo();
         utxo.amount = new Amount({ unit: UnitEnum.Sat, value: o.getValue() });
         let txId = o.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
-        utxo.transaction = binToHex(txId);
+        utxo.transactionId = binToHex(txId);
         utxo.index = o.getOutpoint()!.getIndex();
-        utxo.utxoId = utxo.transaction + ":" + utxo.index;
+        utxo.utxoId = utxo.transactionId + ":" + utxo.index;
         return utxo;
       })
     );

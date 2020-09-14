@@ -1,8 +1,8 @@
-export { balance } from "./balance";
-export { createWallet } from "./createWallet";
-export { depositAddress } from "./depositAddress";
-export { depositQr } from "./depositQr";
-export { maxAmountToSend } from "./maxAmountToSend";
-export { send } from "./send";
-export { sendMax } from "./sendMax";
-export { utxos } from "./utxos";
+export { balance } from "./wallet/balance";
+export { createWallet } from "./wallet/createWallet";
+export { depositAddress } from "./wallet/depositAddress";
+export { depositQr } from "./wallet/depositQr";
+export { maxAmountToSend } from "./wallet/maxAmountToSend";
+export { send } from "./wallet/send";
+export { sendMax } from "./wallet/sendMax";
+export { utxos } from "./wallet/utxos";
