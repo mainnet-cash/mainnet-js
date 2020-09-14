@@ -303,21 +303,21 @@ components:
       properties:
         buyerAddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
           type: string
         arbiterAddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
           type: string
         sellerAddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
           type: string
       required:
       - walletId
     CashaddrFormat:
       example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-      format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+      pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
       type: string
     EscrowResponse:
       allOf:
@@ -503,7 +503,7 @@ components:
           type: string
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
           type: string
       type: object
     BalanceResponse:
@@ -532,7 +532,7 @@ components:
       properties:
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
           type: string
     ScalableVectorGraphic:
       example:
@@ -595,7 +595,7 @@ components:
       properties:
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
           type: string
     SendResponse:
       allOf:
