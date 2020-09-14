@@ -22,8 +22,16 @@ externalDocs:
 servers:
   - url: http://localhost:3000/v1
 tags:
-  - $ref: 'tags.yml#/wallet'
-  - $ref: 'tags.yml#/contract'
+  - name: wallet
+    description: Interact with wallets
+    externalDocs:
+      description: Find out more
+      url: /api-doc/#/wallet/
+  - name: contract 
+    description: Interact with contracts
+    externalDocs:
+      description: Find out more
+      url: /api-doc/#/contract/
 paths:
   /contract/escrow/create:
     $ref: 'contract.yml#/escrow/create'
@@ -45,5 +53,3 @@ paths:
     $ref: 'wallet.yml#/send_max'
   /wallet/utxos:
     $ref: 'wallet.yml#/utxos'
-schemas:
-  $ref: "schemas.yml"
