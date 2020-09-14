@@ -6,7 +6,9 @@ api/walletApi.ts
 git_push.sh
 model/amount.ts
 model/balanceResponse.ts
+model/cashaddr.ts
 model/contract.ts
+model/depositAddressResponse.ts
 model/escrowAction.ts
 model/escrowFinalizeRequest.ts
 model/escrowRequest.ts

@@ -45,6 +45,26 @@ export const createWallet = ({ walletRequest }) => new Promise(
   },
 );
 /**
+* Get a deposit address in cash address format
+*
+* serializedWallet SerializedWallet Request for a deposit address given a wallet 
+* returns DepositAddressResponse
+* */
+export const depositAddress = ({ serializedWallet }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      resolve(Service.successResponse({
+        serializedWallet,
+      }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || "Invalid input",
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
 * Get receiving cash address as a qrcode
 *
 * serializedWallet SerializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 

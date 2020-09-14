@@ -2,7 +2,9 @@ import localVarRequest from 'request';
 
 export * from './amount';
 export * from './balanceResponse';
+export * from './cashaddr';
 export * from './contract';
+export * from './depositAddressResponse';
 export * from './escrowAction';
 export * from './escrowFinalizeRequest';
 export * from './escrowRequest';
@@ -41,7 +43,9 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 import { Amount } from './amount';
 import { BalanceResponse } from './balanceResponse';
+import { Cashaddr } from './cashaddr';
 import { Contract } from './contract';
+import { DepositAddressResponse } from './depositAddressResponse';
 import { EscrowAction } from './escrowAction';
 import { EscrowFinalizeRequest } from './escrowFinalizeRequest';
 import { EscrowRequest } from './escrowRequest';
@@ -90,7 +94,9 @@ let enumsMap: {[index: string]: any} = {
 let typeMap: {[index: string]: any} = {
     "Amount": Amount,
     "BalanceResponse": BalanceResponse,
+    "Cashaddr": Cashaddr,
     "Contract": Contract,
+    "DepositAddressResponse": DepositAddressResponse,
     "EscrowFinalizeRequest": EscrowFinalizeRequest,
     "EscrowRequest": EscrowRequest,
     "EscrowResponse": EscrowResponse,

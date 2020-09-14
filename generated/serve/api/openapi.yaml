@@ -147,6 +147,28 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/deposit_address:
+    post:
+      operationId: depositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositAddressResponse'
+          description: successful operation
+      summary: Get a deposit address in cash address format
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/deposit_qr:
     post:
       operationId: depositQr
@@ -503,6 +525,15 @@ components:
           description: Amount in United States Dollars
           example: 438.02
           type: number
+    DepositAddressResponse:
+      allOf:
+      - $ref: '#/components/schemas/Cashaddr'
+    Cashaddr:
+      properties:
+        cashaddr:
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          format: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          type: string
     ScalableVectorGraphic:
       example:
         src: data:image/svg+xml;base64,PD94bWwgdm... ==**
