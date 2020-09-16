@@ -110,7 +110,7 @@ module.exports = async function globalSetup(globalConfig) {
   if (global.mainnetServer === undefined) {
     global.mainnetServer = spawn(
       "npx",
-      ["ts-node", "./generated/serve/index.ts"],
+      ["ts-node", "serve.ts"],
       {
         shell: false,
       }
