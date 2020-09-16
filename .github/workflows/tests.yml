@@ -69,6 +69,7 @@ jobs:
       with:
         node-version: 12
     - uses: microsoft/playwright-github-action@v1
+    - run: npm i -g npx
     - run: npm install
     - run: npm run test
     - run: npm run build
