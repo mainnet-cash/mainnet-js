@@ -101,7 +101,7 @@ module.exports = async function () {
   }
   if (global.mainnetServer === undefined) {
     global.mainnetServer = spawn(
-      "npx",
+      "yarn",
       ["ts-node", "serve.ts"],
       {
         shell: false,
