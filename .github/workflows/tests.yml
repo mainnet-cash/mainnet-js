@@ -4,11 +4,10 @@ on:
   push:
     branches:
       - master
-      - release-*
+      - feature*
   pull_request:
     branches:
       - master
-      - release-*
 
 env:
   # Force terminal colors. @see https://www.npmjs.com/package/colors
