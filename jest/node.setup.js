@@ -47,7 +47,8 @@ function serverReady() {
       resolve(true);
     });
 
-    req.on("error", () => {
+    req.on("error", (e) => {
+      console.log(e)
       resolve(false);
     });
   });
@@ -94,13 +95,18 @@ module.exports = async function () {
     console.log("...already running");
   }
   if (global.mainnetServer === undefined) {
-    global.mainnetServer = spawn(
-      "npx",
-      ["ts-node", "./generated/serve/index.ts"],
-      {
-        shell: false,
-      }
-    );
+    try{
+      global.mainnetServer = spawn(
+        "npx",
+        ["ts-node", "./generated/serve/index.ts"],
+        {
+          shell: false,
+        }
+      );  
+    } catch(e){
+      console.error(e)
+      throw(e)
+    }
   }
 
   // ping express
