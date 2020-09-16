@@ -100,6 +100,7 @@ module.exports = async function globalSetup(globalConfig) {
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`,
+      `-d=critical` // prevent daemon messages from overrunning the process buffer
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");

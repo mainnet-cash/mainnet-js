@@ -73,6 +73,7 @@ function generateBlock(user, password, numberOfBlocks, binDir) {
   if (bchctl.stderr.length > 0) {
     throw Error(bchctl.stderr.toString());
   }
+  console.log(bchctl.status)
   return JSON.parse(bchctl.stdout.toString());
 }
 
@@ -91,11 +92,12 @@ module.exports = async function () {
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`,
+      `-d=critical` // prevent daemon messages from overrunning the process buffer
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
   } else {
-    console.log("...already running");
+    console.log("...bchd already running");
   }
   if (global.mainnetServer === undefined) {
     global.mainnetServer = spawn(
@@ -129,6 +131,7 @@ module.exports = async function () {
         process.env.BCHD_BIN_DIRECTORY || "bin"
       );  
     }
+    console.log("block height: " + await getBlockHeight())
     await delay(200);
   }
   console.log("proceeding...");
