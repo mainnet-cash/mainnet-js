@@ -158,6 +158,7 @@ export class WifWallet extends BaseWallet {
     let resp = new SendResponse({});
     resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
+    console.log(JSON.stringify(resp))
     return resp;
   }
 

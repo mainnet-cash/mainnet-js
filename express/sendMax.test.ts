@@ -3,6 +3,7 @@ import { Amount } from "../generated/client/typescript-mock/model/amount";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
 import { SendMaxRequest } from "../generated/client/typescript-mock/api";
+import { exception } from "console";
 
 test("Send from Alice to Bob, have Bob send max back", async () => {
   try {
@@ -34,14 +35,19 @@ test("Send from Alice to Bob, have Bob send max back", async () => {
       let BobSendToAliceReq = new SendMaxRequest();
       BobSendToAliceReq.walletId = bobsWallet.walletId;
       BobSendToAliceReq.cashaddr = process.env.ADDRESS as string;
-      let sendResult = await api.sendMax(BobSendToAliceReq);
+      try{
+        let sendResult = await api.sendMax(BobSendToAliceReq);
+        const resp = sendResult.response;
+        const body = sendResult.body;
+        expect(resp.statusCode).toBe(200);
+        expect((body.transactionId as string).length).toBe(64);
+        expect(body.balance!.bch as number).toBe(0);
+        expect(body.balance!.sat as number).toBe(0);
+      } catch(e){
+        console.log(e)
+      }
 
-      const resp = sendResult.response;
-      const body = sendResult.body;
-      expect(resp.statusCode).toBe(200);
-      expect((body.transaction as string).length).toBe(64);
-      expect(body.balance!.bch as number).toBe(0);
-      expect(body.balance!.sat as number).toBe(0);
+      
     }
   } catch (e) {
     throw Error(e);

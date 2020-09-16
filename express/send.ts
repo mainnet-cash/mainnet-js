@@ -13,8 +13,8 @@ export const send = (request) =>
     try {
       let wallet = await walletFromIdString(sendRequestJson.walletId);
       if (wallet) {
-        let result = await wallet.send(sendRequestJson.to);
-        resolve(Service.successResponse(result));
+        let resp = await wallet.send(sendRequestJson.to);
+        resolve(Service.successResponse({ ...resp }));
       } else {
         throw Error("Could not derive wallet");
       }

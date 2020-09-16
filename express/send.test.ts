@@ -36,7 +36,7 @@ test("Send from a Regtest wallet with the API", async () => {
       const resp = sendResult.response;
       const body = sendResult.body;
       expect(resp.statusCode).toBe(200);
-      expect((body.transaction as string).length).toBe(64);
+      expect((body.transactionId as string).length).toBe(64);
       expect(body.balance!.bch as number).toBeGreaterThan(49);
       expect(body.balance!.sat as number).toBeGreaterThan(
         50 * bchParam.subUnits
