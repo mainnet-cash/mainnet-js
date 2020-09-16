@@ -25,7 +25,7 @@ export class Utxo {
     /**
     * The hash of a transaction
     */
-    'transaction': string;
+    'transactionId': string;
 
     static discriminator: string | undefined = undefined;
 
@@ -46,8 +46,8 @@ export class Utxo {
             "type": "string"
         },
         {
-            "name": "transaction",
-            "baseName": "transaction",
+            "name": "transactionId",
+            "baseName": "transactionId",
             "type": "string"
         }    ];
 
