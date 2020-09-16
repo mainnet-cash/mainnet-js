@@ -26,8 +26,9 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
-        node-version: 10
+        node-version: 12
     - uses: microsoft/playwright-github-action@v1
+    - run: npm install
     - run: npm run test
     - run: npm run build
     - run: npm run test:browser
@@ -43,8 +44,9 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
-        node-version: 10
+        node-version: 12
     - uses: microsoft/playwright-github-action@v1
+    - run: npm install
     - run: npm run test
     - run: npm run build
     - run: npm run test:browser
@@ -65,8 +67,9 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
-        node-version: 10
+        node-version: 12
     - uses: microsoft/playwright-github-action@v1
+    - run: npm install
     - run: npm run test
     - run: npm run build
     - run: npm run test:browser
