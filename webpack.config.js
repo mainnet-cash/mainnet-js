@@ -78,8 +78,18 @@ const webWorkerConfig = {
   },
 };
 
+const browserTestDiff = {
+  output: {
+    filename: `mainnet.js`,
+    path: __dirname + "/jest/playwright",
+  }
+};
+
+const browserTestConfig = merge(browserConfig, browserTestDiff)
+
 module.exports = [
   nodeConfig,
   browserConfig,
+  browserTestConfig,
   //webWorkerConfig
 ].map((c) => merge(baseConfig, c));
