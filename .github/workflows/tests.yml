@@ -31,21 +31,6 @@ jobs:
     - run: npm run test
     - run: npm run build
     - run: npm run test:browser
-    - run: mkdir -p coredumps
-    # Set core dump file name pattern
-    - run: sudo bash -c 'echo "$(pwd -P)/coredumps/core-pid_%p.dump" > /proc/sys/kernel/core_pattern'
-    # XVFB-RUN merges both STDOUT and STDERR, whereas we need only STDERR
-    # Wrap `npm run` in a subshell to redirect STDERR to file.
-    # Enable core dumps in the subshell.
-    - run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- bash -c "ulimit -c unlimited && npx test-runner test/ --jobs=1 --forbid-only --timeout=30000 --global-timeout=5400000 --retries=3 --reporter=dot,json && npm run coverage"
-      env:
-        BROWSER: ${{ matrix.browser }}
-        PWRUNNER_JSON_REPORT: "test-results/report.json"
-    - uses: actions/upload-artifact@v1
-      if: always()
-      with:
-        name: ${{ matrix.browser }}-${{ matrix.os }}-test-results
-        path: test-results
 
   test_mac:
     name: "macOS"
@@ -65,12 +50,6 @@ jobs:
     - run: npm run test:browser
       env:
         BROWSER: ${{ matrix.browser }}
-        PWRUNNER_JSON_REPORT: "test-results/report.json"
-    - uses: actions/upload-artifact@v1
-      if: ${{ always() }}
-      with:
-        name: ${{ matrix.browser }}-mac-test-results
-        path: test-results
 
   test_win:
     name: "Windows"
@@ -94,9 +73,3 @@ jobs:
       shell: bash
       env:
         BROWSER: ${{ matrix.browser }}
-        PWRUNNER_JSON_REPORT: "test-results/report.json"
-    - uses: actions/upload-artifact@v1
-      if: ${{ always() }}
-      with:
-        name: ${{ matrix.browser }}-win-test-results
-        path: test-results
