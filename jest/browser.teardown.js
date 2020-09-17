@@ -1,3 +1,5 @@
+const child_process = require("child_process");
+
 module.exports = async function globalTeardown() {
 
   // Your global teardown
