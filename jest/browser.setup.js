@@ -112,7 +112,7 @@ module.exports = async function globalSetup(globalConfig) {
       "npx",
       ["ts-node", "serve.ts"],
       {
-        shell: false,
+        shell: true,
       }
     );
   }

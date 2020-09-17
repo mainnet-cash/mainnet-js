@@ -104,7 +104,7 @@ module.exports = async function () {
       "npx",
       ["ts-node", "serve.ts"],
       {
-        shell: false,
+        shell: true,
       }
     );
   }
