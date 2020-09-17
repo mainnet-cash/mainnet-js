@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [webkit]
+        browser: [chromium]
     runs-on: windows-latest
     steps:
     - name: Install Media Pack

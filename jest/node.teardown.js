@@ -5,6 +5,7 @@ module.exports = async function () {
   console.log("stopped bchd");
 
   global.mainnetServer.stdio.forEach((s) => s.pause());
+  global.mainnetServer.console.forEach((s) => s.pause());
   global.mainnetServer.kill();
   console.log("stopped express");
 };
