@@ -106,7 +106,6 @@ module.exports = async function () {
       ["ts-node", "serve.ts"],
       {
         shell: false,
-        detached: false,
       }
     );
   }

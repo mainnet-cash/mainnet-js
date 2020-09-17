@@ -100,9 +100,9 @@ module.exports = async function globalSetup(globalConfig) {
   } else {
     console.log("...already running");
   }
-  if (global.demoServer === undefined) {
+  if (global.moduleServer === undefined) {
     let npx = process.platform === "win32" ? "npx.cmd" : "npx"
-    global.demoServer = spawn(
+    global.moduleServer = spawn(
       npx,
       ["reload", "--dir=jest/playwright/"],
       {
