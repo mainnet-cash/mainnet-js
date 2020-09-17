@@ -107,6 +107,7 @@ module.exports = async function globalSetup(globalConfig) {
       ["reload", "--dir=jest/playwright/"],
       {
         shell: false,
+        detached: false,
       }
     );
   }
