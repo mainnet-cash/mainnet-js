@@ -100,8 +100,9 @@ module.exports = async function () {
     console.log("...bchd already running");
   }
   if (global.mainnetServer === undefined) {
+    let npx = process.platform === "win32" ? "npx.cmd" : "npx"
     global.mainnetServer = spawn(
-      "npx",
+      npx,
       ["ts-node", "serve.ts"],
       {
         shell: false,
