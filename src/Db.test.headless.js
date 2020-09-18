@@ -11,7 +11,6 @@ describe(`Playwright should load test page`, () => {
   beforeAll(async () => {
     browser = await playwright["chromium"].launch();
     page = await browser.newPage();
-
     if (!page) {
       throw new Error("Connection wasn't established");
     }

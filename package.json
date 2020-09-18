@@ -20,7 +20,6 @@
     "pretest": "node util/checkBchd.js",
     "test": "npx jest --runInBand --detectOpenHandles",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
-    "test:server": "npx jest express/WalletService.test",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "grpcui:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
