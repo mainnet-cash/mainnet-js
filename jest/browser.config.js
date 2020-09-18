@@ -3,7 +3,7 @@ module.exports = {
   rootDir: "../",
   preset: "jest-playwright-preset",
   roots: ["<rootDir>/src"],
-  testMatch: ["**/?(*.)+(headless).[t|j]s"],
+  testMatch: ["**/?(*.)+(headless.test).[t|j]s"],
   testPathIgnorePatterns: ["/node_modules/", "dist"], //
   testEnvironment: "node",
   transform: {
