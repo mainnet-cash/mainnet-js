@@ -99,23 +99,7 @@ module.exports = async function () {
   } else {
     console.log("...bchd already running");
   }
-  if (global.mainnetServer === undefined) {
-    let npx = process.platform === "win32" ? "npx.cmd" : "npx"
-    global.mainnetServer = spawn(
-      npx,
-      ["ts-node", "serve.ts"],
-      {
-        shell: false,
-      }
-    );
-  }
-
-  // ping express
-  for (let i = 0; !(await serverReady()) && i < 10; i++) {
-    console.log("Waiting for express server");
-    await delay(2000);
-  }
-
+  
   // ping bchd as a readiness signal, give up and run anyway after 10s
   for (let i = 0; (await pingBchd()).length > 0 && i < 5; i++) {
     console.log("Waiting for bchd node");
@@ -133,7 +117,7 @@ module.exports = async function () {
       );  
     }
     console.log("block height: " + await getBlockHeight())
-    await delay(200);
+    await delay(5000);
   }
   console.log("proceeding...");
 };

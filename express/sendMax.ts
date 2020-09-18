@@ -11,7 +11,6 @@ import { SendMaxRequest } from "../src/wallet/model";
 export const sendMax = (request) =>
   new Promise(async (resolve, reject) => {
     const sendRequestJson = request.body;
-    console.log(JSON.stringify(sendRequestJson))
     try {
       let wallet = await walletFromIdString(sendRequestJson.walletId);
       if (!wallet) {

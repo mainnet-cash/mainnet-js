@@ -10,13 +10,9 @@ import { walletFromIdString } from "../src/wallet/createWallet";
 export const utxos = (request) =>
   new Promise(async (resolve, reject) => {
     try {
-      let sendParam = request.body;
-      let wallet = await walletFromIdString(sendParam.walletId);
-
-      if (wallet.cashaddr) {
-        let result = await wallet.utxos();
-        resolve(Service.successResponse({ ...result }));
-      }
+      let wallet = await walletFromIdString(request.body.walletId);
+      let resp = await wallet.utxos();
+      resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(JSON.stringify(e));
       reject(

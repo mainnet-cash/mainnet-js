@@ -158,7 +158,6 @@ export class WifWallet extends BaseWallet {
     let resp = new SendResponse({});
     resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
-    console.log(JSON.stringify(resp))
     return resp;
   }
 
@@ -273,11 +272,11 @@ export class WifWallet extends BaseWallet {
   /**
    * _processsSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
    * @param  {SendRequest[]} sendRequests
-   * @param  {} discardChange=true
+   * @param  {} discardChange=false
    */
   private async _processSendRequests(
     sendRequests: SendRequest[],
-    discardChange = true
+    discardChange = false
   ) {
     if (!this.privateKey) {
       throw Error(

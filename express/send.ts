@@ -12,14 +12,12 @@ export const send = (request) =>
     const sendRequestJson = request.body;
     try {
       let wallet = await walletFromIdString(sendRequestJson.walletId);
-      if (wallet) {
-        let resp = await wallet.send(sendRequestJson.to);
-        resolve(Service.successResponse({ ...resp }));
-      } else {
+      if (!wallet) {
         throw Error("Could not derive wallet");
       }
+      let resp = await wallet.send(sendRequestJson.to);
+      resolve(Service.successResponse({...resp}));
     } catch (e) {
-      console.log(JSON.stringify(e));
       reject(
         Service.rejectResponse(e.message || "Invalid input", e.status || 500)
       );
