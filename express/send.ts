@@ -16,7 +16,7 @@ export const send = (request) =>
         throw Error("Could not derive wallet");
       }
       let resp = await wallet.send(sendRequestJson.to);
-      resolve(Service.successResponse({...resp}));
+      resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
         Service.rejectResponse(e.message || "Invalid input", e.status || 500)

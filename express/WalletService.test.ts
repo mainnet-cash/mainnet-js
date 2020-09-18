@@ -1,21 +1,19 @@
-import { getServer } from '../generated/serve/index'
+import { getServer } from "../generated/serve/index";
 import * as mockApi from "../generated/client/typescript-mock/api";
 import { bchParam } from "../src/chain";
 import { Amount } from "../generated/client/typescript-mock/model/amount";
 import { SendMaxRequest } from "../generated/client/typescript-mock/model/sendMaxRequest";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import { UtxoResponse } from '../generated/client/typescript-mock/api';
+import { UtxoResponse } from "../generated/client/typescript-mock/api";
 
-var request = require('supertest');
+var request = require("supertest");
 
 var app;
 
-describe('Post Endpoints', () => {
-
+describe("Post Endpoints", () => {
   beforeAll(async function () {
     app = await getServer().launch();
-
   });
   afterEach(function () {
     app.close();
@@ -24,16 +22,16 @@ describe('Post Endpoints', () => {
   /**
    * balance
    */
-  it('Should return the balance from a regtest wallet', async () => {
+  it("Should return the balance from a regtest wallet", async () => {
     const resp = await request(app)
-      .post('/v1/wallet/balance')
+      .post("/v1/wallet/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-      })
-    expect(resp.statusCode).toEqual(200)
-    expect(resp.body.sat).toBeGreaterThan(100)
-    expect(resp.body.bch).toBeGreaterThan(5000)
-  })
+      });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.sat).toBeGreaterThan(100);
+    expect(resp.body.bch).toBeGreaterThan(5000);
+  });
 
   /**
    * createWallet
@@ -43,9 +41,7 @@ describe('Post Endpoints', () => {
     req.name = "A simple Regtest Wallet";
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
     req.network = mockApi.WalletRequest.NetworkEnum.Regtest;
-    let resp = await request(app)
-      .post('/v1/wallet/')
-      .send(req)
+    let resp = await request(app).post("/v1/wallet/").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.name).toBe(req.name);
@@ -61,9 +57,7 @@ describe('Post Endpoints', () => {
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
     req.network = mockApi.WalletRequest.NetworkEnum.Testnet;
 
-    let resp = await request(app)
-      .post('/v1/wallet/')
-      .send(req)
+    let resp = await request(app).post("/v1/wallet/").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.name).toBe(req.name);
@@ -78,9 +72,7 @@ describe('Post Endpoints', () => {
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
     req.network = mockApi.WalletRequest.NetworkEnum.Mainnet;
 
-    let resp = await request(app)
-      .post('/v1/wallet/')
-      .send(req)
+    let resp = await request(app).post("/v1/wallet/").send(req);
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
@@ -95,12 +87,10 @@ describe('Post Endpoints', () => {
    */
 
   it("Should return the deposit address from a regtest wallet", async () => {
-    let resp = await request(app)
-      .post('/v1/wallet/deposit_address')
-      .send({
-        walletId:
-          "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
-      })
+    let resp = await request(app).post("/v1/wallet/deposit_address").send({
+      walletId:
+        "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
+    });
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
@@ -110,16 +100,13 @@ describe('Post Endpoints', () => {
   });
 
   /**
- * depositQr
- */
+   * depositQr
+   */
   it("Should get the deposit qr from a regtest wallet", async () => {
-
-    let resp = await request(app)
-      .post('/v1/wallet/deposit_qr')
-      .send({
-        walletId:
-          "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
-      })
+    let resp = await request(app).post("/v1/wallet/deposit_qr").send({
+      walletId:
+        "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
+    });
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
@@ -135,34 +122,32 @@ describe('Post Endpoints', () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app)
-        .post('/v1/wallet/')
-        .send({
-          name: "Bobs Regtest One Time Wallet",
-          type: mockApi.WalletRequest.TypeEnum.Wif,
-          network: mockApi.WalletRequest.NetworkEnum.Regtest
-        })
+      const bobsWalletResp = await request(app).post("/v1/wallet/").send({
+        name: "Bobs Regtest One Time Wallet",
+        type: mockApi.WalletRequest.TypeEnum.Wif,
+        network: mockApi.WalletRequest.NetworkEnum.Regtest,
+      });
 
-      const bobsCashaddr = bobsWalletResp.body.cashaddr
+      const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
       const sendResp = await request(app)
-        .post('/v1/wallet/send')
+        .post("/v1/wallet/send")
         .send({
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-          to: [{
-            cashaddr: bobsCashaddr,
-            amount: {
-              unit: Amount.UnitEnum.Sat,
-              value: 120000
-            }
-          }]
-        })
+          to: [
+            {
+              cashaddr: bobsCashaddr,
+              amount: {
+                unit: Amount.UnitEnum.Sat,
+                value: 120000,
+              },
+            },
+          ],
+        });
 
-      let resp = await request(app)
-        .post('/v1/wallet/max_amount_to_send')
-        .send({
-          walletId: bobsWalletResp.body.walletId
-        })
+      let resp = await request(app).post("/v1/wallet/max_amount_to_send").send({
+        walletId: bobsWalletResp.body.walletId,
+      });
       const body = resp.body;
       expect(resp.statusCode).toBe(200);
       expect(body!.sat).toBeGreaterThan(110000);
@@ -174,19 +159,15 @@ describe('Post Endpoints', () => {
    */
 
   test("Should send from a Regtest wallet with the API", async () => {
-
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app)
-        .post('/v1/wallet/')
-        .send({
-          name: "Bobs Regtest One Time Wallet",
-          type: mockApi.WalletRequest.TypeEnum.Wif,
-          network: mockApi.WalletRequest.NetworkEnum.Regtest
-        })
-      const bobsCashaddr = bobsWalletResp.body.cashaddr
-
+      const bobsWalletResp = await request(app).post("/v1/wallet/").send({
+        name: "Bobs Regtest One Time Wallet",
+        type: mockApi.WalletRequest.TypeEnum.Wif,
+        network: mockApi.WalletRequest.NetworkEnum.Regtest,
+      });
+      const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
       let toBob = new SendRequestItem();
       toBob.cashaddr = bobsCashaddr;
@@ -195,19 +176,16 @@ describe('Post Endpoints', () => {
       toBob.amount.value = 3000;
 
       let AliceSendToBobReq = new SendRequest();
-      AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`
+      AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
       AliceSendToBobReq.to = [toBob];
 
-
       const sendResp = await request(app)
-        .post('/v1/wallet/send')
-        .send( AliceSendToBobReq )
+        .post("/v1/wallet/send")
+        .send(AliceSendToBobReq);
 
-      const resp = await request(app)
-        .post('/v1/wallet/balance')
-        .send({
-          walletId: bobsWalletResp.body.walletId
-        })
+      const resp = await request(app).post("/v1/wallet/balance").send({
+        walletId: bobsWalletResp.body.walletId,
+      });
 
       const body = resp.body;
 
@@ -217,24 +195,21 @@ describe('Post Endpoints', () => {
       expect(resp.statusCode).toBe(200);
       expect(body.sat as number).toBe(3000);
     }
-
   });
-
 
   /**
    * sendMax
    */
 
-   it("Should send all available funds", async () => {
-
+  it("Should send all available funds", async () => {
     let bobWalletReq = new mockApi.WalletRequest();
     bobWalletReq.name = "A Bobs Regtest Wallet";
     bobWalletReq.type = mockApi.WalletRequest.TypeEnum.Wif;
     bobWalletReq.network = mockApi.WalletRequest.NetworkEnum.Regtest;
 
     const bobsWalletResp = await request(app)
-      .post('/v1/wallet/')
-      .send(bobWalletReq)
+      .post("/v1/wallet/")
+      .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
 
     let toBob = new SendRequestItem();
@@ -247,51 +222,44 @@ describe('Post Endpoints', () => {
     AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
     AliceSendToBobReq.to = [toBob];
 
-    await request(app)
-      .post('/v1/wallet/send')
-      .send(AliceSendToBobReq)
-    
+    await request(app).post("/v1/wallet/send").send(AliceSendToBobReq);
+
     let BobSendToAliceReq = new SendMaxRequest();
     BobSendToAliceReq.walletId = bobsWallet.walletId;
     BobSendToAliceReq.cashaddr = process.env.ADDRESS as string;
-    
+
     let resp = await request(app)
-    .post('/v1/wallet/send_max')
-    .send(BobSendToAliceReq)
+      .post("/v1/wallet/send_max")
+      .send(BobSendToAliceReq);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect((body.transactionId as string).length).toBe(64);
     expect(body.balance!.bch as number).toBe(0);
     expect(body.balance!.sat as number).toBe(0);
-  
-   })
+  });
   /**
    * utxos
    */
   it("Should return the unspent transaction outputs for a regtest wallet", async () => {
-    
-      const resp = await request(app)
-      .post('/v1/wallet/utxo')
+    const resp = await request(app)
+      .post("/v1/wallet/utxo")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-      })
+      });
 
-      const body = resp.body as UtxoResponse;
-      if (body.utxos) {
-        const valueArray = await Promise.all(
-          body.utxos.map(async (b) => {
-            return b!.amount!.value || 0;
-          })
-        );
-        const value = valueArray.reduce((a, b) => a + b, 0);
-        expect(resp.statusCode).toBe(200);
-        expect(value).toBeGreaterThan(490 * bchParam.subUnits);
-        expect(body!.utxos!.length).toBeGreaterThan(100);
-      } else {
-        throw Error("no utxos returned");
-      }
-    
+    const body = resp.body as UtxoResponse;
+    if (body.utxos) {
+      const valueArray = await Promise.all(
+        body.utxos.map(async (b) => {
+          return b!.amount!.value || 0;
+        })
+      );
+      const value = valueArray.reduce((a, b) => a + b, 0);
+      expect(resp.statusCode).toBe(200);
+      expect(value).toBeGreaterThan(490 * bchParam.subUnits);
+      expect(body!.utxos!.length).toBeGreaterThan(100);
+    } else {
+      throw Error("no utxos returned");
+    }
   });
-
-})
-
+});
