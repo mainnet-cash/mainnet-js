@@ -10,22 +10,7 @@ on:
     paths:
       - '!*.MD'
 jobs:
-  test:
-    strategy:
-      matrix:
-        os: [ "ubuntu-latest" ]
-        node: [ '12' ]
-    name: test/node ${{ matrix.node }}/${{ matrix.platform }}
-    runs-on: ${{ matrix.os }}
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: ${{ matrix.node }}
-    - run: npm install
-    - run: npm run test
   coverage:
-    needs: [ test ]
     name: coverage
     runs-on: ubuntu-latest
     steps:
@@ -34,6 +19,7 @@ jobs:
       with:
         node-version: '12'
     - run: npm install
+    - run: npm run pretest
     - uses: paambaati/codeclimate-action@v2.5.7
       env:
         CC_TEST_REPORTER_ID: cf454b72ccba2f9ed854092c9c9f89b8d3dbae7417f7ed0d75421e53a404b824
