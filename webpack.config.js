@@ -82,10 +82,10 @@ const browserTestDiff = {
   output: {
     filename: `mainnet.js`,
     path: __dirname + "/jest/playwright",
-  }
+  },
 };
 
-const browserTestConfig = merge(browserConfig, browserTestDiff)
+const browserTestConfig = merge(browserConfig, browserTestDiff);
 
 module.exports = [
   nodeConfig,

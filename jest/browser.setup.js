@@ -1,11 +1,9 @@
 // jest/browser.setup.js
 require("dotenv").config({ path: ".env.regtest" });
 
-
 const { spawn, spawnSync } = require("child_process");
 const http = require("http");
 const { GrpcClient } = require("grpc-bchrpc-node");
-
 
 async function getBlockHeight() {
   let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
@@ -79,7 +77,6 @@ function generateBlock(user, password, numberOfBlocks, binDir) {
  */
 module.exports = async function globalSetup(globalConfig) {
   // do stuff which needs to be done before all tests are executed
-  
 
   console.log("starting bchd ...");
 
@@ -93,7 +90,7 @@ module.exports = async function globalSetup(globalConfig) {
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`,
-      `-d=critical` // prevent daemon messages from overrunning the process buffer
+      `-d=critical`, // prevent daemon messages from overrunning the process buffer
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
@@ -101,17 +98,13 @@ module.exports = async function globalSetup(globalConfig) {
     console.log("...already running");
   }
   if (global.moduleServer === undefined) {
-    let npx = process.platform === "win32" ? "npx.cmd" : "npx"
-    global.moduleServer = spawn(
-      npx,
-      ["reload", "--dir=jest/playwright/"],
-      {
-        shell: false,
-        detached: false,
-      }
-    );
+    let npx = process.platform === "win32" ? "npx.cmd" : "npx";
+    global.moduleServer = spawn(npx, ["reload", "--dir=jest/playwright/"], {
+      shell: false,
+      detached: false,
+    });
   }
-  
+
   // ping html
   for (let i = 0; !(await serverReady()) && i < 10; i++) {
     console.log("Waiting for html server");

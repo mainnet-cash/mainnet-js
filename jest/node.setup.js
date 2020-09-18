@@ -22,7 +22,7 @@ async function getBlockHeight() {
     },
   });
   let blockchainInfo = await client.getBlockchainInfo();
-  console.log("block height: " +blockchainInfo.getBestHeight())
+  console.log("block height: " + blockchainInfo.getBestHeight());
   return blockchainInfo.getBestHeight();
 }
 
@@ -49,7 +49,7 @@ function serverReady() {
     });
 
     req.on("error", (e) => {
-      console.log("Express error " +e.code)
+      console.log("Express error " + e.code);
       resolve(false);
     });
   });
@@ -73,11 +73,11 @@ function generateBlock(user, password, numberOfBlocks, binDir) {
   if (bchctl.stderr.length > 0) {
     throw Error(bchctl.stderr.toString());
   }
-  console.log(bchctl.status)
+  console.log(bchctl.status);
   return JSON.parse(bchctl.stdout.toString());
 }
 
-let miningStarted = false
+let miningStarted = false;
 
 module.exports = async function () {
   console.log("starting bchd ...");
@@ -92,7 +92,7 @@ module.exports = async function () {
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`,
-      `-d=critical` // prevent daemon messages from overrunning the process buffer
+      `-d=critical`, // prevent daemon messages from overrunning the process buffer
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
@@ -108,16 +108,16 @@ module.exports = async function () {
 
   for (let i = 0; (await getBlockHeight()) < 100 && i < 15; i++) {
     console.log("Waiting for blocks to be mined");
-    if(!miningStarted){
+    if (!miningStarted) {
       generateBlock(
         process.env.RPC_USER || "alice",
         process.env.RPC_PASS || "password",
         105,
         process.env.BCHD_BIN_DIRECTORY || "bin"
-      );  
+      );
     }
-    console.log("block height: " + await getBlockHeight())
-    await delay(5000);
+    console.log("block height: " + (await getBlockHeight()));
+    await delay(200);
   }
   console.log("proceeding...");
 };

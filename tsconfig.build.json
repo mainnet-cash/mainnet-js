@@ -1,19 +1,16 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "ES2020",
-        "declaration": true,
-        "lib": ["es2017","esnext.bigint","dom"],
-        "sourceMap": true,
-        "strict": true,
-        "strictPropertyInitialization": false,
-        "experimentalDecorators": true,
-        "moduleResolution": "node",
-        "esModuleInterop": true,
-        "types": ["jest-playwright-preset", "expect-playwright"]
-    },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2020",
+    "declaration": true,
+    "lib": ["es2017", "esnext.bigint", "dom"],
+    "sourceMap": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "types": ["jest-playwright-preset", "expect-playwright"]
+  },
+  "exclude": ["node_modules", "dist"]
 }

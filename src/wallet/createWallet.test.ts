@@ -28,7 +28,9 @@ test("Expect Error passing testnet wallet to mainnet", async () => {
       "wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
     );
   } catch (e) {
-      expect(e.message).toBe("Error: attempted to pass a testnet Wif to a mainnet wallet");
+    expect(e.message).toBe(
+      "Error: attempted to pass a testnet Wif to a mainnet wallet"
+    );
   }
 });
 
@@ -39,7 +41,8 @@ test("Expect Error passing mainnet wallet to testnet", async () => {
       "wif:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
-      expect(e.message).toBe("Error: attempted to pass a mainnet Wif to a testnet wallet");
+    expect(e.message).toBe(
+      "Error: attempted to pass a mainnet Wif to a testnet wallet"
+    );
   }
-
 });

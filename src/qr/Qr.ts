@@ -11,15 +11,15 @@ export function qrAddress(address: string, size = 256): string {
     width: size,
     height: size,
   }).svg();
-  let svgB64 = ""
-  if(typeof process === 'undefined'){
+  let svgB64 = "";
+  if (typeof process === "undefined") {
     svgB64 = btoa(svg);
-  }else{
+  } else {
     const btoa = (str: string) => {
-      return Buffer.from(str).toString('base64');
-    }  
-    svgB64 = btoa(svg);    
+      return Buffer.from(str).toString("base64");
+    };
+    svgB64 = btoa(svg);
   }
-  
+
   return `data:image/svg+xml;base64,${svgB64}`;
 }

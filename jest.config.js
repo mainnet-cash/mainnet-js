@@ -5,12 +5,13 @@ module.exports = {
   collectCoverageFrom: [
     "**/*.{js,jsx,ts}",
     "!**/node_modules/**",
-    "!**/generated/**"
+    "!**/generated/**",
   ],
   coveragePathIgnorePatterns: [
-    '.*/src/.*\\.d\\.ts',
-     '.*/src/.*\\.test\\.{ts,js}',
-     '.*/src/.*\\.test\\.headless\\.js'],
+    ".*/src/.*\\.d\\.ts",
+    ".*/src/.*\\.test\\.{ts,js}",
+    ".*/src/.*\\.test\\.headless\\.js",
+  ],
   roots: ["<rootDir>/src", "<rootDir>/express/"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
