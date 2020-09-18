@@ -1,3 +1,3 @@
-import {startServer} from "./generated/serve/index";
+import { startServer } from "./generated/serve/index";
 
-startServer()
+startServer();
