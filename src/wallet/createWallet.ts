@@ -77,7 +77,7 @@ export async function walletFromIdString(
     type: WalletTypeEnum[walletType],
   } as WalletRequest;
   let wallet = await createWalletObject(walletRequest);
-  try{
+  try {
     switch (walletType) {
       case "wif":
         await wallet.fromWIF(privateImport);
@@ -86,9 +86,9 @@ export async function walletFromIdString(
         throw Error("Heuristic Wallets are not implemented");
       default:
         throw Error("The wallet type was not understood");
-    }  
-  } catch(e){
-    throw Error(e)
+    }
+  } catch (e) {
+    throw Error(e);
   }
   return wallet;
 }

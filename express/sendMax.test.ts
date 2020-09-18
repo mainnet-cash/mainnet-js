@@ -35,7 +35,7 @@ test("Send from Alice to Bob, have Bob send max back", async () => {
       let BobSendToAliceReq = new SendMaxRequest();
       BobSendToAliceReq.walletId = bobsWallet.walletId;
       BobSendToAliceReq.cashaddr = process.env.ADDRESS as string;
-      try{
+      try {
         let sendResult = await api.sendMax(BobSendToAliceReq);
         const resp = sendResult.response;
         const body = sendResult.body;
@@ -43,11 +43,9 @@ test("Send from Alice to Bob, have Bob send max back", async () => {
         expect((body.transactionId as string).length).toBe(64);
         expect(body.balance!.bch as number).toBe(0);
         expect(body.balance!.sat as number).toBe(0);
-      } catch(e){
-        console.log(e)
+      } catch (e) {
+        console.log(e);
       }
-
-      
     }
   } catch (e) {
     throw Error(e);

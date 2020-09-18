@@ -87,11 +87,17 @@ export class WifWallet extends BaseWallet {
     if (hasError) {
       throw Error(result as string);
     } else {
-      if ((walletImportFormatString[0] === "L" || walletImportFormatString[0] === "K") && (this.networkType !== NetworkType.Mainnet)) {
-        throw Error("attempted to pass a testnet Wif to a mainnet wallet")
-      }
-      else if ((walletImportFormatString[0] === "c") && (this.networkType !== NetworkType.Testnet)) {
-        throw Error("attempted to pass a mainnet Wif to a testnet wallet")
+      if (
+        (walletImportFormatString[0] === "L" ||
+          walletImportFormatString[0] === "K") &&
+        this.networkType !== NetworkType.Mainnet
+      ) {
+        throw Error("attempted to pass a testnet Wif to a mainnet wallet");
+      } else if (
+        walletImportFormatString[0] === "c" &&
+        this.networkType !== NetworkType.Testnet
+      ) {
+        throw Error("attempted to pass a mainnet Wif to a testnet wallet");
       }
     }
     let resultData: PrivateKey = result as PrivateKey;
@@ -104,7 +110,6 @@ export class WifWallet extends BaseWallet {
       this.networkPrefix
     )) as string;
   }
-
 
   public async generateWif(): Promise<void | Error> {
     const sha256 = await sha256Promise;
@@ -158,7 +163,7 @@ export class WifWallet extends BaseWallet {
     let resp = new SendResponse({});
     resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
-    console.log(JSON.stringify(resp))
+    console.log(JSON.stringify(resp));
     return resp;
   }
 
@@ -294,9 +299,7 @@ export class WifWallet extends BaseWallet {
     let spendAmount = await sumSendRequestAmounts(sendRequests);
 
     if (utxos.length === 0) {
-      throw Error(
-        "There were no Unspent Outputs"
-      );
+      throw Error("There were no Unspent Outputs");
     }
     if (typeof spendAmount !== "bigint") {
       throw Error("Couldn't get spend amount when building transaction");

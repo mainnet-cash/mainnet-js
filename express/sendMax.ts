@@ -11,7 +11,7 @@ import { SendMaxRequest } from "../src/wallet/model";
 export const sendMax = (request) =>
   new Promise(async (resolve, reject) => {
     const sendRequestJson = request.body;
-    console.log(JSON.stringify(sendRequestJson))
+    console.log(JSON.stringify(sendRequestJson));
     try {
       let wallet = await walletFromIdString(sendRequestJson.walletId);
       if (!wallet) {
@@ -22,7 +22,7 @@ export const sendMax = (request) =>
       let resp = await wallet.sendMax(sendRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e)
+      console.log(e);
       reject(
         Service.rejectResponse(e.message || "Invalid input", e.status || 500)
       );
