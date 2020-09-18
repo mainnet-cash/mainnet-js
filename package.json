@@ -18,11 +18,9 @@
   ],
   "scripts": {
     "pretest": "node util/checkBchd.js",
-    "test": "npx jest --runInBand",
-    "test:wallet": "npx jest sendMax",
-    "test:server": "npx jest express",
-    "test:browser": "npx jest --config jest/browser.config.js",
-    "test:browser:server": "npx reload --dir=jest/playwright/",
+    "test": "npx jest --runInBand --detectOpenHandles",
+    "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
+    "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "grpcui:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
     "grpcui:regtest": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
@@ -30,8 +28,8 @@
     "grpcui:mainnet": "grpcui -proto pb/bchrpc.proto bchd.greyh.at:8335",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "serve": "npx ts-node ./generated/serve/index.ts",
-    "serve:monitor": "npx nodemon ./generated/serve/index.ts",
+    "serve": "npx ts-node serve.ts",
+    "serve:monitor": "npx nodemon serve.ts",
     "build": "npx webpack",
     "demo": "npx reload --dir=demo/"
   },
@@ -58,6 +56,7 @@
     "js-yaml": "^3.3.0",
     "node-fetch": "^2.6.1",
     "nodemon": "^2.0.4",
+    "nyc": "^15.1.0",
     "openapi-sampler": "^1.0.0-beta.15",
     "playwright": "^1.4.0",
     "prettier": "^2.0.5",
@@ -71,7 +70,8 @@
     "unzipper": "^0.10.11",
     "webpack": "^v5.0.0-beta.28",
     "webpack-cli": "^3.3.12",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "yarn": "^1.22.5"
   },
   "dependencies": {
     "@bitauth/libauth": "^1.17.1",

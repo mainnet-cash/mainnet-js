@@ -22,4 +22,6 @@ const launchServer = async () => {
   }
 };
 
-launchServer().catch(e => logger.error(e));
+export function startServer(){
+  launchServer().catch(e => logger.error(e));
+}

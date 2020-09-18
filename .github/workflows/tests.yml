@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - feature*
+      - feature/*
   pull_request:
     branches:
       - master
@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
-        os: [ubuntu-18.04, ubuntu-20.04]
+        os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [webkit]
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [chromium]
     runs-on: windows-latest
     steps:
     - name: Install Media Pack

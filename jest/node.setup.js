@@ -22,6 +22,7 @@ async function getBlockHeight() {
     },
   });
   let blockchainInfo = await client.getBlockchainInfo();
+  console.log("block height: " +blockchainInfo.getBestHeight())
   return blockchainInfo.getBestHeight();
 }
 
@@ -48,7 +49,7 @@ function serverReady() {
     });
 
     req.on("error", (e) => {
-      console.log(e)
+      console.log("Express error " +e.code)
       resolve(false);
     });
   });
@@ -72,8 +73,11 @@ function generateBlock(user, password, numberOfBlocks, binDir) {
   if (bchctl.stderr.length > 0) {
     throw Error(bchctl.stderr.toString());
   }
+  console.log(bchctl.status)
   return JSON.parse(bchctl.stdout.toString());
 }
+
+let miningStarted = false
 
 module.exports = async function () {
   console.log("starting bchd ...");
@@ -88,31 +92,28 @@ module.exports = async function () {
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`,
+      `-d=critical` // prevent daemon messages from overrunning the process buffer
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
   } else {
-    console.log("...already running");
+    console.log("...bchd already running");
   }
   if (global.mainnetServer === undefined) {
-    try{
-      global.mainnetServer = spawn(
-        "npx",
-        ["ts-node", "./generated/serve/index.ts"],
-        {
-          shell: false,
-        }
-      );  
-    } catch(e){
-      console.error(e)
-      throw(e)
-    }
+    let npx = process.platform === "win32" ? "npx.cmd" : "npx"
+    global.mainnetServer = spawn(
+      npx,
+      ["ts-node", "serve.ts"],
+      {
+        shell: false,
+      }
+    );
   }
 
   // ping express
   for (let i = 0; !(await serverReady()) && i < 10; i++) {
     console.log("Waiting for express server");
-    await delay(1000);
+    await delay(2000);
   }
 
   // ping bchd as a readiness signal, give up and run anyway after 10s
@@ -122,14 +123,17 @@ module.exports = async function () {
   }
 
   for (let i = 0; (await getBlockHeight()) < 100 && i < 15; i++) {
-    console.log("Waiting blocks to be mined");
-    generateBlock(
-      process.env.RPC_USER || "alice",
-      process.env.RPC_PASS || "password",
-      105,
-      process.env.BCHD_BIN_DIRECTORY || "bin"
-    );
-    await delay(2000);
+    console.log("Waiting for blocks to be mined");
+    if(!miningStarted){
+      generateBlock(
+        process.env.RPC_USER || "alice",
+        process.env.RPC_PASS || "password",
+        105,
+        process.env.BCHD_BIN_DIRECTORY || "bin"
+      );  
+    }
+    console.log("block height: " + await getBlockHeight())
+    await delay(200);
   }
   console.log("proceeding...");
 };

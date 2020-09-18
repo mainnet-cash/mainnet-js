@@ -3,9 +3,9 @@ module.exports = {
   rootDir: "../",
   preset: "jest-playwright-preset",
   roots: ["<rootDir>/src"],
-  testMatch: ["**/?(*.)+(headless).[t|j]s"],
+  testMatch: ["**/?(*.)+(test.headless).[t|j]s"],
   testPathIgnorePatterns: ["/node_modules/", "dist"], //
-  testEnvironment: "jsdom",
+  testEnvironment: "node",
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },

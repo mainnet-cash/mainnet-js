@@ -3,12 +3,9 @@ require("dotenv").config({ path: ".env.regtest" });
 
 
 const { spawn, spawnSync } = require("child_process");
-
 const http = require("http");
-const { json } = require("body-parser");
-
 const { GrpcClient } = require("grpc-bchrpc-node");
-const { setup: setupDevServer } = require('jest-process-manager')
+
 
 async function getBlockHeight() {
   let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
@@ -44,7 +41,7 @@ async function pingBchd() {
 
 function serverReady() {
   return new Promise((resolve) => {
-    let req = http.get("http://localhost:3000/api-doc/");
+    let req = http.get("http://localhost:8080/");
 
     req.on("response", () => {
       resolve(true);
@@ -82,11 +79,7 @@ function generateBlock(user, password, numberOfBlocks, binDir) {
  */
 module.exports = async function globalSetup(globalConfig) {
   // do stuff which needs to be done before all tests are executed
-  await setupDevServer({
-    command: `npm run test:browser:server`,
-    launchTimeout: 50000,
-    port: 8080,
-  })
+  
 
   console.log("starting bchd ...");
 
@@ -100,25 +93,28 @@ module.exports = async function globalSetup(globalConfig) {
       `--miningaddr=${process.env.ADDRESS}`,
       `--addrindex`,
       `--txindex`,
+      `-d=critical` // prevent daemon messages from overrunning the process buffer
     ];
     global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
     console.log("... OKAY");
   } else {
     console.log("...already running");
   }
-  if (global.mainnetServer === undefined) {
-    global.mainnetServer = spawn(
-      "npx",
-      ["ts-node", "./generated/serve/index.ts"],
+  if (global.moduleServer === undefined) {
+    let npx = process.platform === "win32" ? "npx.cmd" : "npx"
+    global.moduleServer = spawn(
+      npx,
+      ["reload", "--dir=jest/playwright/"],
       {
         shell: false,
+        detached: false,
       }
     );
   }
   
-  // ping express
+  // ping html
   for (let i = 0; !(await serverReady()) && i < 10; i++) {
-    console.log("Waiting for express server");
+    console.log("Waiting for html server");
     await delay(1000);
   }
 
