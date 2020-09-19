@@ -33,7 +33,7 @@ describe(`Playwright should load test page`, () => {
       await alice.fromWIF(wif);
       return alice.depositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
   });
 
   test(`Should return deposit qr from testnet wallet`, async () => {
@@ -44,7 +44,7 @@ describe(`Playwright should load test page`, () => {
       return alice.depositQr();
     }, process.env.PRIVATE_WIF);
     expect(
-      result.startsWith("data:image/svg+xml;base64,PD94bWwgdm")
+      result.src.startsWith("data:image/svg+xml;base64,PD94bWwgdm")
     ).toBeTruthy();
   });
 
@@ -55,20 +55,9 @@ describe(`Playwright should load test page`, () => {
       await alice.fromWIF(wif);
       return alice.depositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
   });
 
-  test(`Should return deposit qr from testnet wallet`, async () => {
-    const result = await page.evaluate(async (wif) => {
-      // Get a QR code for alice's wallet
-      const alice = new mainnet.TestnetWallet("Alice's Mining");
-      await alice.fromWIF(wif);
-      return alice.depositQr();
-    }, process.env.PRIVATE_WIF);
-    expect(
-      result.startsWith("data:image/svg+xml;base64,PD94bWwgdm")
-    ).toBeTruthy();
-  });
 
   test(`Should load page`, async () => {
     expect(page).not.toBeNull();

@@ -25,7 +25,7 @@ describe(`Playwright should load test page`, () => {
     await browser.close();
   });
 
-  test(`Should return deposit address from testnet wallet`, async () => {
+  test(`Should store a testnet wallet`, async () => {
     const result = await page.evaluate(async () => {
       const db = new mainnet.WalletDatabase("username123");
       let w1 = new mainnet.TestnetWallet("Testnet Wallet 1");
