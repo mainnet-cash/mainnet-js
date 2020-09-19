@@ -99,7 +99,7 @@ module.exports = async function () {
   } else {
     console.log("...bchd already running");
   }
-  
+
   // ping bchd as a readiness signal, give up and run anyway after 10s
   for (let i = 0; (await pingBchd()).length > 0 && i < 5; i++) {
     console.log("Waiting for bchd node");
