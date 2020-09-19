@@ -336,7 +336,13 @@ components:
           description: |
             A Qr code image data in svg format as utf-8 encoded string.
             Suitable for inclusion in html using:
-                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>                
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>      
+        title: 
+          type: string
+          description: hover text for graphic 
+        alt:
+          type: string
+          description: assistive text         
     SendMaxRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"

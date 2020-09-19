@@ -8,12 +8,13 @@ import {
   decodePrivateKeyWif,
   encodePrivateKeyWif,
   generatePrivateKey,
-  WalletImportFormatType,
 } from "@bitauth/libauth";
 
 import { UnitEnum, WalletTypeEnum, NetworkType } from "./enum";
 
 import { BaseWallet } from "./Base";
+
+import { PrivateKey } from "./interface"
 
 import {
   Amount,
@@ -30,7 +31,7 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress } from "../qr/Qr";
+import { qrAddress, Image } from "../qr/Qr";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceResponseFromSatoshi,
@@ -42,11 +43,6 @@ import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
-
-interface PrivateKey {
-  privateKey: Uint8Array;
-  type: WalletImportFormatType;
-}
 
 export class WifWallet extends BaseWallet {
   publicKey?: Uint8Array;
@@ -167,7 +163,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
-    let maxSpendableAmount = await this.getMaxAmountToSpend();
+    let maxSpendableAmount = await this.maxAmountToSend({});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
     }
@@ -183,10 +179,10 @@ export class WifWallet extends BaseWallet {
   }
 
   public depositAddress() {
-    return this.cashaddr;
+    return {cashaddr: this.cashaddr};
   }
 
-  public depositQr() {
+  public depositQr():Image {
     return qrAddress(this.cashaddr as string);
   }
 
@@ -218,7 +214,7 @@ export class WifWallet extends BaseWallet {
     return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
   }
 
-  public async getMaxAmountToSpend(outputCount = 1): Promise<BalanceResponse> {
+  public async maxAmountToSend({outputCount=1}:{outputCount?:number}): Promise<BalanceResponse> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
@@ -252,7 +248,7 @@ export class WifWallet extends BaseWallet {
     return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
   /**
-   * Get unspent outputs for the wallet
+   * utxos Get unspent outputs for the wallet
    */
   public async utxos() {
     if (!this.cashaddr) {

@@ -101,10 +101,8 @@ describe('Post Endpoints', () => {
         walletId:
           "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
       })
-    const body = resp.body;
-
     expect(resp.statusCode).toBe(200);
-    expect(body!.cashaddr).toBe(
+    expect(resp.body.cashaddr).toBe(
       "bchreg:qp3t43vq3xnxdfuge4l4q4ndehkn48uexghagrwwx5"
     );
   });

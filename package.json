@@ -84,5 +84,6 @@
     "bch",
     "bitcoin cash"
   ],
+  "sideEffects": false,
   "author": "readcash"
 }
