@@ -58,7 +58,6 @@ describe(`Playwright should load test page`, () => {
     expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
   });
 
-
   test(`Should load page`, async () => {
     expect(page).not.toBeNull();
     expect(await page.title()).toEqual("Load module for playwright");
