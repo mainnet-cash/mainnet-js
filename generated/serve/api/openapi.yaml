@@ -354,12 +354,20 @@ components:
     ScalableVectorGraphic:
       example:
         src: data:image/svg+xml;base64,PD94bWwgdm... ==**
+        alt: alt
+        title: title
       properties:
         src:
           description: "A Qr code image data in svg format as utf-8 encoded string.\n\
             Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
-            \ ==**\"\\>                \n"
+            \ ==**\"\\>      \n"
           example: data:image/svg+xml;base64,PD94bWwgdm... ==**
+          type: string
+        title:
+          description: hover text for graphic
+          type: string
+        alt:
+          description: assistive text
           type: string
     SendMaxRequest:
       allOf:
