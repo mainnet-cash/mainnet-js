@@ -1,9 +1,9 @@
 var QRCode = require("qrcode-svg");
 
-export interface Image{
-  src: string
-  title: string
-  alt: string
+export interface Image {
+  src: string;
+  title: string;
+  alt: string;
 }
 /**
  * qrAddress returns a qr code for a given cashaddress as raw utf-8 svg
@@ -28,8 +28,8 @@ export function qrAddress(address: string, size = 256): Image {
   }
 
   return {
-    src:`data:image/svg+xml;base64,${svgB64}`,
+    src: `data:image/svg+xml;base64,${svgB64}`,
     title: address,
-    alt: "a Bitcoin Cash address QR Code"
-  }
+    alt: "a Bitcoin Cash address QR Code",
+  };
 }

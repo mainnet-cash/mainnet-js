@@ -1,8 +1,6 @@
-import {
-    WalletImportFormatType,
-  } from "@bitauth/libauth";
+import { WalletImportFormatType } from "@bitauth/libauth";
 
 export interface PrivateKey {
-    privateKey: Uint8Array;
-    type: WalletImportFormatType;
+  privateKey: Uint8Array;
+  type: WalletImportFormatType;
 }

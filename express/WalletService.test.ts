@@ -87,12 +87,10 @@ describe("Post Endpoints", () => {
    */
 
   it("Should return the deposit address from a regtest wallet", async () => {
-    let resp = await request(app)
-      .post('/v1/wallet/deposit_address')
-      .send({
-        walletId:
-          "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
-      })
+    let resp = await request(app).post("/v1/wallet/deposit_address").send({
+      walletId:
+        "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
+    });
     expect(resp.statusCode).toBe(200);
     expect(resp.body.cashaddr).toBe(
       "bchreg:qp3t43vq3xnxdfuge4l4q4ndehkn48uexghagrwwx5"

@@ -14,7 +14,7 @@ import { UnitEnum, WalletTypeEnum, NetworkType } from "./enum";
 
 import { BaseWallet } from "./Base";
 
-import { PrivateKey } from "./interface"
+import { PrivateKey } from "./interface";
 
 import {
   Amount,
@@ -179,10 +179,10 @@ export class WifWallet extends BaseWallet {
   }
 
   public depositAddress() {
-    return {cashaddr: this.cashaddr};
+    return { cashaddr: this.cashaddr };
   }
 
-  public depositQr():Image {
+  public depositQr(): Image {
     return qrAddress(this.cashaddr as string);
   }
 
@@ -214,7 +214,11 @@ export class WifWallet extends BaseWallet {
     return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
   }
 
-  public async maxAmountToSend({outputCount=1}:{outputCount?:number}): Promise<BalanceResponse> {
+  public async maxAmountToSend({
+    outputCount = 1,
+  }: {
+    outputCount?: number;
+  }): Promise<BalanceResponse> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
