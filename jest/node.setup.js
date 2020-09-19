@@ -1,81 +1,16 @@
 // jest/node.setup.js
 require("dotenv").config({ path: ".env.regtest" });
 
-const { spawn, spawnSync } = require("child_process");
+const { spawn } = require("child_process");
 const http = require("http");
-const { json } = require("body-parser");
+const { pingBchd, generateBlock, getBlockHeight } = require("../util/generateBlock");
 
-const { GrpcClient } = require("grpc-bchrpc-node");
 
-async function getBlockHeight() {
-  let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
-  const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
-  const host = `${process.env.HOST}`;
-  let client = new GrpcClient({
-    url: url,
-    testnet: true,
-    rootCertPath: cert,
-    options: {
-      "grpc.ssl_target_name_override": host,
-      "grpc.default_authority": host,
-      "grpc.max_receive_message_length": -1,
-    },
-  });
-  let blockchainInfo = await client.getBlockchainInfo();
-  console.log("block height: " + blockchainInfo.getBestHeight());
-  return blockchainInfo.getBestHeight();
-}
-
-async function pingBchd() {
-  const readinessArgs = [
-    `--rpcuser=${process.env.RPC_USER}`,
-    `--rpcpass=${process.env.RPC_PASS}`,
-    `--testnet`,
-    "ping",
-  ];
-  let response = await spawnSync(
-    `${process.env.BCHD_BIN_DIRECTORY}/bchctl`,
-    readinessArgs
-  );
-  return response.stderr;
-}
-
-function serverReady() {
-  return new Promise((resolve) => {
-    let req = http.get("http://localhost:3000/api-doc/");
-
-    req.on("response", () => {
-      resolve(true);
-    });
-
-    req.on("error", (e) => {
-      console.log("Express error " + e.code);
-      resolve(false);
-    });
-  });
-}
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function generateBlock(user, password, numberOfBlocks, binDir) {
-  const bchctlArgs = [
-    `--testnet`,
-    `--rpcuser=${user}`,
-    `--rpcpass=${password}`,
-    `generate`,
-    `--skipverify`,
-    numberOfBlocks,
-  ];
-
-  const bchctl = spawnSync(`${binDir}/bchctl`, bchctlArgs);
-  if (bchctl.stderr.length > 0) {
-    throw Error(bchctl.stderr.toString());
-  }
-  console.log(bchctl.status);
-  return JSON.parse(bchctl.stdout.toString());
-}
 
 let miningStarted = false;
 
