@@ -18,11 +18,11 @@ const baseConfig = {
   optimization: {
     minimize: true,
     mangleWasmImports: true,
-    usedExports: true
+    usedExports: true,
   },
   output: {
     library: "mainnet",
-  }
+  },
 };
 
 const nodeConfig = {
@@ -54,7 +54,7 @@ const browserConfig = {
       util: false,
       url: false,
     },
-  }
+  },
 };
 
 const webWorkerConfig = {

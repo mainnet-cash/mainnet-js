@@ -47,7 +47,6 @@ test("Expect Error passing mainnet wallet to testnet", async () => {
   }
 });
 
-
 test("Expect Error passing hd wallet", async () => {
   expect.assertions(1);
   try {
@@ -55,12 +54,9 @@ test("Expect Error passing hd wallet", async () => {
       "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
-    expect(e.message).toBe(
-      "Heuristic Wallets are not implemented"
-    );
+    expect(e.message).toBe("Heuristic Wallets are not implemented");
   }
 });
-
 
 test("Expect Error passing unknown wallet", async () => {
   expect.assertions(1);
@@ -69,8 +65,6 @@ test("Expect Error passing unknown wallet", async () => {
       "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
-    expect(e.message).toBe(
-      "The wallet type was not understood"
-    );
+    expect(e.message).toBe("The wallet type was not understood");
   }
 });
