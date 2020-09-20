@@ -10,7 +10,7 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { UnitEnum, WalletTypeEnum, NetworkType } from "./enum";
+import { UnitEnum, WalletTypeEnum } from "./enum";
 
 import { BaseWallet } from "./Base";
 
@@ -32,6 +32,7 @@ import {
 } from "../transaction/Wif";
 
 import { qrAddress, Image } from "../qr/Qr";
+import { checkWifNetwork } from "../util/checkWifNetwork"
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceResponseFromSatoshi,
@@ -82,20 +83,8 @@ export class WifWallet extends BaseWallet {
     const hasError = typeof result === "string";
     if (hasError) {
       throw Error(result as string);
-    } else {
-      if (
-        (walletImportFormatString[0] === "L" ||
-          walletImportFormatString[0] === "K") &&
-        this.networkType !== NetworkType.Mainnet
-      ) {
-        throw Error("attempted to pass a testnet Wif to a mainnet wallet");
-      } else if (
-        walletImportFormatString[0] === "c" &&
-        this.networkType !== NetworkType.Testnet
-      ) {
-        throw Error("attempted to pass a mainnet Wif to a testnet wallet");
-      }
-    }
+    } 
+    checkWifNetwork(walletImportFormatString, this.networkType)
     let resultData: PrivateKey = result as PrivateKey;
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = walletImportFormatString;
