@@ -32,7 +32,7 @@ import {
 } from "../transaction/Wif";
 
 import { qrAddress, Image } from "../qr/Qr";
-import { checkWifNetwork } from "../util/checkWifNetwork"
+import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceResponseFromSatoshi,
@@ -83,8 +83,8 @@ export class WifWallet extends BaseWallet {
     const hasError = typeof result === "string";
     if (hasError) {
       throw Error(result as string);
-    } 
-    checkWifNetwork(walletImportFormatString, this.networkType)
+    }
+    checkWifNetwork(walletImportFormatString, this.networkType);
     let resultData: PrivateKey = result as PrivateKey;
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = walletImportFormatString;
