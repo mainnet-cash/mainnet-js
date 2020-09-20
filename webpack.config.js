@@ -1,10 +1,9 @@
 const merge = require("deepmerge");
-
 var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "development",
+  mode: "production",
   module: {
     rules: [
       {
@@ -16,10 +15,14 @@ const baseConfig = {
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
-  devtool: "source-map",
+  optimization: {
+    minimize: true,
+    mangleWasmImports: true,
+    usedExports: true
+  },
   output: {
     library: "mainnet",
-  },
+  }
 };
 
 const nodeConfig = {
@@ -51,7 +54,7 @@ const browserConfig = {
       util: false,
       url: false,
     },
-  },
+  }
 };
 
 const webWorkerConfig = {
@@ -88,7 +91,7 @@ const browserTestDiff = {
 const browserTestConfig = merge(browserConfig, browserTestDiff);
 
 module.exports = [
-  nodeConfig,
+  //nodeConfig,
   browserConfig,
   browserTestConfig,
   //webWorkerConfig

@@ -80,7 +80,6 @@ export class ExpressServer {
             errors: err.errors || "",
           });
         });
-        console.log(`Listening on port ${this.port}`);
         return this.app.listen(this.port);
       });
   }

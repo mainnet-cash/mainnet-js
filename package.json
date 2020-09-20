@@ -10,7 +10,7 @@
   "name": "mainnet-js",
   "version": "0.0.1-rc",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet.node.js",
+  "main": "dist/mainnet-0.0.1-rc.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -64,12 +64,14 @@
     "reload": "^3.1.0",
     "supertest": "^4.0.2",
     "swagger-ui-express": "^4.0.2",
+    "terser-webpack-plugin": "^4.2.2",
     "ts-jest": "^26.2.0",
     "ts-loader": "^8.0.2",
     "ts-node": "^9.0.0",
     "typescript": "^3.9.7",
     "unzipper": "^0.10.11",
     "webpack": "^v5.0.0-beta.28",
+    "webpack-bundle-analyzer": "^3.9.0",
     "webpack-cli": "^3.3.12",
     "winston": "^3.2.1",
     "yarn": "^1.22.5"
@@ -77,7 +79,7 @@
   "dependencies": {
     "@bitauth/libauth": "^1.17.1",
     "dexie": "^3.0.2",
-    "grpc-bchrpc-browser": "0.0.11",
+    "grpc-bchrpc-browser": "^0.16.5-v2",
     "grpc-bchrpc-node": "^0.10.2"
   },
   "keywords": [
