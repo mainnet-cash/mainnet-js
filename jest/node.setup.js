@@ -3,14 +3,15 @@ require("dotenv").config({ path: ".env.regtest" });
 
 const { spawn } = require("child_process");
 const http = require("http");
-const { pingBchd, generateBlock, getBlockHeight } = require("../util/generateBlock");
-
-
+const {
+  pingBchd,
+  generateBlock,
+  getBlockHeight,
+} = require("../util/generateBlock");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 
 let miningStarted = false;
 

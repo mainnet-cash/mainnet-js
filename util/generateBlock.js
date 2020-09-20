@@ -1,7 +1,6 @@
 const { spawnSync } = require("child_process");
 const { GrpcClient } = require("grpc-bchrpc-node");
 
-
 async function getBlockHeight() {
   let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
   const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
@@ -55,5 +54,5 @@ function pingBchd() {
 module.exports = {
   pingBchd,
   generateBlock,
-  getBlockHeight
-}
+  getBlockHeight,
+};

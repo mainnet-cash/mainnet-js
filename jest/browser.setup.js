@@ -1,9 +1,12 @@
 // jest/browser.setup.js
 require("dotenv").config({ path: ".env.regtest" });
-const { pingBchd, generateBlock, getBlockHeight } = require("../util/generateBlock");
+const {
+  pingBchd,
+  generateBlock,
+  getBlockHeight,
+} = require("../util/generateBlock");
 const { spawn } = require("child_process");
 const http = require("http");
-
 
 function serverReady() {
   return new Promise((resolve) => {
@@ -22,8 +25,6 @@ function serverReady() {
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-
 
 /**
  * Sets up the environment for running tests with Jest
