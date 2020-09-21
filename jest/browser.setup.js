@@ -1,5 +1,11 @@
 // jest/browser.setup.js
 require("dotenv").config({ path: ".env.regtest" });
+try{
+  require("dotenv").config({ path: ".env.testnet" });
+}catch(e){
+  // okay
+}
+
 const {
   pingBchd,
   generateBlock,

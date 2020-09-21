@@ -26,10 +26,44 @@ describe(`Playwright should load test page`, () => {
     await browser.close();
   });
 
+  test(`Should load page`, async () => {
+    expect(page).not.toBeNull();
+    expect(await page.title()).toEqual("Load module for playwright");
+  });
+
+  test(`Should throw error on regtest wallet`, async () => {
+    expect.assertions(1);
+    let params = {name:"Alice's Testnet",type:"wif",network:"regtest"}
+    try{
+      const result = await page.evaluate(async (p) => {
+        return await mainnet.createWallet(p);
+      }, params);
+    } catch(e){
+      expect(e.message.slice(0,97)).toBe(
+        "page.evaluate: Evaluation failed: Error: This usage is not supported in the browser at this time."
+        )
+    }
+  });
+
+  test(`Should create testnet wallet`, async () => {
+    let params = {name:"Alice's Testnet",type:"wif",network:"testnet"}
+    const result = await page.evaluate(async (p) => {
+      return await mainnet.createWallet(p);
+    }, params);
+    expect(result.cashaddr.slice(0,9)).toBe("bchtest:q");
+  });
+
+  test(`Should create mainnet wallet`, async () => {
+    let params = {name:"Alice's Testnet",type:"wif",network:"mainnet"}
+    const result = await page.evaluate(async (p) => {
+      return await mainnet.createWallet(p);
+    }, params);
+    expect(result.cashaddr.slice(0,13)).toBe("bitcoincash:q");
+  });
+
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      // Get alices deposit address
-      const alice = new mainnet.TestnetWallet("Alice's Mining");
+      const alice = new mainnet.TestnetWallet("Alice's Testnet");
       await alice.fromWIF(wif);
       return alice.depositAddress();
     }, process.env.PRIVATE_WIF);
@@ -38,8 +72,7 @@ describe(`Playwright should load test page`, () => {
 
   test(`Should return deposit qr from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      // Get a QR code for alice's wallet
-      const alice = new mainnet.TestnetWallet("Alice's Mining");
+      const alice = new mainnet.TestnetWallet("Alice's Testnet");
       await alice.fromWIF(wif);
       return alice.depositQr();
     }, process.env.PRIVATE_WIF);
@@ -50,16 +83,38 @@ describe(`Playwright should load test page`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      // Get alices deposit address
-      const alice = new mainnet.TestnetWallet("Alice's Mining");
+      const alice = new mainnet.TestnetWallet("Alice's Testnet");
       await alice.fromWIF(wif);
       return alice.depositAddress();
     }, process.env.PRIVATE_WIF);
     expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
   });
 
-  test(`Should load page`, async () => {
-    expect(page).not.toBeNull();
-    expect(await page.title()).toEqual("Load module for playwright");
+  test(`Should return testnet balance`, async () => {
+    if(process.env.ALICE_TESTNET_ADDRESS){
+      const result = await page.evaluate(async (addr) => {
+        const alice = new mainnet.TestnetWallet("Alice's Testnet");
+        await alice.watchOnly(addr);
+        return alice.balance();
+      }, process.env.ALICE_TESTNET_ADDRESS);
+      expect(result.sat).toBeGreaterThan(0);  
+    }else{
+      expect.assertions(1);
+      console.warn("SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env")
+    }
   });
+
+  test(`Should return testnet max amount to send`, async () => {
+    if(process.env.ALICE_TESTNET_ADDRESS){
+      const result = await page.evaluate(async (walletId) => {
+        const alice = await mainnet.walletFromIdString(walletId)
+        return alice.maxAmountToSend({});
+      }, process.env.ALICE_TESTNET_WALLET_ID);
+      expect(result.sat).toBeGreaterThan(0);  
+    }else{
+      expect.assertions(1);
+      console.warn("SKIPPING testnet maxAmountToSend test, set ALICE_TESTNET_ADDRESS env")
+    }
+  });
+
 });

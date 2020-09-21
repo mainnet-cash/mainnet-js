@@ -17,10 +17,11 @@
     "dist/*.js.map"
   ],
   "scripts": {
+    "cli": "npx ts-node src/cli.ts",
+    "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "pretest": "node util/checkBchd.js",
     "test": "npx jest --runInBand --detectOpenHandles",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
-    "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "grpcui:install": "go get github.com/fullstorydev/grpcui/... && go install github.com/fullstorydev/grpcui/cmd/grpcui",
     "grpcui:pb-update": "wget https://raw.githubusercontent.com/gcash/bchd/master/bchrpc/bchrpc.proto -O pb/bchrpc.proto",
     "grpcui:regtest": "grpcui -proto pb/bchrpc.proto -insecure localhost:18335",
