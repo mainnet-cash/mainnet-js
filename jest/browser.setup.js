@@ -2,7 +2,7 @@
 require("dotenv").config({ path: ".env.regtest" });
 try {
   require("dotenv").config({ path: ".env.testnet" });
-}catch(e){
+} catch (e) {
   // the testnet file contains secrets to testnet wallets and cannot be committed.
 }
 
