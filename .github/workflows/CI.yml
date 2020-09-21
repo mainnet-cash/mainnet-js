@@ -71,6 +71,9 @@ jobs:
     - run: npm run test
     - run: npm run build
     - run: npm run test:browser
+      env:
+        ALICE_TESTNET_ADDRESS: ${{ secrets.ALICE_TESTNET_ADDRESS }}
+        ALICE_TESTNET_WALLET_ID: ${{ secrets.ALICE_TESTNET_WALLET_ID }}
   test_mac:
     name: "macOS"
     needs: [ format ]
@@ -91,6 +94,8 @@ jobs:
     - run: npm run test:browser
       env:
         BROWSER: ${{ matrix.browser }}
+        ALICE_TESTNET_ADDRESS: ${{ secrets.ALICE_TESTNET_ADDRESS }}
+        ALICE_TESTNET_WALLET_ID: ${{ secrets.ALICE_TESTNET_WALLET_ID }}        
   test_win:
     name: "Windows"
     needs: [ format ]
@@ -115,6 +120,8 @@ jobs:
       shell: bash
       env:
         BROWSER: ${{ matrix.browser }}
+        ALICE_TESTNET_ADDRESS: ${{ secrets.ALICE_TESTNET_ADDRESS }}
+        ALICE_TESTNET_WALLET_ID: ${{ secrets.ALICE_TESTNET_WALLET_ID }}       
   coverage:
     needs: [ test_linux, test_mac, test_win ]
     name: coverage
