@@ -1,8 +1,8 @@
 // jest/browser.setup.js
 require("dotenv").config({ path: ".env.regtest" });
-try{
+try {
   require("dotenv").config({ path: ".env.testnet" });
-}catch(e){
+} catch (e) {
   // okay
 }
 

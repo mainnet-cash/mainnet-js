@@ -2,7 +2,7 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
 import { GrpcClient } from "grpc-bchrpc-node";
 import { NetworkEnum, NetworkType } from "./enum";
-import { browserNotSupported} from "../util/browserNotSupported"
+import { browserNotSupported } from "../util/browserNotSupported";
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
@@ -39,7 +39,7 @@ export class BaseWallet {
     if (this.isTestnet) {
       switch (this.networkPrefix) {
         case CashAddressNetworkPrefix.regtest:
-          browserNotSupported()
+          browserNotSupported();
           url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
           const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
           const host = `${process.env.HOST}`;
