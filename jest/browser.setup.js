@@ -6,7 +6,6 @@ try {
   // the testnet file contains secrets to testnet wallets and cannot be committed.
 }
 
-
 const { spawn } = require("child_process");
 const http = require("http");
 
@@ -34,7 +33,6 @@ function delay(ms) {
 module.exports = async function globalSetup(globalConfig) {
   // do stuff which needs to be done before all tests are executed
 
-  
   if (global.moduleServer === undefined) {
     let npx = process.platform === "win32" ? "npx.cmd" : "npx";
     global.moduleServer = spawn(npx, ["reload", "--dir=jest/playwright/"], {
