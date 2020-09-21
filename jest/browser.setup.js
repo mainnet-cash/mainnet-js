@@ -6,11 +6,7 @@ try {
   // the testnet file contains secrets to testnet wallets and cannot be committed.
 }
 
-const {
-  pingBchd,
-  generateBlock,
-  getBlockHeight,
-} = require("../util/generateBlock");
+
 const { spawn } = require("child_process");
 const http = require("http");
 
@@ -38,25 +34,7 @@ function delay(ms) {
 module.exports = async function globalSetup(globalConfig) {
   // do stuff which needs to be done before all tests are executed
 
-  console.log("starting bchd ...");
-
-  if (global.bchDaemon === undefined) {
-    const bchdArgs = [
-      `--${process.env.NETWORK}`,
-      `--rpclisten=:${process.env.PORT}`,
-      `--grpclisten=${process.env.HOST_IP}:${process.env.GRPC_PORT}`,
-      `--rpcuser=${process.env.RPC_USER}`,
-      `--rpcpass=${process.env.RPC_PASS}`,
-      `--miningaddr=${process.env.ADDRESS}`,
-      `--addrindex`,
-      `--txindex`,
-      `-d=critical`, // prevent daemon messages from overrunning the process buffer
-    ];
-    global.bchDaemon = spawn("./bin/bchd", bchdArgs, { shell: false });
-    console.log("... OKAY");
-  } else {
-    console.log("...already running");
-  }
+  
   if (global.moduleServer === undefined) {
     let npx = process.platform === "win32" ? "npx.cmd" : "npx";
     global.moduleServer = spawn(npx, ["reload", "--dir=jest/playwright/"], {
@@ -71,21 +49,5 @@ module.exports = async function globalSetup(globalConfig) {
     await delay(1000);
   }
 
-  // ping bchd as a readiness signal, give up and run anyway after 10s
-  for (let i = 0; (await pingBchd()).length > 0 && i < 5; i++) {
-    console.log("Waiting for bchd node");
-    await delay(2000);
-  }
-
-  for (let i = 0; (await getBlockHeight()) < 100 && i < 15; i++) {
-    console.log("Waiting blocks to be mined");
-    generateBlock(
-      process.env.RPC_USER || "alice",
-      process.env.RPC_PASS || "password",
-      105,
-      process.env.BCHD_BIN_DIRECTORY || "bin"
-    );
-    await delay(2000);
-  }
   console.log("proceeding...");
 };
