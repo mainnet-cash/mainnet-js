@@ -1,6 +1,6 @@
 import { NetworkType } from "../wallet/enum";
 
-export  function checkWifNetwork(
+export function checkWifNetwork(
   walletImportFormatString: string,
   networkType: NetworkType
 ) {
