@@ -170,7 +170,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SendRequest"
+                $ref: "#/components/schemas/SendRequest"
         description: place a send request
         required: true
       responses:
@@ -225,7 +225,7 @@ components:
         - $ref: "#/components/schemas/TransactionId"
       required:
         - amount
-        - transaction
+        - transactionId
         - utxoId
     Network:
       properties:
@@ -305,7 +305,7 @@ components:
           description: serialized outpoint
     TransactionId:
       properties:
-        transaction:
+        transactionId:
           type: string
           example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
           description: The hash of a transaction
@@ -336,7 +336,13 @@ components:
           description: |
             A Qr code image data in svg format as utf-8 encoded string.
             Suitable for inclusion in html using:
-                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>                
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>      
+        title: 
+          type: string
+          description: hover text for graphic 
+        alt:
+          type: string
+          description: assistive text         
     SendMaxRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"
@@ -362,7 +368,7 @@ components:
         walletId:
           type: string
           format: password
-          example: "testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
       required:

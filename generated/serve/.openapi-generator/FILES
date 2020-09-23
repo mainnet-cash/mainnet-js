@@ -5,7 +5,6 @@ config.ts
 controllers/Controller.ts
 controllers/WalletController.ts
 controllers/index.ts
-expressServer.ts
 logger.ts
 services/Service.ts
 services/WalletService.ts

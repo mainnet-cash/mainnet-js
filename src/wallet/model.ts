@@ -21,7 +21,7 @@ export class Utxo {
   "index"?: number;
   "amount": Amount;
   "utxoId": string;
-  "transaction": string;
+  "transactionId": string;
 }
 
 export class UtxoResponse {
@@ -63,17 +63,17 @@ export class SendMaxRequest {
 }
 
 export class SendResponse {
-  transaction?: string;
+  transactionId?: string;
   balance?: BalanceResponse;
 
   constructor({
-    transaction,
+    transactionId,
     balance,
   }: {
-    transaction?: string;
+    transactionId?: string;
     balance?: any;
   }) {
-    this.transaction = transaction;
+    this.transactionId = transactionId;
     this.balance = new BalanceResponse(balance);
   }
 }

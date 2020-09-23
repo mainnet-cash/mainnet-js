@@ -14,9 +14,17 @@ import { RequestFile } from './models';
 
 export class ScalableVectorGraphic {
     /**
-    * A Qr code image data in svg format as utf-8 encoded string. Suitable for inclusion in html using:     - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm... ==**\"\\>                 
+    * A Qr code image data in svg format as utf-8 encoded string. Suitable for inclusion in html using:     - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm... ==**\"\\>       
     */
     'src'?: string;
+    /**
+    * hover text for graphic
+    */
+    'title'?: string;
+    /**
+    * assistive text
+    */
+    'alt'?: string;
 
     static discriminator: string | undefined = undefined;
 
@@ -24,6 +32,16 @@ export class ScalableVectorGraphic {
         {
             "name": "src",
             "baseName": "src",
+            "type": "string"
+        },
+        {
+            "name": "title",
+            "baseName": "title",
+            "type": "string"
+        },
+        {
+            "name": "alt",
+            "baseName": "alt",
             "type": "string"
         }    ];
 

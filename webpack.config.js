@@ -1,10 +1,9 @@
 const merge = require("deepmerge");
-
 var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "development",
+  mode: "production",
   module: {
     rules: [
       {
@@ -16,7 +15,11 @@ const baseConfig = {
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
-  devtool: "source-map",
+  optimization: {
+    minimize: true,
+    mangleWasmImports: true,
+    usedExports: true,
+  },
   output: {
     library: "mainnet",
   },
@@ -78,8 +81,18 @@ const webWorkerConfig = {
   },
 };
 
+const browserTestDiff = {
+  output: {
+    filename: `mainnet.js`,
+    path: __dirname + "/jest/playwright",
+  },
+};
+
+const browserTestConfig = merge(browserConfig, browserTestDiff);
+
 module.exports = [
-  nodeConfig,
+  //nodeConfig,
   browserConfig,
+  browserTestConfig,
   //webWorkerConfig
 ].map((c) => merge(baseConfig, c));

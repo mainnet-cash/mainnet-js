@@ -22,4 +22,11 @@ const launchServer = async () => {
   }
 };
 
-launchServer().catch(e => logger.error(e));
+export const getServer = () => {
+  expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
+  return expressServer
+}
+
+export function startServer(){
+  launchServer().catch(e => logger.error(e));
+}

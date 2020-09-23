@@ -21878,6 +21878,4397 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/dexie/dist/dexie.mjs":
+/*!*******************************************!*\
+  !*** ./node_modules/dexie/dist/dexie.mjs ***!
+  \*******************************************/
+/*! namespace exports */
+/*! export default [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__.r, __webpack_require__.d, __webpack_require__.* */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ });
+/*
+ * Dexie.js - a minimalistic wrapper for IndexedDB
+ * ===============================================
+ *
+ * By David Fahlander, david.fahlander@gmail.com
+ *
+ * Version 3.0.2, Fri Jul 31 2020
+ *
+ * http://dexie.org
+ *
+ * Apache License Version 2.0, January 2004, http://www.apache.org/licenses/
+ */
+ 
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+
+
+
+
+
+
+
+
+
+
+function __spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+}
+
+var keys = Object.keys;
+var isArray = Array.isArray;
+var _global = typeof self !== 'undefined' ? self :
+    typeof window !== 'undefined' ? window :
+        global;
+if (typeof Promise !== 'undefined' && !_global.Promise) {
+    _global.Promise = Promise;
+}
+function extend(obj, extension) {
+    if (typeof extension !== 'object')
+        return obj;
+    keys(extension).forEach(function (key) {
+        obj[key] = extension[key];
+    });
+    return obj;
+}
+var getProto = Object.getPrototypeOf;
+var _hasOwn = {}.hasOwnProperty;
+function hasOwn(obj, prop) {
+    return _hasOwn.call(obj, prop);
+}
+function props(proto, extension) {
+    if (typeof extension === 'function')
+        extension = extension(getProto(proto));
+    keys(extension).forEach(function (key) {
+        setProp(proto, key, extension[key]);
+    });
+}
+var defineProperty = Object.defineProperty;
+function setProp(obj, prop, functionOrGetSet, options) {
+    defineProperty(obj, prop, extend(functionOrGetSet && hasOwn(functionOrGetSet, "get") && typeof functionOrGetSet.get === 'function' ?
+        { get: functionOrGetSet.get, set: functionOrGetSet.set, configurable: true } :
+        { value: functionOrGetSet, configurable: true, writable: true }, options));
+}
+function derive(Child) {
+    return {
+        from: function (Parent) {
+            Child.prototype = Object.create(Parent.prototype);
+            setProp(Child.prototype, "constructor", Child);
+            return {
+                extend: props.bind(null, Child.prototype)
+            };
+        }
+    };
+}
+var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+function getPropertyDescriptor(obj, prop) {
+    var pd = getOwnPropertyDescriptor(obj, prop);
+    var proto;
+    return pd || (proto = getProto(obj)) && getPropertyDescriptor(proto, prop);
+}
+var _slice = [].slice;
+function slice(args, start, end) {
+    return _slice.call(args, start, end);
+}
+function override(origFunc, overridedFactory) {
+    return overridedFactory(origFunc);
+}
+function assert(b) {
+    if (!b)
+        throw new Error("Assertion Failed");
+}
+function asap(fn) {
+    if (_global.setImmediate)
+        setImmediate(fn);
+    else
+        setTimeout(fn, 0);
+}
+
+function arrayToObject(array, extractor) {
+    return array.reduce(function (result, item, i) {
+        var nameAndValue = extractor(item, i);
+        if (nameAndValue)
+            result[nameAndValue[0]] = nameAndValue[1];
+        return result;
+    }, {});
+}
+
+function tryCatch(fn, onerror, args) {
+    try {
+        fn.apply(null, args);
+    }
+    catch (ex) {
+        onerror && onerror(ex);
+    }
+}
+function getByKeyPath(obj, keyPath) {
+    if (hasOwn(obj, keyPath))
+        return obj[keyPath];
+    if (!keyPath)
+        return obj;
+    if (typeof keyPath !== 'string') {
+        var rv = [];
+        for (var i = 0, l = keyPath.length; i < l; ++i) {
+            var val = getByKeyPath(obj, keyPath[i]);
+            rv.push(val);
+        }
+        return rv;
+    }
+    var period = keyPath.indexOf('.');
+    if (period !== -1) {
+        var innerObj = obj[keyPath.substr(0, period)];
+        return innerObj === undefined ? undefined : getByKeyPath(innerObj, keyPath.substr(period + 1));
+    }
+    return undefined;
+}
+function setByKeyPath(obj, keyPath, value) {
+    if (!obj || keyPath === undefined)
+        return;
+    if ('isFrozen' in Object && Object.isFrozen(obj))
+        return;
+    if (typeof keyPath !== 'string' && 'length' in keyPath) {
+        assert(typeof value !== 'string' && 'length' in value);
+        for (var i = 0, l = keyPath.length; i < l; ++i) {
+            setByKeyPath(obj, keyPath[i], value[i]);
+        }
+    }
+    else {
+        var period = keyPath.indexOf('.');
+        if (period !== -1) {
+            var currentKeyPath = keyPath.substr(0, period);
+            var remainingKeyPath = keyPath.substr(period + 1);
+            if (remainingKeyPath === "")
+                if (value === undefined) {
+                    if (isArray(obj) && !isNaN(parseInt(currentKeyPath)))
+                        obj.splice(currentKeyPath, 1);
+                    else
+                        delete obj[currentKeyPath];
+                }
+                else
+                    obj[currentKeyPath] = value;
+            else {
+                var innerObj = obj[currentKeyPath];
+                if (!innerObj)
+                    innerObj = (obj[currentKeyPath] = {});
+                setByKeyPath(innerObj, remainingKeyPath, value);
+            }
+        }
+        else {
+            if (value === undefined) {
+                if (isArray(obj) && !isNaN(parseInt(keyPath)))
+                    obj.splice(keyPath, 1);
+                else
+                    delete obj[keyPath];
+            }
+            else
+                obj[keyPath] = value;
+        }
+    }
+}
+function delByKeyPath(obj, keyPath) {
+    if (typeof keyPath === 'string')
+        setByKeyPath(obj, keyPath, undefined);
+    else if ('length' in keyPath)
+        [].map.call(keyPath, function (kp) {
+            setByKeyPath(obj, kp, undefined);
+        });
+}
+function shallowClone(obj) {
+    var rv = {};
+    for (var m in obj) {
+        if (hasOwn(obj, m))
+            rv[m] = obj[m];
+    }
+    return rv;
+}
+var concat = [].concat;
+function flatten(a) {
+    return concat.apply([], a);
+}
+var intrinsicTypeNames = "Boolean,String,Date,RegExp,Blob,File,FileList,ArrayBuffer,DataView,Uint8ClampedArray,ImageData,Map,Set"
+    .split(',').concat(flatten([8, 16, 32, 64].map(function (num) { return ["Int", "Uint", "Float"].map(function (t) { return t + num + "Array"; }); }))).filter(function (t) { return _global[t]; });
+var intrinsicTypes = intrinsicTypeNames.map(function (t) { return _global[t]; });
+var intrinsicTypeNameSet = arrayToObject(intrinsicTypeNames, function (x) { return [x, true]; });
+function deepClone(any) {
+    if (!any || typeof any !== 'object')
+        return any;
+    var rv;
+    if (isArray(any)) {
+        rv = [];
+        for (var i = 0, l = any.length; i < l; ++i) {
+            rv.push(deepClone(any[i]));
+        }
+    }
+    else if (intrinsicTypes.indexOf(any.constructor) >= 0) {
+        rv = any;
+    }
+    else {
+        rv = any.constructor ? Object.create(any.constructor.prototype) : {};
+        for (var prop in any) {
+            if (hasOwn(any, prop)) {
+                rv[prop] = deepClone(any[prop]);
+            }
+        }
+    }
+    return rv;
+}
+var toString = {}.toString;
+function toStringTag(o) {
+    return toString.call(o).slice(8, -1);
+}
+var getValueOf = function (val, type) {
+    return type === "Array" ? '' + val.map(function (v) { return getValueOf(v, toStringTag(v)); }) :
+        type === "ArrayBuffer" ? '' + new Uint8Array(val) :
+            type === "Date" ? val.getTime() :
+                ArrayBuffer.isView(val) ? '' + new Uint8Array(val.buffer) :
+                    val;
+};
+function getObjectDiff(a, b, rv, prfx) {
+    rv = rv || {};
+    prfx = prfx || '';
+    keys(a).forEach(function (prop) {
+        if (!hasOwn(b, prop))
+            rv[prfx + prop] = undefined;
+        else {
+            var ap = a[prop], bp = b[prop];
+            if (typeof ap === 'object' && typeof bp === 'object' && ap && bp) {
+                var apTypeName = toStringTag(ap);
+                var bpTypeName = toStringTag(bp);
+                if (apTypeName === bpTypeName) {
+                    if (intrinsicTypeNameSet[apTypeName]) {
+                        if (getValueOf(ap, apTypeName) !== getValueOf(bp, bpTypeName)) {
+                            rv[prfx + prop] = b[prop];
+                        }
+                    }
+                    else {
+                        getObjectDiff(ap, bp, rv, prfx + prop + ".");
+                    }
+                }
+                else {
+                    rv[prfx + prop] = b[prop];
+                }
+            }
+            else if (ap !== bp)
+                rv[prfx + prop] = b[prop];
+        }
+    });
+    keys(b).forEach(function (prop) {
+        if (!hasOwn(a, prop)) {
+            rv[prfx + prop] = b[prop];
+        }
+    });
+    return rv;
+}
+var iteratorSymbol = typeof Symbol !== 'undefined' && Symbol.iterator;
+var getIteratorOf = iteratorSymbol ? function (x) {
+    var i;
+    return x != null && (i = x[iteratorSymbol]) && i.apply(x);
+} : function () { return null; };
+var NO_CHAR_ARRAY = {};
+function getArrayOf(arrayLike) {
+    var i, a, x, it;
+    if (arguments.length === 1) {
+        if (isArray(arrayLike))
+            return arrayLike.slice();
+        if (this === NO_CHAR_ARRAY && typeof arrayLike === 'string')
+            return [arrayLike];
+        if ((it = getIteratorOf(arrayLike))) {
+            a = [];
+            while (x = it.next(), !x.done)
+                a.push(x.value);
+            return a;
+        }
+        if (arrayLike == null)
+            return [arrayLike];
+        i = arrayLike.length;
+        if (typeof i === 'number') {
+            a = new Array(i);
+            while (i--)
+                a[i] = arrayLike[i];
+            return a;
+        }
+        return [arrayLike];
+    }
+    i = arguments.length;
+    a = new Array(i);
+    while (i--)
+        a[i] = arguments[i];
+    return a;
+}
+var isAsyncFunction = typeof Symbol !== 'undefined'
+    ? function (fn) { return fn[Symbol.toStringTag] === 'AsyncFunction'; }
+    : function () { return false; };
+
+var debug = typeof location !== 'undefined' &&
+    /^(http|https):\/\/(localhost|127\.0\.0\.1)/.test(location.href);
+function setDebug(value, filter) {
+    debug = value;
+    libraryFilter = filter;
+}
+var libraryFilter = function () { return true; };
+var NEEDS_THROW_FOR_STACK = !new Error("").stack;
+function getErrorWithStack() {
+    if (NEEDS_THROW_FOR_STACK)
+        try {
+            throw new Error();
+        }
+        catch (e) {
+            return e;
+        }
+    return new Error();
+}
+function prettyStack(exception, numIgnoredFrames) {
+    var stack = exception.stack;
+    if (!stack)
+        return "";
+    numIgnoredFrames = (numIgnoredFrames || 0);
+    if (stack.indexOf(exception.name) === 0)
+        numIgnoredFrames += (exception.name + exception.message).split('\n').length;
+    return stack.split('\n')
+        .slice(numIgnoredFrames)
+        .filter(libraryFilter)
+        .map(function (frame) { return "\n" + frame; })
+        .join('');
+}
+
+var dexieErrorNames = [
+    'Modify',
+    'Bulk',
+    'OpenFailed',
+    'VersionChange',
+    'Schema',
+    'Upgrade',
+    'InvalidTable',
+    'MissingAPI',
+    'NoSuchDatabase',
+    'InvalidArgument',
+    'SubTransaction',
+    'Unsupported',
+    'Internal',
+    'DatabaseClosed',
+    'PrematureCommit',
+    'ForeignAwait'
+];
+var idbDomErrorNames = [
+    'Unknown',
+    'Constraint',
+    'Data',
+    'TransactionInactive',
+    'ReadOnly',
+    'Version',
+    'NotFound',
+    'InvalidState',
+    'InvalidAccess',
+    'Abort',
+    'Timeout',
+    'QuotaExceeded',
+    'Syntax',
+    'DataClone'
+];
+var errorList = dexieErrorNames.concat(idbDomErrorNames);
+var defaultTexts = {
+    VersionChanged: "Database version changed by other database connection",
+    DatabaseClosed: "Database has been closed",
+    Abort: "Transaction aborted",
+    TransactionInactive: "Transaction has already completed or failed"
+};
+function DexieError(name, msg) {
+    this._e = getErrorWithStack();
+    this.name = name;
+    this.message = msg;
+}
+derive(DexieError).from(Error).extend({
+    stack: {
+        get: function () {
+            return this._stack ||
+                (this._stack = this.name + ": " + this.message + prettyStack(this._e, 2));
+        }
+    },
+    toString: function () { return this.name + ": " + this.message; }
+});
+function getMultiErrorMessage(msg, failures) {
+    return msg + ". Errors: " + Object.keys(failures)
+        .map(function (key) { return failures[key].toString(); })
+        .filter(function (v, i, s) { return s.indexOf(v) === i; })
+        .join('\n');
+}
+function ModifyError(msg, failures, successCount, failedKeys) {
+    this._e = getErrorWithStack();
+    this.failures = failures;
+    this.failedKeys = failedKeys;
+    this.successCount = successCount;
+    this.message = getMultiErrorMessage(msg, failures);
+}
+derive(ModifyError).from(DexieError);
+function BulkError(msg, failures) {
+    this._e = getErrorWithStack();
+    this.name = "BulkError";
+    this.failures = failures;
+    this.message = getMultiErrorMessage(msg, failures);
+}
+derive(BulkError).from(DexieError);
+var errnames = errorList.reduce(function (obj, name) { return (obj[name] = name + "Error", obj); }, {});
+var BaseException = DexieError;
+var exceptions = errorList.reduce(function (obj, name) {
+    var fullName = name + "Error";
+    function DexieError(msgOrInner, inner) {
+        this._e = getErrorWithStack();
+        this.name = fullName;
+        if (!msgOrInner) {
+            this.message = defaultTexts[name] || fullName;
+            this.inner = null;
+        }
+        else if (typeof msgOrInner === 'string') {
+            this.message = "" + msgOrInner + (!inner ? '' : '\n ' + inner);
+            this.inner = inner || null;
+        }
+        else if (typeof msgOrInner === 'object') {
+            this.message = msgOrInner.name + " " + msgOrInner.message;
+            this.inner = msgOrInner;
+        }
+    }
+    derive(DexieError).from(BaseException);
+    obj[name] = DexieError;
+    return obj;
+}, {});
+exceptions.Syntax = SyntaxError;
+exceptions.Type = TypeError;
+exceptions.Range = RangeError;
+var exceptionMap = idbDomErrorNames.reduce(function (obj, name) {
+    obj[name + "Error"] = exceptions[name];
+    return obj;
+}, {});
+function mapError(domError, message) {
+    if (!domError || domError instanceof DexieError || domError instanceof TypeError || domError instanceof SyntaxError || !domError.name || !exceptionMap[domError.name])
+        return domError;
+    var rv = new exceptionMap[domError.name](message || domError.message, domError);
+    if ("stack" in domError) {
+        setProp(rv, "stack", { get: function () {
+                return this.inner.stack;
+            } });
+    }
+    return rv;
+}
+var fullNameExceptions = errorList.reduce(function (obj, name) {
+    if (["Syntax", "Type", "Range"].indexOf(name) === -1)
+        obj[name + "Error"] = exceptions[name];
+    return obj;
+}, {});
+fullNameExceptions.ModifyError = ModifyError;
+fullNameExceptions.DexieError = DexieError;
+fullNameExceptions.BulkError = BulkError;
+
+function nop() { }
+function mirror(val) { return val; }
+function pureFunctionChain(f1, f2) {
+    if (f1 == null || f1 === mirror)
+        return f2;
+    return function (val) {
+        return f2(f1(val));
+    };
+}
+function callBoth(on1, on2) {
+    return function () {
+        on1.apply(this, arguments);
+        on2.apply(this, arguments);
+    };
+}
+function hookCreatingChain(f1, f2) {
+    if (f1 === nop)
+        return f2;
+    return function () {
+        var res = f1.apply(this, arguments);
+        if (res !== undefined)
+            arguments[0] = res;
+        var onsuccess = this.onsuccess,
+        onerror = this.onerror;
+        this.onsuccess = null;
+        this.onerror = null;
+        var res2 = f2.apply(this, arguments);
+        if (onsuccess)
+            this.onsuccess = this.onsuccess ? callBoth(onsuccess, this.onsuccess) : onsuccess;
+        if (onerror)
+            this.onerror = this.onerror ? callBoth(onerror, this.onerror) : onerror;
+        return res2 !== undefined ? res2 : res;
+    };
+}
+function hookDeletingChain(f1, f2) {
+    if (f1 === nop)
+        return f2;
+    return function () {
+        f1.apply(this, arguments);
+        var onsuccess = this.onsuccess,
+        onerror = this.onerror;
+        this.onsuccess = this.onerror = null;
+        f2.apply(this, arguments);
+        if (onsuccess)
+            this.onsuccess = this.onsuccess ? callBoth(onsuccess, this.onsuccess) : onsuccess;
+        if (onerror)
+            this.onerror = this.onerror ? callBoth(onerror, this.onerror) : onerror;
+    };
+}
+function hookUpdatingChain(f1, f2) {
+    if (f1 === nop)
+        return f2;
+    return function (modifications) {
+        var res = f1.apply(this, arguments);
+        extend(modifications, res);
+        var onsuccess = this.onsuccess,
+        onerror = this.onerror;
+        this.onsuccess = null;
+        this.onerror = null;
+        var res2 = f2.apply(this, arguments);
+        if (onsuccess)
+            this.onsuccess = this.onsuccess ? callBoth(onsuccess, this.onsuccess) : onsuccess;
+        if (onerror)
+            this.onerror = this.onerror ? callBoth(onerror, this.onerror) : onerror;
+        return res === undefined ?
+            (res2 === undefined ? undefined : res2) :
+            (extend(res, res2));
+    };
+}
+function reverseStoppableEventChain(f1, f2) {
+    if (f1 === nop)
+        return f2;
+    return function () {
+        if (f2.apply(this, arguments) === false)
+            return false;
+        return f1.apply(this, arguments);
+    };
+}
+
+function promisableChain(f1, f2) {
+    if (f1 === nop)
+        return f2;
+    return function () {
+        var res = f1.apply(this, arguments);
+        if (res && typeof res.then === 'function') {
+            var thiz = this, i = arguments.length, args = new Array(i);
+            while (i--)
+                args[i] = arguments[i];
+            return res.then(function () {
+                return f2.apply(thiz, args);
+            });
+        }
+        return f2.apply(this, arguments);
+    };
+}
+
+var INTERNAL = {};
+var LONG_STACKS_CLIP_LIMIT = 100;
+var MAX_LONG_STACKS = 20;
+var ZONE_ECHO_LIMIT = 100;
+var _a = typeof Promise === 'undefined' ?
+    [] :
+    (function () {
+        var globalP = Promise.resolve();
+        if (typeof crypto === 'undefined' || !crypto.subtle)
+            return [globalP, globalP.__proto__, globalP];
+        var nativeP = crypto.subtle.digest("SHA-512", new Uint8Array([0]));
+        return [
+            nativeP,
+            nativeP.__proto__,
+            globalP
+        ];
+    })();
+var resolvedNativePromise = _a[0];
+var nativePromiseProto = _a[1];
+var resolvedGlobalPromise = _a[2];
+var nativePromiseThen = nativePromiseProto && nativePromiseProto.then;
+var NativePromise = resolvedNativePromise && resolvedNativePromise.constructor;
+var patchGlobalPromise = !!resolvedGlobalPromise;
+var stack_being_generated = false;
+var schedulePhysicalTick = resolvedGlobalPromise ?
+    function () { resolvedGlobalPromise.then(physicalTick); }
+    :
+        _global.setImmediate ?
+            setImmediate.bind(null, physicalTick) :
+            _global.MutationObserver ?
+                function () {
+                    var hiddenDiv = document.createElement("div");
+                    (new MutationObserver(function () {
+                        physicalTick();
+                        hiddenDiv = null;
+                    })).observe(hiddenDiv, { attributes: true });
+                    hiddenDiv.setAttribute('i', '1');
+                } :
+                function () { setTimeout(physicalTick, 0); };
+var asap$1 = function (callback, args) {
+    microtickQueue.push([callback, args]);
+    if (needsNewPhysicalTick) {
+        schedulePhysicalTick();
+        needsNewPhysicalTick = false;
+    }
+};
+var isOutsideMicroTick = true;
+var needsNewPhysicalTick = true;
+var unhandledErrors = [];
+var rejectingErrors = [];
+var currentFulfiller = null;
+var rejectionMapper = mirror;
+var globalPSD = {
+    id: 'global',
+    global: true,
+    ref: 0,
+    unhandleds: [],
+    onunhandled: globalError,
+    pgp: false,
+    env: {},
+    finalize: function () {
+        this.unhandleds.forEach(function (uh) {
+            try {
+                globalError(uh[0], uh[1]);
+            }
+            catch (e) { }
+        });
+    }
+};
+var PSD = globalPSD;
+var microtickQueue = [];
+var numScheduledCalls = 0;
+var tickFinalizers = [];
+function DexiePromise(fn) {
+    if (typeof this !== 'object')
+        throw new TypeError('Promises must be constructed via new');
+    this._listeners = [];
+    this.onuncatched = nop;
+    this._lib = false;
+    var psd = (this._PSD = PSD);
+    if (debug) {
+        this._stackHolder = getErrorWithStack();
+        this._prev = null;
+        this._numPrev = 0;
+    }
+    if (typeof fn !== 'function') {
+        if (fn !== INTERNAL)
+            throw new TypeError('Not a function');
+        this._state = arguments[1];
+        this._value = arguments[2];
+        if (this._state === false)
+            handleRejection(this, this._value);
+        return;
+    }
+    this._state = null;
+    this._value = null;
+    ++psd.ref;
+    executePromiseTask(this, fn);
+}
+var thenProp = {
+    get: function () {
+        var psd = PSD, microTaskId = totalEchoes;
+        function then(onFulfilled, onRejected) {
+            var _this = this;
+            var possibleAwait = !psd.global && (psd !== PSD || microTaskId !== totalEchoes);
+            if (possibleAwait)
+                decrementExpectedAwaits();
+            var rv = new DexiePromise(function (resolve, reject) {
+                propagateToListener(_this, new Listener(nativeAwaitCompatibleWrap(onFulfilled, psd, possibleAwait), nativeAwaitCompatibleWrap(onRejected, psd, possibleAwait), resolve, reject, psd));
+            });
+            debug && linkToPreviousPromise(rv, this);
+            return rv;
+        }
+        then.prototype = INTERNAL;
+        return then;
+    },
+    set: function (value) {
+        setProp(this, 'then', value && value.prototype === INTERNAL ?
+            thenProp :
+            {
+                get: function () {
+                    return value;
+                },
+                set: thenProp.set
+            });
+    }
+};
+props(DexiePromise.prototype, {
+    then: thenProp,
+    _then: function (onFulfilled, onRejected) {
+        propagateToListener(this, new Listener(null, null, onFulfilled, onRejected, PSD));
+    },
+    catch: function (onRejected) {
+        if (arguments.length === 1)
+            return this.then(null, onRejected);
+        var type = arguments[0], handler = arguments[1];
+        return typeof type === 'function' ? this.then(null, function (err) {
+            return err instanceof type ? handler(err) : PromiseReject(err);
+        })
+            : this.then(null, function (err) {
+                return err && err.name === type ? handler(err) : PromiseReject(err);
+            });
+    },
+    finally: function (onFinally) {
+        return this.then(function (value) {
+            onFinally();
+            return value;
+        }, function (err) {
+            onFinally();
+            return PromiseReject(err);
+        });
+    },
+    stack: {
+        get: function () {
+            if (this._stack)
+                return this._stack;
+            try {
+                stack_being_generated = true;
+                var stacks = getStack(this, [], MAX_LONG_STACKS);
+                var stack = stacks.join("\nFrom previous: ");
+                if (this._state !== null)
+                    this._stack = stack;
+                return stack;
+            }
+            finally {
+                stack_being_generated = false;
+            }
+        }
+    },
+    timeout: function (ms, msg) {
+        var _this = this;
+        return ms < Infinity ?
+            new DexiePromise(function (resolve, reject) {
+                var handle = setTimeout(function () { return reject(new exceptions.Timeout(msg)); }, ms);
+                _this.then(resolve, reject).finally(clearTimeout.bind(null, handle));
+            }) : this;
+    }
+});
+if (typeof Symbol !== 'undefined' && Symbol.toStringTag)
+    setProp(DexiePromise.prototype, Symbol.toStringTag, 'Dexie.Promise');
+globalPSD.env = snapShot();
+function Listener(onFulfilled, onRejected, resolve, reject, zone) {
+    this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+    this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+    this.resolve = resolve;
+    this.reject = reject;
+    this.psd = zone;
+}
+props(DexiePromise, {
+    all: function () {
+        var values = getArrayOf.apply(null, arguments)
+            .map(onPossibleParallellAsync);
+        return new DexiePromise(function (resolve, reject) {
+            if (values.length === 0)
+                resolve([]);
+            var remaining = values.length;
+            values.forEach(function (a, i) { return DexiePromise.resolve(a).then(function (x) {
+                values[i] = x;
+                if (!--remaining)
+                    resolve(values);
+            }, reject); });
+        });
+    },
+    resolve: function (value) {
+        if (value instanceof DexiePromise)
+            return value;
+        if (value && typeof value.then === 'function')
+            return new DexiePromise(function (resolve, reject) {
+                value.then(resolve, reject);
+            });
+        var rv = new DexiePromise(INTERNAL, true, value);
+        linkToPreviousPromise(rv, currentFulfiller);
+        return rv;
+    },
+    reject: PromiseReject,
+    race: function () {
+        var values = getArrayOf.apply(null, arguments).map(onPossibleParallellAsync);
+        return new DexiePromise(function (resolve, reject) {
+            values.map(function (value) { return DexiePromise.resolve(value).then(resolve, reject); });
+        });
+    },
+    PSD: {
+        get: function () { return PSD; },
+        set: function (value) { return PSD = value; }
+    },
+    newPSD: newScope,
+    usePSD: usePSD,
+    scheduler: {
+        get: function () { return asap$1; },
+        set: function (value) { asap$1 = value; }
+    },
+    rejectionMapper: {
+        get: function () { return rejectionMapper; },
+        set: function (value) { rejectionMapper = value; }
+    },
+    follow: function (fn, zoneProps) {
+        return new DexiePromise(function (resolve, reject) {
+            return newScope(function (resolve, reject) {
+                var psd = PSD;
+                psd.unhandleds = [];
+                psd.onunhandled = reject;
+                psd.finalize = callBoth(function () {
+                    var _this = this;
+                    run_at_end_of_this_or_next_physical_tick(function () {
+                        _this.unhandleds.length === 0 ? resolve() : reject(_this.unhandleds[0]);
+                    });
+                }, psd.finalize);
+                fn();
+            }, zoneProps, resolve, reject);
+        });
+    }
+});
+if (NativePromise) {
+    if (NativePromise.allSettled)
+        setProp(DexiePromise, "allSettled", function () {
+            var possiblePromises = getArrayOf.apply(null, arguments).map(onPossibleParallellAsync);
+            return new DexiePromise(function (resolve) {
+                if (possiblePromises.length === 0)
+                    resolve([]);
+                var remaining = possiblePromises.length;
+                var results = new Array(remaining);
+                possiblePromises.forEach(function (p, i) { return DexiePromise.resolve(p).then(function (value) { return results[i] = { status: "fulfilled", value: value }; }, function (reason) { return results[i] = { status: "rejected", reason: reason }; })
+                    .then(function () { return --remaining || resolve(results); }); });
+            });
+        });
+    if (NativePromise.any && typeof AggregateError !== 'undefined')
+        setProp(DexiePromise, "any", function () {
+            var possiblePromises = getArrayOf.apply(null, arguments).map(onPossibleParallellAsync);
+            return new DexiePromise(function (resolve, reject) {
+                if (possiblePromises.length === 0)
+                    reject(new AggregateError([]));
+                var remaining = possiblePromises.length;
+                var failures = new Array(remaining);
+                possiblePromises.forEach(function (p, i) { return DexiePromise.resolve(p).then(function (value) { return resolve(value); }, function (failure) {
+                    failures[i] = failure;
+                    if (!--remaining)
+                        reject(new AggregateError(failures));
+                }); });
+            });
+        });
+}
+function executePromiseTask(promise, fn) {
+    try {
+        fn(function (value) {
+            if (promise._state !== null)
+                return;
+            if (value === promise)
+                throw new TypeError('A promise cannot be resolved with itself.');
+            var shouldExecuteTick = promise._lib && beginMicroTickScope();
+            if (value && typeof value.then === 'function') {
+                executePromiseTask(promise, function (resolve, reject) {
+                    value instanceof DexiePromise ?
+                        value._then(resolve, reject) :
+                        value.then(resolve, reject);
+                });
+            }
+            else {
+                promise._state = true;
+                promise._value = value;
+                propagateAllListeners(promise);
+            }
+            if (shouldExecuteTick)
+                endMicroTickScope();
+        }, handleRejection.bind(null, promise));
+    }
+    catch (ex) {
+        handleRejection(promise, ex);
+    }
+}
+function handleRejection(promise, reason) {
+    rejectingErrors.push(reason);
+    if (promise._state !== null)
+        return;
+    var shouldExecuteTick = promise._lib && beginMicroTickScope();
+    reason = rejectionMapper(reason);
+    promise._state = false;
+    promise._value = reason;
+    debug && reason !== null && typeof reason === 'object' && !reason._promise && tryCatch(function () {
+        var origProp = getPropertyDescriptor(reason, "stack");
+        reason._promise = promise;
+        setProp(reason, "stack", {
+            get: function () {
+                return stack_being_generated ?
+                    origProp && (origProp.get ?
+                        origProp.get.apply(reason) :
+                        origProp.value) :
+                    promise.stack;
+            }
+        });
+    });
+    addPossiblyUnhandledError(promise);
+    propagateAllListeners(promise);
+    if (shouldExecuteTick)
+        endMicroTickScope();
+}
+function propagateAllListeners(promise) {
+    var listeners = promise._listeners;
+    promise._listeners = [];
+    for (var i = 0, len = listeners.length; i < len; ++i) {
+        propagateToListener(promise, listeners[i]);
+    }
+    var psd = promise._PSD;
+    --psd.ref || psd.finalize();
+    if (numScheduledCalls === 0) {
+        ++numScheduledCalls;
+        asap$1(function () {
+            if (--numScheduledCalls === 0)
+                finalizePhysicalTick();
+        }, []);
+    }
+}
+function propagateToListener(promise, listener) {
+    if (promise._state === null) {
+        promise._listeners.push(listener);
+        return;
+    }
+    var cb = promise._state ? listener.onFulfilled : listener.onRejected;
+    if (cb === null) {
+        return (promise._state ? listener.resolve : listener.reject)(promise._value);
+    }
+    ++listener.psd.ref;
+    ++numScheduledCalls;
+    asap$1(callListener, [cb, promise, listener]);
+}
+function callListener(cb, promise, listener) {
+    try {
+        currentFulfiller = promise;
+        var ret, value = promise._value;
+        if (promise._state) {
+            ret = cb(value);
+        }
+        else {
+            if (rejectingErrors.length)
+                rejectingErrors = [];
+            ret = cb(value);
+            if (rejectingErrors.indexOf(value) === -1)
+                markErrorAsHandled(promise);
+        }
+        listener.resolve(ret);
+    }
+    catch (e) {
+        listener.reject(e);
+    }
+    finally {
+        currentFulfiller = null;
+        if (--numScheduledCalls === 0)
+            finalizePhysicalTick();
+        --listener.psd.ref || listener.psd.finalize();
+    }
+}
+function getStack(promise, stacks, limit) {
+    if (stacks.length === limit)
+        return stacks;
+    var stack = "";
+    if (promise._state === false) {
+        var failure = promise._value, errorName, message;
+        if (failure != null) {
+            errorName = failure.name || "Error";
+            message = failure.message || failure;
+            stack = prettyStack(failure, 0);
+        }
+        else {
+            errorName = failure;
+            message = "";
+        }
+        stacks.push(errorName + (message ? ": " + message : "") + stack);
+    }
+    if (debug) {
+        stack = prettyStack(promise._stackHolder, 2);
+        if (stack && stacks.indexOf(stack) === -1)
+            stacks.push(stack);
+        if (promise._prev)
+            getStack(promise._prev, stacks, limit);
+    }
+    return stacks;
+}
+function linkToPreviousPromise(promise, prev) {
+    var numPrev = prev ? prev._numPrev + 1 : 0;
+    if (numPrev < LONG_STACKS_CLIP_LIMIT) {
+        promise._prev = prev;
+        promise._numPrev = numPrev;
+    }
+}
+function physicalTick() {
+    beginMicroTickScope() && endMicroTickScope();
+}
+function beginMicroTickScope() {
+    var wasRootExec = isOutsideMicroTick;
+    isOutsideMicroTick = false;
+    needsNewPhysicalTick = false;
+    return wasRootExec;
+}
+function endMicroTickScope() {
+    var callbacks, i, l;
+    do {
+        while (microtickQueue.length > 0) {
+            callbacks = microtickQueue;
+            microtickQueue = [];
+            l = callbacks.length;
+            for (i = 0; i < l; ++i) {
+                var item = callbacks[i];
+                item[0].apply(null, item[1]);
+            }
+        }
+    } while (microtickQueue.length > 0);
+    isOutsideMicroTick = true;
+    needsNewPhysicalTick = true;
+}
+function finalizePhysicalTick() {
+    var unhandledErrs = unhandledErrors;
+    unhandledErrors = [];
+    unhandledErrs.forEach(function (p) {
+        p._PSD.onunhandled.call(null, p._value, p);
+    });
+    var finalizers = tickFinalizers.slice(0);
+    var i = finalizers.length;
+    while (i)
+        finalizers[--i]();
+}
+function run_at_end_of_this_or_next_physical_tick(fn) {
+    function finalizer() {
+        fn();
+        tickFinalizers.splice(tickFinalizers.indexOf(finalizer), 1);
+    }
+    tickFinalizers.push(finalizer);
+    ++numScheduledCalls;
+    asap$1(function () {
+        if (--numScheduledCalls === 0)
+            finalizePhysicalTick();
+    }, []);
+}
+function addPossiblyUnhandledError(promise) {
+    if (!unhandledErrors.some(function (p) { return p._value === promise._value; }))
+        unhandledErrors.push(promise);
+}
+function markErrorAsHandled(promise) {
+    var i = unhandledErrors.length;
+    while (i)
+        if (unhandledErrors[--i]._value === promise._value) {
+            unhandledErrors.splice(i, 1);
+            return;
+        }
+}
+function PromiseReject(reason) {
+    return new DexiePromise(INTERNAL, false, reason);
+}
+function wrap(fn, errorCatcher) {
+    var psd = PSD;
+    return function () {
+        var wasRootExec = beginMicroTickScope(), outerScope = PSD;
+        try {
+            switchToZone(psd, true);
+            return fn.apply(this, arguments);
+        }
+        catch (e) {
+            errorCatcher && errorCatcher(e);
+        }
+        finally {
+            switchToZone(outerScope, false);
+            if (wasRootExec)
+                endMicroTickScope();
+        }
+    };
+}
+var task = { awaits: 0, echoes: 0, id: 0 };
+var taskCounter = 0;
+var zoneStack = [];
+var zoneEchoes = 0;
+var totalEchoes = 0;
+var zone_id_counter = 0;
+function newScope(fn, props$$1, a1, a2) {
+    var parent = PSD, psd = Object.create(parent);
+    psd.parent = parent;
+    psd.ref = 0;
+    psd.global = false;
+    psd.id = ++zone_id_counter;
+    var globalEnv = globalPSD.env;
+    psd.env = patchGlobalPromise ? {
+        Promise: DexiePromise,
+        PromiseProp: { value: DexiePromise, configurable: true, writable: true },
+        all: DexiePromise.all,
+        race: DexiePromise.race,
+        allSettled: DexiePromise.allSettled,
+        any: DexiePromise.any,
+        resolve: DexiePromise.resolve,
+        reject: DexiePromise.reject,
+        nthen: getPatchedPromiseThen(globalEnv.nthen, psd),
+        gthen: getPatchedPromiseThen(globalEnv.gthen, psd)
+    } : {};
+    if (props$$1)
+        extend(psd, props$$1);
+    ++parent.ref;
+    psd.finalize = function () {
+        --this.parent.ref || this.parent.finalize();
+    };
+    var rv = usePSD(psd, fn, a1, a2);
+    if (psd.ref === 0)
+        psd.finalize();
+    return rv;
+}
+function incrementExpectedAwaits() {
+    if (!task.id)
+        task.id = ++taskCounter;
+    ++task.awaits;
+    task.echoes += ZONE_ECHO_LIMIT;
+    return task.id;
+}
+function decrementExpectedAwaits(sourceTaskId) {
+    if (!task.awaits || (sourceTaskId && sourceTaskId !== task.id))
+        return;
+    if (--task.awaits === 0)
+        task.id = 0;
+    task.echoes = task.awaits * ZONE_ECHO_LIMIT;
+}
+if (('' + nativePromiseThen).indexOf('[native code]') === -1) {
+    incrementExpectedAwaits = decrementExpectedAwaits = nop;
+}
+function onPossibleParallellAsync(possiblePromise) {
+    if (task.echoes && possiblePromise && possiblePromise.constructor === NativePromise) {
+        incrementExpectedAwaits();
+        return possiblePromise.then(function (x) {
+            decrementExpectedAwaits();
+            return x;
+        }, function (e) {
+            decrementExpectedAwaits();
+            return rejection(e);
+        });
+    }
+    return possiblePromise;
+}
+function zoneEnterEcho(targetZone) {
+    ++totalEchoes;
+    if (!task.echoes || --task.echoes === 0) {
+        task.echoes = task.id = 0;
+    }
+    zoneStack.push(PSD);
+    switchToZone(targetZone, true);
+}
+function zoneLeaveEcho() {
+    var zone = zoneStack[zoneStack.length - 1];
+    zoneStack.pop();
+    switchToZone(zone, false);
+}
+function switchToZone(targetZone, bEnteringZone) {
+    var currentZone = PSD;
+    if (bEnteringZone ? task.echoes && (!zoneEchoes++ || targetZone !== PSD) : zoneEchoes && (!--zoneEchoes || targetZone !== PSD)) {
+        enqueueNativeMicroTask(bEnteringZone ? zoneEnterEcho.bind(null, targetZone) : zoneLeaveEcho);
+    }
+    if (targetZone === PSD)
+        return;
+    PSD = targetZone;
+    if (currentZone === globalPSD)
+        globalPSD.env = snapShot();
+    if (patchGlobalPromise) {
+        var GlobalPromise_1 = globalPSD.env.Promise;
+        var targetEnv = targetZone.env;
+        nativePromiseProto.then = targetEnv.nthen;
+        GlobalPromise_1.prototype.then = targetEnv.gthen;
+        if (currentZone.global || targetZone.global) {
+            Object.defineProperty(_global, 'Promise', targetEnv.PromiseProp);
+            GlobalPromise_1.all = targetEnv.all;
+            GlobalPromise_1.race = targetEnv.race;
+            GlobalPromise_1.resolve = targetEnv.resolve;
+            GlobalPromise_1.reject = targetEnv.reject;
+            if (targetEnv.allSettled)
+                GlobalPromise_1.allSettled = targetEnv.allSettled;
+            if (targetEnv.any)
+                GlobalPromise_1.any = targetEnv.any;
+        }
+    }
+}
+function snapShot() {
+    var GlobalPromise = _global.Promise;
+    return patchGlobalPromise ? {
+        Promise: GlobalPromise,
+        PromiseProp: Object.getOwnPropertyDescriptor(_global, "Promise"),
+        all: GlobalPromise.all,
+        race: GlobalPromise.race,
+        allSettled: GlobalPromise.allSettled,
+        any: GlobalPromise.any,
+        resolve: GlobalPromise.resolve,
+        reject: GlobalPromise.reject,
+        nthen: nativePromiseProto.then,
+        gthen: GlobalPromise.prototype.then
+    } : {};
+}
+function usePSD(psd, fn, a1, a2, a3) {
+    var outerScope = PSD;
+    try {
+        switchToZone(psd, true);
+        return fn(a1, a2, a3);
+    }
+    finally {
+        switchToZone(outerScope, false);
+    }
+}
+function enqueueNativeMicroTask(job) {
+    nativePromiseThen.call(resolvedNativePromise, job);
+}
+function nativeAwaitCompatibleWrap(fn, zone, possibleAwait) {
+    return typeof fn !== 'function' ? fn : function () {
+        var outerZone = PSD;
+        if (possibleAwait)
+            incrementExpectedAwaits();
+        switchToZone(zone, true);
+        try {
+            return fn.apply(this, arguments);
+        }
+        finally {
+            switchToZone(outerZone, false);
+        }
+    };
+}
+function getPatchedPromiseThen(origThen, zone) {
+    return function (onResolved, onRejected) {
+        return origThen.call(this, nativeAwaitCompatibleWrap(onResolved, zone, false), nativeAwaitCompatibleWrap(onRejected, zone, false));
+    };
+}
+var UNHANDLEDREJECTION = "unhandledrejection";
+function globalError(err, promise) {
+    var rv;
+    try {
+        rv = promise.onuncatched(err);
+    }
+    catch (e) { }
+    if (rv !== false)
+        try {
+            var event, eventData = { promise: promise, reason: err };
+            if (_global.document && document.createEvent) {
+                event = document.createEvent('Event');
+                event.initEvent(UNHANDLEDREJECTION, true, true);
+                extend(event, eventData);
+            }
+            else if (_global.CustomEvent) {
+                event = new CustomEvent(UNHANDLEDREJECTION, { detail: eventData });
+                extend(event, eventData);
+            }
+            if (event && _global.dispatchEvent) {
+                dispatchEvent(event);
+                if (!_global.PromiseRejectionEvent && _global.onunhandledrejection)
+                    try {
+                        _global.onunhandledrejection(event);
+                    }
+                    catch (_) { }
+            }
+            if (debug && event && !event.defaultPrevented) {
+                console.warn("Unhandled rejection: " + (err.stack || err));
+            }
+        }
+        catch (e) { }
+}
+var rejection = DexiePromise.reject;
+
+function tempTransaction(db, mode, storeNames, fn) {
+    if (!db._state.openComplete && (!PSD.letThrough)) {
+        if (!db._state.isBeingOpened) {
+            if (!db._options.autoOpen)
+                return rejection(new exceptions.DatabaseClosed());
+            db.open().catch(nop);
+        }
+        return db._state.dbReadyPromise.then(function () { return tempTransaction(db, mode, storeNames, fn); });
+    }
+    else {
+        var trans = db._createTransaction(mode, storeNames, db._dbSchema);
+        try {
+            trans.create();
+        }
+        catch (ex) {
+            return rejection(ex);
+        }
+        return trans._promise(mode, function (resolve, reject) {
+            return newScope(function () {
+                PSD.trans = trans;
+                return fn(resolve, reject, trans);
+            });
+        }).then(function (result) {
+            return trans._completion.then(function () { return result; });
+        });
+    }
+}
+
+var DEXIE_VERSION = '3.0.2';
+var maxString = String.fromCharCode(65535);
+var minKey = -Infinity;
+var INVALID_KEY_ARGUMENT = "Invalid key provided. Keys must be of type string, number, Date or Array<string | number | Date>.";
+var STRING_EXPECTED = "String expected.";
+var connections = [];
+var isIEOrEdge = typeof navigator !== 'undefined' && /(MSIE|Trident|Edge)/.test(navigator.userAgent);
+var hasIEDeleteObjectStoreBug = isIEOrEdge;
+var hangsOnDeleteLargeKeyRange = isIEOrEdge;
+var dexieStackFrameFilter = function (frame) { return !/(dexie\.js|dexie\.min\.js)/.test(frame); };
+var DBNAMES_DB = '__dbnames';
+var READONLY = 'readonly';
+var READWRITE = 'readwrite';
+
+function combine(filter1, filter2) {
+    return filter1 ?
+        filter2 ?
+            function () { return filter1.apply(this, arguments) && filter2.apply(this, arguments); } :
+            filter1 :
+        filter2;
+}
+
+var AnyRange = {
+    type: 3          ,
+    lower: -Infinity,
+    lowerOpen: false,
+    upper: [[]],
+    upperOpen: false
+};
+
+var Table =               (function () {
+    function Table() {
+    }
+    Table.prototype._trans = function (mode, fn, writeLocked) {
+        var trans = this._tx || PSD.trans;
+        var tableName = this.name;
+        function checkTableInTransaction(resolve, reject, trans) {
+            if (!trans.schema[tableName])
+                throw new exceptions.NotFound("Table " + tableName + " not part of transaction");
+            return fn(trans.idbtrans, trans);
+        }
+        var wasRootExec = beginMicroTickScope();
+        try {
+            return trans && trans.db === this.db ?
+                trans === PSD.trans ?
+                    trans._promise(mode, checkTableInTransaction, writeLocked) :
+                    newScope(function () { return trans._promise(mode, checkTableInTransaction, writeLocked); }, { trans: trans, transless: PSD.transless || PSD }) :
+                tempTransaction(this.db, mode, [this.name], checkTableInTransaction);
+        }
+        finally {
+            if (wasRootExec)
+                endMicroTickScope();
+        }
+    };
+    Table.prototype.get = function (keyOrCrit, cb) {
+        var _this = this;
+        if (keyOrCrit && keyOrCrit.constructor === Object)
+            return this.where(keyOrCrit).first(cb);
+        return this._trans('readonly', function (trans) {
+            return _this.core.get({ trans: trans, key: keyOrCrit })
+                .then(function (res) { return _this.hook.reading.fire(res); });
+        }).then(cb);
+    };
+    Table.prototype.where = function (indexOrCrit) {
+        if (typeof indexOrCrit === 'string')
+            return new this.db.WhereClause(this, indexOrCrit);
+        if (isArray(indexOrCrit))
+            return new this.db.WhereClause(this, "[" + indexOrCrit.join('+') + "]");
+        var keyPaths = keys(indexOrCrit);
+        if (keyPaths.length === 1)
+            return this
+                .where(keyPaths[0])
+                .equals(indexOrCrit[keyPaths[0]]);
+        var compoundIndex = this.schema.indexes.concat(this.schema.primKey).filter(function (ix) {
+            return ix.compound &&
+                keyPaths.every(function (keyPath) { return ix.keyPath.indexOf(keyPath) >= 0; }) &&
+                ix.keyPath.every(function (keyPath) { return keyPaths.indexOf(keyPath) >= 0; });
+        })[0];
+        if (compoundIndex && this.db._maxKey !== maxString)
+            return this
+                .where(compoundIndex.name)
+                .equals(compoundIndex.keyPath.map(function (kp) { return indexOrCrit[kp]; }));
+        if (!compoundIndex && debug)
+            console.warn("The query " + JSON.stringify(indexOrCrit) + " on " + this.name + " would benefit of a " +
+                ("compound index [" + keyPaths.join('+') + "]"));
+        var idxByName = this.schema.idxByName;
+        var idb = this.db._deps.indexedDB;
+        function equals(a, b) {
+            try {
+                return idb.cmp(a, b) === 0;
+            }
+            catch (e) {
+                return false;
+            }
+        }
+        var _a = keyPaths.reduce(function (_a, keyPath) {
+            var prevIndex = _a[0], prevFilterFn = _a[1];
+            var index = idxByName[keyPath];
+            var value = indexOrCrit[keyPath];
+            return [
+                prevIndex || index,
+                prevIndex || !index ?
+                    combine(prevFilterFn, index && index.multi ?
+                        function (x) {
+                            var prop = getByKeyPath(x, keyPath);
+                            return isArray(prop) && prop.some(function (item) { return equals(value, item); });
+                        } : function (x) { return equals(value, getByKeyPath(x, keyPath)); })
+                    : prevFilterFn
+            ];
+        }, [null, null]), idx = _a[0], filterFunction = _a[1];
+        return idx ?
+            this.where(idx.name).equals(indexOrCrit[idx.keyPath])
+                .filter(filterFunction) :
+            compoundIndex ?
+                this.filter(filterFunction) :
+                this.where(keyPaths).equals('');
+    };
+    Table.prototype.filter = function (filterFunction) {
+        return this.toCollection().and(filterFunction);
+    };
+    Table.prototype.count = function (thenShortcut) {
+        return this.toCollection().count(thenShortcut);
+    };
+    Table.prototype.offset = function (offset) {
+        return this.toCollection().offset(offset);
+    };
+    Table.prototype.limit = function (numRows) {
+        return this.toCollection().limit(numRows);
+    };
+    Table.prototype.each = function (callback) {
+        return this.toCollection().each(callback);
+    };
+    Table.prototype.toArray = function (thenShortcut) {
+        return this.toCollection().toArray(thenShortcut);
+    };
+    Table.prototype.toCollection = function () {
+        return new this.db.Collection(new this.db.WhereClause(this));
+    };
+    Table.prototype.orderBy = function (index) {
+        return new this.db.Collection(new this.db.WhereClause(this, isArray(index) ?
+            "[" + index.join('+') + "]" :
+            index));
+    };
+    Table.prototype.reverse = function () {
+        return this.toCollection().reverse();
+    };
+    Table.prototype.mapToClass = function (constructor) {
+        this.schema.mappedClass = constructor;
+        var readHook = function (obj) {
+            if (!obj)
+                return obj;
+            var res = Object.create(constructor.prototype);
+            for (var m in obj)
+                if (hasOwn(obj, m))
+                    try {
+                        res[m] = obj[m];
+                    }
+                    catch (_) { }
+            return res;
+        };
+        if (this.schema.readHook) {
+            this.hook.reading.unsubscribe(this.schema.readHook);
+        }
+        this.schema.readHook = readHook;
+        this.hook("reading", readHook);
+        return constructor;
+    };
+    Table.prototype.defineClass = function () {
+        function Class(content) {
+            extend(this, content);
+        }
+        
+        return this.mapToClass(Class);
+    };
+    Table.prototype.add = function (obj, key) {
+        var _this = this;
+        return this._trans('readwrite', function (trans) {
+            return _this.core.mutate({ trans: trans, type: 'add', keys: key != null ? [key] : null, values: [obj] });
+        }).then(function (res) { return res.numFailures ? DexiePromise.reject(res.failures[0]) : res.lastResult; })
+            .then(function (lastResult) {
+            if (!_this.core.schema.primaryKey.outbound) {
+                try {
+                    setByKeyPath(obj, _this.core.schema.primaryKey.keyPath, lastResult);
+                }
+                catch (_) { }
+                
+            }
+            return lastResult;
+        });
+    };
+    Table.prototype.update = function (keyOrObject, modifications) {
+        if (typeof modifications !== 'object' || isArray(modifications))
+            throw new exceptions.InvalidArgument("Modifications must be an object.");
+        if (typeof keyOrObject === 'object' && !isArray(keyOrObject)) {
+            keys(modifications).forEach(function (keyPath) {
+                setByKeyPath(keyOrObject, keyPath, modifications[keyPath]);
+            });
+            var key = getByKeyPath(keyOrObject, this.schema.primKey.keyPath);
+            if (key === undefined)
+                return rejection(new exceptions.InvalidArgument("Given object does not contain its primary key"));
+            return this.where(":id").equals(key).modify(modifications);
+        }
+        else {
+            return this.where(":id").equals(keyOrObject).modify(modifications);
+        }
+    };
+    Table.prototype.put = function (obj, key) {
+        var _this = this;
+        return this._trans('readwrite', function (trans) { return _this.core.mutate({ trans: trans, type: 'put', values: [obj], keys: key != null ? [key] : null }); })
+            .then(function (res) { return res.numFailures ? DexiePromise.reject(res.failures[0]) : res.lastResult; })
+            .then(function (lastResult) {
+            if (!_this.core.schema.primaryKey.outbound) {
+                try {
+                    setByKeyPath(obj, _this.core.schema.primaryKey.keyPath, lastResult);
+                }
+                catch (_) { }
+                
+            }
+            return lastResult;
+        });
+    };
+    Table.prototype.delete = function (key) {
+        var _this = this;
+        return this._trans('readwrite', function (trans) { return _this.core.mutate({ trans: trans, type: 'delete', keys: [key] }); })
+            .then(function (res) { return res.numFailures ? DexiePromise.reject(res.failures[0]) : undefined; });
+    };
+    Table.prototype.clear = function () {
+        var _this = this;
+        return this._trans('readwrite', function (trans) { return _this.core.mutate({ trans: trans, type: 'deleteRange', range: AnyRange }); })
+            .then(function (res) { return res.numFailures ? DexiePromise.reject(res.failures[0]) : undefined; });
+    };
+    Table.prototype.bulkGet = function (keys$$1) {
+        var _this = this;
+        return this._trans('readonly', function (trans) {
+            return _this.core.getMany({
+                keys: keys$$1,
+                trans: trans
+            }).then(function (result) { return result.map(function (res) { return _this.hook.reading.fire(res); }); });
+        });
+    };
+    Table.prototype.bulkAdd = function (objects, keysOrOptions, options) {
+        var _this = this;
+        var keys$$1 = Array.isArray(keysOrOptions) ? keysOrOptions : undefined;
+        options = options || (keys$$1 ? undefined : keysOrOptions);
+        var wantResults = options ? options.allKeys : undefined;
+        return this._trans('readwrite', function (trans) {
+            var outbound = _this.core.schema.primaryKey.outbound;
+            if (!outbound && keys$$1)
+                throw new exceptions.InvalidArgument("bulkAdd(): keys argument invalid on tables with inbound keys");
+            if (keys$$1 && keys$$1.length !== objects.length)
+                throw new exceptions.InvalidArgument("Arguments objects and keys must have the same length");
+            var numObjects = objects.length;
+            return _this.core.mutate({ trans: trans, type: 'add', keys: keys$$1, values: objects, wantResults: wantResults })
+                .then(function (_a) {
+                var numFailures = _a.numFailures, results = _a.results, lastResult = _a.lastResult, failures = _a.failures;
+                var result = wantResults ? results : lastResult;
+                if (numFailures === 0)
+                    return result;
+                throw new BulkError(_this.name + ".bulkAdd(): " + numFailures + " of " + numObjects + " operations failed", Object.keys(failures).map(function (pos) { return failures[pos]; }));
+            });
+        });
+    };
+    Table.prototype.bulkPut = function (objects, keysOrOptions, options) {
+        var _this = this;
+        var keys$$1 = Array.isArray(keysOrOptions) ? keysOrOptions : undefined;
+        options = options || (keys$$1 ? undefined : keysOrOptions);
+        var wantResults = options ? options.allKeys : undefined;
+        return this._trans('readwrite', function (trans) {
+            var outbound = _this.core.schema.primaryKey.outbound;
+            if (!outbound && keys$$1)
+                throw new exceptions.InvalidArgument("bulkPut(): keys argument invalid on tables with inbound keys");
+            if (keys$$1 && keys$$1.length !== objects.length)
+                throw new exceptions.InvalidArgument("Arguments objects and keys must have the same length");
+            var numObjects = objects.length;
+            return _this.core.mutate({ trans: trans, type: 'put', keys: keys$$1, values: objects, wantResults: wantResults })
+                .then(function (_a) {
+                var numFailures = _a.numFailures, results = _a.results, lastResult = _a.lastResult, failures = _a.failures;
+                var result = wantResults ? results : lastResult;
+                if (numFailures === 0)
+                    return result;
+                throw new BulkError(_this.name + ".bulkPut(): " + numFailures + " of " + numObjects + " operations failed", Object.keys(failures).map(function (pos) { return failures[pos]; }));
+            });
+        });
+    };
+    Table.prototype.bulkDelete = function (keys$$1) {
+        var _this = this;
+        var numKeys = keys$$1.length;
+        return this._trans('readwrite', function (trans) {
+            return _this.core.mutate({ trans: trans, type: 'delete', keys: keys$$1 });
+        }).then(function (_a) {
+            var numFailures = _a.numFailures, lastResult = _a.lastResult, failures = _a.failures;
+            if (numFailures === 0)
+                return lastResult;
+            throw new BulkError(_this.name + ".bulkDelete(): " + numFailures + " of " + numKeys + " operations failed", failures);
+        });
+    };
+    return Table;
+}());
+
+function Events(ctx) {
+    var evs = {};
+    var rv = function (eventName, subscriber) {
+        if (subscriber) {
+            var i = arguments.length, args = new Array(i - 1);
+            while (--i)
+                args[i - 1] = arguments[i];
+            evs[eventName].subscribe.apply(null, args);
+            return ctx;
+        }
+        else if (typeof (eventName) === 'string') {
+            return evs[eventName];
+        }
+    };
+    rv.addEventType = add;
+    for (var i = 1, l = arguments.length; i < l; ++i) {
+        add(arguments[i]);
+    }
+    return rv;
+    function add(eventName, chainFunction, defaultFunction) {
+        if (typeof eventName === 'object')
+            return addConfiguredEvents(eventName);
+        if (!chainFunction)
+            chainFunction = reverseStoppableEventChain;
+        if (!defaultFunction)
+            defaultFunction = nop;
+        var context = {
+            subscribers: [],
+            fire: defaultFunction,
+            subscribe: function (cb) {
+                if (context.subscribers.indexOf(cb) === -1) {
+                    context.subscribers.push(cb);
+                    context.fire = chainFunction(context.fire, cb);
+                }
+            },
+            unsubscribe: function (cb) {
+                context.subscribers = context.subscribers.filter(function (fn) { return fn !== cb; });
+                context.fire = context.subscribers.reduce(chainFunction, defaultFunction);
+            }
+        };
+        evs[eventName] = rv[eventName] = context;
+        return context;
+    }
+    function addConfiguredEvents(cfg) {
+        keys(cfg).forEach(function (eventName) {
+            var args = cfg[eventName];
+            if (isArray(args)) {
+                add(eventName, cfg[eventName][0], cfg[eventName][1]);
+            }
+            else if (args === 'asap') {
+                var context = add(eventName, mirror, function fire() {
+                    var i = arguments.length, args = new Array(i);
+                    while (i--)
+                        args[i] = arguments[i];
+                    context.subscribers.forEach(function (fn) {
+                        asap(function fireEvent() {
+                            fn.apply(null, args);
+                        });
+                    });
+                });
+            }
+            else
+                throw new exceptions.InvalidArgument("Invalid event config");
+        });
+    }
+}
+
+function makeClassConstructor(prototype, constructor) {
+    derive(constructor).from({ prototype: prototype });
+    return constructor;
+}
+
+function createTableConstructor(db) {
+    return makeClassConstructor(Table.prototype, function Table$$1(name, tableSchema, trans) {
+        this.db = db;
+        this._tx = trans;
+        this.name = name;
+        this.schema = tableSchema;
+        this.hook = db._allTables[name] ? db._allTables[name].hook : Events(null, {
+            "creating": [hookCreatingChain, nop],
+            "reading": [pureFunctionChain, mirror],
+            "updating": [hookUpdatingChain, nop],
+            "deleting": [hookDeletingChain, nop]
+        });
+    });
+}
+
+function isPlainKeyRange(ctx, ignoreLimitFilter) {
+    return !(ctx.filter || ctx.algorithm || ctx.or) &&
+        (ignoreLimitFilter ? ctx.justLimit : !ctx.replayFilter);
+}
+function addFilter(ctx, fn) {
+    ctx.filter = combine(ctx.filter, fn);
+}
+function addReplayFilter(ctx, factory, isLimitFilter) {
+    var curr = ctx.replayFilter;
+    ctx.replayFilter = curr ? function () { return combine(curr(), factory()); } : factory;
+    ctx.justLimit = isLimitFilter && !curr;
+}
+function addMatchFilter(ctx, fn) {
+    ctx.isMatch = combine(ctx.isMatch, fn);
+}
+function getIndexOrStore(ctx, coreSchema) {
+    if (ctx.isPrimKey)
+        return coreSchema.primaryKey;
+    var index = coreSchema.getIndexByKeyPath(ctx.index);
+    if (!index)
+        throw new exceptions.Schema("KeyPath " + ctx.index + " on object store " + coreSchema.name + " is not indexed");
+    return index;
+}
+function openCursor(ctx, coreTable, trans) {
+    var index = getIndexOrStore(ctx, coreTable.schema);
+    return coreTable.openCursor({
+        trans: trans,
+        values: !ctx.keysOnly,
+        reverse: ctx.dir === 'prev',
+        unique: !!ctx.unique,
+        query: {
+            index: index,
+            range: ctx.range
+        }
+    });
+}
+function iter(ctx, fn, coreTrans, coreTable) {
+    var filter = ctx.replayFilter ? combine(ctx.filter, ctx.replayFilter()) : ctx.filter;
+    if (!ctx.or) {
+        return iterate(openCursor(ctx, coreTable, coreTrans), combine(ctx.algorithm, filter), fn, !ctx.keysOnly && ctx.valueMapper);
+    }
+    else {
+        var set_1 = {};
+        var union = function (item, cursor, advance) {
+            if (!filter || filter(cursor, advance, function (result) { return cursor.stop(result); }, function (err) { return cursor.fail(err); })) {
+                var primaryKey = cursor.primaryKey;
+                var key = '' + primaryKey;
+                if (key === '[object ArrayBuffer]')
+                    key = '' + new Uint8Array(primaryKey);
+                if (!hasOwn(set_1, key)) {
+                    set_1[key] = true;
+                    fn(item, cursor, advance);
+                }
+            }
+        };
+        return Promise.all([
+            ctx.or._iterate(union, coreTrans),
+            iterate(openCursor(ctx, coreTable, coreTrans), ctx.algorithm, union, !ctx.keysOnly && ctx.valueMapper)
+        ]);
+    }
+}
+function iterate(cursorPromise, filter, fn, valueMapper) {
+    var mappedFn = valueMapper ? function (x, c, a) { return fn(valueMapper(x), c, a); } : fn;
+    var wrappedFn = wrap(mappedFn);
+    return cursorPromise.then(function (cursor) {
+        if (cursor) {
+            return cursor.start(function () {
+                var c = function () { return cursor.continue(); };
+                if (!filter || filter(cursor, function (advancer) { return c = advancer; }, function (val) { cursor.stop(val); c = nop; }, function (e) { cursor.fail(e); c = nop; }))
+                    wrappedFn(cursor.value, cursor, function (advancer) { return c = advancer; });
+                c();
+            });
+        }
+    });
+}
+
+var Collection =               (function () {
+    function Collection() {
+    }
+    Collection.prototype._read = function (fn, cb) {
+        var ctx = this._ctx;
+        return ctx.error ?
+            ctx.table._trans(null, rejection.bind(null, ctx.error)) :
+            ctx.table._trans('readonly', fn).then(cb);
+    };
+    Collection.prototype._write = function (fn) {
+        var ctx = this._ctx;
+        return ctx.error ?
+            ctx.table._trans(null, rejection.bind(null, ctx.error)) :
+            ctx.table._trans('readwrite', fn, "locked");
+    };
+    Collection.prototype._addAlgorithm = function (fn) {
+        var ctx = this._ctx;
+        ctx.algorithm = combine(ctx.algorithm, fn);
+    };
+    Collection.prototype._iterate = function (fn, coreTrans) {
+        return iter(this._ctx, fn, coreTrans, this._ctx.table.core);
+    };
+    Collection.prototype.clone = function (props$$1) {
+        var rv = Object.create(this.constructor.prototype), ctx = Object.create(this._ctx);
+        if (props$$1)
+            extend(ctx, props$$1);
+        rv._ctx = ctx;
+        return rv;
+    };
+    Collection.prototype.raw = function () {
+        this._ctx.valueMapper = null;
+        return this;
+    };
+    Collection.prototype.each = function (fn) {
+        var ctx = this._ctx;
+        return this._read(function (trans) { return iter(ctx, fn, trans, ctx.table.core); });
+    };
+    Collection.prototype.count = function (cb) {
+        var _this = this;
+        return this._read(function (trans) {
+            var ctx = _this._ctx;
+            var coreTable = ctx.table.core;
+            if (isPlainKeyRange(ctx, true)) {
+                return coreTable.count({
+                    trans: trans,
+                    query: {
+                        index: getIndexOrStore(ctx, coreTable.schema),
+                        range: ctx.range
+                    }
+                }).then(function (count) { return Math.min(count, ctx.limit); });
+            }
+            else {
+                var count = 0;
+                return iter(ctx, function () { ++count; return false; }, trans, coreTable)
+                    .then(function () { return count; });
+            }
+        }).then(cb);
+    };
+    Collection.prototype.sortBy = function (keyPath, cb) {
+        var parts = keyPath.split('.').reverse(), lastPart = parts[0], lastIndex = parts.length - 1;
+        function getval(obj, i) {
+            if (i)
+                return getval(obj[parts[i]], i - 1);
+            return obj[lastPart];
+        }
+        var order = this._ctx.dir === "next" ? 1 : -1;
+        function sorter(a, b) {
+            var aVal = getval(a, lastIndex), bVal = getval(b, lastIndex);
+            return aVal < bVal ? -order : aVal > bVal ? order : 0;
+        }
+        return this.toArray(function (a) {
+            return a.sort(sorter);
+        }).then(cb);
+    };
+    Collection.prototype.toArray = function (cb) {
+        var _this = this;
+        return this._read(function (trans) {
+            var ctx = _this._ctx;
+            if (ctx.dir === 'next' && isPlainKeyRange(ctx, true) && ctx.limit > 0) {
+                var valueMapper_1 = ctx.valueMapper;
+                var index = getIndexOrStore(ctx, ctx.table.core.schema);
+                return ctx.table.core.query({
+                    trans: trans,
+                    limit: ctx.limit,
+                    values: true,
+                    query: {
+                        index: index,
+                        range: ctx.range
+                    }
+                }).then(function (_a) {
+                    var result = _a.result;
+                    return valueMapper_1 ? result.map(valueMapper_1) : result;
+                });
+            }
+            else {
+                var a_1 = [];
+                return iter(ctx, function (item) { return a_1.push(item); }, trans, ctx.table.core).then(function () { return a_1; });
+            }
+        }, cb);
+    };
+    Collection.prototype.offset = function (offset) {
+        var ctx = this._ctx;
+        if (offset <= 0)
+            return this;
+        ctx.offset += offset;
+        if (isPlainKeyRange(ctx)) {
+            addReplayFilter(ctx, function () {
+                var offsetLeft = offset;
+                return function (cursor, advance) {
+                    if (offsetLeft === 0)
+                        return true;
+                    if (offsetLeft === 1) {
+                        --offsetLeft;
+                        return false;
+                    }
+                    advance(function () {
+                        cursor.advance(offsetLeft);
+                        offsetLeft = 0;
+                    });
+                    return false;
+                };
+            });
+        }
+        else {
+            addReplayFilter(ctx, function () {
+                var offsetLeft = offset;
+                return function () { return (--offsetLeft < 0); };
+            });
+        }
+        return this;
+    };
+    Collection.prototype.limit = function (numRows) {
+        this._ctx.limit = Math.min(this._ctx.limit, numRows);
+        addReplayFilter(this._ctx, function () {
+            var rowsLeft = numRows;
+            return function (cursor, advance, resolve) {
+                if (--rowsLeft <= 0)
+                    advance(resolve);
+                return rowsLeft >= 0;
+            };
+        }, true);
+        return this;
+    };
+    Collection.prototype.until = function (filterFunction, bIncludeStopEntry) {
+        addFilter(this._ctx, function (cursor, advance, resolve) {
+            if (filterFunction(cursor.value)) {
+                advance(resolve);
+                return bIncludeStopEntry;
+            }
+            else {
+                return true;
+            }
+        });
+        return this;
+    };
+    Collection.prototype.first = function (cb) {
+        return this.limit(1).toArray(function (a) { return a[0]; }).then(cb);
+    };
+    Collection.prototype.last = function (cb) {
+        return this.reverse().first(cb);
+    };
+    Collection.prototype.filter = function (filterFunction) {
+        addFilter(this._ctx, function (cursor) {
+            return filterFunction(cursor.value);
+        });
+        addMatchFilter(this._ctx, filterFunction);
+        return this;
+    };
+    Collection.prototype.and = function (filter) {
+        return this.filter(filter);
+    };
+    Collection.prototype.or = function (indexName) {
+        return new this.db.WhereClause(this._ctx.table, indexName, this);
+    };
+    Collection.prototype.reverse = function () {
+        this._ctx.dir = (this._ctx.dir === "prev" ? "next" : "prev");
+        if (this._ondirectionchange)
+            this._ondirectionchange(this._ctx.dir);
+        return this;
+    };
+    Collection.prototype.desc = function () {
+        return this.reverse();
+    };
+    Collection.prototype.eachKey = function (cb) {
+        var ctx = this._ctx;
+        ctx.keysOnly = !ctx.isMatch;
+        return this.each(function (val, cursor) { cb(cursor.key, cursor); });
+    };
+    Collection.prototype.eachUniqueKey = function (cb) {
+        this._ctx.unique = "unique";
+        return this.eachKey(cb);
+    };
+    Collection.prototype.eachPrimaryKey = function (cb) {
+        var ctx = this._ctx;
+        ctx.keysOnly = !ctx.isMatch;
+        return this.each(function (val, cursor) { cb(cursor.primaryKey, cursor); });
+    };
+    Collection.prototype.keys = function (cb) {
+        var ctx = this._ctx;
+        ctx.keysOnly = !ctx.isMatch;
+        var a = [];
+        return this.each(function (item, cursor) {
+            a.push(cursor.key);
+        }).then(function () {
+            return a;
+        }).then(cb);
+    };
+    Collection.prototype.primaryKeys = function (cb) {
+        var ctx = this._ctx;
+        if (ctx.dir === 'next' && isPlainKeyRange(ctx, true) && ctx.limit > 0) {
+            return this._read(function (trans) {
+                var index = getIndexOrStore(ctx, ctx.table.core.schema);
+                return ctx.table.core.query({
+                    trans: trans,
+                    values: false,
+                    limit: ctx.limit,
+                    query: {
+                        index: index,
+                        range: ctx.range
+                    }
+                });
+            }).then(function (_a) {
+                var result = _a.result;
+                return result;
+            }).then(cb);
+        }
+        ctx.keysOnly = !ctx.isMatch;
+        var a = [];
+        return this.each(function (item, cursor) {
+            a.push(cursor.primaryKey);
+        }).then(function () {
+            return a;
+        }).then(cb);
+    };
+    Collection.prototype.uniqueKeys = function (cb) {
+        this._ctx.unique = "unique";
+        return this.keys(cb);
+    };
+    Collection.prototype.firstKey = function (cb) {
+        return this.limit(1).keys(function (a) { return a[0]; }).then(cb);
+    };
+    Collection.prototype.lastKey = function (cb) {
+        return this.reverse().firstKey(cb);
+    };
+    Collection.prototype.distinct = function () {
+        var ctx = this._ctx, idx = ctx.index && ctx.table.schema.idxByName[ctx.index];
+        if (!idx || !idx.multi)
+            return this;
+        var set = {};
+        addFilter(this._ctx, function (cursor) {
+            var strKey = cursor.primaryKey.toString();
+            var found = hasOwn(set, strKey);
+            set[strKey] = true;
+            return !found;
+        });
+        return this;
+    };
+    Collection.prototype.modify = function (changes) {
+        var _this = this;
+        var ctx = this._ctx;
+        return this._write(function (trans) {
+            var modifyer;
+            if (typeof changes === 'function') {
+                modifyer = changes;
+            }
+            else {
+                var keyPaths = keys(changes);
+                var numKeys = keyPaths.length;
+                modifyer = function (item) {
+                    var anythingModified = false;
+                    for (var i = 0; i < numKeys; ++i) {
+                        var keyPath = keyPaths[i], val = changes[keyPath];
+                        if (getByKeyPath(item, keyPath) !== val) {
+                            setByKeyPath(item, keyPath, val);
+                            anythingModified = true;
+                        }
+                    }
+                    return anythingModified;
+                };
+            }
+            var coreTable = ctx.table.core;
+            var _a = coreTable.schema.primaryKey, outbound = _a.outbound, extractKey = _a.extractKey;
+            var limit = 'testmode' in Dexie ? 1 : 2000;
+            var cmp = _this.db.core.cmp;
+            var totalFailures = [];
+            var successCount = 0;
+            var failedKeys = [];
+            var applyMutateResult = function (expectedCount, res) {
+                var failures = res.failures, numFailures = res.numFailures;
+                successCount += expectedCount - numFailures;
+                for (var _i = 0, _a = keys(failures); _i < _a.length; _i++) {
+                    var pos = _a[_i];
+                    totalFailures.push(failures[pos]);
+                }
+            };
+            return _this.clone().primaryKeys().then(function (keys$$1) {
+                var nextChunk = function (offset) {
+                    var count = Math.min(limit, keys$$1.length - offset);
+                    return coreTable.getMany({ trans: trans, keys: keys$$1.slice(offset, offset + count) }).then(function (values) {
+                        var addValues = [];
+                        var putValues = [];
+                        var putKeys = outbound ? [] : null;
+                        var deleteKeys = [];
+                        for (var i = 0; i < count; ++i) {
+                            var origValue = values[i];
+                            var ctx_1 = {
+                                value: deepClone(origValue),
+                                primKey: keys$$1[offset + i]
+                            };
+                            if (modifyer.call(ctx_1, ctx_1.value, ctx_1) !== false) {
+                                if (ctx_1.value == null) {
+                                    deleteKeys.push(keys$$1[offset + i]);
+                                }
+                                else if (!outbound && cmp(extractKey(origValue), extractKey(ctx_1.value)) !== 0) {
+                                    deleteKeys.push(keys$$1[offset + i]);
+                                    addValues.push(ctx_1.value);
+                                }
+                                else {
+                                    putValues.push(ctx_1.value);
+                                    if (outbound)
+                                        putKeys.push(keys$$1[offset + i]);
+                                }
+                            }
+                        }
+                        return Promise.resolve(addValues.length > 0 &&
+                            coreTable.mutate({ trans: trans, type: 'add', values: addValues })
+                                .then(function (res) {
+                                for (var pos in res.failures) {
+                                    deleteKeys.splice(parseInt(pos), 1);
+                                }
+                                applyMutateResult(addValues.length, res);
+                            })).then(function (res) { return putValues.length > 0 &&
+                            coreTable.mutate({ trans: trans, type: 'put', keys: putKeys, values: putValues })
+                                .then(function (res) { return applyMutateResult(putValues.length, res); }); }).then(function () { return deleteKeys.length > 0 &&
+                            coreTable.mutate({ trans: trans, type: 'delete', keys: deleteKeys })
+                                .then(function (res) { return applyMutateResult(deleteKeys.length, res); }); }).then(function () {
+                            return keys$$1.length > offset + count && nextChunk(offset + limit);
+                        });
+                    });
+                };
+                return nextChunk(0).then(function () {
+                    if (totalFailures.length > 0)
+                        throw new ModifyError("Error modifying one or more objects", totalFailures, successCount, failedKeys);
+                    return keys$$1.length;
+                });
+            });
+        });
+    };
+    Collection.prototype.delete = function () {
+        var ctx = this._ctx, range = ctx.range;
+        if (isPlainKeyRange(ctx) &&
+            ((ctx.isPrimKey && !hangsOnDeleteLargeKeyRange) || range.type === 3          ))
+         {
+            return this._write(function (trans) {
+                var primaryKey = ctx.table.core.schema.primaryKey;
+                var coreRange = range;
+                return ctx.table.core.count({ trans: trans, query: { index: primaryKey, range: coreRange } }).then(function (count) {
+                    return ctx.table.core.mutate({ trans: trans, type: 'deleteRange', range: coreRange })
+                        .then(function (_a) {
+                        var failures = _a.failures, lastResult = _a.lastResult, results = _a.results, numFailures = _a.numFailures;
+                        if (numFailures)
+                            throw new ModifyError("Could not delete some values", Object.keys(failures).map(function (pos) { return failures[pos]; }), count - numFailures);
+                        return count - numFailures;
+                    });
+                });
+            });
+        }
+        return this.modify(function (value, ctx) { return ctx.value = null; });
+    };
+    return Collection;
+}());
+
+function createCollectionConstructor(db) {
+    return makeClassConstructor(Collection.prototype, function Collection$$1(whereClause, keyRangeGenerator) {
+        this.db = db;
+        var keyRange = AnyRange, error = null;
+        if (keyRangeGenerator)
+            try {
+                keyRange = keyRangeGenerator();
+            }
+            catch (ex) {
+                error = ex;
+            }
+        var whereCtx = whereClause._ctx;
+        var table = whereCtx.table;
+        var readingHook = table.hook.reading.fire;
+        this._ctx = {
+            table: table,
+            index: whereCtx.index,
+            isPrimKey: (!whereCtx.index || (table.schema.primKey.keyPath && whereCtx.index === table.schema.primKey.name)),
+            range: keyRange,
+            keysOnly: false,
+            dir: "next",
+            unique: "",
+            algorithm: null,
+            filter: null,
+            replayFilter: null,
+            justLimit: true,
+            isMatch: null,
+            offset: 0,
+            limit: Infinity,
+            error: error,
+            or: whereCtx.or,
+            valueMapper: readingHook !== mirror ? readingHook : null
+        };
+    });
+}
+
+function simpleCompare(a, b) {
+    return a < b ? -1 : a === b ? 0 : 1;
+}
+function simpleCompareReverse(a, b) {
+    return a > b ? -1 : a === b ? 0 : 1;
+}
+
+function fail(collectionOrWhereClause, err, T) {
+    var collection = collectionOrWhereClause instanceof WhereClause ?
+        new collectionOrWhereClause.Collection(collectionOrWhereClause) :
+        collectionOrWhereClause;
+    collection._ctx.error = T ? new T(err) : new TypeError(err);
+    return collection;
+}
+function emptyCollection(whereClause) {
+    return new whereClause.Collection(whereClause, function () { return rangeEqual(""); }).limit(0);
+}
+function upperFactory(dir) {
+    return dir === "next" ?
+        function (s) { return s.toUpperCase(); } :
+        function (s) { return s.toLowerCase(); };
+}
+function lowerFactory(dir) {
+    return dir === "next" ?
+        function (s) { return s.toLowerCase(); } :
+        function (s) { return s.toUpperCase(); };
+}
+function nextCasing(key, lowerKey, upperNeedle, lowerNeedle, cmp, dir) {
+    var length = Math.min(key.length, lowerNeedle.length);
+    var llp = -1;
+    for (var i = 0; i < length; ++i) {
+        var lwrKeyChar = lowerKey[i];
+        if (lwrKeyChar !== lowerNeedle[i]) {
+            if (cmp(key[i], upperNeedle[i]) < 0)
+                return key.substr(0, i) + upperNeedle[i] + upperNeedle.substr(i + 1);
+            if (cmp(key[i], lowerNeedle[i]) < 0)
+                return key.substr(0, i) + lowerNeedle[i] + upperNeedle.substr(i + 1);
+            if (llp >= 0)
+                return key.substr(0, llp) + lowerKey[llp] + upperNeedle.substr(llp + 1);
+            return null;
+        }
+        if (cmp(key[i], lwrKeyChar) < 0)
+            llp = i;
+    }
+    if (length < lowerNeedle.length && dir === "next")
+        return key + upperNeedle.substr(key.length);
+    if (length < key.length && dir === "prev")
+        return key.substr(0, upperNeedle.length);
+    return (llp < 0 ? null : key.substr(0, llp) + lowerNeedle[llp] + upperNeedle.substr(llp + 1));
+}
+function addIgnoreCaseAlgorithm(whereClause, match, needles, suffix) {
+    var upper, lower, compare, upperNeedles, lowerNeedles, direction, nextKeySuffix, needlesLen = needles.length;
+    if (!needles.every(function (s) { return typeof s === 'string'; })) {
+        return fail(whereClause, STRING_EXPECTED);
+    }
+    function initDirection(dir) {
+        upper = upperFactory(dir);
+        lower = lowerFactory(dir);
+        compare = (dir === "next" ? simpleCompare : simpleCompareReverse);
+        var needleBounds = needles.map(function (needle) {
+            return { lower: lower(needle), upper: upper(needle) };
+        }).sort(function (a, b) {
+            return compare(a.lower, b.lower);
+        });
+        upperNeedles = needleBounds.map(function (nb) { return nb.upper; });
+        lowerNeedles = needleBounds.map(function (nb) { return nb.lower; });
+        direction = dir;
+        nextKeySuffix = (dir === "next" ? "" : suffix);
+    }
+    initDirection("next");
+    var c = new whereClause.Collection(whereClause, function () { return createRange(upperNeedles[0], lowerNeedles[needlesLen - 1] + suffix); });
+    c._ondirectionchange = function (direction) {
+        initDirection(direction);
+    };
+    var firstPossibleNeedle = 0;
+    c._addAlgorithm(function (cursor, advance, resolve) {
+        var key = cursor.key;
+        if (typeof key !== 'string')
+            return false;
+        var lowerKey = lower(key);
+        if (match(lowerKey, lowerNeedles, firstPossibleNeedle)) {
+            return true;
+        }
+        else {
+            var lowestPossibleCasing = null;
+            for (var i = firstPossibleNeedle; i < needlesLen; ++i) {
+                var casing = nextCasing(key, lowerKey, upperNeedles[i], lowerNeedles[i], compare, direction);
+                if (casing === null && lowestPossibleCasing === null)
+                    firstPossibleNeedle = i + 1;
+                else if (lowestPossibleCasing === null || compare(lowestPossibleCasing, casing) > 0) {
+                    lowestPossibleCasing = casing;
+                }
+            }
+            if (lowestPossibleCasing !== null) {
+                advance(function () { cursor.continue(lowestPossibleCasing + nextKeySuffix); });
+            }
+            else {
+                advance(resolve);
+            }
+            return false;
+        }
+    });
+    return c;
+}
+function createRange(lower, upper, lowerOpen, upperOpen) {
+    return {
+        type: 2            ,
+        lower: lower,
+        upper: upper,
+        lowerOpen: lowerOpen,
+        upperOpen: upperOpen
+    };
+}
+function rangeEqual(value) {
+    return {
+        type: 1            ,
+        lower: value,
+        upper: value
+    };
+}
+
+var WhereClause =               (function () {
+    function WhereClause() {
+    }
+    Object.defineProperty(WhereClause.prototype, "Collection", {
+        get: function () {
+            return this._ctx.table.db.Collection;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    WhereClause.prototype.between = function (lower, upper, includeLower, includeUpper) {
+        includeLower = includeLower !== false;
+        includeUpper = includeUpper === true;
+        try {
+            if ((this._cmp(lower, upper) > 0) ||
+                (this._cmp(lower, upper) === 0 && (includeLower || includeUpper) && !(includeLower && includeUpper)))
+                return emptyCollection(this);
+            return new this.Collection(this, function () { return createRange(lower, upper, !includeLower, !includeUpper); });
+        }
+        catch (e) {
+            return fail(this, INVALID_KEY_ARGUMENT);
+        }
+    };
+    WhereClause.prototype.equals = function (value) {
+        return new this.Collection(this, function () { return rangeEqual(value); });
+    };
+    WhereClause.prototype.above = function (value) {
+        if (value == null)
+            return fail(this, INVALID_KEY_ARGUMENT);
+        return new this.Collection(this, function () { return createRange(value, undefined, true); });
+    };
+    WhereClause.prototype.aboveOrEqual = function (value) {
+        if (value == null)
+            return fail(this, INVALID_KEY_ARGUMENT);
+        return new this.Collection(this, function () { return createRange(value, undefined, false); });
+    };
+    WhereClause.prototype.below = function (value) {
+        if (value == null)
+            return fail(this, INVALID_KEY_ARGUMENT);
+        return new this.Collection(this, function () { return createRange(undefined, value, false, true); });
+    };
+    WhereClause.prototype.belowOrEqual = function (value) {
+        if (value == null)
+            return fail(this, INVALID_KEY_ARGUMENT);
+        return new this.Collection(this, function () { return createRange(undefined, value); });
+    };
+    WhereClause.prototype.startsWith = function (str) {
+        if (typeof str !== 'string')
+            return fail(this, STRING_EXPECTED);
+        return this.between(str, str + maxString, true, true);
+    };
+    WhereClause.prototype.startsWithIgnoreCase = function (str) {
+        if (str === "")
+            return this.startsWith(str);
+        return addIgnoreCaseAlgorithm(this, function (x, a) { return x.indexOf(a[0]) === 0; }, [str], maxString);
+    };
+    WhereClause.prototype.equalsIgnoreCase = function (str) {
+        return addIgnoreCaseAlgorithm(this, function (x, a) { return x === a[0]; }, [str], "");
+    };
+    WhereClause.prototype.anyOfIgnoreCase = function () {
+        var set = getArrayOf.apply(NO_CHAR_ARRAY, arguments);
+        if (set.length === 0)
+            return emptyCollection(this);
+        return addIgnoreCaseAlgorithm(this, function (x, a) { return a.indexOf(x) !== -1; }, set, "");
+    };
+    WhereClause.prototype.startsWithAnyOfIgnoreCase = function () {
+        var set = getArrayOf.apply(NO_CHAR_ARRAY, arguments);
+        if (set.length === 0)
+            return emptyCollection(this);
+        return addIgnoreCaseAlgorithm(this, function (x, a) { return a.some(function (n) { return x.indexOf(n) === 0; }); }, set, maxString);
+    };
+    WhereClause.prototype.anyOf = function () {
+        var _this = this;
+        var set = getArrayOf.apply(NO_CHAR_ARRAY, arguments);
+        var compare = this._cmp;
+        try {
+            set.sort(compare);
+        }
+        catch (e) {
+            return fail(this, INVALID_KEY_ARGUMENT);
+        }
+        if (set.length === 0)
+            return emptyCollection(this);
+        var c = new this.Collection(this, function () { return createRange(set[0], set[set.length - 1]); });
+        c._ondirectionchange = function (direction) {
+            compare = (direction === "next" ?
+                _this._ascending :
+                _this._descending);
+            set.sort(compare);
+        };
+        var i = 0;
+        c._addAlgorithm(function (cursor, advance, resolve) {
+            var key = cursor.key;
+            while (compare(key, set[i]) > 0) {
+                ++i;
+                if (i === set.length) {
+                    advance(resolve);
+                    return false;
+                }
+            }
+            if (compare(key, set[i]) === 0) {
+                return true;
+            }
+            else {
+                advance(function () { cursor.continue(set[i]); });
+                return false;
+            }
+        });
+        return c;
+    };
+    WhereClause.prototype.notEqual = function (value) {
+        return this.inAnyRange([[minKey, value], [value, this.db._maxKey]], { includeLowers: false, includeUppers: false });
+    };
+    WhereClause.prototype.noneOf = function () {
+        var set = getArrayOf.apply(NO_CHAR_ARRAY, arguments);
+        if (set.length === 0)
+            return new this.Collection(this);
+        try {
+            set.sort(this._ascending);
+        }
+        catch (e) {
+            return fail(this, INVALID_KEY_ARGUMENT);
+        }
+        var ranges = set.reduce(function (res, val) { return res ?
+            res.concat([[res[res.length - 1][1], val]]) :
+            [[minKey, val]]; }, null);
+        ranges.push([set[set.length - 1], this.db._maxKey]);
+        return this.inAnyRange(ranges, { includeLowers: false, includeUppers: false });
+    };
+    WhereClause.prototype.inAnyRange = function (ranges, options) {
+        var _this = this;
+        var cmp = this._cmp, ascending = this._ascending, descending = this._descending, min = this._min, max = this._max;
+        if (ranges.length === 0)
+            return emptyCollection(this);
+        if (!ranges.every(function (range) {
+            return range[0] !== undefined &&
+                range[1] !== undefined &&
+                ascending(range[0], range[1]) <= 0;
+        })) {
+            return fail(this, "First argument to inAnyRange() must be an Array of two-value Arrays [lower,upper] where upper must not be lower than lower", exceptions.InvalidArgument);
+        }
+        var includeLowers = !options || options.includeLowers !== false;
+        var includeUppers = options && options.includeUppers === true;
+        function addRange(ranges, newRange) {
+            var i = 0, l = ranges.length;
+            for (; i < l; ++i) {
+                var range = ranges[i];
+                if (cmp(newRange[0], range[1]) < 0 && cmp(newRange[1], range[0]) > 0) {
+                    range[0] = min(range[0], newRange[0]);
+                    range[1] = max(range[1], newRange[1]);
+                    break;
+                }
+            }
+            if (i === l)
+                ranges.push(newRange);
+            return ranges;
+        }
+        var sortDirection = ascending;
+        function rangeSorter(a, b) { return sortDirection(a[0], b[0]); }
+        var set;
+        try {
+            set = ranges.reduce(addRange, []);
+            set.sort(rangeSorter);
+        }
+        catch (ex) {
+            return fail(this, INVALID_KEY_ARGUMENT);
+        }
+        var rangePos = 0;
+        var keyIsBeyondCurrentEntry = includeUppers ?
+            function (key) { return ascending(key, set[rangePos][1]) > 0; } :
+            function (key) { return ascending(key, set[rangePos][1]) >= 0; };
+        var keyIsBeforeCurrentEntry = includeLowers ?
+            function (key) { return descending(key, set[rangePos][0]) > 0; } :
+            function (key) { return descending(key, set[rangePos][0]) >= 0; };
+        function keyWithinCurrentRange(key) {
+            return !keyIsBeyondCurrentEntry(key) && !keyIsBeforeCurrentEntry(key);
+        }
+        var checkKey = keyIsBeyondCurrentEntry;
+        var c = new this.Collection(this, function () { return createRange(set[0][0], set[set.length - 1][1], !includeLowers, !includeUppers); });
+        c._ondirectionchange = function (direction) {
+            if (direction === "next") {
+                checkKey = keyIsBeyondCurrentEntry;
+                sortDirection = ascending;
+            }
+            else {
+                checkKey = keyIsBeforeCurrentEntry;
+                sortDirection = descending;
+            }
+            set.sort(rangeSorter);
+        };
+        c._addAlgorithm(function (cursor, advance, resolve) {
+            var key = cursor.key;
+            while (checkKey(key)) {
+                ++rangePos;
+                if (rangePos === set.length) {
+                    advance(resolve);
+                    return false;
+                }
+            }
+            if (keyWithinCurrentRange(key)) {
+                return true;
+            }
+            else if (_this._cmp(key, set[rangePos][1]) === 0 || _this._cmp(key, set[rangePos][0]) === 0) {
+                return false;
+            }
+            else {
+                advance(function () {
+                    if (sortDirection === ascending)
+                        cursor.continue(set[rangePos][0]);
+                    else
+                        cursor.continue(set[rangePos][1]);
+                });
+                return false;
+            }
+        });
+        return c;
+    };
+    WhereClause.prototype.startsWithAnyOf = function () {
+        var set = getArrayOf.apply(NO_CHAR_ARRAY, arguments);
+        if (!set.every(function (s) { return typeof s === 'string'; })) {
+            return fail(this, "startsWithAnyOf() only works with strings");
+        }
+        if (set.length === 0)
+            return emptyCollection(this);
+        return this.inAnyRange(set.map(function (str) { return [str, str + maxString]; }));
+    };
+    return WhereClause;
+}());
+
+function createWhereClauseConstructor(db) {
+    return makeClassConstructor(WhereClause.prototype, function WhereClause$$1(table, index, orCollection) {
+        this.db = db;
+        this._ctx = {
+            table: table,
+            index: index === ":id" ? null : index,
+            or: orCollection
+        };
+        var indexedDB = db._deps.indexedDB;
+        if (!indexedDB)
+            throw new exceptions.MissingAPI("indexedDB API missing");
+        this._cmp = this._ascending = indexedDB.cmp.bind(indexedDB);
+        this._descending = function (a, b) { return indexedDB.cmp(b, a); };
+        this._max = function (a, b) { return indexedDB.cmp(a, b) > 0 ? a : b; };
+        this._min = function (a, b) { return indexedDB.cmp(a, b) < 0 ? a : b; };
+        this._IDBKeyRange = db._deps.IDBKeyRange;
+    });
+}
+
+function safariMultiStoreFix(storeNames) {
+    return storeNames.length === 1 ? storeNames[0] : storeNames;
+}
+
+function getMaxKey(IdbKeyRange) {
+    try {
+        IdbKeyRange.only([[]]);
+        return [[]];
+    }
+    catch (e) {
+        return maxString;
+    }
+}
+
+function eventRejectHandler(reject) {
+    return wrap(function (event) {
+        preventDefault(event);
+        reject(event.target.error);
+        return false;
+    });
+}
+
+
+
+function preventDefault(event) {
+    if (event.stopPropagation)
+        event.stopPropagation();
+    if (event.preventDefault)
+        event.preventDefault();
+}
+
+var Transaction =               (function () {
+    function Transaction() {
+    }
+    Transaction.prototype._lock = function () {
+        assert(!PSD.global);
+        ++this._reculock;
+        if (this._reculock === 1 && !PSD.global)
+            PSD.lockOwnerFor = this;
+        return this;
+    };
+    Transaction.prototype._unlock = function () {
+        assert(!PSD.global);
+        if (--this._reculock === 0) {
+            if (!PSD.global)
+                PSD.lockOwnerFor = null;
+            while (this._blockedFuncs.length > 0 && !this._locked()) {
+                var fnAndPSD = this._blockedFuncs.shift();
+                try {
+                    usePSD(fnAndPSD[1], fnAndPSD[0]);
+                }
+                catch (e) { }
+            }
+        }
+        return this;
+    };
+    Transaction.prototype._locked = function () {
+        return this._reculock && PSD.lockOwnerFor !== this;
+    };
+    Transaction.prototype.create = function (idbtrans) {
+        var _this = this;
+        if (!this.mode)
+            return this;
+        var idbdb = this.db.idbdb;
+        var dbOpenError = this.db._state.dbOpenError;
+        assert(!this.idbtrans);
+        if (!idbtrans && !idbdb) {
+            switch (dbOpenError && dbOpenError.name) {
+                case "DatabaseClosedError":
+                    throw new exceptions.DatabaseClosed(dbOpenError);
+                case "MissingAPIError":
+                    throw new exceptions.MissingAPI(dbOpenError.message, dbOpenError);
+                default:
+                    throw new exceptions.OpenFailed(dbOpenError);
+            }
+        }
+        if (!this.active)
+            throw new exceptions.TransactionInactive();
+        assert(this._completion._state === null);
+        idbtrans = this.idbtrans = idbtrans || idbdb.transaction(safariMultiStoreFix(this.storeNames), this.mode);
+        idbtrans.onerror = wrap(function (ev) {
+            preventDefault(ev);
+            _this._reject(idbtrans.error);
+        });
+        idbtrans.onabort = wrap(function (ev) {
+            preventDefault(ev);
+            _this.active && _this._reject(new exceptions.Abort(idbtrans.error));
+            _this.active = false;
+            _this.on("abort").fire(ev);
+        });
+        idbtrans.oncomplete = wrap(function () {
+            _this.active = false;
+            _this._resolve();
+        });
+        return this;
+    };
+    Transaction.prototype._promise = function (mode, fn, bWriteLock) {
+        var _this = this;
+        if (mode === 'readwrite' && this.mode !== 'readwrite')
+            return rejection(new exceptions.ReadOnly("Transaction is readonly"));
+        if (!this.active)
+            return rejection(new exceptions.TransactionInactive());
+        if (this._locked()) {
+            return new DexiePromise(function (resolve, reject) {
+                _this._blockedFuncs.push([function () {
+                        _this._promise(mode, fn, bWriteLock).then(resolve, reject);
+                    }, PSD]);
+            });
+        }
+        else if (bWriteLock) {
+            return newScope(function () {
+                var p = new DexiePromise(function (resolve, reject) {
+                    _this._lock();
+                    var rv = fn(resolve, reject, _this);
+                    if (rv && rv.then)
+                        rv.then(resolve, reject);
+                });
+                p.finally(function () { return _this._unlock(); });
+                p._lib = true;
+                return p;
+            });
+        }
+        else {
+            var p = new DexiePromise(function (resolve, reject) {
+                var rv = fn(resolve, reject, _this);
+                if (rv && rv.then)
+                    rv.then(resolve, reject);
+            });
+            p._lib = true;
+            return p;
+        }
+    };
+    Transaction.prototype._root = function () {
+        return this.parent ? this.parent._root() : this;
+    };
+    Transaction.prototype.waitFor = function (promiseLike) {
+        var root = this._root();
+        var promise = DexiePromise.resolve(promiseLike);
+        if (root._waitingFor) {
+            root._waitingFor = root._waitingFor.then(function () { return promise; });
+        }
+        else {
+            root._waitingFor = promise;
+            root._waitingQueue = [];
+            var store = root.idbtrans.objectStore(root.storeNames[0]);
+            (function spin() {
+                ++root._spinCount;
+                while (root._waitingQueue.length)
+                    (root._waitingQueue.shift())();
+                if (root._waitingFor)
+                    store.get(-Infinity).onsuccess = spin;
+            }());
+        }
+        var currentWaitPromise = root._waitingFor;
+        return new DexiePromise(function (resolve, reject) {
+            promise.then(function (res) { return root._waitingQueue.push(wrap(resolve.bind(null, res))); }, function (err) { return root._waitingQueue.push(wrap(reject.bind(null, err))); }).finally(function () {
+                if (root._waitingFor === currentWaitPromise) {
+                    root._waitingFor = null;
+                }
+            });
+        });
+    };
+    Transaction.prototype.abort = function () {
+        this.active && this._reject(new exceptions.Abort());
+        this.active = false;
+    };
+    Transaction.prototype.table = function (tableName) {
+        var memoizedTables = (this._memoizedTables || (this._memoizedTables = {}));
+        if (hasOwn(memoizedTables, tableName))
+            return memoizedTables[tableName];
+        var tableSchema = this.schema[tableName];
+        if (!tableSchema) {
+            throw new exceptions.NotFound("Table " + tableName + " not part of transaction");
+        }
+        var transactionBoundTable = new this.db.Table(tableName, tableSchema, this);
+        transactionBoundTable.core = this.db.core.table(tableName);
+        memoizedTables[tableName] = transactionBoundTable;
+        return transactionBoundTable;
+    };
+    return Transaction;
+}());
+
+function createTransactionConstructor(db) {
+    return makeClassConstructor(Transaction.prototype, function Transaction$$1(mode, storeNames, dbschema, parent) {
+        var _this = this;
+        this.db = db;
+        this.mode = mode;
+        this.storeNames = storeNames;
+        this.schema = dbschema;
+        this.idbtrans = null;
+        this.on = Events(this, "complete", "error", "abort");
+        this.parent = parent || null;
+        this.active = true;
+        this._reculock = 0;
+        this._blockedFuncs = [];
+        this._resolve = null;
+        this._reject = null;
+        this._waitingFor = null;
+        this._waitingQueue = null;
+        this._spinCount = 0;
+        this._completion = new DexiePromise(function (resolve, reject) {
+            _this._resolve = resolve;
+            _this._reject = reject;
+        });
+        this._completion.then(function () {
+            _this.active = false;
+            _this.on.complete.fire();
+        }, function (e) {
+            var wasActive = _this.active;
+            _this.active = false;
+            _this.on.error.fire(e);
+            _this.parent ?
+                _this.parent._reject(e) :
+                wasActive && _this.idbtrans && _this.idbtrans.abort();
+            return rejection(e);
+        });
+    });
+}
+
+function createIndexSpec(name, keyPath, unique, multi, auto, compound, isPrimKey) {
+    return {
+        name: name,
+        keyPath: keyPath,
+        unique: unique,
+        multi: multi,
+        auto: auto,
+        compound: compound,
+        src: (unique && !isPrimKey ? '&' : '') + (multi ? '*' : '') + (auto ? "++" : "") + nameFromKeyPath(keyPath)
+    };
+}
+function nameFromKeyPath(keyPath) {
+    return typeof keyPath === 'string' ?
+        keyPath :
+        keyPath ? ('[' + [].join.call(keyPath, '+') + ']') : "";
+}
+
+function createTableSchema(name, primKey, indexes) {
+    return {
+        name: name,
+        primKey: primKey,
+        indexes: indexes,
+        mappedClass: null,
+        idxByName: arrayToObject(indexes, function (index) { return [index.name, index]; })
+    };
+}
+
+function getKeyExtractor(keyPath) {
+    if (keyPath == null) {
+        return function () { return undefined; };
+    }
+    else if (typeof keyPath === 'string') {
+        return getSinglePathKeyExtractor(keyPath);
+    }
+    else {
+        return function (obj) { return getByKeyPath(obj, keyPath); };
+    }
+}
+function getSinglePathKeyExtractor(keyPath) {
+    var split = keyPath.split('.');
+    if (split.length === 1) {
+        return function (obj) { return obj[keyPath]; };
+    }
+    else {
+        return function (obj) { return getByKeyPath(obj, keyPath); };
+    }
+}
+
+function getEffectiveKeys(primaryKey, req) {
+    if (req.type === 'delete')
+        return req.keys;
+    return req.keys || req.values.map(primaryKey.extractKey);
+}
+function getExistingValues(table, req, effectiveKeys) {
+    return req.type === 'add' ? Promise.resolve(new Array(req.values.length)) :
+        table.getMany({ trans: req.trans, keys: effectiveKeys });
+}
+
+function arrayify(arrayLike) {
+    return [].slice.call(arrayLike);
+}
+
+var _id_counter = 0;
+function getKeyPathAlias(keyPath) {
+    return keyPath == null ?
+        ":id" :
+        typeof keyPath === 'string' ?
+            keyPath :
+            "[" + keyPath.join('+') + "]";
+}
+function createDBCore(db, indexedDB, IdbKeyRange, tmpTrans) {
+    var cmp = indexedDB.cmp.bind(indexedDB);
+    function extractSchema(db, trans) {
+        var tables = arrayify(db.objectStoreNames);
+        return {
+            schema: {
+                name: db.name,
+                tables: tables.map(function (table) { return trans.objectStore(table); }).map(function (store) {
+                    var keyPath = store.keyPath, autoIncrement = store.autoIncrement;
+                    var compound = isArray(keyPath);
+                    var outbound = keyPath == null;
+                    var indexByKeyPath = {};
+                    var result = {
+                        name: store.name,
+                        primaryKey: {
+                            name: null,
+                            isPrimaryKey: true,
+                            outbound: outbound,
+                            compound: compound,
+                            keyPath: keyPath,
+                            autoIncrement: autoIncrement,
+                            unique: true,
+                            extractKey: getKeyExtractor(keyPath)
+                        },
+                        indexes: arrayify(store.indexNames).map(function (indexName) { return store.index(indexName); })
+                            .map(function (index) {
+                            var name = index.name, unique = index.unique, multiEntry = index.multiEntry, keyPath = index.keyPath;
+                            var compound = isArray(keyPath);
+                            var result = {
+                                name: name,
+                                compound: compound,
+                                keyPath: keyPath,
+                                unique: unique,
+                                multiEntry: multiEntry,
+                                extractKey: getKeyExtractor(keyPath)
+                            };
+                            indexByKeyPath[getKeyPathAlias(keyPath)] = result;
+                            return result;
+                        }),
+                        getIndexByKeyPath: function (keyPath) { return indexByKeyPath[getKeyPathAlias(keyPath)]; }
+                    };
+                    indexByKeyPath[":id"] = result.primaryKey;
+                    if (keyPath != null) {
+                        indexByKeyPath[getKeyPathAlias(keyPath)] = result.primaryKey;
+                    }
+                    return result;
+                })
+            },
+            hasGetAll: tables.length > 0 && ('getAll' in trans.objectStore(tables[0])) &&
+                !(typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) &&
+                    !/(Chrome\/|Edge\/)/.test(navigator.userAgent) &&
+                    [].concat(navigator.userAgent.match(/Safari\/(\d*)/))[1] < 604)
+        };
+    }
+    function makeIDBKeyRange(range) {
+        if (range.type === 3          )
+            return null;
+        if (range.type === 4            )
+            throw new Error("Cannot convert never type to IDBKeyRange");
+        var lower = range.lower, upper = range.upper, lowerOpen = range.lowerOpen, upperOpen = range.upperOpen;
+        var idbRange = lower === undefined ?
+            upper === undefined ?
+                null :
+                IdbKeyRange.upperBound(upper, !!upperOpen) :
+            upper === undefined ?
+                IdbKeyRange.lowerBound(lower, !!lowerOpen) :
+                IdbKeyRange.bound(lower, upper, !!lowerOpen, !!upperOpen);
+        return idbRange;
+    }
+    function createDbCoreTable(tableSchema) {
+        var tableName = tableSchema.name;
+        function mutate(_a) {
+            var trans = _a.trans, type = _a.type, keys$$1 = _a.keys, values = _a.values, range = _a.range, wantResults = _a.wantResults;
+            return new Promise(function (resolve, reject) {
+                resolve = wrap(resolve);
+                var store = trans.objectStore(tableName);
+                var outbound = store.keyPath == null;
+                var isAddOrPut = type === "put" || type === "add";
+                if (!isAddOrPut && type !== 'delete' && type !== 'deleteRange')
+                    throw new Error("Invalid operation type: " + type);
+                var length = (keys$$1 || values || { length: 1 }).length;
+                if (keys$$1 && values && keys$$1.length !== values.length) {
+                    throw new Error("Given keys array must have same length as given values array.");
+                }
+                if (length === 0)
+                    return resolve({ numFailures: 0, failures: {}, results: [], lastResult: undefined });
+                var results = wantResults && __spreadArrays((keys$$1 ?
+                    keys$$1 :
+                    getEffectiveKeys(tableSchema.primaryKey, { type: type, keys: keys$$1, values: values })));
+                var req;
+                var failures = [];
+                var numFailures = 0;
+                var errorHandler = function (event) {
+                    ++numFailures;
+                    preventDefault(event);
+                    if (results)
+                        results[event.target._reqno] = undefined;
+                    failures[event.target._reqno] = event.target.error;
+                };
+                var setResult = function (_a) {
+                    var target = _a.target;
+                    results[target._reqno] = target.result;
+                };
+                if (type === 'deleteRange') {
+                    if (range.type === 4            )
+                        return resolve({ numFailures: numFailures, failures: failures, results: results, lastResult: undefined });
+                    if (range.type === 3          )
+                        req = store.clear();
+                    else
+                        req = store.delete(makeIDBKeyRange(range));
+                }
+                else {
+                    var _a = isAddOrPut ?
+                        outbound ?
+                            [values, keys$$1] :
+                            [values, null] :
+                        [keys$$1, null], args1 = _a[0], args2 = _a[1];
+                    if (isAddOrPut) {
+                        for (var i = 0; i < length; ++i) {
+                            req = (args2 && args2[i] !== undefined ?
+                                store[type](args1[i], args2[i]) :
+                                store[type](args1[i]));
+                            req._reqno = i;
+                            if (results && results[i] === undefined) {
+                                req.onsuccess = setResult;
+                            }
+                            req.onerror = errorHandler;
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < length; ++i) {
+                            req = store[type](args1[i]);
+                            req._reqno = i;
+                            req.onerror = errorHandler;
+                        }
+                    }
+                }
+                var done = function (event) {
+                    var lastResult = event.target.result;
+                    if (results)
+                        results[length - 1] = lastResult;
+                    resolve({
+                        numFailures: numFailures,
+                        failures: failures,
+                        results: results,
+                        lastResult: lastResult
+                    });
+                };
+                req.onerror = function (event) {
+                    errorHandler(event);
+                    done(event);
+                };
+                req.onsuccess = done;
+            });
+        }
+        function openCursor(_a) {
+            var trans = _a.trans, values = _a.values, query = _a.query, reverse = _a.reverse, unique = _a.unique;
+            return new Promise(function (resolve, reject) {
+                resolve = wrap(resolve);
+                var index = query.index, range = query.range;
+                var store = trans.objectStore(tableName);
+                var source = index.isPrimaryKey ?
+                    store :
+                    store.index(index.name);
+                var direction = reverse ?
+                    unique ?
+                        "prevunique" :
+                        "prev" :
+                    unique ?
+                        "nextunique" :
+                        "next";
+                var req = values || !('openKeyCursor' in source) ?
+                    source.openCursor(makeIDBKeyRange(range), direction) :
+                    source.openKeyCursor(makeIDBKeyRange(range), direction);
+                req.onerror = eventRejectHandler(reject);
+                req.onsuccess = wrap(function (ev) {
+                    var cursor = req.result;
+                    if (!cursor) {
+                        resolve(null);
+                        return;
+                    }
+                    cursor.___id = ++_id_counter;
+                    cursor.done = false;
+                    var _cursorContinue = cursor.continue.bind(cursor);
+                    var _cursorContinuePrimaryKey = cursor.continuePrimaryKey;
+                    if (_cursorContinuePrimaryKey)
+                        _cursorContinuePrimaryKey = _cursorContinuePrimaryKey.bind(cursor);
+                    var _cursorAdvance = cursor.advance.bind(cursor);
+                    var doThrowCursorIsNotStarted = function () { throw new Error("Cursor not started"); };
+                    var doThrowCursorIsStopped = function () { throw new Error("Cursor not stopped"); };
+                    cursor.trans = trans;
+                    cursor.stop = cursor.continue = cursor.continuePrimaryKey = cursor.advance = doThrowCursorIsNotStarted;
+                    cursor.fail = wrap(reject);
+                    cursor.next = function () {
+                        var _this = this;
+                        var gotOne = 1;
+                        return this.start(function () { return gotOne-- ? _this.continue() : _this.stop(); }).then(function () { return _this; });
+                    };
+                    cursor.start = function (callback) {
+                        var iterationPromise = new Promise(function (resolveIteration, rejectIteration) {
+                            resolveIteration = wrap(resolveIteration);
+                            req.onerror = eventRejectHandler(rejectIteration);
+                            cursor.fail = rejectIteration;
+                            cursor.stop = function (value) {
+                                cursor.stop = cursor.continue = cursor.continuePrimaryKey = cursor.advance = doThrowCursorIsStopped;
+                                resolveIteration(value);
+                            };
+                        });
+                        var guardedCallback = function () {
+                            if (req.result) {
+                                try {
+                                    callback();
+                                }
+                                catch (err) {
+                                    cursor.fail(err);
+                                }
+                            }
+                            else {
+                                cursor.done = true;
+                                cursor.start = function () { throw new Error("Cursor behind last entry"); };
+                                cursor.stop();
+                            }
+                        };
+                        req.onsuccess = wrap(function (ev) {
+                            req.onsuccess = guardedCallback;
+                            guardedCallback();
+                        });
+                        cursor.continue = _cursorContinue;
+                        cursor.continuePrimaryKey = _cursorContinuePrimaryKey;
+                        cursor.advance = _cursorAdvance;
+                        guardedCallback();
+                        return iterationPromise;
+                    };
+                    resolve(cursor);
+                }, reject);
+            });
+        }
+        function query(hasGetAll) {
+            return function (request) {
+                return new Promise(function (resolve, reject) {
+                    resolve = wrap(resolve);
+                    var trans = request.trans, values = request.values, limit = request.limit, query = request.query;
+                    var nonInfinitLimit = limit === Infinity ? undefined : limit;
+                    var index = query.index, range = query.range;
+                    var store = trans.objectStore(tableName);
+                    var source = index.isPrimaryKey ? store : store.index(index.name);
+                    var idbKeyRange = makeIDBKeyRange(range);
+                    if (limit === 0)
+                        return resolve({ result: [] });
+                    if (hasGetAll) {
+                        var req = values ?
+                            source.getAll(idbKeyRange, nonInfinitLimit) :
+                            source.getAllKeys(idbKeyRange, nonInfinitLimit);
+                        req.onsuccess = function (event) { return resolve({ result: event.target.result }); };
+                        req.onerror = eventRejectHandler(reject);
+                    }
+                    else {
+                        var count_1 = 0;
+                        var req_1 = values || !('openKeyCursor' in source) ?
+                            source.openCursor(idbKeyRange) :
+                            source.openKeyCursor(idbKeyRange);
+                        var result_1 = [];
+                        req_1.onsuccess = function (event) {
+                            var cursor = req_1.result;
+                            if (!cursor)
+                                return resolve({ result: result_1 });
+                            result_1.push(values ? cursor.value : cursor.primaryKey);
+                            if (++count_1 === limit)
+                                return resolve({ result: result_1 });
+                            cursor.continue();
+                        };
+                        req_1.onerror = eventRejectHandler(reject);
+                    }
+                });
+            };
+        }
+        return {
+            name: tableName,
+            schema: tableSchema,
+            mutate: mutate,
+            getMany: function (_a) {
+                var trans = _a.trans, keys$$1 = _a.keys;
+                return new Promise(function (resolve, reject) {
+                    resolve = wrap(resolve);
+                    var store = trans.objectStore(tableName);
+                    var length = keys$$1.length;
+                    var result = new Array(length);
+                    var keyCount = 0;
+                    var callbackCount = 0;
+                    var valueCount = 0;
+                    var req;
+                    var successHandler = function (event) {
+                        var req = event.target;
+                        if ((result[req._pos] = req.result) != null)
+                            ++valueCount;
+                        if (++callbackCount === keyCount)
+                            resolve(result);
+                    };
+                    var errorHandler = eventRejectHandler(reject);
+                    for (var i = 0; i < length; ++i) {
+                        var key = keys$$1[i];
+                        if (key != null) {
+                            req = store.get(keys$$1[i]);
+                            req._pos = i;
+                            req.onsuccess = successHandler;
+                            req.onerror = errorHandler;
+                            ++keyCount;
+                        }
+                    }
+                    if (keyCount === 0)
+                        resolve(result);
+                });
+            },
+            get: function (_a) {
+                var trans = _a.trans, key = _a.key;
+                return new Promise(function (resolve, reject) {
+                    resolve = wrap(resolve);
+                    var store = trans.objectStore(tableName);
+                    var req = store.get(key);
+                    req.onsuccess = function (event) { return resolve(event.target.result); };
+                    req.onerror = eventRejectHandler(reject);
+                });
+            },
+            query: query(hasGetAll),
+            openCursor: openCursor,
+            count: function (_a) {
+                var query = _a.query, trans = _a.trans;
+                var index = query.index, range = query.range;
+                return new Promise(function (resolve, reject) {
+                    var store = trans.objectStore(tableName);
+                    var source = index.isPrimaryKey ? store : store.index(index.name);
+                    var idbKeyRange = makeIDBKeyRange(range);
+                    var req = idbKeyRange ? source.count(idbKeyRange) : source.count();
+                    req.onsuccess = wrap(function (ev) { return resolve(ev.target.result); });
+                    req.onerror = eventRejectHandler(reject);
+                });
+            }
+        };
+    }
+    var _a = extractSchema(db, tmpTrans), schema = _a.schema, hasGetAll = _a.hasGetAll;
+    var tables = schema.tables.map(function (tableSchema) { return createDbCoreTable(tableSchema); });
+    var tableMap = {};
+    tables.forEach(function (table) { return tableMap[table.name] = table; });
+    return {
+        stack: "dbcore",
+        transaction: db.transaction.bind(db),
+        table: function (name) {
+            var result = tableMap[name];
+            if (!result)
+                throw new Error("Table '" + name + "' not found");
+            return tableMap[name];
+        },
+        cmp: cmp,
+        MIN_KEY: -Infinity,
+        MAX_KEY: getMaxKey(IdbKeyRange),
+        schema: schema
+    };
+}
+
+function createMiddlewareStack(stackImpl, middlewares) {
+    return middlewares.reduce(function (down, _a) {
+        var create = _a.create;
+        return (__assign(__assign({}, down), create(down)));
+    }, stackImpl);
+}
+function createMiddlewareStacks(middlewares, idbdb, _a, tmpTrans) {
+    var IDBKeyRange = _a.IDBKeyRange, indexedDB = _a.indexedDB;
+    var dbcore = createMiddlewareStack(createDBCore(idbdb, indexedDB, IDBKeyRange, tmpTrans), middlewares.dbcore);
+    return {
+        dbcore: dbcore
+    };
+}
+function generateMiddlewareStacks(db, tmpTrans) {
+    var idbdb = tmpTrans.db;
+    var stacks = createMiddlewareStacks(db._middlewares, idbdb, db._deps, tmpTrans);
+    db.core = stacks.dbcore;
+    db.tables.forEach(function (table) {
+        var tableName = table.name;
+        if (db.core.schema.tables.some(function (tbl) { return tbl.name === tableName; })) {
+            table.core = db.core.table(tableName);
+            if (db[tableName] instanceof db.Table) {
+                db[tableName].core = table.core;
+            }
+        }
+    });
+}
+
+function setApiOnPlace(db, objs, tableNames, dbschema) {
+    tableNames.forEach(function (tableName) {
+        var schema = dbschema[tableName];
+        objs.forEach(function (obj) {
+            if (!(tableName in obj)) {
+                if (obj === db.Transaction.prototype || obj instanceof db.Transaction) {
+                    setProp(obj, tableName, {
+                        get: function () { return this.table(tableName); },
+                        set: function (value) {
+                            defineProperty(this, tableName, { value: value, writable: true, configurable: true, enumerable: true });
+                        }
+                    });
+                }
+                else {
+                    obj[tableName] = new db.Table(tableName, schema);
+                }
+            }
+        });
+    });
+}
+function removeTablesApi(db, objs) {
+    objs.forEach(function (obj) {
+        for (var key in obj) {
+            if (obj[key] instanceof db.Table)
+                delete obj[key];
+        }
+    });
+}
+function lowerVersionFirst(a, b) {
+    return a._cfg.version - b._cfg.version;
+}
+function runUpgraders(db, oldVersion, idbUpgradeTrans, reject) {
+    var globalSchema = db._dbSchema;
+    var trans = db._createTransaction('readwrite', db._storeNames, globalSchema);
+    trans.create(idbUpgradeTrans);
+    trans._completion.catch(reject);
+    var rejectTransaction = trans._reject.bind(trans);
+    var transless = PSD.transless || PSD;
+    newScope(function () {
+        PSD.trans = trans;
+        PSD.transless = transless;
+        if (oldVersion === 0) {
+            keys(globalSchema).forEach(function (tableName) {
+                createTable(idbUpgradeTrans, tableName, globalSchema[tableName].primKey, globalSchema[tableName].indexes);
+            });
+            generateMiddlewareStacks(db, idbUpgradeTrans);
+            DexiePromise.follow(function () { return db.on.populate.fire(trans); }).catch(rejectTransaction);
+        }
+        else
+            updateTablesAndIndexes(db, oldVersion, trans, idbUpgradeTrans).catch(rejectTransaction);
+    });
+}
+function updateTablesAndIndexes(db, oldVersion, trans, idbUpgradeTrans) {
+    var queue = [];
+    var versions = db._versions;
+    var globalSchema = db._dbSchema = buildGlobalSchema(db, db.idbdb, idbUpgradeTrans);
+    var anyContentUpgraderHasRun = false;
+    var versToRun = versions.filter(function (v) { return v._cfg.version >= oldVersion; });
+    versToRun.forEach(function (version) {
+        queue.push(function () {
+            var oldSchema = globalSchema;
+            var newSchema = version._cfg.dbschema;
+            adjustToExistingIndexNames(db, oldSchema, idbUpgradeTrans);
+            adjustToExistingIndexNames(db, newSchema, idbUpgradeTrans);
+            globalSchema = db._dbSchema = newSchema;
+            var diff = getSchemaDiff(oldSchema, newSchema);
+            diff.add.forEach(function (tuple) {
+                createTable(idbUpgradeTrans, tuple[0], tuple[1].primKey, tuple[1].indexes);
+            });
+            diff.change.forEach(function (change) {
+                if (change.recreate) {
+                    throw new exceptions.Upgrade("Not yet support for changing primary key");
+                }
+                else {
+                    var store_1 = idbUpgradeTrans.objectStore(change.name);
+                    change.add.forEach(function (idx) { return addIndex(store_1, idx); });
+                    change.change.forEach(function (idx) {
+                        store_1.deleteIndex(idx.name);
+                        addIndex(store_1, idx);
+                    });
+                    change.del.forEach(function (idxName) { return store_1.deleteIndex(idxName); });
+                }
+            });
+            var contentUpgrade = version._cfg.contentUpgrade;
+            if (contentUpgrade && version._cfg.version > oldVersion) {
+                generateMiddlewareStacks(db, idbUpgradeTrans);
+                anyContentUpgraderHasRun = true;
+                var upgradeSchema_1 = shallowClone(newSchema);
+                diff.del.forEach(function (table) {
+                    upgradeSchema_1[table] = oldSchema[table];
+                });
+                removeTablesApi(db, [db.Transaction.prototype]);
+                setApiOnPlace(db, [db.Transaction.prototype], keys(upgradeSchema_1), upgradeSchema_1);
+                trans.schema = upgradeSchema_1;
+                var contentUpgradeIsAsync_1 = isAsyncFunction(contentUpgrade);
+                if (contentUpgradeIsAsync_1) {
+                    incrementExpectedAwaits();
+                }
+                var returnValue_1;
+                var promiseFollowed = DexiePromise.follow(function () {
+                    returnValue_1 = contentUpgrade(trans);
+                    if (returnValue_1) {
+                        if (contentUpgradeIsAsync_1) {
+                            var decrementor = decrementExpectedAwaits.bind(null, null);
+                            returnValue_1.then(decrementor, decrementor);
+                        }
+                    }
+                });
+                return (returnValue_1 && typeof returnValue_1.then === 'function' ?
+                    DexiePromise.resolve(returnValue_1) : promiseFollowed.then(function () { return returnValue_1; }));
+            }
+        });
+        queue.push(function (idbtrans) {
+            if (!anyContentUpgraderHasRun || !hasIEDeleteObjectStoreBug) {
+                var newSchema = version._cfg.dbschema;
+                deleteRemovedTables(newSchema, idbtrans);
+            }
+            removeTablesApi(db, [db.Transaction.prototype]);
+            setApiOnPlace(db, [db.Transaction.prototype], db._storeNames, db._dbSchema);
+            trans.schema = db._dbSchema;
+        });
+    });
+    function runQueue() {
+        return queue.length ? DexiePromise.resolve(queue.shift()(trans.idbtrans)).then(runQueue) :
+            DexiePromise.resolve();
+    }
+    return runQueue().then(function () {
+        createMissingTables(globalSchema, idbUpgradeTrans);
+    });
+}
+function getSchemaDiff(oldSchema, newSchema) {
+    var diff = {
+        del: [],
+        add: [],
+        change: []
+    };
+    var table;
+    for (table in oldSchema) {
+        if (!newSchema[table])
+            diff.del.push(table);
+    }
+    for (table in newSchema) {
+        var oldDef = oldSchema[table], newDef = newSchema[table];
+        if (!oldDef) {
+            diff.add.push([table, newDef]);
+        }
+        else {
+            var change = {
+                name: table,
+                def: newDef,
+                recreate: false,
+                del: [],
+                add: [],
+                change: []
+            };
+            if (oldDef.primKey.src !== newDef.primKey.src &&
+                !isIEOrEdge
+            ) {
+                change.recreate = true;
+                diff.change.push(change);
+            }
+            else {
+                var oldIndexes = oldDef.idxByName;
+                var newIndexes = newDef.idxByName;
+                var idxName = void 0;
+                for (idxName in oldIndexes) {
+                    if (!newIndexes[idxName])
+                        change.del.push(idxName);
+                }
+                for (idxName in newIndexes) {
+                    var oldIdx = oldIndexes[idxName], newIdx = newIndexes[idxName];
+                    if (!oldIdx)
+                        change.add.push(newIdx);
+                    else if (oldIdx.src !== newIdx.src)
+                        change.change.push(newIdx);
+                }
+                if (change.del.length > 0 || change.add.length > 0 || change.change.length > 0) {
+                    diff.change.push(change);
+                }
+            }
+        }
+    }
+    return diff;
+}
+function createTable(idbtrans, tableName, primKey, indexes) {
+    var store = idbtrans.db.createObjectStore(tableName, primKey.keyPath ?
+        { keyPath: primKey.keyPath, autoIncrement: primKey.auto } :
+        { autoIncrement: primKey.auto });
+    indexes.forEach(function (idx) { return addIndex(store, idx); });
+    return store;
+}
+function createMissingTables(newSchema, idbtrans) {
+    keys(newSchema).forEach(function (tableName) {
+        if (!idbtrans.db.objectStoreNames.contains(tableName)) {
+            createTable(idbtrans, tableName, newSchema[tableName].primKey, newSchema[tableName].indexes);
+        }
+    });
+}
+function deleteRemovedTables(newSchema, idbtrans) {
+    for (var i = 0; i < idbtrans.db.objectStoreNames.length; ++i) {
+        var storeName = idbtrans.db.objectStoreNames[i];
+        if (newSchema[storeName] == null) {
+            idbtrans.db.deleteObjectStore(storeName);
+        }
+    }
+}
+function addIndex(store, idx) {
+    store.createIndex(idx.name, idx.keyPath, { unique: idx.unique, multiEntry: idx.multi });
+}
+function buildGlobalSchema(db, idbdb, tmpTrans) {
+    var globalSchema = {};
+    var dbStoreNames = slice(idbdb.objectStoreNames, 0);
+    dbStoreNames.forEach(function (storeName) {
+        var store = tmpTrans.objectStore(storeName);
+        var keyPath = store.keyPath;
+        var primKey = createIndexSpec(nameFromKeyPath(keyPath), keyPath || "", false, false, !!store.autoIncrement, keyPath && typeof keyPath !== "string", true);
+        var indexes = [];
+        for (var j = 0; j < store.indexNames.length; ++j) {
+            var idbindex = store.index(store.indexNames[j]);
+            keyPath = idbindex.keyPath;
+            var index = createIndexSpec(idbindex.name, keyPath, !!idbindex.unique, !!idbindex.multiEntry, false, keyPath && typeof keyPath !== "string", false);
+            indexes.push(index);
+        }
+        globalSchema[storeName] = createTableSchema(storeName, primKey, indexes);
+    });
+    return globalSchema;
+}
+function readGlobalSchema(db, idbdb, tmpTrans) {
+    db.verno = idbdb.version / 10;
+    var globalSchema = db._dbSchema = buildGlobalSchema(db, idbdb, tmpTrans);
+    db._storeNames = slice(idbdb.objectStoreNames, 0);
+    setApiOnPlace(db, [db._allTables], keys(globalSchema), globalSchema);
+}
+function adjustToExistingIndexNames(db, schema, idbtrans) {
+    var storeNames = idbtrans.db.objectStoreNames;
+    for (var i = 0; i < storeNames.length; ++i) {
+        var storeName = storeNames[i];
+        var store = idbtrans.objectStore(storeName);
+        db._hasGetAll = 'getAll' in store;
+        for (var j = 0; j < store.indexNames.length; ++j) {
+            var indexName = store.indexNames[j];
+            var keyPath = store.index(indexName).keyPath;
+            var dexieName = typeof keyPath === 'string' ? keyPath : "[" + slice(keyPath).join('+') + "]";
+            if (schema[storeName]) {
+                var indexSpec = schema[storeName].idxByName[dexieName];
+                if (indexSpec) {
+                    indexSpec.name = indexName;
+                    delete schema[storeName].idxByName[dexieName];
+                    schema[storeName].idxByName[indexName] = indexSpec;
+                }
+            }
+        }
+    }
+    if (typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) &&
+        !/(Chrome\/|Edge\/)/.test(navigator.userAgent) &&
+        _global.WorkerGlobalScope && _global instanceof _global.WorkerGlobalScope &&
+        [].concat(navigator.userAgent.match(/Safari\/(\d*)/))[1] < 604) {
+        db._hasGetAll = false;
+    }
+}
+function parseIndexSyntax(primKeyAndIndexes) {
+    return primKeyAndIndexes.split(',').map(function (index, indexNum) {
+        index = index.trim();
+        var name = index.replace(/([&*]|\+\+)/g, "");
+        var keyPath = /^\[/.test(name) ? name.match(/^\[(.*)\]$/)[1].split('+') : name;
+        return createIndexSpec(name, keyPath || null, /\&/.test(index), /\*/.test(index), /\+\+/.test(index), isArray(keyPath), indexNum === 0);
+    });
+}
+
+var Version =               (function () {
+    function Version() {
+    }
+    Version.prototype._parseStoresSpec = function (stores, outSchema) {
+        keys(stores).forEach(function (tableName) {
+            if (stores[tableName] !== null) {
+                var indexes = parseIndexSyntax(stores[tableName]);
+                var primKey = indexes.shift();
+                if (primKey.multi)
+                    throw new exceptions.Schema("Primary key cannot be multi-valued");
+                indexes.forEach(function (idx) {
+                    if (idx.auto)
+                        throw new exceptions.Schema("Only primary key can be marked as autoIncrement (++)");
+                    if (!idx.keyPath)
+                        throw new exceptions.Schema("Index must have a name and cannot be an empty string");
+                });
+                outSchema[tableName] = createTableSchema(tableName, primKey, indexes);
+            }
+        });
+    };
+    Version.prototype.stores = function (stores) {
+        var db = this.db;
+        this._cfg.storesSource = this._cfg.storesSource ?
+            extend(this._cfg.storesSource, stores) :
+            stores;
+        var versions = db._versions;
+        var storesSpec = {};
+        var dbschema = {};
+        versions.forEach(function (version) {
+            extend(storesSpec, version._cfg.storesSource);
+            dbschema = (version._cfg.dbschema = {});
+            version._parseStoresSpec(storesSpec, dbschema);
+        });
+        db._dbSchema = dbschema;
+        removeTablesApi(db, [db._allTables, db, db.Transaction.prototype]);
+        setApiOnPlace(db, [db._allTables, db, db.Transaction.prototype, this._cfg.tables], keys(dbschema), dbschema);
+        db._storeNames = keys(dbschema);
+        return this;
+    };
+    Version.prototype.upgrade = function (upgradeFunction) {
+        this._cfg.contentUpgrade = upgradeFunction;
+        return this;
+    };
+    return Version;
+}());
+
+function createVersionConstructor(db) {
+    return makeClassConstructor(Version.prototype, function Version$$1(versionNumber) {
+        this.db = db;
+        this._cfg = {
+            version: versionNumber,
+            storesSource: null,
+            dbschema: {},
+            tables: {},
+            contentUpgrade: null
+        };
+    });
+}
+
+var databaseEnumerator;
+function DatabaseEnumerator(indexedDB) {
+    var hasDatabasesNative = indexedDB && typeof indexedDB.databases === 'function';
+    var dbNamesTable;
+    if (!hasDatabasesNative) {
+        var db = new Dexie(DBNAMES_DB, { addons: [] });
+        db.version(1).stores({ dbnames: 'name' });
+        dbNamesTable = db.table('dbnames');
+    }
+    return {
+        getDatabaseNames: function () {
+            return hasDatabasesNative
+                ?
+                    DexiePromise.resolve(indexedDB.databases()).then(function (infos) { return infos
+                        .map(function (info) { return info.name; })
+                        .filter(function (name) { return name !== DBNAMES_DB; }); })
+                :
+                    dbNamesTable.toCollection().primaryKeys();
+        },
+        add: function (name) {
+            return !hasDatabasesNative && name !== DBNAMES_DB && dbNamesTable.put({ name: name }).catch(nop);
+        },
+        remove: function (name) {
+            return !hasDatabasesNative && name !== DBNAMES_DB && dbNamesTable.delete(name).catch(nop);
+        }
+    };
+}
+function initDatabaseEnumerator(indexedDB) {
+    try {
+        databaseEnumerator = DatabaseEnumerator(indexedDB);
+    }
+    catch (e) { }
+}
+
+function vip(fn) {
+    return newScope(function () {
+        PSD.letThrough = true;
+        return fn();
+    });
+}
+
+function dexieOpen(db) {
+    var state = db._state;
+    var indexedDB = db._deps.indexedDB;
+    if (state.isBeingOpened || db.idbdb)
+        return state.dbReadyPromise.then(function () { return state.dbOpenError ?
+            rejection(state.dbOpenError) :
+            db; });
+    debug && (state.openCanceller._stackHolder = getErrorWithStack());
+    state.isBeingOpened = true;
+    state.dbOpenError = null;
+    state.openComplete = false;
+    var resolveDbReady = state.dbReadyResolve,
+    upgradeTransaction = null;
+    return DexiePromise.race([state.openCanceller, new DexiePromise(function (resolve, reject) {
+            if (!indexedDB)
+                throw new exceptions.MissingAPI("indexedDB API not found. If using IE10+, make sure to run your code on a server URL " +
+                    "(not locally). If using old Safari versions, make sure to include indexedDB polyfill.");
+            var dbName = db.name;
+            var req = state.autoSchema ?
+                indexedDB.open(dbName) :
+                indexedDB.open(dbName, Math.round(db.verno * 10));
+            if (!req)
+                throw new exceptions.MissingAPI("IndexedDB API not available");
+            req.onerror = eventRejectHandler(reject);
+            req.onblocked = wrap(db._fireOnBlocked);
+            req.onupgradeneeded = wrap(function (e) {
+                upgradeTransaction = req.transaction;
+                if (state.autoSchema && !db._options.allowEmptyDB) {
+                    req.onerror = preventDefault;
+                    upgradeTransaction.abort();
+                    req.result.close();
+                    var delreq = indexedDB.deleteDatabase(dbName);
+                    delreq.onsuccess = delreq.onerror = wrap(function () {
+                        reject(new exceptions.NoSuchDatabase("Database " + dbName + " doesnt exist"));
+                    });
+                }
+                else {
+                    upgradeTransaction.onerror = eventRejectHandler(reject);
+                    var oldVer = e.oldVersion > Math.pow(2, 62) ? 0 : e.oldVersion;
+                    db.idbdb = req.result;
+                    runUpgraders(db, oldVer / 10, upgradeTransaction, reject);
+                }
+            }, reject);
+            req.onsuccess = wrap(function () {
+                upgradeTransaction = null;
+                var idbdb = db.idbdb = req.result;
+                var objectStoreNames = slice(idbdb.objectStoreNames);
+                if (objectStoreNames.length > 0)
+                    try {
+                        var tmpTrans = idbdb.transaction(safariMultiStoreFix(objectStoreNames), 'readonly');
+                        if (state.autoSchema)
+                            readGlobalSchema(db, idbdb, tmpTrans);
+                        else
+                            adjustToExistingIndexNames(db, db._dbSchema, tmpTrans);
+                        generateMiddlewareStacks(db, tmpTrans);
+                    }
+                    catch (e) {
+                    }
+                connections.push(db);
+                idbdb.onversionchange = wrap(function (ev) {
+                    state.vcFired = true;
+                    db.on("versionchange").fire(ev);
+                });
+                databaseEnumerator.add(dbName);
+                resolve();
+            }, reject);
+        })]).then(function () {
+        state.onReadyBeingFired = [];
+        return DexiePromise.resolve(vip(db.on.ready.fire)).then(function fireRemainders() {
+            if (state.onReadyBeingFired.length > 0) {
+                var remainders = state.onReadyBeingFired.reduce(promisableChain, nop);
+                state.onReadyBeingFired = [];
+                return DexiePromise.resolve(vip(remainders)).then(fireRemainders);
+            }
+        });
+    }).finally(function () {
+        state.onReadyBeingFired = null;
+    }).then(function () {
+        state.isBeingOpened = false;
+        return db;
+    }).catch(function (err) {
+        try {
+            upgradeTransaction && upgradeTransaction.abort();
+        }
+        catch (e) { }
+        state.isBeingOpened = false;
+        db.close();
+        state.dbOpenError = err;
+        return rejection(state.dbOpenError);
+    }).finally(function () {
+        state.openComplete = true;
+        resolveDbReady();
+    });
+}
+
+function awaitIterator(iterator) {
+    var callNext = function (result) { return iterator.next(result); }, doThrow = function (error) { return iterator.throw(error); }, onSuccess = step(callNext), onError = step(doThrow);
+    function step(getNext) {
+        return function (val) {
+            var next = getNext(val), value = next.value;
+            return next.done ? value :
+                (!value || typeof value.then !== 'function' ?
+                    isArray(value) ? Promise.all(value).then(onSuccess, onError) : onSuccess(value) :
+                    value.then(onSuccess, onError));
+        };
+    }
+    return step(callNext)();
+}
+
+function extractTransactionArgs(mode, _tableArgs_, scopeFunc) {
+    var i = arguments.length;
+    if (i < 2)
+        throw new exceptions.InvalidArgument("Too few arguments");
+    var args = new Array(i - 1);
+    while (--i)
+        args[i - 1] = arguments[i];
+    scopeFunc = args.pop();
+    var tables = flatten(args);
+    return [mode, tables, scopeFunc];
+}
+function enterTransactionScope(db, mode, storeNames, parentTransaction, scopeFunc) {
+    return DexiePromise.resolve().then(function () {
+        var transless = PSD.transless || PSD;
+        var trans = db._createTransaction(mode, storeNames, db._dbSchema, parentTransaction);
+        var zoneProps = {
+            trans: trans,
+            transless: transless
+        };
+        if (parentTransaction) {
+            trans.idbtrans = parentTransaction.idbtrans;
+        }
+        else {
+            trans.create();
+        }
+        var scopeFuncIsAsync = isAsyncFunction(scopeFunc);
+        if (scopeFuncIsAsync) {
+            incrementExpectedAwaits();
+        }
+        var returnValue;
+        var promiseFollowed = DexiePromise.follow(function () {
+            returnValue = scopeFunc.call(trans, trans);
+            if (returnValue) {
+                if (scopeFuncIsAsync) {
+                    var decrementor = decrementExpectedAwaits.bind(null, null);
+                    returnValue.then(decrementor, decrementor);
+                }
+                else if (typeof returnValue.next === 'function' && typeof returnValue.throw === 'function') {
+                    returnValue = awaitIterator(returnValue);
+                }
+            }
+        }, zoneProps);
+        return (returnValue && typeof returnValue.then === 'function' ?
+            DexiePromise.resolve(returnValue).then(function (x) { return trans.active ?
+                x
+                : rejection(new exceptions.PrematureCommit("Transaction committed too early. See http://bit.ly/2kdckMn")); })
+            : promiseFollowed.then(function () { return returnValue; })).then(function (x) {
+            if (parentTransaction)
+                trans._resolve();
+            return trans._completion.then(function () { return x; });
+        }).catch(function (e) {
+            trans._reject(e);
+            return rejection(e);
+        });
+    });
+}
+
+function pad(a, value, count) {
+    var result = isArray(a) ? a.slice() : [a];
+    for (var i = 0; i < count; ++i)
+        result.push(value);
+    return result;
+}
+function createVirtualIndexMiddleware(down) {
+    return __assign(__assign({}, down), { table: function (tableName) {
+            var table = down.table(tableName);
+            var schema = table.schema;
+            var indexLookup = {};
+            var allVirtualIndexes = [];
+            function addVirtualIndexes(keyPath, keyTail, lowLevelIndex) {
+                var keyPathAlias = getKeyPathAlias(keyPath);
+                var indexList = (indexLookup[keyPathAlias] = indexLookup[keyPathAlias] || []);
+                var keyLength = keyPath == null ? 0 : typeof keyPath === 'string' ? 1 : keyPath.length;
+                var isVirtual = keyTail > 0;
+                var virtualIndex = __assign(__assign({}, lowLevelIndex), { isVirtual: isVirtual, isPrimaryKey: !isVirtual && lowLevelIndex.isPrimaryKey, keyTail: keyTail,
+                    keyLength: keyLength, extractKey: getKeyExtractor(keyPath), unique: !isVirtual && lowLevelIndex.unique });
+                indexList.push(virtualIndex);
+                if (!virtualIndex.isPrimaryKey) {
+                    allVirtualIndexes.push(virtualIndex);
+                }
+                if (keyLength > 1) {
+                    var virtualKeyPath = keyLength === 2 ?
+                        keyPath[0] :
+                        keyPath.slice(0, keyLength - 1);
+                    addVirtualIndexes(virtualKeyPath, keyTail + 1, lowLevelIndex);
+                }
+                indexList.sort(function (a, b) { return a.keyTail - b.keyTail; });
+                return virtualIndex;
+            }
+            var primaryKey = addVirtualIndexes(schema.primaryKey.keyPath, 0, schema.primaryKey);
+            indexLookup[":id"] = [primaryKey];
+            for (var _i = 0, _a = schema.indexes; _i < _a.length; _i++) {
+                var index = _a[_i];
+                addVirtualIndexes(index.keyPath, 0, index);
+            }
+            function findBestIndex(keyPath) {
+                var result = indexLookup[getKeyPathAlias(keyPath)];
+                return result && result[0];
+            }
+            function translateRange(range, keyTail) {
+                return {
+                    type: range.type === 1             ?
+                        2             :
+                        range.type,
+                    lower: pad(range.lower, range.lowerOpen ? down.MAX_KEY : down.MIN_KEY, keyTail),
+                    lowerOpen: true,
+                    upper: pad(range.upper, range.upperOpen ? down.MIN_KEY : down.MAX_KEY, keyTail),
+                    upperOpen: true
+                };
+            }
+            function translateRequest(req) {
+                var index = req.query.index;
+                return index.isVirtual ? __assign(__assign({}, req), { query: {
+                        index: index,
+                        range: translateRange(req.query.range, index.keyTail)
+                    } }) : req;
+            }
+            var result = __assign(__assign({}, table), { schema: __assign(__assign({}, schema), { primaryKey: primaryKey, indexes: allVirtualIndexes, getIndexByKeyPath: findBestIndex }), count: function (req) {
+                    return table.count(translateRequest(req));
+                },
+                query: function (req) {
+                    return table.query(translateRequest(req));
+                },
+                openCursor: function (req) {
+                    var _a = req.query.index, keyTail = _a.keyTail, isVirtual = _a.isVirtual, keyLength = _a.keyLength;
+                    if (!isVirtual)
+                        return table.openCursor(req);
+                    function createVirtualCursor(cursor) {
+                        function _continue(key) {
+                            key != null ?
+                                cursor.continue(pad(key, req.reverse ? down.MAX_KEY : down.MIN_KEY, keyTail)) :
+                                req.unique ?
+                                    cursor.continue(pad(cursor.key, req.reverse ? down.MIN_KEY : down.MAX_KEY, keyTail)) :
+                                    cursor.continue();
+                        }
+                        var virtualCursor = Object.create(cursor, {
+                            continue: { value: _continue },
+                            continuePrimaryKey: {
+                                value: function (key, primaryKey) {
+                                    cursor.continuePrimaryKey(pad(key, down.MAX_KEY, keyTail), primaryKey);
+                                }
+                            },
+                            key: {
+                                get: function () {
+                                    var key = cursor.key;
+                                    return keyLength === 1 ?
+                                        key[0] :
+                                        key.slice(0, keyLength);
+                                }
+                            },
+                            value: {
+                                get: function () {
+                                    return cursor.value;
+                                }
+                            }
+                        });
+                        return virtualCursor;
+                    }
+                    return table.openCursor(translateRequest(req))
+                        .then(function (cursor) { return cursor && createVirtualCursor(cursor); });
+                } });
+            return result;
+        } });
+}
+var virtualIndexMiddleware = {
+    stack: "dbcore",
+    name: "VirtualIndexMiddleware",
+    level: 1,
+    create: createVirtualIndexMiddleware
+};
+
+var hooksMiddleware = {
+    stack: "dbcore",
+    name: "HooksMiddleware",
+    level: 2,
+    create: function (downCore) { return (__assign(__assign({}, downCore), { table: function (tableName) {
+            var downTable = downCore.table(tableName);
+            var primaryKey = downTable.schema.primaryKey;
+            var tableMiddleware = __assign(__assign({}, downTable), { mutate: function (req) {
+                    var dxTrans = PSD.trans;
+                    var _a = dxTrans.table(tableName).hook, deleting = _a.deleting, creating = _a.creating, updating = _a.updating;
+                    switch (req.type) {
+                        case 'add':
+                            if (creating.fire === nop)
+                                break;
+                            return dxTrans._promise('readwrite', function () { return addPutOrDelete(req); }, true);
+                        case 'put':
+                            if (creating.fire === nop && updating.fire === nop)
+                                break;
+                            return dxTrans._promise('readwrite', function () { return addPutOrDelete(req); }, true);
+                        case 'delete':
+                            if (deleting.fire === nop)
+                                break;
+                            return dxTrans._promise('readwrite', function () { return addPutOrDelete(req); }, true);
+                        case 'deleteRange':
+                            if (deleting.fire === nop)
+                                break;
+                            return dxTrans._promise('readwrite', function () { return deleteRange(req); }, true);
+                    }
+                    return downTable.mutate(req);
+                    function addPutOrDelete(req) {
+                        var dxTrans = PSD.trans;
+                        var keys$$1 = req.keys || getEffectiveKeys(primaryKey, req);
+                        if (!keys$$1)
+                            throw new Error("Keys missing");
+                        req = req.type === 'add' || req.type === 'put' ? __assign(__assign({}, req), { keys: keys$$1, wantResults: true }) :
+                         __assign({}, req);
+                        if (req.type !== 'delete')
+                            req.values = __spreadArrays(req.values);
+                        if (req.keys)
+                            req.keys = __spreadArrays(req.keys);
+                        return getExistingValues(downTable, req, keys$$1).then(function (existingValues) {
+                            var contexts = keys$$1.map(function (key, i) {
+                                var existingValue = existingValues[i];
+                                var ctx = { onerror: null, onsuccess: null };
+                                if (req.type === 'delete') {
+                                    deleting.fire.call(ctx, key, existingValue, dxTrans);
+                                }
+                                else if (req.type === 'add' || existingValue === undefined) {
+                                    var generatedPrimaryKey = creating.fire.call(ctx, key, req.values[i], dxTrans);
+                                    if (key == null && generatedPrimaryKey != null) {
+                                        key = generatedPrimaryKey;
+                                        req.keys[i] = key;
+                                        if (!primaryKey.outbound) {
+                                            setByKeyPath(req.values[i], primaryKey.keyPath, key);
+                                        }
+                                    }
+                                }
+                                else {
+                                    var objectDiff = getObjectDiff(existingValue, req.values[i]);
+                                    var additionalChanges_1 = updating.fire.call(ctx, objectDiff, key, existingValue, dxTrans);
+                                    if (additionalChanges_1) {
+                                        var requestedValue_1 = req.values[i];
+                                        Object.keys(additionalChanges_1).forEach(function (keyPath) {
+                                            setByKeyPath(requestedValue_1, keyPath, additionalChanges_1[keyPath]);
+                                        });
+                                    }
+                                }
+                                return ctx;
+                            });
+                            return downTable.mutate(req).then(function (_a) {
+                                var failures = _a.failures, results = _a.results, numFailures = _a.numFailures, lastResult = _a.lastResult;
+                                for (var i = 0; i < keys$$1.length; ++i) {
+                                    var primKey = results ? results[i] : keys$$1[i];
+                                    var ctx = contexts[i];
+                                    if (primKey == null) {
+                                        ctx.onerror && ctx.onerror(failures[i]);
+                                    }
+                                    else {
+                                        ctx.onsuccess && ctx.onsuccess(req.type === 'put' && existingValues[i] ?
+                                            req.values[i] :
+                                            primKey
+                                        );
+                                    }
+                                }
+                                return { failures: failures, results: results, numFailures: numFailures, lastResult: lastResult };
+                            }).catch(function (error) {
+                                contexts.forEach(function (ctx) { return ctx.onerror && ctx.onerror(error); });
+                                return Promise.reject(error);
+                            });
+                        });
+                    }
+                    function deleteRange(req) {
+                        return deleteNextChunk(req.trans, req.range, 10000);
+                    }
+                    function deleteNextChunk(trans, range, limit) {
+                        return downTable.query({ trans: trans, values: false, query: { index: primaryKey, range: range }, limit: limit })
+                            .then(function (_a) {
+                            var result = _a.result;
+                            return addPutOrDelete({ type: 'delete', keys: result, trans: trans }).then(function (res) {
+                                if (res.numFailures > 0)
+                                    return Promise.reject(res.failures[0]);
+                                if (result.length < limit) {
+                                    return { failures: [], numFailures: 0, lastResult: undefined };
+                                }
+                                else {
+                                    return deleteNextChunk(trans, __assign(__assign({}, range), { lower: result[result.length - 1], lowerOpen: true }), limit);
+                                }
+                            });
+                        });
+                    }
+                } });
+            return tableMiddleware;
+        } })); }
+};
+
+var Dexie =               (function () {
+    function Dexie(name, options) {
+        var _this = this;
+        this._middlewares = {};
+        this.verno = 0;
+        var deps = Dexie.dependencies;
+        this._options = options = __assign({
+            addons: Dexie.addons, autoOpen: true,
+            indexedDB: deps.indexedDB, IDBKeyRange: deps.IDBKeyRange }, options);
+        this._deps = {
+            indexedDB: options.indexedDB,
+            IDBKeyRange: options.IDBKeyRange
+        };
+        var addons = options.addons;
+        this._dbSchema = {};
+        this._versions = [];
+        this._storeNames = [];
+        this._allTables = {};
+        this.idbdb = null;
+        var state = {
+            dbOpenError: null,
+            isBeingOpened: false,
+            onReadyBeingFired: null,
+            openComplete: false,
+            dbReadyResolve: nop,
+            dbReadyPromise: null,
+            cancelOpen: nop,
+            openCanceller: null,
+            autoSchema: true
+        };
+        state.dbReadyPromise = new DexiePromise(function (resolve) {
+            state.dbReadyResolve = resolve;
+        });
+        state.openCanceller = new DexiePromise(function (_, reject) {
+            state.cancelOpen = reject;
+        });
+        this._state = state;
+        this.name = name;
+        this.on = Events(this, "populate", "blocked", "versionchange", { ready: [promisableChain, nop] });
+        this.on.ready.subscribe = override(this.on.ready.subscribe, function (subscribe) {
+            return function (subscriber, bSticky) {
+                Dexie.vip(function () {
+                    var state = _this._state;
+                    if (state.openComplete) {
+                        if (!state.dbOpenError)
+                            DexiePromise.resolve().then(subscriber);
+                        if (bSticky)
+                            subscribe(subscriber);
+                    }
+                    else if (state.onReadyBeingFired) {
+                        state.onReadyBeingFired.push(subscriber);
+                        if (bSticky)
+                            subscribe(subscriber);
+                    }
+                    else {
+                        subscribe(subscriber);
+                        var db_1 = _this;
+                        if (!bSticky)
+                            subscribe(function unsubscribe() {
+                                db_1.on.ready.unsubscribe(subscriber);
+                                db_1.on.ready.unsubscribe(unsubscribe);
+                            });
+                    }
+                });
+            };
+        });
+        this.Collection = createCollectionConstructor(this);
+        this.Table = createTableConstructor(this);
+        this.Transaction = createTransactionConstructor(this);
+        this.Version = createVersionConstructor(this);
+        this.WhereClause = createWhereClauseConstructor(this);
+        this.on("versionchange", function (ev) {
+            if (ev.newVersion > 0)
+                console.warn("Another connection wants to upgrade database '" + _this.name + "'. Closing db now to resume the upgrade.");
+            else
+                console.warn("Another connection wants to delete database '" + _this.name + "'. Closing db now to resume the delete request.");
+            _this.close();
+        });
+        this.on("blocked", function (ev) {
+            if (!ev.newVersion || ev.newVersion < ev.oldVersion)
+                console.warn("Dexie.delete('" + _this.name + "') was blocked");
+            else
+                console.warn("Upgrade '" + _this.name + "' blocked by other connection holding version " + ev.oldVersion / 10);
+        });
+        this._maxKey = getMaxKey(options.IDBKeyRange);
+        this._createTransaction = function (mode, storeNames, dbschema, parentTransaction) { return new _this.Transaction(mode, storeNames, dbschema, parentTransaction); };
+        this._fireOnBlocked = function (ev) {
+            _this.on("blocked").fire(ev);
+            connections
+                .filter(function (c) { return c.name === _this.name && c !== _this && !c._state.vcFired; })
+                .map(function (c) { return c.on("versionchange").fire(ev); });
+        };
+        this.use(virtualIndexMiddleware);
+        this.use(hooksMiddleware);
+        addons.forEach(function (addon) { return addon(_this); });
+    }
+    Dexie.prototype.version = function (versionNumber) {
+        if (isNaN(versionNumber) || versionNumber < 0.1)
+            throw new exceptions.Type("Given version is not a positive number");
+        versionNumber = Math.round(versionNumber * 10) / 10;
+        if (this.idbdb || this._state.isBeingOpened)
+            throw new exceptions.Schema("Cannot add version when database is open");
+        this.verno = Math.max(this.verno, versionNumber);
+        var versions = this._versions;
+        var versionInstance = versions.filter(function (v) { return v._cfg.version === versionNumber; })[0];
+        if (versionInstance)
+            return versionInstance;
+        versionInstance = new this.Version(versionNumber);
+        versions.push(versionInstance);
+        versions.sort(lowerVersionFirst);
+        versionInstance.stores({});
+        this._state.autoSchema = false;
+        return versionInstance;
+    };
+    Dexie.prototype._whenReady = function (fn) {
+        var _this = this;
+        return this._state.openComplete || PSD.letThrough ? fn() : new DexiePromise(function (resolve, reject) {
+            if (!_this._state.isBeingOpened) {
+                if (!_this._options.autoOpen) {
+                    reject(new exceptions.DatabaseClosed());
+                    return;
+                }
+                _this.open().catch(nop);
+            }
+            _this._state.dbReadyPromise.then(resolve, reject);
+        }).then(fn);
+    };
+    Dexie.prototype.use = function (_a) {
+        var stack = _a.stack, create = _a.create, level = _a.level, name = _a.name;
+        if (name)
+            this.unuse({ stack: stack, name: name });
+        var middlewares = this._middlewares[stack] || (this._middlewares[stack] = []);
+        middlewares.push({ stack: stack, create: create, level: level == null ? 10 : level, name: name });
+        middlewares.sort(function (a, b) { return a.level - b.level; });
+        return this;
+    };
+    Dexie.prototype.unuse = function (_a) {
+        var stack = _a.stack, name = _a.name, create = _a.create;
+        if (stack && this._middlewares[stack]) {
+            this._middlewares[stack] = this._middlewares[stack].filter(function (mw) {
+                return create ? mw.create !== create :
+                    name ? mw.name !== name :
+                        false;
+            });
+        }
+        return this;
+    };
+    Dexie.prototype.open = function () {
+        return dexieOpen(this);
+    };
+    Dexie.prototype.close = function () {
+        var idx = connections.indexOf(this), state = this._state;
+        if (idx >= 0)
+            connections.splice(idx, 1);
+        if (this.idbdb) {
+            try {
+                this.idbdb.close();
+            }
+            catch (e) { }
+            this.idbdb = null;
+        }
+        this._options.autoOpen = false;
+        state.dbOpenError = new exceptions.DatabaseClosed();
+        if (state.isBeingOpened)
+            state.cancelOpen(state.dbOpenError);
+        state.dbReadyPromise = new DexiePromise(function (resolve) {
+            state.dbReadyResolve = resolve;
+        });
+        state.openCanceller = new DexiePromise(function (_, reject) {
+            state.cancelOpen = reject;
+        });
+    };
+    Dexie.prototype.delete = function () {
+        var _this = this;
+        var hasArguments = arguments.length > 0;
+        var state = this._state;
+        return new DexiePromise(function (resolve, reject) {
+            var doDelete = function () {
+                _this.close();
+                var req = _this._deps.indexedDB.deleteDatabase(_this.name);
+                req.onsuccess = wrap(function () {
+                    databaseEnumerator.remove(_this.name);
+                    resolve();
+                });
+                req.onerror = eventRejectHandler(reject);
+                req.onblocked = _this._fireOnBlocked;
+            };
+            if (hasArguments)
+                throw new exceptions.InvalidArgument("Arguments not allowed in db.delete()");
+            if (state.isBeingOpened) {
+                state.dbReadyPromise.then(doDelete);
+            }
+            else {
+                doDelete();
+            }
+        });
+    };
+    Dexie.prototype.backendDB = function () {
+        return this.idbdb;
+    };
+    Dexie.prototype.isOpen = function () {
+        return this.idbdb !== null;
+    };
+    Dexie.prototype.hasBeenClosed = function () {
+        var dbOpenError = this._state.dbOpenError;
+        return dbOpenError && (dbOpenError.name === 'DatabaseClosed');
+    };
+    Dexie.prototype.hasFailed = function () {
+        return this._state.dbOpenError !== null;
+    };
+    Dexie.prototype.dynamicallyOpened = function () {
+        return this._state.autoSchema;
+    };
+    Object.defineProperty(Dexie.prototype, "tables", {
+        get: function () {
+            var _this = this;
+            return keys(this._allTables).map(function (name) { return _this._allTables[name]; });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Dexie.prototype.transaction = function () {
+        var args = extractTransactionArgs.apply(this, arguments);
+        return this._transaction.apply(this, args);
+    };
+    Dexie.prototype._transaction = function (mode, tables, scopeFunc) {
+        var _this = this;
+        var parentTransaction = PSD.trans;
+        if (!parentTransaction || parentTransaction.db !== this || mode.indexOf('!') !== -1)
+            parentTransaction = null;
+        var onlyIfCompatible = mode.indexOf('?') !== -1;
+        mode = mode.replace('!', '').replace('?', '');
+        var idbMode, storeNames;
+        try {
+            storeNames = tables.map(function (table) {
+                var storeName = table instanceof _this.Table ? table.name : table;
+                if (typeof storeName !== 'string')
+                    throw new TypeError("Invalid table argument to Dexie.transaction(). Only Table or String are allowed");
+                return storeName;
+            });
+            if (mode == "r" || mode === READONLY)
+                idbMode = READONLY;
+            else if (mode == "rw" || mode == READWRITE)
+                idbMode = READWRITE;
+            else
+                throw new exceptions.InvalidArgument("Invalid transaction mode: " + mode);
+            if (parentTransaction) {
+                if (parentTransaction.mode === READONLY && idbMode === READWRITE) {
+                    if (onlyIfCompatible) {
+                        parentTransaction = null;
+                    }
+                    else
+                        throw new exceptions.SubTransaction("Cannot enter a sub-transaction with READWRITE mode when parent transaction is READONLY");
+                }
+                if (parentTransaction) {
+                    storeNames.forEach(function (storeName) {
+                        if (parentTransaction && parentTransaction.storeNames.indexOf(storeName) === -1) {
+                            if (onlyIfCompatible) {
+                                parentTransaction = null;
+                            }
+                            else
+                                throw new exceptions.SubTransaction("Table " + storeName +
+                                    " not included in parent transaction.");
+                        }
+                    });
+                }
+                if (onlyIfCompatible && parentTransaction && !parentTransaction.active) {
+                    parentTransaction = null;
+                }
+            }
+        }
+        catch (e) {
+            return parentTransaction ?
+                parentTransaction._promise(null, function (_, reject) { reject(e); }) :
+                rejection(e);
+        }
+        var enterTransaction = enterTransactionScope.bind(null, this, idbMode, storeNames, parentTransaction, scopeFunc);
+        return (parentTransaction ?
+            parentTransaction._promise(idbMode, enterTransaction, "lock") :
+            PSD.trans ?
+                usePSD(PSD.transless, function () { return _this._whenReady(enterTransaction); }) :
+                this._whenReady(enterTransaction));
+    };
+    Dexie.prototype.table = function (tableName) {
+        if (!hasOwn(this._allTables, tableName)) {
+            throw new exceptions.InvalidTable("Table " + tableName + " does not exist");
+        }
+        return this._allTables[tableName];
+    };
+    return Dexie;
+}());
+
+var Dexie$1 = Dexie;
+props(Dexie$1, __assign(__assign({}, fullNameExceptions), {
+    delete: function (databaseName) {
+        var db = new Dexie$1(databaseName);
+        return db.delete();
+    },
+    exists: function (name) {
+        return new Dexie$1(name, { addons: [] }).open().then(function (db) {
+            db.close();
+            return true;
+        }).catch('NoSuchDatabaseError', function () { return false; });
+    },
+    getDatabaseNames: function (cb) {
+        return databaseEnumerator ?
+            databaseEnumerator.getDatabaseNames().then(cb) :
+            DexiePromise.resolve([]);
+    },
+    defineClass: function () {
+        function Class(content) {
+            extend(this, content);
+        }
+        return Class;
+    },
+    ignoreTransaction: function (scopeFunc) {
+        return PSD.trans ?
+            usePSD(PSD.transless, scopeFunc) :
+            scopeFunc();
+    },
+    vip: vip, async: function (generatorFn) {
+        return function () {
+            try {
+                var rv = awaitIterator(generatorFn.apply(this, arguments));
+                if (!rv || typeof rv.then !== 'function')
+                    return DexiePromise.resolve(rv);
+                return rv;
+            }
+            catch (e) {
+                return rejection(e);
+            }
+        };
+    }, spawn: function (generatorFn, args, thiz) {
+        try {
+            var rv = awaitIterator(generatorFn.apply(thiz, args || []));
+            if (!rv || typeof rv.then !== 'function')
+                return DexiePromise.resolve(rv);
+            return rv;
+        }
+        catch (e) {
+            return rejection(e);
+        }
+    },
+    currentTransaction: {
+        get: function () { return PSD.trans || null; }
+    }, waitFor: function (promiseOrFunction, optionalTimeout) {
+        var promise = DexiePromise.resolve(typeof promiseOrFunction === 'function' ?
+            Dexie$1.ignoreTransaction(promiseOrFunction) :
+            promiseOrFunction)
+            .timeout(optionalTimeout || 60000);
+        return PSD.trans ?
+            PSD.trans.waitFor(promise) :
+            promise;
+    },
+    Promise: DexiePromise,
+    debug: {
+        get: function () { return debug; },
+        set: function (value) {
+            setDebug(value, value === 'dexie' ? function () { return true; } : dexieStackFrameFilter);
+        }
+    },
+    derive: derive, extend: extend, props: props, override: override,
+    Events: Events,
+    getByKeyPath: getByKeyPath, setByKeyPath: setByKeyPath, delByKeyPath: delByKeyPath, shallowClone: shallowClone, deepClone: deepClone, getObjectDiff: getObjectDiff, asap: asap,
+    minKey: minKey,
+    addons: [],
+    connections: connections,
+    errnames: errnames,
+    dependencies: (function () {
+        try {
+            return {
+                indexedDB: _global.indexedDB || _global.mozIndexedDB || _global.webkitIndexedDB || _global.msIndexedDB,
+                IDBKeyRange: _global.IDBKeyRange || _global.webkitIDBKeyRange
+            };
+        }
+        catch (e) {
+            return { indexedDB: null, IDBKeyRange: null };
+        }
+    })(),
+    semVer: DEXIE_VERSION, version: DEXIE_VERSION.split('.')
+        .map(function (n) { return parseInt(n); })
+        .reduce(function (p, c, i) { return p + (c / Math.pow(10, i * 2)); }),
+    default: Dexie$1,
+    Dexie: Dexie$1 }));
+Dexie$1.maxKey = getMaxKey(Dexie$1.dependencies.IDBKeyRange);
+
+initDatabaseEnumerator(Dexie.dependencies.indexedDB);
+DexiePromise.rejectionMapper = mapError;
+setDebug(debug, dexieStackFrameFilter);
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Dexie);
+//# sourceMappingURL=dexie.mjs.map
+
+
+/***/ }),
+
 /***/ "./node_modules/fs.realpath/index.js":
 /*!*******************************************!*\
   !*** ./node_modules/fs.realpath/index.js ***!
@@ -43684,7 +48075,46 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   !*** ./node_modules/grpc/package.json ***!
   \****************************************/
 /*! default exports */
+/*! export _args [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export 0 [provided] [no usage info] [missing usage info prevents renaming] */
+/*!     export 0 [provided] [no usage info] [missing usage info prevents renaming] */
+/*!     export 1 [provided] [no usage info] [missing usage info prevents renaming] */
+/*!     other exports [not provided] [no usage info] */
+/*!   other exports [not provided] [no usage info] */
+/*! export _from [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _id [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _inBundle [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _integrity [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _location [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _phantomChildren [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export ascli [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export bytebuffer [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export code-point-at [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export decamelize [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export glob [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export number-is-nan [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export os-locale [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export window-size [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   other exports [not provided] [no usage info] */
+/*! export _requested [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export escapedName [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export fetchSpec [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export name [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export raw [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export rawSpec [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export registry [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export saveSpec [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export type [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   other exports [not provided] [no usage info] */
+/*! export _requiredBy [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export 0 [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   other exports [not provided] [no usage info] */
+/*! export _resolved [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _spec [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export _where [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export author [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export name [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   other exports [not provided] [no usage info] */
 /*! export binary [provided] [no usage info] [missing usage info prevents renaming] */
 /*!   export host [provided] [no usage info] [missing usage info prevents renaming] */
 /*!   export module_name [provided] [no usage info] [missing usage info prevents renaming] */
@@ -43693,6 +48123,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 /*!   export remote_path [provided] [no usage info] [missing usage info prevents renaming] */
 /*!   other exports [not provided] [no usage info] */
 /*! export bugs [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   export url [provided] [no usage info] [missing usage info prevents renaming] */
+/*!   other exports [not provided] [no usage info] */
 /*! export contributors [provided] [no usage info] [missing usage info prevents renaming] */
 /*!   export 0 [provided] [no usage info] [missing usage info prevents renaming] */
 /*!     export email [provided] [no usage info] [missing usage info prevents renaming] */
@@ -43790,7 +48222,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"grpc\",\"version\":\"1.24.3\",\"author\":\"Google Inc.\",\"description\":\"gRPC Library for Node\",\"homepage\":\"https://grpc.io/\",\"repository\":{\"type\":\"git\",\"url\":\"https://github.com/grpc/grpc-node.git\"},\"bugs\":\"https://github.com/grpc/grpc-node/issues\",\"contributors\":[{\"name\":\"Michael Lumish\",\"email\":\"mlumish@google.com\"}],\"directories\":{\"lib\":\"src\"},\"scripts\":{\"build\":\"node-pre-gyp build\",\"electron-build\":\"node-pre-gyp configure build --runtime=electron --disturl=https://atom.io/download/atom-shell\",\"coverage\":\"istanbul cover ./node_modules/.bin/_mocha test\",\"install\":\"node-pre-gyp install --fallback-to-build --library=static_library\",\"prepack\":\"git submodule update --init --recursive && npm install\"},\"dependencies\":{\"@types/bytebuffer\":\"^5.0.40\",\"lodash.camelcase\":\"^4.3.0\",\"lodash.clone\":\"^4.5.0\",\"nan\":\"^2.13.2\",\"node-pre-gyp\":\"^0.15.0\",\"protobufjs\":\"^5.0.3\"},\"devDependencies\":{\"body-parser\":\"^1.15.2\",\"electron-mocha\":\"^3.1.1\",\"express\":\"^4.14.0\",\"google-protobuf\":\"^3.0.0\",\"istanbul\":\"^0.4.4\",\"lodash\":\"^4.17.4\",\"minimist\":\"^1.1.0\",\"node-forge\":\"^0.7.5\",\"poisson-process\":\"^0.2.1\"},\"engines\":{\"node\":\">=4\"},\"binary\":{\"module_name\":\"grpc_node\",\"module_path\":\"src/node/extension_binary/{node_abi}-{platform}-{arch}-{libc}\",\"host\":\"https://node-precompiled-binaries.grpc.io/\",\"remote_path\":\"{name}/v{version}\",\"package_name\":\"{node_abi}-{platform}-{arch}-{libc}.tar.gz\"},\"files\":[\"LICENSE\",\"README.md\",\"deps/grpc/etc/\",\"index.js\",\"index.d.ts\",\"src/*.js\",\"ext/*.{cc,h}\",\"deps/grpc/include/grpc/**/*.h\",\"deps/grpc/src/core/**/*.{c,cc,h}\",\"deps/grpc/src/boringssl/err_data.c\",\"deps/grpc/third_party/abseil-cpp/absl/**/*.{h,hh,inc}\",\"deps/grpc/third_party/boringssl/crypto/**/*.{c,cc,h}\",\"deps/grpc/third_party/boringssl/include/**/*.{c,cc,h}\",\"deps/grpc/third_party/boringssl/ssl/**/*.{c,cc,h}\",\"deps/grpc/third_party/boringssl/third_party/**/*.{c,h}\",\"deps/grpc/third_party/nanopb/*.{c,cc,h}\",\"deps/grpc/third_party/upb/**/*.{c,h,inc}\",\"deps/grpc/third_party/zlib/**/*.{c,cc,h}\",\"deps/grpc/third_party/address_sorting/**/*.{c,h}\",\"deps/grpc/third_party/cares/**/*.{c,h}\",\"binding.gyp\"],\"main\":\"index.js\",\"typings\":\"index.d.ts\",\"license\":\"Apache-2.0\",\"jshintConfig\":{\"bitwise\":true,\"curly\":true,\"eqeqeq\":true,\"esnext\":true,\"freeze\":true,\"immed\":true,\"indent\":2,\"latedef\":\"nofunc\",\"maxlen\":80,\"mocha\":true,\"newcap\":true,\"node\":true,\"noarg\":true,\"quotmark\":\"single\",\"strict\":true,\"trailing\":true,\"undef\":true,\"unused\":\"vars\"}}");
+module.exports = JSON.parse("{\"_args\":[[\"grpc@1.24.3\",\"/home/amnesia/Projects/oss/mainnet-js\"]],\"_from\":\"grpc@1.24.3\",\"_id\":\"grpc@1.24.3\",\"_inBundle\":false,\"_integrity\":\"sha512-EDemzuZTfhM0hgrXqC4PtR76O3t+hTIYJYR5vgiW0yt2WJqo4mhxUqZUirzUQz34Psz7dbLp38C6Cl7Ij2vXRQ==\",\"_location\":\"/grpc\",\"_phantomChildren\":{\"ascli\":\"1.0.1\",\"bytebuffer\":\"5.0.1\",\"code-point-at\":\"1.1.0\",\"decamelize\":\"1.2.0\",\"glob\":\"7.1.6\",\"number-is-nan\":\"1.0.1\",\"os-locale\":\"1.4.0\",\"window-size\":\"0.1.4\"},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"grpc@1.24.3\",\"name\":\"grpc\",\"escapedName\":\"grpc\",\"rawSpec\":\"1.24.3\",\"saveSpec\":null,\"fetchSpec\":\"1.24.3\"},\"_requiredBy\":[\"/grpc-bchrpc-node\"],\"_resolved\":\"https://registry.npmjs.org/grpc/-/grpc-1.24.3.tgz\",\"_spec\":\"1.24.3\",\"_where\":\"/home/amnesia/Projects/oss/mainnet-js\",\"author\":{\"name\":\"Google Inc.\"},\"binary\":{\"module_name\":\"grpc_node\",\"module_path\":\"src/node/extension_binary/{node_abi}-{platform}-{arch}-{libc}\",\"host\":\"https://node-precompiled-binaries.grpc.io/\",\"remote_path\":\"{name}/v{version}\",\"package_name\":\"{node_abi}-{platform}-{arch}-{libc}.tar.gz\"},\"bugs\":{\"url\":\"https://github.com/grpc/grpc-node/issues\"},\"contributors\":[{\"name\":\"Michael Lumish\",\"email\":\"mlumish@google.com\"}],\"dependencies\":{\"@types/bytebuffer\":\"^5.0.40\",\"lodash.camelcase\":\"^4.3.0\",\"lodash.clone\":\"^4.5.0\",\"nan\":\"^2.13.2\",\"node-pre-gyp\":\"^0.15.0\",\"protobufjs\":\"^5.0.3\"},\"description\":\"gRPC Library for Node\",\"devDependencies\":{\"body-parser\":\"^1.15.2\",\"electron-mocha\":\"^3.1.1\",\"express\":\"^4.14.0\",\"google-protobuf\":\"^3.0.0\",\"istanbul\":\"^0.4.4\",\"lodash\":\"^4.17.4\",\"minimist\":\"^1.1.0\",\"node-forge\":\"^0.7.5\",\"poisson-process\":\"^0.2.1\"},\"directories\":{\"lib\":\"src\"},\"engines\":{\"node\":\">=4\"},\"files\":[\"LICENSE\",\"README.md\",\"deps/grpc/etc/\",\"index.js\",\"index.d.ts\",\"src/*.js\",\"ext/*.{cc,h}\",\"deps/grpc/include/grpc/**/*.h\",\"deps/grpc/src/core/**/*.{c,cc,h}\",\"deps/grpc/src/boringssl/err_data.c\",\"deps/grpc/third_party/abseil-cpp/absl/**/*.{h,hh,inc}\",\"deps/grpc/third_party/boringssl/crypto/**/*.{c,cc,h}\",\"deps/grpc/third_party/boringssl/include/**/*.{c,cc,h}\",\"deps/grpc/third_party/boringssl/ssl/**/*.{c,cc,h}\",\"deps/grpc/third_party/boringssl/third_party/**/*.{c,h}\",\"deps/grpc/third_party/nanopb/*.{c,cc,h}\",\"deps/grpc/third_party/upb/**/*.{c,h,inc}\",\"deps/grpc/third_party/zlib/**/*.{c,cc,h}\",\"deps/grpc/third_party/address_sorting/**/*.{c,h}\",\"deps/grpc/third_party/cares/**/*.{c,h}\",\"binding.gyp\"],\"homepage\":\"https://grpc.io/\",\"jshintConfig\":{\"bitwise\":true,\"curly\":true,\"eqeqeq\":true,\"esnext\":true,\"freeze\":true,\"immed\":true,\"indent\":2,\"latedef\":\"nofunc\",\"maxlen\":80,\"mocha\":true,\"newcap\":true,\"node\":true,\"noarg\":true,\"quotmark\":\"single\",\"strict\":true,\"trailing\":true,\"undef\":true,\"unused\":\"vars\"},\"license\":\"Apache-2.0\",\"main\":\"index.js\",\"name\":\"grpc\",\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/grpc/grpc-node.git\"},\"scripts\":{\"build\":\"node-pre-gyp build\",\"coverage\":\"istanbul cover ./node_modules/.bin/_mocha test\",\"electron-build\":\"node-pre-gyp configure build --runtime=electron --disturl=https://atom.io/download/atom-shell\",\"install\":\"node-pre-gyp install --fallback-to-build --library=static_library\",\"prepack\":\"git submodule update --init --recursive && npm install\"},\"typings\":\"index.d.ts\",\"version\":\"1.24.3\"}");
 
 /***/ }),
 
@@ -53853,6 +58285,1681 @@ function regExpEscape (s) {
 
 /***/ }),
 
+/***/ "./node_modules/node-fetch/lib/index.mjs":
+/*!***********************************************!*\
+  !*** ./node_modules/node-fetch/lib/index.mjs ***!
+  \***********************************************/
+/*! namespace exports */
+/*! export FetchError [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export Headers [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export Request [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export Response [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export default [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_require__, __webpack_require__.n, __webpack_exports__, __webpack_require__.r, __webpack_require__.d, __webpack_require__.* */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__,
+/* harmony export */   "Headers": () => /* binding */ Headers,
+/* harmony export */   "Request": () => /* binding */ Request,
+/* harmony export */   "Response": () => /* binding */ Response,
+/* harmony export */   "FetchError": () => /* binding */ FetchError
+/* harmony export */ });
+/* harmony import */ var stream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! stream */ "stream");
+/* harmony import */ var stream__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(stream__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! http */ "http");
+/* harmony import */ var http__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(http__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! url */ "url");
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(url__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var https__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! https */ "https");
+/* harmony import */ var https__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(https__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var zlib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! zlib */ "zlib");
+/* harmony import */ var zlib__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(zlib__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+
+
+// Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
+
+// fix for "Readable" isn't a named export issue
+const Readable = (stream__WEBPACK_IMPORTED_MODULE_0___default().Readable);
+
+const BUFFER = Symbol('buffer');
+const TYPE = Symbol('type');
+
+class Blob {
+	constructor() {
+		this[TYPE] = '';
+
+		const blobParts = arguments[0];
+		const options = arguments[1];
+
+		const buffers = [];
+		let size = 0;
+
+		if (blobParts) {
+			const a = blobParts;
+			const length = Number(a.length);
+			for (let i = 0; i < length; i++) {
+				const element = a[i];
+				let buffer;
+				if (element instanceof Buffer) {
+					buffer = element;
+				} else if (ArrayBuffer.isView(element)) {
+					buffer = Buffer.from(element.buffer, element.byteOffset, element.byteLength);
+				} else if (element instanceof ArrayBuffer) {
+					buffer = Buffer.from(element);
+				} else if (element instanceof Blob) {
+					buffer = element[BUFFER];
+				} else {
+					buffer = Buffer.from(typeof element === 'string' ? element : String(element));
+				}
+				size += buffer.length;
+				buffers.push(buffer);
+			}
+		}
+
+		this[BUFFER] = Buffer.concat(buffers);
+
+		let type = options && options.type !== undefined && String(options.type).toLowerCase();
+		if (type && !/[^\u0020-\u007E]/.test(type)) {
+			this[TYPE] = type;
+		}
+	}
+	get size() {
+		return this[BUFFER].length;
+	}
+	get type() {
+		return this[TYPE];
+	}
+	text() {
+		return Promise.resolve(this[BUFFER].toString());
+	}
+	arrayBuffer() {
+		const buf = this[BUFFER];
+		const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+		return Promise.resolve(ab);
+	}
+	stream() {
+		const readable = new Readable();
+		readable._read = function () {};
+		readable.push(this[BUFFER]);
+		readable.push(null);
+		return readable;
+	}
+	toString() {
+		return '[object Blob]';
+	}
+	slice() {
+		const size = this.size;
+
+		const start = arguments[0];
+		const end = arguments[1];
+		let relativeStart, relativeEnd;
+		if (start === undefined) {
+			relativeStart = 0;
+		} else if (start < 0) {
+			relativeStart = Math.max(size + start, 0);
+		} else {
+			relativeStart = Math.min(start, size);
+		}
+		if (end === undefined) {
+			relativeEnd = size;
+		} else if (end < 0) {
+			relativeEnd = Math.max(size + end, 0);
+		} else {
+			relativeEnd = Math.min(end, size);
+		}
+		const span = Math.max(relativeEnd - relativeStart, 0);
+
+		const buffer = this[BUFFER];
+		const slicedBuffer = buffer.slice(relativeStart, relativeStart + span);
+		const blob = new Blob([], { type: arguments[2] });
+		blob[BUFFER] = slicedBuffer;
+		return blob;
+	}
+}
+
+Object.defineProperties(Blob.prototype, {
+	size: { enumerable: true },
+	type: { enumerable: true },
+	slice: { enumerable: true }
+});
+
+Object.defineProperty(Blob.prototype, Symbol.toStringTag, {
+	value: 'Blob',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+/**
+ * fetch-error.js
+ *
+ * FetchError interface for operational errors
+ */
+
+/**
+ * Create FetchError instance
+ *
+ * @param   String      message      Error message for human
+ * @param   String      type         Error type for machine
+ * @param   String      systemError  For Node.js system error
+ * @return  FetchError
+ */
+function FetchError(message, type, systemError) {
+  Error.call(this, message);
+
+  this.message = message;
+  this.type = type;
+
+  // when err.type is `system`, err.code contains system error code
+  if (systemError) {
+    this.code = this.errno = systemError.code;
+  }
+
+  // hide custom error implementation details from end-users
+  Error.captureStackTrace(this, this.constructor);
+}
+
+FetchError.prototype = Object.create(Error.prototype);
+FetchError.prototype.constructor = FetchError;
+FetchError.prototype.name = 'FetchError';
+
+let convert;
+try {
+	convert = Object(function webpackMissingModule() { var e = new Error("Cannot find module 'encoding'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()).convert;
+} catch (e) {}
+
+const INTERNALS = Symbol('Body internals');
+
+// fix an issue where "PassThrough" isn't a named export for node <10
+const PassThrough = (stream__WEBPACK_IMPORTED_MODULE_0___default().PassThrough);
+
+/**
+ * Body mixin
+ *
+ * Ref: https://fetch.spec.whatwg.org/#body
+ *
+ * @param   Stream  body  Readable stream
+ * @param   Object  opts  Response options
+ * @return  Void
+ */
+function Body(body) {
+	var _this = this;
+
+	var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+	    _ref$size = _ref.size;
+
+	let size = _ref$size === undefined ? 0 : _ref$size;
+	var _ref$timeout = _ref.timeout;
+	let timeout = _ref$timeout === undefined ? 0 : _ref$timeout;
+
+	if (body == null) {
+		// body is undefined or null
+		body = null;
+	} else if (isURLSearchParams(body)) {
+		// body is a URLSearchParams
+		body = Buffer.from(body.toString());
+	} else if (isBlob(body)) ; else if (Buffer.isBuffer(body)) ; else if (Object.prototype.toString.call(body) === '[object ArrayBuffer]') {
+		// body is ArrayBuffer
+		body = Buffer.from(body);
+	} else if (ArrayBuffer.isView(body)) {
+		// body is ArrayBufferView
+		body = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
+	} else if (body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default())) ; else {
+		// none of the above
+		// coerce to string then buffer
+		body = Buffer.from(String(body));
+	}
+	this[INTERNALS] = {
+		body,
+		disturbed: false,
+		error: null
+	};
+	this.size = size;
+	this.timeout = timeout;
+
+	if (body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default())) {
+		body.on('error', function (err) {
+			const error = err.name === 'AbortError' ? err : new FetchError(`Invalid response body while trying to fetch ${_this.url}: ${err.message}`, 'system', err);
+			_this[INTERNALS].error = error;
+		});
+	}
+}
+
+Body.prototype = {
+	get body() {
+		return this[INTERNALS].body;
+	},
+
+	get bodyUsed() {
+		return this[INTERNALS].disturbed;
+	},
+
+	/**
+  * Decode response as ArrayBuffer
+  *
+  * @return  Promise
+  */
+	arrayBuffer() {
+		return consumeBody.call(this).then(function (buf) {
+			return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+		});
+	},
+
+	/**
+  * Return raw response as Blob
+  *
+  * @return Promise
+  */
+	blob() {
+		let ct = this.headers && this.headers.get('content-type') || '';
+		return consumeBody.call(this).then(function (buf) {
+			return Object.assign(
+			// Prevent copying
+			new Blob([], {
+				type: ct.toLowerCase()
+			}), {
+				[BUFFER]: buf
+			});
+		});
+	},
+
+	/**
+  * Decode response as json
+  *
+  * @return  Promise
+  */
+	json() {
+		var _this2 = this;
+
+		return consumeBody.call(this).then(function (buffer) {
+			try {
+				return JSON.parse(buffer.toString());
+			} catch (err) {
+				return Body.Promise.reject(new FetchError(`invalid json response body at ${_this2.url} reason: ${err.message}`, 'invalid-json'));
+			}
+		});
+	},
+
+	/**
+  * Decode response as text
+  *
+  * @return  Promise
+  */
+	text() {
+		return consumeBody.call(this).then(function (buffer) {
+			return buffer.toString();
+		});
+	},
+
+	/**
+  * Decode response as buffer (non-spec api)
+  *
+  * @return  Promise
+  */
+	buffer() {
+		return consumeBody.call(this);
+	},
+
+	/**
+  * Decode response as text, while automatically detecting the encoding and
+  * trying to decode to UTF-8 (non-spec api)
+  *
+  * @return  Promise
+  */
+	textConverted() {
+		var _this3 = this;
+
+		return consumeBody.call(this).then(function (buffer) {
+			return convertBody(buffer, _this3.headers);
+		});
+	}
+};
+
+// In browsers, all properties are enumerable.
+Object.defineProperties(Body.prototype, {
+	body: { enumerable: true },
+	bodyUsed: { enumerable: true },
+	arrayBuffer: { enumerable: true },
+	blob: { enumerable: true },
+	json: { enumerable: true },
+	text: { enumerable: true }
+});
+
+Body.mixIn = function (proto) {
+	for (const name of Object.getOwnPropertyNames(Body.prototype)) {
+		// istanbul ignore else: future proof
+		if (!(name in proto)) {
+			const desc = Object.getOwnPropertyDescriptor(Body.prototype, name);
+			Object.defineProperty(proto, name, desc);
+		}
+	}
+};
+
+/**
+ * Consume and convert an entire Body to a Buffer.
+ *
+ * Ref: https://fetch.spec.whatwg.org/#concept-body-consume-body
+ *
+ * @return  Promise
+ */
+function consumeBody() {
+	var _this4 = this;
+
+	if (this[INTERNALS].disturbed) {
+		return Body.Promise.reject(new TypeError(`body used already for: ${this.url}`));
+	}
+
+	this[INTERNALS].disturbed = true;
+
+	if (this[INTERNALS].error) {
+		return Body.Promise.reject(this[INTERNALS].error);
+	}
+
+	let body = this.body;
+
+	// body is null
+	if (body === null) {
+		return Body.Promise.resolve(Buffer.alloc(0));
+	}
+
+	// body is blob
+	if (isBlob(body)) {
+		body = body.stream();
+	}
+
+	// body is buffer
+	if (Buffer.isBuffer(body)) {
+		return Body.Promise.resolve(body);
+	}
+
+	// istanbul ignore if: should never happen
+	if (!(body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default()))) {
+		return Body.Promise.resolve(Buffer.alloc(0));
+	}
+
+	// body is stream
+	// get ready to actually consume the body
+	let accum = [];
+	let accumBytes = 0;
+	let abort = false;
+
+	return new Body.Promise(function (resolve, reject) {
+		let resTimeout;
+
+		// allow timeout on slow response body
+		if (_this4.timeout) {
+			resTimeout = setTimeout(function () {
+				abort = true;
+				reject(new FetchError(`Response timeout while trying to fetch ${_this4.url} (over ${_this4.timeout}ms)`, 'body-timeout'));
+			}, _this4.timeout);
+		}
+
+		// handle stream errors
+		body.on('error', function (err) {
+			if (err.name === 'AbortError') {
+				// if the request was aborted, reject with this Error
+				abort = true;
+				reject(err);
+			} else {
+				// other errors, such as incorrect content-encoding
+				reject(new FetchError(`Invalid response body while trying to fetch ${_this4.url}: ${err.message}`, 'system', err));
+			}
+		});
+
+		body.on('data', function (chunk) {
+			if (abort || chunk === null) {
+				return;
+			}
+
+			if (_this4.size && accumBytes + chunk.length > _this4.size) {
+				abort = true;
+				reject(new FetchError(`content size at ${_this4.url} over limit: ${_this4.size}`, 'max-size'));
+				return;
+			}
+
+			accumBytes += chunk.length;
+			accum.push(chunk);
+		});
+
+		body.on('end', function () {
+			if (abort) {
+				return;
+			}
+
+			clearTimeout(resTimeout);
+
+			try {
+				resolve(Buffer.concat(accum, accumBytes));
+			} catch (err) {
+				// handle streams that have accumulated too much data (issue #414)
+				reject(new FetchError(`Could not create Buffer from response body for ${_this4.url}: ${err.message}`, 'system', err));
+			}
+		});
+	});
+}
+
+/**
+ * Detect buffer encoding and convert to target encoding
+ * ref: http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
+ *
+ * @param   Buffer  buffer    Incoming buffer
+ * @param   String  encoding  Target encoding
+ * @return  String
+ */
+function convertBody(buffer, headers) {
+	if (typeof convert !== 'function') {
+		throw new Error('The package `encoding` must be installed to use the textConverted() function');
+	}
+
+	const ct = headers.get('content-type');
+	let charset = 'utf-8';
+	let res, str;
+
+	// header
+	if (ct) {
+		res = /charset=([^;]*)/i.exec(ct);
+	}
+
+	// no charset in content type, peek at response body for at most 1024 bytes
+	str = buffer.slice(0, 1024).toString();
+
+	// html5
+	if (!res && str) {
+		res = /<meta.+?charset=(['"])(.+?)\1/i.exec(str);
+	}
+
+	// html4
+	if (!res && str) {
+		res = /<meta[\s]+?http-equiv=(['"])content-type\1[\s]+?content=(['"])(.+?)\2/i.exec(str);
+		if (!res) {
+			res = /<meta[\s]+?content=(['"])(.+?)\1[\s]+?http-equiv=(['"])content-type\3/i.exec(str);
+			if (res) {
+				res.pop(); // drop last quote
+			}
+		}
+
+		if (res) {
+			res = /charset=(.*)/i.exec(res.pop());
+		}
+	}
+
+	// xml
+	if (!res && str) {
+		res = /<\?xml.+?encoding=(['"])(.+?)\1/i.exec(str);
+	}
+
+	// found charset
+	if (res) {
+		charset = res.pop();
+
+		// prevent decode issues when sites use incorrect encoding
+		// ref: https://hsivonen.fi/encoding-menu/
+		if (charset === 'gb2312' || charset === 'gbk') {
+			charset = 'gb18030';
+		}
+	}
+
+	// turn raw buffers into a single utf-8 buffer
+	return convert(buffer, 'UTF-8', charset).toString();
+}
+
+/**
+ * Detect a URLSearchParams object
+ * ref: https://github.com/bitinn/node-fetch/issues/296#issuecomment-307598143
+ *
+ * @param   Object  obj     Object to detect by type or brand
+ * @return  String
+ */
+function isURLSearchParams(obj) {
+	// Duck-typing as a necessary condition.
+	if (typeof obj !== 'object' || typeof obj.append !== 'function' || typeof obj.delete !== 'function' || typeof obj.get !== 'function' || typeof obj.getAll !== 'function' || typeof obj.has !== 'function' || typeof obj.set !== 'function') {
+		return false;
+	}
+
+	// Brand-checking and more duck-typing as optional condition.
+	return obj.constructor.name === 'URLSearchParams' || Object.prototype.toString.call(obj) === '[object URLSearchParams]' || typeof obj.sort === 'function';
+}
+
+/**
+ * Check if `obj` is a W3C `Blob` object (which `File` inherits from)
+ * @param  {*} obj
+ * @return {boolean}
+ */
+function isBlob(obj) {
+	return typeof obj === 'object' && typeof obj.arrayBuffer === 'function' && typeof obj.type === 'string' && typeof obj.stream === 'function' && typeof obj.constructor === 'function' && typeof obj.constructor.name === 'string' && /^(Blob|File)$/.test(obj.constructor.name) && /^(Blob|File)$/.test(obj[Symbol.toStringTag]);
+}
+
+/**
+ * Clone body given Res/Req instance
+ *
+ * @param   Mixed  instance  Response or Request instance
+ * @return  Mixed
+ */
+function clone(instance) {
+	let p1, p2;
+	let body = instance.body;
+
+	// don't allow cloning a used body
+	if (instance.bodyUsed) {
+		throw new Error('cannot clone body after it is used');
+	}
+
+	// check that body is a stream and not form-data object
+	// note: we can't clone the form-data object without having it as a dependency
+	if (body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default()) && typeof body.getBoundary !== 'function') {
+		// tee instance body
+		p1 = new PassThrough();
+		p2 = new PassThrough();
+		body.pipe(p1);
+		body.pipe(p2);
+		// set instance body to teed body and return the other teed body
+		instance[INTERNALS].body = p1;
+		body = p2;
+	}
+
+	return body;
+}
+
+/**
+ * Performs the operation "extract a `Content-Type` value from |object|" as
+ * specified in the specification:
+ * https://fetch.spec.whatwg.org/#concept-bodyinit-extract
+ *
+ * This function assumes that instance.body is present.
+ *
+ * @param   Mixed  instance  Any options.body input
+ */
+function extractContentType(body) {
+	if (body === null) {
+		// body is null
+		return null;
+	} else if (typeof body === 'string') {
+		// body is string
+		return 'text/plain;charset=UTF-8';
+	} else if (isURLSearchParams(body)) {
+		// body is a URLSearchParams
+		return 'application/x-www-form-urlencoded;charset=UTF-8';
+	} else if (isBlob(body)) {
+		// body is blob
+		return body.type || null;
+	} else if (Buffer.isBuffer(body)) {
+		// body is buffer
+		return null;
+	} else if (Object.prototype.toString.call(body) === '[object ArrayBuffer]') {
+		// body is ArrayBuffer
+		return null;
+	} else if (ArrayBuffer.isView(body)) {
+		// body is ArrayBufferView
+		return null;
+	} else if (typeof body.getBoundary === 'function') {
+		// detect form data input from form-data module
+		return `multipart/form-data;boundary=${body.getBoundary()}`;
+	} else if (body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default())) {
+		// body is stream
+		// can't really do much about this
+		return null;
+	} else {
+		// Body constructor defaults other things to string
+		return 'text/plain;charset=UTF-8';
+	}
+}
+
+/**
+ * The Fetch Standard treats this as if "total bytes" is a property on the body.
+ * For us, we have to explicitly get it with a function.
+ *
+ * ref: https://fetch.spec.whatwg.org/#concept-body-total-bytes
+ *
+ * @param   Body    instance   Instance of Body
+ * @return  Number?            Number of bytes, or null if not possible
+ */
+function getTotalBytes(instance) {
+	const body = instance.body;
+
+
+	if (body === null) {
+		// body is null
+		return 0;
+	} else if (isBlob(body)) {
+		return body.size;
+	} else if (Buffer.isBuffer(body)) {
+		// body is buffer
+		return body.length;
+	} else if (body && typeof body.getLengthSync === 'function') {
+		// detect form data input from form-data module
+		if (body._lengthRetrievers && body._lengthRetrievers.length == 0 || // 1.x
+		body.hasKnownLength && body.hasKnownLength()) {
+			// 2.x
+			return body.getLengthSync();
+		}
+		return null;
+	} else {
+		// body is stream
+		return null;
+	}
+}
+
+/**
+ * Write a Body to a Node.js WritableStream (e.g. http.Request) object.
+ *
+ * @param   Body    instance   Instance of Body
+ * @return  Void
+ */
+function writeToStream(dest, instance) {
+	const body = instance.body;
+
+
+	if (body === null) {
+		// body is null
+		dest.end();
+	} else if (isBlob(body)) {
+		body.stream().pipe(dest);
+	} else if (Buffer.isBuffer(body)) {
+		// body is buffer
+		dest.write(body);
+		dest.end();
+	} else {
+		// body is stream
+		body.pipe(dest);
+	}
+}
+
+// expose Promise
+Body.Promise = global.Promise;
+
+/**
+ * headers.js
+ *
+ * Headers class offers convenient helpers
+ */
+
+const invalidTokenRegex = /[^\^_`a-zA-Z\-0-9!#$%&'*+.|~]/;
+const invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
+
+function validateName(name) {
+	name = `${name}`;
+	if (invalidTokenRegex.test(name) || name === '') {
+		throw new TypeError(`${name} is not a legal HTTP header name`);
+	}
+}
+
+function validateValue(value) {
+	value = `${value}`;
+	if (invalidHeaderCharRegex.test(value)) {
+		throw new TypeError(`${value} is not a legal HTTP header value`);
+	}
+}
+
+/**
+ * Find the key in the map object given a header name.
+ *
+ * Returns undefined if not found.
+ *
+ * @param   String  name  Header name
+ * @return  String|Undefined
+ */
+function find(map, name) {
+	name = name.toLowerCase();
+	for (const key in map) {
+		if (key.toLowerCase() === name) {
+			return key;
+		}
+	}
+	return undefined;
+}
+
+const MAP = Symbol('map');
+class Headers {
+	/**
+  * Headers class
+  *
+  * @param   Object  headers  Response headers
+  * @return  Void
+  */
+	constructor() {
+		let init = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
+
+		this[MAP] = Object.create(null);
+
+		if (init instanceof Headers) {
+			const rawHeaders = init.raw();
+			const headerNames = Object.keys(rawHeaders);
+
+			for (const headerName of headerNames) {
+				for (const value of rawHeaders[headerName]) {
+					this.append(headerName, value);
+				}
+			}
+
+			return;
+		}
+
+		// We don't worry about converting prop to ByteString here as append()
+		// will handle it.
+		if (init == null) ; else if (typeof init === 'object') {
+			const method = init[Symbol.iterator];
+			if (method != null) {
+				if (typeof method !== 'function') {
+					throw new TypeError('Header pairs must be iterable');
+				}
+
+				// sequence<sequence<ByteString>>
+				// Note: per spec we have to first exhaust the lists then process them
+				const pairs = [];
+				for (const pair of init) {
+					if (typeof pair !== 'object' || typeof pair[Symbol.iterator] !== 'function') {
+						throw new TypeError('Each header pair must be iterable');
+					}
+					pairs.push(Array.from(pair));
+				}
+
+				for (const pair of pairs) {
+					if (pair.length !== 2) {
+						throw new TypeError('Each header pair must be a name/value tuple');
+					}
+					this.append(pair[0], pair[1]);
+				}
+			} else {
+				// record<ByteString, ByteString>
+				for (const key of Object.keys(init)) {
+					const value = init[key];
+					this.append(key, value);
+				}
+			}
+		} else {
+			throw new TypeError('Provided initializer must be an object');
+		}
+	}
+
+	/**
+  * Return combined header value given name
+  *
+  * @param   String  name  Header name
+  * @return  Mixed
+  */
+	get(name) {
+		name = `${name}`;
+		validateName(name);
+		const key = find(this[MAP], name);
+		if (key === undefined) {
+			return null;
+		}
+
+		return this[MAP][key].join(', ');
+	}
+
+	/**
+  * Iterate over all headers
+  *
+  * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
+  * @param   Boolean   thisArg   `this` context for callback function
+  * @return  Void
+  */
+	forEach(callback) {
+		let thisArg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+
+		let pairs = getHeaders(this);
+		let i = 0;
+		while (i < pairs.length) {
+			var _pairs$i = pairs[i];
+			const name = _pairs$i[0],
+			      value = _pairs$i[1];
+
+			callback.call(thisArg, value, name, this);
+			pairs = getHeaders(this);
+			i++;
+		}
+	}
+
+	/**
+  * Overwrite header values given name
+  *
+  * @param   String  name   Header name
+  * @param   String  value  Header value
+  * @return  Void
+  */
+	set(name, value) {
+		name = `${name}`;
+		value = `${value}`;
+		validateName(name);
+		validateValue(value);
+		const key = find(this[MAP], name);
+		this[MAP][key !== undefined ? key : name] = [value];
+	}
+
+	/**
+  * Append a value onto existing header
+  *
+  * @param   String  name   Header name
+  * @param   String  value  Header value
+  * @return  Void
+  */
+	append(name, value) {
+		name = `${name}`;
+		value = `${value}`;
+		validateName(name);
+		validateValue(value);
+		const key = find(this[MAP], name);
+		if (key !== undefined) {
+			this[MAP][key].push(value);
+		} else {
+			this[MAP][name] = [value];
+		}
+	}
+
+	/**
+  * Check for header name existence
+  *
+  * @param   String   name  Header name
+  * @return  Boolean
+  */
+	has(name) {
+		name = `${name}`;
+		validateName(name);
+		return find(this[MAP], name) !== undefined;
+	}
+
+	/**
+  * Delete all header values given name
+  *
+  * @param   String  name  Header name
+  * @return  Void
+  */
+	delete(name) {
+		name = `${name}`;
+		validateName(name);
+		const key = find(this[MAP], name);
+		if (key !== undefined) {
+			delete this[MAP][key];
+		}
+	}
+
+	/**
+  * Return raw headers (non-spec api)
+  *
+  * @return  Object
+  */
+	raw() {
+		return this[MAP];
+	}
+
+	/**
+  * Get an iterator on keys.
+  *
+  * @return  Iterator
+  */
+	keys() {
+		return createHeadersIterator(this, 'key');
+	}
+
+	/**
+  * Get an iterator on values.
+  *
+  * @return  Iterator
+  */
+	values() {
+		return createHeadersIterator(this, 'value');
+	}
+
+	/**
+  * Get an iterator on entries.
+  *
+  * This is the default iterator of the Headers object.
+  *
+  * @return  Iterator
+  */
+	[Symbol.iterator]() {
+		return createHeadersIterator(this, 'key+value');
+	}
+}
+Headers.prototype.entries = Headers.prototype[Symbol.iterator];
+
+Object.defineProperty(Headers.prototype, Symbol.toStringTag, {
+	value: 'Headers',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+Object.defineProperties(Headers.prototype, {
+	get: { enumerable: true },
+	forEach: { enumerable: true },
+	set: { enumerable: true },
+	append: { enumerable: true },
+	has: { enumerable: true },
+	delete: { enumerable: true },
+	keys: { enumerable: true },
+	values: { enumerable: true },
+	entries: { enumerable: true }
+});
+
+function getHeaders(headers) {
+	let kind = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'key+value';
+
+	const keys = Object.keys(headers[MAP]).sort();
+	return keys.map(kind === 'key' ? function (k) {
+		return k.toLowerCase();
+	} : kind === 'value' ? function (k) {
+		return headers[MAP][k].join(', ');
+	} : function (k) {
+		return [k.toLowerCase(), headers[MAP][k].join(', ')];
+	});
+}
+
+const INTERNAL = Symbol('internal');
+
+function createHeadersIterator(target, kind) {
+	const iterator = Object.create(HeadersIteratorPrototype);
+	iterator[INTERNAL] = {
+		target,
+		kind,
+		index: 0
+	};
+	return iterator;
+}
+
+const HeadersIteratorPrototype = Object.setPrototypeOf({
+	next() {
+		// istanbul ignore if
+		if (!this || Object.getPrototypeOf(this) !== HeadersIteratorPrototype) {
+			throw new TypeError('Value of `this` is not a HeadersIterator');
+		}
+
+		var _INTERNAL = this[INTERNAL];
+		const target = _INTERNAL.target,
+		      kind = _INTERNAL.kind,
+		      index = _INTERNAL.index;
+
+		const values = getHeaders(target, kind);
+		const len = values.length;
+		if (index >= len) {
+			return {
+				value: undefined,
+				done: true
+			};
+		}
+
+		this[INTERNAL].index = index + 1;
+
+		return {
+			value: values[index],
+			done: false
+		};
+	}
+}, Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]())));
+
+Object.defineProperty(HeadersIteratorPrototype, Symbol.toStringTag, {
+	value: 'HeadersIterator',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+/**
+ * Export the Headers object in a form that Node.js can consume.
+ *
+ * @param   Headers  headers
+ * @return  Object
+ */
+function exportNodeCompatibleHeaders(headers) {
+	const obj = Object.assign({ __proto__: null }, headers[MAP]);
+
+	// http.request() only supports string as Host header. This hack makes
+	// specifying custom Host header possible.
+	const hostHeaderKey = find(headers[MAP], 'Host');
+	if (hostHeaderKey !== undefined) {
+		obj[hostHeaderKey] = obj[hostHeaderKey][0];
+	}
+
+	return obj;
+}
+
+/**
+ * Create a Headers object from an object of headers, ignoring those that do
+ * not conform to HTTP grammar productions.
+ *
+ * @param   Object  obj  Object of headers
+ * @return  Headers
+ */
+function createHeadersLenient(obj) {
+	const headers = new Headers();
+	for (const name of Object.keys(obj)) {
+		if (invalidTokenRegex.test(name)) {
+			continue;
+		}
+		if (Array.isArray(obj[name])) {
+			for (const val of obj[name]) {
+				if (invalidHeaderCharRegex.test(val)) {
+					continue;
+				}
+				if (headers[MAP][name] === undefined) {
+					headers[MAP][name] = [val];
+				} else {
+					headers[MAP][name].push(val);
+				}
+			}
+		} else if (!invalidHeaderCharRegex.test(obj[name])) {
+			headers[MAP][name] = [obj[name]];
+		}
+	}
+	return headers;
+}
+
+const INTERNALS$1 = Symbol('Response internals');
+
+// fix an issue where "STATUS_CODES" aren't a named export for node <10
+const STATUS_CODES = (http__WEBPACK_IMPORTED_MODULE_1___default().STATUS_CODES);
+
+/**
+ * Response class
+ *
+ * @param   Stream  body  Readable stream
+ * @param   Object  opts  Response options
+ * @return  Void
+ */
+class Response {
+	constructor() {
+		let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+		let opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+		Body.call(this, body, opts);
+
+		const status = opts.status || 200;
+		const headers = new Headers(opts.headers);
+
+		if (body != null && !headers.has('Content-Type')) {
+			const contentType = extractContentType(body);
+			if (contentType) {
+				headers.append('Content-Type', contentType);
+			}
+		}
+
+		this[INTERNALS$1] = {
+			url: opts.url,
+			status,
+			statusText: opts.statusText || STATUS_CODES[status],
+			headers,
+			counter: opts.counter
+		};
+	}
+
+	get url() {
+		return this[INTERNALS$1].url || '';
+	}
+
+	get status() {
+		return this[INTERNALS$1].status;
+	}
+
+	/**
+  * Convenience property representing if the request ended normally
+  */
+	get ok() {
+		return this[INTERNALS$1].status >= 200 && this[INTERNALS$1].status < 300;
+	}
+
+	get redirected() {
+		return this[INTERNALS$1].counter > 0;
+	}
+
+	get statusText() {
+		return this[INTERNALS$1].statusText;
+	}
+
+	get headers() {
+		return this[INTERNALS$1].headers;
+	}
+
+	/**
+  * Clone this response
+  *
+  * @return  Response
+  */
+	clone() {
+		return new Response(clone(this), {
+			url: this.url,
+			status: this.status,
+			statusText: this.statusText,
+			headers: this.headers,
+			ok: this.ok,
+			redirected: this.redirected
+		});
+	}
+}
+
+Body.mixIn(Response.prototype);
+
+Object.defineProperties(Response.prototype, {
+	url: { enumerable: true },
+	status: { enumerable: true },
+	ok: { enumerable: true },
+	redirected: { enumerable: true },
+	statusText: { enumerable: true },
+	headers: { enumerable: true },
+	clone: { enumerable: true }
+});
+
+Object.defineProperty(Response.prototype, Symbol.toStringTag, {
+	value: 'Response',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+const INTERNALS$2 = Symbol('Request internals');
+
+// fix an issue where "format", "parse" aren't a named export for node <10
+const parse_url = (url__WEBPACK_IMPORTED_MODULE_2___default().parse);
+const format_url = (url__WEBPACK_IMPORTED_MODULE_2___default().format);
+
+const streamDestructionSupported = 'destroy' in (stream__WEBPACK_IMPORTED_MODULE_0___default().Readable.prototype);
+
+/**
+ * Check if a value is an instance of Request.
+ *
+ * @param   Mixed   input
+ * @return  Boolean
+ */
+function isRequest(input) {
+	return typeof input === 'object' && typeof input[INTERNALS$2] === 'object';
+}
+
+function isAbortSignal(signal) {
+	const proto = signal && typeof signal === 'object' && Object.getPrototypeOf(signal);
+	return !!(proto && proto.constructor.name === 'AbortSignal');
+}
+
+/**
+ * Request class
+ *
+ * @param   Mixed   input  Url or Request instance
+ * @param   Object  init   Custom options
+ * @return  Void
+ */
+class Request {
+	constructor(input) {
+		let init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+		let parsedURL;
+
+		// normalize input
+		if (!isRequest(input)) {
+			if (input && input.href) {
+				// in order to support Node.js' Url objects; though WHATWG's URL objects
+				// will fall into this branch also (since their `toString()` will return
+				// `href` property anyway)
+				parsedURL = parse_url(input.href);
+			} else {
+				// coerce input to a string before attempting to parse
+				parsedURL = parse_url(`${input}`);
+			}
+			input = {};
+		} else {
+			parsedURL = parse_url(input.url);
+		}
+
+		let method = init.method || input.method || 'GET';
+		method = method.toUpperCase();
+
+		if ((init.body != null || isRequest(input) && input.body !== null) && (method === 'GET' || method === 'HEAD')) {
+			throw new TypeError('Request with GET/HEAD method cannot have body');
+		}
+
+		let inputBody = init.body != null ? init.body : isRequest(input) && input.body !== null ? clone(input) : null;
+
+		Body.call(this, inputBody, {
+			timeout: init.timeout || input.timeout || 0,
+			size: init.size || input.size || 0
+		});
+
+		const headers = new Headers(init.headers || input.headers || {});
+
+		if (inputBody != null && !headers.has('Content-Type')) {
+			const contentType = extractContentType(inputBody);
+			if (contentType) {
+				headers.append('Content-Type', contentType);
+			}
+		}
+
+		let signal = isRequest(input) ? input.signal : null;
+		if ('signal' in init) signal = init.signal;
+
+		if (signal != null && !isAbortSignal(signal)) {
+			throw new TypeError('Expected signal to be an instanceof AbortSignal');
+		}
+
+		this[INTERNALS$2] = {
+			method,
+			redirect: init.redirect || input.redirect || 'follow',
+			headers,
+			parsedURL,
+			signal
+		};
+
+		// node-fetch-only options
+		this.follow = init.follow !== undefined ? init.follow : input.follow !== undefined ? input.follow : 20;
+		this.compress = init.compress !== undefined ? init.compress : input.compress !== undefined ? input.compress : true;
+		this.counter = init.counter || input.counter || 0;
+		this.agent = init.agent || input.agent;
+	}
+
+	get method() {
+		return this[INTERNALS$2].method;
+	}
+
+	get url() {
+		return format_url(this[INTERNALS$2].parsedURL);
+	}
+
+	get headers() {
+		return this[INTERNALS$2].headers;
+	}
+
+	get redirect() {
+		return this[INTERNALS$2].redirect;
+	}
+
+	get signal() {
+		return this[INTERNALS$2].signal;
+	}
+
+	/**
+  * Clone this request
+  *
+  * @return  Request
+  */
+	clone() {
+		return new Request(this);
+	}
+}
+
+Body.mixIn(Request.prototype);
+
+Object.defineProperty(Request.prototype, Symbol.toStringTag, {
+	value: 'Request',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+Object.defineProperties(Request.prototype, {
+	method: { enumerable: true },
+	url: { enumerable: true },
+	headers: { enumerable: true },
+	redirect: { enumerable: true },
+	clone: { enumerable: true },
+	signal: { enumerable: true }
+});
+
+/**
+ * Convert a Request to Node.js http request options.
+ *
+ * @param   Request  A Request instance
+ * @return  Object   The options object to be passed to http.request
+ */
+function getNodeRequestOptions(request) {
+	const parsedURL = request[INTERNALS$2].parsedURL;
+	const headers = new Headers(request[INTERNALS$2].headers);
+
+	// fetch step 1.3
+	if (!headers.has('Accept')) {
+		headers.set('Accept', '*/*');
+	}
+
+	// Basic fetch
+	if (!parsedURL.protocol || !parsedURL.hostname) {
+		throw new TypeError('Only absolute URLs are supported');
+	}
+
+	if (!/^https?:$/.test(parsedURL.protocol)) {
+		throw new TypeError('Only HTTP(S) protocols are supported');
+	}
+
+	if (request.signal && request.body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default().Readable) && !streamDestructionSupported) {
+		throw new Error('Cancellation of streamed requests with AbortSignal is not supported in node < 8');
+	}
+
+	// HTTP-network-or-cache fetch steps 2.4-2.7
+	let contentLengthValue = null;
+	if (request.body == null && /^(POST|PUT)$/i.test(request.method)) {
+		contentLengthValue = '0';
+	}
+	if (request.body != null) {
+		const totalBytes = getTotalBytes(request);
+		if (typeof totalBytes === 'number') {
+			contentLengthValue = String(totalBytes);
+		}
+	}
+	if (contentLengthValue) {
+		headers.set('Content-Length', contentLengthValue);
+	}
+
+	// HTTP-network-or-cache fetch step 2.11
+	if (!headers.has('User-Agent')) {
+		headers.set('User-Agent', 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)');
+	}
+
+	// HTTP-network-or-cache fetch step 2.15
+	if (request.compress && !headers.has('Accept-Encoding')) {
+		headers.set('Accept-Encoding', 'gzip,deflate');
+	}
+
+	let agent = request.agent;
+	if (typeof agent === 'function') {
+		agent = agent(parsedURL);
+	}
+
+	if (!headers.has('Connection') && !agent) {
+		headers.set('Connection', 'close');
+	}
+
+	// HTTP-network fetch step 4.2
+	// chunked encoding is handled by Node.js
+
+	return Object.assign({}, parsedURL, {
+		method: request.method,
+		headers: exportNodeCompatibleHeaders(headers),
+		agent
+	});
+}
+
+/**
+ * abort-error.js
+ *
+ * AbortError interface for cancelled requests
+ */
+
+/**
+ * Create AbortError instance
+ *
+ * @param   String      message      Error message for human
+ * @return  AbortError
+ */
+function AbortError(message) {
+  Error.call(this, message);
+
+  this.type = 'aborted';
+  this.message = message;
+
+  // hide custom error implementation details from end-users
+  Error.captureStackTrace(this, this.constructor);
+}
+
+AbortError.prototype = Object.create(Error.prototype);
+AbortError.prototype.constructor = AbortError;
+AbortError.prototype.name = 'AbortError';
+
+// fix an issue where "PassThrough", "resolve" aren't a named export for node <10
+const PassThrough$1 = (stream__WEBPACK_IMPORTED_MODULE_0___default().PassThrough);
+const resolve_url = (url__WEBPACK_IMPORTED_MODULE_2___default().resolve);
+
+/**
+ * Fetch function
+ *
+ * @param   Mixed    url   Absolute url or Request instance
+ * @param   Object   opts  Fetch options
+ * @return  Promise
+ */
+function fetch(url, opts) {
+
+	// allow custom promise
+	if (!fetch.Promise) {
+		throw new Error('native promise missing, set fetch.Promise to your favorite alternative');
+	}
+
+	Body.Promise = fetch.Promise;
+
+	// wrap http.request into fetch
+	return new fetch.Promise(function (resolve, reject) {
+		// build request object
+		const request = new Request(url, opts);
+		const options = getNodeRequestOptions(request);
+
+		const send = (options.protocol === 'https:' ? (https__WEBPACK_IMPORTED_MODULE_3___default()) : (http__WEBPACK_IMPORTED_MODULE_1___default())).request;
+		const signal = request.signal;
+
+		let response = null;
+
+		const abort = function abort() {
+			let error = new AbortError('The user aborted a request.');
+			reject(error);
+			if (request.body && request.body instanceof (stream__WEBPACK_IMPORTED_MODULE_0___default().Readable)) {
+				request.body.destroy(error);
+			}
+			if (!response || !response.body) return;
+			response.body.emit('error', error);
+		};
+
+		if (signal && signal.aborted) {
+			abort();
+			return;
+		}
+
+		const abortAndFinalize = function abortAndFinalize() {
+			abort();
+			finalize();
+		};
+
+		// send request
+		const req = send(options);
+		let reqTimeout;
+
+		if (signal) {
+			signal.addEventListener('abort', abortAndFinalize);
+		}
+
+		function finalize() {
+			req.abort();
+			if (signal) signal.removeEventListener('abort', abortAndFinalize);
+			clearTimeout(reqTimeout);
+		}
+
+		if (request.timeout) {
+			req.once('socket', function (socket) {
+				reqTimeout = setTimeout(function () {
+					reject(new FetchError(`network timeout at: ${request.url}`, 'request-timeout'));
+					finalize();
+				}, request.timeout);
+			});
+		}
+
+		req.on('error', function (err) {
+			reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, 'system', err));
+			finalize();
+		});
+
+		req.on('response', function (res) {
+			clearTimeout(reqTimeout);
+
+			const headers = createHeadersLenient(res.headers);
+
+			// HTTP fetch step 5
+			if (fetch.isRedirect(res.statusCode)) {
+				// HTTP fetch step 5.2
+				const location = headers.get('Location');
+
+				// HTTP fetch step 5.3
+				const locationURL = location === null ? null : resolve_url(request.url, location);
+
+				// HTTP fetch step 5.5
+				switch (request.redirect) {
+					case 'error':
+						reject(new FetchError(`uri requested responds with a redirect, redirect mode is set to error: ${request.url}`, 'no-redirect'));
+						finalize();
+						return;
+					case 'manual':
+						// node-fetch-specific step: make manual redirect a bit easier to use by setting the Location header value to the resolved URL.
+						if (locationURL !== null) {
+							// handle corrupted header
+							try {
+								headers.set('Location', locationURL);
+							} catch (err) {
+								// istanbul ignore next: nodejs server prevent invalid response headers, we can't test this through normal request
+								reject(err);
+							}
+						}
+						break;
+					case 'follow':
+						// HTTP-redirect fetch step 2
+						if (locationURL === null) {
+							break;
+						}
+
+						// HTTP-redirect fetch step 5
+						if (request.counter >= request.follow) {
+							reject(new FetchError(`maximum redirect reached at: ${request.url}`, 'max-redirect'));
+							finalize();
+							return;
+						}
+
+						// HTTP-redirect fetch step 6 (counter increment)
+						// Create a new Request object.
+						const requestOpts = {
+							headers: new Headers(request.headers),
+							follow: request.follow,
+							counter: request.counter + 1,
+							agent: request.agent,
+							compress: request.compress,
+							method: request.method,
+							body: request.body,
+							signal: request.signal,
+							timeout: request.timeout,
+							size: request.size
+						};
+
+						// HTTP-redirect fetch step 9
+						if (res.statusCode !== 303 && request.body && getTotalBytes(request) === null) {
+							reject(new FetchError('Cannot follow redirect with body being a readable stream', 'unsupported-redirect'));
+							finalize();
+							return;
+						}
+
+						// HTTP-redirect fetch step 11
+						if (res.statusCode === 303 || (res.statusCode === 301 || res.statusCode === 302) && request.method === 'POST') {
+							requestOpts.method = 'GET';
+							requestOpts.body = undefined;
+							requestOpts.headers.delete('content-length');
+						}
+
+						// HTTP-redirect fetch step 15
+						resolve(fetch(new Request(locationURL, requestOpts)));
+						finalize();
+						return;
+				}
+			}
+
+			// prepare response
+			res.once('end', function () {
+				if (signal) signal.removeEventListener('abort', abortAndFinalize);
+			});
+			let body = res.pipe(new PassThrough$1());
+
+			const response_options = {
+				url: request.url,
+				status: res.statusCode,
+				statusText: res.statusMessage,
+				headers: headers,
+				size: request.size,
+				timeout: request.timeout,
+				counter: request.counter
+			};
+
+			// HTTP-network fetch step 12.1.1.3
+			const codings = headers.get('Content-Encoding');
+
+			// HTTP-network fetch step 12.1.1.4: handle content codings
+
+			// in following scenarios we ignore compression support
+			// 1. compression support is disabled
+			// 2. HEAD request
+			// 3. no Content-Encoding header
+			// 4. no content response (204)
+			// 5. content not modified response (304)
+			if (!request.compress || request.method === 'HEAD' || codings === null || res.statusCode === 204 || res.statusCode === 304) {
+				response = new Response(body, response_options);
+				resolve(response);
+				return;
+			}
+
+			// For Node v6+
+			// Be less strict when decoding compressed responses, since sometimes
+			// servers send slightly invalid responses that are still accepted
+			// by common browsers.
+			// Always using Z_SYNC_FLUSH is what cURL does.
+			const zlibOptions = {
+				flush: (zlib__WEBPACK_IMPORTED_MODULE_4___default().Z_SYNC_FLUSH),
+				finishFlush: (zlib__WEBPACK_IMPORTED_MODULE_4___default().Z_SYNC_FLUSH)
+			};
+
+			// for gzip
+			if (codings == 'gzip' || codings == 'x-gzip') {
+				body = body.pipe(zlib__WEBPACK_IMPORTED_MODULE_4___default().createGunzip(zlibOptions));
+				response = new Response(body, response_options);
+				resolve(response);
+				return;
+			}
+
+			// for deflate
+			if (codings == 'deflate' || codings == 'x-deflate') {
+				// handle the infamous raw deflate response from old servers
+				// a hack for old IIS and Apache servers
+				const raw = res.pipe(new PassThrough$1());
+				raw.once('data', function (chunk) {
+					// see http://stackoverflow.com/questions/37519828
+					if ((chunk[0] & 0x0F) === 0x08) {
+						body = body.pipe(zlib__WEBPACK_IMPORTED_MODULE_4___default().createInflate());
+					} else {
+						body = body.pipe(zlib__WEBPACK_IMPORTED_MODULE_4___default().createInflateRaw());
+					}
+					response = new Response(body, response_options);
+					resolve(response);
+				});
+				return;
+			}
+
+			// for br
+			if (codings == 'br' && typeof (zlib__WEBPACK_IMPORTED_MODULE_4___default().createBrotliDecompress) === 'function') {
+				body = body.pipe(zlib__WEBPACK_IMPORTED_MODULE_4___default().createBrotliDecompress());
+				response = new Response(body, response_options);
+				resolve(response);
+				return;
+			}
+
+			// otherwise, use response as-is
+			response = new Response(body, response_options);
+			resolve(response);
+		});
+
+		writeToStream(req, request);
+	});
+}
+/**
+ * Redirect code matching
+ *
+ * @param   Number   code  Status code
+ * @return  Boolean
+ */
+fetch.isRedirect = function (code) {
+	return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
+};
+
+// expose Promise
+fetch.Promise = global.Promise;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (fetch);
+
+
+
+/***/ }),
+
 /***/ "./node_modules/node-pre-gyp/lib/pre-binding.js":
 /*!******************************************************!*\
   !*** ./node_modules/node-pre-gyp/lib/pre-binding.js ***!
@@ -57713,6 +63820,443 @@ function nextTick(fn, arg1, arg2, arg3) {
   }
 }
 
+
+
+/***/ }),
+
+/***/ "./node_modules/qrcode-svg/lib/qrcode.js":
+/*!***********************************************!*\
+  !*** ./node_modules/qrcode-svg/lib/qrcode.js ***!
+  \***********************************************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: module, __webpack_require__ */
+/*! CommonJS bailout: module.exports is used directly at 423:2-16 */
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/**
+ * @fileoverview
+ * - modified davidshimjs/qrcodejs library for use in node.js
+ * - Using the 'QRCode for Javascript library'
+ * - Fixed dataset of 'QRCode for Javascript library' for support full-spec.
+ * - this library has no dependencies.
+ *
+ * @version 0.9.1 (2016-02-12)
+ * @author davidshimjs, papnkukn
+ * @see <a href="http://www.d-project.com/" target="_blank">http://www.d-project.com/</a>
+ * @see <a href="http://jeromeetienne.github.com/jquery-qrcode/" target="_blank">http://jeromeetienne.github.com/jquery-qrcode/</a>
+ * @see <a href="https://github.com/davidshimjs/qrcodejs" target="_blank">https://github.com/davidshimjs/qrcodejs</a>
+ */
+
+//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+function QR8bitByte(data) {
+  this.mode = QRMode.MODE_8BIT_BYTE;
+  this.data = data;
+  this.parsedData = [];
+
+  // Added to support UTF-8 Characters
+  for (var i = 0, l = this.data.length; i < l; i++) {
+    var byteArray = [];
+    var code = this.data.charCodeAt(i);
+
+    if (code > 0x10000) {
+      byteArray[0] = 0xF0 | ((code & 0x1C0000) >>> 18);
+      byteArray[1] = 0x80 | ((code & 0x3F000) >>> 12);
+      byteArray[2] = 0x80 | ((code & 0xFC0) >>> 6);
+      byteArray[3] = 0x80 | (code & 0x3F);
+    } else if (code > 0x800) {
+      byteArray[0] = 0xE0 | ((code & 0xF000) >>> 12);
+      byteArray[1] = 0x80 | ((code & 0xFC0) >>> 6);
+      byteArray[2] = 0x80 | (code & 0x3F);
+    } else if (code > 0x80) {
+      byteArray[0] = 0xC0 | ((code & 0x7C0) >>> 6);
+      byteArray[1] = 0x80 | (code & 0x3F);
+    } else {
+      byteArray[0] = code;
+    }
+
+    this.parsedData.push(byteArray);
+  }
+
+  this.parsedData = Array.prototype.concat.apply([], this.parsedData);
+
+  if (this.parsedData.length != this.data.length) {
+    this.parsedData.unshift(191);
+    this.parsedData.unshift(187);
+    this.parsedData.unshift(239);
+  }
+}
+
+QR8bitByte.prototype = {
+  getLength: function (buffer) {
+    return this.parsedData.length;
+  },
+  write: function (buffer) {
+    for (var i = 0, l = this.parsedData.length; i < l; i++) {
+      buffer.put(this.parsedData[i], 8);
+    }
+  }
+};
+
+function QRCodeModel(typeNumber, errorCorrectLevel) {
+  this.typeNumber = typeNumber;
+  this.errorCorrectLevel = errorCorrectLevel;
+  this.modules = null;
+  this.moduleCount = 0;
+  this.dataCache = null;
+  this.dataList = [];
+}
+
+QRCodeModel.prototype={addData:function(data){var newData=new QR8bitByte(data);this.dataList.push(newData);this.dataCache=null;},isDark:function(row,col){if(row<0||this.moduleCount<=row||col<0||this.moduleCount<=col){throw new Error(row+","+col);}
+return this.modules[row][col];},getModuleCount:function(){return this.moduleCount;},make:function(){this.makeImpl(false,this.getBestMaskPattern());},makeImpl:function(test,maskPattern){this.moduleCount=this.typeNumber*4+17;this.modules=new Array(this.moduleCount);for(var row=0;row<this.moduleCount;row++){this.modules[row]=new Array(this.moduleCount);for(var col=0;col<this.moduleCount;col++){this.modules[row][col]=null;}}
+this.setupPositionProbePattern(0,0);this.setupPositionProbePattern(this.moduleCount-7,0);this.setupPositionProbePattern(0,this.moduleCount-7);this.setupPositionAdjustPattern();this.setupTimingPattern();this.setupTypeInfo(test,maskPattern);if(this.typeNumber>=7){this.setupTypeNumber(test);}
+if(this.dataCache==null){this.dataCache=QRCodeModel.createData(this.typeNumber,this.errorCorrectLevel,this.dataList);}
+this.mapData(this.dataCache,maskPattern);},setupPositionProbePattern:function(row,col){for(var r=-1;r<=7;r++){if(row+r<=-1||this.moduleCount<=row+r)continue;for(var c=-1;c<=7;c++){if(col+c<=-1||this.moduleCount<=col+c)continue;if((0<=r&&r<=6&&(c==0||c==6))||(0<=c&&c<=6&&(r==0||r==6))||(2<=r&&r<=4&&2<=c&&c<=4)){this.modules[row+r][col+c]=true;}else{this.modules[row+r][col+c]=false;}}}},getBestMaskPattern:function(){var minLostPoint=0;var pattern=0;for(var i=0;i<8;i++){this.makeImpl(true,i);var lostPoint=QRUtil.getLostPoint(this);if(i==0||minLostPoint>lostPoint){minLostPoint=lostPoint;pattern=i;}}
+return pattern;},createMovieClip:function(target_mc,instance_name,depth){var qr_mc=target_mc.createEmptyMovieClip(instance_name,depth);var cs=1;this.make();for(var row=0;row<this.modules.length;row++){var y=row*cs;for(var col=0;col<this.modules[row].length;col++){var x=col*cs;var dark=this.modules[row][col];if(dark){qr_mc.beginFill(0,100);qr_mc.moveTo(x,y);qr_mc.lineTo(x+cs,y);qr_mc.lineTo(x+cs,y+cs);qr_mc.lineTo(x,y+cs);qr_mc.endFill();}}}
+return qr_mc;},setupTimingPattern:function(){for(var r=8;r<this.moduleCount-8;r++){if(this.modules[r][6]!=null){continue;}
+this.modules[r][6]=(r%2==0);}
+for(var c=8;c<this.moduleCount-8;c++){if(this.modules[6][c]!=null){continue;}
+this.modules[6][c]=(c%2==0);}},setupPositionAdjustPattern:function(){var pos=QRUtil.getPatternPosition(this.typeNumber);for(var i=0;i<pos.length;i++){for(var j=0;j<pos.length;j++){var row=pos[i];var col=pos[j];if(this.modules[row][col]!=null){continue;}
+for(var r=-2;r<=2;r++){for(var c=-2;c<=2;c++){if(r==-2||r==2||c==-2||c==2||(r==0&&c==0)){this.modules[row+r][col+c]=true;}else{this.modules[row+r][col+c]=false;}}}}}},setupTypeNumber:function(test){var bits=QRUtil.getBCHTypeNumber(this.typeNumber);for(var i=0;i<18;i++){var mod=(!test&&((bits>>i)&1)==1);this.modules[Math.floor(i/3)][i%3+this.moduleCount-8-3]=mod;}
+for(var i=0;i<18;i++){var mod=(!test&&((bits>>i)&1)==1);this.modules[i%3+this.moduleCount-8-3][Math.floor(i/3)]=mod;}},setupTypeInfo:function(test,maskPattern){var data=(this.errorCorrectLevel<<3)|maskPattern;var bits=QRUtil.getBCHTypeInfo(data);for(var i=0;i<15;i++){var mod=(!test&&((bits>>i)&1)==1);if(i<6){this.modules[i][8]=mod;}else if(i<8){this.modules[i+1][8]=mod;}else{this.modules[this.moduleCount-15+i][8]=mod;}}
+for(var i=0;i<15;i++){var mod=(!test&&((bits>>i)&1)==1);if(i<8){this.modules[8][this.moduleCount-i-1]=mod;}else if(i<9){this.modules[8][15-i-1+1]=mod;}else{this.modules[8][15-i-1]=mod;}}
+this.modules[this.moduleCount-8][8]=(!test);},mapData:function(data,maskPattern){var inc=-1;var row=this.moduleCount-1;var bitIndex=7;var byteIndex=0;for(var col=this.moduleCount-1;col>0;col-=2){if(col==6)col--;while(true){for(var c=0;c<2;c++){if(this.modules[row][col-c]==null){var dark=false;if(byteIndex<data.length){dark=(((data[byteIndex]>>>bitIndex)&1)==1);}
+var mask=QRUtil.getMask(maskPattern,row,col-c);if(mask){dark=!dark;}
+this.modules[row][col-c]=dark;bitIndex--;if(bitIndex==-1){byteIndex++;bitIndex=7;}}}
+row+=inc;if(row<0||this.moduleCount<=row){row-=inc;inc=-inc;break;}}}}};QRCodeModel.PAD0=0xEC;QRCodeModel.PAD1=0x11;QRCodeModel.createData=function(typeNumber,errorCorrectLevel,dataList){var rsBlocks=QRRSBlock.getRSBlocks(typeNumber,errorCorrectLevel);var buffer=new QRBitBuffer();for(var i=0;i<dataList.length;i++){var data=dataList[i];buffer.put(data.mode,4);buffer.put(data.getLength(),QRUtil.getLengthInBits(data.mode,typeNumber));data.write(buffer);}
+var totalDataCount=0;for(var i=0;i<rsBlocks.length;i++){totalDataCount+=rsBlocks[i].dataCount;}
+if(buffer.getLengthInBits()>totalDataCount*8){throw new Error("code length overflow. ("
++buffer.getLengthInBits()
++">"
++totalDataCount*8
++")");}
+if(buffer.getLengthInBits()+4<=totalDataCount*8){buffer.put(0,4);}
+while(buffer.getLengthInBits()%8!=0){buffer.putBit(false);}
+while(true){if(buffer.getLengthInBits()>=totalDataCount*8){break;}
+buffer.put(QRCodeModel.PAD0,8);if(buffer.getLengthInBits()>=totalDataCount*8){break;}
+buffer.put(QRCodeModel.PAD1,8);}
+return QRCodeModel.createBytes(buffer,rsBlocks);};QRCodeModel.createBytes=function(buffer,rsBlocks){var offset=0;var maxDcCount=0;var maxEcCount=0;var dcdata=new Array(rsBlocks.length);var ecdata=new Array(rsBlocks.length);for(var r=0;r<rsBlocks.length;r++){var dcCount=rsBlocks[r].dataCount;var ecCount=rsBlocks[r].totalCount-dcCount;maxDcCount=Math.max(maxDcCount,dcCount);maxEcCount=Math.max(maxEcCount,ecCount);dcdata[r]=new Array(dcCount);for(var i=0;i<dcdata[r].length;i++){dcdata[r][i]=0xff&buffer.buffer[i+offset];}
+offset+=dcCount;var rsPoly=QRUtil.getErrorCorrectPolynomial(ecCount);var rawPoly=new QRPolynomial(dcdata[r],rsPoly.getLength()-1);var modPoly=rawPoly.mod(rsPoly);ecdata[r]=new Array(rsPoly.getLength()-1);for(var i=0;i<ecdata[r].length;i++){var modIndex=i+modPoly.getLength()-ecdata[r].length;ecdata[r][i]=(modIndex>=0)?modPoly.get(modIndex):0;}}
+var totalCodeCount=0;for(var i=0;i<rsBlocks.length;i++){totalCodeCount+=rsBlocks[i].totalCount;}
+var data=new Array(totalCodeCount);var index=0;for(var i=0;i<maxDcCount;i++){for(var r=0;r<rsBlocks.length;r++){if(i<dcdata[r].length){data[index++]=dcdata[r][i];}}}
+for(var i=0;i<maxEcCount;i++){for(var r=0;r<rsBlocks.length;r++){if(i<ecdata[r].length){data[index++]=ecdata[r][i];}}}
+return data;};var QRMode={MODE_NUMBER:1<<0,MODE_ALPHA_NUM:1<<1,MODE_8BIT_BYTE:1<<2,MODE_KANJI:1<<3};var QRErrorCorrectLevel={L:1,M:0,Q:3,H:2};var QRMaskPattern={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7};var QRUtil={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],G15:(1<<10)|(1<<8)|(1<<5)|(1<<4)|(1<<2)|(1<<1)|(1<<0),G18:(1<<12)|(1<<11)|(1<<10)|(1<<9)|(1<<8)|(1<<5)|(1<<2)|(1<<0),G15_MASK:(1<<14)|(1<<12)|(1<<10)|(1<<4)|(1<<1),getBCHTypeInfo:function(data){var d=data<<10;while(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G15)>=0){d^=(QRUtil.G15<<(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G15)));}
+return((data<<10)|d)^QRUtil.G15_MASK;},getBCHTypeNumber:function(data){var d=data<<12;while(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G18)>=0){d^=(QRUtil.G18<<(QRUtil.getBCHDigit(d)-QRUtil.getBCHDigit(QRUtil.G18)));}
+return(data<<12)|d;},getBCHDigit:function(data){var digit=0;while(data!=0){digit++;data>>>=1;}
+return digit;},getPatternPosition:function(typeNumber){return QRUtil.PATTERN_POSITION_TABLE[typeNumber-1];},getMask:function(maskPattern,i,j){switch(maskPattern){case QRMaskPattern.PATTERN000:return(i+j)%2==0;case QRMaskPattern.PATTERN001:return i%2==0;case QRMaskPattern.PATTERN010:return j%3==0;case QRMaskPattern.PATTERN011:return(i+j)%3==0;case QRMaskPattern.PATTERN100:return(Math.floor(i/2)+Math.floor(j/3))%2==0;case QRMaskPattern.PATTERN101:return(i*j)%2+(i*j)%3==0;case QRMaskPattern.PATTERN110:return((i*j)%2+(i*j)%3)%2==0;case QRMaskPattern.PATTERN111:return((i*j)%3+(i+j)%2)%2==0;default:throw new Error("bad maskPattern:"+maskPattern);}},getErrorCorrectPolynomial:function(errorCorrectLength){var a=new QRPolynomial([1],0);for(var i=0;i<errorCorrectLength;i++){a=a.multiply(new QRPolynomial([1,QRMath.gexp(i)],0));}
+return a;},getLengthInBits:function(mode,type){if(1<=type&&type<10){switch(mode){case QRMode.MODE_NUMBER:return 10;case QRMode.MODE_ALPHA_NUM:return 9;case QRMode.MODE_8BIT_BYTE:return 8;case QRMode.MODE_KANJI:return 8;default:throw new Error("mode:"+mode);}}else if(type<27){switch(mode){case QRMode.MODE_NUMBER:return 12;case QRMode.MODE_ALPHA_NUM:return 11;case QRMode.MODE_8BIT_BYTE:return 16;case QRMode.MODE_KANJI:return 10;default:throw new Error("mode:"+mode);}}else if(type<41){switch(mode){case QRMode.MODE_NUMBER:return 14;case QRMode.MODE_ALPHA_NUM:return 13;case QRMode.MODE_8BIT_BYTE:return 16;case QRMode.MODE_KANJI:return 12;default:throw new Error("mode:"+mode);}}else{throw new Error("type:"+type);}},getLostPoint:function(qrCode){var moduleCount=qrCode.getModuleCount();var lostPoint=0;for(var row=0;row<moduleCount;row++){for(var col=0;col<moduleCount;col++){var sameCount=0;var dark=qrCode.isDark(row,col);for(var r=-1;r<=1;r++){if(row+r<0||moduleCount<=row+r){continue;}
+for(var c=-1;c<=1;c++){if(col+c<0||moduleCount<=col+c){continue;}
+if(r==0&&c==0){continue;}
+if(dark==qrCode.isDark(row+r,col+c)){sameCount++;}}}
+if(sameCount>5){lostPoint+=(3+sameCount-5);}}}
+for(var row=0;row<moduleCount-1;row++){for(var col=0;col<moduleCount-1;col++){var count=0;if(qrCode.isDark(row,col))count++;if(qrCode.isDark(row+1,col))count++;if(qrCode.isDark(row,col+1))count++;if(qrCode.isDark(row+1,col+1))count++;if(count==0||count==4){lostPoint+=3;}}}
+for(var row=0;row<moduleCount;row++){for(var col=0;col<moduleCount-6;col++){if(qrCode.isDark(row,col)&&!qrCode.isDark(row,col+1)&&qrCode.isDark(row,col+2)&&qrCode.isDark(row,col+3)&&qrCode.isDark(row,col+4)&&!qrCode.isDark(row,col+5)&&qrCode.isDark(row,col+6)){lostPoint+=40;}}}
+for(var col=0;col<moduleCount;col++){for(var row=0;row<moduleCount-6;row++){if(qrCode.isDark(row,col)&&!qrCode.isDark(row+1,col)&&qrCode.isDark(row+2,col)&&qrCode.isDark(row+3,col)&&qrCode.isDark(row+4,col)&&!qrCode.isDark(row+5,col)&&qrCode.isDark(row+6,col)){lostPoint+=40;}}}
+var darkCount=0;for(var col=0;col<moduleCount;col++){for(var row=0;row<moduleCount;row++){if(qrCode.isDark(row,col)){darkCount++;}}}
+var ratio=Math.abs(100*darkCount/moduleCount/moduleCount-50)/5;lostPoint+=ratio*10;return lostPoint;}};var QRMath={glog:function(n){if(n<1){throw new Error("glog("+n+")");}
+return QRMath.LOG_TABLE[n];},gexp:function(n){while(n<0){n+=255;}
+while(n>=256){n-=255;}
+return QRMath.EXP_TABLE[n];},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)};for(var i=0;i<8;i++){QRMath.EXP_TABLE[i]=1<<i;}
+for(var i=8;i<256;i++){QRMath.EXP_TABLE[i]=QRMath.EXP_TABLE[i-4]^QRMath.EXP_TABLE[i-5]^QRMath.EXP_TABLE[i-6]^QRMath.EXP_TABLE[i-8];}
+for(var i=0;i<255;i++){QRMath.LOG_TABLE[QRMath.EXP_TABLE[i]]=i;}
+function QRPolynomial(num,shift){if(num.length==undefined){throw new Error(num.length+"/"+shift);}
+var offset=0;while(offset<num.length&&num[offset]==0){offset++;}
+this.num=new Array(num.length-offset+shift);for(var i=0;i<num.length-offset;i++){this.num[i]=num[i+offset];}}
+QRPolynomial.prototype={get:function(index){return this.num[index];},getLength:function(){return this.num.length;},multiply:function(e){var num=new Array(this.getLength()+e.getLength()-1);for(var i=0;i<this.getLength();i++){for(var j=0;j<e.getLength();j++){num[i+j]^=QRMath.gexp(QRMath.glog(this.get(i))+QRMath.glog(e.get(j)));}}
+return new QRPolynomial(num,0);},mod:function(e){if(this.getLength()-e.getLength()<0){return this;}
+var ratio=QRMath.glog(this.get(0))-QRMath.glog(e.get(0));var num=new Array(this.getLength());for(var i=0;i<this.getLength();i++){num[i]=this.get(i);}
+for(var i=0;i<e.getLength();i++){num[i]^=QRMath.gexp(QRMath.glog(e.get(i))+ratio);}
+return new QRPolynomial(num,0).mod(e);}};function QRRSBlock(totalCount,dataCount){this.totalCount=totalCount;this.dataCount=dataCount;}
+QRRSBlock.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]];QRRSBlock.getRSBlocks=function(typeNumber,errorCorrectLevel){var rsBlock=QRRSBlock.getRsBlockTable(typeNumber,errorCorrectLevel);if(rsBlock==undefined){throw new Error("bad rs block @ typeNumber:"+typeNumber+"/errorCorrectLevel:"+errorCorrectLevel);}
+var length=rsBlock.length/3;var list=[];for(var i=0;i<length;i++){var count=rsBlock[i*3+0];var totalCount=rsBlock[i*3+1];var dataCount=rsBlock[i*3+2];for(var j=0;j<count;j++){list.push(new QRRSBlock(totalCount,dataCount));}}
+return list;};QRRSBlock.getRsBlockTable=function(typeNumber,errorCorrectLevel){switch(errorCorrectLevel){case QRErrorCorrectLevel.L:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+0];case QRErrorCorrectLevel.M:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+1];case QRErrorCorrectLevel.Q:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+2];case QRErrorCorrectLevel.H:return QRRSBlock.RS_BLOCK_TABLE[(typeNumber-1)*4+3];default:return undefined;}};function QRBitBuffer(){this.buffer=[];this.length=0;}
+QRBitBuffer.prototype={get:function(index){var bufIndex=Math.floor(index/8);return((this.buffer[bufIndex]>>>(7-index%8))&1)==1;},put:function(num,length){for(var i=0;i<length;i++){this.putBit(((num>>>(length-i-1))&1)==1);}},getLengthInBits:function(){return this.length;},putBit:function(bit){var bufIndex=Math.floor(this.length/8);if(this.buffer.length<=bufIndex){this.buffer.push(0);}
+if(bit){this.buffer[bufIndex]|=(0x80>>>(this.length%8));}
+this.length++;}};var QRCodeLimitLength=[[17,14,11,7],[32,26,20,14],[53,42,32,24],[78,62,46,34],[106,84,60,44],[134,106,74,58],[154,122,86,64],[192,152,108,84],[230,180,130,98],[271,213,151,119],[321,251,177,137],[367,287,203,155],[425,331,241,177],[458,362,258,194],[520,412,292,220],[586,450,322,250],[644,504,364,280],[718,560,394,310],[792,624,442,338],[858,666,482,382],[929,711,509,403],[1003,779,565,439],[1091,857,611,461],[1171,911,661,511],[1273,997,715,535],[1367,1059,751,593],[1465,1125,805,625],[1528,1190,868,658],[1628,1264,908,698],[1732,1370,982,742],[1840,1452,1030,790],[1952,1538,1112,842],[2068,1628,1168,898],[2188,1722,1228,958],[2303,1809,1283,983],[2431,1911,1351,1051],[2563,1989,1423,1093],[2699,2099,1499,1139],[2809,2213,1579,1219],[2953,2331,1663,1273]];
+
+
+/** Constructor */
+function QRCode(options) {
+  var instance = this;
+  
+  //Default options
+  this.options = {
+    padding: 4,
+    width: 256, 
+    height: 256,
+    typeNumber: 4,
+    color: "#000000",
+    background: "#ffffff",
+    ecl: "M"
+  };
+  
+  //In case the options is string
+  if (typeof options === 'string') {
+    options = {
+      content: options
+    };
+  }
+  
+  //Merge options
+  if (options) {
+    for (var i in options) {
+      this.options[i] = options[i];
+    }
+  }
+  
+  if (typeof this.options.content !== 'string') {
+    throw new Error("Expected 'content' as string!");
+  }
+  
+  if (this.options.content.length === 0 /* || this.options.content.length > 7089 */) {
+    throw new Error("Expected 'content' to be non-empty!");
+  }
+  
+  if (!(this.options.padding >= 0)) {
+    throw new Error("Expected 'padding' value to be non-negative!");
+  }
+  
+  if (!(this.options.width > 0) || !(this.options.height > 0)) {
+    throw new Error("Expected 'width' or 'height' value to be higher than zero!");
+  }
+  
+  //Gets the error correction level
+  function _getErrorCorrectLevel(ecl) {
+    switch (ecl) {
+        case "L":
+          return QRErrorCorrectLevel.L;
+          
+        case "M":
+          return QRErrorCorrectLevel.M;
+          
+        case "Q":
+          return QRErrorCorrectLevel.Q;
+          
+        case "H":
+          return QRErrorCorrectLevel.H;
+          
+        default:
+          throw new Error("Unknwon error correction level: " + ecl);
+      }
+  }
+  
+  //Get type number
+  function _getTypeNumber(content, ecl) {      
+    var length = _getUTF8Length(content);
+    
+    var type = 1;
+    var limit = 0;
+    for (var i = 0, len = QRCodeLimitLength.length; i <= len; i++) {
+      var table = QRCodeLimitLength[i];
+      if (!table) {
+        throw new Error("Content too long: expected " + limit + " but got " + length);
+      }
+      
+      switch (ecl) {
+        case "L":
+          limit = table[0];
+          break;
+          
+        case "M":
+          limit = table[1];
+          break;
+          
+        case "Q":
+          limit = table[2];
+          break;
+          
+        case "H":
+          limit = table[3];
+          break;
+          
+        default:
+          throw new Error("Unknwon error correction level: " + ecl);
+      }
+      
+      if (length <= limit) {
+        break;
+      }
+      
+      type++;
+    }
+    
+    if (type > QRCodeLimitLength.length) {
+      throw new Error("Content too long");
+    }
+    
+    return type;
+  }
+
+  //Gets text length
+  function _getUTF8Length(content) {
+    var result = encodeURI(content).toString().replace(/\%[0-9a-fA-F]{2}/g, 'a');
+    return result.length + (result.length != content ? 3 : 0);
+  }
+  
+  //Generate QR Code matrix
+  var content = this.options.content;
+  var type = _getTypeNumber(content, this.options.ecl);
+  var ecl = _getErrorCorrectLevel(this.options.ecl);
+  this.qrcode = new QRCodeModel(type, ecl);
+  this.qrcode.addData(content);
+  this.qrcode.make();
+}
+
+/** Generates QR Code as SVG image */
+QRCode.prototype.svg = function(opt) {
+  var options = this.options || { };
+  var modules = this.qrcode.modules;
+  
+  if (typeof opt == "undefined") {
+    opt = { container: options.container || "svg" };
+  }
+  
+  //Apply new lines and indents in SVG?
+  var pretty = typeof options.pretty != "undefined" ? !!options.pretty : true;
+  
+  var indent = pretty ? '  ' : '';
+  var EOL = pretty ? '\r\n' : '';
+  var width = options.width;
+  var height = options.height;
+  var length = modules.length;
+  var xsize = width / (length + 2 * options.padding);
+  var ysize = height / (length + 2 * options.padding);
+  
+  //Join (union, merge) rectangles into one shape?
+  var join = typeof options.join != "undefined" ? !!options.join : false;
+  
+  //Swap the X and Y modules, pull request #2
+  var swap = typeof options.swap != "undefined" ? !!options.swap : false;
+  
+  //Apply <?xml...?> declaration in SVG?
+  var xmlDeclaration = typeof options.xmlDeclaration != "undefined" ? !!options.xmlDeclaration : true;
+  
+  //Populate with predefined shape instead of "rect" elements, thanks to @kkocdko
+  var predefined = typeof options.predefined != "undefined" ? !!options.predefined : false;
+  var defs = predefined ? indent + '<defs><path id="qrmodule" d="M0 0 h' + ysize + ' v' + xsize + ' H0 z" style="fill:' + options.color + ';shape-rendering:crispEdges;" /></defs>' + EOL : '';
+  
+  //Background rectangle
+  var bgrect = indent + '<rect x="0" y="0" width="' + width + '" height="' + height + '" style="fill:' + options.background + ';shape-rendering:crispEdges;"/>' + EOL;
+  
+  //Rectangles representing modules
+  var modrect = '';
+  var pathdata = '';
+
+  for (var y = 0; y < length; y++) {
+    for (var x = 0; x < length; x++) {
+      var module = modules[x][y];
+      if (module) {
+        
+        var px = (x * xsize + options.padding * xsize);
+        var py = (y * ysize + options.padding * ysize);
+        
+        //Some users have had issues with the QR Code, thanks to @danioso for the solution
+        if (swap) {
+          var t = px;
+          px = py;
+          py = t;
+        }
+        
+        if (join) {
+          //Module as a part of svg path data, thanks to @danioso
+          var w = xsize + px
+          var h = ysize + py
+
+          px = (Number.isInteger(px))? Number(px): px.toFixed(2);
+          py = (Number.isInteger(py))? Number(py): py.toFixed(2);
+          w = (Number.isInteger(w))? Number(w): w.toFixed(2);
+          h = (Number.isInteger(h))? Number(h): h.toFixed(2);
+
+          pathdata += ('M' + px + ',' + py + ' V' + h + ' H' + w + ' V' + py + ' H' + px + ' Z ');
+        }
+        else if (predefined) {
+          //Module as a predefined shape, thanks to @kkocdko
+          modrect += indent + '<use x="' + px.toString() + '" y="' + py.toString() + '" href="#qrmodule" />' + EOL;
+        }
+        else {
+          //Module as rectangle element
+          modrect += indent + '<rect x="' + px.toString() + '" y="' + py.toString() + '" width="' + xsize + '" height="' + ysize + '" style="fill:' + options.color + ';shape-rendering:crispEdges;"/>' + EOL;
+        }
+      }
+    }
+  }
+  
+  if (join) {
+    modrect = indent + '<path x="0" y="0" style="fill:' + options.color + ';shape-rendering:crispEdges;" d="' + pathdata + '" />';
+  }
+
+  var svg = "";
+  switch (opt.container) {
+    //Wrapped in SVG document
+    case "svg":
+      if (xmlDeclaration) {
+        svg += '<?xml version="1.0" standalone="yes"?>' + EOL;
+      }
+      svg += '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + width + '" height="' + height + '">' + EOL;
+      svg += defs + bgrect + modrect;
+      svg += '</svg>';
+      break;
+      
+    //Viewbox for responsive use in a browser, thanks to @danioso
+    case "svg-viewbox":
+      if (xmlDeclaration) {
+        svg += '<?xml version="1.0" standalone="yes"?>' + EOL;
+      }
+      svg += '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + width + ' ' + height + '">' + EOL;
+      svg += defs + bgrect + modrect;
+      svg += '</svg>';
+      break;
+      
+    
+    //Wrapped in group element    
+    case "g":
+      svg += '<g width="' + width + '" height="' + height + '">' + EOL;
+      svg += defs + bgrect + modrect;
+      svg += '</g>';
+      break;
+      
+    //Without a container
+    default:
+      svg += (defs + bgrect + modrect).replace(/^\s+/, ""); //Clear indents on each line
+      break;
+  }
+  
+  return svg;
+};
+
+/** Writes QR Code image to a file */
+QRCode.prototype.save = function(file, callback) {
+  var data = this.svg();
+  if (typeof callback != "function") {
+    callback = function(error, result) { };
+  }
+  try {
+    //Package 'fs' is available in node.js but not in a web browser
+    var fs = __webpack_require__(/*! fs */ "fs");
+    fs.writeFile(file, data, callback);
+  }
+  catch (e) {
+    //Sorry, 'fs' is not available
+    callback(e);
+  }
+};
+
+if (true) {
+  module.exports = QRCode;
+}
 
 
 /***/ }),
@@ -62335,44 +68879,75 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 /***/ }),
 
-/***/ "./src/cashaddr.ts":
-/*!*************************!*\
-  !*** ./src/cashaddr.ts ***!
-  \*************************/
+/***/ "./src/Db.ts":
+/*!*******************!*\
+  !*** ./src/Db.ts ***!
+  \*******************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: top-level-this-exports, __webpack_exports__, __webpack_require__ */
+/*! CommonJS bailout: this is used directly at 2:23-27 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WalletDatabase = void 0;
+const dexie_1 = __importDefault(__webpack_require__(/*! dexie */ "./node_modules/dexie/dist/dexie.mjs"));
+//
+// Declare Database
+//
+class WalletDatabase extends dexie_1.default {
+    constructor(dbName) {
+        super(dbName);
+        this.version(2).stores({
+            wallet: "++id,name,wallet",
+        });
+        this.wallet = this.table("wallet");
+    }
+    async addWallet({ name, wallet, }) {
+        // Make sure we have something in DB:
+        return this.transaction("rw", this.wallet, async () => {
+            // Make sure we have something in DB:
+            if ((await this.wallet.where({ name: name }).count()) === 0) {
+                const id = await this.wallet.add({ name: name, wallet: wallet });
+            }
+        }).catch((e) => {
+            throw e.stack || e;
+        });
+    }
+    async getWallets() {
+        let wallets = await this.transaction("r", this.wallet, async () => {
+            return await this.wallet.where("id").above(0).toArray();
+        });
+        return wallets;
+    }
+}
+exports.WalletDatabase = WalletDatabase;
+
+
+/***/ }),
+
+/***/ "./src/chain.ts":
+/*!**********************!*\
+  !*** ./src/chain.ts ***!
+  \**********************/
 /*! flagged exports */
 /*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export deriveCashAddr [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export bchParam [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
-/*! runtime requirements: __webpack_exports__, __webpack_require__ */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/*! runtime requirements: __webpack_exports__ */
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deriveCashAddr = void 0;
-const libauth_1 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
-// Given a private key and network, derive cashaddr from the locking code
-// TODO, is there a more direct way to do this?
-// TODO, This can be moved off the Wallet Class
-async function deriveCashAddr(privateKey, networkPrefix) {
-    const lockingScript = "lock";
-    const template = libauth_1.validateAuthenticationTemplate(libauth_1.authenticationTemplateP2pkhNonHd);
-    if (typeof template === "string") {
-        throw new Error("Address template error");
-    }
-    const lockingData = {
-        keys: { privateKeys: { key: privateKey } },
-    };
-    const compiler = await libauth_1.authenticationTemplateToCompilerBCH(template);
-    const lockingBytecode = compiler.generateBytecode(lockingScript, lockingData);
-    if (!lockingBytecode.success) {
-        throw Error(JSON.stringify(lockingBytecode));
-    }
-    else {
-        return libauth_1.lockingBytecodeToCashAddress(lockingBytecode.bytecode, networkPrefix);
-    }
-}
-exports.deriveCashAddr = deriveCashAddr;
+exports.bchParam = void 0;
+exports.bchParam = {
+    subUnits: 100000000,
+};
 
 
 /***/ }),
@@ -62386,6 +68961,7 @@ exports.deriveCashAddr = deriveCashAddr;
 /*! CommonJS bailout: this is used directly at 2:23-27 */
 /*! CommonJS bailout: this is used directly at 9:20-24 */
 /*! CommonJS bailout: exports is used directly at 13:30-37 */
+/*! CommonJS bailout: exports is used directly at 14:30-37 */
 /*! CommonJS bailout: exports is used directly at 15:38-45 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -62403,7 +68979,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__webpack_require__(/*! ./ok */ "./src/ok.ts"), exports);
-//export * from "./generateBlock";
+__exportStar(__webpack_require__(/*! ./Db */ "./src/Db.ts"), exports);
 __exportStar(__webpack_require__(/*! ./wallet/Wif */ "./src/wallet/Wif.ts"), exports);
 
 
@@ -62432,15 +69008,13 @@ exports.ok = ok;
 
 /***/ }),
 
-/***/ "./src/transaction/Wif.ts":
-/*!********************************!*\
-  !*** ./src/transaction/Wif.ts ***!
-  \********************************/
+/***/ "./src/qr/Qr.ts":
+/*!**********************!*\
+  !*** ./src/qr/Qr.ts ***!
+  \**********************/
 /*! flagged exports */
 /*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export buildP2pkhNonHdTransaction [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export getInputTotal [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export getSuitableUtxos [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export qrAddress [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_exports__, __webpack_require__ */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -62448,27 +69022,116 @@ exports.ok = ok;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputTotal = exports.getSuitableUtxos = exports.buildP2pkhNonHdTransaction = void 0;
+exports.qrAddress = void 0;
+var QRCode = __webpack_require__(/*! qrcode-svg */ "./node_modules/qrcode-svg/lib/qrcode.js");
+/**
+ * qrAddress returns a qr code for a given cashaddress as raw utf-8 svg
+ * @param  {string} address
+ * @param  {} size=256 The width and height of the returned image
+ * @returns Image
+ */
+function qrAddress(address, size = 256) {
+    let svg = new QRCode({
+        content: address,
+        width: size,
+        height: size,
+    }).svg();
+    let svgB64 = "";
+    if (typeof process === "undefined") {
+        svgB64 = btoa(svg);
+    }
+    else {
+        const btoa = (str) => {
+            return Buffer.from(str).toString("base64");
+        };
+        svgB64 = btoa(svg);
+    }
+    return {
+        src: `data:image/svg+xml;base64,${svgB64}`,
+        title: address,
+        alt: "a Bitcoin Cash address QR Code",
+    };
+}
+exports.qrAddress = qrAddress;
+
+
+/***/ }),
+
+/***/ "./src/transaction/Wif.ts":
+/*!********************************!*\
+  !*** ./src/transaction/Wif.ts ***!
+  \********************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export buildEncodedTransaction [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export buildP2pkhNonHdTransaction [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getFeeAmount [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getSuitableUtxos [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export prepareInputs [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export prepareOutputs [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__ */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.buildEncodedTransaction = exports.getFeeAmount = exports.getSuitableUtxos = exports.prepareOutputs = exports.prepareInputs = exports.buildP2pkhNonHdTransaction = void 0;
 // Unstable?
 const libauth_1 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
+const sumSendRequestAmounts_1 = __webpack_require__(/*! ../util/sumSendRequestAmounts */ "./src/util/sumSendRequestAmounts.ts");
+const sumUtxoValue_1 = __webpack_require__(/*! ../util/sumUtxoValue */ "./src/util/sumUtxoValue.ts");
 // Build a transaction for a p2pkh transaction for a non HD wallet
-async function buildP2pkhNonHdTransaction(inputs, output, signingKey, fee = 0) {
-    var _a, _b;
+async function buildP2pkhNonHdTransaction(inputs, outputs, signingKey, fee = 0, discardChange = false) {
+    if (!signingKey) {
+        throw new Error("Missing signing key when building transaction");
+    }
     const template = libauth_1.validateAuthenticationTemplate(libauth_1.authenticationTemplateP2pkhNonHd);
     if (typeof template === "string") {
         throw new Error("Transaction template error");
     }
     const compiler = await libauth_1.authenticationTemplateToCompilerBCH(template);
-    const amount = output.amount.inSatoshi();
+    const inputAmount = await sumUtxoValue_1.sumUtxoValue(inputs);
+    const sendAmount = await sumSendRequestAmounts_1.sumSendRequestAmounts(outputs);
+    // Get the change locking bytecode
+    let changeLockingBytecode = compiler.generateBytecode("lock", {
+        keys: { privateKeys: { key: signingKey } },
+    });
+    if (!changeLockingBytecode.success) {
+        throw new Error(changeLockingBytecode.toString());
+    }
+    try {
+        let lockedOutputs = prepareOutputs(outputs);
+        if (discardChange !== true) {
+            const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+            lockedOutputs.push({
+                lockingBytecode: changeLockingBytecode.bytecode,
+                satoshis: libauth_1.bigIntToBinUint64LE(BigInt(changeAmount)),
+            });
+        }
+        let signedInputs = prepareInputs(inputs, compiler, signingKey);
+        const result = libauth_1.generateTransaction({
+            inputs: signedInputs,
+            locktime: 0,
+            outputs: [...lockedOutputs],
+            version: 2,
+        });
+        return result;
+    }
+    catch (error) {
+        throw Error(error.toString());
+    }
+}
+exports.buildP2pkhNonHdTransaction = buildP2pkhNonHdTransaction;
+function prepareInputs(inputs, compiler, signingKey) {
     let signedInputs = [];
     for (const i of inputs) {
         const utxoTxnValue = i.getValue();
-        const utxoIndex = (_a = i.getOutpoint()) === null || _a === void 0 ? void 0 : _a.getIndex();
+        const utxoIndex = i.getOutpoint().getIndex();
         // slice will create a clone of the array
-        let utxoOutpointTransactionHash = (_b = i
-            .getOutpoint()) === null || _b === void 0 ? void 0 : _b.getHash_asU8().slice();
+        let utxoOutpointTransactionHash = i.getOutpoint().getHash_asU8().slice();
         // reverse the cloned copy
-        utxoOutpointTransactionHash === null || utxoOutpointTransactionHash === void 0 ? void 0 : utxoOutpointTransactionHash.reverse();
+        utxoOutpointTransactionHash.reverse();
         if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
             throw new Error("Missing unspent outpoint when building transaction");
         }
@@ -62487,77 +69150,301 @@ async function buildP2pkhNonHdTransaction(inputs, output, signingKey, fee = 0) {
         };
         signedInputs.push(newInput);
     }
-    const changeAmount = ((await getInputTotal(inputs)) - amount) - fee;
-    if (!signingKey) {
-        throw new Error("Missing signing key when building transaction");
-    }
-    try {
-        let outputLockingBytecode = libauth_1.cashAddressToLockingBytecode(output.address);
+    return signedInputs;
+}
+exports.prepareInputs = prepareInputs;
+function prepareOutputs(outputs) {
+    let lockedOutputs = [];
+    for (const output of outputs) {
+        // TODO move this to transaction/Wif
+        let outputLockingBytecode = libauth_1.cashAddressToLockingBytecode(output.cashaddr);
         if (!outputLockingBytecode.hasOwnProperty("bytecode") ||
             !outputLockingBytecode.hasOwnProperty("prefix")) {
             throw new Error(outputLockingBytecode.toString());
         }
         outputLockingBytecode = outputLockingBytecode;
-        // Get the change locking bytecode
-        let changeLockingBytecode = compiler.generateBytecode("lock", {
-            keys: { privateKeys: { key: signingKey } },
-        });
-        if (!changeLockingBytecode.success) {
-            throw new Error(changeLockingBytecode.toString());
-        }
-        const result = libauth_1.generateTransaction({
-            inputs: signedInputs,
-            locktime: 0,
-            outputs: [
-                {
-                    lockingBytecode: outputLockingBytecode.bytecode,
-                    satoshis: libauth_1.bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
-                },
-                {
-                    lockingBytecode: changeLockingBytecode.bytecode,
-                    satoshis: libauth_1.bigIntToBinUint64LE(BigInt(changeAmount)),
-                },
-            ],
-            version: 2,
-        });
-        return result;
+        let lockedOutput = {
+            lockingBytecode: outputLockingBytecode.bytecode,
+            satoshis: libauth_1.bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+        };
+        lockedOutputs.push(lockedOutput);
     }
-    catch (error) {
-        throw Error(error.toString());
-    }
+    return lockedOutputs;
 }
-exports.buildP2pkhNonHdTransaction = buildP2pkhNonHdTransaction;
-async function getSuitableUtxos(unspentOutputs, amount, bestHeight) {
+exports.prepareOutputs = prepareOutputs;
+async function getSuitableUtxos(unspentOutputs, amountRequired, bestHeight) {
     let suitableUtxos = [];
-    let amountRequired = 0;
+    let amountAvailable = 0n;
     for (const u of unspentOutputs) {
         if (u.getIsCoinbase() && bestHeight) {
             let age = bestHeight - u.getBlockHeight();
             if (age > 100) {
                 suitableUtxos.push(u);
-                amountRequired += u.getValue();
+                amountAvailable += BigInt(u.getValue());
             }
         }
         else {
             suitableUtxos.push(u);
-            amountRequired += u.getValue();
+            amountAvailable += BigInt(u.getValue());
         }
-        if (amountRequired > amount) {
+        // if amountRequired is not given, assume it is a max spend request, skip this condition
+        if (amountRequired && amountAvailable > amountRequired) {
             break;
         }
     }
-    if (amountRequired > amount) {
+    // If the amount needed is met, or no amount is given, return
+    if (typeof amountRequired === "undefined") {
         return suitableUtxos;
     }
+    else if (amountAvailable < amountRequired) {
+        throw Error(`Amount required was not met, ${amountRequired} needed, ${amountAvailable} available`);
+    }
     else {
-        throw Error("Could not find suitable outpoints for given amount");
+        return suitableUtxos;
     }
 }
 exports.getSuitableUtxos = getSuitableUtxos;
-// Gets balance by summing value in all utxos in stats
-async function getInputTotal(inputs) {
-    if (inputs) {
-        const balanceArray = await Promise.all(inputs.map(async (o) => {
+async function getFeeAmount({ utxos, sendRequests, privateKey, }) {
+    // build transaction
+    if (utxos) {
+        // Build the transaction to get the approximate size
+        let draftTransaction = await buildEncodedTransaction(utxos, sendRequests, privateKey, 888);
+        return draftTransaction.length * 2;
+    }
+    else {
+        throw Error("The available inputs in the wallet cannot satisfy this send request");
+    }
+}
+exports.getFeeAmount = getFeeAmount;
+// Build encoded transaction
+async function buildEncodedTransaction(fundingUtxos, sendRequests, privateKey, fee = 0, discardChange = false) {
+    let txn = await buildP2pkhNonHdTransaction(fundingUtxos, sendRequests, privateKey, fee, discardChange);
+    // submit transaction
+    if (txn.success) {
+        return libauth_1.encodeTransaction(txn.transaction);
+    }
+    else {
+        throw Error("Error building transaction with fee");
+    }
+}
+exports.buildEncodedTransaction = buildEncodedTransaction;
+
+
+/***/ }),
+
+/***/ "./src/util/balanceObjectFromSatoshi.ts":
+/*!**********************************************!*\
+  !*** ./src/util/balanceObjectFromSatoshi.ts ***!
+  \**********************************************/
+/*! flagged exports */
+/*! export BalanceResponse [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export balanceResponseFromSatoshi [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__ */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.balanceResponseFromSatoshi = exports.BalanceResponse = void 0;
+const chain_1 = __webpack_require__(/*! ../chain */ "./src/chain.ts");
+const getUsdRate_1 = __webpack_require__(/*! ./getUsdRate */ "./src/util/getUsdRate.ts");
+class BalanceResponse {
+    constructor(bch, sat, usd) {
+        this.bch = bch;
+        this.sat = sat;
+        this.usd = usd;
+    }
+}
+exports.BalanceResponse = BalanceResponse;
+async function balanceResponseFromSatoshi(value) {
+    let response = new BalanceResponse();
+    for (let a of ["bch", "sat", "usd"]) {
+        switch (a) {
+            case "bch":
+                response.bch = value / chain_1.bchParam.subUnits;
+                break;
+            case "sat":
+                response.sat = value;
+                break;
+            case "usd":
+                response.usd = (value / chain_1.bchParam.subUnits) * (await getUsdRate_1.getUsdRate());
+                break;
+            default:
+                throw Error("Balance response not understood");
+        }
+    }
+    return response;
+}
+exports.balanceResponseFromSatoshi = balanceResponseFromSatoshi;
+
+
+/***/ }),
+
+/***/ "./src/util/checkWifNetwork.ts":
+/*!*************************************!*\
+  !*** ./src/util/checkWifNetwork.ts ***!
+  \*************************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export checkWifNetwork [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__ */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkWifNetwork = void 0;
+const enum_1 = __webpack_require__(/*! ../wallet/enum */ "./src/wallet/enum.ts");
+function checkWifNetwork(walletImportFormatString, networkType) {
+    if ((walletImportFormatString[0] === "L" ||
+        walletImportFormatString[0] === "K") &&
+        networkType !== enum_1.NetworkType.Mainnet) {
+        throw new Error("attempted to pass a testnet Wif to a mainnet wallet");
+    }
+    else if ((walletImportFormatString[0] !== "L" &&
+        walletImportFormatString[0] !== "K") &&
+        networkType === enum_1.NetworkType.Mainnet) {
+        throw new Error("attempted to pass a mainnet Wif to a testnet wallet");
+    }
+}
+exports.checkWifNetwork = checkWifNetwork;
+
+
+/***/ }),
+
+/***/ "./src/util/deriveCashaddr.ts":
+/*!************************************!*\
+  !*** ./src/util/deriveCashaddr.ts ***!
+  \************************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export deriveCashaddr [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__ */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.deriveCashaddr = void 0;
+const libauth_1 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
+// Given a private key and network, derive cashaddr from the locking code
+// TODO, is there a more direct way to do this?
+// TODO, This can be moved off the Wallet Class
+async function deriveCashaddr(privateKey, networkPrefix) {
+    const lockingScript = "lock";
+    const template = libauth_1.validateAuthenticationTemplate(libauth_1.authenticationTemplateP2pkhNonHd);
+    if (typeof template === "string") {
+        throw new Error("Address template error");
+    }
+    const lockingData = {
+        keys: { privateKeys: { key: privateKey } },
+    };
+    const compiler = await libauth_1.authenticationTemplateToCompilerBCH(template);
+    const lockingBytecode = compiler.generateBytecode(lockingScript, lockingData);
+    if (!lockingBytecode.success) {
+        throw Error(JSON.stringify(lockingBytecode));
+    }
+    else {
+        return libauth_1.lockingBytecodeToCashAddress(lockingBytecode.bytecode, networkPrefix);
+    }
+}
+exports.deriveCashaddr = deriveCashaddr;
+
+
+/***/ }),
+
+/***/ "./src/util/getUsdRate.ts":
+/*!********************************!*\
+  !*** ./src/util/getUsdRate.ts ***!
+  \********************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getUsdRate [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__ */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getUsdRate = void 0;
+const fetch = __webpack_require__(/*! node-fetch */ "./node_modules/node-fetch/lib/index.mjs");
+async function getUsdRate() {
+    try {
+        let response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd");
+        let data = await response.json();
+        return data["bitcoin-cash"].usd;
+    }
+    catch (e) {
+        throw Error(e);
+    }
+}
+exports.getUsdRate = getUsdRate;
+
+
+/***/ }),
+
+/***/ "./src/util/sumSendRequestAmounts.ts":
+/*!*******************************************!*\
+  !*** ./src/util/sumSendRequestAmounts.ts ***!
+  \*******************************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export sumSendRequestAmounts [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__ */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sumSendRequestAmounts = void 0;
+async function sumSendRequestAmounts(requests) {
+    if (requests) {
+        const balanceArray = await Promise.all(requests.map(async (r) => {
+            return r.amount.inSatoshi();
+        }));
+        const balance = balanceArray.reduce(sumBalance, 0n);
+        return balance;
+    }
+    else {
+        return 0n;
+    }
+}
+exports.sumSendRequestAmounts = sumSendRequestAmounts;
+function sumBalance(a, b) {
+    // a is zero or a number
+    if (b instanceof Error) {
+        throw b;
+    }
+    return BigInt(a) + BigInt(b);
+}
+
+
+/***/ }),
+
+/***/ "./src/util/sumUtxoValue.ts":
+/*!**********************************!*\
+  !*** ./src/util/sumUtxoValue.ts ***!
+  \**********************************/
+/*! flagged exports */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export sumUtxoValue [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__ */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sumUtxoValue = void 0;
+async function sumUtxoValue(utxos) {
+    if (utxos) {
+        const balanceArray = await Promise.all(utxos.map(async (o) => {
             return o.getValue();
         }));
         const balance = balanceArray.reduce((a, b) => a + b, 0);
@@ -62567,30 +69454,7 @@ async function getInputTotal(inputs) {
         return 0;
     }
 }
-exports.getInputTotal = getInputTotal;
-
-
-/***/ }),
-
-/***/ "./src/util/randomInt.ts":
-/*!*******************************!*\
-  !*** ./src/util/randomInt.ts ***!
-  \*******************************/
-/*! flagged exports */
-/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export getRandomInt [provided] [no usage info] [missing usage info prevents renaming] */
-/*! other exports [not provided] [no usage info] */
-/*! runtime requirements: __webpack_exports__ */
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getRandomInt = void 0;
-function getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
-}
-exports.getRandomInt = getRandomInt;
+exports.sumUtxoValue = sumUtxoValue;
 
 
 /***/ }),
@@ -62601,7 +69465,6 @@ exports.getRandomInt = getRandomInt;
   \****************************/
 /*! flagged exports */
 /*! export BaseWallet [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export SendRequest [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_exports__, __webpack_require__ */
@@ -62610,34 +69473,11 @@ exports.getRandomInt = getRandomInt;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BaseWallet = exports.SendRequest = void 0;
-// Unstable?
+exports.BaseWallet = void 0;
 const libauth_1 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
-// This is swapped out by webpack for the web module
+// GrpcClient is swapped out by webpack for a web module
 const grpc_bchrpc_node_1 = __webpack_require__(/*! grpc-bchrpc-node */ "./node_modules/grpc-bchrpc-node/dist/index.js");
-class SendRequest {
-    constructor(SerializedSendRequest) {
-        this.address = SerializedSendRequest[0];
-        this.amount = new Amount(SerializedSendRequest[1]);
-    }
-}
-exports.SendRequest = SendRequest;
-class Amount {
-    constructor(SerializedAmount) {
-        this.amount = SerializedAmount[0];
-        this.unit = SerializedAmount[1];
-    }
-    inSatoshi() {
-        switch (this.unit) {
-            case "satoshi":
-                return Number(this.amount);
-            case "coin":
-                return Number(this.amount / 10e8);
-            default:
-                throw Error("Unit of value not defined");
-        }
-    }
-}
+const enum_1 = __webpack_require__(/*! ./enum */ "./src/wallet/enum.ts");
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
@@ -62648,8 +69488,21 @@ class BaseWallet {
         this.networkPrefix = networkPrefix;
         this.networkType =
             this.networkPrefix === libauth_1.CashAddressNetworkPrefix.mainnet
-                ? "mainnet"
-                : "testnet";
+                ? enum_1.NetworkType.Mainnet
+                : enum_1.NetworkType.Testnet;
+        switch (networkPrefix) {
+            case libauth_1.CashAddressNetworkPrefix.mainnet:
+                this.network = enum_1.NetworkEnum.Mainnet;
+                break;
+            case libauth_1.CashAddressNetworkPrefix.testnet:
+                this.network = enum_1.NetworkEnum.Testnet;
+                break;
+            case libauth_1.CashAddressNetworkPrefix.regtest:
+                this.network = enum_1.NetworkEnum.Regtest;
+                break;
+            default:
+                throw Error("could not map cashaddr prefix to network");
+        }
         this.isTestnet = this.networkType === "testnet" ? true : false;
         if (this.isTestnet) {
             switch (this.networkPrefix) {
@@ -62669,7 +69522,7 @@ class BaseWallet {
                     });
                     break;
                 case libauth_1.CashAddressNetworkPrefix.testnet:
-                    url = 'https://bchd-testnet.greyh.at:18335';
+                    url = "https://bchd-testnet.greyh.at:18335";
                     this.client = new grpc_bchrpc_node_1.GrpcClient({
                         url: url,
                         testnet: true,
@@ -62681,7 +69534,7 @@ class BaseWallet {
             }
         }
         else {
-            url = 'https://bchd.greyh.at:8335';
+            url = "https://bchd.greyh.at:8335";
             this.client = new grpc_bchrpc_node_1.GrpcClient({
                 url: url,
                 testnet: false,
@@ -62702,9 +69555,9 @@ exports.BaseWallet = BaseWallet;
   !*** ./src/wallet/Wif.ts ***!
   \***************************/
 /*! flagged exports */
+/*! export MainnetWallet [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export RegTestWallet [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export TestnetWallet [provided] [no usage info] [missing usage info prevents renaming] */
-/*! export Wallet [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export WifWallet [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
@@ -62714,22 +69567,28 @@ exports.BaseWallet = BaseWallet;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RegTestWallet = exports.TestnetWallet = exports.Wallet = exports.WifWallet = void 0;
+exports.RegTestWallet = exports.TestnetWallet = exports.MainnetWallet = exports.WifWallet = void 0;
 // Stable
 const libauth_1 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
 // Unstable?
 const libauth_2 = __webpack_require__(/*! @bitauth/libauth */ "./node_modules/@bitauth/libauth/build/module/index.js");
+const enum_1 = __webpack_require__(/*! ./enum */ "./src/wallet/enum.ts");
 const Base_1 = __webpack_require__(/*! ./Base */ "./src/wallet/Base.ts");
+const model_1 = __webpack_require__(/*! ./model */ "./src/wallet/model.ts");
 const Wif_1 = __webpack_require__(/*! ../transaction/Wif */ "./src/transaction/Wif.ts");
-const cashaddr_1 = __webpack_require__(/*! ../cashaddr */ "./src/cashaddr.ts");
-const randomInt_1 = __webpack_require__(/*! ../util/randomInt */ "./src/util/randomInt.ts");
+const Qr_1 = __webpack_require__(/*! ../qr/Qr */ "./src/qr/Qr.ts");
+const checkWifNetwork_1 = __webpack_require__(/*! ../util/checkWifNetwork */ "./src/util/checkWifNetwork.ts");
+const deriveCashaddr_1 = __webpack_require__(/*! ../util/deriveCashaddr */ "./src/util/deriveCashaddr.ts");
+const balanceObjectFromSatoshi_1 = __webpack_require__(/*! ../util/balanceObjectFromSatoshi */ "./src/util/balanceObjectFromSatoshi.ts");
+const sumUtxoValue_1 = __webpack_require__(/*! ../util/sumUtxoValue */ "./src/util/sumUtxoValue.ts");
+const sumSendRequestAmounts_1 = __webpack_require__(/*! ../util/sumSendRequestAmounts */ "./src/util/sumSendRequestAmounts.ts");
 const secp256k1Promise = libauth_1.instantiateSecp256k1();
 const sha256Promise = libauth_1.instantiateSha256();
 class WifWallet extends Base_1.BaseWallet {
     constructor(name = "", networkPrefix) {
         super(name, networkPrefix);
         this.name = name;
-        this.walletType = 'wif';
+        this.walletType = enum_1.WalletTypeEnum.Wif;
     }
     // Initialize wallet from a cash addr
     async watchOnly(address) {
@@ -62749,153 +69608,198 @@ class WifWallet extends Base_1.BaseWallet {
         let result = libauth_2.decodePrivateKeyWif(sha256, walletImportFormatString);
         const hasError = typeof result === "string";
         if (hasError) {
-            return new Error(result);
+            throw Error(result);
         }
-        else {
-            let resultData = result;
-            this.privateKey = resultData.privateKey;
-            this.privateKeyWif = walletImportFormatString;
-            this.walletType = "wif";
-            this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-            this.cashaddr = (await cashaddr_1.deriveCashAddr(this.privateKey, this.networkPrefix));
-        }
+        checkWifNetwork_1.checkWifNetwork(walletImportFormatString, this.networkType);
+        let resultData = result;
+        this.privateKey = resultData.privateKey;
+        this.privateKeyWif = walletImportFormatString;
+        this.walletType = enum_1.WalletTypeEnum.Wif;
+        this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+        this.cashaddr = (await deriveCashaddr_1.deriveCashaddr(this.privateKey, this.networkPrefix));
     }
     async generateWif() {
         const sha256 = await sha256Promise;
         const secp256k1 = await secp256k1Promise;
         // nodejs
-        if (typeof process !== 'undefined') {
+        if (typeof process !== "undefined") {
             let crypto = __webpack_require__(/*! crypto */ "crypto");
             this.privateKey = libauth_2.generatePrivateKey(() => crypto.randomBytes(32));
         }
-        // window, webworkers, serviceworkers
+        // window, webworkers, service workers
         else {
             this.privateKey = libauth_2.generatePrivateKey(() => window.crypto.getRandomValues(new Uint8Array(32)));
         }
         this.privateKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
         this.privateKeyWif = libauth_2.encodePrivateKeyWif(sha256, this.privateKey, this.networkType);
-        this.walletType = "wif";
-        this.cashaddr = (await cashaddr_1.deriveCashAddr(this.privateKey, this.networkPrefix));
+        this.walletType = enum_1.WalletTypeEnum.Wif;
+        this.cashaddr = (await deriveCashaddr_1.deriveCashaddr(this.privateKey, this.networkPrefix));
+    }
+    async send(requests) {
+        let result = await this.sendRaw(requests);
+        let resp = new model_1.SendResponse({});
+        resp.transactionId = libauth_2.binToHex(result);
+        resp.balance = await this.balance();
+        return resp;
     }
     // Processes an array of send requests
-    async send(requests) {
+    async sendRaw(requests) {
         // Deserialize the request
-        const sendRequestList = await Promise.all(requests.map(async (rawSendRequest) => {
-            return new Base_1.SendRequest(rawSendRequest);
+        const sendRequests = await Promise.all(requests.map(async (rawSendRequest) => {
+            return new model_1.SendRequest(rawSendRequest);
         }));
-        // Process the requests
-        const sendResponseList = await Promise.all(sendRequestList.map(async (sendRequest) => {
-            return this._processSendRequest(sendRequest);
-        }));
-        return sendResponseList;
+        return await this._processSendRequests(sendRequests);
+    }
+    async sendMax(sendMaxRequest) {
+        let result = await this.sendMaxRaw(sendMaxRequest);
+        let resp = new model_1.SendResponse({});
+        resp.transactionId = libauth_2.binToHex(result);
+        resp.balance = await this.balance();
+        return resp;
+    }
+    async sendMaxRaw(sendMaxRequest) {
+        let maxSpendableAmount = await this.maxAmountToSend({});
+        if (maxSpendableAmount.sat === undefined) {
+            throw Error("no Max amount to send");
+        }
+        let sendRequest = new model_1.SendRequest({
+            cashaddr: sendMaxRequest.cashaddr,
+            amount: new model_1.Amount({ value: maxSpendableAmount.sat, unit: enum_1.UnitEnum.Sat }),
+        });
+        return await this._processSendRequests([sendRequest], true);
     }
     getSerializedWallet() {
-        return `${this.walletType}:${this.networkPrefix}:${this.privateKeyWif}`;
+        return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     }
-    // Gets balance by summing value in all utxos in stats
-    async getBalance(address) {
-        var _a;
-        const res = await ((_a = this.client) === null || _a === void 0 ? void 0 : _a.getAddressUtxos({
+    depositAddress() {
+        return { cashaddr: this.cashaddr };
+    }
+    depositQr() {
+        return Qr_1.qrAddress(this.cashaddr);
+    }
+    async getUtxos(address) {
+        if (!this.client) {
+            throw Error("Attempting to get utxos from wallet without a client");
+        }
+        const res = await this.client.getAddressUtxos({
             address: address,
             includeMempool: true,
-        }));
-        const txns = res === null || res === void 0 ? void 0 : res.getOutputsList();
-        if (txns) {
-            const balanceArray = await Promise.all(txns.map(async (o) => {
-                return o.getValue();
-            }));
-            const balance = balanceArray.reduce((a, b) => a + b, 0);
-            return balance;
+        });
+        if (!res) {
+            throw Error("No Utxo response from server");
         }
-        else {
-            return 0;
-        }
+        return res.getOutputsList();
+    }
+    async balance() {
+        return await balanceObjectFromSatoshi_1.balanceResponseFromSatoshi(await this.getBalance());
+    }
+    // Gets balance by summing value in all utxos in stats
+    async getBalance() {
+        const utxos = await this.getUtxos(this.cashaddr);
+        return await sumUtxoValue_1.sumUtxoValue(utxos);
     }
     toString() {
         return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
     }
-    // Return address balance in satoshi
-    async balanceSats(address) {
-        return await this.getBalance(address);
+    async maxAmountToSend({ outputCount = 1, }) {
+        if (!this.privateKey) {
+            throw Error("Couldn't get network or private key for wallet.");
+        }
+        if (!this.cashaddr) {
+            throw Error("attempted to send without a cashaddr");
+        }
+        // get inputs
+        let utxos = await this.getUtxos(this.cashaddr);
+        // Get current height to assure recently mined coins are not spent.
+        let bestHeight = (await this.client.getBlockchainInfo()).getBestHeight();
+        let amount = new model_1.Amount({ value: 100, unit: enum_1.UnitEnum.Sat });
+        // simulate outputs using the sender's address
+        const sendRequest = new model_1.SendRequest({
+            cashaddr: this.cashaddr,
+            amount: amount,
+        });
+        let sendRequests = Array(outputCount)
+            .fill(0)
+            .map(() => sendRequest);
+        let fundingUtxos = await Wif_1.getSuitableUtxos(utxos, undefined, bestHeight);
+        let fee = await Wif_1.getFeeAmount({
+            utxos: fundingUtxos,
+            sendRequests: sendRequests,
+            privateKey: this.privateKey,
+        });
+        let spendableAmount = await sumUtxoValue_1.sumUtxoValue(fundingUtxos);
+        return await balanceObjectFromSatoshi_1.balanceResponseFromSatoshi(spendableAmount - fee);
     }
-    // Return address balance in bitcoin
-    async balance(address) {
-        return (await this.getBalance(address)) / 10e8;
+    /**
+     * utxos Get unspent outputs for the wallet
+     */
+    async utxos() {
+        if (!this.cashaddr) {
+            throw Error("Attempted to get utxos without an address");
+        }
+        let utxos = await this.getUtxos(this.cashaddr);
+        let resp = new model_1.UtxoResponse();
+        resp.utxos = await Promise.all(utxos.map(async (o) => {
+            let utxo = new model_1.Utxo();
+            utxo.amount = new model_1.Amount({ unit: enum_1.UnitEnum.Sat, value: o.getValue() });
+            let txId = o.getOutpoint().getHash_asU8() || new Uint8Array([]);
+            utxo.transactionId = libauth_2.binToHex(txId);
+            utxo.index = o.getOutpoint().getIndex();
+            utxo.utxoId = utxo.transactionId + ":" + utxo.index;
+            return utxo;
+        }));
+        return resp;
     }
-    // Process an individual send request
-    async _processSendRequest(request) {
-        var _a, _b, _c, _d;
-        if (this.networkPrefix && this.privateKey) {
-            // get input
-            if (!this.cashaddr) {
-                throw Error("attempted to send without a cashaddr");
-            }
-            let utxos = await ((_a = this.client) === null || _a === void 0 ? void 0 : _a.getAddressUtxos({
-                address: this.cashaddr,
-                includeMempool: true,
-            }));
-            let bestHeight = (_d = (_c = (await ((_b = this.client) === null || _b === void 0 ? void 0 : _b.getBlockchainInfo()))) === null || _c === void 0 ? void 0 : _c.getBestHeight()) !== null && _d !== void 0 ? _d : 0;
-            let spendAmount = request.amount.inSatoshi();
-            // TODO refactor this
-            if (utxos && typeof spendAmount === 'number') {
-                let outputList = (utxos === null || utxos === void 0 ? void 0 : utxos.getOutputsList()) || [];
-                let draftUtxos = await Wif_1.getSuitableUtxos(outputList, spendAmount, bestHeight);
-                // build transaction
-                if (draftUtxos) {
-                    // Build the transaction to get the approximate size
-                    let draftTransaction = await this._buildEncodedTransaction(draftUtxos, request, this.privateKey, 10);
-                    let fee = (draftTransaction.length * 2) + randomInt_1.getRandomInt(1000);
-                    let fundingUtxos = await Wif_1.getSuitableUtxos(outputList, spendAmount + fee, bestHeight);
-                    if (fundingUtxos) {
-                        let encodedTransaction = await this._buildEncodedTransaction(fundingUtxos, request, this.privateKey, fee);
-                        return await this._submitTransaction(encodedTransaction);
-                    }
-                    else {
-                        throw Error("The available inputs couldn't satisfy the request with fees");
-                    }
-                }
-                else {
-                    throw Error("The available inputs in the wallet cannot satisfy this send request");
-                }
-            }
-            else {
-                throw Error("There were no Unspent Outputs or the send amount could not be parsed");
-            }
+    /**
+     * _processsSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
+     * @param  {SendRequest[]} sendRequests
+     * @param  {} discardChange=false
+     */
+    async _processSendRequests(sendRequests, discardChange = false) {
+        if (!this.privateKey) {
+            throw Error(`Wallet ${this.name} is missing either a network or private key`);
         }
-        else {
-            throw Error(`Wallet ${this.name} hasn't is missing either a network or private key`);
+        if (!this.cashaddr) {
+            throw Error("attempted to send without a cashaddr");
         }
-    }
-    // Build encoded transaction 
-    async _buildEncodedTransaction(fundingUtxos, request, privateKey, fee = 0) {
-        let txn = await Wif_1.buildP2pkhNonHdTransaction(fundingUtxos, request, privateKey, fee);
-        // submit transaction
-        if (txn.success) {
-            return libauth_2.encodeTransaction(txn.transaction);
+        // get input
+        let utxos = await this.getUtxos(this.cashaddr);
+        let bestHeight = (await this.client.getBlockchainInfo()).getBestHeight();
+        let spendAmount = await sumSendRequestAmounts_1.sumSendRequestAmounts(sendRequests);
+        if (utxos.length === 0) {
+            throw Error("There were no Unspent Outputs");
         }
-        else {
-            throw Error("Error building transaction with fee");
+        if (typeof spendAmount !== "bigint") {
+            throw Error("Couldn't get spend amount when building transaction");
         }
+        let fee = await Wif_1.getFeeAmount({
+            utxos: utxos,
+            sendRequests: sendRequests,
+            privateKey: this.privateKey,
+        });
+        let fundingUtxos = await Wif_1.getSuitableUtxos(utxos, BigInt(spendAmount) + BigInt(fee), bestHeight);
+        if (fundingUtxos.length === 0) {
+            throw Error("The available inputs couldn't satisfy the request with fees");
+        }
+        let encodedTransaction = await Wif_1.buildEncodedTransaction(fundingUtxos, sendRequests, this.privateKey, fee, discardChange);
+        return await this._submitTransaction(encodedTransaction);
     }
     // Submit a raw transaction
     async _submitTransaction(transaction) {
-        if (this.client) {
-            const res = await this.client.submitTransaction({ txn: transaction });
-            return res.getHash_asU8();
-        }
-        else {
+        if (!this.client) {
             throw Error("Wallet node client was not initialized");
         }
+        const res = await this.client.submitTransaction({ txn: transaction });
+        return res.getHash_asU8();
     }
 }
 exports.WifWallet = WifWallet;
-class Wallet extends WifWallet {
+class MainnetWallet extends WifWallet {
     constructor(name = "") {
-        throw Error("This wallet is in active development");
         super(name, libauth_2.CashAddressNetworkPrefix.mainnet);
     }
 }
-exports.Wallet = Wallet;
+exports.MainnetWallet = MainnetWallet;
 class TestnetWallet extends WifWallet {
     constructor(name = "") {
         super(name, libauth_2.CashAddressNetworkPrefix.testnet);
@@ -62908,6 +69812,136 @@ class RegTestWallet extends WifWallet {
     }
 }
 exports.RegTestWallet = RegTestWallet;
+
+
+/***/ }),
+
+/***/ "./src/wallet/enum.ts":
+/*!****************************!*\
+  !*** ./src/wallet/enum.ts ***!
+  \****************************/
+/*! flagged exports */
+/*! export NetworkEnum [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export NetworkType [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export UnitEnum [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export WalletTypeEnum [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__ */
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NetworkEnum = exports.WalletTypeEnum = exports.UnitEnum = exports.NetworkType = void 0;
+var NetworkType;
+(function (NetworkType) {
+    NetworkType["Mainnet"] = "mainnet";
+    NetworkType["Testnet"] = "testnet";
+})(NetworkType = exports.NetworkType || (exports.NetworkType = {}));
+var UnitEnum;
+(function (UnitEnum) {
+    UnitEnum[UnitEnum["Bch"] = "bch"] = "Bch";
+    UnitEnum[UnitEnum["Usd"] = "usd"] = "Usd";
+    UnitEnum[UnitEnum["Bit"] = "bit"] = "Bit";
+    UnitEnum[UnitEnum["Bits"] = "bits"] = "Bits";
+    UnitEnum[UnitEnum["Sat"] = "sat"] = "Sat";
+    UnitEnum[UnitEnum["Sats"] = "sats"] = "Sats";
+    UnitEnum[UnitEnum["Satoshi"] = "satoshi"] = "Satoshi";
+    UnitEnum[UnitEnum["Satoshis"] = "satoshis"] = "Satoshis";
+})(UnitEnum = exports.UnitEnum || (exports.UnitEnum = {}));
+var WalletTypeEnum;
+(function (WalletTypeEnum) {
+    WalletTypeEnum["Wif"] = "wif";
+    WalletTypeEnum["Hd"] = "hd";
+})(WalletTypeEnum = exports.WalletTypeEnum || (exports.WalletTypeEnum = {}));
+var NetworkEnum;
+(function (NetworkEnum) {
+    NetworkEnum[NetworkEnum["Mainnet"] = "mainnet"] = "Mainnet";
+    NetworkEnum[NetworkEnum["Testnet"] = "testnet"] = "Testnet";
+    NetworkEnum[NetworkEnum["Regtest"] = "regtest"] = "Regtest";
+    NetworkEnum[NetworkEnum["Simtest"] = "simtest"] = "Simtest";
+})(NetworkEnum = exports.NetworkEnum || (exports.NetworkEnum = {}));
+
+
+/***/ }),
+
+/***/ "./src/wallet/model.ts":
+/*!*****************************!*\
+  !*** ./src/wallet/model.ts ***!
+  \*****************************/
+/*! flagged exports */
+/*! export Amount [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export SendMaxRequest [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export SendRequest [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export SendResponse [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export Utxo [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export UtxoResponse [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export __esModule [provided] [no usage info] [missing usage info prevents renaming] */
+/*! other exports [not provided] [no usage info] */
+/*! runtime requirements: __webpack_exports__, __webpack_require__ */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SendResponse = exports.SendMaxRequest = exports.Amount = exports.UtxoResponse = exports.Utxo = exports.SendRequest = void 0;
+const chain_1 = __webpack_require__(/*! ../chain */ "./src/chain.ts");
+const balanceObjectFromSatoshi_1 = __webpack_require__(/*! ../util/balanceObjectFromSatoshi */ "./src/util/balanceObjectFromSatoshi.ts");
+const enum_1 = __webpack_require__(/*! ./enum */ "./src/wallet/enum.ts");
+// These are the minimal models used to provide types for the express server
+//
+// This file will be deprecated auto-generated file in the future
+// Any business logic contained here should be moved elsewhere in src/
+class SendRequest {
+    constructor({ cashaddr, amount }) {
+        this.cashaddr = cashaddr;
+        this.amount = new Amount(amount);
+    }
+}
+exports.SendRequest = SendRequest;
+class Utxo {
+}
+exports.Utxo = Utxo;
+class UtxoResponse {
+}
+exports.UtxoResponse = UtxoResponse;
+class Amount {
+    constructor({ value, unit }) {
+        this.value = value;
+        this.unit = unit;
+    }
+    inSatoshi() {
+        switch (this.unit) {
+            case enum_1.UnitEnum.Satoshi:
+                return BigInt(this.value);
+            case enum_1.UnitEnum.Sat:
+                return BigInt(this.value);
+            case enum_1.UnitEnum.Sats:
+                return BigInt(this.value);
+            case enum_1.UnitEnum.Satoshis:
+                return BigInt(this.value);
+            case enum_1.UnitEnum.Bch:
+                return BigInt(this.value * chain_1.bchParam.subUnits);
+            default:
+                throw Error("Unit of value not defined");
+        }
+    }
+}
+exports.Amount = Amount;
+class SendMaxRequest {
+    constructor({ cashaddr }) {
+        this.cashaddr = cashaddr;
+    }
+}
+exports.SendMaxRequest = SendMaxRequest;
+class SendResponse {
+    constructor({ transactionId, balance, }) {
+        this.transactionId = transactionId;
+        this.balance = new balanceObjectFromSatoshi_1.BalanceResponse(balance);
+    }
+}
+exports.SendResponse = SendResponse;
 
 
 /***/ }),
@@ -63229,6 +70263,32 @@ module.exports = require("fs");
 
 /***/ }),
 
+/***/ "http":
+/*!***********************!*\
+  !*** external "http" ***!
+  \***********************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: module */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("http");
+
+/***/ }),
+
+/***/ "https":
+/*!************************!*\
+  !*** external "https" ***!
+  \************************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: module */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("https");
+
+/***/ }),
+
 /***/ "os":
 /*!*********************!*\
   !*** external "os" ***!
@@ -63291,6 +70351,19 @@ module.exports = require("url");
 
 "use strict";
 module.exports = require("util");
+
+/***/ }),
+
+/***/ "zlib":
+/*!***********************!*\
+  !*** external "zlib" ***!
+  \***********************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: module */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("zlib");
 
 /***/ })
 

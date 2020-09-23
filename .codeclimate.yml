@@ -1,0 +1,10 @@
+exclude_patterns:
+  - "dist/"
+  - "demo/"
+  - "jest/"
+  - "**/node_modules/"
+  - "**/*.test.ts"
+  - "**/*.test.headless.js"
+  - "**/*.d.ts"
+  - "generated/"
+  - "webpack.config.js"

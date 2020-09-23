@@ -16,6 +16,7 @@ import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 
 import { SendRequest } from "../wallet/model";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
+import { sumUtxoValue } from "../util/sumUtxoValue";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
@@ -37,7 +38,7 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   const compiler = await authenticationTemplateToCompilerBCH(template);
-  const inputAmount = await getInputTotal(inputs);
+  const inputAmount = await sumUtxoValue(inputs);
   const sendAmount = await sumSendRequestAmounts(outputs);
 
   // Get the change locking bytecode
@@ -168,21 +169,6 @@ export async function getSuitableUtxos(
     );
   } else {
     return suitableUtxos;
-  }
-}
-
-// Gets balance by summing value in all utxos in stats
-export async function getInputTotal(inputs: UnspentOutput[]): Promise<number> {
-  if (inputs) {
-    const balanceArray: number[] = await Promise.all(
-      inputs.map(async (o: UnspentOutput) => {
-        return o.getValue();
-      })
-    );
-    const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
-    return balance;
-  } else {
-    return 0;
   }
 }
 

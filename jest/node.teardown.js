@@ -1,10 +1,14 @@
-module.exports = async function () {
-  // stop bchd
-  global.bchDaemon.stdio.forEach((s) => s.pause());
-  global.bchDaemon.kill();
-  console.log("stopped bchd");
+const child_process = require("child_process");
 
-  global.mainnetServer.stdio.forEach((s) => s.pause());
-  global.mainnetServer.kill();
-  console.log("stopped express");
+module.exports = async function () {
+  // Stop bchd
+  global.bchDaemon.stdio.forEach((s) => s.pause());
+
+  // Windows doesn't respect a *nix kill signal
+  if (process.platform === "win32") {
+    child_process.exec("taskkill /pid " + global.bchDaemon.pid + " /T /F");
+  } else {
+    global.bchDaemon.kill();
+  }
+  console.log("stopped bchd");
 };
