@@ -16,14 +16,14 @@ export class TransactionId {
     /**
     * The hash of a transaction
     */
-    'transaction'?: string;
+    'transactionId'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "transaction",
-            "baseName": "transaction",
+            "name": "transactionId",
+            "baseName": "transactionId",
             "type": "string"
         }    ];
 

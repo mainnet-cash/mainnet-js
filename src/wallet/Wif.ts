@@ -8,12 +8,13 @@ import {
   decodePrivateKeyWif,
   encodePrivateKeyWif,
   generatePrivateKey,
-  WalletImportFormatType,
 } from "@bitauth/libauth";
 
 import { UnitEnum, WalletTypeEnum } from "./enum";
 
 import { BaseWallet } from "./Base";
+
+import { PrivateKey } from "./interface";
 
 import {
   Amount,
@@ -30,7 +31,8 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress } from "../qr/Qr";
+import { qrAddress, Image } from "../qr/Qr";
+import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceResponseFromSatoshi,
@@ -42,11 +44,6 @@ import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
-
-interface PrivateKey {
-  privateKey: Uint8Array;
-  type: WalletImportFormatType;
-}
 
 export class WifWallet extends BaseWallet {
   publicKey?: Uint8Array;
@@ -86,17 +83,17 @@ export class WifWallet extends BaseWallet {
     const hasError = typeof result === "string";
     if (hasError) {
       throw Error(result as string);
-    } else {
-      let resultData: PrivateKey = result as PrivateKey;
-      this.privateKey = resultData.privateKey;
-      this.privateKeyWif = walletImportFormatString;
-      this.walletType = WalletTypeEnum.Wif;
-      this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-      this.cashaddr = (await deriveCashaddr(
-        this.privateKey,
-        this.networkPrefix
-      )) as string;
     }
+    checkWifNetwork(walletImportFormatString, this.networkType);
+    let resultData: PrivateKey = result as PrivateKey;
+    this.privateKey = resultData.privateKey;
+    this.privateKeyWif = walletImportFormatString;
+    this.walletType = WalletTypeEnum.Wif;
+    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.cashaddr = (await deriveCashaddr(
+      this.privateKey,
+      this.networkPrefix
+    )) as string;
   }
 
   public async generateWif(): Promise<void | Error> {
@@ -130,7 +127,7 @@ export class WifWallet extends BaseWallet {
   public async send(requests: Array<any>): Promise<SendResponse> {
     let result = await this.sendRaw(requests);
     let resp = new SendResponse({});
-    resp.transaction = binToHex(result);
+    resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
     return resp;
   }
@@ -149,13 +146,13 @@ export class WifWallet extends BaseWallet {
   public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
     let result = await this.sendMaxRaw(sendMaxRequest);
     let resp = new SendResponse({});
-    resp.transaction = binToHex(result);
+    resp.transactionId = binToHex(result);
     resp.balance = await this.balance();
     return resp;
   }
 
   public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
-    let maxSpendableAmount = await this.getMaxAmountToSpend();
+    let maxSpendableAmount = await this.maxAmountToSend({});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
     }
@@ -171,10 +168,10 @@ export class WifWallet extends BaseWallet {
   }
 
   public depositAddress() {
-    return this.cashaddr;
+    return { cashaddr: this.cashaddr };
   }
 
-  public depositQr() {
+  public depositQr(): Image {
     return qrAddress(this.cashaddr as string);
   }
 
@@ -206,7 +203,11 @@ export class WifWallet extends BaseWallet {
     return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
   }
 
-  public async getMaxAmountToSpend(outputCount = 1): Promise<BalanceResponse> {
+  public async maxAmountToSend({
+    outputCount = 1,
+  }: {
+    outputCount?: number;
+  }): Promise<BalanceResponse> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
@@ -240,7 +241,7 @@ export class WifWallet extends BaseWallet {
     return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
   /**
-   * Get unspent outputs for the wallet
+   * utxos Get unspent outputs for the wallet
    */
   public async utxos() {
     if (!this.cashaddr) {
@@ -253,9 +254,9 @@ export class WifWallet extends BaseWallet {
         let utxo = new Utxo();
         utxo.amount = new Amount({ unit: UnitEnum.Sat, value: o.getValue() });
         let txId = o.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
-        utxo.transaction = binToHex(txId);
+        utxo.transactionId = binToHex(txId);
         utxo.index = o.getOutpoint()!.getIndex();
-        utxo.utxoId = utxo.transaction + ":" + utxo.index;
+        utxo.utxoId = utxo.transactionId + ":" + utxo.index;
         return utxo;
       })
     );
@@ -265,11 +266,11 @@ export class WifWallet extends BaseWallet {
   /**
    * _processsSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
    * @param  {SendRequest[]} sendRequests
-   * @param  {} discardChange=true
+   * @param  {} discardChange=false
    */
   private async _processSendRequests(
     sendRequests: SendRequest[],
-    discardChange = true
+    discardChange = false
   ) {
     if (!this.privateKey) {
       throw Error(
@@ -286,9 +287,7 @@ export class WifWallet extends BaseWallet {
     let spendAmount = await sumSendRequestAmounts(sendRequests);
 
     if (utxos.length === 0) {
-      throw Error(
-        "There were no Unspent Outputs or the send amount could not be parsed"
-      );
+      throw Error("There were no Unspent Outputs");
     }
     if (typeof spendAmount !== "bigint") {
       throw Error("Couldn't get spend amount when building transaction");

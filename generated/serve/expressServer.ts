@@ -63,14 +63,14 @@ export class ExpressServer {
     });
   }
 
-  launch() {
-    new OpenApiValidator({
+  async launch () {
+    return new OpenApiValidator({
       apiSpec: this.openApiPath,
       operationHandlers: path.join(__dirname),
       fileUploader: { dest: config.FILE_UPLOAD_PATH },
     }).install(this.app)
       .catch(e => console.log(e))
-      .then(() => {
+      .then(async() => {
         // eslint-disable-next-line no-unused-vars
         // @ts-ignore
         this.app.use((err, req, res, nest: any) => {
@@ -80,9 +80,7 @@ export class ExpressServer {
             errors: err.errors || "",
           });
         });
-
-        http.createServer(this.app).listen(this.port);
-        console.log(`Listening on port ${this.port}`);
+        return this.app.listen(this.port);
       });
   }
 
