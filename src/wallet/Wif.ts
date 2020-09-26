@@ -14,16 +14,18 @@ import { UnitEnum, WalletTypeEnum } from "./enum";
 
 import { BaseWallet } from "./Base";
 
-import { PrivateKey } from "./interface";
+import { PrivateKey } from "../interface";
 
 import {
   Amount,
   SendMaxRequest,
   SendRequest,
   SendResponse,
-  Utxo,
+  UtxoItem,
   UtxoResponse,
 } from "./model";
+
+import { Utxo } from "../interface"
 
 import {
   buildEncodedTransaction,
@@ -40,7 +42,7 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
-import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
+import { EROFS } from "constants";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -124,12 +126,16 @@ export class WifWallet extends BaseWallet {
     )) as string;
   }
 
-  public async send(requests: Array<any>): Promise<SendResponse> {
-    let result = await this.sendRaw(requests);
-    let resp = new SendResponse({});
-    resp.transactionId = binToHex(result);
-    resp.balance = await this.balance();
-    return resp;
+  public async send(requests: SendRequest[]): Promise<SendResponse> {
+    try {
+      let result = await this._processSendRequests(requests);
+      let resp = new SendResponse({});
+      resp.transactionId = result;
+      resp.balance = await this.balance();
+      return resp;
+    } catch (e) {
+      throw e
+    }
   }
 
   // Processes an array of send requests
@@ -144,11 +150,15 @@ export class WifWallet extends BaseWallet {
   }
 
   public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
-    let result = await this.sendMaxRaw(sendMaxRequest);
-    let resp = new SendResponse({});
-    resp.transactionId = binToHex(result);
-    resp.balance = await this.balance();
-    return resp;
+    try {
+      let result = await this.sendMaxRaw(sendMaxRequest);
+      let resp = new SendResponse({});
+      resp.transactionId = result;
+      resp.balance = await this.balance();
+      return resp;
+    } catch(e){
+      throw Error(e)
+    }
   }
 
   public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
@@ -175,18 +185,17 @@ export class WifWallet extends BaseWallet {
     return qrAddress(this.cashaddr as string);
   }
 
-  public async getUtxos(address: string): Promise<UnspentOutput[]> {
-    if (!this.client) {
+  public async getUtxos(address: string): Promise<Utxo[]> {
+    if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
-    const res = await this.client.getAddressUtxos({
-      address: address,
-      includeMempool: true,
-    });
+    const res = await this.provider.getUtxos(
+      address
+    );
     if (!res) {
       throw Error("No Utxo response from server");
     }
-    return res.getOutputsList();
+    return res;
   }
 
   public async balance() {
@@ -218,7 +227,10 @@ export class WifWallet extends BaseWallet {
     let utxos = await this.getUtxos(this.cashaddr);
 
     // Get current height to assure recently mined coins are not spent.
-    let bestHeight = (await this.client!.getBlockchainInfo())!.getBestHeight();
+    let bestHeight = (await this.provider!.getBlockHeight());
+    if (!bestHeight) {
+      throw Error("Couldn't get chain height")
+    }
     let amount = new Amount({ value: 100, unit: UnitEnum.Sat });
 
     // simulate outputs using the sender's address
@@ -250,12 +262,12 @@ export class WifWallet extends BaseWallet {
     let utxos = await this.getUtxos(this.cashaddr);
     let resp = new UtxoResponse();
     resp.utxos = await Promise.all(
-      utxos.map(async (o: UnspentOutput) => {
-        let utxo = new Utxo();
-        utxo.amount = new Amount({ unit: UnitEnum.Sat, value: o.getValue() });
-        let txId = o.getOutpoint()!.getHash_asU8() || new Uint8Array([]);
-        utxo.transactionId = binToHex(txId);
-        utxo.index = o.getOutpoint()!.getIndex();
+      utxos.map(async (o: Utxo) => {
+        let utxo = new UtxoItem();
+        utxo.amount = new Amount({ unit: UnitEnum.Sat, value: o.satoshis });
+
+        utxo.transactionId = o.txid;
+        utxo.index = o.vout;
         utxo.utxoId = utxo.transactionId + ":" + utxo.index;
         return utxo;
       })
@@ -264,7 +276,7 @@ export class WifWallet extends BaseWallet {
   }
 
   /**
-   * _processsSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
+   * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
    * @param  {SendRequest[]} sendRequests
    * @param  {} discardChange=false
    */
@@ -273,7 +285,7 @@ export class WifWallet extends BaseWallet {
     discardChange = false
   ) {
     if (!this.privateKey) {
-      throw Error(
+      throw new Error(
         `Wallet ${this.name} is missing either a network or private key`
       );
     }
@@ -283,7 +295,7 @@ export class WifWallet extends BaseWallet {
     // get input
     let utxos = await this.getUtxos(this.cashaddr);
 
-    let bestHeight = (await this.client!.getBlockchainInfo())!.getBestHeight();
+    let bestHeight = await this.provider!.getBlockHeight()!;
     let spendAmount = await sumSendRequestAmounts(sendRequests);
 
     if (utxos.length === 0) {
@@ -321,12 +333,12 @@ export class WifWallet extends BaseWallet {
   // Submit a raw transaction
   private async _submitTransaction(
     transaction: Uint8Array
-  ): Promise<Uint8Array> {
-    if (!this.client) {
-      throw Error("Wallet node client was not initialized");
+  ): Promise<string> {
+    if (!this.provider) {
+      throw Error("Wallet network provider was not initialized");
     }
-    const res = await this.client.submitTransaction({ txn: transaction });
-    return res.getHash_asU8();
+    let rawTransaction = binToHex(transaction);
+    return await this.provider.sendRawTransaction(rawTransaction);
   }
 }
 

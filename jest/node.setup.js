@@ -1,5 +1,6 @@
 // jest/node.setup.js
 require("dotenv").config({ path: ".env.regtest" });
+require("dotenv").config({ path: ".env.testnet" });
 
 const { spawn } = require("child_process");
 const http = require("http");

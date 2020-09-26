@@ -84,7 +84,7 @@ export async function walletFromIdString(
     case "hd":
       throw Error("Heuristic Wallets are not implemented");
     default:
-      throw Error("The wallet type was not understood");
+      throw Error(`The wallet type: ${walletType} was not understood`);
   }
   return wallet;
 }
