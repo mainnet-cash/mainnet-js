@@ -152,7 +152,7 @@ describe(`Wallet should function in the browser`, () => {
       const result = await page.evaluate(
         async (args) => {
           const alice = await mainnet.walletFromIdString(args[0]);
-          const bob = await mainnet.walletFromIdString(args[1]);
+          const bob = await mainnet.createWallet(args[1]);
           await alice.send([
             { cashaddr: bob.cashaddr, amount: { value: 3000, unit: "sat" } },
           ]);
