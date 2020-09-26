@@ -4,10 +4,7 @@ const PAGE_URL = "http://localhost:8080";
 describe(`Wallet should function in the browser`, () => {
   let browser = null;
   let page = null;
-  const getRandomInt = function(max) {
-    return Math.floor(Math.random() * Math.floor(max));
-  }
-  
+
   /**
    * Create the browser and page context
    */
@@ -135,7 +132,7 @@ describe(`Wallet should function in the browser`, () => {
             name: "Bob's random wallet",
           });
           await alice.send([
-            { cashaddr: bob.cashaddr, amount: { value: 3000+getRandomInt(1000), unit: "sat" } },
+            { cashaddr: bob.cashaddr, amount: { value: 3000, unit: "sat" } },
           ]);
           return bob.sendMax({ cashaddr: alice.cashaddr });
         },
