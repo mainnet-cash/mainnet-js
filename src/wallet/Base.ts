@@ -1,7 +1,11 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
-import { MainnetProvider, TestnetProvider, RegtestProvider } from "../network/default"
-import { NetworkProvider } from "../network"
+import {
+  MainnetProvider,
+  TestnetProvider,
+  RegtestProvider,
+} from "../network/default";
+import { NetworkProvider } from "../network";
 import { NetworkEnum, NetworkType } from "./enum";
 import { browserNotSupported } from "../util/browserNotSupported";
 /**
@@ -41,14 +45,14 @@ export class BaseWallet {
       switch (this.networkPrefix) {
         case CashAddressNetworkPrefix.regtest:
           browserNotSupported();
-          this.provider = RegtestProvider()
+          this.provider = RegtestProvider();
           break;
         case CashAddressNetworkPrefix.testnet:
-          this.provider = TestnetProvider()
+          this.provider = TestnetProvider();
           break;
       }
     } else {
-      this.provider = MainnetProvider()
+      this.provider = MainnetProvider();
     }
   }
 }

@@ -11,7 +11,13 @@ export class SendRequest {
   cashaddr: string;
   amount: Amount;
 
-  constructor({ cashaddr, amount }: { cashaddr: string; amount: AmountType| { value: number, unit: UnitEnum } }) {
+  constructor({
+    cashaddr,
+    amount,
+  }: {
+    cashaddr: string;
+    amount: AmountType | { value: number; unit: UnitEnum };
+  }) {
     this.cashaddr = cashaddr;
     this.amount = new Amount(amount);
   }
@@ -31,7 +37,7 @@ export class UtxoResponse {
 export class Amount {
   value: number;
   unit: UnitEnum;
-  constructor({ value, unit }: AmountType|{ value: number; unit: UnitEnum }) {
+  constructor({ value, unit }: AmountType | { value: number; unit: UnitEnum }) {
     this.value = value;
     this.unit = unit;
   }
@@ -54,7 +60,7 @@ export class Amount {
   }
 }
 
-export type AmountType = (typeof Amount)[keyof typeof Amount];
+export type AmountType = typeof Amount[keyof typeof Amount];
 
 export class SendMaxRequest {
   cashaddr: string;

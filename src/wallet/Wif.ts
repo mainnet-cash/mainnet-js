@@ -25,7 +25,7 @@ import {
   UtxoResponse,
 } from "./model";
 
-import { Utxo } from "../interface"
+import { Utxo } from "../interface";
 
 import {
   buildEncodedTransaction,
@@ -134,7 +134,7 @@ export class WifWallet extends BaseWallet {
       resp.balance = await this.balance();
       return resp;
     } catch (e) {
-      throw e
+      throw e;
     }
   }
 
@@ -156,8 +156,8 @@ export class WifWallet extends BaseWallet {
       resp.transactionId = result;
       resp.balance = await this.balance();
       return resp;
-    } catch(e){
-      throw Error(e)
+    } catch (e) {
+      throw Error(e);
     }
   }
 
@@ -189,9 +189,7 @@ export class WifWallet extends BaseWallet {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
-    const res = await this.provider.getUtxos(
-      address
-    );
+    const res = await this.provider.getUtxos(address);
     if (!res) {
       throw Error("No Utxo response from server");
     }
@@ -227,9 +225,9 @@ export class WifWallet extends BaseWallet {
     let utxos = await this.getUtxos(this.cashaddr);
 
     // Get current height to assure recently mined coins are not spent.
-    let bestHeight = (await this.provider!.getBlockHeight());
+    let bestHeight = await this.provider!.getBlockHeight();
     if (!bestHeight) {
-      throw Error("Couldn't get chain height")
+      throw Error("Couldn't get chain height");
     }
     let amount = new Amount({ value: 100, unit: UnitEnum.Sat });
 
@@ -331,9 +329,7 @@ export class WifWallet extends BaseWallet {
   }
 
   // Submit a raw transaction
-  private async _submitTransaction(
-    transaction: Uint8Array
-  ): Promise<string> {
+  private async _submitTransaction(transaction: Uint8Array): Promise<string> {
     if (!this.provider) {
       throw Error("Wallet network provider was not initialized");
     }

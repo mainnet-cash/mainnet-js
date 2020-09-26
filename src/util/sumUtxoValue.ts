@@ -1,4 +1,4 @@
-import { Utxo } from "../interface"
+import { Utxo } from "../interface";
 
 export async function sumUtxoValue(utxos: Utxo[]) {
   if (utxos) {

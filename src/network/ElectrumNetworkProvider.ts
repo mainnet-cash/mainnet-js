@@ -1,154 +1,213 @@
+import { binToHex, instantiateSha256, Sha256 } from "@bitauth/libauth";
 import {
-    binToHex,
-    instantiateSha256,
-    Sha256
-} from '@bitauth/libauth';
-import {
-    ElectrumCluster,
-    ElectrumTransport,
-    ClusterOrder,
-    RequestResponse,
-} from 'electrum-cash';
+  ElectrumCluster,
+  ElectrumTransport,
+  ClusterOrder,
+  RequestResponse,
+} from "electrum-cash";
 import NetworkProvider from "./NetworkProvider";
-import { Utxo, Network } from '../interface';
+import { Utxo, Network } from "../interface";
 
-import { deriveLockscript } from '../util/deriveLockscript';
+import { deriveLockscript } from "../util/deriveLockscript";
 
 const sha256Promise = instantiateSha256();
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
-    private electrum: ElectrumCluster;
-    private concurrentRequests: number = 0;
+  private electrum: ElectrumCluster;
+  private concurrentRequests: number = 0;
 
-
-    constructor(
-        public network: Network = Network.MAINNET,
-        electrum?: ElectrumCluster,
-        private manualConnectionManagement?: boolean,
-    ) {
-        // If a custom Electrum Cluster is passed, we use it instead of the default.
-        if (electrum) {
-            this.electrum = electrum;
-            return;
-        }
-
-        if (network === Network.MAINNET) {
-            // Initialize a 2-of-3 Electrum Cluster with 6 reliable hardcoded servers
-            // using the first three servers as "priority" servers
-            this.electrum = new ElectrumCluster('CashScript Application', '1.4.1', 2, 3, ClusterOrder.PRIORITY);
-            this.electrum.addServer('bch.imaginary.cash', 50004, ElectrumTransport.WSS.Scheme, false);
-            this.electrum.addServer('blackie.c3-soft.com', 50004, ElectrumTransport.WSS.Scheme, false);
-            this.electrum.addServer('electroncash.de', 60002, ElectrumTransport.WSS.Scheme, false);
-            this.electrum.addServer('electroncash.dk', 50004, ElectrumTransport.WSS.Scheme, false);
-            this.electrum.addServer('bch.loping.net', 50004, ElectrumTransport.WSS.Scheme, false);
-            this.electrum.addServer('electrum.imaginary.cash', 50004, ElectrumTransport.WSS.Scheme, false);
-        } else if (network === Network.TESTNET) {
-            // Initialize a 1-of-2 Electrum Cluster with 2 hardcoded servers
-            this.electrum = new ElectrumCluster('CashScript Application', '1.4.1', 1, 2);
-            this.electrum.addServer('blackie.c3-soft.com', 60004, ElectrumTransport.WSS.Scheme, false);
-            this.electrum.addServer('electroncash.de', 60004, ElectrumTransport.WSS.Scheme, false);
-            // this.electrum.addServer('bch.loping.net', 60004, ElectrumTransport.WSS.Scheme, false);
-            // this.electrum.addServer('testnet.imaginary.cash', 50004, ElectrumTransport.WSS.Scheme);
-        } else {
-            throw new Error(`Tried to instantiate an ElectrumNetworkProvider for unknown network ${network}`);
-        }
+  constructor(
+    public network: Network = Network.MAINNET,
+    electrum?: ElectrumCluster,
+    private manualConnectionManagement?: boolean
+  ) {
+    // If a custom Electrum Cluster is passed, we use it instead of the default.
+    if (electrum) {
+      this.electrum = electrum;
+      return;
     }
 
-    async getUtxos(address: string): Promise<Utxo[]> {
-        const sha256 = await sha256Promise
-        const scripthash = addressToElectrumScriptHash(address, sha256);
+    if (network === Network.MAINNET) {
+      // Initialize a 2-of-3 Electrum Cluster with 6 reliable hardcoded servers
+      // using the first three servers as "priority" servers
+      this.electrum = new ElectrumCluster(
+        "CashScript Application",
+        "1.4.1",
+        2,
+        3,
+        ClusterOrder.PRIORITY
+      );
+      this.electrum.addServer(
+        "bch.imaginary.cash",
+        50004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "blackie.c3-soft.com",
+        50004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "electroncash.de",
+        60002,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "electroncash.dk",
+        50004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "bch.loping.net",
+        50004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "electrum.imaginary.cash",
+        50004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+    } else if (network === Network.TESTNET) {
+      // Initialize a 1-of-2 Electrum Cluster with 2 hardcoded servers
+      this.electrum = new ElectrumCluster(
+        "CashScript Application",
+        "1.4.1",
+        1,
+        2
+      );
+      this.electrum.addServer(
+        "blackie.c3-soft.com",
+        60004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "electroncash.de",
+        60004,
+        ElectrumTransport.WSS.Scheme,
+        false
+      );
+      // this.electrum.addServer('bch.loping.net', 60004, ElectrumTransport.WSS.Scheme, false);
+      // this.electrum.addServer('testnet.imaginary.cash', 50004, ElectrumTransport.WSS.Scheme);
+    } else {
+      throw new Error(
+        `Tried to instantiate an ElectrumNetworkProvider for unknown network ${network}`
+      );
+    }
+  }
 
-        const result = await this.performRequest('blockchain.scripthash.listunspent', scripthash) as ElectrumUtxo[];
+  async getUtxos(address: string): Promise<Utxo[]> {
+    const sha256 = await sha256Promise;
+    const scripthash = addressToElectrumScriptHash(address, sha256);
 
-        const utxos = result.map(utxo => ({
-            txid: utxo.tx_hash,
-            vout: utxo.tx_pos,
-            satoshis: utxo.value,
-            height: utxo.height,
-        }));
+    const result = (await this.performRequest(
+      "blockchain.scripthash.listunspent",
+      scripthash
+    )) as ElectrumUtxo[];
 
-        return utxos;
+    const utxos = result.map((utxo) => ({
+      txid: utxo.tx_hash,
+      vout: utxo.tx_pos,
+      satoshis: utxo.value,
+      height: utxo.height,
+    }));
+
+    return utxos;
+  }
+
+  async getBlockHeight(): Promise<number> {
+    const { height } = (await this.performRequest(
+      "blockchain.headers.subscribe"
+    )) as BlockHeader;
+
+    return height;
+  }
+
+  async getRawTransaction(txid: string): Promise<string> {
+    return (await this.performRequest(
+      "blockchain.transaction.get",
+      txid
+    )) as string;
+  }
+
+  async sendRawTransaction(txHex: string): Promise<string> {
+    return (await this.performRequest(
+      "blockchain.transaction.broadcast",
+      txHex
+    )) as string;
+  }
+
+  async connectCluster(): Promise<boolean[]> {
+    try {
+      return await this.electrum.startup();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async disconnectCluster(): Promise<boolean[]> {
+    return this.electrum.shutdown();
+  }
+
+  private async performRequest(
+    name: string,
+    ...parameters: (string | number | boolean)[]
+  ): Promise<RequestResponse> {
+    // Only connect the cluster when no concurrent requests are running
+    if (this.shouldConnect()) {
+      this.connectCluster();
     }
 
-    async getBlockHeight(): Promise<number> {
-        const { height } = await this.performRequest('blockchain.headers.subscribe') as BlockHeader;
+    this.concurrentRequests += 1;
 
-        return height;
+    await this.electrum.ready();
+
+    let result;
+    try {
+      result = await this.electrum.request(name, ...parameters);
+    } finally {
+      // Always disconnect the cluster, also if the request fails
+      if (this.shouldDisconnect()) {
+        await this.disconnectCluster();
+      }
     }
 
-    async getRawTransaction(txid: string): Promise<string> {
-        return await this.performRequest('blockchain.transaction.get', txid) as string;
-    }
+    this.concurrentRequests -= 1;
 
-    async sendRawTransaction(txHex: string): Promise<string> {
-        return await this.performRequest('blockchain.transaction.broadcast', txHex) as string;
-    }
+    if (result instanceof Error) throw result;
 
-    async connectCluster(): Promise<boolean[]> {
-        try {
-            return await this.electrum.startup();
-        } catch (e) {
-            return [];
-        }
-    }
+    return result;
+  }
 
-    async disconnectCluster(): Promise<boolean[]> {
-        return this.electrum.shutdown();
-    }
+  private shouldConnect(): boolean {
+    if (this.manualConnectionManagement) return false;
+    if (this.concurrentRequests !== 0) return false;
+    return true;
+  }
 
-    private async performRequest(
-        name: string,
-        ...parameters: (string | number | boolean)[]
-    ): Promise<RequestResponse> {
-        // Only connect the cluster when no concurrent requests are running
-        if (this.shouldConnect()) {
-            this.connectCluster();
-        }
-
-        this.concurrentRequests += 1;
-
-        await this.electrum.ready();
-
-        let result;
-        try {
-            result = await this.electrum.request(name, ...parameters);
-        } finally {
-            // Always disconnect the cluster, also if the request fails
-            if (this.shouldDisconnect()) {
-                await this.disconnectCluster();
-            }
-        }
-
-        this.concurrentRequests -= 1;
-
-        if (result instanceof Error) throw result;
-
-        return result;
-    }
-
-    private shouldConnect(): boolean {
-        if (this.manualConnectionManagement) return false;
-        if (this.concurrentRequests !== 0) return false;
-        return true;
-    }
-
-    private shouldDisconnect(): boolean {
-        if (this.manualConnectionManagement) return false;
-        if (this.concurrentRequests !== 1) return false;
-        return true;
-    }
+  private shouldDisconnect(): boolean {
+    if (this.manualConnectionManagement) return false;
+    if (this.concurrentRequests !== 1) return false;
+    return true;
+  }
 }
 
 interface ElectrumUtxo {
-    tx_pos: number;
-    value: number;
-    tx_hash: string;
-    height: number;
+  tx_pos: number;
+  value: number;
+  tx_hash: string;
+  height: number;
 }
 
 interface BlockHeader {
-    height: number;
-    hex: string;
+  height: number;
+  hex: string;
 }
 
 /**
@@ -160,16 +219,16 @@ interface BlockHeader {
  *
  * @returns The corresponding script hash in an electrum-cash compatible format
  */
-function addressToElectrumScriptHash(address: string, sha256:Sha256): string {
-    // Retrieve locking script
-    const lockScript = deriveLockscript(address);
-    
-    // Hash locking script
-    const scriptHash = sha256.hash(lockScript);
+function addressToElectrumScriptHash(address: string, sha256: Sha256): string {
+  // Retrieve locking script
+  const lockScript = deriveLockscript(address);
 
-    // Reverse scripthash
-    scriptHash.reverse();
+  // Hash locking script
+  const scriptHash = sha256.hash(lockScript);
 
-    // Return scripthash as a hex string
-    return binToHex(scriptHash);
+  // Reverse scripthash
+  scriptHash.reverse();
+
+  // Return scripthash as a hex string
+  return binToHex(scriptHash);
 }

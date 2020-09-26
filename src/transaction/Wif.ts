@@ -12,7 +12,7 @@ import {
   AnyCompilationEnvironment,
   AuthenticationProgramStateBCH,
 } from "@bitauth/libauth";
-import { Utxo } from "../interface"
+import { Utxo } from "../interface";
 
 import { SendRequest } from "../wallet/model";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -88,7 +88,9 @@ export function prepareInputs(
     const utxoTxnValue = i.satoshis;
     const utxoIndex = i.vout;
     // slice will create a clone of the array
-    let utxoOutpointTransactionHash = new Uint8Array(i.txid.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
+    let utxoOutpointTransactionHash = new Uint8Array(
+      i.txid.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+    );
     // reverse the cloned copy
     // utxoOutpointTransactionHash.reverse();
     if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
@@ -145,7 +147,7 @@ export async function getSuitableUtxos(
   let suitableUtxos: Utxo[] = [];
   let amountAvailable = 0n;
   for (const u of unspentOutputs) {
-    if ((u.coinbase && u.height) && bestHeight) {
+    if (u.coinbase && u.height && bestHeight) {
       let age = bestHeight - u.height;
       if (age > 100) {
         suitableUtxos.push(u);
