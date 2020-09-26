@@ -15,7 +15,7 @@ import {
 import { Utxo } from "../interface";
 
 import { SendRequest } from "../wallet/model";
-import { amountInSatoshi } from "../util/amountInSatoshi"
+import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 
