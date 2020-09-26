@@ -12,9 +12,9 @@ test("Send a transaction on the regression network", async () => {
   } else {
     await alice.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
     const bob = await createWalletObject({
-      "type": WalletTypeEnum.Wif,
-      "network": "regtest",
-      "name": "Bob's random wallet"
+      type: WalletTypeEnum.Wif,
+      network: "regtest",
+      name: "Bob's random wallet",
     });
     await alice.send([
       {
@@ -31,16 +31,14 @@ test("Send a transaction on the regression network", async () => {
 test("Send a transaction on testnet", async () => {
   // Build Alice's wallet from Wallet Import Format string, send some sats
 
-  if (
-    !process.env.ALICE_TESTNET_WALLET_ID 
-  ) {
+  if (!process.env.ALICE_TESTNET_WALLET_ID) {
     throw Error("Missing testnet env keys");
   }
   const alice = await walletFromIdString(process.env.ALICE_TESTNET_WALLET_ID);
   const bob = await createWalletObject({
-    "type": WalletTypeEnum.Wif,
-    "network": "testnet",
-    "name": "Bob's random wallet"
+    type: WalletTypeEnum.Wif,
+    network: "testnet",
+    name: "Bob's random wallet",
   });
 
   if (!alice.cashaddr || !bob.cashaddr) {

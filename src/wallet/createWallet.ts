@@ -55,11 +55,11 @@ export async function createWalletObject(
   }
 }
 
-  /**
-   * Create a new wallet
-   * @param walletRequest A wallet request object
-   * @returns A new wallet object
-   */
+/**
+ * Create a new wallet
+ * @param walletRequest A wallet request object
+ * @returns A new wallet object
+ */
 export async function createWallet(
   walletRequest: WalletRequest
 ): Promise<WalletResponse> {
