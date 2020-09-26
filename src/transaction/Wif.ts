@@ -15,6 +15,7 @@ import {
 import { Utxo } from "../interface";
 
 import { SendRequest } from "../wallet/model";
+import { amountInSatoshi } from "../util/amountInSatoshi"
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 
@@ -132,7 +133,7 @@ export function prepareOutputs(outputs: SendRequest[]) {
     };
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+      satoshis: bigIntToBinUint64LE(BigInt(amountInSatoshi(output.amount))),
     };
     lockedOutputs.push(lockedOutput);
   }

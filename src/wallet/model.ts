@@ -41,23 +41,6 @@ export class Amount {
     this.value = value;
     this.unit = unit;
   }
-
-  public inSatoshi(): BigInt | Error {
-    switch (this.unit) {
-      case UnitEnum.Satoshi:
-        return BigInt(this.value);
-      case UnitEnum.Sat:
-        return BigInt(this.value);
-      case UnitEnum.Sats:
-        return BigInt(this.value);
-      case UnitEnum.Satoshis:
-        return BigInt(this.value);
-      case UnitEnum.Bch:
-        return BigInt(this.value * bchParam.subUnits);
-      default:
-        throw Error("Unit of value not defined");
-    }
-  }
 }
 
 export type AmountType = typeof Amount[keyof typeof Amount];
