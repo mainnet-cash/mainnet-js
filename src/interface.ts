@@ -9,16 +9,16 @@ export interface PrivateKey {
 // https://stackoverflow.com/questions/51433319/typescript-constructor-accept-string-for-enum
 const literal = <L extends string>(l: L): L => l;
 export const Network = {
-  MAINNET: literal('mainnet'),
-  TESTNET: literal('testnet'),
-  REGTEST: literal('regtest'),
+  MAINNET: literal("mainnet"),
+  TESTNET: literal("testnet"),
+  REGTEST: literal("regtest"),
 };
-export type Network = (typeof Network)[keyof typeof Network];
+export type Network = typeof Network[keyof typeof Network];
 
 export interface Utxo {
   txid: string;
   vout: number;
   satoshis: number;
   height?: number;
-  coinbase?: boolean
+  coinbase?: boolean;
 }
