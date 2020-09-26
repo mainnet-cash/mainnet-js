@@ -122,16 +122,14 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
-    if (
-      process.env.ALICE_TESTNET_WALLET_ID
-    ) {
+    if (process.env.ALICE_TESTNET_WALLET_ID) {
       const result = await page.evaluate(
         async (args) => {
           const alice = await mainnet.walletFromIdString(args[0]);
           const bob = await mainnet.createWalletObject({
-            "type": "wif",
-            "network": "testnet",
-            "name": "Bob's random wallet"
+            type: "wif",
+            network: "testnet",
+            name: "Bob's random wallet",
           });
           await alice.send([
             { cashaddr: bob.cashaddr, amount: { value: 3000, unit: "sat" } },
