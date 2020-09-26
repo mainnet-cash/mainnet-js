@@ -62,6 +62,7 @@ jobs:
     needs: [ format ]
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         browser: [chromium, firefox, webkit]
         os: [ubuntu-20.04]
@@ -78,7 +79,7 @@ jobs:
     - run: npm run test:browser
   test_mac:
     name: "macOS"
-    needs: [ format ]
+    needs: [ test_linux ]
     strategy:
       fail-fast: false
       matrix:
@@ -98,7 +99,7 @@ jobs:
         BROWSER: ${{ matrix.browser }}
   test_win:
     name: "Windows"
-    needs: [ format ]
+    needs: [ test_mac ]
     strategy:
       fail-fast: false
       matrix:
