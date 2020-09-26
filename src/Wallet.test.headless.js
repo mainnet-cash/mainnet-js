@@ -132,7 +132,10 @@ describe(`Wallet should function in the browser`, () => {
             name: "Bob's random wallet",
           });
           await alice.send([
-            { cashaddr: bob.cashaddr, amount: { value: 3000, unit: "sat" } },
+            {
+              cashaddr: bob.cashaddr,
+              amount: { value: 3000, unit: "sat" },
+            },
           ]);
           return bob.sendMax({ cashaddr: alice.cashaddr });
         },
