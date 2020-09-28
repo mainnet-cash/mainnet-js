@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -fr ~/.bitcoin/regtest/ &&
+bitcoind -regtest -rpcbind=127.0.0.1 -rpcallowip=127.0.0.1/24 -rpcuser=alice -rpcpassword=password &

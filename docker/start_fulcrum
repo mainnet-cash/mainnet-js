@@ -1,0 +1,8 @@
+#!/bin/bash
+echo "removing fulcrum old data"
+rm -fr /tmp/fulcrum &&
+sleep 5 &
+echo "Mining 100 blocks"
+bitcoin-cli --rpcuser=alice --rpcpassword=password --rpcport=18443 generatetoaddress 105 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 &
+echo "starting fulcrum"
+Fulcrum-1.2.10-x86_64-linux/Fulcrum  /tmp/fulcrum.conf &
