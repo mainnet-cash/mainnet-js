@@ -25,6 +25,11 @@ jobs:
         with:
           args: |
             generate -i swagger/v1/api.yml -g typescript-node -o generated/client/typescript-mock
+      - name: Generate Python Client
+        uses: 2qx/codegen-docker-action@v1
+        with:
+          args: |
+            generate -i swagger/v1/api.yml -g python -o generated/client/python        
       - name: Generate Server
         uses: 2qx/codegen-docker-action@v1
         with:
