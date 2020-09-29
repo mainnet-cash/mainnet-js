@@ -1,10 +1,11 @@
 FROM debian:buster-slim
 
 RUN groupadd -r bitcoin && useradd -r -m -g bitcoin bitcoin
+RUN groupadd -r fulcrum && useradd -r -m -g fulcrum fulcrum
 
 RUN set -ex \
 	&& apt-get update \
-	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget \
+	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu wget \
 	&& rm -rf /var/lib/apt/lists/*
 
 ENV BITCOIN_VERSION 22.0.0
@@ -28,23 +29,29 @@ RUN mkdir "$BITCOIN_DATA" \
 VOLUME /data
 
 
-RUN wget https://github.com/cculianu/Fulcrum/releases/download/v1.2.10/Fulcrum-1.2.10-x86_64-linux.tar.gz
-RUN tar -xvf Fulcrum-1.2.10-x86_64-linux.tar.gz
+RUN wget https://github.com/cculianu/Fulcrum/releases/download/v1.2.10/Fulcrum-1.2.10-x86_64-linux.tar.gz 
+RUN mkdir -p /opt/fulcrum
+RUN ls /opt/fulcrum
+RUN tar -xvf Fulcrum-1.2.10-x86_64-linux.tar.gz -C /opt/fulcrum
+RUN ls /opt/fulcrum
 
 VOLUME ["/data"]
-ENV DATA_DIR /data
+ENV DATA_DIR /opt/fulcrum/data
 
-ENV SSL_CERTFILE ${DATA_DIR}/fulcrum.crt
-ENV SSL_KEYFILE ${DATA_DIR}/fulcrum.key
 
 EXPOSE 60003 
 EXPOSE 18443
 
-COPY ./entrypoint.sh /entrypoint.sh
+# COPY ./entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
-COPY fulcrum.conf /tmp/fulcrum.conf
-COPY start_bchn start_bchn
-COPY start_fulcrum start_fulcrum
-COPY docker_cmd.sh docker_cmd.sh
-CMD ./docker_cmd.sh
+
+
+COPY fulcrum.conf /opt/fulcrum/fulcrum.conf
+
+COPY bitcoind.service /etc/systemd/system/bitcoind.service
+COPY fulcrum.service /etc/systemd/system/fulcrum.service
+#RUN systemctl daemon-reload
+#RUN systemctl enable bitcoin
+#RUN systemctl enable fulcrum
+CMD ["bash"]
