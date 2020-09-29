@@ -24,12 +24,5 @@ if [[ "$1" == "bitcoin-cli" || "$1" == "bitcoin-tx" || "$1" == "bitcoind" || "$1
 	exec gosu bitcoin "$@"
 fi
 
-if [ ! -e "$SSL_CERTFILE" ] || [ ! -e "$SSL_KEYFILE" ] ; then
-  openssl req -newkey rsa:2048 -sha256 -nodes -x509 -days 365 -subj "/O=Fulcrum" -keyout "$SSL_KEYFILE" -out "$SSL_CERTFILE"
-fi
-
-if [ "$1" = "Fulcrum-1.2.10-x86_64-linux/Fulcrum" ] ; then
-  set -- "$@" -D "$DATA_DIR" -c "$SSL_CERTFILE" -k "$SSL_KEYFILE"
-fi
 
 exec "$@"
