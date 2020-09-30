@@ -90,7 +90,6 @@ jobs:
       with:
         node-version: '12'
     - run: npm install
-    - run: npm run pretest
     - uses: paambaati/codeclimate-action@v2.5.7
       env:
         CC_TEST_REPORTER_ID: cf454b72ccba2f9ed854092c9c9f89b8d3dbae7417f7ed0d75421e53a404b824
