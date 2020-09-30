@@ -69,15 +69,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 12
-    - run: ./docker/build.sh
-    - uses: microsoft/playwright-github-action@v1
-    - run: npm install
-    - run: npm run test
-    - run: npm run build
-    - run: npm run test:browser
   test_mac:
     name: "macOS"
     needs: [ test_linux ]
@@ -91,8 +82,8 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12
+    - run: docker/build.sh
     - uses: microsoft/playwright-github-action@v1
-    - run: ./docker/build.sh
     - run: npm install
     - run: npm run test
     - run: npm run build
@@ -115,6 +106,8 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12
+    - run: docker/build.sh
+      shell: bash
     - uses: microsoft/playwright-github-action@v1
     - run: npm install
     - run: npm run test
