@@ -1,27 +1,29 @@
 const { spawnSync } = require("child_process");
 const electron = require("electrum-cash");
-const cashscript = require("cashscript")
+const cashscript = require("cashscript");
 
 async function getBlockHeight() {
-  let spv = new electron.ElectrumCluster("Mainnet Regtest Client",
+  let spv = new electron.ElectrumCluster(
+    "Mainnet Regtest Client",
     "1.4.1",
     1,
-    2)
+    2
+  );
   spv.addServer(
     "127.0.0.1",
     60003,
     electron.ElectrumTransport.WS.Scheme,
     false
   );
-  let reg = new cashscript.ElectrumNetworkProvider("regtest", spv, false)
+  let reg = new cashscript.ElectrumNetworkProvider("regtest", spv, false);
   try {
     await spv.startup();
   } catch (e) {
-    spv.shutdown()
-    console.log(e)
+    spv.shutdown();
+    console.log(e);
     return 0;
   }
-  return reg.getBlockHeight()
+  return reg.getBlockHeight();
 }
 
 function generateBlock(user, password, port, numberOfBlocks, address) {
@@ -34,7 +36,7 @@ function generateBlock(user, password, port, numberOfBlocks, address) {
     `--rpcport=${port}`,
     `generatetoaddress`,
     numberOfBlocks,
-    address
+    address,
   ];
 
   const cli = spawnSync(`docker`, generateArgs);
@@ -55,10 +57,7 @@ function pingBchn(user, password, port) {
     `--rpcport=${port}`,
     "getblockchaininfo",
   ];
-  let response = spawnSync(
-    `docker`,
-    readinessArgs
-  );
+  let response = spawnSync(`docker`, readinessArgs);
   return response.stderr;
 }
 
