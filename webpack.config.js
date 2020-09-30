@@ -96,5 +96,5 @@ module.exports = [
   nodeConfig,
   browserConfig,
   browserTestConfig,
-  webWorkerConfig
+  webWorkerConfig,
 ].map((c) => merge(baseConfig, c));
