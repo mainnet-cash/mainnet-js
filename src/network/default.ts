@@ -1,5 +1,4 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
-import { default as GrpcBchrpcNetworkProvider } from "./GrpcBchrpcNetworkProvider";
 
 export function RegtestProvider() {
   return new ElectrumNetworkProvider("regtest", undefined, false);
