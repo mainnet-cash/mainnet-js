@@ -69,16 +69,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-  test_mac:
-    name: "macOS"
-    needs: [ test_linux ]
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [webkit]
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: 12
@@ -88,36 +78,10 @@ jobs:
     - run: npm run test
     - run: npm run build
     - run: npm run test:browser
-      env:
-        BROWSER: ${{ matrix.browser }}
-  test_win:
-    name: "Windows"
-    needs: [ test_mac ]
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium]
-    runs-on: windows-latest
-    steps:
-    - name: Install Media Pack
-      shell: powershell
-      run: Install-WindowsFeature Server-Media-Foundation
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 12
-    - run: docker/build.sh
-      shell: bash
-    - uses: microsoft/playwright-github-action@v1
-    - run: npm install
-    - run: npm run test
-    - run: npm run build
-    - run: npm run test:browser
-      shell: bash
       env:
         BROWSER: ${{ matrix.browser }}
   coverage:
-    needs: [ test_linux, test_mac, test_win ]
+    needs: [ test_linux ]
     name: coverage
     runs-on: ubuntu-latest
     steps:
