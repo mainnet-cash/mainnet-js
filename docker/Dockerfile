@@ -1,11 +1,16 @@
 FROM debian:buster-slim
 
+# If debugging, the following may be helpful. 
+# start with a fresh container
+#
+# docker run -it debian:buster-slim /bin/bash
+
 RUN groupadd -r bitcoin && useradd -r -m -g bitcoin bitcoin
 RUN groupadd -r fulcrum && useradd -r -m -g fulcrum fulcrum
 
 RUN set -ex \
 	&& apt-get update \
-	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu wget \
+	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu wget supervisor \
 	&& rm -rf /var/lib/apt/lists/*
 
 ENV BITCOIN_VERSION 22.0.0
@@ -31,27 +36,16 @@ VOLUME /data
 
 RUN wget https://github.com/cculianu/Fulcrum/releases/download/v1.2.10/Fulcrum-1.2.10-x86_64-linux.tar.gz 
 RUN mkdir -p /opt/fulcrum
-RUN ls /opt/fulcrum
 RUN tar -xvf Fulcrum-1.2.10-x86_64-linux.tar.gz -C /opt/fulcrum
-RUN ls /opt/fulcrum
-
-VOLUME ["/data"]
 ENV DATA_DIR /opt/fulcrum/data
-
+COPY fulcrum.conf /opt/fulcrum/fulcrum.conf
+RUN chown -h fulcrum:fulcrum /opt/fulcrum
 
 EXPOSE 60003 
 EXPOSE 18443
 
-# COPY ./entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+RUN mkdir -p /var/log/supervisor
 
+ADD supervisord.conf /etc/supervisord.conf
 
-
-COPY fulcrum.conf /opt/fulcrum/fulcrum.conf
-
-COPY bitcoind.service /etc/systemd/system/bitcoind.service
-COPY fulcrum.service /etc/systemd/system/fulcrum.service
-#RUN systemctl daemon-reload
-#RUN systemctl enable bitcoin
-#RUN systemctl enable fulcrum
-CMD ["bash"]
+CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]

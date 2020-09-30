@@ -1,58 +1,69 @@
 const { spawnSync } = require("child_process");
-const { GrpcClient } = require("grpc-bchrpc-node");
+const electron = require("electrum-cash");
+const cashscript = require("cashscript")
 
 async function getBlockHeight() {
-  let url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
-  const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
-  const host = `${process.env.HOST}`;
-  let client = new GrpcClient({
-    url: url,
-    testnet: true,
-    rootCertPath: cert,
-    options: {
-      "grpc.ssl_target_name_override": host,
-      "grpc.default_authority": host,
-      "grpc.max_receive_message_length": -1,
-    },
-  });
-  let blockchainInfo = await client.getBlockchainInfo();
-  console.log("block height: " + blockchainInfo.getBestHeight());
-  return blockchainInfo.getBestHeight();
+  let spv = new electron.ElectrumCluster("Mainnet Regtest Client",
+    "1.4.1",
+    1,
+    2)
+  spv.addServer(
+    "127.0.0.1",
+    60003,
+    electron.ElectrumTransport.WS.Scheme,
+    false
+  );
+  let reg = new cashscript.ElectrumNetworkProvider("regtest", spv, false)
+  try {
+    await spv.startup();
+  } catch (e) {
+    spv.shutdown()
+    console.log(e)
+    return 0;
+  }
+  return reg.getBlockHeight()
 }
 
-function generateBlock(user, password, numberOfBlocks, binDir) {
-  const bchctlArgs = [
-    `--testnet`,
+function generateBlock(user, password, port, numberOfBlocks, address) {
+  const generateArgs = [
+    `exec`,
+    `regtest`,
+    `bitcoin-cli`,
     `--rpcuser=${user}`,
-    `--rpcpass=${password}`,
-    `generate`,
-    `--skipverify`,
+    `--rpcpassword=${password}`,
+    `--rpcport=${port}`,
+    `generatetoaddress`,
     numberOfBlocks,
+    address
   ];
 
-  const bchctl = spawnSync(`${binDir}/bchctl`, bchctlArgs);
-  if (bchctl.stderr.length > 0) {
-    throw Error(bchctl.stderr.toString());
+  const cli = spawnSync(`docker`, generateArgs);
+  if (cli.stderr.length > 0) {
+    throw Error(cli.stderr.toString());
   }
-  return JSON.parse(bchctl.stdout.toString());
+  return JSON.parse(cli.stdout.toString());
 }
 
-function pingBchd() {
+function pingBchn(user, password, port) {
   const readinessArgs = [
-    `--rpcuser=${process.env.RPC_USER}`,
-    `--rpcpass=${process.env.RPC_PASS}`,
-    `--testnet`,
-    "ping",
+    `exec`,
+    `-it`,
+    `regtest`,
+    `bitcoin-cli`,
+    `--rpcuser=${user}`,
+    `--rpcpassword=${password}`,
+    `--rpcport=${port}`,
+    "getblockchaininfo",
   ];
   let response = spawnSync(
-    `${process.env.BCHD_BIN_DIRECTORY}/bchctl`,
+    `docker`,
     readinessArgs
   );
   return response.stderr;
 }
 
 module.exports = {
-  pingBchd,
+  pingBchn,
   generateBlock,
   getBlockHeight,
 };

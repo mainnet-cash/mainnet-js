@@ -1,2 +1,4 @@
+#!/bin/bash
 
-docker container kill $(docker ps | awk '/regtest/ {print $1}')
+# This should be automatically handled by the testing harness but in case it isn't...
+docker stop regtest
