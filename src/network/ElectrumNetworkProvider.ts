@@ -96,7 +96,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // this.electrum.addServer('bch.loping.net', 60004, ElectrumTransport.WSS.Scheme, false);
       // this.electrum.addServer('testnet.imaginary.cash', 50004, ElectrumTransport.WSS.Scheme);
     } else if (network === Network.REGTEST) {
-      // 
+      //
       this.electrum = new ElectrumCluster(
         "CashScript Application",
         "1.4.1",
