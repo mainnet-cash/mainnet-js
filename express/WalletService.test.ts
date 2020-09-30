@@ -222,13 +222,12 @@ describe("Post Endpoints", () => {
 
     await request(app).post("/v1/wallet/send").send(AliceSendToBobReq);
 
-    let BobSendToAliceReq = new SendMaxRequest();
-    BobSendToAliceReq.walletId = bobsWallet.walletId;
-    BobSendToAliceReq.cashaddr = process.env.ADDRESS as string;
-
     let resp = await request(app)
       .post("/v1/wallet/send_max")
-      .send(BobSendToAliceReq);
+      .send({
+        walletId: bobsWallet.walletId,
+        cashaddr: process.env.ADDRESS as string,
+      });
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect((body.transactionId as string).length).toBe(64);

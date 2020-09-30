@@ -65,6 +65,6 @@ test("Expect Error passing unknown wallet", async () => {
       "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
-    expect(e.message).toBe("The wallet type was not understood");
+    expect(e.message).toBe("The wallet type: q2k was not understood");
   }
 });

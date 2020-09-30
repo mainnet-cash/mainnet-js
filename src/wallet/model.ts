@@ -11,13 +11,19 @@ export class SendRequest {
   cashaddr: string;
   amount: Amount;
 
-  constructor({ cashaddr, amount }: { cashaddr: string; amount: Amount }) {
+  constructor({
+    cashaddr,
+    amount,
+  }: {
+    cashaddr: string;
+    amount: AmountType | { value: number; unit: UnitEnum };
+  }) {
     this.cashaddr = cashaddr;
     this.amount = new Amount(amount);
   }
 }
 
-export class Utxo {
+export class UtxoItem {
   "index"?: number;
   "amount": Amount;
   "utxoId": string;
@@ -25,34 +31,19 @@ export class Utxo {
 }
 
 export class UtxoResponse {
-  "utxos"?: Array<Utxo>;
+  "utxos"?: Array<UtxoItem>;
 }
 
 export class Amount {
   value: number;
   unit: UnitEnum;
-  constructor({ value, unit }: { value: number; unit: UnitEnum }) {
+  constructor({ value, unit }: AmountType | { value: number; unit: UnitEnum }) {
     this.value = value;
     this.unit = unit;
   }
-
-  public inSatoshi(): BigInt | Error {
-    switch (this.unit) {
-      case UnitEnum.Satoshi:
-        return BigInt(this.value);
-      case UnitEnum.Sat:
-        return BigInt(this.value);
-      case UnitEnum.Sats:
-        return BigInt(this.value);
-      case UnitEnum.Satoshis:
-        return BigInt(this.value);
-      case UnitEnum.Bch:
-        return BigInt(this.value * bchParam.subUnits);
-      default:
-        throw Error("Unit of value not defined");
-    }
-  }
 }
+
+export type AmountType = typeof Amount[keyof typeof Amount];
 
 export class SendMaxRequest {
   cashaddr: string;
