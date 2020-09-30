@@ -72,6 +72,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12
+    - run: ./docker/build.sh
     - uses: microsoft/playwright-github-action@v1
     - run: npm install
     - run: npm run test
@@ -91,6 +92,7 @@ jobs:
       with:
         node-version: 12
     - uses: microsoft/playwright-github-action@v1
+    - run: ./docker/build.sh
     - run: npm install
     - run: npm run test
     - run: npm run build
