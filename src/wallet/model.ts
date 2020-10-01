@@ -15,11 +15,11 @@ export class SendRequest {
   constructor({
     cashaddr,
     value,
-    unit
+    unit,
   }: {
     cashaddr: string;
     value: number;
-    unit: UnitEnum ;
+    unit: UnitEnum;
   }) {
     this.cashaddr = cashaddr;
     this.value = value;
@@ -38,7 +38,6 @@ export class UtxoItem {
 export class UtxoResponse {
   "utxos"?: Array<UtxoItem>;
 }
-
 
 export class SendMaxRequest {
   cashaddr: string;

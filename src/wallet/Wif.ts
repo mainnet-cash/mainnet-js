@@ -166,8 +166,8 @@ export class WifWallet extends BaseWallet {
     }
     let sendRequest = new SendRequest({
       cashaddr: sendMaxRequest.cashaddr,
-      value: maxSpendableAmount.sat, 
-      unit: UnitEnum.Sat 
+      value: maxSpendableAmount.sat,
+      unit: UnitEnum.Sat,
     });
     return await this._processSendRequests([sendRequest], true);
   }
@@ -233,8 +233,9 @@ export class WifWallet extends BaseWallet {
     // simulate outputs using the sender's address
     const sendRequest = new SendRequest({
       cashaddr: this.cashaddr,
-      
-      value: 100, unit: UnitEnum.Sat
+
+      value: 100,
+      unit: UnitEnum.Sat,
     });
     let sendRequests = Array(outputCount)
       .fill(0)
@@ -262,7 +263,7 @@ export class WifWallet extends BaseWallet {
     resp.utxos = await Promise.all(
       utxos.map(async (o: Utxo) => {
         let utxo = new UtxoItem();
-        utxo.unit = UnitEnum.Sat
+        utxo.unit = UnitEnum.Sat;
         utxo.value = o.satoshis;
 
         utxo.transactionId = o.txid;
@@ -339,32 +340,41 @@ export class WifWallet extends BaseWallet {
   }
 }
 
+const fromWIF = async (
+  walletImportFormatString: string,
+  network: CashAddressNetworkPrefix
+) => {
+  let w = new WifWallet("", network);
+  await w.initializeWIF(walletImportFormatString);
+  return w;
+};
 
-const  fromWIF = async (walletImportFormatString: string, network: CashAddressNetworkPrefix) => {
-  let w = new WifWallet("",network)
-  await w.initializeWIF(walletImportFormatString)
-  return w
-}
-
-const  watchOnly = async (walletImportFormatString: string, network: CashAddressNetworkPrefix) => {
-  let w = new WifWallet("", network)
-  await w.initializeWatchOnly(walletImportFormatString)
-  return w
-}
-
+const watchOnly = async (
+  walletImportFormatString: string,
+  network: CashAddressNetworkPrefix
+) => {
+  let w = new WifWallet("", network);
+  await w.initializeWatchOnly(walletImportFormatString);
+  return w;
+};
 
 export class MainnetWallet extends WifWallet {
-
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.mainnet );
+    super(name, CashAddressNetworkPrefix.mainnet);
   }
 
-  public static async fromWIF(walletImportFormatString: string){
-    return await fromWIF(walletImportFormatString, CashAddressNetworkPrefix.mainnet)
+  public static async fromWIF(walletImportFormatString: string) {
+    return await fromWIF(
+      walletImportFormatString,
+      CashAddressNetworkPrefix.mainnet
+    );
   }
 
-  public static async watchOnly(walletImportFormatString: string){
-    return await watchOnly(walletImportFormatString, CashAddressNetworkPrefix.mainnet)
+  public static async watchOnly(walletImportFormatString: string) {
+    return await watchOnly(
+      walletImportFormatString,
+      CashAddressNetworkPrefix.mainnet
+    );
   }
 }
 
@@ -373,11 +383,17 @@ export class TestnetWallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.testnet);
   }
 
-  public static async fromWIF(walletImportFormatString: string){
-    return await fromWIF(walletImportFormatString, CashAddressNetworkPrefix.testnet)
+  public static async fromWIF(walletImportFormatString: string) {
+    return await fromWIF(
+      walletImportFormatString,
+      CashAddressNetworkPrefix.testnet
+    );
   }
-  public static async watchOnly(walletImportFormatString: string){
-    return await watchOnly(walletImportFormatString, CashAddressNetworkPrefix.testnet)
+  public static async watchOnly(walletImportFormatString: string) {
+    return await watchOnly(
+      walletImportFormatString,
+      CashAddressNetworkPrefix.testnet
+    );
   }
 }
 
@@ -385,10 +401,16 @@ export class RegTestWallet extends WifWallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
   }
-  public static async fromWIF(walletImportFormatString: string){
-    return await fromWIF(walletImportFormatString, CashAddressNetworkPrefix.regtest)
+  public static async fromWIF(walletImportFormatString: string) {
+    return await fromWIF(
+      walletImportFormatString,
+      CashAddressNetworkPrefix.regtest
+    );
   }
-  public static async watchOnly(walletImportFormatString: string){
-    return await watchOnly(walletImportFormatString, CashAddressNetworkPrefix.regtest)
+  public static async watchOnly(walletImportFormatString: string) {
+    return await watchOnly(
+      walletImportFormatString,
+      CashAddressNetworkPrefix.regtest
+    );
   }
 }

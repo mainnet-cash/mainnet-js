@@ -23,9 +23,7 @@ function asJsonResponse(wallet: WifWallet): WalletResponse {
   };
 }
 
-export async function createWallet(
-  body: WalletRequest
-): Promise<WifWallet> {
+export async function createWallet(body: WalletRequest): Promise<WifWallet> {
   let wallet;
 
   switch (body.network) {

@@ -4,7 +4,7 @@ const cashscript = require("cashscript");
 const { JSON_SCHEMA } = require("js-yaml");
 
 async function getBlockHeight() {
-  try{
+  try {
     let spv = new electron.ElectrumCluster(
       "Mainnet Regtest Client",
       "1.4.1",
@@ -26,10 +26,9 @@ async function getBlockHeight() {
       return 0;
     }
     return reg.getBlockHeight();
-  
-  } catch(e){
-    console.log("Error getting block height" + e)
-    return 0
+  } catch (e) {
+    console.log("Error getting block height" + e);
+    return 0;
   }
 }
 

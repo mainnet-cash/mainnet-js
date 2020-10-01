@@ -50,7 +50,7 @@ test("Send a transaction on testnet", async () => {
     {
       cashaddr: bob.cashaddr,
       value: 1100,
-      unit: UnitEnum.Sat
+      unit: UnitEnum.Sat,
     },
   ]);
 

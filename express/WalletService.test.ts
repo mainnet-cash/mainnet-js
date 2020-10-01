@@ -22,9 +22,7 @@ describe("Post Endpoints", () => {
    * ready
    */
   it("Should return true from the readiness indicator", async () => {
-    const resp = await request(app)
-      .get("/ready")
-      .send();
+    const resp = await request(app).get("/ready").send();
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.status).toEqual("okay");
   });
@@ -33,11 +31,11 @@ describe("Post Endpoints", () => {
    * ready
    */
   it("Should return swagger doc UI from root url", async () => {
-    const resp = await request(app)
-      .get("/api-docs/")
-      .send();
+    const resp = await request(app).get("/api-docs/").send();
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.slice(0, 145)).toEqual(`\n\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Swagger UI</title>`);
+    expect(resp.body.slice(0, 145)).toEqual(
+      `\n\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Swagger UI</title>`
+    );
   });
 
   /**

@@ -119,8 +119,8 @@ describe(`Wallet should function in the browser`, () => {
           await alice.send([
             {
               cashaddr: bob.cashaddr,
-              value: 3000, 
-              unit: "sat"
+              value: 3000,
+              unit: "sat",
             },
           ]);
           return bob.sendMax({ cashaddr: alice.cashaddr });
