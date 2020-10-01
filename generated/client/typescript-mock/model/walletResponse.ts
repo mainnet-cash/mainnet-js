@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 import { Network } from './network';
 import { SerializedWallet } from './serializedWallet';
 
-export class WalletResponse {
+export class WalletResponse extends SerializedWallet {
     /**
     * The wallet in Wallet Import Format (WIF) 
     */
@@ -27,10 +27,6 @@ export class WalletResponse {
     * The address in cashaddr format. 
     */
     'cashaddr'?: string;
-    /**
-    * ID that is returned in `wallet` field of /wallet call 
-    */
-    'walletId': string;
     /**
     * network type
     */
@@ -55,18 +51,13 @@ export class WalletResponse {
             "type": "string"
         },
         {
-            "name": "walletId",
-            "baseName": "walletId",
-            "type": "string"
-        },
-        {
             "name": "network",
             "baseName": "network",
             "type": "WalletResponse.NetworkEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return WalletResponse.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(WalletResponse.attributeTypeMap);
     }
 }
 

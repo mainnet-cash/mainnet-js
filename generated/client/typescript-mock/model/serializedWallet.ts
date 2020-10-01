@@ -18,7 +18,7 @@ export class SerializedWallet {
     */
     'walletId': string;
 
-    static discriminator: string | undefined = undefined;
+    static discriminator: string | undefined = "walletId";
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {

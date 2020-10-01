@@ -16,7 +16,7 @@ import { TransactionId } from './transactionId';
 import { UnitType } from './unitType';
 import { ValueType } from './valueType';
 
-export class Utxo {
+export class Utxo extends TransactionId {
     'index'?: number;
     'value'?: number;
     /**
@@ -27,10 +27,6 @@ export class Utxo {
     * serialized outpoint
     */
     'utxoId': string;
-    /**
-    * The hash of a transaction
-    */
-    'transactionId': string;
 
     static discriminator: string | undefined = undefined;
 
@@ -54,15 +50,10 @@ export class Utxo {
             "name": "utxoId",
             "baseName": "utxoId",
             "type": "string"
-        },
-        {
-            "name": "transactionId",
-            "baseName": "transactionId",
-            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return Utxo.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(Utxo.attributeTypeMap);
     }
 }
 

@@ -15,7 +15,7 @@ import { RequestFile } from './models';
 export class Cashaddr {
     'cashaddr'?: string;
 
-    static discriminator: string | undefined = undefined;
+    static discriminator: string | undefined = "cashaddr";
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {

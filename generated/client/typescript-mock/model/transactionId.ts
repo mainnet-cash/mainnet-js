@@ -18,7 +18,7 @@ export class TransactionId {
     */
     'transactionId'?: string;
 
-    static discriminator: string | undefined = undefined;
+    static discriminator: string | undefined = "transactionId";
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {

@@ -14,21 +14,12 @@ import { RequestFile } from './models';
 import { SerializedWallet } from './serializedWallet';
 import { ToCashaddr } from './toCashaddr';
 
-export class SendMaxRequest {
-    /**
-    * ID that is returned in `wallet` field of /wallet call 
-    */
-    'walletId': string;
+export class SendMaxRequest extends SerializedWallet {
     'cashaddr': string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
-        {
-            "name": "walletId",
-            "baseName": "walletId",
-            "type": "string"
-        },
         {
             "name": "cashaddr",
             "baseName": "cashaddr",
@@ -36,7 +27,7 @@ export class SendMaxRequest {
         }    ];
 
     static getAttributeTypeMap() {
-        return SendMaxRequest.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(SendMaxRequest.attributeTypeMap);
     }
 }
 
