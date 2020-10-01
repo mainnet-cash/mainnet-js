@@ -1,0 +1,184 @@
+createWallet:
+  post:
+    operationId: createWallet
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/WalletRequest"
+      description: Request a new random wallet
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/WalletResponse"
+        description: successful operation
+      "405":
+        content: {}
+        description: Invalid input
+    summary: Create a new wallet
+    tags:
+      - wallet
+balance:
+  post:
+    operationId: balance
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/BalanceRequest"
+      description: |
+        Request for a wallet balance
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/BalanceResponse"
+        description: successful operation
+    summary: Get total balance for wallet
+    tags:
+      - wallet
+deposit_address:
+  post:
+    operationId: depositAddress
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/SerializedWallet"
+      description: |
+        Request for a deposit address given a wallet
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/DepositAddressResponse"
+        description: successful operation
+    summary: Get a deposit address in cash address format
+    tags:
+      - wallet
+deposit_qr:
+  post:
+    operationId: depositQr
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/SerializedWallet"
+      description: |
+        Request for a deposit cash address as a Quick Response code (qrcode)
+      required: true
+    responses:
+      200:
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/ScalableVectorGraphic"
+        description: |
+          A Qr code image data encoded string in the src field suitable for inclusion in html using:
+              - \<img src\=\"{response.src}"\>                
+    summary: Get receiving cash address as a qrcode
+    tags:
+      - wallet
+max_amount_to_send:
+  post:
+    operationId: maxAmountToSend
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/MaxAmountToSendRequest"
+      description: get amount that will be spend with a spend max request
+      required: true      
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/BalanceResponse"
+        description: transaction accepted
+      "400":
+        content: {}
+        description: Invalid Request
+      "418":
+        content: {}
+        description: Invalid network for given address
+    summary: Get maximum spendable amount
+    tags:
+      - wallet
+send:
+  post:
+    operationId: send
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/SendRequest"
+      description: place a send request
+      required: true
+    responses:
+      "202":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/SendResponse"
+        description: transaction accepted
+      "400":
+        content: {}
+        description: Invalid Request
+      "418":
+        content: {}
+        description: Invalid network for given address
+    summary: Send some amount to a given address
+    tags:
+      - wallet
+send_max:
+  post:
+    operationId: sendMax
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/SendMaxRequest"
+      description: Request to all available funds to a given address
+      required: true
+    responses:
+      "202":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/SendMaxResponse"
+        description: transaction accepted
+      "400":
+        content: {}
+        description: Invalid Request
+    summary: Send all available funds to a given address
+    tags:
+      - wallet
+utxos:
+  post:
+    operationId: utxos
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "schemas.yml#/SerializedWallet"
+      description: |
+        Request detailed list of unspent transaction outputs
+      required: true
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: "schemas.yml#/UtxoResponse"
+        description: successful operation
+    summary: Get detailed information about unspent outputs (utxos)
+    tags:
+      - wallet
