@@ -63,18 +63,16 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = new mainnet.TestnetWallet("Alice's Testnet");
-      await alice.fromWIF(wif);
-      return alice.depositAddress();
+      const alice = await mainnet.TestnetWallet.fromWIF(wif);
+      return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
     expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
   });
 
   test(`Should return deposit qr from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = new mainnet.TestnetWallet("Alice's Testnet");
-      await alice.fromWIF(wif);
-      return alice.depositQr();
+      const alice = await mainnet.TestnetWallet.fromWIF(wif);
+      return alice.getDepositQr();
     }, process.env.PRIVATE_WIF);
     expect(
       result.src.startsWith("data:image/svg+xml;base64,PD94bWwgdm")
@@ -83,9 +81,8 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = new mainnet.TestnetWallet("Alice's Testnet");
-      await alice.fromWIF(wif);
-      return alice.depositAddress();
+      const alice = await mainnet.TestnetWallet.fromWIF(wif);
+      return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
     expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
   });
@@ -93,9 +90,8 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should return testnet balance`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
-        const alice = new mainnet.TestnetWallet("Alice's Testnet");
-        await alice.watchOnly(addr);
-        return alice.balance();
+        const alice = await mainnet.TestnetWallet.watchOnly(addr);
+        return alice.getBalance();
       }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result.sat).toBeGreaterThan(0);
     } else {

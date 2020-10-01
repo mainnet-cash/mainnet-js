@@ -15,7 +15,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.3
+  version: 0.0.4
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -326,9 +326,11 @@ components:
             Suitable for inclusion in html using:
                 - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>      
         title: 
+          example: "bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
           type: string
           description: hover text for graphic 
         alt:
+          example: "A Bitcoin Cash Qr Code"
           type: string
           description: assistive text         
     SendMaxRequest:

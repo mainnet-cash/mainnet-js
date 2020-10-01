@@ -37,7 +37,7 @@ export async function createWallet(body: WalletRequest): Promise<WifWallet> {
       wallet = new MainnetWallet(body.name);
       break;
     default:
-      throw Error(`The wallet network ${body.network} was not understood`);
+      wallet = new MainnetWallet(body.name);
   }
   if (wallet) {
     switch (body.type) {
@@ -46,6 +46,8 @@ export async function createWallet(body: WalletRequest): Promise<WifWallet> {
         break;
       case WalletTypeEnum.Hd:
         throw Error("Not Implemented");
+      default:
+        await wallet.generateWif();
     }
     return wallet;
   } else {

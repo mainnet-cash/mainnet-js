@@ -25,5 +25,6 @@
 services/index.ts
 package.json
 index.ts
+config.ts
 expressServer.ts
 serve.ts

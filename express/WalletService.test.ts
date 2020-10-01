@@ -33,8 +33,8 @@ describe("Post Endpoints", () => {
   it("Should return swagger doc UI from root url", async () => {
     const resp = await request(app).get("/api-docs/").send();
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.slice(0, 145)).toEqual(
-      `\n\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Swagger UI</title>`
+    expect(resp.text.slice(0, 391)).toEqual(
+      `\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Swagger UI</title>\n  <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >\n  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" /><link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />\n  \n  <style>\n    html\n`
     );
   });
 
@@ -108,8 +108,8 @@ describe("Post Endpoints", () => {
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
-    expect(body!.name).toBe(req.name);
-    expect(body!.network).toBe(req.network);
+    expect(body!.name).toBe("");
+    expect(body!.network).toBe("mainnet");
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
     expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
   });

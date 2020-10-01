@@ -184,7 +184,7 @@ export class WifWallet extends BaseWallet {
     return qrAddress(this.cashaddr as string);
   }
 
-  public async getUtxos(address: string): Promise<Utxo[]> {
+  public async getAddressUtxos(address: string): Promise<Utxo[]> {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
@@ -202,7 +202,7 @@ export class WifWallet extends BaseWallet {
 
   // Gets balance by summing value in all utxos in stats
   public async getBalanceFromUtxos(): Promise<number> {
-    const utxos = await this.getUtxos(this.cashaddr!);
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
     return await sumUtxoValue(utxos);
   }
 
@@ -222,7 +222,7 @@ export class WifWallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
     // get inputs
-    let utxos = await this.getUtxos(this.cashaddr);
+    let utxos = await this.getAddressUtxos(this.cashaddr);
 
     // Get current height to assure recently mined coins are not spent.
     let bestHeight = await this.provider!.getBlockHeight();
@@ -254,11 +254,11 @@ export class WifWallet extends BaseWallet {
   /**
    * utxos Get unspent outputs for the wallet
    */
-  public async utxos() {
+  public async getUtxos() {
     if (!this.cashaddr) {
       throw Error("Attempted to get utxos without an address");
     }
-    let utxos = await this.getUtxos(this.cashaddr);
+    let utxos = await this.getAddressUtxos(this.cashaddr);
     let resp = new UtxoResponse();
     resp.utxos = await Promise.all(
       utxos.map(async (o: Utxo) => {
@@ -293,7 +293,7 @@ export class WifWallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
     // get input
-    let utxos = await this.getUtxos(this.cashaddr);
+    let utxos = await this.getAddressUtxos(this.cashaddr);
 
     let bestHeight = await this.provider!.getBlockHeight()!;
     let spendAmount = await sumSendRequestAmounts(sendRequests);

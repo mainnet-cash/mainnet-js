@@ -13,7 +13,7 @@ let expressServer: any;
 
 const launchServer = async () => {
   try {
-    expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
+    expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML,config.DOC_YAML );
     expressServer.launch();
     logger.info(`Express server running on ${config.URL_PORT}`);
   } catch (error) {
@@ -23,7 +23,7 @@ const launchServer = async () => {
 };
 
 export const getServer = () => {
-  expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML);
+  expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
   return expressServer
 }
 

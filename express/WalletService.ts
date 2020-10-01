@@ -45,11 +45,16 @@ const methodOnWallet = (request: any, method): Promise<any> =>
   });
 
 export const balance = (request) => methodOnWallet(request, "getBalance");
+
 export const depositAddress = (request) =>
   methodOnWallet(request, "getDepositAddress");
+
 export const depositQr = (request) => methodOnWallet(request, "getDepositQr");
+
 export const maxAmountToSend = (request) =>
   methodOnWallet(request, "getMaxAmountToSend");
+
 // export const send = (request) => methodOnWallet(request, "send")
 // export const sendMax = (request) => methodOnWallet(request, "sendMax")
+
 export const utxos = (request) => methodOnWallet(request, "getUtxos");
