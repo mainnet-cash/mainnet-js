@@ -291,16 +291,22 @@ components:
           type: string
           example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
           description: The hash of a transaction
+      discriminator:
+        propertyName: transactionId          
     ToCashaddr:
       properties:
         cashaddr:
            type: string
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+      discriminator:
+        propertyName: to           
     Cashaddr:
       properties:
         cashaddr:
            type: string
            example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      discriminator:
+        propertyName: cashaddr           
     PortableNetworkGraphic:
       properties:
         src:
@@ -355,6 +361,8 @@ components:
             ID that is returned in `wallet` field of /wallet call
       required:
         - walletId
+      discriminator:
+        propertyName: walletId        
     DepositAddressResponse:
       allOf:
         - $ref: "#/components/schemas/Cashaddr"
