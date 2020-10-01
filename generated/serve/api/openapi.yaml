@@ -15,7 +15,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.3
+  version: 0.0.4
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -336,8 +336,8 @@ components:
     ScalableVectorGraphic:
       example:
         src: data:image/svg+xml;base64,PD94bWwgdm... ==**
-        alt: alt
-        title: title
+        alt: A Bitcoin Cash Qr Code
+        title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       properties:
         src:
           description: "A Qr code image data in svg format as utf-8 encoded string.\n\
@@ -347,9 +347,11 @@ components:
           type: string
         title:
           description: hover text for graphic
+          example: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
         alt:
           description: assistive text
+          example: A Bitcoin Cash Qr Code
           type: string
     SendMaxRequest:
       allOf:

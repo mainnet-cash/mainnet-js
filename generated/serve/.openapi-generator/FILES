@@ -1,7 +1,6 @@
 .eslintrc.json
 README.md
 api/openapi.yaml
-config.ts
 controllers/Controller.ts
 controllers/WalletController.ts
 controllers/index.ts
