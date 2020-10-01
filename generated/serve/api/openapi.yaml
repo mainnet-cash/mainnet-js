@@ -2,33 +2,28 @@ openapi: 3.0.1
 info:
   contact:
     email: hello@mainnet.cash
-  description: |
-    A developer friendly bitcoin cash wallet api
-
-    This API is currently in active development, breaking changes may
-    be made prior to official release of version 1.
-
-    **Important:** modifying this library to prematurely operate on mainnet
-    may result in loss of funds
+  description: "A high-level developer friendly bitcoin cash wallet api\nThis API\
+    \ is currently in active development, breaking changes may \nbe made prior to\
+    \ official release of version 1.\n"
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.2
+  version: 0.0.3
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
 - url: http://localhost:3000/v1
 tags:
-- description: Create a wallet
+- description: Interact with wallets
   externalDocs:
     description: Find out more
-    url: http://mainnet.cash/docs#wallet
+    url: /api-doc/#/wallet/
   name: wallet
 paths:
-  /wallet:
+  /wallet/create:
     post:
       operationId: createWallet
       requestBody:
@@ -36,7 +31,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WalletRequest'
-        description: Request a new new random wallet
+        description: Request a new random wallet
         required: true
       responses:
         "200":
@@ -48,7 +43,7 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: create a new wallet
+      summary: Create a new wallet
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -59,7 +54,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SerializedWallet'
+              $ref: '#/components/schemas/BalanceRequest'
         description: |
           Request for a wallet balance
         required: true
@@ -114,7 +109,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
           description: "A Qr code image data encoded string in the src field suitable\
-            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
+            \ for inclusion in html using:\n    - \\<img src\\=\\\"{response.src}\"\
             \\>                \n"
       summary: Get receiving cash address as a qrcode
       tags:
@@ -144,28 +139,6 @@ paths:
           content: {}
           description: Invalid network for given address
       summary: Get maximum spendable amount
-      tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
-  /wallet/utxo:
-    post:
-      operationId: utxos
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request detailed list of unspent transaction outputs
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UtxoResponse'
-          description: successful operation
-      summary: Get detailed information about unspent outputs (utxos)
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -220,26 +193,54 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/utxos:
+    post:
+      operationId: utxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request detailed list of unspent transaction outputs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtxoResponse'
+          description: successful operation
+      summary: Get detailed information about unspent outputs (utxos)
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
 components:
   schemas:
-    Utxo:
+    WalletRequest:
       allOf:
-      - $ref: '#/components/schemas/Outpoint'
-      - $ref: '#/components/schemas/TransactionId'
+      - $ref: '#/components/schemas/WalletType'
+      - $ref: '#/components/schemas/Network'
       example:
-        amount:
-          unit: sat
-          value: 100
-        index: 0.8008281904610115
+        type: wif
+        network: testnet
+        name: username1
       properties:
-        index:
-          type: number
-        amount:
-          $ref: '#/components/schemas/Amount'
-      required:
-      - amount
-      - transactionId
-      - utxoId
+        name:
+          description: User defined string for wallet
+          example: username1
+          type: string
+      type: object
+    WalletType:
+      properties:
+        type:
+          description: Wallet type, either a single wallet with private key (wif)
+            or a Hierarchical Deterministic wallet determined from a seed.
+          enum:
+          - wif
+          - hd
+          example: wif
+          type: string
     Network:
       properties:
         network:
@@ -251,26 +252,55 @@ components:
           - simtest
           example: testnet
           type: string
-    WalletType:
-      properties:
-        type:
-          description: Wallet type, either a single wallet with private key (wif)
-            or a Hierarchical Deterministic wallet determined from a seed.
-          enum:
-          - wif
-          - hd
-          example: wif
-          type: string
-    Amount:
+    WalletResponse:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      - $ref: '#/components/schemas/Network'
       example:
-        unit: sat
-        value: 100
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        wif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        name: username1
       properties:
-        value:
-          example: 100
-          type: number
+        wif:
+          description: |
+            The wallet in Wallet Import Format (WIF)
+          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        name:
+          description: User defined string for wallet
+          example: username1
+          type: string
+        cashaddr:
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          type: string
+      type: object
+    SerializedWallet:
+      discriminator:
+        propertyName: walletId
+      example:
+        walletId: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+      properties:
+        walletId:
+          description: |
+            Serialized wallet returned in `walletId` field of /wallet/create call
+          example: testnet:wif:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          format: password
+          type: string
+      required:
+      - walletId
+    CashaddrFormat:
+      example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+      type: string
+    BalanceRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      - $ref: '#/components/schemas/UnitType'
+    UnitType:
+      properties:
         unit:
-          description: Denomination for amount
+          description: Unit of account.
           enum:
           - bch
           - usd
@@ -301,6 +331,135 @@ components:
           description: Amount in United States Dollars
           example: 438.02
           type: number
+    DepositAddressResponse:
+      allOf:
+      - $ref: '#/components/schemas/Cashaddr'
+    Cashaddr:
+      discriminator:
+        propertyName: cashaddr
+      properties:
+        cashaddr:
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          type: string
+    ScalableVectorGraphic:
+      example:
+        src: data:image/svg+xml;base64,PD94bWwgdm... ==**
+      properties:
+        src:
+          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
+            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
+            \ ==**\"\\>                \n"
+          example: data:image/svg+xml;base64,PD94bWwgdm... ==**
+          type: string
+    MaxAmountToSendRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      example:
+        outputCount: 0
+      properties:
+        outputCount:
+          description: |
+            (optional) if sending all funds to multiple addresses, the
+            count of the number of address funds will be sent
+            to may be included.
+          format: int32
+          type: integer
+      required:
+      - walletId
+    SendRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      example:
+        to:
+        - null
+        - null
+      properties:
+        to:
+          items:
+            $ref: '#/components/schemas/SendRequestItem'
+          type: array
+      required:
+      - walletId
+      type: object
+    SendRequestItem:
+      allOf:
+      - $ref: '#/components/schemas/ToCashaddr'
+      - $ref: '#/components/schemas/ValueType'
+      - $ref: '#/components/schemas/UnitType'
+      required:
+      - cashaddr
+      - to
+      type: object
+    ToCashaddr:
+      discriminator:
+        propertyName: to
+      properties:
+        cashaddr:
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
+          type: string
+    ValueType:
+      properties:
+        value:
+          example: 100
+          type: number
+    SendResponse:
+      allOf:
+      - $ref: '#/components/schemas/TransactionId'
+      example:
+        balance:
+          bch: 1
+          sat: 100000000
+          usd: 438.02
+      properties:
+        balance:
+          $ref: '#/components/schemas/BalanceResponse'
+      type: object
+    TransactionId:
+      discriminator:
+        propertyName: transactionId
+      properties:
+        transactionId:
+          description: The hash of a transaction in hex format
+          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          type: string
+    SendMaxRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      - $ref: '#/components/schemas/ToCashaddr'
+      example:
+        utxoIds:
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+      properties:
+        utxoIds:
+          items:
+            $ref: '#/components/schemas/OutputItem'
+          type: array
+      required:
+      - cashaddr
+      - walletId
+    UtxoIds:
+      items:
+        $ref: '#/components/schemas/OutputItem'
+      type: array
+    OutputItem:
+      description: serialized outpoint
+      example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+      type: string
+    SendMaxResponse:
+      allOf:
+      - $ref: '#/components/schemas/TransactionId'
+      example:
+        balance:
+          bch: 0
+          sat: 0
+          usd: 0
+      properties:
+        balance:
+          $ref: '#/components/schemas/ZeroBalanceResponse'
+      type: object
     ZeroBalanceResponse:
       example:
         bch: 0
@@ -320,203 +479,34 @@ components:
           description: Amount in United States Dollars
           example: 0
           type: number
+    UtxoResponse:
+      example:
+        utxos:
+        - index: 0.8008281904610115
+        - index: 0.8008281904610115
+      properties:
+        utxos:
+          items:
+            $ref: '#/components/schemas/Utxo'
+          type: array
+    Utxo:
+      allOf:
+      - $ref: '#/components/schemas/ValueType'
+      - $ref: '#/components/schemas/UnitType'
+      - $ref: '#/components/schemas/Outpoint'
+      - $ref: '#/components/schemas/TransactionId'
+      example:
+        index: 0.8008281904610115
+      properties:
+        index:
+          type: number
+      required:
+      - amount
+      - transaction
+      - utxoId
     Outpoint:
       properties:
         utxoId:
           description: serialized outpoint
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
           type: string
-    TransactionId:
-      properties:
-        transactionId:
-          description: The hash of a transaction
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: string
-    ToCashaddr:
-      properties:
-        cashaddr:
-          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          type: string
-    Cashaddr:
-      properties:
-        cashaddr:
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-    PortableNetworkGraphic:
-      properties:
-        src:
-          description: "A Qr code image data in png format as base64 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...\
-            \   ...Jggg==**\"\\> \n"
-          example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ...
-            ...AAAAABJRU5ErkJggg==
-          type: string
-    ScalableVectorGraphic:
-      example:
-        src: data:image/svg+xml;base64,PD94bWwgdm... ==**
-        alt: alt
-        title: title
-      properties:
-        src:
-          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
-            \ ==**\"\\>      \n"
-          example: data:image/svg+xml;base64,PD94bWwgdm... ==**
-          type: string
-        title:
-          description: hover text for graphic
-          type: string
-        alt:
-          description: assistive text
-          type: string
-    SendMaxRequest:
-      allOf:
-      - $ref: '#/components/schemas/SerializedWallet'
-      - $ref: '#/components/schemas/ToCashaddr'
-      required:
-      - cashaddr
-      - walletId
-    MaxAmountToSendRequest:
-      allOf:
-      - $ref: '#/components/schemas/SerializedWallet'
-      example:
-        output_count: 0
-      properties:
-        output_count:
-          description: |
-            (optional) if sending all funds to multiple addresses, the
-            count of the number of address funds will be sent
-            to may be included.
-          format: int32
-          type: integer
-      required:
-      - walletId
-    SerializedWallet:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          format: password
-          type: string
-      required:
-      - walletId
-    DepositAddressResponse:
-      allOf:
-      - $ref: '#/components/schemas/Cashaddr'
-    UtxoResponse:
-      example:
-        utxos:
-        - amount:
-            unit: sat
-            value: 100
-          index: 0.8008281904610115
-        - amount:
-            unit: sat
-            value: 100
-          index: 0.8008281904610115
-      properties:
-        utxos:
-          items:
-            $ref: '#/components/schemas/Utxo'
-          type: array
-    WalletResponse:
-      allOf:
-      - $ref: '#/components/schemas/SerializedWallet'
-      - $ref: '#/components/schemas/Network'
-      example:
-        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        wif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        name: username1
-      properties:
-        wif:
-          description: |
-            The wallet in Wallet Import Format (WIF)
-          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        name:
-          description: User defined string for wallet
-          example: username1
-          type: string
-        cashaddr:
-          description: |
-            The address in cashaddr format.
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-      type: object
-    WalletRequest:
-      allOf:
-      - $ref: '#/components/schemas/WalletType'
-      - $ref: '#/components/schemas/Network'
-      example:
-        type: wif
-        network: testnet
-        name: username1
-      properties:
-        name:
-          description: User defined string for wallet
-          example: username1
-          type: string
-      required:
-      - name
-      - network
-      - type
-      type: object
-    SendRequest:
-      allOf:
-      - $ref: '#/components/schemas/SerializedWallet'
-      example:
-        to:
-        - amount:
-            unit: sat
-            value: 100
-        - amount:
-            unit: sat
-            value: 100
-      properties:
-        to:
-          items:
-            $ref: '#/components/schemas/SendRequestItem'
-          type: array
-      required:
-      - walletId
-      type: object
-    SendRequestItem:
-      allOf:
-      - $ref: '#/components/schemas/ToCashaddr'
-      example:
-        amount:
-          unit: sat
-          value: 100
-      properties:
-        amount:
-          $ref: '#/components/schemas/Amount'
-      required:
-      - cashaddr
-      type: object
-    SendMaxResponse:
-      allOf:
-      - $ref: '#/components/schemas/TransactionId'
-      example:
-        balance:
-          bch: 0
-          sat: 0
-          usd: 0
-      properties:
-        balance:
-          $ref: '#/components/schemas/ZeroBalanceResponse'
-      type: object
-    SendResponse:
-      allOf:
-      - $ref: '#/components/schemas/TransactionId'
-      example:
-        balance:
-          bch: 1
-          sat: 100000000
-          usd: 438.02
-      properties:
-        balance:
-          $ref: '#/components/schemas/BalanceResponse'
-      type: object

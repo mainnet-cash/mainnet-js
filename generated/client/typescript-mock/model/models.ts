@@ -1,13 +1,12 @@
 import localVarRequest from 'request';
 
-export * from './amount';
+export * from './balanceRequest';
 export * from './balanceResponse';
 export * from './cashaddr';
 export * from './depositAddressResponse';
 export * from './maxAmountToSendRequest';
 export * from './network';
 export * from './outpoint';
-export * from './portableNetworkGraphic';
 export * from './scalableVectorGraphic';
 export * from './sendMaxRequest';
 export * from './sendMaxResponse';
@@ -17,8 +16,10 @@ export * from './sendResponse';
 export * from './serializedWallet';
 export * from './toCashaddr';
 export * from './transactionId';
+export * from './unitType';
 export * from './utxo';
 export * from './utxoResponse';
+export * from './valueType';
 export * from './walletRequest';
 export * from './walletResponse';
 export * from './walletType';
@@ -37,14 +38,13 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
-import { Amount } from './amount';
+import { BalanceRequest } from './balanceRequest';
 import { BalanceResponse } from './balanceResponse';
 import { Cashaddr } from './cashaddr';
 import { DepositAddressResponse } from './depositAddressResponse';
 import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
 import { Network } from './network';
 import { Outpoint } from './outpoint';
-import { PortableNetworkGraphic } from './portableNetworkGraphic';
 import { ScalableVectorGraphic } from './scalableVectorGraphic';
 import { SendMaxRequest } from './sendMaxRequest';
 import { SendMaxResponse } from './sendMaxResponse';
@@ -54,8 +54,10 @@ import { SendResponse } from './sendResponse';
 import { SerializedWallet } from './serializedWallet';
 import { ToCashaddr } from './toCashaddr';
 import { TransactionId } from './transactionId';
+import { UnitType } from './unitType';
 import { Utxo } from './utxo';
 import { UtxoResponse } from './utxoResponse';
+import { ValueType } from './valueType';
 import { WalletRequest } from './walletRequest';
 import { WalletResponse } from './walletResponse';
 import { WalletType } from './walletType';
@@ -74,8 +76,11 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
-        "Amount.UnitEnum": Amount.UnitEnum,
+        "BalanceRequest.UnitEnum": BalanceRequest.UnitEnum,
         "Network.NetworkEnum": Network.NetworkEnum,
+        "SendRequestItem.UnitEnum": SendRequestItem.UnitEnum,
+        "UnitType.UnitEnum": UnitType.UnitEnum,
+        "Utxo.UnitEnum": Utxo.UnitEnum,
         "WalletRequest.TypeEnum": WalletRequest.TypeEnum,
         "WalletRequest.NetworkEnum": WalletRequest.NetworkEnum,
         "WalletResponse.NetworkEnum": WalletResponse.NetworkEnum,
@@ -83,14 +88,13 @@ let enumsMap: {[index: string]: any} = {
 }
 
 let typeMap: {[index: string]: any} = {
-    "Amount": Amount,
+    "BalanceRequest": BalanceRequest,
     "BalanceResponse": BalanceResponse,
     "Cashaddr": Cashaddr,
     "DepositAddressResponse": DepositAddressResponse,
     "MaxAmountToSendRequest": MaxAmountToSendRequest,
     "Network": Network,
     "Outpoint": Outpoint,
-    "PortableNetworkGraphic": PortableNetworkGraphic,
     "ScalableVectorGraphic": ScalableVectorGraphic,
     "SendMaxRequest": SendMaxRequest,
     "SendMaxResponse": SendMaxResponse,
@@ -100,8 +104,10 @@ let typeMap: {[index: string]: any} = {
     "SerializedWallet": SerializedWallet,
     "ToCashaddr": ToCashaddr,
     "TransactionId": TransactionId,
+    "UnitType": UnitType,
     "Utxo": Utxo,
     "UtxoResponse": UtxoResponse,
+    "ValueType": ValueType,
     "WalletRequest": WalletRequest,
     "WalletResponse": WalletResponse,
     "WalletType": WalletType,

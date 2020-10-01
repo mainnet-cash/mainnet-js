@@ -3,14 +3,13 @@ api.ts
 api/apis.ts
 api/walletApi.ts
 git_push.sh
-model/amount.ts
+model/balanceRequest.ts
 model/balanceResponse.ts
 model/cashaddr.ts
 model/depositAddressResponse.ts
 model/maxAmountToSendRequest.ts
 model/network.ts
 model/outpoint.ts
-model/portableNetworkGraphic.ts
 model/scalableVectorGraphic.ts
 model/sendMaxRequest.ts
 model/sendMaxResponse.ts
@@ -20,8 +19,10 @@ model/sendResponse.ts
 model/serializedWallet.ts
 model/toCashaddr.ts
 model/transactionId.ts
+model/unitType.ts
 model/utxo.ts
 model/utxoResponse.ts
+model/valueType.ts
 model/walletRequest.ts
 model/walletResponse.ts
 model/walletType.ts
