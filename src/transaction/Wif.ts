@@ -133,7 +133,7 @@ export function prepareOutputs(outputs: SendRequest[]) {
     };
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(BigInt(amountInSatoshi(output.amount))),
+      satoshis: bigIntToBinUint64LE(BigInt(amountInSatoshi(output.value, output.unit))),
     };
     lockedOutputs.push(lockedOutput);
   }

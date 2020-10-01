@@ -23,7 +23,7 @@ function asJsonResponse(wallet: WifWallet): WalletResponse {
   };
 }
 
-export async function createWalletObject(
+export async function createWallet(
   body: WalletRequest
 ): Promise<WifWallet> {
   let wallet;
@@ -60,10 +60,10 @@ export async function createWalletObject(
  * @param walletRequest A wallet request object
  * @returns A new wallet object
  */
-export async function createWallet(
+export async function createWalletResponse(
   walletRequest: WalletRequest
 ): Promise<WalletResponse> {
-  let wallet = await createWalletObject(walletRequest);
+  let wallet = await createWallet(walletRequest);
   if (wallet) {
     return asJsonResponse(wallet);
   } else {
@@ -81,10 +81,10 @@ export async function walletFromIdString(
     network: network,
     type: WalletTypeEnum[walletType],
   } as WalletRequest;
-  let wallet = await createWalletObject(walletRequest);
+  let wallet = await createWallet(walletRequest);
   switch (walletType) {
     case "wif":
-      await wallet.fromWIF(privateImport);
+      await wallet.initializeWIF(privateImport);
       break;
     case "hd":
       throw Error("Heuristic Wallets are not implemented");

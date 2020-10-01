@@ -1,6 +1,6 @@
 import { Service } from "../generated/serve/services/Service";
 import { walletFromIdString } from "../src/wallet/createWallet";
-import { createWallet as createWalletFn } from "../src/wallet/createWallet";
+import { createWalletResponse } from "../src/wallet/createWallet";
 export { send } from "./send";
 export { sendMax } from "./sendMax";
 
@@ -13,7 +13,7 @@ export { sendMax } from "./sendMax";
 export const createWallet = (request) =>
   new Promise(async (resolve, reject) => {
     try {
-      let resp = await createWalletFn(request.body);
+      let resp = await createWalletResponse(request.body);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(JSON.stringify(e));
@@ -44,12 +44,12 @@ const methodOnWallet = (request: any, method): Promise<any> =>
     }
   });
 
-export const balance = (request) => methodOnWallet(request, "balance");
+export const balance = (request) => methodOnWallet(request, "getBalance");
 export const depositAddress = (request) =>
-  methodOnWallet(request, "depositAddress");
-export const depositQr = (request) => methodOnWallet(request, "depositQr");
+  methodOnWallet(request, "getDepositAddress");
+export const depositQr = (request) => methodOnWallet(request, "getDepositQr");
 export const maxAmountToSend = (request) =>
-  methodOnWallet(request, "maxAmountToSend");
+  methodOnWallet(request, "getMaxAmountToSend");
 // export const send = (request) => methodOnWallet(request, "send")
 // export const sendMax = (request) => methodOnWallet(request, "sendMax")
-export const utxos = (request) => methodOnWallet(request, "utxos");
+export const utxos = (request) => methodOnWallet(request, "getUtxos");

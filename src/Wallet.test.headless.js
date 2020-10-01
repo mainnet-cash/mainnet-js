@@ -36,7 +36,7 @@ describe(`Wallet should function in the browser`, () => {
     let params = { name: "Alice's Testnet", type: "wif", network: "regtest" };
     try {
       const result = await page.evaluate(async (p) => {
-        return await mainnet.createWallet(p);
+        return await mainnet.createWalletResponse(p);
       }, params);
     } catch (e) {
       expect(e.message.slice(0, 97)).toBe(
@@ -48,7 +48,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create testnet wallet`, async () => {
     let params = { name: "Alice's Testnet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
-      return await mainnet.createWallet(p);
+      return await mainnet.createWalletResponse(p);
     }, params);
     expect(result.cashaddr.slice(0, 9)).toBe("bchtest:q");
   });
@@ -56,7 +56,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create mainnet wallet`, async () => {
     let params = { name: "Alice's Testnet", type: "wif", network: "mainnet" };
     const result = await page.evaluate(async (p) => {
-      return await mainnet.createWallet(p);
+      return await mainnet.createWalletResponse(p);
     }, params);
     expect(result.cashaddr.slice(0, 13)).toBe("bitcoincash:q");
   });
@@ -111,7 +111,7 @@ describe(`Wallet should function in the browser`, () => {
       const result = await page.evaluate(
         async (args) => {
           const alice = await mainnet.walletFromIdString(args[0]);
-          const bob = await mainnet.createWalletObject({
+          const bob = await mainnet.createWallet({
             type: "wif",
             network: "testnet",
             name: "Bob's random wallet",
@@ -119,7 +119,8 @@ describe(`Wallet should function in the browser`, () => {
           await alice.send([
             {
               cashaddr: bob.cashaddr,
-              amount: { value: 3000, unit: "sat" },
+              value: 3000, 
+              unit: "sat"
             },
           ]);
           return bob.sendMax({ cashaddr: alice.cashaddr });
