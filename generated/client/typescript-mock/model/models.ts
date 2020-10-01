@@ -1,12 +1,12 @@
 import localVarRequest from 'request';
 
-export * from './balanceRequest';
 export * from './balanceResponse';
 export * from './cashaddr';
 export * from './depositAddressResponse';
 export * from './maxAmountToSendRequest';
 export * from './network';
 export * from './outpoint';
+export * from './portableNetworkGraphic';
 export * from './scalableVectorGraphic';
 export * from './sendMaxRequest';
 export * from './sendMaxResponse';
@@ -38,13 +38,13 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
-import { BalanceRequest } from './balanceRequest';
 import { BalanceResponse } from './balanceResponse';
 import { Cashaddr } from './cashaddr';
 import { DepositAddressResponse } from './depositAddressResponse';
 import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
 import { Network } from './network';
 import { Outpoint } from './outpoint';
+import { PortableNetworkGraphic } from './portableNetworkGraphic';
 import { ScalableVectorGraphic } from './scalableVectorGraphic';
 import { SendMaxRequest } from './sendMaxRequest';
 import { SendMaxResponse } from './sendMaxResponse';
@@ -76,7 +76,6 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
-        "BalanceRequest.UnitEnum": BalanceRequest.UnitEnum,
         "Network.NetworkEnum": Network.NetworkEnum,
         "SendRequestItem.UnitEnum": SendRequestItem.UnitEnum,
         "UnitType.UnitEnum": UnitType.UnitEnum,
@@ -88,13 +87,13 @@ let enumsMap: {[index: string]: any} = {
 }
 
 let typeMap: {[index: string]: any} = {
-    "BalanceRequest": BalanceRequest,
     "BalanceResponse": BalanceResponse,
     "Cashaddr": Cashaddr,
     "DepositAddressResponse": DepositAddressResponse,
     "MaxAmountToSendRequest": MaxAmountToSendRequest,
     "Network": Network,
     "Outpoint": Outpoint,
+    "PortableNetworkGraphic": PortableNetworkGraphic,
     "ScalableVectorGraphic": ScalableVectorGraphic,
     "SendMaxRequest": SendMaxRequest,
     "SendMaxResponse": SendMaxResponse,

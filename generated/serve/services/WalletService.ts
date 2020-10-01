@@ -7,14 +7,14 @@ import * as core from "express-serve-static-core";
 /**
 * Get total balance for wallet
 *
-* balanceRequest BalanceRequest Request for a wallet balance 
+* serializedWallet SerializedWallet Request for a wallet balance 
 * returns BalanceResponse
 * */
-export const balance = ({ balanceRequest }) => new Promise(
+export const balance = ({ serializedWallet }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
-        balanceRequest,
+        serializedWallet,
       }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -25,9 +25,9 @@ export const balance = ({ balanceRequest }) => new Promise(
   },
 );
 /**
-* Create a new wallet
+* create a new wallet
 *
-* walletRequest WalletRequest Request a new random wallet
+* walletRequest WalletRequest Request a new new random wallet
 * returns WalletResponse
 * */
 export const createWallet = ({ walletRequest }) => new Promise(

@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * A high-level developer friendly bitcoin cash wallet api This API is currently in active development, breaking changes may  be made prior to official release of version 1. 
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
  *
  * The version of the OpenAPI document: 0.0.3
  * Contact: hello@mainnet.cash
@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 import { Network } from './network';
 import { SerializedWallet } from './serializedWallet';
 
-export class WalletResponse extends SerializedWallet {
+export class WalletResponse {
     /**
     * The wallet in Wallet Import Format (WIF) 
     */
@@ -23,7 +23,14 @@ export class WalletResponse extends SerializedWallet {
     * User defined string for wallet
     */
     'name'?: string;
+    /**
+    * The address in cashaddr format. 
+    */
     'cashaddr'?: string;
+    /**
+    * ID that is returned in `wallet` field of /wallet call 
+    */
+    'walletId': string;
     /**
     * network type
     */
@@ -48,13 +55,18 @@ export class WalletResponse extends SerializedWallet {
             "type": "string"
         },
         {
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
+        },
+        {
             "name": "network",
             "baseName": "network",
             "type": "WalletResponse.NetworkEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(WalletResponse.attributeTypeMap);
+        return WalletResponse.attributeTypeMap;
     }
 }
 

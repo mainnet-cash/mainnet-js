@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * A high-level developer friendly bitcoin cash wallet api This API is currently in active development, breaking changes may  be made prior to official release of version 1. 
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
  *
  * The version of the OpenAPI document: 0.0.3
  * Contact: hello@mainnet.cash
@@ -15,16 +15,22 @@ import { ToCashaddr } from './toCashaddr';
 import { UnitType } from './unitType';
 import { ValueType } from './valueType';
 
-export class SendRequestItem extends ToCashaddr {
-    'value'?: number;
+export class SendRequestItem {
+    'cashaddr': string;
+    'value': number;
     /**
     * Unit of account.
     */
-    'unit'?: SendRequestItem.UnitEnum;
+    'unit': SendRequestItem.UnitEnum;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "cashaddr",
+            "baseName": "cashaddr",
+            "type": "string"
+        },
         {
             "name": "value",
             "baseName": "value",
@@ -37,7 +43,7 @@ export class SendRequestItem extends ToCashaddr {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequestItem.attributeTypeMap);
+        return SendRequestItem.attributeTypeMap;
     }
 }
 

@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * A high-level developer friendly bitcoin cash wallet api This API is currently in active development, breaking changes may  be made prior to official release of version 1. 
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
  *
  * The version of the OpenAPI document: 0.0.3
  * Contact: hello@mainnet.cash
@@ -14,17 +14,20 @@ import { RequestFile } from './models';
 import { SerializedWallet } from './serializedWallet';
 import { ToCashaddr } from './toCashaddr';
 
-export class SendMaxRequest extends SerializedWallet {
-    'utxoIds'?: Array<string>;
+export class SendMaxRequest {
+    /**
+    * ID that is returned in `wallet` field of /wallet call 
+    */
+    'walletId': string;
     'cashaddr': string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "utxoIds",
-            "baseName": "utxoIds",
-            "type": "Array<string>"
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
         },
         {
             "name": "cashaddr",
@@ -33,7 +36,7 @@ export class SendMaxRequest extends SerializedWallet {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendMaxRequest.attributeTypeMap);
+        return SendMaxRequest.attributeTypeMap;
     }
 }
 

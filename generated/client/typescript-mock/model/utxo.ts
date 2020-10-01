@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * A high-level developer friendly bitcoin cash wallet api This API is currently in active development, breaking changes may  be made prior to official release of version 1. 
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
  *
  * The version of the OpenAPI document: 0.0.3
  * Contact: hello@mainnet.cash
@@ -16,7 +16,7 @@ import { TransactionId } from './transactionId';
 import { UnitType } from './unitType';
 import { ValueType } from './valueType';
 
-export class Utxo extends TransactionId {
+export class Utxo {
     'index'?: number;
     'value'?: number;
     /**
@@ -27,6 +27,10 @@ export class Utxo extends TransactionId {
     * serialized outpoint
     */
     'utxoId': string;
+    /**
+    * The hash of a transaction
+    */
+    'transactionId': string;
 
     static discriminator: string | undefined = undefined;
 
@@ -50,10 +54,15 @@ export class Utxo extends TransactionId {
             "name": "utxoId",
             "baseName": "utxoId",
             "type": "string"
+        },
+        {
+            "name": "transactionId",
+            "baseName": "transactionId",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(Utxo.attributeTypeMap);
+        return Utxo.attributeTypeMap;
     }
 }
 

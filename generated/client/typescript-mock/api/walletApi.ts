@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * A high-level developer friendly bitcoin cash wallet api This API is currently in active development, breaking changes may  be made prior to official release of version 1. 
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
  *
  * The version of the OpenAPI document: 0.0.3
  * Contact: hello@mainnet.cash
@@ -15,7 +15,6 @@ import localVarRequest from 'request';
 import http from 'http';
 
 /* tslint:disable:no-unused-locals */
-import { BalanceRequest } from '../model/balanceRequest';
 import { BalanceResponse } from '../model/balanceResponse';
 import { DepositAddressResponse } from '../model/depositAddressResponse';
 import { MaxAmountToSendRequest } from '../model/maxAmountToSendRequest';
@@ -101,9 +100,9 @@ export class WalletApi {
     /**
      * 
      * @summary Get total balance for wallet
-     * @param balanceRequest Request for a wallet balance 
+     * @param serializedWallet Request for a wallet balance 
      */
-    public async balance (balanceRequest: BalanceRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: BalanceResponse;  }> {
+    public async balance (serializedWallet: SerializedWallet, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: BalanceResponse;  }> {
         const localVarPath = this.basePath + '/wallet/balance';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -116,9 +115,9 @@ export class WalletApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'balanceRequest' is not null or undefined
-        if (balanceRequest === null || balanceRequest === undefined) {
-            throw new Error('Required parameter balanceRequest was null or undefined when calling balance.');
+        // verify required parameter 'serializedWallet' is not null or undefined
+        if (serializedWallet === null || serializedWallet === undefined) {
+            throw new Error('Required parameter serializedWallet was null or undefined when calling balance.');
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -132,7 +131,7 @@ export class WalletApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(balanceRequest, "BalanceRequest")
+            body: ObjectSerializer.serialize(serializedWallet, "SerializedWallet")
         };
 
         let authenticationPromise = Promise.resolve();
@@ -169,8 +168,8 @@ export class WalletApi {
     }
     /**
      * 
-     * @summary Create a new wallet
-     * @param walletRequest Request a new random wallet
+     * @summary create a new wallet
+     * @param walletRequest Request a new new random wallet
      */
     public async createWallet (walletRequest: WalletRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: WalletResponse;  }> {
         const localVarPath = this.basePath + '/wallet/create';
@@ -587,7 +586,7 @@ export class WalletApi {
      * @param serializedWallet Request detailed list of unspent transaction outputs 
      */
     public async utxos (serializedWallet: SerializedWallet, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: UtxoResponse;  }> {
-        const localVarPath = this.basePath + '/wallet/utxos';
+        const localVarPath = this.basePath + '/wallet/utxo';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
         const produces = ['application/json'];
