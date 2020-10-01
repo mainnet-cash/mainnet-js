@@ -1,3 +1,4 @@
+// Here there are two network types, mainnet and all other networks
 export enum NetworkType {
   Mainnet = "mainnet",
   Testnet = "testnet",

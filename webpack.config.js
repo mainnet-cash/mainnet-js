@@ -47,10 +47,11 @@ const browserConfig = {
       child_process: false,
       crypto: false,
       fs: false,
-      "grpc-bchrpc-node": "grpc-bchrpc-browser",
+      net: false,
       os: false,
       path: false,
       stream: false,
+      tls: false,
       util: false,
       url: false,
     },
@@ -71,10 +72,11 @@ const webWorkerConfig = {
       child_process: false,
       crypto: false,
       fs: false,
-      "grpc-bchrpc-node": "grpc-bchrpc-browser",
+      net: false,
       os: false,
       path: false,
       stream: false,
+      tls: false,
       util: false,
       url: false,
     },
@@ -91,8 +93,8 @@ const browserTestDiff = {
 const browserTestConfig = merge(browserConfig, browserTestDiff);
 
 module.exports = [
-  //nodeConfig,
+  nodeConfig,
   browserConfig,
   browserTestConfig,
-  //webWorkerConfig
+  webWorkerConfig,
 ].map((c) => merge(baseConfig, c));
