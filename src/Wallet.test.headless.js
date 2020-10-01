@@ -106,21 +106,6 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
-  test(`Should return testnet max amount to send`, async () => {
-    if (process.env.ALICE_TESTNET_WALLET_ID) {
-      const result = await page.evaluate(async (walletId) => {
-        const alice = await mainnet.walletFromIdString(walletId);
-        return alice.maxAmountToSend({});
-      }, process.env.ALICE_TESTNET_WALLET_ID);
-      expect(result.sat).toBeGreaterThan(0);
-    } else {
-      expect.assertions(1);
-      console.warn(
-        "SKIPPING testnet maxAmountToSend test, set ALICE_TESTNET_ADDRESS env"
-      );
-    }
-  });
-
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
     if (process.env.ALICE_TESTNET_WALLET_ID) {
       const result = await page.evaluate(
