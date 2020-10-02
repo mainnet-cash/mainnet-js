@@ -58,7 +58,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SerializedWallet"
+              $ref: "#/components/schemas/BalanceRequest"
         description: |
           Request for a wallet balance
         required: true
@@ -67,7 +67,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BalanceResponse"
+                $ref: '#/components/schemas/BalanceResponse'
+            text/plain:
+              schema:
+                type: number
+                description: If a unit of account is passed, a plain number is returned.
           description: successful operation
       summary: Get total balance for wallet
       tags:
@@ -124,14 +128,14 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/MaxAmountToSendRequest"
-        description: get amount that will be spend with a spend max request
+        description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
         required: true      
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BalanceResponse"
+                $ref: "#/components/schemas/BalanceResponse"  
           description: transaction accepted
         "400":
           content: {}
@@ -170,7 +174,9 @@ paths:
         content:
           application/json:
             schema:
-                $ref: "#/components/schemas/SendRequest"
+              oneOf:
+                - $ref: "#/components/schemas/SendRequest"
+                - $ref: "#/components/schemas/SerializedSendRequest"
         description: place a send request
         required: true
       responses:
@@ -249,6 +255,12 @@ components:
             - hd
           example: wif
           type: string
+    BalanceRequest:
+      allOf:
+        - $ref: "#/components/schemas/SerializedWallet"
+        - $ref: "#/components/schemas/UnitType"
+      required:
+        - walletId       
     BalanceResponse:
       properties:
         bch:
@@ -353,6 +365,8 @@ components:
             to may be included.
       required:
         - walletId
+        - value
+        - unit
     SerializedWallet:
       properties:
         walletId:
@@ -437,9 +451,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SendRequestItem"
-      required:
-        - walletId
       type: object
+    SerializedSendRequest:
+      allOf:
+        - $ref: "#/components/schemas/SerializedWallet"
+      properties:
+        to: 
+          type: array
+          items:
+            type: array
+            items:
+              oneOf:
+                - string
+                - number
+            description: | 
+              And array of send parameters, in the form:
+              [cashaddr, value, unit]
+            example: "[bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t, 100, 'sat']"
     SendRequestItem:
       allOf:
         - $ref: "#/components/schemas/ToCashaddr"
