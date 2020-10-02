@@ -166,10 +166,8 @@ describe("Post Endpoints", () => {
           to: [
             {
               cashaddr: bobsCashaddr,
-              amount: {
-                unit: Amount.UnitEnum.Sat,
-                value: 120000,
-              },
+              unit: Amount.UnitEnum.Sat,
+              value: 120000,
             },
           ],
         });

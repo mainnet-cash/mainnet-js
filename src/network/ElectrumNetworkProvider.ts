@@ -117,19 +117,17 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getUtxos(address: string): Promise<Utxo[]> {
-    const sha256 = await sha256Promise;
-    const scripthash = addressToElectrumScriptHash(address, sha256);
 
     const result = (await this.performRequest(
-      "blockchain.scripthash.listunspent",
-      scripthash
+      "blockchain.address.listunspent",
+      address
     )) as ElectrumUtxo[];
 
     const utxos = result.map((utxo) => ({
       txid: utxo.tx_hash,
       vout: utxo.tx_pos,
       satoshis: utxo.value,
-      height: utxo.height,
+      height: utxo.height
     }));
 
     return utxos;
@@ -222,27 +220,4 @@ interface ElectrumUtxo {
 interface BlockHeader {
   height: number;
   hex: string;
-}
-
-/**
- * Helper function to convert an address to an electrum-cash compatible scripthash.
- * This is necessary to support electrum versions lower than 1.4.3, which do not
- * support addresses, only script hashes.
- *
- * @param address Address to convert to an electrum scripthash
- *
- * @returns The corresponding script hash in an electrum-cash compatible format
- */
-function addressToElectrumScriptHash(address: string, sha256: Sha256): string {
-  // Retrieve locking script
-  const lockScript = deriveLockscript(address);
-
-  // Hash locking script
-  const scriptHash = sha256.hash(lockScript);
-
-  // Reverse scripthash
-  scriptHash.reverse();
-
-  // Return scripthash as a hex string
-  return binToHex(scriptHash);
 }

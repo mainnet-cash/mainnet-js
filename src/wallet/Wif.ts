@@ -233,7 +233,6 @@ export class WifWallet extends BaseWallet {
     // simulate outputs using the sender's address
     const sendRequest = new SendRequest({
       cashaddr: this.cashaddr,
-
       value: 100,
       unit: UnitEnum.Sat,
     });
@@ -293,7 +292,7 @@ export class WifWallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
     // get input
-    let utxos = await this.getAddressUtxos(this.cashaddr);
+    let utxos = await this.provider!.getUtxos(this.cashaddr);
 
     let bestHeight = await this.provider!.getBlockHeight()!;
     let spendAmount = await sumSendRequestAmounts(sendRequests);

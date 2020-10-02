@@ -3,7 +3,7 @@ const electron = require("electrum-cash");
 const cashscript = require("cashscript");
 const { JSON_SCHEMA } = require("js-yaml");
 
-async function getBlockHeight() {
+async function getRegtestUtxos(address) {
   try {
     let spv = new electron.ElectrumCluster(
       "Mainnet Regtest Client",
@@ -25,7 +25,7 @@ async function getBlockHeight() {
       console.log(e);
       return 0;
     }
-    return reg.getBlockHeight();
+    return reg.getUtxos(address);
   } catch (e) {
     console.log("Error getting block height" + e);
     return 0;
@@ -70,5 +70,5 @@ function pingBchn(user, password, port) {
 module.exports = {
   pingBchn,
   generateBlock,
-  getBlockHeight,
+  getRegtestUtxos,
 };
