@@ -218,6 +218,28 @@ paths:
       summary: Send all available funds to a given address
       tags:
         - wallet
+  /mine:
+    post:
+      summary: Mine regtest coins to a specified address
+      operationId: mine
+      requestBody:
+        content:
+          application/json:
+
+            example: 
+              cashaddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+              blocks: 105
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/RegCashaddr"
+              properties:
+                blocks:
+                  type: number
+                  description: the number of blocks to mine
+                  example: 105
+            required:
+              - cashaddr
+              - blocks              
 components:
   schemas:
     Utxo:
@@ -319,6 +341,13 @@ components:
            example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       discriminator:
         propertyName: cashaddr           
+    RegCashaddr:
+      properties:
+        cashaddr:
+           type: string
+           example: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      discriminator:
+        propertyName: regcashaddr           
     PortableNetworkGraphic:
       properties:
         src:
