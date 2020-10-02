@@ -117,7 +117,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getUtxos(address: string): Promise<Utxo[]> {
-
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
       address
@@ -127,7 +126,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       txid: utxo.tx_hash,
       vout: utxo.tx_pos,
       satoshis: utxo.value,
-      height: utxo.height
+      height: utxo.height,
     }));
 
     return utxos;

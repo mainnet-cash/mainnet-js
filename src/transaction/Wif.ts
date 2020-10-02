@@ -195,7 +195,7 @@ export async function getFeeAmount({
       privateKey,
       888
     );
-    return (draftTransaction.length * 1) + 1;
+    return draftTransaction.length * 1 + 1;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"

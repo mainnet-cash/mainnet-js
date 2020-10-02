@@ -28,7 +28,11 @@ module.exports = async function () {
     await delay(2000);
   }
 
-  for (let i = 0; (await getRegtestUtxos(process.env.ADDRESS)) < 105 && i < 45; i++) {
+  for (
+    let i = 0;
+    (await getRegtestUtxos(process.env.ADDRESS)) < 105 && i < 45;
+    i++
+  ) {
     console.log("Waiting for blocks to be mined");
     await delay(2000);
   }
