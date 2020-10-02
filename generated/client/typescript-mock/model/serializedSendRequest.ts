@@ -12,37 +12,21 @@
 
 import { RequestFile } from './models';
 import { SerializedWallet } from './serializedWallet';
-import { UnitType } from './unitType';
 
-export class BalanceRequest extends SerializedWallet {
-    /**
-    * Unit of account.
-    */
-    'unit'?: BalanceRequest.UnitEnum;
+export class SerializedSendRequest extends SerializedWallet {
+    'to'?: Array<Array<object>>;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "unit",
-            "baseName": "unit",
-            "type": "BalanceRequest.UnitEnum"
+            "name": "to",
+            "baseName": "to",
+            "type": "Array<Array<object>>"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(BalanceRequest.attributeTypeMap);
+        return super.getAttributeTypeMap().concat(SerializedSendRequest.attributeTypeMap);
     }
 }
 
-export namespace BalanceRequest {
-    export enum UnitEnum {
-        Bch = <any> 'bch',
-        Usd = <any> 'usd',
-        Bit = <any> 'bit',
-        Bits = <any> 'bits',
-        Sat = <any> 'sat',
-        Sats = <any> 'sats',
-        Satoshi = <any> 'satoshi',
-        Satoshis = <any> 'satoshis'
-    }
-}

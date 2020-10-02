@@ -3,6 +3,7 @@ api.ts
 api/apis.ts
 api/walletApi.ts
 git_push.sh
+model/balanceRequest.ts
 model/balanceResponse.ts
 model/cashaddr.ts
 model/depositAddressResponse.ts
@@ -16,6 +17,7 @@ model/sendMaxResponse.ts
 model/sendRequest.ts
 model/sendRequestItem.ts
 model/sendResponse.ts
+model/serializedSendRequest.ts
 model/serializedWallet.ts
 model/toCashaddr.ts
 model/transactionId.ts

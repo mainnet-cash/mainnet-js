@@ -1,5 +1,6 @@
 import localVarRequest from 'request';
 
+export * from './balanceRequest';
 export * from './balanceResponse';
 export * from './cashaddr';
 export * from './depositAddressResponse';
@@ -13,6 +14,7 @@ export * from './sendMaxResponse';
 export * from './sendRequest';
 export * from './sendRequestItem';
 export * from './sendResponse';
+export * from './serializedSendRequest';
 export * from './serializedWallet';
 export * from './toCashaddr';
 export * from './transactionId';
@@ -38,6 +40,7 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
+import { BalanceRequest } from './balanceRequest';
 import { BalanceResponse } from './balanceResponse';
 import { Cashaddr } from './cashaddr';
 import { DepositAddressResponse } from './depositAddressResponse';
@@ -51,6 +54,7 @@ import { SendMaxResponse } from './sendMaxResponse';
 import { SendRequest } from './sendRequest';
 import { SendRequestItem } from './sendRequestItem';
 import { SendResponse } from './sendResponse';
+import { SerializedSendRequest } from './serializedSendRequest';
 import { SerializedWallet } from './serializedWallet';
 import { ToCashaddr } from './toCashaddr';
 import { TransactionId } from './transactionId';
@@ -76,6 +80,7 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
+        "BalanceRequest.UnitEnum": BalanceRequest.UnitEnum,
         "Network.NetworkEnum": Network.NetworkEnum,
         "SendRequestItem.UnitEnum": SendRequestItem.UnitEnum,
         "UnitType.UnitEnum": UnitType.UnitEnum,
@@ -87,6 +92,7 @@ let enumsMap: {[index: string]: any} = {
 }
 
 let typeMap: {[index: string]: any} = {
+    "BalanceRequest": BalanceRequest,
     "BalanceResponse": BalanceResponse,
     "Cashaddr": Cashaddr,
     "DepositAddressResponse": DepositAddressResponse,
@@ -100,6 +106,7 @@ let typeMap: {[index: string]: any} = {
     "SendRequest": SendRequest,
     "SendRequestItem": SendRequestItem,
     "SendResponse": SendResponse,
+    "SerializedSendRequest": SerializedSendRequest,
     "SerializedWallet": SerializedWallet,
     "ToCashaddr": ToCashaddr,
     "TransactionId": TransactionId,
