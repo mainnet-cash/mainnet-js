@@ -23,7 +23,7 @@ describe("Post Endpoints", () => {
   /**
    * test mining blocks
    */
-  it("Should return true from the readiness indicator", async () => {
+  it("Should mine a number of blocks to a given address", async () => {
     const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
       name: "Bobs Regtest One Time Wallet",
       type: mockApi.WalletRequest.TypeEnum.Wif,
@@ -31,9 +31,9 @@ describe("Post Endpoints", () => {
     });
 
     const bobsCashaddr = bobsWalletResp.body.cashaddr;
-    const resp = await request(app).get("/mine").send({
+    const resp = await request(app).post("/v1/mine").send({
       cashaddr: bobsCashaddr,
-      blocks: 1,
+      blocks: 15,
     });
 
     const bobBalanceResp = await request(app).post("/v1/wallet/balance").send({
@@ -41,8 +41,7 @@ describe("Post Endpoints", () => {
     });
 
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.length).toEqual(1);
-    console.log(resp.body);
-    expect(bobBalanceResp.body.bch).toEqual(50);
+    expect(resp.body.length).toEqual(15);
+    expect(bobBalanceResp.body.bch).toBeGreaterThan(50*15);
   });
 });

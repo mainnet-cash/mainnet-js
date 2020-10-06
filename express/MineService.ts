@@ -1,5 +1,5 @@
 import { Service } from "../generated/serve/services/Service";
-import { generateBlocks } from "../src/mine/generateBlocks";
+import { mine as mineFn} from "../src/mine";
 
 /**
  * walletMethod handle most other api calls on a wallet
@@ -10,7 +10,7 @@ export const mine = (request: any): Promise<any> =>
   new Promise(async (resolve, reject) => {
     try {
       let args = request.body;
-      let resp = await generateBlocks(args);
+      let resp = await mineFn(args);
       resolve(Service.successResponse(resp));
     } catch (e) {
       console.log(e);

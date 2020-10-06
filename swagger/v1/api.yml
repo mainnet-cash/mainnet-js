@@ -231,13 +231,14 @@ paths:
           - cashaddr
           - blocks        
       responses:
-        "202":
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TransactionId"
+                  type: string
+                  description: a list of block hashes
           description: request accepted
         "400":
           content: {}
@@ -376,6 +377,8 @@ components:
       required:
         - walletId
         - cashaddr
+        - value
+        - unit
     MaxAmountToSendRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"
@@ -389,8 +392,6 @@ components:
             to may be included.
       required:
         - walletId
-        - value
-        - unit
     SerializedWallet:
       properties:
         walletId:
