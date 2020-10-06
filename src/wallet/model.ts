@@ -26,7 +26,7 @@ export class SendRequest {
   }
 }
 
-export type SendRequestArray = Array<string|number|UnitEnum>
+export type SendRequestArray = Array<string | number | UnitEnum>;
 
 export class UtxoItem {
   "index"?: number;

@@ -106,7 +106,7 @@ describe(`Wallet should function in the browser`, () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
         const alice = await mainnet.TestnetWallet.watchOnly(addr);
-        return alice.getBalance('usd');
+        return alice.getBalance("usd");
       }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result).toBeGreaterThan(0);
     } else {

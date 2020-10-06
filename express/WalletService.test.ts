@@ -3,7 +3,10 @@ import * as mockApi from "../generated/client/typescript-mock/api";
 import { bchParam } from "../src/chain";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import { UtxoResponse, UnitType } from "../generated/client/typescript-mock/api";
+import {
+  UtxoResponse,
+  UnitType,
+} from "../generated/client/typescript-mock/api";
 
 var request = require("supertest");
 

@@ -17,8 +17,8 @@ export async function balanceResponseFromSatoshi(
   value: number
 ): Promise<BalanceResponse> {
   let response = new BalanceResponse();
-  let returnUnits: UnitEnum[] = ["bch", "sat", "usd"]
-  
+  let returnUnits: UnitEnum[] = ["bch", "sat", "usd"];
+
   for (const u of returnUnits) {
     switch (u) {
       case UnitEnum.BCH:
@@ -31,18 +31,19 @@ export async function balanceResponseFromSatoshi(
         response.usd = (value / bchParam.subUnits) * (await getUsdRate());
         break;
       default:
-        throw Error(`Balance response type ${JSON.stringify(u)} not understood`);
+        throw Error(
+          `Balance response type ${JSON.stringify(u)} not understood`
+        );
     }
   }
   return response;
 }
 
-
 export async function balanceFromSatoshi(
   value: number,
   unit?: UnitEnum
 ): Promise<number> {
-  let response: number
+  let response: number;
   switch (unit) {
     case UnitEnum.BCH:
       return value / bchParam.subUnits;
@@ -51,7 +52,8 @@ export async function balanceFromSatoshi(
     case UnitEnum.USD:
       return (value / bchParam.subUnits) * (await getUsdRate());
     default:
-      throw Error(`Balance response type ${JSON.stringify(unit)} not understood`);
+      throw Error(
+        `Balance response type ${JSON.stringify(unit)} not understood`
+      );
   }
 }
-

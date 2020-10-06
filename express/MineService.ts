@@ -1,6 +1,5 @@
-
 import { Service } from "../generated/serve/services/Service";
-import {generateBlocks} from "../src/mine/generateBlocks"
+import { generateBlocks } from "../src/mine/generateBlocks";
 
 /**
  * walletMethod handle most other api calls on a wallet

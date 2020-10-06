@@ -18,7 +18,6 @@ export const UnitEnum = {
 };
 export type UnitEnum = typeof UnitEnum[keyof typeof UnitEnum];
 
-
 export enum WalletTypeEnum {
   Wif = "wif",
   Hd = "hd",

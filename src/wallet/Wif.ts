@@ -40,7 +40,7 @@ import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
-  BalanceResponse
+  BalanceResponse,
 } from "../util/balanceObjectFromSatoshi";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -127,13 +127,15 @@ export class WifWallet extends BaseWallet {
     )) as string;
   }
 
-  public async send(requests: SendRequest[]|SendRequestArray[]): Promise<SendResponse> {
+  public async send(
+    requests: SendRequest[] | SendRequestArray[]
+  ): Promise<SendResponse> {
     try {
-      let sendRequests = asSendRequestObject(requests)
+      let sendRequests = asSendRequestObject(requests);
       let result = await this._processSendRequests(sendRequests);
       let resp = new SendResponse({});
       resp.transactionId = result;
-      resp.balance = await this.getBalance() as BalanceResponse;
+      resp.balance = (await this.getBalance()) as BalanceResponse;
       return resp;
     } catch (e) {
       throw e;
@@ -145,7 +147,7 @@ export class WifWallet extends BaseWallet {
       let result = await this.sendMaxRaw(sendMaxRequest);
       let resp = new SendResponse({});
       resp.transactionId = result;
-      resp.balance = await this.getBalance() as BalanceResponse;
+      resp.balance = (await this.getBalance()) as BalanceResponse;
       return resp;
     } catch (e) {
       throw Error(e);
@@ -188,10 +190,10 @@ export class WifWallet extends BaseWallet {
     return res;
   }
 
-  public async getBalance(unit?: UnitEnum) : Promise<BalanceResponse|number> {
-    if(unit){
+  public async getBalance(unit?: UnitEnum): Promise<BalanceResponse | number> {
+    if (unit) {
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
-    }else{
+    } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
     }
   }
