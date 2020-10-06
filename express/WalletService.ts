@@ -1,8 +1,10 @@
 import { Service } from "../generated/serve/services/Service";
 import { walletFromIdString } from "../src/wallet/createWallet";
-import { createWallet as createWalletFn } from "../src/wallet/createWallet";
+import { createWalletResponse } from "../src/wallet/createWallet";
+
 export { send } from "./send";
 export { sendMax } from "./sendMax";
+export { balance } from "./balance";
 
 /**
  * create a new wallet
@@ -13,7 +15,7 @@ export { sendMax } from "./sendMax";
 export const createWallet = (request) =>
   new Promise(async (resolve, reject) => {
     try {
-      let resp = await createWalletFn(request.body);
+      let resp = await createWalletResponse(request.body);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(JSON.stringify(e));
@@ -24,11 +26,11 @@ export const createWallet = (request) =>
   });
 
 /**
- * methodOnWallet handle most other api calls on a wallet
+ * walletMethod handle most other api calls on a wallet
  *
  * takes a walletId and some other arguments
  * */
-const methodOnWallet = (request: any, method): Promise<any> =>
+const walletMethod = (request: any, method): Promise<any> =>
   new Promise(async (resolve, reject) => {
     try {
       let wallet = await walletFromIdString(request.body.walletId);
@@ -44,12 +46,8 @@ const methodOnWallet = (request: any, method): Promise<any> =>
     }
   });
 
-export const balance = (request) => methodOnWallet(request, "balance");
-export const depositAddress = (request) =>
-  methodOnWallet(request, "depositAddress");
-export const depositQr = (request) => methodOnWallet(request, "depositQr");
-export const maxAmountToSend = (request) =>
-  methodOnWallet(request, "maxAmountToSend");
-// export const send = (request) => methodOnWallet(request, "send")
-// export const sendMax = (request) => methodOnWallet(request, "sendMax")
-export const utxos = (request) => methodOnWallet(request, "utxos");
+//export const balance = (req) => walletMethod(req, "getBalance");
+export const depositAddress = (req) => walletMethod(req, "getDepositAddress");
+export const depositQr = (req) => walletMethod(req, "getDepositQr");
+export const maxAmountToSend = (req) => walletMethod(req, "getMaxAmountToSend");
+export const utxos = (req) => walletMethod(req, "getUtxos");

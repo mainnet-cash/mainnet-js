@@ -2,9 +2,9 @@ import { NetworkEnum, WalletTypeEnum } from "./enum";
 import { RegTestWallet, TestnetWallet, MainnetWallet, WifWallet } from "./Wif";
 
 interface WalletRequest {
-  name: string;
-  network: string;
-  type: WalletTypeEnum;
+  name?: string;
+  network?: string;
+  type?: WalletTypeEnum;
 }
 
 interface WalletResponse {
@@ -23,9 +23,7 @@ function asJsonResponse(wallet: WifWallet): WalletResponse {
   };
 }
 
-export async function createWalletObject(
-  body: WalletRequest
-): Promise<WifWallet> {
+export async function createWallet(body: WalletRequest): Promise<WifWallet> {
   let wallet;
 
   switch (body.network) {
@@ -39,7 +37,7 @@ export async function createWalletObject(
       wallet = new MainnetWallet(body.name);
       break;
     default:
-      throw Error(`The wallet network ${body.network} was not understood`);
+      wallet = new MainnetWallet(body.name);
   }
   if (wallet) {
     switch (body.type) {
@@ -48,6 +46,8 @@ export async function createWalletObject(
         break;
       case WalletTypeEnum.Hd:
         throw Error("Not Implemented");
+      default:
+        await wallet.generateWif();
     }
     return wallet;
   } else {
@@ -55,10 +55,15 @@ export async function createWalletObject(
   }
 }
 
-export async function createWallet(
-  body: WalletRequest
+/**
+ * Create a new wallet
+ * @param walletRequest A wallet request object
+ * @returns A new wallet object
+ */
+export async function createWalletResponse(
+  walletRequest: WalletRequest
 ): Promise<WalletResponse> {
-  let wallet = await createWalletObject(body);
+  let wallet = await createWallet(walletRequest);
   if (wallet) {
     return asJsonResponse(wallet);
   } else {
@@ -76,15 +81,15 @@ export async function walletFromIdString(
     network: network,
     type: WalletTypeEnum[walletType],
   } as WalletRequest;
-  let wallet = await createWalletObject(walletRequest);
+  let wallet = await createWallet(walletRequest);
   switch (walletType) {
     case "wif":
-      await wallet.fromWIF(privateImport);
+      await wallet.initializeWIF(privateImport);
       break;
     case "hd":
       throw Error("Heuristic Wallets are not implemented");
     default:
-      throw Error("The wallet type was not understood");
+      throw Error(`The wallet type: ${walletType} was not understood`);
   }
   return wallet;
 }

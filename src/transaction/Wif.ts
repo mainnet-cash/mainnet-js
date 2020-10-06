@@ -12,15 +12,16 @@ import {
   AnyCompilationEnvironment,
   AuthenticationProgramStateBCH,
 } from "@bitauth/libauth";
-import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
+import { Utxo } from "../interface";
 
 import { SendRequest } from "../wallet/model";
+import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
-  inputs: UnspentOutput[],
+  inputs: Utxo[],
   outputs: SendRequest[],
   signingKey: Uint8Array,
   fee: number = 0,
@@ -75,7 +76,7 @@ export async function buildP2pkhNonHdTransaction(
 }
 
 export function prepareInputs(
-  inputs: UnspentOutput[],
+  inputs: Utxo[],
   compiler: Compiler<
     TransactionContextCommon,
     AnyCompilationEnvironment<TransactionContextCommon>,
@@ -85,12 +86,14 @@ export function prepareInputs(
 ) {
   let signedInputs: any[] = [];
   for (const i of inputs) {
-    const utxoTxnValue = i.getValue();
-    const utxoIndex = i.getOutpoint()!.getIndex();
+    const utxoTxnValue = i.satoshis;
+    const utxoIndex = i.vout;
     // slice will create a clone of the array
-    let utxoOutpointTransactionHash = i.getOutpoint()!.getHash_asU8()!.slice();
+    let utxoOutpointTransactionHash = new Uint8Array(
+      i.txid.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+    );
     // reverse the cloned copy
-    utxoOutpointTransactionHash.reverse();
+    // utxoOutpointTransactionHash.reverse();
     if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
       throw new Error("Missing unspent outpoint when building transaction");
     }
@@ -130,7 +133,9 @@ export function prepareOutputs(outputs: SendRequest[]) {
     };
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(BigInt(output.amount.inSatoshi())),
+      satoshis: bigIntToBinUint64LE(
+        BigInt(amountInSatoshi(output.value, output.unit))
+      ),
     };
     lockedOutputs.push(lockedOutput);
   }
@@ -138,22 +143,22 @@ export function prepareOutputs(outputs: SendRequest[]) {
 }
 
 export async function getSuitableUtxos(
-  unspentOutputs: UnspentOutput[],
+  unspentOutputs: Utxo[],
   amountRequired: BigInt | undefined,
   bestHeight: number
 ) {
-  let suitableUtxos: UnspentOutput[] = [];
+  let suitableUtxos: Utxo[] = [];
   let amountAvailable = 0n;
   for (const u of unspentOutputs) {
-    if (u.getIsCoinbase() && bestHeight) {
-      let age = bestHeight - u.getBlockHeight();
+    if (u.coinbase && u.height && bestHeight) {
+      let age = bestHeight - u.height;
       if (age > 100) {
         suitableUtxos.push(u);
-        amountAvailable += BigInt(u.getValue());
+        amountAvailable += BigInt(u.satoshis);
       }
     } else {
       suitableUtxos.push(u);
-      amountAvailable += BigInt(u.getValue());
+      amountAvailable += BigInt(u.satoshis);
     }
     // if amountRequired is not given, assume it is a max spend request, skip this condition
     if (amountRequired && amountAvailable > amountRequired) {
@@ -177,7 +182,7 @@ export async function getFeeAmount({
   sendRequests,
   privateKey,
 }: {
-  utxos: UnspentOutput[];
+  utxos: Utxo[];
   sendRequests: SendRequest[];
   privateKey: Uint8Array;
 }) {
@@ -190,7 +195,7 @@ export async function getFeeAmount({
       privateKey,
       888
     );
-    return draftTransaction.length * 2;
+    return draftTransaction.length * 1 + 1;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"
@@ -200,7 +205,7 @@ export async function getFeeAmount({
 
 // Build encoded transaction
 export async function buildEncodedTransaction(
-  fundingUtxos: UnspentOutput[],
+  fundingUtxos: Utxo[],
   sendRequests: SendRequest[],
   privateKey: Uint8Array,
   fee: number = 0,

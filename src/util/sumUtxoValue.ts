@@ -1,10 +1,10 @@
-import { UnspentOutput } from "grpc-bchrpc-node/pb/bchrpc_pb";
+import { Utxo } from "../interface";
 
-export async function sumUtxoValue(utxos: UnspentOutput[]) {
+export async function sumUtxoValue(utxos: Utxo[]) {
   if (utxos) {
     const balanceArray: number[] = await Promise.all(
-      utxos.map(async (o: UnspentOutput) => {
-        return o.getValue();
+      utxos.map(async (o: Utxo) => {
+        return o.satoshis;
       })
     );
     const balance = balanceArray.reduce((a: number, b: number) => a + b, 0);
