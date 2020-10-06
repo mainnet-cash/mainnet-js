@@ -1,4 +1,3 @@
-import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { UnitEnum } from "./enum";
 
@@ -26,6 +25,8 @@ export class SendRequest {
     this.unit = unit;
   }
 }
+
+export type SendRequestArray = Array<string|number|UnitEnum>
 
 export class UtxoItem {
   "index"?: number;

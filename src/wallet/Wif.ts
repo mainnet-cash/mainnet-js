@@ -19,6 +19,7 @@ import { PrivateKey } from "../interface";
 import {
   SendMaxRequest,
   SendRequest,
+  SendRequestArray,
   SendResponse,
   UtxoItem,
   UtxoResponse,
@@ -33,11 +34,13 @@ import {
 } from "../transaction/Wif";
 
 import { qrAddress, Image } from "../qr/Qr";
+import { asSendRequestObject } from "../util/asSendRequestObject";
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
+  balanceFromSatoshi,
   balanceResponseFromSatoshi,
-  BalanceResponse,
+  BalanceResponse
 } from "../util/balanceObjectFromSatoshi";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -53,7 +56,7 @@ export class WifWallet extends BaseWallet {
   walletType?: WalletTypeEnum;
   cashaddr?: string;
 
-  constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
+  constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
     super(name, networkPrefix);
     this.name = name;
     this.walletType = WalletTypeEnum.Wif;
@@ -124,27 +127,17 @@ export class WifWallet extends BaseWallet {
     )) as string;
   }
 
-  public async send(requests: SendRequest[]): Promise<SendResponse> {
+  public async send(requests: SendRequest[]|SendRequestArray[]): Promise<SendResponse> {
     try {
-      let result = await this._processSendRequests(requests);
+      let sendRequests = asSendRequestObject(requests)
+      let result = await this._processSendRequests(sendRequests);
       let resp = new SendResponse({});
       resp.transactionId = result;
-      resp.balance = await this.getBalance();
+      resp.balance = await this.getBalance() as BalanceResponse;
       return resp;
     } catch (e) {
       throw e;
     }
-  }
-
-  // Processes an array of send requests
-  public async sendRaw(requests: Array<any>) {
-    // Deserialize the request
-    const sendRequests: SendRequest[] = await Promise.all(
-      requests.map(async (rawSendRequest: any) => {
-        return new SendRequest(rawSendRequest);
-      })
-    );
-    return await this._processSendRequests(sendRequests);
   }
 
   public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
@@ -152,7 +145,7 @@ export class WifWallet extends BaseWallet {
       let result = await this.sendMaxRaw(sendMaxRequest);
       let resp = new SendResponse({});
       resp.transactionId = result;
-      resp.balance = await this.getBalance();
+      resp.balance = await this.getBalance() as BalanceResponse;
       return resp;
     } catch (e) {
       throw Error(e);
@@ -167,7 +160,7 @@ export class WifWallet extends BaseWallet {
     let sendRequest = new SendRequest({
       cashaddr: sendMaxRequest.cashaddr,
       value: maxSpendableAmount.sat,
-      unit: UnitEnum.Sat,
+      unit: "sat",
     });
     return await this._processSendRequests([sendRequest], true);
   }
@@ -195,9 +188,12 @@ export class WifWallet extends BaseWallet {
     return res;
   }
 
-  public async getBalance() {
-    // TODO handle other denominations
-    return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
+  public async getBalance(unit?: UnitEnum) : Promise<BalanceResponse|number> {
+    if(unit){
+      return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
+    }else{
+      return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
+    }
   }
 
   // Gets balance by summing value in all utxos in stats
@@ -234,7 +230,7 @@ export class WifWallet extends BaseWallet {
     const sendRequest = new SendRequest({
       cashaddr: this.cashaddr,
       value: 100,
-      unit: UnitEnum.Sat,
+      unit: "sat",
     });
     let sendRequests = Array(outputCount)
       .fill(0)
@@ -262,7 +258,7 @@ export class WifWallet extends BaseWallet {
     resp.utxos = await Promise.all(
       utxos.map(async (o: Utxo) => {
         let utxo = new UtxoItem();
-        utxo.unit = UnitEnum.Sat;
+        utxo.unit = "sat";
         utxo.value = o.satoshis;
 
         utxo.transactionId = o.txid;

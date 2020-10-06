@@ -22,7 +22,7 @@ async function getRegtestUtxos(address) {
       await spv.startup();
     } catch (e) {
       spv.shutdown();
-      console.log(e);
+      //console.log(e);
       return 0;
     }
     return reg.getUtxos(address);

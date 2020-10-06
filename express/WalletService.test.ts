@@ -1,10 +1,9 @@
 import { getServer } from "../generated/serve/index";
 import * as mockApi from "../generated/client/typescript-mock/api";
 import { bchParam } from "../src/chain";
-import { Amount } from "../generated/client/typescript-mock/model/amount";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import { UtxoResponse } from "../generated/client/typescript-mock/api";
+import { UtxoResponse, UnitType } from "../generated/client/typescript-mock/api";
 
 var request = require("supertest");
 
@@ -166,7 +165,7 @@ describe("Post Endpoints", () => {
           to: [
             {
               cashaddr: bobsCashaddr,
-              unit: Amount.UnitEnum.Sat,
+              unit: UnitType.UnitEnum.Sat,
               value: 120000,
             },
           ],
@@ -198,7 +197,7 @@ describe("Post Endpoints", () => {
 
       let toBob = new SendRequestItem();
       toBob.cashaddr = bobsCashaddr;
-      toBob.unit = Amount.UnitEnum.Sat;
+      toBob.unit = UnitType.UnitEnum.Sat;
       toBob.value = 3000;
 
       let AliceSendToBobReq = new SendRequest();
@@ -240,7 +239,7 @@ describe("Post Endpoints", () => {
 
     let toBob = new SendRequestItem();
     toBob.cashaddr = bobsWallet.cashaddr as string;
-    toBob.unit = Amount.UnitEnum.Bch;
+    toBob.unit = UnitType.UnitEnum.Bch;
     toBob.value = 1;
 
     let AliceSendToBobReq = new SendRequest();

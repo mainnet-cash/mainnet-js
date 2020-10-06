@@ -3,15 +3,15 @@ import { UnitEnum } from "../wallet/enum";
 
 export function amountInSatoshi(value: number, unit: UnitEnum): BigInt | Error {
   switch (unit) {
-    case UnitEnum.Satoshi:
+    case UnitEnum.SATOSHI:
       return BigInt(value);
-    case UnitEnum.Sat:
+    case UnitEnum.SAT:
       return BigInt(value);
-    case UnitEnum.Sats:
+    case UnitEnum.SATS:
       return BigInt(value);
-    case UnitEnum.Satoshis:
+    case UnitEnum.SATOSHIS:
       return BigInt(value);
-    case UnitEnum.Bch:
+    case UnitEnum.BCH:
       return BigInt(value * bchParam.subUnits);
     default:
       throw Error("Unit of value not defined");

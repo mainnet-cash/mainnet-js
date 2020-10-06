@@ -225,7 +225,6 @@ paths:
       requestBody:
         content:
           application/json:
-
             example: 
               cashaddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
               blocks: 105

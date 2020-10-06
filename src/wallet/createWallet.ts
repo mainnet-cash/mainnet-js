@@ -2,9 +2,9 @@ import { NetworkEnum, WalletTypeEnum } from "./enum";
 import { RegTestWallet, TestnetWallet, MainnetWallet, WifWallet } from "./Wif";
 
 interface WalletRequest {
-  name: string;
-  network: string;
-  type: WalletTypeEnum;
+  name?: string;
+  network?: string;
+  type?: WalletTypeEnum;
 }
 
 interface WalletResponse {

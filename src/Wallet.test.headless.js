@@ -102,6 +102,21 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
+  test(`Should return testnet balance in usd`, async () => {
+    if (process.env.ALICE_TESTNET_ADDRESS) {
+      const result = await page.evaluate(async (addr) => {
+        const alice = await mainnet.TestnetWallet.watchOnly(addr);
+        return alice.getBalance('usd');
+      }, process.env.ALICE_TESTNET_ADDRESS);
+      expect(result).toBeGreaterThan(0);
+    } else {
+      expect.assertions(1);
+      console.warn(
+        "SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env"
+      );
+    }
+  });
+
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
     if (process.env.ALICE_TESTNET_WALLET_ID) {
       const result = await page.evaluate(
