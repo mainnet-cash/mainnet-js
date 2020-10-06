@@ -5,6 +5,7 @@ export * from './balanceResponse';
 export * from './cashaddr';
 export * from './depositAddressResponse';
 export * from './maxAmountToSendRequest';
+export * from './mineRequest';
 export * from './network';
 export * from './outpoint';
 export * from './regCashaddr';
@@ -45,6 +46,7 @@ import { BalanceResponse } from './balanceResponse';
 import { Cashaddr } from './cashaddr';
 import { DepositAddressResponse } from './depositAddressResponse';
 import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
+import { MineRequest } from './mineRequest';
 import { Network } from './network';
 import { Outpoint } from './outpoint';
 import { RegCashaddr } from './regCashaddr';
@@ -97,6 +99,7 @@ let typeMap: {[index: string]: any} = {
     "Cashaddr": Cashaddr,
     "DepositAddressResponse": DepositAddressResponse,
     "MaxAmountToSendRequest": MaxAmountToSendRequest,
+    "MineRequest": MineRequest,
     "Network": Network,
     "Outpoint": Outpoint,
     "RegCashaddr": RegCashaddr,

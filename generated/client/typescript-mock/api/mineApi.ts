@@ -15,9 +15,8 @@ import localVarRequest from 'request';
 import http from 'http';
 
 /* tslint:disable:no-unused-locals */
-import { RegCashaddr } from '../model/regCashaddr';
+import { MineRequest } from '../model/mineRequest';
 import { TransactionId } from '../model/transactionId';
-import { UNKNOWNBASETYPE } from '../model/uNKNOWNBASETYPE';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
@@ -91,9 +90,9 @@ export class MineApi {
     /**
      * 
      * @summary Mine regtest coins to a specified address
-     * @param uNKNOWNBASETYPE 
+     * @param mineRequest 
      */
-    public async mine (uNKNOWNBASETYPE?: UNKNOWN_BASE_TYPE, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<TransactionId>;  }> {
+    public async mine (mineRequest?: MineRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<TransactionId>;  }> {
         const localVarPath = this.basePath + '/mine';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -117,7 +116,7 @@ export class MineApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(uNKNOWNBASETYPE, "UNKNOWN_BASE_TYPE")
+            body: ObjectSerializer.serialize(mineRequest, "MineRequest")
         };
 
         let authenticationPromise = Promise.resolve();

@@ -7,14 +7,14 @@ import * as core from "express-serve-static-core";
 /**
 * Mine regtest coins to a specified address
 *
-* uNKNOWNUnderscoreBASEUnderscoreTYPE UNKNOWN_BASE_TYPE  (optional)
+* mineRequest MineRequest  (optional)
 * returns List
 * */
-export const mine = ({ uNKNOWNUnderscoreBASEUnderscoreTYPE }) => new Promise(
+export const mine = ({ mineRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
-        uNKNOWNUnderscoreBASEUnderscoreTYPE,
+        mineRequest,
       }));
     } catch (e) {
       reject(Service.rejectResponse(

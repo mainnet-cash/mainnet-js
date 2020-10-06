@@ -233,17 +233,8 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              cashaddr: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-              blocks: 105
             schema:
-              allOf:
-              - $ref: '#/components/schemas/RegCashaddr'
-              properties:
-                blocks:
-                  description: the number of blocks to mine
-                  example: 105
-                  type: number
+              $ref: '#/components/schemas/MineRequest'
       responses:
         "202":
           content:
@@ -494,6 +485,17 @@ components:
           - satoshis
           example: sat
           type: string
+    MineRequest:
+      allOf:
+      - $ref: '#/components/schemas/RegCashaddr'
+      example:
+        cashaddr: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        blocks: 105
+      properties:
+        blocks:
+          description: the number of blocks to mine
+          example: 105
+          type: number
     WalletRequest:
       allOf:
       - $ref: '#/components/schemas/WalletType'

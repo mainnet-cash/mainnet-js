@@ -9,6 +9,7 @@ model/balanceResponse.ts
 model/cashaddr.ts
 model/depositAddressResponse.ts
 model/maxAmountToSendRequest.ts
+model/mineRequest.ts
 model/network.ts
 model/outpoint.ts
 model/regCashaddr.ts
