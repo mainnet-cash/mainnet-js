@@ -258,6 +258,10 @@ describe("Post Endpoints", () => {
         cashaddr: process.env.ADDRESS as string,
       });
     const body = resp.body;
+    ;
+    if(resp.statusCode !== 200){
+      console.log(resp.error.text)
+    }
     expect(resp.statusCode).toBe(200);
     expect((body.transactionId as string).length).toBe(64);
     expect(body.balance!.bch as number).toBe(0);
