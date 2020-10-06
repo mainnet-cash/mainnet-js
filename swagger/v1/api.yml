@@ -457,14 +457,13 @@ components:
       example: 
         cashaddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
         blocks: 105
-      schema:
-        allOf:
-          - $ref: "#/components/schemas/RegCashaddr"
-        properties:
-          blocks:
-            type: number
-            description: the number of blocks to mine
-            example: 105
+      allOf:
+        - $ref: "#/components/schemas/RegCashaddr"
+      properties:
+        blocks:
+          type: number
+          description: the number of blocks to mine
+          example: 105
     WalletRequest:
       example:
         type: wif
