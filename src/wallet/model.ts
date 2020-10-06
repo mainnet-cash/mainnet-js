@@ -1,4 +1,3 @@
-import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { UnitEnum } from "./enum";
 
@@ -9,23 +8,30 @@ import { UnitEnum } from "./enum";
 
 export class SendRequest {
   cashaddr: string;
-  amount: Amount;
+  value: number;
+  unit: UnitEnum;
 
   constructor({
     cashaddr,
-    amount,
+    value,
+    unit,
   }: {
     cashaddr: string;
-    amount: AmountType | { value: number; unit: UnitEnum };
+    value: number;
+    unit: UnitEnum;
   }) {
     this.cashaddr = cashaddr;
-    this.amount = new Amount(amount);
+    this.value = value;
+    this.unit = unit;
   }
 }
 
+export type SendRequestArray = Array<string | number | UnitEnum>;
+
 export class UtxoItem {
   "index"?: number;
-  "amount": Amount;
+  "value": number;
+  "unit": UnitEnum;
   "utxoId": string;
   "transactionId": string;
 }
@@ -33,17 +39,6 @@ export class UtxoItem {
 export class UtxoResponse {
   "utxos"?: Array<UtxoItem>;
 }
-
-export class Amount {
-  value: number;
-  unit: UnitEnum;
-  constructor({ value, unit }: AmountType | { value: number; unit: UnitEnum }) {
-    this.value = value;
-    this.unit = unit;
-  }
-}
-
-export type AmountType = typeof Amount[keyof typeof Amount];
 
 export class SendMaxRequest {
   cashaddr: string;

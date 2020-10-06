@@ -7,14 +7,14 @@ import * as core from "express-serve-static-core";
 /**
 * Get total balance for wallet
 *
-* serializedWallet SerializedWallet Request for a wallet balance 
+* balanceRequest BalanceRequest Request for a wallet balance 
 * returns BalanceResponse
 * */
-export const balance = ({ serializedWallet }) => new Promise(
+export const balance = ({ balanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
-        serializedWallet,
+        balanceRequest,
       }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -87,7 +87,7 @@ export const depositQr = ({ serializedWallet }) => new Promise(
 /**
 * Get maximum spendable amount
 *
-* maxAmountToSendRequest MaxAmountToSendRequest get amount that will be spend with a spend max request
+* maxAmountToSendRequest MaxAmountToSendRequest get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
 * returns BalanceResponse
 * */
 export const maxAmountToSend = ({ maxAmountToSendRequest }) => new Promise(
@@ -107,14 +107,14 @@ export const maxAmountToSend = ({ maxAmountToSendRequest }) => new Promise(
 /**
 * Send some amount to a given address
 *
-* sendRequest SendRequest place a send request
+* uNKNOWNUnderscoreBASEUnderscoreTYPE UNKNOWN_BASE_TYPE place a send request
 * returns SendResponse
 * */
-export const send = ({ sendRequest }) => new Promise(
+export const send = ({ uNKNOWNUnderscoreBASEUnderscoreTYPE }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
-        sendRequest,
+        uNKNOWNUnderscoreBASEUnderscoreTYPE,
       }));
     } catch (e) {
       reject(Service.rejectResponse(

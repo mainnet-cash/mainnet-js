@@ -15,7 +15,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.2
+  version: 0.0.4
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -28,7 +28,7 @@ tags:
     url: http://mainnet.cash/docs#wallet
   name: wallet
 paths:
-  /wallet:
+  /wallet/create:
     post:
       operationId: createWallet
       requestBody:
@@ -59,7 +59,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SerializedWallet'
+              $ref: '#/components/schemas/BalanceRequest'
         description: |
           Request for a wallet balance
         required: true
@@ -69,6 +69,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+            text/plain:
+              schema:
+                description: If a unit of account is passed, a plain number is returned.
+                type: number
           description: successful operation
       summary: Get total balance for wallet
       tags:
@@ -128,7 +132,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/MaxAmountToSendRequest'
-        description: get amount that will be spend with a spend max request
+        description: get amount that will be spend with a spend max request. If a
+          unit type is specified, a numeric value will be returned.
         required: true
       responses:
         "200":
@@ -176,7 +181,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendRequest'
+              oneOf:
+              - $ref: '#/components/schemas/SendRequest'
+              - $ref: '#/components/schemas/SerializedSendRequest'
         description: place a send request
         required: true
       responses:
@@ -220,22 +227,44 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /mine:
+    post:
+      operationId: mine
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MineRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  description: a list of block hashes
+                  type: string
+                type: array
+          description: request accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Mine regtest coins to a specified address
+      tags:
+      - mine
+      x-eov-operation-handler: controllers/MineController
 components:
   schemas:
     Utxo:
       allOf:
+      - $ref: '#/components/schemas/ValueType'
+      - $ref: '#/components/schemas/UnitType'
       - $ref: '#/components/schemas/Outpoint'
       - $ref: '#/components/schemas/TransactionId'
       example:
-        amount:
-          unit: sat
-          value: 100
         index: 0.8008281904610115
       properties:
         index:
           type: number
-        amount:
-          $ref: '#/components/schemas/Amount'
       required:
       - amount
       - transactionId
@@ -261,27 +290,12 @@ components:
           - hd
           example: wif
           type: string
-    Amount:
-      example:
-        unit: sat
-        value: 100
-      properties:
-        value:
-          example: 100
-          type: number
-        unit:
-          description: Denomination for amount
-          enum:
-          - bch
-          - usd
-          - bit
-          - bits
-          - sat
-          - sats
-          - satoshi
-          - satoshis
-          example: sat
-          type: string
+    BalanceRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      - $ref: '#/components/schemas/UnitType'
+      required:
+      - walletId
     BalanceResponse:
       example:
         bch: 1
@@ -327,35 +341,39 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
           type: string
     TransactionId:
+      discriminator:
+        propertyName: transactionId
       properties:
         transactionId:
           description: The hash of a transaction
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
     ToCashaddr:
+      discriminator:
+        propertyName: to
       properties:
         cashaddr:
           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           type: string
     Cashaddr:
+      discriminator:
+        propertyName: cashaddr
       properties:
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
-    PortableNetworkGraphic:
+    RegCashaddr:
+      discriminator:
+        propertyName: regcashaddr
       properties:
-        src:
-          description: "A Qr code image data in png format as base64 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...\
-            \   ...Jggg==**\"\\> \n"
-          example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ...
-            ...AAAAABJRU5ErkJggg==
+        cashaddr:
+          example: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
     ScalableVectorGraphic:
       example:
         src: data:image/svg+xml;base64,PD94bWwgdm... ==**
-        alt: alt
-        title: title
+        alt: A Bitcoin Cash Qr Code
+        title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       properties:
         src:
           description: "A Qr code image data in svg format as utf-8 encoded string.\n\
@@ -365,9 +383,11 @@ components:
           type: string
         title:
           description: hover text for graphic
+          example: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
         alt:
           description: assistive text
+          example: A Bitcoin Cash Qr Code
           type: string
     SendMaxRequest:
       allOf:
@@ -392,6 +412,8 @@ components:
       required:
       - walletId
     SerializedWallet:
+      discriminator:
+        propertyName: walletId
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
       properties:
@@ -409,19 +431,18 @@ components:
     UtxoResponse:
       example:
         utxos:
-        - amount:
-            unit: sat
-            value: 100
-          index: 0.8008281904610115
-        - amount:
-            unit: sat
-            value: 100
-          index: 0.8008281904610115
+        - index: 0.8008281904610115
+        - index: 0.8008281904610115
       properties:
         utxos:
           items:
             $ref: '#/components/schemas/Utxo'
           type: array
+    ValueType:
+      properties:
+        value:
+          example: 100
+          type: number
     WalletResponse:
       allOf:
       - $ref: '#/components/schemas/SerializedWallet'
@@ -446,6 +467,32 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
       type: object
+    UnitType:
+      properties:
+        unit:
+          description: Unit of account.
+          enum:
+          - bch
+          - usd
+          - bit
+          - bits
+          - sat
+          - sats
+          - satoshi
+          - satoshis
+          example: sat
+          type: string
+    MineRequest:
+      allOf:
+      - $ref: '#/components/schemas/RegCashaddr'
+      example:
+        cashaddr: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        blocks: 105
+      properties:
+        blocks:
+          description: the number of blocks to mine
+          example: 105
+          type: number
     WalletRequest:
       allOf:
       - $ref: '#/components/schemas/WalletType'
@@ -459,42 +506,38 @@ components:
           description: User defined string for wallet
           example: username1
           type: string
-      required:
-      - name
-      - network
-      - type
       type: object
     SendRequest:
       allOf:
       - $ref: '#/components/schemas/SerializedWallet'
-      example:
-        to:
-        - amount:
-            unit: sat
-            value: 100
-        - amount:
-            unit: sat
-            value: 100
       properties:
         to:
           items:
             $ref: '#/components/schemas/SendRequestItem'
           type: array
-      required:
-      - walletId
       type: object
+    SerializedSendRequest:
+      allOf:
+      - $ref: '#/components/schemas/SerializedWallet'
+      properties:
+        to:
+          items:
+            description: |
+              And array of send parameters, in the form:
+              [cashaddr, value, unit]
+            example: '[bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t, 100, ''sat'']'
+            items: {}
+            type: array
+          type: array
     SendRequestItem:
       allOf:
       - $ref: '#/components/schemas/ToCashaddr'
-      example:
-        amount:
-          unit: sat
-          value: 100
-      properties:
-        amount:
-          $ref: '#/components/schemas/Amount'
+      - $ref: '#/components/schemas/ValueType'
+      - $ref: '#/components/schemas/UnitType'
       required:
       - cashaddr
+      - unit
+      - value
       type: object
     SendMaxResponse:
       allOf:

@@ -38,7 +38,7 @@ export class BaseWallet {
         this.network = NetworkEnum.Regtest;
         break;
       default:
-        throw Error("could not map cashaddr prefix to network");
+        this.network = NetworkEnum.Mainnet;
     }
     this.isTestnet = this.networkType === "testnet" ? true : false;
     if (this.isTestnet) {

@@ -11,32 +11,25 @@
  */
 
 import { RequestFile } from './models';
+import { RegCashaddr } from './regCashaddr';
 
-export class Network {
+export class MineRequest extends RegCashaddr {
     /**
-    * network type
+    * the number of blocks to mine
     */
-    'network'?: Network.NetworkEnum;
+    'blocks'?: number;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "network",
-            "baseName": "network",
-            "type": "Network.NetworkEnum"
+            "name": "blocks",
+            "baseName": "blocks",
+            "type": "number"
         }    ];
 
     static getAttributeTypeMap() {
-        return Network.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(MineRequest.attributeTypeMap);
     }
 }
 
-export namespace Network {
-    export enum NetworkEnum {
-        Mainnet = <any> 'mainnet',
-        Testnet = <any> 'testnet',
-        Regtest = <any> 'regtest',
-        Simtest = <any> 'simtest'
-    }
-}

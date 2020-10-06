@@ -11,32 +11,38 @@
  */
 
 import { RequestFile } from './models';
+import { SerializedWallet } from './serializedWallet';
+import { UnitType } from './unitType';
 
-export class Network {
+export class BalanceRequest extends SerializedWallet {
     /**
-    * network type
+    * Unit of account.
     */
-    'network'?: Network.NetworkEnum;
+    'unit'?: BalanceRequest.UnitEnum;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "network",
-            "baseName": "network",
-            "type": "Network.NetworkEnum"
+            "name": "unit",
+            "baseName": "unit",
+            "type": "BalanceRequest.UnitEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return Network.attributeTypeMap;
+        return super.getAttributeTypeMap().concat(BalanceRequest.attributeTypeMap);
     }
 }
 
-export namespace Network {
-    export enum NetworkEnum {
-        Mainnet = <any> 'mainnet',
-        Testnet = <any> 'testnet',
-        Regtest = <any> 'regtest',
-        Simtest = <any> 'simtest'
+export namespace BalanceRequest {
+    export enum UnitEnum {
+        Bch = <any> 'bch',
+        Usd = <any> 'usd',
+        Bit = <any> 'bit',
+        Bits = <any> 'bits',
+        Sat = <any> 'sat',
+        Sats = <any> 'sats',
+        Satoshi = <any> 'satoshi',
+        Satoshis = <any> 'satoshis'
     }
 }

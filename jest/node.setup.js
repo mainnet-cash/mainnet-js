@@ -4,11 +4,7 @@ require("dotenv").config({ path: ".env.testnet" });
 
 const { spawn } = require("child_process");
 const http = require("http");
-const {
-  pingBchn,
-  generateBlock,
-  getBlockHeight,
-} = require("../util/generateBlock");
+const { pingBchn, getRegtestUtxos } = require("../util/generateBlock");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -32,19 +28,14 @@ module.exports = async function () {
     await delay(2000);
   }
 
-  for (let i = 0; (await getBlockHeight()) < 105 && i < 15; i++) {
+  for (
+    let i = 0;
+    (await getRegtestUtxos(process.env.ADDRESS)) < 105 && i < 45;
+    i++
+  ) {
     console.log("Waiting for blocks to be mined");
-    if (!miningStarted) {
-      generateBlock(
-        process.env.RPC_USER,
-        process.env.RPC_PASS,
-        process.env.PORT,
-        105,
-        process.env.ADDRESS
-      );
-    }
-    console.log("block height: " + (await getBlockHeight()));
-    await delay(61000);
+    await delay(2000);
   }
+  console.log("utxos: " + (await getRegtestUtxos(process.env.ADDRESS)).length);
   console.log("proceeding...");
 };
