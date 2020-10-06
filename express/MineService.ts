@@ -1,5 +1,5 @@
 import { Service } from "../generated/serve/services/Service";
-import { mine as mineFn} from "../src/mine";
+import { mine as mineFn } from "../src/mine";
 
 /**
  * walletMethod handle most other api calls on a wallet

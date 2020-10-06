@@ -7,7 +7,6 @@ export function mine({
   cashaddr: string;
   blocks: number;
 }) {
-    
   const generateArgs = [
     `exec`,
     `regtest`,
@@ -18,7 +17,7 @@ export function mine({
     `generatetoaddress`,
     blocks,
     cashaddr,
-];
+  ];
 
   const cli = spawnSync(`docker`, generateArgs);
   if (cli.stderr.length > 0) {
