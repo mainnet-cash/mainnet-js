@@ -6,12 +6,12 @@ import { generateBlocks } from "../src/mine/generateBlocks";
  *
  * takes a walletId and some other arguments
  * */
-export const mine = (request: any, method): Promise<any> =>
+export const mine = (request: any): Promise<any> =>
   new Promise(async (resolve, reject) => {
     try {
       let args = request.body;
       let resp = await generateBlocks(args);
-      resolve(Service.successResponse({ ...resp }));
+      resolve(Service.successResponse(resp));
     } catch (e) {
       console.log(e);
       reject(
