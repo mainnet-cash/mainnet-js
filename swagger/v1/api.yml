@@ -377,8 +377,6 @@ components:
       required:
         - walletId
         - cashaddr
-        - value
-        - unit
     MaxAmountToSendRequest:
       allOf:
         - $ref: "#/components/schemas/SerializedWallet"
