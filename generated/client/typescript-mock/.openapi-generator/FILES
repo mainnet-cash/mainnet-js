@@ -1,6 +1,7 @@
 .gitignore
 api.ts
 api/apis.ts
+api/mineApi.ts
 api/walletApi.ts
 git_push.sh
 model/balanceRequest.ts
@@ -10,7 +11,7 @@ model/depositAddressResponse.ts
 model/maxAmountToSendRequest.ts
 model/network.ts
 model/outpoint.ts
-model/portableNetworkGraphic.ts
+model/regCashaddr.ts
 model/scalableVectorGraphic.ts
 model/sendMaxRequest.ts
 model/sendMaxResponse.ts

@@ -7,7 +7,7 @@ export * from './depositAddressResponse';
 export * from './maxAmountToSendRequest';
 export * from './network';
 export * from './outpoint';
-export * from './portableNetworkGraphic';
+export * from './regCashaddr';
 export * from './scalableVectorGraphic';
 export * from './sendMaxRequest';
 export * from './sendMaxResponse';
@@ -47,7 +47,7 @@ import { DepositAddressResponse } from './depositAddressResponse';
 import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
 import { Network } from './network';
 import { Outpoint } from './outpoint';
-import { PortableNetworkGraphic } from './portableNetworkGraphic';
+import { RegCashaddr } from './regCashaddr';
 import { ScalableVectorGraphic } from './scalableVectorGraphic';
 import { SendMaxRequest } from './sendMaxRequest';
 import { SendMaxResponse } from './sendMaxResponse';
@@ -99,7 +99,7 @@ let typeMap: {[index: string]: any} = {
     "MaxAmountToSendRequest": MaxAmountToSendRequest,
     "Network": Network,
     "Outpoint": Outpoint,
-    "PortableNetworkGraphic": PortableNetworkGraphic,
+    "RegCashaddr": RegCashaddr,
     "ScalableVectorGraphic": ScalableVectorGraphic,
     "SendMaxRequest": SendMaxRequest,
     "SendMaxResponse": SendMaxResponse,
