@@ -40,6 +40,7 @@ export class UtxoResponse {
   "utxos"?: Array<UtxoItem>;
 }
 
+
 export class SendMaxRequest {
   cashaddr: string;
 
