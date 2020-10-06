@@ -236,9 +236,23 @@ paths:
                   type: number
                   description: the number of blocks to mine
                   example: 105
-            required:
-              - cashaddr
-              - blocks              
+        required:
+          - cashaddr
+          - blocks        
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionId"
+          description: request accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      tags:
+        - mine                    
 components:
   schemas:
     Utxo:
@@ -347,15 +361,6 @@ components:
            example: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       discriminator:
         propertyName: regcashaddr           
-    PortableNetworkGraphic:
-      properties:
-        src:
-          type: string
-          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABHNCSVQ... ...AAAAABJRU5ErkJggg=="
-          description: |
-            A Qr code image data in png format as base64 encoded string.
-            Suitable for inclusion in html using:
-                - \<img src\=\"data:image/png;base64,**iVBORw0KGgoAAAANSUhEUg...   ...Jggg==**"\> 
     ScalableVectorGraphic:
       properties:
         src:
