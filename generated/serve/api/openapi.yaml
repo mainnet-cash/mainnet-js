@@ -236,12 +236,13 @@ paths:
             schema:
               $ref: '#/components/schemas/MineRequest'
       responses:
-        "202":
+        "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/TransactionId'
+                  description: a list of block hashes
+                  type: string
                 type: array
           description: request accepted
         "400":
@@ -342,8 +343,6 @@ components:
     TransactionId:
       discriminator:
         propertyName: transactionId
-      example:
-        transactionId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
       properties:
         transactionId:
           description: The hash of a transaction
@@ -396,6 +395,8 @@ components:
       - $ref: '#/components/schemas/ToCashaddr'
       required:
       - cashaddr
+      - unit
+      - value
       - walletId
     MaxAmountToSendRequest:
       allOf:
@@ -411,8 +412,6 @@ components:
           format: int32
           type: integer
       required:
-      - unit
-      - value
       - walletId
     SerializedWallet:
       discriminator:

@@ -16,7 +16,6 @@ import http from 'http';
 
 /* tslint:disable:no-unused-locals */
 import { MineRequest } from '../model/mineRequest';
-import { TransactionId } from '../model/transactionId';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
@@ -92,7 +91,7 @@ export class MineApi {
      * @summary Mine regtest coins to a specified address
      * @param mineRequest 
      */
-    public async mine (mineRequest?: MineRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<TransactionId>;  }> {
+    public async mine (mineRequest?: MineRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<string>;  }> {
         const localVarPath = this.basePath + '/mine';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -135,12 +134,12 @@ export class MineApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Array<TransactionId>;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: Array<string>;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Array<TransactionId>");
+                        body = ObjectSerializer.deserialize(body, "Array<string>");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
