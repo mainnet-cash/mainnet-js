@@ -52,5 +52,3 @@ Changes may be validated using openapi-generator locally using:
 
 Any changes to the server, generated clients or documentation will be reflected
 after validation and committed automatically in CI.
-
-Details about the
