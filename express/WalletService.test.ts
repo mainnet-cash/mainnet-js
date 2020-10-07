@@ -51,7 +51,21 @@ describe("Post Endpoints", () => {
       });
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.sat).toBeGreaterThan(100);
-    expect(resp.body.bch).toBeGreaterThan(5000);
+    expect(resp.body.bch).toBeGreaterThanOrEqual(5000);
+  });
+
+  /**
+   * balance
+   */
+  it("Should return the balance from a regtest wallet in satoshi", async () => {
+    const resp = await request(app)
+      .post("/v1/wallet/balance")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        unit: "sat"
+      });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.text).toBeGreaterThanOrEqual(5000*bchParam.subUnits);
   });
 
   /**
