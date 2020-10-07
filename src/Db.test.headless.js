@@ -28,8 +28,8 @@ describe(`WalletDatabase should handle indexeddb `, () => {
   test(`Should store a testnet wallet`, async () => {
     const result = await page.evaluate(async () => {
       const db = new WalletDatabase("username123");
-      let w1 = new TestnetWallet("Testnet Wallet 1");
-      let w2 = new TestnetWallet("Testnet Wallet 2");
+      let w1 = new TestNetWallet("TestNet Wallet 1");
+      let w2 = new TestNetWallet("TestNet Wallet 2");
       await w1.generateWif();
       await w2.generateWif();
       await db.addWallet({ name: w1.name, wallet: w1.getSerializedWallet() });
@@ -38,6 +38,6 @@ describe(`WalletDatabase should handle indexeddb `, () => {
       return storedWallets.pop();
     });
     expect(result.wallet.slice(0, 13)).toBe("wif:testnet:3");
-    expect(result.name).toBe("Testnet Wallet 2");
+    expect(result.name).toBe("TestNet Wallet 2");
   });
 });

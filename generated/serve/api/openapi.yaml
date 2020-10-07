@@ -8,19 +8,21 @@ info:
     This API is currently in active development, breaking changes may
     be made prior to official release of version 1.
 
-    **Important:** modifying this library to prematurely operate on mainnet
-    may result in loss of funds
+    **Important:** This library is in active development
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.4
+  version: 0.0.1-rc
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
-- url: http://localhost:3000/v1
+- description: unstable service (for development)
+  url: https://rest-unstable.mainnet.cash/
+- description: local development server via npm run serve
+  url: http://localhost:3000/v1
 tags:
 - description: Create a wallet
   externalDocs:
