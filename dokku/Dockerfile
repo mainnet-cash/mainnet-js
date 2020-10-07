@@ -28,7 +28,7 @@ RUN yarn
 
 ## Copy the rest of the application
 USER appuser
-COPY --chown=appuser:appuser .. /app/
+COPY --chown=appuser:appuser . /app/
 
 RUN yarn
 
