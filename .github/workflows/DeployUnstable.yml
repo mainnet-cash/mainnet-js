@@ -18,10 +18,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
+      - name: Fetch unshallow
+        run: git fetch --prune --tags --unshallow
       - name: Push to rest-unstable
         run: |
           git branch
           git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
-          git fetch --unshallow dokku
           git push -f dokku deploy:master
         shell: bash
