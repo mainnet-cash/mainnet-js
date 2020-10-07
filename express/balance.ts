@@ -15,8 +15,13 @@ export const balance = (request) =>
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
+
       let resp = await wallet.getBalance(sendRequestJson.unit);
-      resolve(Service.successResponse(resp));
+      if (typeof resp === "number") {
+        resolve(Service.successResponse(resp.toString()));
+      } else {
+        resolve(Service.successResponse(resp));
+      }
     } catch (e) {
       reject(
         Service.rejectResponse(e.message || "Invalid input", e.status || 500)
