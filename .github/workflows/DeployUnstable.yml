@@ -22,5 +22,6 @@ jobs:
         run: |
           git branch
           git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
+          git fetch --unshallow dokku
           git push -f dokku deploy:master
         shell: bash
