@@ -22,8 +22,6 @@ jobs:
           ref: ${{ github.ref }}
       - name: Push to rest-unstable
         run: |
-          pwd
-          ls -la
           git branch
           git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
           git push dokku deploy:master
