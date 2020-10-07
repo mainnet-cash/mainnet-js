@@ -1,6 +1,6 @@
 /**
  * Mainnet Cash
- * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** modifying this library to prematurely operate on mainnet may result in loss of funds 
+ * A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development 
  *
  * The version of the OpenAPI document: 0.0.4
  * Contact: hello@mainnet.cash
