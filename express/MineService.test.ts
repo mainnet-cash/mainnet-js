@@ -35,6 +35,6 @@ describe("Post Endpoints", () => {
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toEqual(15);
-    expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(50 * 15);
+    expect(bobBalanceResp.body.bch).toBeGreaterThan(50 * 15);
   });
 });

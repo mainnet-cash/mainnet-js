@@ -30,7 +30,15 @@ describe("Post Endpoints", () => {
   });
 
   /**
-   * ready
+   * redirect to docs
+   */
+  it("Should return true from the readiness indicator", async () => {
+    const resp = await request(app).get("/").send();
+    expect(resp.statusCode).toEqual(301);
+  });
+
+  /**
+   * serve docs
    */
   it("Should return swagger doc UI from root url", async () => {
     const resp = await request(app).get("/api-docs/").send();

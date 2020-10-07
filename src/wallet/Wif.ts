@@ -355,7 +355,7 @@ const watchOnly = async (
   return w;
 };
 
-export class MainnetWallet extends WifWallet {
+export class Wallet extends WifWallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.mainnet);
   }
@@ -375,7 +375,7 @@ export class MainnetWallet extends WifWallet {
   }
 }
 
-export class TestnetWallet extends WifWallet {
+export class TestNetWallet extends WifWallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet);
   }

@@ -20,9 +20,6 @@ const baseConfig = {
     mangleWasmImports: true,
     usedExports: true,
   },
-  output: {
-    library: "mainnet",
-  },
 };
 
 const nodeConfig = {
@@ -39,7 +36,6 @@ const browserConfig = {
     filename: `mainnet-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
-    library: "mainnet",
   },
   resolve: {
     alias: {
@@ -64,7 +60,6 @@ const webWorkerConfig = {
     filename: `mainnet-webworker-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
-    library: "mainnet",
   },
   resolve: {
     alias: {
@@ -93,8 +88,8 @@ const browserTestDiff = {
 const browserTestConfig = merge(browserConfig, browserTestDiff);
 
 module.exports = [
-  nodeConfig,
+  //nodeConfig,
   browserConfig,
   browserTestConfig,
-  webWorkerConfig,
+  //webWorkerConfig,
 ].map((c) => merge(baseConfig, c));

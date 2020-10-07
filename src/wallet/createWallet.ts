@@ -1,5 +1,5 @@
 import { NetworkEnum, WalletTypeEnum } from "./enum";
-import { RegTestWallet, TestnetWallet, MainnetWallet, WifWallet } from "./Wif";
+import { RegTestWallet, TestNetWallet, Wallet, WifWallet } from "./Wif";
 
 interface WalletRequest {
   name?: string;
@@ -31,13 +31,13 @@ export async function createWallet(body: WalletRequest): Promise<WifWallet> {
       wallet = new RegTestWallet(body.name);
       break;
     case "testnet":
-      wallet = new TestnetWallet(body.name);
+      wallet = new TestNetWallet(body.name);
       break;
     case "mainnet":
-      wallet = new MainnetWallet(body.name);
+      wallet = new Wallet(body.name);
       break;
     default:
-      wallet = new MainnetWallet(body.name);
+      wallet = new Wallet(body.name);
   }
   if (wallet) {
     switch (body.type) {
@@ -73,7 +73,7 @@ export async function createWalletResponse(
 
 export async function walletFromIdString(
   walletId: string
-): Promise<MainnetWallet | TestnetWallet | RegTestWallet> {
+): Promise<Wallet | TestNetWallet | RegTestWallet> {
   let [walletType, network, privateImport]: string[] = walletId.split(":");
 
   let walletRequest = {
