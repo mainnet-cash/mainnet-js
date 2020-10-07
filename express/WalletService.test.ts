@@ -70,10 +70,10 @@ describe("Post Endpoints", () => {
       .post("/v1/wallet/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-        unit: "sat"
+        unit: "sat",
       });
     expect(resp.statusCode).toEqual(200);
-    expect(resp.text).toBeGreaterThanOrEqual(5000*bchParam.subUnits);
+    expect(resp.text).toBeGreaterThanOrEqual(5000 * bchParam.subUnits);
   });
 
   /**
