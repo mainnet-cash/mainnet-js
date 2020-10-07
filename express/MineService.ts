@@ -2,9 +2,9 @@ import { Service } from "../generated/serve/services/Service";
 import { mine as mineFn } from "../src/mine";
 
 /**
- * walletMethod handle most other api calls on a wallet
+ * mine handle mining call
  *
- * takes a walletId and some other arguments
+ * takes a cash address and number of blocks as arguments
  * */
 export const mine = (request: any): Promise<any> =>
   new Promise(async (resolve, reject) => {

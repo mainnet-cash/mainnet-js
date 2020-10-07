@@ -8,8 +8,8 @@ const path = require("path");
 
 export const config = {
   ROOT_DIR: __dirname,
-  URL_PORT: 3000,
-  URL_PATH: "http://localhost",
+  URL_PORT: process.env.PORT ?  parseInt(process.env.PORT) :3000,
+  URL_PATH: process.env.URL_PATH ? process.env.URL_PATH : "http://localhost",
   BASE_VERSION: "/v1",
   CONTROLLER_DIRECTORY: path.join(__dirname, "controllers"),
   PROJECT_DIR: __dirname,

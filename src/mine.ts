@@ -13,7 +13,7 @@ export function mine({
     `bitcoin-cli`,
     `--rpcuser=${process.env.RPC_USER}`,
     `--rpcpassword=${process.env.RPC_PASS}`,
-    `--rpcport=${process.env.PORT}`,
+    `--rpcport=${process.env.RPC_PORT}`,
     `generatetoaddress`,
     blocks,
     cashaddr,
