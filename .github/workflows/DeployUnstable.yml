@@ -25,5 +25,6 @@ jobs:
           pwd
           ls -la
           git branch
-          git push dokku@rest-unstable.mainnet.cash origin deploy:master
+          git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
+          git push dokku origin deploy:master
         shell: bash
