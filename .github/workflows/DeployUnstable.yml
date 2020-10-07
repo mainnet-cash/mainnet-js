@@ -17,6 +17,9 @@ jobs:
         shell: bash
         env:
           SSH_PRIVATE_KEY: ${{secrets.UNSTABLE_PRIVATE_KEY}}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
       - name: Push to rest-unstable
         run: |
           pwd
