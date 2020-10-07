@@ -1,0 +1,4 @@
+node_modules/
+.git/
+generated/client/php
+generated/client/python
