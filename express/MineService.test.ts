@@ -1,12 +1,5 @@
 import { getServer } from "../generated/serve/index";
 import * as mockApi from "../generated/client/typescript-mock/api";
-import { bchParam } from "../src/chain";
-import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
-import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import {
-  UtxoResponse,
-  UnitType,
-} from "../generated/client/typescript-mock/api";
 
 var request = require("supertest");
 
@@ -42,6 +35,6 @@ describe("Post Endpoints", () => {
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toEqual(15);
-    expect(bobBalanceResp.body.bch).toBeGreaterThan(50 * 15);
+    expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(50 * 15);
   });
 });
