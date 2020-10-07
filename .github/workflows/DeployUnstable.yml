@@ -11,18 +11,15 @@ jobs:
       - name: Save SSH key
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa.key
-          sudo chmod 600 ~/.ssh/id_rsa.key
+          echo "${{secrets.UNSTABLE_PRIVATE_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan rest-unstable.mainnet.cash >> ~/.ssh/known_hosts
         shell: bash
-        env:
-          SSH_PRIVATE_KEY: ${{secrets.UNSTABLE_PRIVATE_KEY}}
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
       - name: Push to rest-unstable
         run: |
-          ssh-add ~/.ssh/id_rsa.key
           git branch
           git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
           git push dokku deploy:master
