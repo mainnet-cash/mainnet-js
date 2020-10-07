@@ -22,13 +22,13 @@ RUN chown -R appuser:appuser /app/
 # Run yarn
 USER appuser
 WORKDIR /app/
-COPY package.json /app/
-COPY yarn.lock /app/
+COPY ../package.json /app/
+COPY ../yarn.lock /app/
 RUN yarn
 
 ## Copy the rest of the application
 USER appuser
-COPY --chown=appuser:appuser . /app/
+COPY --chown=appuser:appuser .. /app/
 
 RUN yarn
 

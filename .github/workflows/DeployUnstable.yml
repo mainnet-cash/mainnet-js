@@ -18,6 +18,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
+      - name: Copy and commit certain files for Dokku
+        run: |
+          cp dokku/* .
+          git add .dockerignore CHECKS Dockerfile
+          git commit -m 'Dokku files'
       - name: Fetch unshallow
         run: git fetch --prune --tags --unshallow
       - name: Push to rest-unstable
