@@ -21,6 +21,7 @@ jobs:
       - name: Copy and commit certain files for Dokku
         run: |
           cp dokku/* .
+          cp dokku/.dockerignore .
           git add .dockerignore CHECKS Dockerfile
           git commit -m 'Dokku files'
       - name: Fetch unshallow
