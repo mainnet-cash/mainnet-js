@@ -73,7 +73,9 @@ describe("Post Endpoints", () => {
         unit: "sat",
       });
     expect(resp.statusCode).toEqual(200);
-    expect(parseInt(resp.text)).toBeGreaterThanOrEqual(5000*bchParam.subUnits);
+    expect(parseInt(resp.text)).toBeGreaterThanOrEqual(
+      5000 * bchParam.subUnits
+    );
   });
 
   /**
