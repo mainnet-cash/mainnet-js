@@ -2,4 +2,4 @@ FROM node:14
 
 RUN yarn
 
-CMD npm serve
+CMD npm run serve
