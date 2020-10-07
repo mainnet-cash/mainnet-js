@@ -19,6 +19,8 @@ jobs:
           SSH_PRIVATE_KEY: ${{secrets.UNSTABLE_PRIVATE_KEY}}
       - name: Push to rest-unstable
         run: |
+          pwd
+          ls -la
           git branch
           git push dokku@rest-unstable.mainnet.cash origin deploy:master
         shell: bash
