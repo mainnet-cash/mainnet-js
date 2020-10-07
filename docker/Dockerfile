@@ -10,7 +10,7 @@ RUN groupadd -r fulcrum && useradd -r -m -g fulcrum fulcrum
 
 RUN set -ex \
 	&& apt-get update \
-	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu wget supervisor \
+	&& apt-get install -qq --no-install-recommends ca-certificates coreutils dirmngr gosu wget supervisor \
 	&& rm -rf /var/lib/apt/lists/*
 
 ENV BITCOIN_VERSION 22.0.0

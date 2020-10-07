@@ -4,5 +4,6 @@
  * Do not edit the class manually.
  */
 
+export * as MineController from "./MineController";
 export * as WalletController from "./WalletController";
 

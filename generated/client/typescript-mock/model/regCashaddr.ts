@@ -12,31 +12,20 @@
 
 import { RequestFile } from './models';
 
-export class Network {
-    /**
-    * network type
-    */
-    'network'?: Network.NetworkEnum;
+export class RegCashaddr {
+    'cashaddr'?: string;
 
-    static discriminator: string | undefined = undefined;
+    static discriminator: string | undefined = "regcashaddr";
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "network",
-            "baseName": "network",
-            "type": "Network.NetworkEnum"
+            "name": "cashaddr",
+            "baseName": "cashaddr",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return Network.attributeTypeMap;
+        return RegCashaddr.attributeTypeMap;
     }
 }
 
-export namespace Network {
-    export enum NetworkEnum {
-        Mainnet = <any> 'mainnet',
-        Testnet = <any> 'testnet',
-        Regtest = <any> 'regtest',
-        Simtest = <any> 'simtest'
-    }
-}

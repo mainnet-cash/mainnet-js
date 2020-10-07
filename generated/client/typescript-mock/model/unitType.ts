@@ -12,31 +12,35 @@
 
 import { RequestFile } from './models';
 
-export class Network {
+export class UnitType {
     /**
-    * network type
+    * Unit of account.
     */
-    'network'?: Network.NetworkEnum;
+    'unit'?: UnitType.UnitEnum;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "network",
-            "baseName": "network",
-            "type": "Network.NetworkEnum"
+            "name": "unit",
+            "baseName": "unit",
+            "type": "UnitType.UnitEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return Network.attributeTypeMap;
+        return UnitType.attributeTypeMap;
     }
 }
 
-export namespace Network {
-    export enum NetworkEnum {
-        Mainnet = <any> 'mainnet',
-        Testnet = <any> 'testnet',
-        Regtest = <any> 'regtest',
-        Simtest = <any> 'simtest'
+export namespace UnitType {
+    export enum UnitEnum {
+        Bch = <any> 'bch',
+        Usd = <any> 'usd',
+        Bit = <any> 'bit',
+        Bits = <any> 'bits',
+        Sat = <any> 'sat',
+        Sats = <any> 'sats',
+        Satoshi = <any> 'satoshi',
+        Satoshis = <any> 'satoshis'
     }
 }

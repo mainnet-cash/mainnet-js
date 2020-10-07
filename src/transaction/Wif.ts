@@ -133,7 +133,9 @@ export function prepareOutputs(outputs: SendRequest[]) {
     };
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(BigInt(amountInSatoshi(output.amount))),
+      satoshis: bigIntToBinUint64LE(
+        BigInt(amountInSatoshi(output.value, output.unit))
+      ),
     };
     lockedOutputs.push(lockedOutput);
   }
@@ -193,7 +195,7 @@ export async function getFeeAmount({
       privateKey,
       888
     );
-    return draftTransaction.length * 2;
+    return draftTransaction.length * 1 + 1;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"

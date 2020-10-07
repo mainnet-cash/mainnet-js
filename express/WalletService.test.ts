@@ -1,11 +1,12 @@
 import { getServer } from "../generated/serve/index";
 import * as mockApi from "../generated/client/typescript-mock/api";
 import { bchParam } from "../src/chain";
-import { Amount } from "../generated/client/typescript-mock/model/amount";
-import { SendMaxRequest } from "../generated/client/typescript-mock/model/sendMaxRequest";
 import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
 import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import { UtxoResponse } from "../generated/client/typescript-mock/api";
+import {
+  UtxoResponse,
+  UnitType,
+} from "../generated/client/typescript-mock/api";
 
 var request = require("supertest");
 
@@ -17,6 +18,26 @@ describe("Post Endpoints", () => {
   });
   afterEach(function () {
     app.close();
+  });
+
+  /**
+   * ready
+   */
+  it("Should return true from the readiness indicator", async () => {
+    const resp = await request(app).get("/ready").send();
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.status).toEqual("okay");
+  });
+
+  /**
+   * ready
+   */
+  it("Should return swagger doc UI from root url", async () => {
+    const resp = await request(app).get("/api-docs/").send();
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.text.slice(0, 391)).toEqual(
+      `\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Swagger UI</title>\n  <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >\n  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" /><link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />\n  \n  <style>\n    html\n`
+    );
   });
 
   /**
@@ -41,7 +62,7 @@ describe("Post Endpoints", () => {
     req.name = "A simple Regtest Wallet";
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
     req.network = mockApi.WalletRequest.NetworkEnum.Regtest;
-    let resp = await request(app).post("/v1/wallet/").send(req);
+    let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.name).toBe(req.name);
@@ -57,7 +78,7 @@ describe("Post Endpoints", () => {
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
     req.network = mockApi.WalletRequest.NetworkEnum.Testnet;
 
-    let resp = await request(app).post("/v1/wallet/").send(req);
+    let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.name).toBe(req.name);
@@ -72,7 +93,7 @@ describe("Post Endpoints", () => {
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
     req.network = mockApi.WalletRequest.NetworkEnum.Mainnet;
 
-    let resp = await request(app).post("/v1/wallet/").send(req);
+    let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
@@ -82,6 +103,18 @@ describe("Post Endpoints", () => {
     expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
   });
 
+  it("Should create a mainnet wallet on empty request", async () => {
+    let req = new mockApi.WalletRequest();
+
+    let resp = await request(app).post("/v1/wallet/create").send(req);
+    const body = resp.body;
+
+    expect(resp.statusCode).toBe(200);
+    expect(body!.name).toBe("");
+    expect(body!.network).toBe("mainnet");
+    expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
+    expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
+  });
   /**
    * depositAddress
    */
@@ -120,7 +153,7 @@ describe("Post Endpoints", () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app).post("/v1/wallet/").send({
+      const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
         name: "Bobs Regtest One Time Wallet",
         type: mockApi.WalletRequest.TypeEnum.Wif,
         network: mockApi.WalletRequest.NetworkEnum.Regtest,
@@ -135,10 +168,8 @@ describe("Post Endpoints", () => {
           to: [
             {
               cashaddr: bobsCashaddr,
-              amount: {
-                unit: Amount.UnitEnum.Sat,
-                value: 120000,
-              },
+              unit: UnitType.UnitEnum.Sat,
+              value: 120000,
             },
           ],
         });
@@ -160,7 +191,7 @@ describe("Post Endpoints", () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app).post("/v1/wallet/").send({
+      const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
         name: "Bobs Regtest One Time Wallet",
         type: mockApi.WalletRequest.TypeEnum.Wif,
         network: mockApi.WalletRequest.NetworkEnum.Regtest,
@@ -169,9 +200,8 @@ describe("Post Endpoints", () => {
 
       let toBob = new SendRequestItem();
       toBob.cashaddr = bobsCashaddr;
-      toBob.amount = new Amount();
-      toBob.amount.unit = Amount.UnitEnum.Sat;
-      toBob.amount.value = 3000;
+      toBob.unit = UnitType.UnitEnum.Sat;
+      toBob.value = 3000;
 
       let AliceSendToBobReq = new SendRequest();
       AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
@@ -206,15 +236,14 @@ describe("Post Endpoints", () => {
     bobWalletReq.network = mockApi.WalletRequest.NetworkEnum.Regtest;
 
     const bobsWalletResp = await request(app)
-      .post("/v1/wallet/")
+      .post("/v1/wallet/create")
       .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
 
     let toBob = new SendRequestItem();
     toBob.cashaddr = bobsWallet.cashaddr as string;
-    toBob.amount = new Amount();
-    toBob.amount.unit = Amount.UnitEnum.Bch;
-    toBob.amount.value = 1;
+    toBob.unit = UnitType.UnitEnum.Bch;
+    toBob.value = 1;
 
     let AliceSendToBobReq = new SendRequest();
     AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
@@ -229,6 +258,9 @@ describe("Post Endpoints", () => {
         cashaddr: process.env.ADDRESS as string,
       });
     const body = resp.body;
+    if (resp.statusCode !== 200) {
+      console.log(resp.error.text);
+    }
     expect(resp.statusCode).toBe(200);
     expect((body.transactionId as string).length).toBe(64);
     expect(body.balance!.bch as number).toBe(0);
@@ -248,7 +280,7 @@ describe("Post Endpoints", () => {
     if (body.utxos) {
       const valueArray = await Promise.all(
         body.utxos.map(async (b) => {
-          return b!.amount!.value || 0;
+          return b!.value || 0;
         })
       );
       const value = valueArray.reduce((a, b) => a + b, 0);

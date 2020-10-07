@@ -17,11 +17,12 @@
     "dist/*.js.map"
   ],
   "scripts": {
+    "api:validate": "npx openapi-generator validate -i ./swagger/v1/api.yml",
     "cli": "npx ts-node src/cli.ts",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "test": "npx jest --runInBand --detectOpenHandles",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
-    "test:wallet": "npm run test WalletService.test.ts",
+    "test:server": "npx jest express/WalletService --runInBand --detectOpenHandles",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "serve": "npx ts-node generated/serve/serve.ts",
