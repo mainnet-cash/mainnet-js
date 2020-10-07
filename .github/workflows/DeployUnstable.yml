@@ -22,6 +22,8 @@ jobs:
         run: |
           cp dokku/* .
           cp dokku/.dockerignore .
+          git config --global user.email "ci@github.com"
+          git config --global user.name "Github CI"
           git add .dockerignore CHECKS Dockerfile
           git commit -m 'Dokku files'
       - name: Fetch unshallow
