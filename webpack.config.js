@@ -59,7 +59,7 @@ const webWorkerConfig = {
   output: {
     filename: `mainnet-webworker-${packageJson.version}.js`,
     path: __dirname + "/dist",
-    libraryTarget: "umd"
+    libraryTarget: "umd",
   },
   resolve: {
     alias: {
