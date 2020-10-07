@@ -26,6 +26,5 @@ jobs:
           ls -la
           git branch
           git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
-          ssh -i ~/.ssh/id_rsa.key dokku@rest-unstable.mainnet.cash pwd
-          git push dokku origin deploy:master
+          git push dokku deploy:master
         shell: bash
