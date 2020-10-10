@@ -302,14 +302,14 @@ export class WifWallet extends BaseWallet {
       throw Error("Couldn't get spend amount when building transaction");
     }
 
-    let fee = await getFeeAmount({
+    let feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
     });
     let fundingUtxos = await getSuitableUtxos(
       utxos,
-      BigInt(spendAmount) + BigInt(fee),
+      BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight
     );
     if (fundingUtxos.length === 0) {
@@ -317,6 +317,11 @@ export class WifWallet extends BaseWallet {
         "The available inputs couldn't satisfy the request with fees"
       );
     }
+    let fee = await getFeeAmount({
+      utxos: fundingUtxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey,
+    });
     let encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,
       sendRequests,

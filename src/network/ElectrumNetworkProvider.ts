@@ -80,9 +80,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         "CashScript Application",
         "1.4.1",
         1,
-        2,
-        undefined,
-        1050
+        1,
+        undefined
       );
       this.electrum.addServer(
         "blackie.c3-soft.com",
@@ -114,7 +113,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       );
     } else {
       throw new Error(
-        `Tried to instantiate an ElectrumNetworkProvider for unknown network ${network}`
+        `Tried to instantiate an ElectrumNetworkProvider for unknown network: ${network}`
       );
     }
   }

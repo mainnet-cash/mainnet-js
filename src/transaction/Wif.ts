@@ -193,7 +193,7 @@ export async function getFeeAmount({
       utxos,
       sendRequests,
       privateKey,
-      888
+      1000
     );
     return draftTransaction.length * 1 + 1;
   } else {

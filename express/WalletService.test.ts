@@ -70,10 +70,12 @@ describe("Post Endpoints", () => {
       .post("/v1/wallet/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-        unit: "sat"
+        unit: "sat",
       });
     expect(resp.statusCode).toEqual(200);
-    expect(parseInt(resp.text)).toBeGreaterThanOrEqual(5000*bchParam.subUnits);
+    expect(parseInt(resp.text)).toBeGreaterThanOrEqual(
+      5000 * bchParam.subUnits
+    );
   });
 
   /**
@@ -137,7 +139,7 @@ describe("Post Endpoints", () => {
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
     expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
   });
-  
+
   /**
    * depositAddress
    */
