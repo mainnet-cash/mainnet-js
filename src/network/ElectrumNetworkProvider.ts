@@ -38,6 +38,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         ClusterOrder.PRIORITY,
         550
       );
+      this.electrum.addServer("fulcrum.fountainhead.cash", 50002, ElectrumTransport.TCP_TLS.Scheme, false);
+      this.electrum.addServer("bch.imaginary.cash", 50002, ElectrumTransport.TCP_TLS.Scheme, false);
+      this.electrum.addServer("electrum.imaginary.cash", 50002, ElectrumTransport.TCP_TLS.Scheme, false);
+      this.electrum.addServer("blackie.c3-soft.com", 50002, ElectrumTransport.TCP_TLS.Scheme, false);
       this.electrum.addServer(
         "bch.imaginary.cash",
         50004,
@@ -103,7 +107,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         1,
         1,
         ClusterOrder.RANDOM,
-        550
+        1020
       );
       this.electrum.addServer(
         "127.0.0.1",

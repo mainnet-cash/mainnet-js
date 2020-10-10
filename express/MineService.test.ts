@@ -10,7 +10,7 @@ describe("Post Endpoints", () => {
   beforeAll(async function () {
     app = await getServer().launch();
   });
-  
+
   afterEach(function () {
     app.close();
   });
@@ -30,7 +30,6 @@ describe("Post Endpoints", () => {
       cashaddr: bobsCashaddr,
       blocks: 15,
     });
-
     const bobBalanceResp = await request(app).post("/v1/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
