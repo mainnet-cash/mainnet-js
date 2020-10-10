@@ -6,11 +6,10 @@ var request = require("supertest");
 var app;
 
 describe("Post Endpoints", () => {
-
   beforeAll(async function () {
     app = await getServer().launch();
   });
-  
+
   afterEach(function () {
     app.close();
   });
