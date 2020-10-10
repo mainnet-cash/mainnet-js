@@ -63,7 +63,7 @@ describe("Post Endpoints", () => {
   });
 
   /**
-   * balance
+   * balance in satoshi
    */
   it("Should return the balance from a regtest wallet in satoshi", async () => {
     const resp = await request(app)
@@ -73,7 +73,7 @@ describe("Post Endpoints", () => {
         unit: "sat"
       });
     expect(resp.statusCode).toEqual(200);
-    expect(resp.text).toBeGreaterThanOrEqual(5000*bchParam.subUnits);
+    expect(parseInt(resp.text)).toBeGreaterThanOrEqual(5000*bchParam.subUnits);
   });
 
   /**
@@ -137,6 +137,7 @@ describe("Post Endpoints", () => {
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
     expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
   });
+  
   /**
    * depositAddress
    */
