@@ -31,11 +31,36 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // Initialize a 2-of-3 Electrum Cluster with 6 reliable hardcoded servers
       // using the first three servers as "priority" servers
       this.electrum = new ElectrumCluster(
-        "CashScript Application",
+        "Mainnet",
         "1.4.1",
         2,
         3,
-        ClusterOrder.PRIORITY
+        ClusterOrder.PRIORITY,
+        550
+      );
+      this.electrum.addServer(
+        "fulcrum.fountainhead.cash",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "bch.imaginary.cash",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "electrum.imaginary.cash",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "blackie.c3-soft.com",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
       );
       this.electrum.addServer(
         "bch.imaginary.cash",
@@ -79,7 +104,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         "CashScript Application",
         "1.4.1",
         1,
-        2
+        1,
+        undefined
       );
       this.electrum.addServer(
         "blackie.c3-soft.com",
@@ -93,15 +119,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         ElectrumTransport.WSS.Scheme,
         false
       );
-      // this.electrum.addServer('bch.loping.net', 60004, ElectrumTransport.WSS.Scheme, false);
-      // this.electrum.addServer('testnet.imaginary.cash', 50004, ElectrumTransport.WSS.Scheme);
     } else if (network === Network.REGTEST) {
       //
       this.electrum = new ElectrumCluster(
         "CashScript Application",
         "1.4.1",
         1,
-        2
+        1,
+        ClusterOrder.RANDOM,
+        1020
       );
       this.electrum.addServer(
         "127.0.0.1",
@@ -111,7 +137,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       );
     } else {
       throw new Error(
-        `Tried to instantiate an ElectrumNetworkProvider for unknown network ${network}`
+        `Tried to instantiate an ElectrumNetworkProvider for unknown network: ${network}`
       );
     }
   }

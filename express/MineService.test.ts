@@ -9,6 +9,7 @@ describe("Post Endpoints", () => {
   beforeAll(async function () {
     app = await getServer().launch();
   });
+
   afterEach(function () {
     app.close();
   });
@@ -29,12 +30,13 @@ describe("Post Endpoints", () => {
       blocks: 15,
     });
 
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const bobBalanceResp = await request(app).post("/v1/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toEqual(15);
-    expect(bobBalanceResp.body.bch).toBeGreaterThan(50 * 15);
+    expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(50 * 15);
   });
 });
