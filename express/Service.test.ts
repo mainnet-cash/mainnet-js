@@ -28,7 +28,7 @@ describe("Post Endpoints", () => {
     expect(resp.statusCode).toEqual(301);
   });
 
-   /**
+  /**
    * redirect to docs
    */
   it("Should timeout", async () => {
@@ -46,4 +46,4 @@ describe("Post Endpoints", () => {
       `\n<!-- HTML for static distribution bundle build -->\n<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Swagger UI</title>\n  <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >\n  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" /><link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />\n  \n  <style>\n    html\n`
     );
   });
-})
+});
