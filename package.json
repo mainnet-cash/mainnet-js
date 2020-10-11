@@ -26,6 +26,7 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "serve": "npx ts-node generated/serve/serve.ts",
+    "serve:cluster": "npx ts-node generated/serve/cluster.ts",
     "serve:monitor": "npx nodemon generated/serve/serve.ts",
     "build": "npx webpack",
     "demo": "npx reload --dir=demo/"
@@ -41,6 +42,7 @@
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",
     "cashscript": "^0.5.2",
+    "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "deepmerge": "^4.2.2",

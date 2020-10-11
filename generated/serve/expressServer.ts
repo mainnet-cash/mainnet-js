@@ -11,6 +11,7 @@ import express = require("express");
 import cors = require("cors");
 import cookieParser = require("cookie-parser");
 import bodyParser = require("body-parser");
+import timeout = require('connect-timeout'); 
 // @ts-ignore
 import { OpenApiValidator } from "express-openapi-validator";
 import jsYaml = require("js-yaml");
@@ -48,6 +49,7 @@ export class ExpressServer {
     this.app.use(cors());
     this.app.use(bodyParser.json({ limit: "14MB" }));
     this.app.use(express.json());
+    this.app.use(timeout(`${config.TIMEOUT}s`));
     this.app.use(express.urlencoded({ extended: false }));
     this.app.use(cookieParser());
     //Simple readiness indicator
@@ -65,6 +67,10 @@ export class ExpressServer {
       res.redirect(301, '/api-docs');
    })
     this.app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(this.docSchema));
+    // @ts-ignore
+    this.app.get("/timeout", (req: any, res: any) => {
+      
+    });
     this.app.get("/login-redirect", (req: any, res: any) => {
       res.status(200);
       res.json(req.query);

@@ -1,6 +1,6 @@
 const { spawnSync } = require("child_process");
 
-export function mine({
+export async function mine({
   cashaddr,
   blocks,
 }: {
@@ -19,7 +19,7 @@ export function mine({
     cashaddr,
   ];
 
-  const cli = spawnSync(`docker`, generateArgs);
+  const cli = await spawnSync(`docker`, generateArgs);
   if (cli.stderr.length > 0) {
     return console.log("Mine Error: " + cli.stderr.toString());
   }
