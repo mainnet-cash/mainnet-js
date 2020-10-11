@@ -12,7 +12,7 @@ export const config = {
   URL_PORT: process.env.PORT ?  parseInt(process.env.PORT) :3000,
   URL_PATH: process.env.URL_PATH ? process.env.URL_PATH : "http://localhost",
   TIMEOUT: process.env.TIMEOUT ?  parseInt(process.env.TIMEOUT) :60,
-  WORKERS: process.env.WORKERS ?  parseInt(process.env.WORKERS) : os.totalmem()/300000000,
+  WORKERS: process.env.WORKERS ?  parseInt(process.env.WORKERS) : os.totalmem()/300000000, // about 3 process per GB
   BASE_VERSION: "/v1",
   CONTROLLER_DIRECTORY: path.join(__dirname, "controllers"),
   PROJECT_DIR: __dirname,
