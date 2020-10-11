@@ -6,6 +6,7 @@ var request = require("supertest");
 var app;
 
 describe("Post Endpoints", () => {
+
   beforeAll(async function () {
     app = await getServer().launch();
   });
@@ -29,9 +30,12 @@ describe("Post Endpoints", () => {
       cashaddr: bobsCashaddr,
       blocks: 15,
     });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const bobBalanceResp = await request(app).post("/v1/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
+
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toEqual(15);
