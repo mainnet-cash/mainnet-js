@@ -8,10 +8,6 @@ import {
 import NetworkProvider from "./NetworkProvider";
 import { Utxo, Network } from "../interface";
 
-import { deriveLockscript } from "../util/deriveLockscript";
-
-const sha256Promise = instantiateSha256();
-
 export default class ElectrumNetworkProvider implements NetworkProvider {
   private electrum: ElectrumCluster;
   private concurrentRequests: number = 0;

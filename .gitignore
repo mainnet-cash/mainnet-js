@@ -8,3 +8,7 @@ bin
 generated/serve/*.log
 *.log
 src/**/*.d.ts
+src/**/*.js
+src/**/*.js.map
+generated/client/*
+

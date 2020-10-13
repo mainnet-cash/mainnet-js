@@ -1,12 +1,11 @@
-const fetch = require("node-fetch");
+const axios = require("axios");
 
 export async function getUsdRate(): Promise<number> {
   try {
-    let response = await fetch(
+    let response = await axios.get(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd"
     );
-    let data = await response.json();
-    return data["bitcoin-cash"].usd;
+    return response.data["bitcoin-cash"].usd;
   } catch (e) {
     throw Error(e);
   }

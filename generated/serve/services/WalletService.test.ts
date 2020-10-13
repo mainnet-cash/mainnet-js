@@ -1,20 +1,15 @@
-import { getServer } from "../generated/serve/index";
-import * as mockApi from "../generated/client/typescript-mock/api";
-import { bchParam } from "../src/chain";
-import { SendRequest } from "../generated/client/typescript-mock/model/sendRequest";
-import { SendRequestItem } from "../generated/client/typescript-mock/model/sendRequestItem";
-import {
-  UtxoResponse,
-  UnitType,
-} from "../generated/client/typescript-mock/api";
 
+import * as mockApi from "../../client/typescript-mock/api";
+import { bchParam } from "../../../src/chain";
+
+var server = require("../")
 var request = require("supertest");
 
 var app;
 
 describe("Post Endpoints", () => {
   beforeAll(async function () {
-    app = await getServer().launch();
+    app = await server.getServer().launch();
   });
   afterEach(function () {
     app.close();
@@ -165,7 +160,7 @@ describe("Post Endpoints", () => {
           to: [
             {
               cashaddr: bobsCashaddr,
-              unit: UnitType.UnitEnum.Sat,
+              unit: 'sat',
               value: 120000,
             },
           ],
@@ -195,18 +190,16 @@ describe("Post Endpoints", () => {
       });
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
-      let toBob = new SendRequestItem();
-      toBob.cashaddr = bobsCashaddr;
-      toBob.unit = UnitType.UnitEnum.Sat;
-      toBob.value = 3000;
-
-      let AliceSendToBobReq = new SendRequest();
-      AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
-      AliceSendToBobReq.to = [toBob];
-
       const sendResp = await request(app)
         .post("/v1/wallet/send")
-        .send(AliceSendToBobReq);
+        .send({
+          walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+          to: [{
+            cashaddr: bobsCashaddr,
+            unit: 'sat',
+            value: 3000
+          }]
+        });
 
       const resp = await request(app).post("/v1/wallet/balance").send({
         walletId: bobsWalletResp.body.walletId,
@@ -237,17 +230,17 @@ describe("Post Endpoints", () => {
       .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
 
-    let toBob = new SendRequestItem();
-    toBob.cashaddr = bobsWallet.cashaddr as string;
-    toBob.unit = UnitType.UnitEnum.Bch;
-    toBob.value = 1;
-
-    let AliceSendToBobReq = new SendRequest();
-    AliceSendToBobReq.walletId = `wif:regtest:${process.env.PRIVATE_WIF}`;
-    AliceSendToBobReq.to = [toBob];
-
-    await request(app).post("/v1/wallet/send").send(AliceSendToBobReq);
-
+    let initialResp = await request(app).post("/v1/wallet/send").send({
+      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      to: [{
+        cashaddr: bobsWallet.cashaddr,
+        unit: 'bch',
+        value: 1
+      }]
+    });
+    if (initialResp.statusCode !== 200) {
+      console.log(initialResp.error.text);
+    }
     let resp = await request(app)
       .post("/v1/wallet/send_max")
       .send({
@@ -273,14 +266,14 @@ describe("Post Endpoints", () => {
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       });
 
-    const body = resp.body as UtxoResponse;
+    const body = resp.body;
     if (body.utxos) {
       const valueArray = await Promise.all(
         body.utxos.map(async (b) => {
           return b!.value || 0;
         })
       );
-      const value = valueArray.reduce((a, b) => a + b, 0);
+      const value = valueArray.reduce((a:any, b:any) => a + b, 0);
       expect(resp.statusCode).toBe(200);
       expect(value).toBeGreaterThan(490 * bchParam.subUnits);
       expect(body!.utxos!.length).toBeGreaterThan(100);
