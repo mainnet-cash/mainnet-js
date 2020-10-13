@@ -88,7 +88,7 @@ test("Send a transaction on testnet", async () => {
   ]);
 
   // Build Bob's wallet from a public address, check his balance.
-  
+
   await bob.sendMax({ cashaddr: alice.cashaddr });
   const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
   expect(bobBalanceFinal.sat).toBe(0);
