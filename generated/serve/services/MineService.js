@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-
+const mainnet = require("../../../dist/mainnet-node-0.0.1-rc");
 /**
 * Mine regtest coins to a specified address
 *
@@ -10,8 +10,7 @@ const Service = require('./Service');
 const mine = ({ mineRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let args = mineRequest;
-      let resp = await mineFn(args);
+      let resp = await mainnet.mine(mineRequest);
       resolve(Service.successResponse(resp));
     } catch (e) {
       console.log(e);

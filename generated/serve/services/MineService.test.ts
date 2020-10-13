@@ -1,5 +1,4 @@
-import { getServer } from "../generated/serve/index";
-import * as mockApi from "../generated/client/typescript-mock/api";
+var server = require("../")
 
 var request = require("supertest");
 
@@ -7,7 +6,7 @@ var app;
 
 describe("Post Endpoints", () => {
   beforeAll(async function () {
-    app = await getServer().launch();
+    app = await server.getServer().launch();  
   });
 
   afterEach(function () {
@@ -20,8 +19,8 @@ describe("Post Endpoints", () => {
   it("Should mine a number of blocks to a given address", async () => {
     const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
       name: "Bobs Regtest One Time Wallet",
-      type: mockApi.WalletRequest.TypeEnum.Wif,
-      network: mockApi.WalletRequest.NetworkEnum.Regtest,
+      type: "wif",
+      network: "regtest",
     });
 
     const bobsCashaddr = bobsWalletResp.body.cashaddr;
@@ -30,7 +29,7 @@ describe("Post Endpoints", () => {
       blocks: 15,
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     const bobBalanceResp = await request(app).post("/v1/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });

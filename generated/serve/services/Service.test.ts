@@ -1,11 +1,11 @@
-import { getServer } from "../generated/serve/index";
+var server = require("../")
 var request = require("supertest");
 
 var app;
 
 describe("Post Endpoints", () => {
   beforeAll(async function () {
-    app = await getServer().launch();
+    app = await server.getServer().launch();  
   });
   afterEach(function () {
     app.close();

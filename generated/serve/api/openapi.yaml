@@ -183,9 +183,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-              - $ref: '#/components/schemas/SendRequest'
-              - $ref: '#/components/schemas/SerializedSendRequest'
+              $ref: '#/components/schemas/SendRequest'
         description: place a send request
         required: true
       responses:

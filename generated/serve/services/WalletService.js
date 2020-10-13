@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const _createWallet = require("../../../src/wallet/createWallet");
+const mainnet = require("../../../dist/mainnet-node-0.0.1-rc");
 
 /**
 * Get total balance for wallet
@@ -11,7 +11,7 @@ const _createWallet = require("../../../src/wallet/createWallet");
 const balance = ({ balanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await _createWallet.walletFromIdString(balanceRequest.walletId);
+      let wallet = await mainnet.walletFromIdString(balanceRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -38,7 +38,7 @@ const balance = ({ balanceRequest }) => new Promise(
 const createWallet = ({ walletRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await _createWallet.createWalletResponse(walletRequest);
+      let resp = await mainnet.createWalletResponse(walletRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(JSON.stringify(e));
@@ -57,7 +57,7 @@ const createWallet = ({ walletRequest }) => new Promise(
 const depositAddress = ({ serializedWallet }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await _createWallet.walletFromIdString(serializedWallet.walletId);
+      let wallet = await mainnet.walletFromIdString(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getDepositAddress(args);
@@ -78,7 +78,7 @@ const depositAddress = ({ serializedWallet }) =>
 const depositQr = ({ serializedWallet }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await _createWallet.walletFromIdString(serializedWallet.walletId);
+      let wallet = await mainnet.walletFromIdString(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getDepositQr(args);
@@ -99,7 +99,7 @@ const depositQr = ({ serializedWallet }) =>
 const maxAmountToSend = ({ maxAmountToSendRequest }) => new 
  Promise(async (resolve, reject) => {
   try {
-    let wallet = await _createWallet.walletFromIdString(maxAmountToSendRequest.walletId);
+    let wallet = await mainnet.walletFromIdString(maxAmountToSendRequest.walletId);
     let args = maxAmountToSendRequest;
     delete args.walletId;
     let resp = await wallet.getMaxAmountToSend(args);
@@ -120,7 +120,7 @@ const maxAmountToSend = ({ maxAmountToSendRequest }) => new
 const send = ({ sendRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await _createWallet.walletFromIdString(sendRequest.walletId);
+      let wallet = await mainnet.walletFromIdString(sendRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -142,7 +142,7 @@ const send = ({ sendRequest }) => new Promise(
 const sendMax = ({ sendMaxRequest }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await _createWallet.walletFromIdString(sendMaxRequest.walletId);
+      let wallet = await mainnet.walletFromIdString(sendMaxRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -165,7 +165,7 @@ const sendMax = ({ sendMaxRequest }) =>
 const utxos = ({ serializedWallet }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await _createWallet.walletFromIdString(serializedWallet.walletId);
+      let wallet = await mainnet.walletFromIdString(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getUtxos(args);

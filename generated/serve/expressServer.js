@@ -30,11 +30,11 @@ class ExpressServer {
   setupMiddleware() {
     // this.setupAllowedMedia();
     this.app.use(cors());
-    this.app.use(bodyParser.json({ limit: '1MB' }));
+    this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
     this.app.use(timeout(`${config.TIMEOUT}s`));
     this.app.use(express.urlencoded({ extended: false }));
-    this.app.use(cookieParser());
+    //this.app.use(cookieParser());
     //Simple test to see that the server is up and responding
     this.app.get("/ready", (req, res) => {
       res.status(200);
@@ -74,7 +74,6 @@ class ExpressServer {
             errors: err.errors || '',
           });
         });
-        console.log(`Listening on port ${this.port}`);
         return this.app.listen(this.port);
       });
   }

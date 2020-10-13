@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "es2020",
     "rootDir": "src",
     "moduleResolution": "node",
     "module": "commonjs",
@@ -38,8 +38,7 @@
 
     "lib": [
       "es2017",
-      "esnext.bigint",
-      // TODO: remove after https://github.com/DefinitelyTyped/DefinitelyTyped/issues/24419 is resolved
+      "es2020.bigint",
       "dom"
     ],
     "typeRoots": ["node_modules/@types", "src/types"]
