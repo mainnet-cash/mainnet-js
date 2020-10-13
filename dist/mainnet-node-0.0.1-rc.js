@@ -14456,7 +14456,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vm_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6657);
 /* harmony import */ var _vm_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_vm_types__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
-/* harmony reexport (unknown) */ for(const __WEBPACK_IMPORT_KEY__ in _vm_types__WEBPACK_IMPORTED_MODULE_1__) if(["default","ConsensusCommon","OpcodesBTC","OpcodesCommon","SigningSerializationFlag","assembleBytecode","assembleBytecodeBCH","assembleBytecodeBTC","authenticationInstructionIsMalformed","authenticationInstructionsAreMalformed","authenticationInstructionsAreNotMalformed","checkLimitsCommon","cloneAuthenticationProgramStateCommon","cloneStack","commonOperations","createAuthenticationProgramInternalStateCommon","createAuthenticationProgramStateCommon","createAuthenticationProgramStateCommonEmpty","createTransactionContextCommon","createTransactionContextCommonEmpty","createTransactionContextCommonTesting","disassembleAuthenticationInstruction","disassembleBytecode","disassembleBytecodeBCH","disassembleBytecodeBTC","disassembleParsedAuthenticationInstruction","disassembleParsedAuthenticationInstructionMalformed","disassembleParsedAuthenticationInstructions","generateBytecodeMap","generateSigningSerializationBCH","hashOutputs","hashPrevouts","hashSequence","instantiateVirtualMachineBCH","isDefinedSigningSerializationType","isLegacySigningSerialization","lengthBytesForPushOpcode","parseBytecode","readAuthenticationInstruction","serializeAuthenticationInstruction","serializeAuthenticationInstructions","serializeParsedAuthenticationInstruction","serializeParsedAuthenticationInstructionMalformed","serializeParsedAuthenticationInstructions","undefinedOperation"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = () => _vm_types__WEBPACK_IMPORTED_MODULE_1__[__WEBPACK_IMPORT_KEY__]
+/* harmony reexport (unknown) */ for(const __WEBPACK_IMPORT_KEY__ in _vm_types__WEBPACK_IMPORTED_MODULE_1__) if(["default","ConsensusCommon","OpcodesBTC","assembleBytecode","assembleBytecodeBCH","assembleBytecodeBTC","authenticationInstructionIsMalformed","authenticationInstructionsAreMalformed","authenticationInstructionsAreNotMalformed","checkLimitsCommon","cloneAuthenticationProgramStateCommon","cloneStack","commonOperations","createAuthenticationProgramInternalStateCommon","createAuthenticationProgramStateCommon","createAuthenticationProgramStateCommonEmpty","createTransactionContextCommon","createTransactionContextCommonEmpty","createTransactionContextCommonTesting","disassembleAuthenticationInstruction","disassembleBytecode","disassembleBytecodeBCH","disassembleBytecodeBTC","disassembleParsedAuthenticationInstruction","disassembleParsedAuthenticationInstructionMalformed","disassembleParsedAuthenticationInstructions","generateBytecodeMap","instantiateVirtualMachineBCH","lengthBytesForPushOpcode","parseBytecode","readAuthenticationInstruction","serializeAuthenticationInstruction","serializeAuthenticationInstructions","serializeParsedAuthenticationInstruction","serializeParsedAuthenticationInstructionMalformed","serializeParsedAuthenticationInstructions","undefinedOperation"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = () => _vm_types__WEBPACK_IMPORTED_MODULE_1__[__WEBPACK_IMPORT_KEY__]
 /* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
 /* harmony import */ var _virtual_machine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4225);
 
@@ -24588,19 +24588,18 @@ exports.deriveCashaddr = deriveCashaddr;
 /***/ }),
 
 /***/ 9928:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getUsdRate = void 0;
-const node_fetch_1 = __importDefault(__webpack_require__(3574));
+if (typeof process !== 'undefined') {
+    const fetch = __webpack_require__(3574);
+}
 async function getUsdRate() {
     try {
-        let response = await node_fetch_1.default("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd");
+        let response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd");
         let data = await response.json();
         return data["bitcoin-cash"].usd;
     }

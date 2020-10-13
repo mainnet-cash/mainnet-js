@@ -1,4 +1,6 @@
-import fetch from "node-fetch";
+if(typeof process !== 'undefined'){
+  const fetch = require("node-fetch");
+}
 
 export async function getUsdRate(): Promise<number> {
   try {
