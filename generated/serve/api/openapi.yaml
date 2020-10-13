@@ -510,6 +510,10 @@ components:
     SendRequest:
       allOf:
       - $ref: '#/components/schemas/SerializedWallet'
+      example:
+        to:
+        - null
+        - null
       properties:
         to:
           items:

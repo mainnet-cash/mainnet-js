@@ -24,7 +24,6 @@ import { SendMaxRequest } from '../model/sendMaxRequest';
 import { SendMaxResponse } from '../model/sendMaxResponse';
 import { SendRequest } from '../model/sendRequest';
 import { SendResponse } from '../model/sendResponse';
-import { SerializedSendRequest } from '../model/serializedSendRequest';
 import { SerializedWallet } from '../model/serializedWallet';
 import { UtxoResponse } from '../model/utxoResponse';
 import { WalletRequest } from '../model/walletRequest';
@@ -447,9 +446,9 @@ export class WalletApi {
     /**
      * 
      * @summary Send some amount to a given address
-     * @param sendRequestSerializedSendRequest place a send request
+     * @param sendRequest place a send request
      */
-    public async send (sendRequestSerializedSendRequest: SendRequest | SerializedSendRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: SendResponse;  }> {
+    public async send (sendRequest: SendRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: SendResponse;  }> {
         const localVarPath = this.basePath + '/wallet/send';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -462,9 +461,9 @@ export class WalletApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'sendRequestSerializedSendRequest' is not null or undefined
-        if (sendRequestSerializedSendRequest === null || sendRequestSerializedSendRequest === undefined) {
-            throw new Error('Required parameter sendRequestSerializedSendRequest was null or undefined when calling send.');
+        // verify required parameter 'sendRequest' is not null or undefined
+        if (sendRequest === null || sendRequest === undefined) {
+            throw new Error('Required parameter sendRequest was null or undefined when calling send.');
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -478,7 +477,7 @@ export class WalletApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(sendRequestSerializedSendRequest, "SendRequest | SerializedSendRequest")
+            body: ObjectSerializer.serialize(sendRequest, "SendRequest")
         };
 
         let authenticationPromise = Promise.resolve();
