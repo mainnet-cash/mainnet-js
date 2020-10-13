@@ -16,7 +16,7 @@ const baseConfig = {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
   optimization: {
-    minimize: false,
+    minimize: true,
     mangleWasmImports: true,
     usedExports: true,
   },
