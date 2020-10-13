@@ -1,4 +1,4 @@
-if(typeof process !== 'undefined'){
+if (typeof process !== "undefined") {
   const fetch = require("node-fetch");
 }
 
