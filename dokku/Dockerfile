@@ -34,4 +34,4 @@ RUN yarn
 
 EXPOSE 3000
 
-CMD npm run serve:cluster
+CMD bash -lc "echo $PORT; npm run serve:cluster"
