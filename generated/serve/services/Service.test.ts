@@ -1,4 +1,4 @@
-import { getServer } from "../generated/serve/index";
+import { getServer } from "../index";
 var request = require("supertest");
 
 var app;
