@@ -16,7 +16,7 @@ const baseConfig = {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
   optimization: {
-    minimize: true,
+    minimize: false,
     mangleWasmImports: true,
     usedExports: true,
   },
@@ -98,7 +98,7 @@ const browserTestConfig = merge(browserConfig, browserTestDiff);
 // Join configurations with the base configuration
 module.exports = [
   nodeConfig,
-  browserConfig,
-  browserTestConfig,
-  webWorkerConfig,
+  //browserConfig,
+  //browserTestConfig,
+  //webWorkerConfig,
 ].map((c) => merge(baseConfig, c));

@@ -10,7 +10,7 @@
   "name": "mainnet-js",
   "version": "0.0.1-rc",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-0.0.1-rc.js",
+  "main": "dist/mainnet-node-0.0.1-rc.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -69,6 +69,7 @@
     "supertest": "^4.0.2",
     "swagger-ui-express": "^4.0.2",
     "terser-webpack-plugin": "^4.2.3",
+    "timeout-signal": "^1.1.0",
     "ts-jest": "^26.4.1",
     "ts-loader": "^8.0.5",
     "ts-node": "^9.0.0",
