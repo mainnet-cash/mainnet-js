@@ -32,6 +32,4 @@ COPY --chown=appuser:appuser . /app/
 
 RUN yarn
 
-EXPOSE 3000
-
-CMD bash -lc "echo $PORT; npm run serve:cluster"
+CMD bash -lc "echo $WORKERS workers will be run; npm run serve:cluster"
