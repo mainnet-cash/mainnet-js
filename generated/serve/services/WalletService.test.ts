@@ -15,7 +15,6 @@ describe("Post Endpoints", () => {
     app.close();
   });
 
-
   /**
    * balance
    */

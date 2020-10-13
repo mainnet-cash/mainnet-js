@@ -18,6 +18,7 @@ class ExpressServer {
     this.port = port;
     this.app = express();
     this.openApiPath = openApiYaml;
+    this.docPath = docYaml;
     try {
       this.schema = jsYaml.safeLoad(fs.readFileSync(openApiYaml));
       this.docSchema = jsYaml.safeLoad(fs.readFileSync(docYaml).toString());
@@ -46,6 +47,7 @@ class ExpressServer {
     this.app.get('/', (req, res) => {
       res.redirect(301, '/api-docs');
     });
+    
     this.app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(this.docSchema));
     this.app.get("/timeout", (req, res) => {});
     this.app.get('/login-redirect', (req, res) => {
