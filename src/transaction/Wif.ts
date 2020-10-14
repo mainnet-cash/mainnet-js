@@ -51,7 +51,7 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   try {
-    let lockedOutputs = prepareOutputs(outputs);
+    let lockedOutputs = await prepareOutputs(outputs);
 
     if (discardChange !== true) {
       const changeAmount =
@@ -115,7 +115,7 @@ export function prepareInputs(
   return signedInputs;
 }
 
-export function prepareOutputs(outputs: SendRequest[]) {
+export async function prepareOutputs(outputs: SendRequest[]) {
   let lockedOutputs: any[] = [];
   for (const output of outputs) {
     // TODO move this to transaction/Wif
@@ -134,7 +134,7 @@ export function prepareOutputs(outputs: SendRequest[]) {
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
       satoshis: bigIntToBinUint64LE(
-        BigInt(amountInSatoshi(output.value, output.unit))
+        BigInt(await amountInSatoshi(output.value, output.unit))
       ),
     };
     lockedOutputs.push(lockedOutput);

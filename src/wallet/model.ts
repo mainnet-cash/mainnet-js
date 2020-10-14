@@ -22,7 +22,7 @@ export class SendRequest {
   }) {
     this.cashaddr = cashaddr;
     this.value = value;
-    this.unit = unit;
+    this.unit = unit.toLocaleLowerCase() as UnitEnum;
   }
 }
 

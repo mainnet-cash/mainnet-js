@@ -160,7 +160,7 @@ describe("Post Endpoints", () => {
           to: [
             {
               cashaddr: bobsCashaddr,
-              unit: 'sat',
+              unit: 'satoshis',
               value: 120000,
             },
           ],

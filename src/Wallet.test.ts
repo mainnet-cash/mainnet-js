@@ -4,6 +4,32 @@ import { bchParam } from "./chain";
 import { RegTestWallet, TestNetWallet } from "./wallet/Wif";
 import { createWallet, walletFromIdString } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
+import { getUsdRate } from "./util/getUsdRate";
+
+test("Should get the regtest wallet balance", async () => {
+  // Build Alice's wallet from Wallet Import Format string, send some sats
+  if (!process.env.PRIVATE_WIF) {
+    throw Error("Attempted to pass an empty WIF");
+  } else {
+    let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
+    // Build Bob's wallet from a public address, check his balance.
+    const aliceBalance = (await alice.getBalance()) as BalanceResponse;
+    expect(aliceBalance.bch).toBeGreaterThan(5000);
+    expect(await alice.getBalance("sat")).toBeGreaterThan(
+      5000 * bchParam.subUnits
+    );
+  }
+});
+
+test("Should get a random regtest wallet", async () => {
+  let alice = await RegTestWallet.create();
+  expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
+  expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
+  const aliceBalance = (await alice.getBalance()) as BalanceResponse;
+  expect(aliceBalance.bch).toBe(0);
+  expect(aliceBalance.usd).toBe(0);
+  expect(await alice.getBalance("sat")).toBe(0);
+});
 
 test("Should get the regtest wallet balance", async () => {
   // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -60,12 +86,32 @@ test("Send a transaction on the regression network", async () => {
       {
         cashaddr: bob.cashaddr!,
         value: 1100,
-        unit: UnitEnum.SAT,
+        unit: "satoshis",
       },
     ]);
     // Build Bob's wallet from a public address, check his balance.
     const bobBalance = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalance.sat).toBe(1100);
+  }
+});
+
+test("Send a transaction in dollars regression network", async () => {
+  // Build Alice's wallet from Wallet Import Format string, send some sats
+  if (!process.env.PRIVATE_WIF) {
+    throw Error("Attempted to pass an empty WIF");
+  } else {
+    let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
+    const bob = await createWallet({
+      type: WalletTypeEnum.Wif,
+      network: "regtest",
+      name: "Bob's random wallet",
+    });
+    let usdRate = await getUsdRate();
+    await alice.send([[bob.cashaddr!, usdRate, "Usd"]]);
+    // Build Bob's wallet from a public address, check his balance.
+    const bobBalance = (await bob.getBalance()) as BalanceResponse;
+
+    expect(bobBalance.usd).toBe(usdRate);
   }
 });
 
