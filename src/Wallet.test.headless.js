@@ -53,7 +53,6 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
-
   test(`Should create testnet wallet`, async () => {
     let params = { name: "Alice's TestNet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
