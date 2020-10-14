@@ -342,13 +342,11 @@ export class WifWallet extends BaseWallet {
   }
 }
 
-const create = async (
-  network: CashAddressNetworkPrefix
-) => {
+const create = async (network: CashAddressNetworkPrefix) => {
   let w = new WifWallet("", network);
   await w.generateWif();
   return w;
-}
+};
 
 const fromWIF = async (
   walletImportFormatString: string,
@@ -380,9 +378,7 @@ export class Wallet extends WifWallet {
     );
   }
   public static async create() {
-    return await create(
-      CashAddressNetworkPrefix.mainnet
-    );
+    return await create(CashAddressNetworkPrefix.mainnet);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
@@ -404,9 +400,7 @@ export class TestNetWallet extends WifWallet {
     );
   }
   public static async create() {
-    return await create(
-      CashAddressNetworkPrefix.testnet
-    );
+    return await create(CashAddressNetworkPrefix.testnet);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
@@ -427,9 +421,7 @@ export class RegTestWallet extends WifWallet {
     );
   }
   public static async create() {
-    return await create(
-      CashAddressNetworkPrefix.regtest
-    );
+    return await create(CashAddressNetworkPrefix.regtest);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(

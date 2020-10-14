@@ -35,10 +35,9 @@ describe(`Wallet should function in the browser`, () => {
     expect(page).not.toBeNull();
     const result = await page.evaluate(async () => {
       return await typeof TestNetWallet;
-    },);
+    });
     expect(result).toEqual("function");
   });
-
 
   test(`Should throw error on regtest wallet`, async () => {
     expect.assertions(1);
@@ -63,10 +62,10 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should create a random testnet wallet`, async () => {
-    let params = { };
+    let params = {};
     const result = await page.evaluate(async (p) => {
       let w = await TestNetWallet.create();
-      return w.getDepositAddress()
+      return w.getDepositAddress();
     }, params);
     expect(result.slice(0, 9)).toBe("bchtest:q");
   });
