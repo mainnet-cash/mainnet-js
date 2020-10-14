@@ -11,7 +11,7 @@ const mainnet = require("../../../dist/mainnet-node-0.0.1-rc");
 const balance = ({ balanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromIdString(balanceRequest.walletId);
+      let wallet = await mainnet.walletFromId(balanceRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -57,7 +57,7 @@ const createWallet = ({ walletRequest }) => new Promise(
 const depositAddress = ({ serializedWallet }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromIdString(serializedWallet.walletId);
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getDepositAddress(args);
@@ -79,7 +79,7 @@ const depositAddress = ({ serializedWallet }) =>
 const depositQr = ({ serializedWallet }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromIdString(serializedWallet.walletId);
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getDepositQr(args);
@@ -100,7 +100,7 @@ const depositQr = ({ serializedWallet }) =>
 const maxAmountToSend = ({ maxAmountToSendRequest }) => new 
  Promise(async (resolve, reject) => {
   try {
-    let wallet = await mainnet.walletFromIdString(maxAmountToSendRequest.walletId);
+    let wallet = await mainnet.walletFromId(maxAmountToSendRequest.walletId);
     let args = maxAmountToSendRequest;
     delete args.walletId;
     let resp = await wallet.getMaxAmountToSend(args);
@@ -121,7 +121,7 @@ const maxAmountToSend = ({ maxAmountToSendRequest }) => new
 const send = ({ sendRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromIdString(sendRequest.walletId);
+      let wallet = await mainnet.walletFromId(sendRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -143,7 +143,7 @@ const send = ({ sendRequest }) => new Promise(
 const sendMax = ({ sendMaxRequest }) =>
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromIdString(sendMaxRequest.walletId);
+      let wallet = await mainnet.walletFromId(sendMaxRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -166,7 +166,7 @@ const sendMax = ({ sendMaxRequest }) =>
 const utxos = ({ serializedWallet }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromIdString(serializedWallet.walletId);
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getUtxos(args);

@@ -71,7 +71,7 @@ export async function createWalletResponse(
   }
 }
 
-export async function walletFromIdString(
+export async function walletFromId(
   walletId: string
 ): Promise<Wallet | TestNetWallet | RegTestWallet> {
   let [walletType, network, privateImport]: string[] = walletId.split(":");
