@@ -190,8 +190,9 @@ export class WifWallet extends BaseWallet {
     return res;
   }
 
-  public async getBalance(unit?: UnitEnum): Promise<BalanceResponse | number> {
-    if (unit) {
+  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+    if (rawUnit) {
+      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
@@ -342,7 +343,7 @@ export class WifWallet extends BaseWallet {
   }
 }
 
-const create = async (network: CashAddressNetworkPrefix) => {
+const newRandom = async (network: CashAddressNetworkPrefix) => {
   let w = new WifWallet("", network);
   await w.generateWif();
   return w;
@@ -377,8 +378,8 @@ export class Wallet extends WifWallet {
       CashAddressNetworkPrefix.mainnet
     );
   }
-  public static async create() {
-    return await create(CashAddressNetworkPrefix.mainnet);
+  public static async newRandom() {
+    return await newRandom(CashAddressNetworkPrefix.mainnet);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
@@ -399,8 +400,8 @@ export class TestNetWallet extends WifWallet {
       CashAddressNetworkPrefix.testnet
     );
   }
-  public static async create() {
-    return await create(CashAddressNetworkPrefix.testnet);
+  public static async newRandom() {
+    return await newRandom(CashAddressNetworkPrefix.testnet);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
@@ -420,8 +421,8 @@ export class RegTestWallet extends WifWallet {
       CashAddressNetworkPrefix.regtest
     );
   }
-  public static async create() {
-    return await create(CashAddressNetworkPrefix.regtest);
+  public static async newRandom() {
+    return await newRandom(CashAddressNetworkPrefix.regtest);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
