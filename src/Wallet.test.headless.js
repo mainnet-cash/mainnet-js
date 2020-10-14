@@ -31,6 +31,14 @@ describe(`Wallet should function in the browser`, () => {
     expect(await page.title()).toEqual("Load module for playwright");
   });
 
+  test(`Should load module`, async () => {
+    expect(page).not.toBeNull();
+    const result = await page.evaluate(async () => {
+      return await typeof TestNetWallet;
+    });
+    expect(result).toEqual("function");
+  });
+
   test(`Should throw error on regtest wallet`, async () => {
     expect.assertions(1);
     let params = { name: "Alice's TestNet", type: "wif", network: "regtest" };
@@ -53,6 +61,15 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.cashaddr.slice(0, 9)).toBe("bchtest:q");
   });
 
+  test(`Should create a random testnet wallet`, async () => {
+    let params = {};
+    const result = await page.evaluate(async (p) => {
+      let w = await TestNetWallet.create();
+      return w.getDepositAddress();
+    }, params);
+    expect(result.slice(0, 9)).toBe("bchtest:q");
+  });
+
   test(`Should create mainnet wallet`, async () => {
     let params = { name: "Alice's TestNet", type: "wif", network: "mainnet" };
     const result = await page.evaluate(async (p) => {
@@ -66,7 +83,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.slice(0, 10)).toBe("bchtest:qp");
   });
 
   test(`Should return deposit qr from testnet wallet`, async () => {
@@ -84,7 +101,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.startsWith("bchtest:qp")).toBeTruthy();
   });
 
   test(`Should return testnet balance`, async () => {
