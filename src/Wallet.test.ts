@@ -61,7 +61,7 @@ test("Send a transaction on the regression network", async () => {
       {
         cashaddr: bob.cashaddr!,
         value: 1100,
-        unit: 'satoshis',
+        unit: "satoshis",
       },
     ]);
     // Build Bob's wallet from a public address, check his balance.
@@ -69,7 +69,6 @@ test("Send a transaction on the regression network", async () => {
     expect(bobBalance.sat).toBe(1100);
   }
 });
-
 
 test("Send a transaction in dollars regression network", async () => {
   // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -82,20 +81,14 @@ test("Send a transaction in dollars regression network", async () => {
       network: "regtest",
       name: "Bob's random wallet",
     });
-    let usdRate = await getUsdRate()
-    await alice.send([
-      [ bob.cashaddr!,
-        usdRate,
-        'Usd',
-      ],
-    ]);
+    let usdRate = await getUsdRate();
+    await alice.send([[bob.cashaddr!, usdRate, "Usd"]]);
     // Build Bob's wallet from a public address, check his balance.
     const bobBalance = (await bob.getBalance()) as BalanceResponse;
-    
+
     expect(bobBalance.usd).toBe(usdRate);
   }
 });
-
 
 test("Send a transaction (as array) on the regression network", async () => {
   // Build Alice's wallet from Wallet Import Format string, send some sats
