@@ -53,6 +53,7 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
+
   test(`Should create testnet wallet`, async () => {
     let params = { name: "Alice's TestNet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
@@ -64,7 +65,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create a random testnet wallet`, async () => {
     let params = {};
     const result = await page.evaluate(async (p) => {
-      let w = await TestNetWallet.create();
+      let w = await TestNetWallet.newRandom();
       return w.getDepositAddress();
     }, params);
     expect(result.slice(0, 9)).toBe("bchtest:q");

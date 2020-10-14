@@ -4,10 +4,10 @@ import { getUsdRate } from "./getUsdRate";
 
 export async function amountInSatoshi(
   value: number,
-  unit: any
+  rawUnit: any
 ): Promise<BigInt | Error> {
-  const lowercaseUnit = unit.toLocaleLowerCase() as UnitEnum;
-  switch (lowercaseUnit) {
+  const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
+  switch (unit) {
     case UnitEnum.BCH:
       return BigInt(value * bchParam.subUnits);
     case UnitEnum.SATOSHI:

@@ -22,7 +22,7 @@ test("Should get the regtest wallet balance", async () => {
 });
 
 test("Should get a random regtest wallet", async () => {
-  let alice = await RegTestWallet.create();
+  let alice = await RegTestWallet.newRandom();
   expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
   expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
   const aliceBalance = (await alice.getBalance()) as BalanceResponse;
@@ -47,7 +47,7 @@ test("Should get the regtest wallet balance", async () => {
 });
 
 test("Should get a random regtest wallet", async () => {
-  let alice = await RegTestWallet.create();
+  let alice = await RegTestWallet.newRandom();
   expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
   expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
   const aliceBalance = (await alice.getBalance()) as BalanceResponse;
@@ -132,7 +132,7 @@ test("Send a transaction (as array) on the regression network", async () => {
 });
 
 test("Should get a random testnet wallet", async () => {
-  let alice = await TestNetWallet.create();
+  let alice = await TestNetWallet.newRandom();
   const aliceBalance = (await alice.getBalance()) as BalanceResponse;
   expect(alice.cashaddr!.slice(0, 9)).toBe("bchtest:q");
   expect(aliceBalance.bch).toBe(0);
