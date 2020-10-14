@@ -1,21 +1,21 @@
-import { walletFromIdString } from "./createWallet";
+import { walletFromId } from "./createWallet";
 
 test("Get a regtest wallet from string id", async () => {
-  let w = await walletFromIdString(
+  let w = await walletFromId(
     "wif:regtest:3h4RrkJS2kSxJZdKho58PgvUJBJJMN2caRxmdWHB8fckx55kC37Gco"
   );
   expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
 });
 
 test("Get a testnet wallet from string id", async () => {
-  let w = await walletFromIdString(
+  let w = await walletFromId(
     "wif:testnet:3h4RrkJS2kSxJZdKho58PgvUJBJJMN2caRxmdWHB8fckx55kC37Gco"
   );
   expect(w.cashaddr!.startsWith("bchtest:")).toBeTruthy();
 });
 
 test("Get a mainnet wallet from string id", async () => {
-  let w = await walletFromIdString(
+  let w = await walletFromId(
     "wif:mainnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
   );
   expect(w.cashaddr!.startsWith("bitcoincash")).toBeTruthy();
@@ -24,7 +24,7 @@ test("Get a mainnet wallet from string id", async () => {
 test("Expect Error passing testnet wallet to mainnet", async () => {
   expect.assertions(1);
   try {
-    await walletFromIdString(
+    await walletFromId(
       "wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
     );
   } catch (e) {
@@ -37,7 +37,7 @@ test("Expect Error passing testnet wallet to mainnet", async () => {
 test("Expect Error passing mainnet wallet to testnet", async () => {
   expect.assertions(1);
   try {
-    await walletFromIdString(
+    await walletFromId(
       "wif:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
@@ -50,7 +50,7 @@ test("Expect Error passing mainnet wallet to testnet", async () => {
 test("Expect Error passing hd wallet", async () => {
   expect.assertions(1);
   try {
-    await walletFromIdString(
+    await walletFromId(
       "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
@@ -61,7 +61,7 @@ test("Expect Error passing hd wallet", async () => {
 test("Expect Error passing unknown wallet", async () => {
   expect.assertions(1);
   try {
-    await walletFromIdString(
+    await walletFromId(
       "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
   } catch (e) {
