@@ -53,7 +53,6 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
-
   test(`Should create testnet wallet`, async () => {
     let params = { name: "Alice's TestNet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
@@ -86,7 +85,6 @@ describe(`Wallet should function in the browser`, () => {
         "page.evaluate: Evaluation failed: Error: Wallet type hd was passed a wif wallet"
       );
     }
-
   });
 
   test(`Should create a random testnet wallet`, async () => {
