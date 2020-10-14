@@ -1,8 +1,12 @@
 import { bchParam } from "../chain";
 import { UnitEnum } from "../wallet/enum";
+import { getUsdRate } from "./getUsdRate";
 
-export function amountInSatoshi(value: number, unit: UnitEnum): BigInt | Error {
-  switch (unit) {
+export async function amountInSatoshi(value: number, unit: any): Promise<BigInt|Error> {
+  const lowercaseUnit = unit.toLocaleLowerCase() as UnitEnum
+  switch (lowercaseUnit) {
+    case UnitEnum.BCH:
+      return BigInt(value * bchParam.subUnits);
     case UnitEnum.SATOSHI:
       return BigInt(value);
     case UnitEnum.SAT:
@@ -11,8 +15,11 @@ export function amountInSatoshi(value: number, unit: UnitEnum): BigInt | Error {
       return BigInt(value);
     case UnitEnum.SATOSHIS:
       return BigInt(value);
-    case UnitEnum.BCH:
-      return BigInt(value * bchParam.subUnits);
+      case UnitEnum.USD:
+        let USD_over_BCH = await getUsdRate()
+        let SAT_over_BCH = bchParam.subUnits
+
+        return BigInt(Number(value * (SAT_over_BCH/USD_over_BCH)).toFixed(0));
     default:
       throw Error("Unit of value not defined");
   }
