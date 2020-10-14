@@ -75,8 +75,8 @@ jobs:
     - run: docker/build.sh
     - uses: microsoft/playwright-github-action@v1
     - run: npm install
-    - run: npm run test
     - run: npm run build
+    - run: npm run test
     - run: npm run test:browser
       env:
         BROWSER: ${{ matrix.browser }}

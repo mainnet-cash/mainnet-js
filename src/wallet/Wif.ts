@@ -172,7 +172,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public getDepositAddress() {
-    return { cashaddr: this.cashaddr };
+    return this.cashaddr;
   }
 
   public getDepositQr(): Image {
@@ -342,6 +342,14 @@ export class WifWallet extends BaseWallet {
   }
 }
 
+const create = async (
+  network: CashAddressNetworkPrefix
+) => {
+  let w = new WifWallet("", network);
+  await w.generateWif();
+  return w;
+}
+
 const fromWIF = async (
   walletImportFormatString: string,
   network: CashAddressNetworkPrefix
@@ -371,7 +379,11 @@ export class Wallet extends WifWallet {
       CashAddressNetworkPrefix.mainnet
     );
   }
-
+  public static async create() {
+    return await create(
+      CashAddressNetworkPrefix.mainnet
+    );
+  }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
       walletImportFormatString,
@@ -391,6 +403,11 @@ export class TestNetWallet extends WifWallet {
       CashAddressNetworkPrefix.testnet
     );
   }
+  public static async create() {
+    return await create(
+      CashAddressNetworkPrefix.testnet
+    );
+  }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
       walletImportFormatString,
@@ -406,6 +423,11 @@ export class RegTestWallet extends WifWallet {
   public static async fromWIF(walletImportFormatString: string) {
     return await fromWIF(
       walletImportFormatString,
+      CashAddressNetworkPrefix.regtest
+    );
+  }
+  public static async create() {
+    return await create(
       CashAddressNetworkPrefix.regtest
     );
   }

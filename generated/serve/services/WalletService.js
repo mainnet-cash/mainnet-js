@@ -61,6 +61,7 @@ const depositAddress = ({ serializedWallet }) =>
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getDepositAddress(args);
+      resp = {cashaddr:resp}
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
