@@ -83,7 +83,7 @@ describe(`Wallet should function in the browser`, () => {
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.slice(0, 97)).toBe(
-        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed a wif wallet"
+        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to wif wallet"
       );
     }
 

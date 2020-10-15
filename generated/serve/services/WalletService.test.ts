@@ -209,7 +209,7 @@ describe("Post Endpoints", () => {
 
       expect(bobsWalletResp.statusCode).toBe(200);
       expect(sendResp.statusCode).toBe(200);
-      expect((sendResp.body.transactionId as string).length).toBe(64);
+      expect((sendResp.body.txId as string).length).toBe(64);
       expect(resp.statusCode).toBe(200);
       expect(body.sat as number).toBe(3000);
     }
@@ -252,7 +252,7 @@ describe("Post Endpoints", () => {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toBe(200);
-    expect((body.transactionId as string).length).toBe(64);
+    expect((body.txId as string).length).toBe(64);
     expect(body.balance!.bch as number).toBe(0);
     expect(body.balance!.sat as number).toBe(0);
   });

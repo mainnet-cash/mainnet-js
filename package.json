@@ -17,7 +17,12 @@
     "dist/*.js.map"
   ],
   "scripts": {
-    "api:validate": "npx openapi-generator validate -i ./swagger/v1/api.yml",
+    "api:validate": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator validate -i /local/swagger/v1/api.yml",
+    "api:build:server": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/generated/serve",
+    "api:build:client": "node swagger/generate.js",
+    "api:serve": "node generated/serve/serve.js",
+    "api:serve:cluster": "node generated/serve/cluster.js",
+    "api:serve:monitor": "npx nodemon generated/serve/serve.ts",
     "cli": "npx ts-node src/cli.ts",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "test": "npx jest --runInBand --detectOpenHandles",
@@ -26,13 +31,7 @@
     "test:server": "npx jest generated/serve/services/WalletService.test.ts --runInBand --detectOpenHandles",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "serve": "node generated/serve/serve.js",
-    "serve:cluster": "node generated/serve/cluster.js",
-    "serve:monitor": "npx nodemon generated/serve/serve.ts",
     "build": "npx webpack",
-    "build:server": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/generated/serve",
-    "build:php": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator generate -i /local/swagger/v1/api.yml -g php -o /local/generated/client/php --additional-properties=packageName=Mainnet,invokerPackage=Mainnet",
-    "build:python": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator generate -i /local/swagger/v1/api.yml -g python -o /local/generated/client/python --additional-properties=packageName=mainnet,projectName=mainnet",
     "demo": "npx reload --dir=demo/"
   },
   "devDependencies": {
