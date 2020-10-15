@@ -349,19 +349,16 @@ const newRandom = async (network: CashAddressNetworkPrefix) => {
   return w;
 };
 
-const fromId = async (
-  walletId: string,
-  network: CashAddressNetworkPrefix
-) => {
+const fromId = async (walletId: string, network: CashAddressNetworkPrefix) => {
   let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
-    if(walletType !='wif'){
-      throw Error(`Wallet type ${walletType} was passed to wif wallet`)
-    }
-    if(network != networkGiven){
-      throw Error(`Network prefix ${networkGiven} to a ${network} wallet`)
-    }
-    return fromWif(privateImport, network)
-}
+  if (walletType != "wif") {
+    throw Error(`Wallet type ${walletType} was passed to wif wallet`);
+  }
+  if (network != networkGiven) {
+    throw Error(`Network prefix ${networkGiven} to a ${network} wallet`);
+  }
+  return fromWif(privateImport, network);
+};
 const fromWif = async (
   walletImportFormatString: string,
   network: CashAddressNetworkPrefix
@@ -391,11 +388,8 @@ export class Wallet extends WifWallet {
       CashAddressNetworkPrefix.mainnet
     );
   }
-  public static async fromId(walletId:string){
-    return await fromId(
-      walletId,
-      CashAddressNetworkPrefix.mainnet
-    )
+  public static async fromId(walletId: string) {
+    return await fromId(walletId, CashAddressNetworkPrefix.mainnet);
   }
   public static async newRandom() {
     return await newRandom(CashAddressNetworkPrefix.mainnet);
@@ -419,11 +413,8 @@ export class TestNetWallet extends WifWallet {
       CashAddressNetworkPrefix.testnet
     );
   }
-  public static async fromId(walletId:string){
-    return await fromId(
-      walletId,
-      CashAddressNetworkPrefix.testnet
-    )
+  public static async fromId(walletId: string) {
+    return await fromId(walletId, CashAddressNetworkPrefix.testnet);
   }
   public static async newRandom() {
     return await newRandom(CashAddressNetworkPrefix.testnet);
@@ -447,11 +438,8 @@ export class RegTestWallet extends WifWallet {
       CashAddressNetworkPrefix.regtest
     );
   }
-  public static async fromId(walletId:string){
-    return await fromId(
-      walletId,
-      CashAddressNetworkPrefix.regtest
-    )
+  public static async fromId(walletId: string) {
+    return await fromId(walletId, CashAddressNetworkPrefix.regtest);
   }
   public static async newRandom() {
     return await newRandom(CashAddressNetworkPrefix.regtest);
