@@ -25,7 +25,7 @@
     "cli": "npx ts-node src/cli.ts",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "test": "npx jest --runInBand --detectOpenHandles",
-    "test:wallet": "npx jest src/Wallet.test.ts --detectOpenHandles",
+    "test:wallet": "npx jest src/Wallet.test.ts --runInBand --detectOpenHandles",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
     "test:server": "npx jest generated/serve/services/WalletService.test.ts --runInBand --detectOpenHandles",
     "format": "prettier --write .",
