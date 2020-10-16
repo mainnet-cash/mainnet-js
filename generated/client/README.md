@@ -1,28 +1,13 @@
 This project uses codegen to generate thin-client libraries for the api. These libraries
 handle the boilerplate of connecting to the server for you.
 
-## Clients
-
-| language         | Examples | Tests | Native Signing |
-| :--------------- | :------: | :---: | :------------: |
-| android          |    -     |   -   |       -        |
-| cpp-restsdk      |    -     |   -   |       -        |
-| csharp           |    -     |   -   |       -        |
-| go               |    -     |   -   |       -        |
-| java             |    -     |   -   |       -        |
-| javascript       |    -     |   -   |       -        |
-| php              |    -     |   -   |       -        |
-| python           |    -     |   -   |       -        |
-| ruby             |    -     |   -   |       -        |
-| rust             |    -     |   -   |       -        |
-| swift            |    -     |   -   |       -        |
-| typescript-dummy |    -     |   ⍰   |       -        |
-
 ## New clients in other new languages
 
-A list of available clients can be generated with the command:
+To generate clients in a particular language, use the following from ../mainnet-js/ directory
 
-    npm run codegen:list
+    npm:build:client python-experimental
+
+Docker is required.
 
 ## Building a proxy
 

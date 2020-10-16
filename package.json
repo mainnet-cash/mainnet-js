@@ -22,7 +22,6 @@
     "api:build:client": "node swagger/generate.js",
     "api:serve": "node generated/serve/serve.js",
     "api:serve:cluster": "node generated/serve/cluster.js",
-    "api:serve:monitor": "npx nodemon generated/serve/serve.ts",
     "cli": "npx ts-node src/cli.ts",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent nyc jest --runInBand --detectOpenHandles",
     "test": "npx jest --runInBand --detectOpenHandles",
