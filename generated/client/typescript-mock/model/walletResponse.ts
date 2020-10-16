@@ -11,10 +11,12 @@
  */
 
 import { RequestFile } from './models';
-import { Network } from './network';
-import { SerializedWallet } from './serializedWallet';
 
-export class WalletResponse extends SerializedWallet {
+export class WalletResponse {
+    /**
+    * ID that is returned in `wallet` field of /wallet call 
+    */
+    'walletId'?: string;
     /**
     * The wallet in Wallet Import Format (WIF) 
     */
@@ -35,6 +37,11 @@ export class WalletResponse extends SerializedWallet {
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
+        },
         {
             "name": "wif",
             "baseName": "wif",
@@ -57,7 +64,7 @@ export class WalletResponse extends SerializedWallet {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(WalletResponse.attributeTypeMap);
+        return WalletResponse.attributeTypeMap;
     }
 }
 

@@ -11,17 +11,21 @@
  */
 
 import { RequestFile } from './models';
-import { Cashaddr } from './cashaddr';
 
-export class DepositAddressResponse extends Cashaddr {
+export class DepositAddressResponse {
+    'cashaddr'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
-    ];
+        {
+            "name": "cashaddr",
+            "baseName": "cashaddr",
+            "type": "string"
+        }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(DepositAddressResponse.attributeTypeMap);
+        return DepositAddressResponse.attributeTypeMap;
     }
 }
 
