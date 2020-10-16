@@ -11,10 +11,12 @@
  */
 
 import { RequestFile } from './models';
-import { SerializedWallet } from './serializedWallet';
-import { UnitType } from './unitType';
 
-export class BalanceRequest extends SerializedWallet {
+export class BalanceRequest {
+    /**
+    * ID that is returned in `wallet` field of /wallet call 
+    */
+    'walletId': string;
     /**
     * Unit of account.
     */
@@ -24,13 +26,18 @@ export class BalanceRequest extends SerializedWallet {
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
+        },
+        {
             "name": "unit",
             "baseName": "unit",
             "type": "BalanceRequest.UnitEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(BalanceRequest.attributeTypeMap);
+        return BalanceRequest.attributeTypeMap;
     }
 }
 

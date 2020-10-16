@@ -11,8 +11,6 @@
  */
 
 import { RequestFile } from './models';
-import { Network } from './network';
-import { WalletType } from './walletType';
 
 export class WalletRequest {
     /**
@@ -20,13 +18,13 @@ export class WalletRequest {
     */
     'name'?: string;
     /**
-    * Wallet type, either a single wallet with private key (wif) or a Hierarchical Deterministic wallet determined from a seed.
-    */
-    'type'?: WalletRequest.TypeEnum;
-    /**
     * network type
     */
     'network'?: WalletRequest.NetworkEnum;
+    /**
+    * Wallet type, either a single wallet with private key (wif) or a Hierarchical Deterministic wallet determined from a seed.
+    */
+    'type'?: WalletRequest.TypeEnum;
 
     static discriminator: string | undefined = undefined;
 
@@ -37,14 +35,14 @@ export class WalletRequest {
             "type": "string"
         },
         {
-            "name": "type",
-            "baseName": "type",
-            "type": "WalletRequest.TypeEnum"
-        },
-        {
             "name": "network",
             "baseName": "network",
             "type": "WalletRequest.NetworkEnum"
+        },
+        {
+            "name": "type",
+            "baseName": "type",
+            "type": "WalletRequest.TypeEnum"
         }    ];
 
     static getAttributeTypeMap() {
@@ -53,14 +51,14 @@ export class WalletRequest {
 }
 
 export namespace WalletRequest {
-    export enum TypeEnum {
-        Wif = <any> 'wif',
-        Hd = <any> 'hd'
-    }
     export enum NetworkEnum {
         Mainnet = <any> 'mainnet',
         Testnet = <any> 'testnet',
         Regtest = <any> 'regtest',
         Simtest = <any> 'simtest'
+    }
+    export enum TypeEnum {
+        Wif = <any> 'wif',
+        Hd = <any> 'hd'
     }
 }

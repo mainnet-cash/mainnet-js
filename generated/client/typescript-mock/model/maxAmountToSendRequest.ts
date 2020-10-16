@@ -11,9 +11,12 @@
  */
 
 import { RequestFile } from './models';
-import { SerializedWallet } from './serializedWallet';
 
-export class MaxAmountToSendRequest extends SerializedWallet {
+export class MaxAmountToSendRequest {
+    /**
+    * ID that is returned in `wallet` field of /wallet call 
+    */
+    'walletId': string;
     /**
     * (optional) if sending all funds to multiple addresses, the count of the number of address funds will be sent to may be included. 
     */
@@ -23,13 +26,18 @@ export class MaxAmountToSendRequest extends SerializedWallet {
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
+        },
+        {
             "name": "outputCount",
             "baseName": "output_count",
             "type": "number"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(MaxAmountToSendRequest.attributeTypeMap);
+        return MaxAmountToSendRequest.attributeTypeMap;
     }
 }
 

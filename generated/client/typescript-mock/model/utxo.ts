@@ -11,13 +11,13 @@
  */
 
 import { RequestFile } from './models';
-import { Outpoint } from './outpoint';
-import { TransactionId } from './transactionId';
-import { UnitType } from './unitType';
-import { ValueType } from './valueType';
 
-export class Utxo extends TransactionId {
+export class Utxo {
     'index'?: number;
+    /**
+    * The hash of a transaction
+    */
+    'txId': string;
     'value'?: number;
     /**
     * Unit of account.
@@ -37,6 +37,11 @@ export class Utxo extends TransactionId {
             "type": "number"
         },
         {
+            "name": "txId",
+            "baseName": "txId",
+            "type": "string"
+        },
+        {
             "name": "value",
             "baseName": "value",
             "type": "number"
@@ -53,7 +58,7 @@ export class Utxo extends TransactionId {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(Utxo.attributeTypeMap);
+        return Utxo.attributeTypeMap;
     }
 }
 
