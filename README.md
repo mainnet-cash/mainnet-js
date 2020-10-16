@@ -43,7 +43,7 @@ getting more testnet coins is an annoyance.
 
 # Workflow
 
-## Specification 
+## Specification
 
 This is a specification driven project. The rest interface is defined using OpenAPI 3
 in a folder called [swagger](swagger/v1/api.yml).
@@ -58,7 +58,7 @@ All code for the javascript bundle should be contained in src/, high level funct
 calls should be as close to the swagger specification as possible.
 
 Tests may be run with:
-  
+
     npm run test
 
 Note this also tests the API server, which depends on the bundled output of src/
@@ -71,7 +71,7 @@ Any changes to the server or documentation will be reflected
 after validation and committed automatically in CI.
 
 The API server is build already, but to rebuild it manually use:
-    
+
     npm run api:build:server
 
 The server uses a nodejs packaged version of the library
@@ -88,8 +88,7 @@ To run multiple instances of the API server in "cluster" mode:
 
 ## Developing API clients
 
-
-To generate clients in a particular language, use: 
+To generate clients in a particular language, use:
 
     npm run api:build:client <generator_name>
 
@@ -97,5 +96,5 @@ For a list of generators see:
 
 https://openapi-generator.tech/docs/generators/
 
-If you need additionalProperties passed to the client generator, these may be added in 
+If you need additionalProperties passed to the client generator, these may be added in
 he [wrapper script](swagger/generate.js)
