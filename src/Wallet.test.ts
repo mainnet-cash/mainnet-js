@@ -7,14 +7,10 @@ import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
 
 describe(`Test Wallet library`, () => {
-
-
   /**
    * Create the browser and page context
    */
-  beforeEach(async () => {
-
-  });
+  beforeEach(async () => {});
 
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -266,6 +262,4 @@ describe(`Test Wallet library`, () => {
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
   });
-
-
 });
