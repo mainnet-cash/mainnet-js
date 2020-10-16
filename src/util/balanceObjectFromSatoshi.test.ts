@@ -15,22 +15,22 @@ test("Get balanceResponse from 1 satoshi", async () => {
 });
 
 test("Get balanceResponse from 1 sat", async () => {
-  let val = await balanceFromSatoshi(1, 'sat');
+  let val = await balanceFromSatoshi(1, "sat");
   expect(val).toBe(1);
 });
 test("Get balanceResponse from 1 sats", async () => {
-  let val = await balanceFromSatoshi(1, 'sats');
+  let val = await balanceFromSatoshi(1, "sats");
   expect(val).toBe(1);
 });
 test("Get balanceResponse from 1 satoshi", async () => {
-  let val = await balanceFromSatoshi(1, 'satoshi');
+  let val = await balanceFromSatoshi(1, "satoshi");
   expect(val).toBe(1);
 });
 test("Get balanceResponse from 1 satoshis", async () => {
-  let val = await balanceFromSatoshi(1, 'satoshis');
+  let val = await balanceFromSatoshi(1, "satoshis");
   expect(val).toBe(1);
 });
 test("Get balanceResponse from 1 bch", async () => {
-  let val = await balanceFromSatoshi(bchParam.subUnits, 'bch');
+  let val = await balanceFromSatoshi(bchParam.subUnits, "bch");
   expect(val).toBe(1);
 });
