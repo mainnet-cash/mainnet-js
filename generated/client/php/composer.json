@@ -1,0 +1,33 @@
+{
+    "name": "mainnet/mainnet",
+    "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development",
+    "keywords": [
+        "bitcoin cash"
+        
+    ],
+    "homepage": "https://mainnet.cash",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "High level api for the Bitcoin Cash blockchain",
+            "homepage": "https://mainnet.cash"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0 || ^9.0",
+        "friendsofphp/php-cs-fixer": "^2.12"
+    },
+    "autoload": {
+        "psr-4": { "Mainnet\\" : "lib/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Mainnet\\" : "test/" }
+    }
+}
