@@ -68,7 +68,7 @@ describe(`Wallet should function in the browser`, () => {
         return await TestNetWallet.fromId(`wif:regtest:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
-      expect(e.message.slice(0, 97)).toBe(
+      expect(e.message.split("\n")[0]).toBe(
         "page.evaluate: Evaluation failed: Error: Network prefix regtest to a bchtest wallet"
       );
     }
@@ -81,8 +81,8 @@ describe(`Wallet should function in the browser`, () => {
         return await RegTestWallet.fromId(`hd:regtest:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
-      expect(e.message.slice(0, 97)).toBe(
-        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed a wif wallet"
+      expect(e.message.split("\n")[0]).toBe(
+        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to wif wallet"
       );
     }
   });

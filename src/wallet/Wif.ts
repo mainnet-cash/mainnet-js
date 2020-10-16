@@ -134,7 +134,7 @@ export class WifWallet extends BaseWallet {
       let sendRequests = asSendRequestObject(requests);
       let result = await this._processSendRequests(sendRequests);
       let resp = new SendResponse({});
-      resp.transactionId = result;
+      resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
       return resp;
     } catch (e) {
@@ -146,7 +146,7 @@ export class WifWallet extends BaseWallet {
     try {
       let result = await this.sendMaxRaw(sendMaxRequest);
       let resp = new SendResponse({});
-      resp.transactionId = result;
+      resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
       return resp;
     } catch (e) {
@@ -264,9 +264,9 @@ export class WifWallet extends BaseWallet {
         utxo.unit = "sat";
         utxo.value = o.satoshis;
 
-        utxo.transactionId = o.txid;
+        utxo.txId = o.txid;
         utxo.index = o.vout;
-        utxo.utxoId = utxo.transactionId + ":" + utxo.index;
+        utxo.utxoId = utxo.txId + ":" + utxo.index;
         return utxo;
       })
     );
