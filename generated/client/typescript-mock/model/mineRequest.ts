@@ -11,9 +11,9 @@
  */
 
 import { RequestFile } from './models';
-import { RegCashaddr } from './regCashaddr';
 
-export class MineRequest extends RegCashaddr {
+export class MineRequest {
+    'cashaddr'?: string;
     /**
     * the number of blocks to mine
     */
@@ -23,13 +23,18 @@ export class MineRequest extends RegCashaddr {
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
+            "name": "cashaddr",
+            "baseName": "cashaddr",
+            "type": "string"
+        },
+        {
             "name": "blocks",
             "baseName": "blocks",
             "type": "number"
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(MineRequest.attributeTypeMap);
+        return MineRequest.attributeTypeMap;
     }
 }
 

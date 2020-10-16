@@ -12,14 +12,22 @@
 
 import { RequestFile } from './models';
 import { BalanceResponse } from './balanceResponse';
-import { TransactionId } from './transactionId';
 
-export class SendResponse extends TransactionId {
+export class SendResponse {
+    /**
+    * The hash of a transaction
+    */
+    'txId'?: string;
     'balance'?: BalanceResponse;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "txId",
+            "baseName": "txId",
+            "type": "string"
+        },
         {
             "name": "balance",
             "baseName": "balance",
@@ -27,7 +35,7 @@ export class SendResponse extends TransactionId {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendResponse.attributeTypeMap);
+        return SendResponse.attributeTypeMap;
     }
 }
 
