@@ -20,6 +20,8 @@ test("Get price of sat(s)", async () => {
   expect(rate).toBe(1n);
   rate = await amountInSatoshi(1, "SATOSHIS");
   expect(rate).toBe(1n);
+  rate = await amountInSatoshi(1, "satoshis");
+  expect(rate).toBe(1n);
 });
 
 test("Get price of USD, Usd, usd", async () => {
