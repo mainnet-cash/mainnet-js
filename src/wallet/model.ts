@@ -52,13 +52,7 @@ export class SendResponse {
   txId?: string;
   balance?: BalanceResponse;
 
-  constructor({
-    txId,
-    balance,
-  }: {
-    txId?: string;
-    balance?: any;
-  }) {
+  constructor({ txId, balance }: { txId?: string; balance?: any }) {
     this.txId = txId;
     this.balance = new BalanceResponse(balance);
   }
