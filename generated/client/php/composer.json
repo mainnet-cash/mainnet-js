@@ -1,8 +1,9 @@
 {
-    "name": "2qx/mainnet",
+    "name": "mainnet/mainnet",
     "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development",
     "keywords": [
         "bitcoin cash"
+        
     ],
     "homepage": "https://mainnet.cash",
     "license": "MIT",
@@ -11,7 +12,7 @@
             "name": "High level api for the Bitcoin Cash blockchain",
             "homepage": "https://mainnet.cash"
         }
-    ],      
+    ],
     "require": {
         "php": ">=7.2",
         "ext-curl": "*",
@@ -24,13 +25,9 @@
         "friendsofphp/php-cs-fixer": "^2.12"
     },
     "autoload": {
-        "psr-4": {
-            "Mainnet\\": "lib/"
-        }
+        "psr-4": { "Mainnet\\" : "lib/" }
     },
     "autoload-dev": {
-        "psr-4": {
-            "Mainnet\\": "test/"
-        }
+        "psr-4": { "Mainnet\\" : "test/" }
     }
 }

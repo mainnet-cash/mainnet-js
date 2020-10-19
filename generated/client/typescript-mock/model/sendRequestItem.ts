@@ -11,11 +11,9 @@
  */
 
 import { RequestFile } from './models';
-import { ToCashaddr } from './toCashaddr';
-import { UnitType } from './unitType';
-import { ValueType } from './valueType';
 
-export class SendRequestItem extends ToCashaddr {
+export class SendRequestItem {
+    'cashaddr': string;
     'value': number;
     /**
     * Unit of account.
@@ -25,6 +23,11 @@ export class SendRequestItem extends ToCashaddr {
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "cashaddr",
+            "baseName": "cashaddr",
+            "type": "string"
+        },
         {
             "name": "value",
             "baseName": "value",
@@ -37,7 +40,7 @@ export class SendRequestItem extends ToCashaddr {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SendRequestItem.attributeTypeMap);
+        return SendRequestItem.attributeTypeMap;
     }
 }
 

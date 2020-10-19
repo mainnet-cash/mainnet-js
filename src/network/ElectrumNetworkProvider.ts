@@ -8,10 +8,6 @@ import {
 import NetworkProvider from "./NetworkProvider";
 import { Utxo, Network } from "../interface";
 
-import { deriveLockscript } from "../util/deriveLockscript";
-
-const sha256Promise = instantiateSha256();
-
 export default class ElectrumNetworkProvider implements NetworkProvider {
   private electrum: ElectrumCluster;
   private concurrentRequests: number = 0;
@@ -37,6 +33,30 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         3,
         ClusterOrder.PRIORITY,
         550
+      );
+      this.electrum.addServer(
+        "fulcrum.fountainhead.cash",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "bch.imaginary.cash",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "electrum.imaginary.cash",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
+      );
+      this.electrum.addServer(
+        "blackie.c3-soft.com",
+        50002,
+        ElectrumTransport.TCP_TLS.Scheme,
+        false
       );
       this.electrum.addServer(
         "bch.imaginary.cash",
@@ -80,9 +100,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         "CashScript Application",
         "1.4.1",
         1,
-        2,
-        undefined,
-        1050
+        1,
+        undefined
       );
       this.electrum.addServer(
         "blackie.c3-soft.com",
@@ -104,7 +123,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         1,
         1,
         ClusterOrder.RANDOM,
-        550
+        1020
       );
       this.electrum.addServer(
         "127.0.0.1",
@@ -114,7 +133,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       );
     } else {
       throw new Error(
-        `Tried to instantiate an ElectrumNetworkProvider for unknown network ${network}`
+        `Tried to instantiate an ElectrumNetworkProvider for unknown network: ${network}`
       );
     }
   }

@@ -1,6 +1,6 @@
 import { createWallet } from "../src/wallet/createWallet";
 import { WalletTypeEnum } from "./wallet/enum";
-import { walletFromIdString } from "../src/wallet/createWallet";
+import { walletFromId } from "../src/wallet/createWallet";
 
 let args = process.argv.slice(); // remove ts-node
 args.shift(); // remove ts-node
@@ -19,11 +19,11 @@ args.shift(); // remove cli.ts
       console.log(response);
       break;
     case "wallet/deposit_qr":
-      w = await walletFromIdString(args[0]);
+      w = await walletFromId(args[0]);
       console.log(w.depositQr());
       break;
     case "wallet/deposit_address":
-      w = await walletFromIdString(args[0]);
+      w = await walletFromId(args[0]);
       console.log(w.depositAddress());
       break;
     default:

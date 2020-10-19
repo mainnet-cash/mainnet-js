@@ -8,6 +8,7 @@ import {
   decodePrivateKeyWif,
   encodePrivateKeyWif,
   generatePrivateKey,
+  hexToBin,
 } from "@bitauth/libauth";
 
 import { UnitEnum, WalletTypeEnum } from "./enum";
@@ -33,6 +34,7 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
+import { IndexedDBProvider } from "../db";
 import { qrAddress, Image } from "../qr/Qr";
 import { asSendRequestObject } from "../util/asSendRequestObject";
 import { checkWifNetwork } from "../util/checkWifNetwork";
@@ -44,14 +46,15 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
+import { createWalletResponse } from "./createWallet";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
 export class WifWallet extends BaseWallet {
   publicKey?: Uint8Array;
-  publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
+  uncompressedPrivateKey? : Uint8Array;
   privateKeyWif?: string;
   walletType?: WalletTypeEnum;
   cashaddr?: string;
@@ -114,12 +117,13 @@ export class WifWallet extends BaseWallet {
         window.crypto.getRandomValues(new Uint8Array(32))
       );
     }
-    this.privateKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.privateKeyWif = encodePrivateKeyWif(
       sha256,
       this.privateKey,
       this.networkType
     );
+    checkWifNetwork(this.privateKeyWif, this.networkType);
     this.walletType = WalletTypeEnum.Wif;
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
@@ -134,7 +138,7 @@ export class WifWallet extends BaseWallet {
       let sendRequests = asSendRequestObject(requests);
       let result = await this._processSendRequests(sendRequests);
       let resp = new SendResponse({});
-      resp.transactionId = result;
+      resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
       return resp;
     } catch (e) {
@@ -146,7 +150,7 @@ export class WifWallet extends BaseWallet {
     try {
       let result = await this.sendMaxRaw(sendMaxRequest);
       let resp = new SendResponse({});
-      resp.transactionId = result;
+      resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
       return resp;
     } catch (e) {
@@ -172,7 +176,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public getDepositAddress() {
-    return { cashaddr: this.cashaddr };
+    return this.cashaddr;
   }
 
   public getDepositQr(): Image {
@@ -190,8 +194,9 @@ export class WifWallet extends BaseWallet {
     return res;
   }
 
-  public async getBalance(unit?: UnitEnum): Promise<BalanceResponse | number> {
-    if (unit) {
+  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+    if (rawUnit) {
+      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
@@ -263,9 +268,9 @@ export class WifWallet extends BaseWallet {
         utxo.unit = "sat";
         utxo.value = o.satoshis;
 
-        utxo.transactionId = o.txid;
+        utxo.txId = o.txid;
         utxo.index = o.vout;
-        utxo.utxoId = utxo.transactionId + ":" + utxo.index;
+        utxo.utxoId = utxo.txId + ":" + utxo.index;
         return utxo;
       })
     );
@@ -302,14 +307,14 @@ export class WifWallet extends BaseWallet {
       throw Error("Couldn't get spend amount when building transaction");
     }
 
-    let fee = await getFeeAmount({
+    let feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
     });
     let fundingUtxos = await getSuitableUtxos(
       utxos,
-      BigInt(spendAmount) + BigInt(fee),
+      BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight
     );
     if (fundingUtxos.length === 0) {
@@ -317,6 +322,11 @@ export class WifWallet extends BaseWallet {
         "The available inputs couldn't satisfy the request with fees"
       );
     }
+    let fee = await getFeeAmount({
+      utxos: fundingUtxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey,
+    });
     let encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,
       sendRequests,
@@ -337,7 +347,52 @@ export class WifWallet extends BaseWallet {
   }
 }
 
-const fromWIF = async (
+const newRandom = async (network: CashAddressNetworkPrefix) => {
+  let w = new WifWallet("", network);
+  await w.generateWif();
+  return w;
+};
+
+const named = async (name:string, dbName:string, network: CashAddressNetworkPrefix) : Promise<Wallet | TestNetWallet | RegTestWallet> => {
+  let w = new WifWallet(name, network)
+  let db = new IndexedDBProvider(dbName)
+  await db.init()
+  let savedWallet = await db.getWallet(name)
+  if (savedWallet){
+    let [walletType, savedNetwork, privateImport]: string[] = savedWallet.wallet.split(":");
+    switch (walletType) {
+      case "wif":
+        if(w.network.toString() !== savedNetwork){
+          throw Error(`Stored wallet network ${savedNetwork} does not match called network: ${w.network}`)
+        }  
+        await w.initializeWIF(privateImport);
+        break;
+      case "hd":
+        throw Error("Heuristic Wallets are not implemented");
+      default:
+        throw Error(`The wallet type: ${walletType} was not understood`);
+    }
+  }else{
+    await w.generateWif();
+    let created = await db.addWallet( w.name, w.getSerializedWallet() );  
+    if(!created){
+      console.warn(`Retrieving  ${name} from ${dbName}`)
+    }
+  }
+  return w
+}
+
+const fromId = async (walletId: string, network: CashAddressNetworkPrefix) => {
+  let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
+  if (walletType != "wif") {
+    throw Error(`Wallet type ${walletType} was passed to wif wallet`);
+  }
+  if (network != networkGiven) {
+    throw Error(`Network prefix ${networkGiven} to a ${network} wallet`);
+  }
+  return fromWif(privateImport, network);
+};
+const fromWif = async (
   walletImportFormatString: string,
   network: CashAddressNetworkPrefix
 ) => {
@@ -360,13 +415,22 @@ export class Wallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.mainnet);
   }
 
-  public static async fromWIF(walletImportFormatString: string) {
-    return await fromWIF(
+  public static async fromWif(walletImportFormatString: string) {
+    return await fromWif(
       walletImportFormatString,
       CashAddressNetworkPrefix.mainnet
     );
   }
-
+  public static async fromId(walletId: string) {
+    return await fromId(walletId, CashAddressNetworkPrefix.mainnet);
+  }
+  public static async named(walletId: string, dbName:string) {
+    dbName = dbName? dbName : "mainnet-js:" + CashAddressNetworkPrefix.mainnet
+    return await named(walletId, dbName, CashAddressNetworkPrefix.mainnet);
+  }
+  public static async newRandom() {
+    return await newRandom(CashAddressNetworkPrefix.mainnet);
+  }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
       walletImportFormatString,
@@ -380,11 +444,21 @@ export class TestNetWallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.testnet);
   }
 
-  public static async fromWIF(walletImportFormatString: string) {
-    return await fromWIF(
+  public static async fromWif(walletImportFormatString: string) {
+    return await fromWif(
       walletImportFormatString,
       CashAddressNetworkPrefix.testnet
     );
+  }
+  public static async fromId(walletId: string) {
+    return await fromId(walletId, CashAddressNetworkPrefix.testnet);
+  }
+  public static async named(walletId: string, dbName?:string) {
+    dbName = dbName? dbName : "mainnet-js:" + CashAddressNetworkPrefix.testnet
+    return await named(walletId, dbName, CashAddressNetworkPrefix.testnet);
+  }
+  public static async newRandom() {
+    return await newRandom(CashAddressNetworkPrefix.testnet);
   }
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
@@ -398,12 +472,24 @@ export class RegTestWallet extends WifWallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
   }
-  public static async fromWIF(walletImportFormatString: string) {
-    return await fromWIF(
+
+  public static async fromWif(walletImportFormatString: string) {
+    return await fromWif(
       walletImportFormatString,
       CashAddressNetworkPrefix.regtest
     );
   }
+  public static async fromId(walletId: string) {
+    return await fromId(walletId, CashAddressNetworkPrefix.regtest);
+  }
+  public static async named(walletId: string, dbName?:string) {
+    dbName = dbName? dbName :  "mainnet-js:" + CashAddressNetworkPrefix.regtest
+    return await named(walletId, dbName, CashAddressNetworkPrefix.regtest);
+  }
+  public static async newRandom() {
+    return await newRandom(CashAddressNetworkPrefix.regtest);
+  }
+
   public static async watchOnly(walletImportFormatString: string) {
     return await watchOnly(
       walletImportFormatString,

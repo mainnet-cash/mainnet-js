@@ -11,14 +11,22 @@
  */
 
 import { RequestFile } from './models';
-import { SerializedWallet } from './serializedWallet';
 
-export class SerializedSendRequest extends SerializedWallet {
+export class SerializedSendRequest {
+    /**
+    * ID that is returned in `wallet` field of /wallet call 
+    */
+    'walletId'?: string;
     'to'?: Array<Array<object>>;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "walletId",
+            "baseName": "walletId",
+            "type": "string"
+        },
         {
             "name": "to",
             "baseName": "to",
@@ -26,7 +34,7 @@ export class SerializedSendRequest extends SerializedWallet {
         }    ];
 
     static getAttributeTypeMap() {
-        return super.getAttributeTypeMap().concat(SerializedSendRequest.attributeTypeMap);
+        return SerializedSendRequest.attributeTypeMap;
     }
 }
 

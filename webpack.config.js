@@ -27,6 +27,8 @@ const nodeConfig = {
   output: {
     filename: `mainnet-node-${packageJson.version}.js`,
     path: __dirname + "/dist",
+    libraryTarget: "umd",
+    library: "mainnet",
   },
 };
 
@@ -43,6 +45,8 @@ const browserConfig = {
       child_process: false,
       crypto: false,
       fs: false,
+      http: false,
+      https: false,
       net: false,
       os: false,
       path: false,
@@ -50,6 +54,7 @@ const browserConfig = {
       tls: false,
       util: false,
       url: false,
+      zlib: false,
     },
   },
 };
@@ -67,6 +72,8 @@ const webWorkerConfig = {
       child_process: false,
       crypto: false,
       fs: false,
+      http: false,
+      https: false,
       net: false,
       os: false,
       path: false,
@@ -74,6 +81,7 @@ const webWorkerConfig = {
       tls: false,
       util: false,
       url: false,
+      zlib: false,
     },
   },
 };
@@ -87,9 +95,10 @@ const browserTestDiff = {
 
 const browserTestConfig = merge(browserConfig, browserTestDiff);
 
+// Join configurations with the base configuration
 module.exports = [
-  //nodeConfig,
+  nodeConfig,
   browserConfig,
   browserTestConfig,
-  //webWorkerConfig,
+  webWorkerConfig,
 ].map((c) => merge(baseConfig, c));

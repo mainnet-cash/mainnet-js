@@ -1,17 +1,37 @@
-
+import { Wallet } from "./interface"
 
 export default interface StorageProvider {
 
 
-    /**
-   * Add a wallet to the database
-   * @param name A user defined name for the wallet transaction hex to be broadcast.
-   * @throws {Error} If the wallet could not be saved.
-   * @returns .
+    init(): Promise<boolean>
+   /**
+   * Ensure the database exists and is open
+   * @throws {Error} If the wallet could not be opened.
+   * @returns if the operation was successful.
    */
-    addWallet(name: string, walet: string): Promise<boolean>
+   
+
+   /**
+   * Add a wallet to the database
+   * @param name A user defined name for the wallet, and the walletId.
+   * @param wallet String used to reconstruct the wallet.
+   * @throws {Error} If the wallet could not be saved.
+   * @returns if the operation was successful.
+   */
+    addWallet(name: string, wallet: string): Promise<boolean>
 
 
-    getWallets(): Promise<string[]>;
-    getWallet(): Promise<string>;
+   /**
+   * @returns All saved wallets.
+   */
+    getWallets(): Promise<Wallet[]>;
+
+
+   /**
+   * Get a named wallet to the database
+   * @param name A user defined name for the wallet.
+   * @throws {Error} If the wallet could not be saved.
+   * @returns The requested wallet.
+   */
+    getWallet(name: string): Promise<Wallet|undefined>;
 }

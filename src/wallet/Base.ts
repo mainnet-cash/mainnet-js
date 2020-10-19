@@ -6,6 +6,7 @@ import {
   RegtestProvider,
 } from "../network/default";
 import { NetworkProvider } from "../network";
+
 import { NetworkEnum, NetworkType } from "./enum";
 import { browserNotSupported } from "../util/browserNotSupported";
 /**
@@ -27,6 +28,8 @@ export class BaseWallet {
       this.networkPrefix === CashAddressNetworkPrefix.mainnet
         ? NetworkType.Mainnet
         : NetworkType.Testnet;
+
+
     switch (networkPrefix) {
       case CashAddressNetworkPrefix.mainnet:
         this.network = NetworkEnum.Mainnet;
