@@ -54,7 +54,7 @@ const sha256Promise = instantiateSha256();
 export class WifWallet extends BaseWallet {
   publicKey?: Uint8Array;
   privateKey?: Uint8Array;
-  uncompressedPrivateKey? : Uint8Array;
+  uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
   walletType?: WalletTypeEnum;
   cashaddr?: string;
@@ -353,18 +353,28 @@ const newRandom = async (network: CashAddressNetworkPrefix) => {
   return w;
 };
 
-const named = async (name:string, dbName:string, network: CashAddressNetworkPrefix) : Promise<Wallet | TestNetWallet | RegTestWallet> => {
-  let w = new WifWallet(name, network)
-  let db = new IndexedDBProvider(dbName)
-  await db.init()
-  let savedWallet = await db.getWallet(name)
-  if (savedWallet){
-    let [walletType, savedNetwork, privateImport]: string[] = savedWallet.wallet.split(":");
+const named = async (
+  name: string,
+  dbName: string,
+  network: CashAddressNetworkPrefix
+): Promise<Wallet | TestNetWallet | RegTestWallet> => {
+  let w = new WifWallet(name, network);
+  let db = new IndexedDBProvider(dbName);
+  await db.init();
+  let savedWallet = await db.getWallet(name);
+  if (savedWallet) {
+    let [
+      walletType,
+      savedNetwork,
+      privateImport,
+    ]: string[] = savedWallet.wallet.split(":");
     switch (walletType) {
       case "wif":
-        if(w.network.toString() !== savedNetwork){
-          throw Error(`Stored wallet network ${savedNetwork} does not match called network: ${w.network}`)
-        }  
+        if (w.network.toString() !== savedNetwork) {
+          throw Error(
+            `Stored wallet network ${savedNetwork} does not match called network: ${w.network}`
+          );
+        }
         await w.initializeWIF(privateImport);
         break;
       case "hd":
@@ -372,15 +382,15 @@ const named = async (name:string, dbName:string, network: CashAddressNetworkPref
       default:
         throw Error(`The wallet type: ${walletType} was not understood`);
     }
-  }else{
+  } else {
     await w.generateWif();
-    let created = await db.addWallet( w.name, w.getSerializedWallet() );  
-    if(!created){
-      console.warn(`Retrieving  ${name} from ${dbName}`)
+    let created = await db.addWallet(w.name, w.getSerializedWallet());
+    if (!created) {
+      console.warn(`Retrieving  ${name} from ${dbName}`);
     }
   }
-  return w
-}
+  return w;
+};
 
 const fromId = async (walletId: string, network: CashAddressNetworkPrefix) => {
   let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
@@ -424,8 +434,8 @@ export class Wallet extends WifWallet {
   public static async fromId(walletId: string) {
     return await fromId(walletId, CashAddressNetworkPrefix.mainnet);
   }
-  public static async named(walletId: string, dbName:string) {
-    dbName = dbName? dbName : "mainnet-js:" + CashAddressNetworkPrefix.mainnet
+  public static async named(walletId: string, dbName: string) {
+    dbName = dbName ? dbName : "mainnet-js:" + CashAddressNetworkPrefix.mainnet;
     return await named(walletId, dbName, CashAddressNetworkPrefix.mainnet);
   }
   public static async newRandom() {
@@ -453,8 +463,8 @@ export class TestNetWallet extends WifWallet {
   public static async fromId(walletId: string) {
     return await fromId(walletId, CashAddressNetworkPrefix.testnet);
   }
-  public static async named(walletId: string, dbName?:string) {
-    dbName = dbName? dbName : "mainnet-js:" + CashAddressNetworkPrefix.testnet
+  public static async named(walletId: string, dbName?: string) {
+    dbName = dbName ? dbName : "mainnet-js:" + CashAddressNetworkPrefix.testnet;
     return await named(walletId, dbName, CashAddressNetworkPrefix.testnet);
   }
   public static async newRandom() {
@@ -482,8 +492,8 @@ export class RegTestWallet extends WifWallet {
   public static async fromId(walletId: string) {
     return await fromId(walletId, CashAddressNetworkPrefix.regtest);
   }
-  public static async named(walletId: string, dbName?:string) {
-    dbName = dbName? dbName :  "mainnet-js:" + CashAddressNetworkPrefix.regtest
+  public static async named(walletId: string, dbName?: string) {
+    dbName = dbName ? dbName : "mainnet-js:" + CashAddressNetworkPrefix.regtest;
     return await named(walletId, dbName, CashAddressNetworkPrefix.regtest);
   }
   public static async newRandom() {

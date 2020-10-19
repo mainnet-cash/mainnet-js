@@ -29,7 +29,6 @@ export class BaseWallet {
         ? NetworkType.Mainnet
         : NetworkType.Testnet;
 
-
     switch (networkPrefix) {
       case CashAddressNetworkPrefix.mainnet:
         this.network = NetworkEnum.Mainnet;

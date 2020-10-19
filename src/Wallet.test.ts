@@ -95,15 +95,16 @@ describe(`Test Wallet library`, () => {
     }
   });
 
-  
   test("Should also throw error on wif/network mismatch", async () => {
     expect.assertions(1);
-    try{
-      await TestNetWallet.fromId(`wif:bchtest:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`);
-    }catch(e){
+    try {
+      await TestNetWallet.fromId(
+        `wif:bchtest:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`
+      );
+    } catch (e) {
       expect(e.message).toBe(
         "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c"
-      )
+      );
     }
   });
 
