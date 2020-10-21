@@ -363,7 +363,7 @@ const named = async (
   await db.init();
   let savedWallet = await db.getWallet(name);
   if (savedWallet) {
-    return savedWallet
+    return savedWallet;
   } else {
     await w.generateWif();
     let created = await db.addWallet(w.name, w.getSerializedWallet());
