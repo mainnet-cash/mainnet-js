@@ -1,0 +1,57 @@
+ 
+version: '3.7'
+
+services:    
+    bitcoind:
+      image: zquestz/bitcoin-cash-node
+      command: bitcoind -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
+      healthcheck:
+        test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
+        interval: 1m30s
+        timeout: 10s
+        retries: 3
+        start_period: 10s
+      container_name: bitcoind
+      ports:
+        - "18443:18443"
+      expose: [60003]
+      volumes:
+        - bitcoin-data:/data
+      networks:
+        - bitcoin
+    bitcoin-mine:
+      image: zquestz/bitcoin-cash-node
+      entrypoint: ["/entrypoint.sh"]
+      command: /bin/sh -c "/bin/sleep 3 && bitcoin-cli -regtest -rpcconnect=bitcoind  -rpcuser=alice -rpcpassword=password -rpcport=18443 generatetoaddress 105 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 1> /dev/null"
+      networks: 
+        - bitcoin
+    fulcrum:
+      image: cculianu/fulcrum
+      command: /bin/sh -c "/bin/sleep 5 && Fulcrum /tmp/fulcrum.conf"
+      ports:
+        - "60003:60003"
+      expose: [60003]
+      depends_on:
+        - bitcoin-mine
+      networks:
+        - bitcoin  
+      volumes:
+        - ./docker/fulcrum.conf:/tmp/fulcrum.conf
+    db:
+      image: postgres:12-alpine
+      environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wallet
+          POSTGRES_HOST_AUTH_METHOD: trust
+      volumes:
+        - "sql-data:/var/lib/postgresql/data"
+      ports:
+        - 15432:5432
+networks:
+  bitcoin:
+
+volumes:
+  bitcoin-data:
+  sql-data:
+  fulcrum-data:

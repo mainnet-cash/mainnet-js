@@ -363,25 +363,7 @@ const named = async (
   await db.init();
   let savedWallet = await db.getWallet(name);
   if (savedWallet) {
-    let [
-      walletType,
-      savedNetwork,
-      privateImport,
-    ]: string[] = savedWallet.wallet.split(":");
-    switch (walletType) {
-      case "wif":
-        if (w.network.toString() !== savedNetwork) {
-          throw Error(
-            `Stored wallet network ${savedNetwork} does not match called network: ${w.network}`
-          );
-        }
-        await w.initializeWIF(privateImport);
-        break;
-      case "hd":
-        throw Error("Heuristic Wallets are not implemented");
-      default:
-        throw Error(`The wallet type: ${walletType} was not understood`);
-    }
+    return savedWallet
   } else {
     await w.generateWif();
     let created = await db.addWallet(w.name, w.getSerializedWallet());

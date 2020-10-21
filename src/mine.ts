@@ -9,7 +9,7 @@ export async function mine({
 }) {
   const generateArgs = [
     `exec`,
-    `regtest`,
+    `bitcoind`,
     `bitcoin-cli`,
     `--rpcuser=${process.env.RPC_USER}`,
     `--rpcpassword=${process.env.RPC_PASS}`,

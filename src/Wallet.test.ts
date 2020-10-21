@@ -1,4 +1,3 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 import { UnitEnum, WalletTypeEnum } from "./wallet/enum";
 import { bchParam } from "./chain";
 import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
