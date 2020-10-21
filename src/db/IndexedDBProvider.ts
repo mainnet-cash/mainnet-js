@@ -1,7 +1,7 @@
 import Dexie from "dexie";
 import StorageProvider from "./StorageProvider";
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif"
-import { WalletI } from "./interface"
+import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
+import { WalletI } from "./interface";
 import { walletFromId } from "../wallet/createWallet";
 
 export default class IndexedDBProvider
@@ -25,7 +25,6 @@ export default class IndexedDBProvider
     return false;
   }
 
-
   public async addWallet(name: string, wallet: string): Promise<boolean> {
     // Make sure we have something in DB:
 
@@ -46,27 +45,35 @@ export default class IndexedDBProvider
     });
   }
 
-  public async getWallet(name: string): Promise<Wallet | TestNetWallet | RegTestWallet | undefined> {
+  public async getWallet(
+    name: string
+  ): Promise<Wallet | TestNetWallet | RegTestWallet | undefined> {
     let obj = await this.db.get({ name: name });
     if (obj) {
-      let w = await walletFromId(obj.wallet)
-      w.name = obj!.name
-      return w
+      let w = await walletFromId(obj.wallet);
+      w.name = obj!.name;
+      return w;
     } else {
-      return
+      return;
     }
   }
 
-  public async getWallets(): Promise<Array<Wallet | TestNetWallet | RegTestWallet>> {
+  public async getWallets(): Promise<
+    Array<Wallet | TestNetWallet | RegTestWallet>
+  > {
     let walletObjects = await this.transaction("r", this.db, async () => {
       return await this.db.where("id").above(0).toArray();
     });
     if (walletObjects) {
-      const WalletArray: (Wallet | TestNetWallet | RegTestWallet)[] = await Promise.all(
+      const WalletArray: (
+        | Wallet
+        | TestNetWallet
+        | RegTestWallet
+      )[] = await Promise.all(
         walletObjects.map(async (obj: WalletI) => {
-          let w = await walletFromId(obj.wallet)
-          w.name = obj!.name
-          return w
+          let w = await walletFromId(obj.wallet);
+          w.name = obj!.name;
+          return w;
         })
       );
       return WalletArray;

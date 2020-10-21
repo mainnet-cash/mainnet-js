@@ -16,7 +16,9 @@ module.exports = async function () {
   console.log("Starting regtest network...");
 
   if (global.fulcrumRegtest === undefined) {
-    global.fulcrumRegtest = spawn("./jest/docker/start.sh", null, { shell: false });
+    global.fulcrumRegtest = spawn("./jest/docker/start.sh", null, {
+      shell: false,
+    });
     console.log("... OKAY");
   } else {
     console.log("... docker already running");

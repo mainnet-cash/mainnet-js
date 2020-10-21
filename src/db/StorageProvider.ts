@@ -1,7 +1,6 @@
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif"
+import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
 
 export default interface StorageProvider {
-  
   /**
    * Ensure the database exists and is open
    * @throws {Error} If the wallet could not be opened.
@@ -16,7 +15,6 @@ export default interface StorageProvider {
    */
   close(): Promise<boolean>;
 
-  
   /**
    * Add a wallet to the database
    * @param name A user defined name for the wallet, and the walletId.
@@ -37,5 +35,7 @@ export default interface StorageProvider {
    * @throws {Error} If the wallet could not be saved.
    * @returns The requested wallet.
    */
-  getWallet(name: string): Promise<Wallet | TestNetWallet | RegTestWallet | undefined>;
+  getWallet(
+    name: string
+  ): Promise<Wallet | TestNetWallet | RegTestWallet | undefined>;
 }
