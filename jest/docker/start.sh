@@ -1,0 +1,1 @@
+docker-compose -f jest/regtest-docker-compose.yml up -d
