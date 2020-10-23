@@ -4,17 +4,19 @@ import { Pool } from "pg";
 import { default as format } from "pg-format";
 
 export default class SqlProvider implements StorageProvider {
-
   private db;
   private dbName: string;
 
-  public constructor(dbName?:string) {
-    this.dbName = dbName? dbName: "wallet";
+  public constructor(dbName?: string) {
+    this.dbName = dbName ? dbName : "wallet";
     this.db = new Pool();
   }
 
   public async init(): Promise<boolean> {
-    let createWalletTable = format('CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );', this.dbName);
+    let createWalletTable = format(
+      "CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );",
+      this.dbName
+    );
     const res = this.db.query(createWalletTable);
     return res;
   }
@@ -24,19 +26,18 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {
-    let text =  format('INSERT into %I (name,wallet) VALUES ($1, $2);', this.dbName);
+    let text = format(
+      "INSERT into %I (name,wallet) VALUES ($1, $2);",
+      this.dbName
+    );
     return await this.db.query(text, [name, wallet]);
   }
 
-  public async getWallets(): Promise<
-    Array<WalletI>
-  > {
+  public async getWallets(): Promise<Array<WalletI>> {
     let text = format("SELECT * FROM %I", this.dbName);
     let result = await this.db.query(text);
     if (result) {
-      const WalletArray: (
-         WalletI
-      )[] = await Promise.all(
+      const WalletArray: WalletI[] = await Promise.all(
         result.rows.map(async (obj: WalletI) => {
           return obj;
         })
@@ -47,9 +48,7 @@ export default class SqlProvider implements StorageProvider {
     }
   }
 
-  public async getWallet(
-    name: string
-  ): Promise<WalletI | undefined> {
+  public async getWallet(name: string): Promise<WalletI | undefined> {
     let text = format("SELECT * FROM %I WHERE name = $1", this.dbName);
     let result = await this.db.query(text, [name]);
     let w = await result.rows[0];
