@@ -6,9 +6,11 @@ import {
   RegtestProvider,
 } from "../network/default";
 import { NetworkProvider } from "../network";
+import { StorageProvider } from "../db";
 
 import { NetworkEnum, NetworkType } from "./enum";
 import { browserNotSupported } from "../util/browserNotSupported";
+
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet

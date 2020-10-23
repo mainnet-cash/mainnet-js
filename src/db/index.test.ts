@@ -1,6 +1,6 @@
 import { RegTestWallet } from "../wallet/Wif";
 
-beforeEach(() => {});
+
 
 /**
  * @jest-environment jsdom
@@ -20,3 +20,5 @@ test("Store and retrieve a Regtest wallet", async () => {
   expect(w1.getSerializedWallet()).toBe(w1Again.getSerializedWallet());
   expect(w2.getSerializedWallet()).toBe(w2Again.getSerializedWallet());
 });
+
+

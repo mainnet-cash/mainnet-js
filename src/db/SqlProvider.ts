@@ -1,20 +1,20 @@
 import StorageProvider from "./StorageProvider";
-import { walletFromId } from "../wallet/createWallet";
 import { WalletI } from "./interface";
 import { Pool } from "pg";
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
+import { default as format } from "pg-format";
 
 export default class SqlProvider implements StorageProvider {
-  private db;
-  private name: string;
 
-  public constructor() {
-    this.name = "wallet";
+  private db;
+  private dbName: string;
+
+  public constructor(dbName?:string) {
+    this.dbName = dbName? dbName: "wallet";
     this.db = new Pool();
   }
 
   public async init(): Promise<boolean> {
-    let createWalletTable = `CREATE TABLE IF NOT EXISTS ${this.name} (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );`;
+    let createWalletTable = format('CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );', this.dbName);
     const res = this.db.query(createWalletTable);
     return res;
   }
@@ -24,25 +24,21 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {
-    let text = `INSERT into wallet (name,wallet) VALUES ($1, $2) ;`;
+    let text =  format('INSERT into %I (name,wallet) VALUES ($1, $2);', this.dbName);
     return await this.db.query(text, [name, wallet]);
   }
 
   public async getWallets(): Promise<
-    Array<Wallet | TestNetWallet | RegTestWallet>
+    Array<WalletI>
   > {
-    let text = `SELECT * FROM wallet`;
-    let result = this.db.query(text);
+    let text = format("SELECT * FROM %I", this.dbName);
+    let result = await this.db.query(text);
     if (result) {
       const WalletArray: (
-        | Wallet
-        | TestNetWallet
-        | RegTestWallet
+         WalletI
       )[] = await Promise.all(
         result.rows.map(async (obj: WalletI) => {
-          let w = await walletFromId(obj.wallet);
-          w.name = obj!.name;
-          return w;
+          return obj;
         })
       );
       return WalletArray;
@@ -53,11 +49,10 @@ export default class SqlProvider implements StorageProvider {
 
   public async getWallet(
     name: string
-  ): Promise<Wallet | TestNetWallet | RegTestWallet | undefined> {
-    let text = `SELECT * FROM wallet WHERE name = $1`;
+  ): Promise<WalletI | undefined> {
+    let text = format("SELECT * FROM %I WHERE name = $1", this.dbName);
     let result = await this.db.query(text, [name]);
-    let w = await walletFromId(result.rows[0].wallet);
-    w.name = result.rows[0].name;
+    let w = await result.rows[0];
     return w;
   }
 }

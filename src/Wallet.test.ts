@@ -5,6 +5,7 @@ import { createWallet, walletFromId } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
 
+
 describe(`Test Wallet library`, () => {
   /**
    * Create the browser and page context
@@ -27,7 +28,7 @@ describe(`Test Wallet library`, () => {
   });
 
   test("Should get a random regtest wallet", async () => {
-    let alice = await RegTestWallet.newRandom();
+    let alice = await RegTestWallet.newRandom("alice_random");
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
     const aliceBalance = (await alice.getBalance()) as BalanceResponse;
@@ -51,19 +52,9 @@ describe(`Test Wallet library`, () => {
     }
   });
 
-  test("Should get a random regtest wallet", async () => {
-    let alice = await RegTestWallet.newRandom();
-    expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
-    expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
-    const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-    expect(aliceBalance.bch).toBe(0);
-    expect(aliceBalance.usd).toBe(0);
-    expect(await alice.getBalance("sat")).toBe(0);
-  });
-
   test("Should get a regtest wallet fromId", async () => {
     let alice = await RegTestWallet.fromId(
-      `wif:bchreg:${process.env.PRIVATE_WIF}`
+      `wif:regtest:${process.env.PRIVATE_WIF}`
     );
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
@@ -71,14 +62,14 @@ describe(`Test Wallet library`, () => {
 
   test("Should get a testnet wallet fromId", async () => {
     let alice = await TestNetWallet.fromId(
-      `wif:bchtest:${process.env.PRIVATE_WIF}`
+      `wif:testnet:${process.env.PRIVATE_WIF}`
     );
     expect(alice.cashaddr!.slice(0, 9)).toBe("bchtest:q");
   });
 
   test("Should get a wallet fromId", async () => {
     let alice = await Wallet.newRandom();
-    let alice2 = await Wallet.fromId(`wif:bitcoincash:${alice.privateKeyWif}`);
+    let alice2 = await Wallet.fromId(`wif:mainnet:${alice.privateKeyWif}`);
     expect(alice2.cashaddr).toBe(alice.cashaddr);
     expect(alice.getDepositAddress()!.slice(0, 13)).toBe("bitcoincash:q");
   });
@@ -86,7 +77,7 @@ describe(`Test Wallet library`, () => {
   test("Should throw error on wif/network mismatch", async () => {
     expect.assertions(1);
     try {
-      await Wallet.fromId(`wif:bitcoincash:${process.env.PRIVATE_WIF}`);
+      await Wallet.fromId(`wif:mainnet:${process.env.PRIVATE_WIF}`);
     } catch (e) {
       expect(e.message).toBe(
         "Mainnet type wif cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6 passed, should start with L or K"
@@ -98,7 +89,7 @@ describe(`Test Wallet library`, () => {
     expect.assertions(1);
     try {
       await TestNetWallet.fromId(
-        `wif:bchtest:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`
+        `wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`
       );
     } catch (e) {
       expect(e.message).toBe(
@@ -110,7 +101,7 @@ describe(`Test Wallet library`, () => {
   test("Should get an error passing wrong walletType", async () => {
     expect.assertions(1);
     try {
-      await RegTestWallet.fromId(`hd:bchreg:${process.env.PRIVATE_WIF}`);
+      await RegTestWallet.fromId(`hd:regtest:${process.env.PRIVATE_WIF}`);
     } catch (e) {
       expect(e.message.slice(0, 97)).toBe(
         "Wallet type hd was passed to wif wallet"
@@ -121,10 +112,10 @@ describe(`Test Wallet library`, () => {
   test("Should get an error passing wrong network to fromId", async () => {
     expect.assertions(1);
     try {
-      await TestNetWallet.fromId(`wif:bchreg:${process.env.PRIVATE_WIF}`);
+      await TestNetWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`);
     } catch (e) {
       expect(e.message.slice(0, 97)).toBe(
-        "Network prefix bchreg to a bchtest wallet"
+        "Network prefix regtest to a testnet wallet"
       );
     }
   });
@@ -135,7 +126,7 @@ describe(`Test Wallet library`, () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       let alice = await RegTestWallet.fromId(
-        `wif:bchreg:${process.env.PRIVATE_WIF}`
+        `wif:regtest:${process.env.PRIVATE_WIF}`
       ); // insert WIF from #1
       expect(await alice.getBalance("sat")).toBeGreaterThan(
         5000 * bchParam.subUnits
@@ -198,7 +189,7 @@ describe(`Test Wallet library`, () => {
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
 
-      expect(bobBalance.usd).toBe(usdRate);
+      expect(Math.round(bobBalance.usd!)).toBe(Math.round(usdRate));
     }
   });
 

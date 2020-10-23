@@ -1,4 +1,4 @@
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
+import { WalletI } from "./interface";
 
 export default interface StorageProvider {
   /**
@@ -27,7 +27,7 @@ export default interface StorageProvider {
   /**
    * @returns All saved wallets.
    */
-  getWallets(): Promise<Array<Wallet | TestNetWallet | RegTestWallet>>;
+  getWallets(): Promise<Array<WalletI>>;
 
   /**
    * Get a named wallet to the database
@@ -37,5 +37,5 @@ export default interface StorageProvider {
    */
   getWallet(
     name: string
-  ): Promise<Wallet | TestNetWallet | RegTestWallet | undefined>;
+  ): Promise<WalletI | undefined>;
 }

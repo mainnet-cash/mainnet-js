@@ -1,8 +1,6 @@
 import Dexie from "dexie";
 import StorageProvider from "./StorageProvider";
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
 import { WalletI } from "./interface";
-import { walletFromId } from "../wallet/createWallet";
 
 export default class IndexedDBProvider
   extends Dexie
@@ -47,33 +45,27 @@ export default class IndexedDBProvider
 
   public async getWallet(
     name: string
-  ): Promise<Wallet | TestNetWallet | RegTestWallet | undefined> {
+  ): Promise<WalletI | undefined> {
     let obj = await this.db.get({ name: name });
     if (obj) {
-      let w = await walletFromId(obj.wallet);
-      w.name = obj!.name;
-      return w;
+      return obj;
     } else {
       return;
     }
   }
 
   public async getWallets(): Promise<
-    Array<Wallet | TestNetWallet | RegTestWallet>
+    Array<WalletI>
   > {
     let walletObjects = await this.transaction("r", this.db, async () => {
       return await this.db.where("id").above(0).toArray();
     });
     if (walletObjects) {
       const WalletArray: (
-        | Wallet
-        | TestNetWallet
-        | RegTestWallet
+        WalletI
       )[] = await Promise.all(
         walletObjects.map(async (obj: WalletI) => {
-          let w = await walletFromId(obj.wallet);
-          w.name = obj!.name;
-          return w;
+          return obj;
         })
       );
       return WalletArray;
@@ -81,4 +73,5 @@ export default class IndexedDBProvider
       return [];
     }
   }
+
 }
