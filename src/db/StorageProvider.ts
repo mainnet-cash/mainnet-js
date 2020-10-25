@@ -35,7 +35,5 @@ export default interface StorageProvider {
    * @throws {Error} If the wallet could not be saved.
    * @returns The requested wallet.
    */
-  getWallet(
-    name: string
-  ): Promise<WalletI | undefined>;
+  getWallet(name: string): Promise<WalletI | undefined>;
 }

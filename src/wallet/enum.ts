@@ -29,4 +29,3 @@ export enum NetworkEnum {
   Regtest = <any>"regtest",
   Simtest = <any>"simtest",
 }
-

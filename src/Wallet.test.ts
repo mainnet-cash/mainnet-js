@@ -5,7 +5,6 @@ import { createWallet, walletFromId } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
 
-
 describe(`Test Wallet library`, () => {
   /**
    * Create the browser and page context

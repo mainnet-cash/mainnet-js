@@ -43,9 +43,7 @@ export default class IndexedDBProvider
     });
   }
 
-  public async getWallet(
-    name: string
-  ): Promise<WalletI | undefined> {
+  public async getWallet(name: string): Promise<WalletI | undefined> {
     let obj = await this.db.get({ name: name });
     if (obj) {
       return obj;
@@ -54,16 +52,12 @@ export default class IndexedDBProvider
     }
   }
 
-  public async getWallets(): Promise<
-    Array<WalletI>
-  > {
+  public async getWallets(): Promise<Array<WalletI>> {
     let walletObjects = await this.transaction("r", this.db, async () => {
       return await this.db.where("id").above(0).toArray();
     });
     if (walletObjects) {
-      const WalletArray: (
-        WalletI
-      )[] = await Promise.all(
+      const WalletArray: WalletI[] = await Promise.all(
         walletObjects.map(async (obj: WalletI) => {
           return obj;
         })
@@ -73,5 +67,4 @@ export default class IndexedDBProvider
       return [];
     }
   }
-
 }
