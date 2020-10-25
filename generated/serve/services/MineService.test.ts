@@ -4,7 +4,7 @@ var request = require("supertest");
 
 var app;
 
-describe("Post Endpoints", () => {
+describe("Test Mine Endpoints", () => {
 
   beforeAll(async function () {
     app = await server.getServer().launch();  

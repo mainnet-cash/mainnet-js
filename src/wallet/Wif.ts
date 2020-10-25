@@ -171,7 +171,15 @@ export class WifWallet extends BaseWallet {
   }
 
   public getSerializedWallet() {
-    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    switch (this.walletType){
+      case("wif"):{
+        return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+      }case("watch"):{
+        return `${this.walletType}:${this.network}:${this.cashaddr}`;
+      }
+      default:
+        return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    }
   }
 
   public getDepositAddress() {

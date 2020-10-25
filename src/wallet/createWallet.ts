@@ -42,33 +42,52 @@ function asJsonResponse(wallet: WifWallet): WalletResponse {
 export async function createWallet(body: WalletRequest): Promise<WifWallet> {
   let wallet;
 
-  switch (body.network) {
-    case "regtest":
-      wallet = new RegTestWallet(body.name);
-      break;
-    case "testnet":
-      wallet = new TestNetWallet(body.name);
-      break;
-    case "mainnet":
-      wallet = new Wallet(body.name);
-      break;
-    default:
-      wallet = new Wallet(body.name);
-  }
-  if (wallet) {
-    switch (body.type) {
-      case WalletTypeEnum.Wif:
-        await wallet.generateWif();
-        break;
-      case WalletTypeEnum.Hd:
-        throw Error("Not Implemented");
-      default:
-        await wallet.generateWif();
+  // Named wallets are saved in the database
+  if (body.name) {
+    if (body.network) {
+      wallet = await named(body.name, networkMap[body.network])
+      if (wallet.network != body.network) {
+        throw Error(`A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`)
+      }
+      if (body.type) {
+        if (wallet.walletType != body.type) {
+          throw Error(`A wallet already exists with name ${body.name}, but with type ${wallet.walletType} not ${body.type}, per request`)
+        }
+      }
+    } else {
+      wallet = await named(body.name)
     }
-    return wallet;
-  } else {
-    throw Error("Error creating wallet");
   }
+  // This handles unsaved/unnamed wallets
+  else {
+    switch (body.network) {
+      case "regtest":
+        wallet = new RegTestWallet(body.name);
+        break;
+      case "testnet":
+        wallet = new TestNetWallet(body.name);
+        break;
+      case "mainnet":
+        wallet = new Wallet(body.name);
+        break;
+      default:
+        wallet = new Wallet(body.name);
+    }
+    if (wallet) {
+      switch (body.type) {
+        case WalletTypeEnum.Wif:
+          await wallet.generateWif();
+          break;
+        case WalletTypeEnum.Hd:
+          throw Error("Not Implemented");
+        default:
+          await wallet.generateWif();
+      }
+    } else {
+      throw Error("Error creating wallet");
+    }
+  }
+  return wallet;
 }
 
 /**
@@ -90,7 +109,7 @@ export async function createWalletResponse(
 export async function walletFromId(
   walletId: string
 ): Promise<Wallet | TestNetWallet | RegTestWallet> {
-  let [walletType, network, privateImport]: string[] = walletId.split(":");
+  let [walletType, network, walletData]: string[] = walletId.split(":");
 
   let walletRequest = {
     name: "",
@@ -100,8 +119,11 @@ export async function walletFromId(
   let wallet = await createWallet(walletRequest);
   switch (walletType) {
     case "wif":
-      await wallet.initializeWIF(privateImport);
+      await wallet.initializeWIF(walletData);
       break;
+    case "watch":
+      await wallet.initializeWatchOnly(wallet.networkPrefix + ":" + walletData);
+      break;      
     case "hd":
       throw Error("Heuristic Wallets are not implemented");
     default:
@@ -113,7 +135,7 @@ export async function walletFromId(
 export const named = async (
   name: string,
   networkPrefix = CashAddressNetworkPrefix.mainnet,
-  dbName: string,
+  dbName?: string,
   forceNew = false
 ): Promise<Wallet | TestNetWallet | RegTestWallet> => {
   if (name.length === 0) {
@@ -124,10 +146,10 @@ export const named = async (
   await db.init();
   let savedWallet = await db.getWallet(name);
   if (savedWallet) {
+    await db.close();
     if (forceNew) {
       throw Error(`A wallet with the name ${name} already exists in ${dbName}`);
     }
-    await db.close();
     return fromId(savedWallet.wallet, name, networkPrefix);
   } else {
     let wallet = await initWallet(name, networkPrefix);

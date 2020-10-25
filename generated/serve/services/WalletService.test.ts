@@ -7,7 +7,7 @@ var request = require("supertest");
 
 var app;
 
-describe("Post Endpoints", () => {
+describe("Test Wallet Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });
@@ -145,7 +145,6 @@ describe("Post Endpoints", () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
-        name: "Bobs Regtest One Time Wallet",
         type: mockApi.WalletRequest.TypeEnum.Wif,
         network: mockApi.WalletRequest.NetworkEnum.Regtest,
       });
@@ -160,7 +159,7 @@ describe("Post Endpoints", () => {
             {
               cashaddr: bobsCashaddr,
               unit: 'satoshis',
-              value: 120000,
+              value: 2000,
             },
           ],
         });
@@ -170,7 +169,7 @@ describe("Post Endpoints", () => {
       });
       const body = resp.body;
       expect(resp.statusCode).toBe(200);
-      expect(body!.sat).toBeGreaterThan(110000);
+      expect(body!.sat).toBeGreaterThan(1000);
     }
   });
 
@@ -183,7 +182,6 @@ describe("Post Endpoints", () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
-        name: "Bobs Regtest One Time Wallet",
         type: mockApi.WalletRequest.TypeEnum.Wif,
         network: mockApi.WalletRequest.NetworkEnum.Regtest,
       });
