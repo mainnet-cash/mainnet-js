@@ -6,14 +6,19 @@ import {
   RegtestProvider,
 } from "../network/default";
 import { NetworkProvider } from "../network";
+import { getStorageProvider } from "../db/util";
+
 import { NetworkEnum, NetworkType } from "./enum";
 import { browserNotSupported } from "../util/browserNotSupported";
+import { StorageProvider } from "../db";
+
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
  */
 export class BaseWallet {
   provider?: NetworkProvider;
+  storage?: StorageProvider;
   isTestnet?: boolean;
   name: string;
   networkPrefix: CashAddressNetworkPrefix;
@@ -22,11 +27,13 @@ export class BaseWallet {
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
     this.name = name;
+    
     this.networkPrefix = networkPrefix;
     this.networkType =
       this.networkPrefix === CashAddressNetworkPrefix.mainnet
         ? NetworkType.Mainnet
         : NetworkType.Testnet;
+
     switch (networkPrefix) {
       case CashAddressNetworkPrefix.mainnet:
         this.network = NetworkEnum.Mainnet;

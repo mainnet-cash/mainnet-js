@@ -3,7 +3,7 @@ var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "production",
+  mode: "development",
   module: {
     rules: [
       {
@@ -42,14 +42,18 @@ const browserConfig = {
   resolve: {
     alias: {
       assert: false,
+      buffer: false,
       child_process: false,
       crypto: false,
+      dns: false,
       fs: false,
       http: false,
       https: false,
       net: false,
       os: false,
       path: false,
+      pg: false,
+      "pg-native": false,
       stream: false,
       tls: false,
       util: false,
@@ -69,14 +73,18 @@ const webWorkerConfig = {
   resolve: {
     alias: {
       assert: false,
+      buffer: false,
       child_process: false,
       crypto: false,
+      dns: false,
       fs: false,
       http: false,
       https: false,
       net: false,
       os: false,
       path: false,
+      pg: false,
+      "pg-native": false,
       stream: false,
       tls: false,
       util: false,

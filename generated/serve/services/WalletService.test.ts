@@ -59,7 +59,7 @@ describe("Post Endpoints", () => {
     expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bchreg:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:regtest:3")).toBeTruthy();
+    expect(body!.walletId!.startsWith("wif:regtest:c")).toBeTruthy();
   });
 
   it("Should create a Testnet wallet with the API", async () => {
@@ -75,7 +75,7 @@ describe("Post Endpoints", () => {
     expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bchtest:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:testnet:3")).toBeTruthy();
+    expect(body!.walletId!.startsWith("wif:testnet:c")).toBeTruthy();
   });
 
   it("Should create a Mainnet wallet with the API", async () => {
@@ -91,7 +91,7 @@ describe("Post Endpoints", () => {
     expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
+    expect(body!.walletId!.startsWith("wif:mainnet:")).toBeTruthy();
   });
 
   it("Should create a mainnet wallet on empty request", async () => {
@@ -104,9 +104,8 @@ describe("Post Endpoints", () => {
     expect(body!.name).toBe("");
     expect(body!.network).toBe("mainnet");
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:mainnet:2")).toBeTruthy();
+    expect(body!.walletId!.startsWith("wif:mainnet:")).toBeTruthy();
   });
-
   /**
    * depositAddress
    */
@@ -114,11 +113,11 @@ describe("Post Endpoints", () => {
   it("Should return the deposit address from a regtest wallet", async () => {
     let resp = await request(app).post("/v1/wallet/deposit_address").send({
       walletId:
-        "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
+        "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     });
     expect(resp.statusCode).toBe(200);
     expect(resp.body.cashaddr).toBe(
-      "bchreg:qp3t43vq3xnxdfuge4l4q4ndehkn48uexghagrwwx5"
+      "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
     );
   });
 
@@ -128,14 +127,14 @@ describe("Post Endpoints", () => {
   it("Should get the deposit qr from a regtest wallet", async () => {
     let resp = await request(app).post("/v1/wallet/deposit_qr").send({
       walletId:
-        "wif:regtest:3h4GVWszSE9WD4WUoQCGtphK1XMS8771ZmABfeGWc44iZbSna5D7Yi",
+        `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
     expect(
-      body!.src!.startsWith("data:image/svg+xml;base64,PD94bWwgdm")
-    ).toBeTruthy();
+      body!.src!.slice(0,36)
+    ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
   });
 
   /**

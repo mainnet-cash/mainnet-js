@@ -2,14 +2,14 @@ import { walletFromId } from "./createWallet";
 
 test("Get a regtest wallet from string id", async () => {
   let w = await walletFromId(
-    "wif:regtest:3h4RrkJS2kSxJZdKho58PgvUJBJJMN2caRxmdWHB8fckx55kC37Gco"
+    "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
   );
   expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
 });
 
 test("Get a testnet wallet from string id", async () => {
   let w = await walletFromId(
-    "wif:testnet:3h4RrkJS2kSxJZdKho58PgvUJBJJMN2caRxmdWHB8fckx55kC37Gco"
+    "wif:testnet:cPS12C2bpGHtKjS5NXNyWyTGGRMPk7D7pjp5JfgxRKWyFnWoDyZg"
   );
   expect(w.cashaddr!.startsWith("bchtest:")).toBeTruthy();
 });
@@ -29,7 +29,7 @@ test("Expect Error passing testnet wallet to mainnet", async () => {
     );
   } catch (e) {
     expect(e.message).toBe(
-      "attempted to pass a testnet Wif to a mainnet wallet"
+      "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c"
     );
   }
 });
@@ -42,7 +42,7 @@ test("Expect Error passing mainnet wallet to testnet", async () => {
     );
   } catch (e) {
     expect(e.message).toBe(
-      "attempted to pass a mainnet Wif to a testnet wallet"
+      "Mainnet type wif cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6 passed, should start with L or K"
     );
   }
 });
