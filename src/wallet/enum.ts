@@ -21,7 +21,7 @@ export type UnitEnum = typeof UnitEnum[keyof typeof UnitEnum];
 export enum WalletTypeEnum {
   Wif = "wif",
   Hd = "hd",
-  Watch = "watch"
+  Watch = "watch",
 }
 
 export enum NetworkEnum {

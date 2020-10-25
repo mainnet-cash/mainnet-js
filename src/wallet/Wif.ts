@@ -171,10 +171,11 @@ export class WifWallet extends BaseWallet {
   }
 
   public getSerializedWallet() {
-    switch (this.walletType){
-      case("wif"):{
+    switch (this.walletType) {
+      case "wif": {
         return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
-      }case("watch"):{
+      }
+      case "watch": {
         return `${this.walletType}:${this.network}:${this.cashaddr}`;
       }
       default:
