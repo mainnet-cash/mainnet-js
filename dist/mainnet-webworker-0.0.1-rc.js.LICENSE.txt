@@ -1,18 +1,40 @@
-/*! CommonJS bailout: exports is used directly at 13:30-37 */
+/*! CommonJS bailout: exports is used directly at 13:36-43 */
 
-/*! CommonJS bailout: exports is used directly at 14:38-45 */
+/*! CommonJS bailout: exports is used directly at 14:32-39 */
 
-/*! CommonJS bailout: exports is used directly at 15:47-54 */
+/*! CommonJS bailout: exports is used directly at 15:38-45 */
+
+/*! CommonJS bailout: exports is used directly at 16:47-54 */
+
+/*! CommonJS bailout: exports is used directly at 245:0-7 */
 
 /*! CommonJS bailout: exports is used directly at 245:37-44 */
 
-/*! CommonJS bailout: exports is used directly at 3:0-7 */
+/*! CommonJS bailout: exports.fromId(...) prevents optimization as exports is passed as call context at 107:15-29 */
 
-/*! CommonJS bailout: module.exports is used directly at 178:0-14 */
+/*! CommonJS bailout: exports.fromWif(...) prevents optimization as exports is passed as call context at 135:11-26 */
+
+/*! CommonJS bailout: exports.named(...) prevents optimization as exports is passed as call context at 121:21-34 */
+
+/*! CommonJS bailout: module.exports is used directly at 10:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 12:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 15:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 17:0-14 */
 
+/*! CommonJS bailout: module.exports is used directly at 19:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 22:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 23:0-14 */
+
 /*! CommonJS bailout: module.exports is used directly at 245:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 245:10-24 */
 
 /*! CommonJS bailout: module.exports is used directly at 247:21-35 */
 
@@ -20,19 +42,39 @@
 
 /*! CommonJS bailout: module.exports is used directly at 26:0-14 */
 
-/*! CommonJS bailout: module.exports is used directly at 3:10-24 */
+/*! CommonJS bailout: module.exports is used directly at 27:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 328:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 423:2-16 */
 
-/*! CommonJS bailout: module.exports is used directly at 53:0-14 */
+/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 50:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 52:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 56:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 57:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 94:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 98:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 9:0-14 */
 
 /*! CommonJS bailout: module.exports.humanize(...) prevents optimization as module.exports is passed as call context at 142:8-31 */
 
 /*! CommonJS bailout: this is used directly at 2:23-27 */
 
 /*! CommonJS bailout: this is used directly at 9:20-24 */
+
+/*! dynamic exports */
 
 /*! export AddressType [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/address/locking-bytecode.js .AddressType */
 
@@ -230,6 +272,8 @@
 
 /*! export IdentifierResolutionType [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/language-types.js .IdentifierResolutionType */
 
+/*! export IndexedDBProvider [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export InstructionSetBCH [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export InstructionSetBCH [provided] [used in main] [could be renamed] */
@@ -333,6 +377,8 @@
 /*! export SigningSerializationFlag [provided] [used in main] [could be renamed] */
 
 /*! export SigningSerializationFlag [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/signing-serialization.js .SigningSerializationFlag */
+
+/*! export SqlProvider [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export TestNetWallet [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -1680,6 +1726,10 @@
 
 /*! export flattenBinArray [provided] [used in main] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/hex.js .flattenBinArray */
 
+/*! export fromId [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export fromWif [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export generateBytecodeMap [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export generateBytecodeMap [provided] [used in main] [could be renamed] */
@@ -2134,6 +2184,8 @@
 
 /*! export mergeRanges [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/language-utils.js .mergeRanges */
 
+/*! export mine [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export minimumLocktimeDate [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/time.js .minimumLocktimeDate */
 
 /*! export minimumLocktimeDate [provided] [used in main] [could be renamed] */
@@ -2141,6 +2193,10 @@
 /*! export minimumLocktimeTimestamp [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/time.js .minimumLocktimeTimestamp */
 
 /*! export minimumLocktimeTimestamp [provided] [used in main] [could be renamed] */
+
+/*! export named [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export newRandom [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export nonOperations [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -3024,9 +3080,13 @@
 
 /*! export verifyTransaction [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/transaction/verify-transaction.js .verifyTransaction */
 
-/*! export walletFromIdString [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+/*! export walletFromId [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export watchOnly [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export withTimeout [provided] [unused] [could be renamed] */
+
+/*! exports [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] -> ./node_modules/axios/lib/axios.js */
 
 /*! flagged exports */
 
@@ -3072,13 +3132,17 @@
 
 /*! unknown exports (runtime-defined) */
 
-/*!*******************!*\
-  !*** ./src/Db.ts ***!
-  \*******************/
-
 /*!********************!*\
   !*** fs (ignored) ***!
   \********************/
+
+/*!********************!*\
+  !*** pg (ignored) ***!
+  \********************/
+
+/*!*********************!*\
+  !*** ./src/mine.ts ***!
+  \*********************/
 
 /*!*********************!*\
   !*** net (ignored) ***!
@@ -3086,10 +3150,6 @@
 
 /*!*********************!*\
   !*** tls (ignored) ***!
-  \*********************/
-
-/*!*********************!*\
-  !*** url (ignored) ***!
   \*********************/
 
 /*!**********************!*\
@@ -3104,29 +3164,17 @@
   !*** ./src/qr/Qr.ts ***!
   \**********************/
 
-/*!**********************!*\
-  !*** http (ignored) ***!
-  \**********************/
-
-/*!**********************!*\
-  !*** util (ignored) ***!
-  \**********************/
-
-/*!**********************!*\
-  !*** zlib (ignored) ***!
-  \**********************/
-
-/*!***********************!*\
-  !*** https (ignored) ***!
-  \***********************/
+/*!************************!*\
+  !*** ./src/db/util.ts ***!
+  \************************/
 
 /*!************************!*\
   !*** crypto (ignored) ***!
   \************************/
 
-/*!************************!*\
-  !*** stream (ignored) ***!
-  \************************/
+/*!*************************!*\
+  !*** ./src/db/index.ts ***!
+  \*************************/
 
 /*!**************************!*\
   !*** ./src/interface.ts ***!
@@ -3147,6 +3195,14 @@
 /*!*****************************!*\
   !*** ./src/wallet/model.ts ***!
   \*****************************/
+
+/*!*******************************!*\
+  !*** ./src/db/SqlProvider.ts ***!
+  \*******************************/
+
+/*!*******************************!*\
+  !*** child_process (ignored) ***!
+  \*******************************/
 
 /*!********************************!*\
   !*** ./src/network/default.ts ***!
@@ -3177,6 +3233,14 @@
   \************************************/
 
 /*!*************************************!*\
+  !*** ./node_modules/axios/index.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./src/db/IndexedDBProvider.ts ***!
+  \*************************************/
+
+/*!*************************************!*\
   !*** ./src/util/amountInSatoshi.ts ***!
   \*************************************/
 
@@ -3189,16 +3253,20 @@
   \***************************************/
 
 /*!*****************************************!*\
+  !*** ./node_modules/axios/lib/axios.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/utils.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
   !*** ./src/util/asSendRequestObject.ts ***!
   \*****************************************/
 
 /*!*****************************************!*\
   !*** ./src/util/browserNotSupported.ts ***!
   \*****************************************/
-
-/*!******************************************!*\
-  !*** ./node_modules/fetch-blob/index.js ***!
-  \******************************************/
 
 /*!*******************************************!*\
   !*** ./node_modules/dexie/dist/dexie.mjs ***!
@@ -3212,9 +3280,25 @@
   !*** ./node_modules/async-mutex/index.mjs ***!
   \********************************************/
 
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/defaults.js ***!
+  \********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/pg-format/lib/index.js ***!
+  \*********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************/
+
 /*!**********************************************!*\
   !*** ./src/util/balanceObjectFromSatoshi.ts ***!
   \**********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/axios/lib/core/settle.js ***!
+  \***********************************************/
 
 /*!***********************************************!*\
   !*** ./node_modules/isomorphic-ws/browser.js ***!
@@ -3225,19 +3309,91 @@
   \***********************************************/
 
 /*!************************************************!*\
-  !*** ./node_modules/node-fetch/dist/index.cjs ***!
+  !*** ./node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/pg-format/lib/reserved.js ***!
   \************************************************/
 
 /*!************************************************!*\
   !*** ./src/network/ElectrumNetworkProvider.ts ***!
   \************************************************/
 
+/*!*************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/createError.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************/
+
 /*!******************************************************!*\
   !*** ./node_modules/electrum-cash/dist/index.mjs.js ***!
   \******************************************************/
 
+/*!*******************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************/
+
 /*!***********************************************************!*\
-  !*** ./node_modules/data-uri-to-buffer/dist/src/index.js ***!
+  !*** ./node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
   \***********************************************************/
 
 /*!*************************************************************!*\
@@ -3246,6 +3402,10 @@
 
 /*!***************************************************************!*\
   !*** ./node_modules/@bitauth/libauth/build/module/lib/lib.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
   \***************************************************************/
 
 /*!*****************************************************************!*\

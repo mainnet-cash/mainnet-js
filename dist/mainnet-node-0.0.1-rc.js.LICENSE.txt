@@ -1,50 +1,346 @@
-/*! CommonJS bailout: exports is used directly at 13:30-37 */
+/*!     export 0 [provided] [unused] [could be renamed] */
 
-/*! CommonJS bailout: exports is used directly at 14:38-45 */
+/*!     export 1 [provided] [unused] [could be renamed] */
 
-/*! CommonJS bailout: exports is used directly at 15:47-54 */
+/*!     export optional [provided] [unused] [could be renamed] */
+
+/*!     export path [provided] [unused] [could be renamed] */
+
+/*!     export threshold [provided] [unused] [could be renamed] */
+
+/*!   export ./lib/adapters/http.js [provided] [unused] [could be renamed] */
+
+/*!   export 0 [provided] [unused] [could be renamed] */
+
+/*!   export 1 [provided] [unused] [could be renamed] */
+
+/*!   export 2 [provided] [unused] [could be renamed] */
+
+/*!   export 3 [provided] [unused] [could be renamed] */
+
+/*!   export 4 [provided] [unused] [could be renamed] */
+
+/*!   export 5 [provided] [unused] [could be renamed] */
+
+/*!   export 6 [provided] [unused] [could be renamed] */
+
+/*!   export async [provided] [unused] [could be renamed] */
+
+/*!   export bluebird [provided] [unused] [could be renamed] */
+
+/*!   export buffer-writer [provided] [unused] [could be renamed] */
+
+/*!   export build [provided] [unused] [could be renamed] */
+
+/*!   export bundlesize [provided] [unused] [could be renamed] */
+
+/*!   export co [provided] [unused] [could be renamed] */
+
+/*!   export concat-stream [provided] [unused] [could be renamed] */
+
+/*!   export core-util-is [provided] [unused] [could be renamed] */
+
+/*!   export coveralls [provided] [unused] [could be renamed] */
+
+/*!   export email [provided] [unused] [could be renamed] */
+
+/*!   export es6-promise [provided] [unused] [could be renamed] */
+
+/*!   export escapedName [provided] [unused] [could be renamed] */
+
+/*!   export eslint [provided] [unused] [could be renamed] */
+
+/*!   export eslint-config-standard [provided] [unused] [could be renamed] */
+
+/*!   export eslint-plugin-import [provided] [unused] [could be renamed] */
+
+/*!   export eslint-plugin-node [provided] [unused] [could be renamed] */
+
+/*!   export eslint-plugin-promise [provided] [unused] [could be renamed] */
+
+/*!   export eslint-plugin-standard [provided] [unused] [could be renamed] */
+
+/*!   export examples [provided] [unused] [could be renamed] */
+
+/*!   export fetchSpec [provided] [unused] [could be renamed] */
+
+/*!   export fix [provided] [unused] [could be renamed] */
+
+/*!   export follow-redirects [provided] [unused] [could be renamed] */
+
+/*!   export generic-pool [provided] [unused] [could be renamed] */
+
+/*!   export grunt [provided] [unused] [could be renamed] */
+
+/*!   export grunt-banner [provided] [unused] [could be renamed] */
+
+/*!   export grunt-cli [provided] [unused] [could be renamed] */
+
+/*!   export grunt-contrib-clean [provided] [unused] [could be renamed] */
+
+/*!   export grunt-contrib-watch [provided] [unused] [could be renamed] */
+
+/*!   export grunt-eslint [provided] [unused] [could be renamed] */
+
+/*!   export grunt-karma [provided] [unused] [could be renamed] */
+
+/*!   export grunt-mocha-test [provided] [unused] [could be renamed] */
+
+/*!   export grunt-ts [provided] [unused] [could be renamed] */
+
+/*!   export grunt-webpack [provided] [unused] [could be renamed] */
+
+/*!   export inherits [provided] [unused] [could be renamed] */
+
+/*!   export istanbul-instrumenter-loader [provided] [unused] [could be renamed] */
+
+/*!   export jasmine-core [provided] [unused] [could be renamed] */
+
+/*!   export karma [provided] [unused] [could be renamed] */
+
+/*!   export karma-chrome-launcher [provided] [unused] [could be renamed] */
+
+/*!   export karma-coverage [provided] [unused] [could be renamed] */
+
+/*!   export karma-firefox-launcher [provided] [unused] [could be renamed] */
+
+/*!   export karma-jasmine [provided] [unused] [could be renamed] */
+
+/*!   export karma-jasmine-ajax [provided] [unused] [could be renamed] */
+
+/*!   export karma-opera-launcher [provided] [unused] [could be renamed] */
+
+/*!   export karma-safari-launcher [provided] [unused] [could be renamed] */
+
+/*!   export karma-sauce-launcher [provided] [unused] [could be renamed] */
+
+/*!   export karma-sinon [provided] [unused] [could be renamed] */
+
+/*!   export karma-sourcemap-loader [provided] [unused] [could be renamed] */
+
+/*!   export karma-webpack [provided] [unused] [could be renamed] */
+
+/*!   export libpq [provided] [unused] [could be renamed] */
+
+/*!   export load-grunt-tasks [provided] [unused] [could be renamed] */
+
+/*!   export lodash [provided] [unused] [could be renamed] */
+
+/*!   export minimist [provided] [unused] [could be renamed] */
+
+/*!   export mocha [provided] [unused] [could be renamed] */
+
+/*!   export name [provided] [unused] [could be renamed] */
+
+/*!   export node [provided] [unused] [could be renamed] */
+
+/*!   export okay [provided] [unused] [could be renamed] */
+
+/*!   export packet-reader [provided] [unused] [could be renamed] */
+
+/*!   export pg [provided] [unused] [could be renamed] */
+
+/*!   export pg-connection-string [provided] [unused] [could be renamed] */
+
+/*!   export pg-copy-streams [provided] [unused] [could be renamed] */
+
+/*!   export pg-int8 [provided] [unused] [could be renamed] */
+
+/*!   export pg-native [provided] [unused] [could be renamed] */
+
+/*!   export pg-pool [provided] [unused] [could be renamed] */
+
+/*!   export pg-protocol [provided] [unused] [could be renamed] */
+
+/*!   export pg-types [provided] [unused] [could be renamed] */
+
+/*!   export pgpass [provided] [unused] [could be renamed] */
+
+/*!   export postgres-bytea [provided] [unused] [could be renamed] */
+
+/*!   export postgres-date [provided] [unused] [could be renamed] */
+
+/*!   export postgres-interval [provided] [unused] [could be renamed] */
+
+/*!   export postversion [provided] [unused] [could be renamed] */
+
+/*!   export preversion [provided] [unused] [could be renamed] */
+
+/*!   export raw [provided] [unused] [could be renamed] */
+
+/*!   export rawSpec [provided] [unused] [could be renamed] */
+
+/*!   export readable-stream [provided] [unused] [could be renamed] */
+
+/*!   export registry [provided] [unused] [could be renamed] */
+
+/*!   export saveSpec [provided] [unused] [could be renamed] */
+
+/*!   export semver [provided] [unused] [could be renamed] */
+
+/*!   export sinon [provided] [unused] [could be renamed] */
+
+/*!   export start [provided] [unused] [could be renamed] */
+
+/*!   export test [provided] [unused] [could be renamed] */
+
+/*!   export type [provided] [unused] [could be renamed] */
+
+/*!   export typescript [provided] [unused] [could be renamed] */
+
+/*!   export url [provided] [unused] [could be renamed] */
+
+/*!   export url-search-params [provided] [unused] [could be renamed] */
+
+/*!   export version [provided] [unused] [could be renamed] */
+
+/*!   export webpack [provided] [unused] [could be renamed] */
+
+/*!   export webpack-dev-server [provided] [unused] [could be renamed] */
+
+/*! CommonJS bailout: exports is used directly at 137:17-24 */
+
+/*! CommonJS bailout: exports is used directly at 13:36-43 */
+
+/*! CommonJS bailout: exports is used directly at 14:0-7 */
+
+/*! CommonJS bailout: exports is used directly at 14:32-39 */
+
+/*! CommonJS bailout: exports is used directly at 15:38-45 */
+
+/*! CommonJS bailout: exports is used directly at 16:47-54 */
 
 /*! CommonJS bailout: exports is used directly at 236:37-44 */
 
+/*! CommonJS bailout: exports is used directly at 245:0-7 */
+
 /*! CommonJS bailout: exports is used directly at 245:37-44 */
 
-/*! CommonJS bailout: exports is used directly at 3:0-7 */
+/*! CommonJS bailout: exports is used directly at 7:0-7 */
+
+/*! CommonJS bailout: exports is used directly at 8:0-7 */
+
+/*! CommonJS bailout: exports is used directly at 9:0-7 */
+
+/*! CommonJS bailout: exports.coerce(...) prevents optimization as exports is passed as call context at 85:14-28 */
+
+/*! CommonJS bailout: exports.enable(...) prevents optimization as exports is passed as call context at 165:2-16 */
+
+/*! CommonJS bailout: exports.enable(...) prevents optimization as exports is passed as call context at 168:0-14 */
+
+/*! CommonJS bailout: exports.enable(...) prevents optimization as exports is passed as call context at 248:0-14 */
+
+/*! CommonJS bailout: exports.enabled(...) prevents optimization as exports is passed as call context at 118:18-33 */
+
+/*! CommonJS bailout: exports.fromId(...) prevents optimization as exports is passed as call context at 107:15-29 */
+
+/*! CommonJS bailout: exports.fromWif(...) prevents optimization as exports is passed as call context at 135:11-26 */
+
+/*! CommonJS bailout: exports.getFileName(...) prevents optimization as exports is passed as call context at 82:39-58 */
+
+/*! CommonJS bailout: exports.getRoot(...) prevents optimization as exports is passed as call context at 82:23-38 */
+
+/*! CommonJS bailout: exports.humanize(...) prevents optimization as exports is passed as call context at 117:38-54 */
+
+/*! CommonJS bailout: exports.humanize(...) prevents optimization as exports is passed as call context at 86:12-28 */
+
+/*! CommonJS bailout: exports.init(...) prevents optimization as exports is passed as call context at 124:4-16 */
+
+/*! CommonJS bailout: exports.named(...) prevents optimization as exports is passed as call context at 121:21-34 */
+
+/*! CommonJS bailout: exports.save(...) prevents optimization as exports is passed as call context at 139:2-14 */
+
+/*! CommonJS bailout: exports.useColors(...) prevents optimization as exports is passed as call context at 119:20-37 */
+
+/*! CommonJS bailout: module.exports is used directly at 100:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 104:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 108:2-16 */
 
 /*! CommonJS bailout: module.exports is used directly at 10:0-14 */
 
+/*! CommonJS bailout: module.exports is used directly at 11:0-14 */
+
 /*! CommonJS bailout: module.exports is used directly at 122:2-16 */
 
+/*! CommonJS bailout: module.exports is used directly at 12:0-14 */
+
 /*! CommonJS bailout: module.exports is used directly at 135:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 137:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 13:14-28 */
+
+/*! CommonJS bailout: module.exports is used directly at 147:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 156:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 15:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 164:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 177:0-14 */
 
-/*! CommonJS bailout: module.exports is used directly at 178:0-14 */
+/*! CommonJS bailout: module.exports is used directly at 19:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 1:9-23 */
+
+/*! CommonJS bailout: module.exports is used directly at 203:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 208:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 20:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 213:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 223:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 22:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 234:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 236:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 238:21-35 */
 
+/*! CommonJS bailout: module.exports is used directly at 23:0-14 */
+
 /*! CommonJS bailout: module.exports is used directly at 245:0-14 */
 
+/*! CommonJS bailout: module.exports is used directly at 245:10-24 */
+
 /*! CommonJS bailout: module.exports is used directly at 247:21-35 */
+
+/*! CommonJS bailout: module.exports is used directly at 255:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 25:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 264:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 26:0-14 */
 
+/*! CommonJS bailout: module.exports is used directly at 27:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 27:2-16 */
+
+/*! CommonJS bailout: module.exports is used directly at 29:2-16 */
+
+/*! CommonJS bailout: module.exports is used directly at 328:0-14 */
+
 /*! CommonJS bailout: module.exports is used directly at 333:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 35:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 392:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 
-/*! CommonJS bailout: module.exports is used directly at 3:10-24 */
+/*! CommonJS bailout: module.exports is used directly at 403:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 420:0-14 */
 
@@ -54,9 +350,43 @@
 
 /*! CommonJS bailout: module.exports is used directly at 486:0-14 */
 
-/*! CommonJS bailout: module.exports is used directly at 53:0-14 */
+/*! CommonJS bailout: module.exports is used directly at 497:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 50:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 52:0-14 */
 
 /*! CommonJS bailout: module.exports is used directly at 54:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 57:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 5:17-31 */
+
+/*! CommonJS bailout: module.exports is used directly at 604:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 76:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 7:19-33 */
+
+/*! CommonJS bailout: module.exports is used directly at 8:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 8:10-24 */
+
+/*! CommonJS bailout: module.exports is used directly at 94:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 98:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 9:0-14 */
+
+/*! CommonJS bailout: module.exports is used directly at 9:10-24 */
+
+/*! CommonJS bailout: module.exports is used directly at 9:13-27 */
+
+/*! CommonJS bailout: module.exports.__defineSetter__(...) prevents optimization as module.exports is passed as call context at 77:0-31 */
 
 /*! CommonJS bailout: module.exports.humanize(...) prevents optimization as module.exports is passed as call context at 142:8-31 */
 
@@ -87,6 +417,10 @@
 /*! export AuthenticationErrorCommon [provided] [used in main] [could be renamed] */
 
 /*! export AuthenticationErrorCommon [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/errors.js .AuthenticationErrorCommon */
+
+/*! export AuthenticationMD5Password [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export BackendKeyDataMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export BalanceResponse [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -119,6 +453,8 @@
 /*! export BitRegroupingError [provided] [used in main] [could be renamed] */
 
 /*! export BitRegroupingError [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/address/bech32.js .BitRegroupingError */
+
+/*! export BufferReader [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export BuiltInVariables [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -176,6 +512,8 @@
 
 /*! export ClusterStatus [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
+/*! export CommandCompleteMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export CompilerDefaults [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export CompilerDefaults [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/instruction-sets-types.js .CompilerDefaults */
@@ -214,7 +552,17 @@
 
 /*! export ContextFlag [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/bin/secp256k1/secp256k1-wasm-types.js .ContextFlag */
 
+/*! export CopyDataMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export CopyResponse [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export DataRowMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export DatabaseError [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export DefaultParameters [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export Duplex [maybe provided (runtime-defined)] [used in main] [usage and provision prevents renaming] */
 
 /*! export ElectrumClient [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -223,6 +571,8 @@
 /*! export ElectrumTransport [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export EventEmitter [maybe provided (runtime-defined)] [used in main] [usage and provision prevents renaming] */
+
+/*! export Field [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export HdKeyDecodingError [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -268,6 +618,8 @@
 
 /*! export IdentifierResolutionType [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/language-types.js .IdentifierResolutionType */
 
+/*! export IndexedDBProvider [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export InstructionSetBCH [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export InstructionSetBCH [provided] [used in main] [could be renamed] */
@@ -291,6 +643,10 @@
 /*! export NetworkEnum [provided] [used in main] [usage prevents renaming] */
 
 /*! export NetworkType [provided] [used in main] [usage prevents renaming] */
+
+/*! export NoticeMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export NotificationResponseMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export OpcodeAlternateNamesBCH [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -336,13 +692,19 @@
 
 /*! export P [provided] [used in main] [could be renamed] */
 
+/*! export ParameterStatusMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export PushOperationConstants [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export PushOperationConstants [provided] [used in main] [could be renamed] */
 
 /*! export PushOperationConstants [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/push.js .PushOperationConstants */
 
+/*! export ReadyForQueryMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export RegTestWallet [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export RowDescriptionMessage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export ScriptNumberError [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -371,6 +733,12 @@
 /*! export SigningSerializationFlag [provided] [used in main] [could be renamed] */
 
 /*! export SigningSerializationFlag [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/signing-serialization.js .SigningSerializationFlag */
+
+/*! export SqlProvider [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export Stream [maybe provided (runtime-defined)] [used in main] [usage and provision prevents renaming] */
+
+/*! export StringDecoder [maybe provided (runtime-defined)] [used in main] [provision prevents renaming] */
 
 /*! export TestNetWallet [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -402,6 +770,10 @@
 
 /*! export WifWallet [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
+/*! export Writable [maybe provided (runtime-defined)] [used in main] [usage and provision prevents renaming] */
+
+/*! export Writer [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export __esModule [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export __esModule [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] -> ./node_modules/ws/index.js .__esModule */
@@ -409,6 +781,58 @@
 /*! export __esModule [maybe provided (runtime-defined)] [unused] [provision prevents renaming] */
 
 /*! export __esModule [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _args [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _development [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _from [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _from [provided] [unused] [could be renamed] */
+
+/*! export _id [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _id [provided] [unused] [could be renamed] */
+
+/*! export _inBundle [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _inBundle [provided] [unused] [could be renamed] */
+
+/*! export _integrity [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _integrity [provided] [unused] [could be renamed] */
+
+/*! export _location [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _location [provided] [unused] [could be renamed] */
+
+/*! export _phantomChildren [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _phantomChildren [provided] [unused] [could be renamed] */
+
+/*! export _requested [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _requested [provided] [unused] [could be renamed] */
+
+/*! export _requiredBy [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _requiredBy [provided] [unused] [could be renamed] */
+
+/*! export _resolved [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _resolved [provided] [unused] [could be renamed] */
+
+/*! export _shasum [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _shasum [provided] [unused] [could be renamed] */
+
+/*! export _spec [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _spec [provided] [unused] [could be renamed] */
+
+/*! export _where [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export _where [provided] [unused] [could be renamed] */
 
 /*! export addressContentsToLockingBytecode [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/address/locking-bytecode.js .addressContentsToLockingBytecode */
 
@@ -435,6 +859,8 @@
 /*! export arithmeticOperations [provided] [used in main] [could be renamed] */
 
 /*! export arithmeticOperations [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/arithmetic.js .arithmeticOperations */
+
+/*! export arrayParser [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export asSendRequestObject [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -521,6 +947,10 @@
 /*! export authenticationTemplateToCompilerBCH [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/template/compiler-bch/compiler-bch.js .authenticationTemplateToCompilerBCH */
 
 /*! export authenticationTemplateToCompilerBCH [provided] [used in main] [could be renamed] */
+
+/*! export author [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export author [provided] [unused] [could be renamed] */
 
 /*! export balanceFromSatoshi [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -648,6 +1078,8 @@
 
 /*! export binToUtf8 [provided] [used in main] [could be renamed] */
 
+/*! export bindComplete [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export bitcoinABCOpcodes [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export bitcoinABCOpcodes [provided] [used in main] [could be renamed] */
@@ -682,11 +1114,25 @@
 
 /*! export booleanToScriptNumber [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/types.js .booleanToScriptNumber */
 
+/*! export browser [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export browserNotSupported [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export bugs [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export bugs [provided] [unused] [could be renamed] */
 
 /*! export buildEncodedTransaction [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export buildP2pkhNonHdTransaction [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export builtins [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export bundleDependencies [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export bundleDependencies [provided] [unused] [could be renamed] */
+
+/*! export bundlesize [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export cashAddressBitToSize [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/address/cash-address.js .cashAddressBitToSize */
 
@@ -743,6 +1189,8 @@
 /*! export cloneStack [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/common.js .cloneStack */
 
 /*! export cloneStack [provided] [used in main] [could be renamed] */
+
+/*! export closeComplete [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export combineOperations [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -1202,6 +1650,8 @@
 
 /*! export containsRange [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/language-utils.js .containsRange */
 
+/*! export copyDone [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export crackHdPrivateNodeFromHdPublicNodeAndChildPrivateNode [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export crackHdPrivateNodeFromHdPublicNodeAndChildPrivateNode [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/instruction-sets-types.js .crackHdPrivateNodeFromHdPublicNodeAndChildPrivateNode */
@@ -1412,6 +1862,14 @@
 
 /*! export default [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
+/*! export dependencies [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export dependencies [provided] [unused] [could be renamed] */
+
+/*! export deprecated [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export deprecated [provided] [unused] [could be renamed] */
+
 /*! export deriveCashaddr [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export deriveHdPath [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
@@ -1476,6 +1934,14 @@
 
 /*! export describeExpectedInput [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/compile.js .describeExpectedInput */
 
+/*! export description [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export description [provided] [unused] [could be renamed] */
+
+/*! export devDependencies [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export devDependencies [provided] [unused] [could be renamed] */
+
 /*! export disabledOperation [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export disabledOperation [provided] [used in main] [could be renamed] */
@@ -1529,6 +1995,8 @@
 /*! export disassembleParsedAuthenticationInstructions [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/instruction-sets-utils.js .disassembleParsedAuthenticationInstructions */
 
 /*! export disassembleParsedAuthenticationInstructions [provided] [used in main] [could be renamed] */
+
+/*! export emptyQuery [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export encodeBase58Address [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/address/base58-address.js .encodeBase58Address */
 
@@ -1660,6 +2128,8 @@
 
 /*! export encodeTransaction [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/transaction/transaction-serialization.js .encodeTransaction */
 
+/*! export engines [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export extendCompilationDataWithScenarioBytecode [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export extendCompilationDataWithScenarioBytecode [provided] [used in main] [could be renamed] */
@@ -1722,9 +2192,15 @@
 
 /*! export extractUnexecutedRanges [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/language-utils.js .extractUnexecutedRanges */
 
+/*! export files [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export flattenBinArray [provided] [used in main] [could be renamed] */
 
 /*! export flattenBinArray [provided] [used in main] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/hex.js .flattenBinArray */
+
+/*! export fromId [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export fromWif [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export generateBytecodeMap [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -1808,11 +2284,15 @@
 
 /*! export getFeeAmount [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
+/*! export getFileName [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export getFlagsForInstructionSetBCH [maybe provided (runtime-defined)] [used in main] [usage and provision prevents renaming] */
 
 /*! export getFlagsForInstructionSetBCH [provided] [used in main] [could be renamed] */
 
 /*! export getFlagsForInstructionSetBCH [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/bch/bch-instruction-sets.js .getFlagsForInstructionSetBCH */
+
+/*! export getPassword [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export getResolutionErrors [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -1846,7 +2326,11 @@
 
 /*! export getTransactionHashLE [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/transaction/transaction-serialization.js .getTransactionHashLE */
 
+/*! export getTypeParser [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export getUsdRate [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export gitHead [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export hashOutputs [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -1885,6 +2369,10 @@
 /*! export hmacSha512 [provided] [used in main] [could be renamed] */
 
 /*! export hmacSha512 [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/crypto/hmac.js .hmacSha512 */
+
+/*! export homepage [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export homepage [provided] [unused] [could be renamed] */
 
 /*! export incrementOperationCount [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -2086,6 +2574,8 @@
 
 /*! export isValidCompressedPublicKeyEncoding [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/encoding.js .isValidCompressedPublicKeyEncoding */
 
+/*! export isValidEntry [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export isValidPublicKeyEncoding [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export isValidPublicKeyEncoding [provided] [used in main] [could be renamed] */
@@ -2124,17 +2614,29 @@
 
 /*! export isVersionRejected [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
+/*! export isWin [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export isWitnessProgram [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export isWitnessProgram [provided] [used in main] [could be renamed] */
 
 /*! export isWitnessProgram [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/bch/bch-instruction-sets.js .isWitnessProgram */
 
+/*! export jsdelivr [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export keywords [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export keywords [provided] [unused] [could be renamed] */
+
 /*! export lengthBytesForPushOpcode [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export lengthBytesForPushOpcode [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/instruction-sets-utils.js .lengthBytesForPushOpcode */
 
 /*! export lengthBytesForPushOpcode [provided] [used in main] [could be renamed] */
+
+/*! export license [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export license [provided] [unused] [could be renamed] */
 
 /*! export lockingBytecodeToAddressContents [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/address/locking-bytecode.js .lockingBytecodeToAddressContents */
 
@@ -2158,6 +2660,10 @@
 
 /*! export locktimeToDate [provided] [used in main] [could be renamed] */
 
+/*! export main [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export main [provided] [unused] [could be renamed] */
+
 /*! export mapOverOperations [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export mapOverOperations [provided] [used in main] [could be renamed] */
@@ -2169,6 +2675,8 @@
 /*! export maskCashAddressPrefix [provided] [used in main] [could be renamed] */
 
 /*! export maskCashAddressPrefix [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/address/cash-address.js .maskCashAddressPrefix */
+
+/*! export match [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export maximumLocktimeDate [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/time.js .maximumLocktimeDate */
 
@@ -2184,6 +2692,8 @@
 
 /*! export mergeRanges [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/language-utils.js .mergeRanges */
 
+/*! export mine [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export minimumLocktimeDate [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/time.js .minimumLocktimeDate */
 
 /*! export minimumLocktimeDate [provided] [used in main] [could be renamed] */
@@ -2191,6 +2701,16 @@
 /*! export minimumLocktimeTimestamp [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/time.js .minimumLocktimeTimestamp */
 
 /*! export minimumLocktimeTimestamp [provided] [used in main] [could be renamed] */
+
+/*! export name [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export name [provided] [unused] [could be renamed] */
+
+/*! export named [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export newRandom [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export noData [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export nonOperations [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -2674,6 +3194,8 @@
 
 /*! export padMinimallyEncodedScriptNumber [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/bch/bch-operations.js .padMinimallyEncodedScriptNumber */
 
+/*! export parse [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export parseAuthenticationTemplateEntities [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export parseAuthenticationTemplateEntities [provided] [used in main] [could be renamed] */
@@ -2730,6 +3252,10 @@
 
 /*! export parseBytesAsScriptNumber [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/types.js .parseBytesAsScriptNumber */
 
+/*! export parseComplete [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export parseLine [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export parseLocktimeBin [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/format/time.js .parseLocktimeBin */
 
 /*! export parseLocktimeBin [provided] [used in main] [could be renamed] */
@@ -2739,6 +3265,12 @@
 /*! export parseScript [provided] [used in main] [could be renamed] */
 
 /*! export parseScript [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/template/language/parse.js .parseScript */
+
+/*! export peerDependencies [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export peerDependenciesMeta [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export portalSuspended [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export prepareInputs [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
@@ -2830,6 +3362,12 @@
 
 /*! export regroupBits [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/address/bech32.js .regroupBits */
 
+/*! export replicationStart [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export repository [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export repository [provided] [unused] [could be renamed] */
+
 /*! export reservedOperation [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export reservedOperation [provided] [used in main] [could be renamed] */
@@ -2870,7 +3408,15 @@
 
 /*! export safelyExtendCompilationData [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/transaction/generate-transaction.js .safelyExtendCompilationData */
 
+/*! export scripts [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export scripts [provided] [unused] [could be renamed] */
+
 /*! export secp256k1Base64Bytes [provided] [used in main] [could be renamed] */
+
+/*! export sep [maybe provided (runtime-defined)] [used in main] [usage and provision prevents renaming] */
+
+/*! export serialize [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export serializeAuthenticationInstruction [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -2901,6 +3447,8 @@
 /*! export serializeParsedAuthenticationInstructions [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/instruction-sets-utils.js .serializeParsedAuthenticationInstructions */
 
 /*! export serializeParsedAuthenticationInstructions [provided] [used in main] [could be renamed] */
+
+/*! export setTypeParser [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export sha1Base64Bytes [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -2980,6 +3528,8 @@
 
 /*! export timeOperations [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/time.js .timeOperations */
 
+/*! export typings [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
 /*! export unconditionalFlowControlOperations [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
 /*! export unconditionalFlowControlOperations [provided] [used in main] [could be renamed] */
@@ -2991,6 +3541,8 @@
 /*! export undefinedOperation [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/common.js .undefinedOperation */
 
 /*! export undefinedOperation [provided] [used in main] [could be renamed] */
+
+/*! export unpkg [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export useFourStackItems [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -3009,6 +3561,8 @@
 /*! export useOneStackItem [provided] [used in main] [could be renamed] */
 
 /*! export useOneStackItem [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/vm/instruction-sets/common/combinators.js .useOneStackItem */
+
+/*! export usePgPass [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export useSixStackItems [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] [usage and provision prevents renaming] */
 
@@ -3074,11 +3628,23 @@
 
 /*! export verifyTransaction [provided] [used in main] [could be renamed] -> ./node_modules/@bitauth/libauth/build/module/lib/transaction/verify-transaction.js .verifyTransaction */
 
-/*! export walletFromIdString [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+/*! export version [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export version [provided] [used in main] [usage prevents renaming] */
+
+/*! export walletFromId [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export warnTo [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
+
+/*! export watchOnly [provided] [maybe used in main (runtime-defined)] [usage prevents renaming] */
 
 /*! export withTimeout [provided] [unused] [could be renamed] */
 
 /*! exports [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] */
+
+/*! exports [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] -> ./node_modules/axios/lib/axios.js */
+
+/*! exports [maybe provided (runtime-defined)] [maybe used in main (runtime-defined)] -> ./node_modules/pg/lib/native/client.js */
 
 /*! flagged exports */
 
@@ -3118,17 +3684,21 @@
 
 /*! runtime requirements: __webpack_require__, __webpack_require__.n, __webpack_require__.r, __webpack_exports__, __webpack_require__.d, __webpack_require__.* */
 
+/*! runtime requirements: __webpack_require__, module */
+
 /*! runtime requirements: module */
 
 /*! runtime requirements: module, __webpack_require__ */
+
+/*! runtime requirements: module, module.loaded, module.id, __webpack_require__.nmd, __webpack_require__, __webpack_require__.* */
 
 /*! runtime requirements: top-level-this-exports, __webpack_exports__, __webpack_require__ */
 
 /*! unknown exports (runtime-defined) */
 
-/*!*******************!*\
-  !*** ./src/Db.ts ***!
-  \*******************/
+/*!*********************!*\
+  !*** ./src/mine.ts ***!
+  \*********************/
 
 /*!*********************!*\
   !*** external "fs" ***!
@@ -3148,6 +3718,10 @@
 
 /*!**********************!*\
   !*** ./src/qr/Qr.ts ***!
+  \**********************/
+
+/*!**********************!*\
+  !*** external "dns" ***!
   \**********************/
 
 /*!**********************!*\
@@ -3171,6 +3745,10 @@
   \***********************/
 
 /*!***********************!*\
+  !*** external "path" ***!
+  \***********************/
+
+/*!***********************!*\
   !*** external "util" ***!
   \***********************/
 
@@ -3179,8 +3757,20 @@
   \***********************/
 
 /*!************************!*\
+  !*** ./src/db/util.ts ***!
+  \************************/
+
+/*!************************!*\
   !*** external "https" ***!
   \************************/
+
+/*!*************************!*\
+  !*** ./src/db/index.ts ***!
+  \*************************/
+
+/*!*************************!*\
+  !*** external "assert" ***!
+  \*************************/
 
 /*!*************************!*\
   !*** external "crypto" ***!
@@ -3214,6 +3804,10 @@
   !*** ./src/wallet/model.ts ***!
   \*****************************/
 
+/*!*******************************!*\
+  !*** ./src/db/SqlProvider.ts ***!
+  \*******************************/
+
 /*!********************************!*\
   !*** ./src/network/default.ts ***!
   \********************************/
@@ -3225,6 +3819,14 @@
 /*!********************************!*\
   !*** ./src/util/getUsdRate.ts ***!
   \********************************/
+
+/*!********************************!*\
+  !*** external "child_process" ***!
+  \********************************/
+
+/*!*********************************!*\
+  !*** external "string_decoder" ***!
+  \*********************************/
 
 /*!**********************************!*\
   !*** ./node_modules/ms/index.js ***!
@@ -3247,12 +3849,68 @@
   \************************************/
 
 /*!*************************************!*\
+  !*** ./node_modules/axios/index.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/libpq/index.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/pg/lib/sasl.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/split/index.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./src/db/IndexedDBProvider.ts ***!
+  \*************************************/
+
+/*!*************************************!*\
   !*** ./src/util/amountInSatoshi.ts ***!
   \*************************************/
 
 /*!*************************************!*\
   !*** ./src/util/checkWifNetwork.ts ***!
   \*************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/pg/lib/index.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/pg/lib/query.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/pg/lib/utils.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/pg/package.json ***!
+  \**************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/pg-int8/index.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/pg-pool/index.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/pg/lib/client.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/pg/lib/result.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/through/index.js ***!
+  \***************************************/
 
 /*!***************************************!*\
   !*** ./node_modules/ws/lib/sender.js ***!
@@ -3262,9 +3920,49 @@
   !*** ./node_modules/ws/lib/stream.js ***!
   \***************************************/
 
+/*!***************************************!*\
+  !*** ./node_modules/xtend/mutable.js ***!
+  \***************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/debug/src/node.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/pg-types/index.js ***!
+  \****************************************/
+
 /*!****************************************!*\
   !*** ./node_modules/ws/lib/limiter.js ***!
   \****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/axios.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/utils.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/axios/package.json ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/debug/src/debug.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/debug/src/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/pg-native/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/pg/lib/defaults.js ***!
+  \*****************************************/
 
 /*!*****************************************!*\
   !*** ./node_modules/ws/lib/receiver.js ***!
@@ -3279,7 +3977,7 @@
   \*****************************************/
 
 /*!******************************************!*\
-  !*** ./node_modules/fetch-blob/index.js ***!
+  !*** ./node_modules/pgpass/lib/index.js ***!
   \******************************************/
 
 /*!******************************************!*\
@@ -3295,7 +3993,23 @@
   \******************************************/
 
 /*!*******************************************!*\
+  !*** ./node_modules/bindings/bindings.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/debug/src/browser.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
   !*** ./node_modules/dexie/dist/dexie.mjs ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/pg/lib/connection.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/pgpass/lib/helper.js ***!
   \*******************************************/
 
 /*!*******************************************!*\
@@ -3311,6 +4025,10 @@
   \********************************************/
 
 /*!********************************************!*\
+  !*** ./node_modules/axios/lib/defaults.js ***!
+  \********************************************/
+
+/*!********************************************!*\
   !*** ./node_modules/isomorphic-ws/node.js ***!
   \********************************************/
 
@@ -3319,8 +4037,44 @@
   \********************************************/
 
 /*!*********************************************!*\
+  !*** ./node_modules/pg-format/lib/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/pg-native/package.json ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/pg/lib/native/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/pg/lib/native/query.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/postgres-date/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
   !*** ./node_modules/ws/lib/event-target.js ***!
   \*********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/pg/lib/native/client.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/postgres-array/index.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/postgres-bytea/index.js ***!
+  \**********************************************/
 
 /*!**********************************************!*\
   !*** ./node_modules/supports-color/index.js ***!
@@ -3331,11 +4085,47 @@
   \**********************************************/
 
 /*!***********************************************!*\
+  !*** ./node_modules/axios/lib/core/settle.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/pg-types/lib/builtins.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/pg/lib/type-overrides.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
   !*** ./node_modules/qrcode-svg/lib/qrcode.js ***!
   \***********************************************/
 
 /*!************************************************!*\
-  !*** ./node_modules/node-fetch/dist/index.cjs ***!
+  !*** ./node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/file-uri-to-path/index.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/follow-redirects/debug.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/follow-redirects/index.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/pg-format/lib/reserved.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/pg-protocol/dist/index.js ***!
   \************************************************/
 
 /*!************************************************!*\
@@ -3343,19 +4133,143 @@
   \************************************************/
 
 /*!*************************************************!*\
+  !*** ./node_modules/axios/lib/adapters/http.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/pg-protocol/dist/parser.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/postgres-interval/index.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
   !*** ./node_modules/ws/lib/websocket-server.js ***!
   \*************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/pg-types/lib/arrayParser.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/pg-types/lib/textParsers.js ***!
+  \**************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/pg-native/lib/copy-stream.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/pg-protocol/dist/messages.js ***!
+  \***************************************************/
 
 /*!***************************************************!*\
   !*** ./node_modules/ws/lib/permessage-deflate.js ***!
   \***************************************************/
 
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/createError.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/pg-connection-string/index.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/pg-native/lib/build-result.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/pg-types/lib/binaryParsers.js ***!
+  \****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/debug/node_modules/ms/index.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/pg-protocol/dist/serializer.js ***!
+  \*****************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************/
+
 /*!******************************************************!*\
   !*** ./node_modules/electrum-cash/dist/index.mjs.js ***!
   \******************************************************/
 
+/*!******************************************************!*\
+  !*** ./node_modules/pg/lib/connection-parameters.js ***!
+  \******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/pg-protocol/dist/buffer-reader.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/pg-protocol/dist/buffer-writer.js ***!
+  \********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************/
+
 /*!***********************************************************!*\
-  !*** ./node_modules/data-uri-to-buffer/dist/src/index.js ***!
+  !*** ./node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
   \***********************************************************/
 
 /*!*************************************************************!*\
@@ -3364,6 +4278,14 @@
 
 /*!***************************************************************!*\
   !*** ./node_modules/@bitauth/libauth/build/module/lib/lib.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/pg-native/node_modules/pg-types/index.js ***!
   \***************************************************************/
 
 /*!*****************************************************************!*\
@@ -3392,6 +4314,10 @@
 
 /*!*********************************************************************!*\
   !*** ./node_modules/electrum-cash/node_modules/debug/src/common.js ***!
+  \*********************************************************************/
+
+/*!*********************************************************************!*\
+  !*** ./node_modules/pg-native/node_modules/postgres-array/index.js ***!
   \*********************************************************************/
 
 /*!**********************************************************************!*\
@@ -3458,6 +4384,14 @@
   !*** ./node_modules/@bitauth/libauth/build/module/lib/key/key-utils.js ***!
   \*************************************************************************/
 
+/*!*************************************************************************!*\
+  !*** ./node_modules/pg-native/node_modules/pg-types/lib/arrayParser.js ***!
+  \*************************************************************************/
+
+/*!*************************************************************************!*\
+  !*** ./node_modules/pg-native/node_modules/pg-types/lib/textParsers.js ***!
+  \*************************************************************************/
+
 /*!**************************************************************************!*\
   !*** ./node_modules/@bitauth/libauth/build/module/lib/address/bech32.js ***!
   \**************************************************************************/
@@ -3468,6 +4402,10 @@
 
 /*!***************************************************************************!*\
   !*** ./node_modules/@bitauth/libauth/build/module/lib/address/address.js ***!
+  \***************************************************************************/
+
+/*!***************************************************************************!*\
+  !*** ./node_modules/pg-native/node_modules/pg-types/lib/binaryParsers.js ***!
   \***************************************************************************/
 
 /*!****************************************************************************!*\
