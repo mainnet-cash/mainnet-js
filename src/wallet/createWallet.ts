@@ -140,17 +140,23 @@ export const named = async (
   }
 };
 
-
-export const newRandom = async (name:string, dbName: string, network=CashAddressNetworkPrefix.mainnet): Promise<Wallet | TestNetWallet | RegTestWallet> => {
-  if(name.length>0){
-    return await named(name, network, dbName, true)
-  }else{
-    return await initWallet(name, network)
+export const newRandom = async (
+  name: string,
+  dbName: string,
+  network = CashAddressNetworkPrefix.mainnet
+): Promise<Wallet | TestNetWallet | RegTestWallet> => {
+  if (name.length > 0) {
+    return await named(name, network, dbName, true);
+  } else {
+    return await initWallet(name, network);
   }
 };
 
-
-export const fromId = async (walletId: string, name='' , networkPrefix=CashAddressNetworkPrefix.mainnet):Promise<Wallet | TestNetWallet | RegTestWallet> => {
+export const fromId = async (
+  walletId: string,
+  name = "",
+  networkPrefix = CashAddressNetworkPrefix.mainnet
+): Promise<Wallet | TestNetWallet | RegTestWallet> => {
   let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
   if (walletType != "wif") {
     throw Error(`Wallet type ${walletType} was passed to wif wallet`);
@@ -165,7 +171,7 @@ export const fromId = async (walletId: string, name='' , networkPrefix=CashAddre
 
 export const fromWif = async (
   walletImportFormatString: string,
-  name='',
+  name = "",
   networkPrefix: CashAddressNetworkPrefix
 ) => {
   let w = new WifWallet(name, networkPrefix);
@@ -175,7 +181,7 @@ export const fromWif = async (
 
 export const watchOnly = async (
   address: string,
-  name="",
+  name = "",
   networkPrefix: CashAddressNetworkPrefix
 ) => {
   let w = new WifWallet(name, networkPrefix);
@@ -183,8 +189,8 @@ export const watchOnly = async (
   return w;
 };
 
-const initWallet = async(
-  name="",
+const initWallet = async (
+  name = "",
   networkPrefix: CashAddressNetworkPrefix
 ) => {
   let w = new WifWallet(name, networkPrefix);

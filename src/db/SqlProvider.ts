@@ -23,7 +23,7 @@ export default class SqlProvider implements StorageProvider {
 
   public async close(): Promise<StorageProvider> {
     await this.db.end();
-    return this
+    return this;
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {
