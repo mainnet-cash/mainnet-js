@@ -3,7 +3,7 @@ var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "production",
+  mode: "development",
   module: {
     rules: [
       {
@@ -52,6 +52,7 @@ const browserConfig = {
       net: false,
       os: false,
       path: false,
+      pg: false,
       "pg-native": false,
       stream: false,
       tls: false,
@@ -82,6 +83,7 @@ const webWorkerConfig = {
       net: false,
       os: false,
       path: false,
+      pg: false,
       "pg-native": false,
       stream: false,
       tls: false,

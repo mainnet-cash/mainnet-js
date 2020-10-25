@@ -370,7 +370,7 @@ export class Wallet extends WifWallet {
     dbName = dbName ? dbName : CashAddressNetworkPrefix.mainnet;
     return await newRandom(name, dbName, CashAddressNetworkPrefix.mainnet);
   }
-  public static async watchOnly(name="", address: string) {
+  public static async watchOnly(address: string, name="") {
     return await watchOnly(
       address,
       name, 
@@ -404,7 +404,7 @@ export class TestNetWallet extends WifWallet {
     dbName = dbName ? dbName :  CashAddressNetworkPrefix.testnet
     return await newRandom(name, dbName, CashAddressNetworkPrefix.testnet);
   }
-  public static async watchOnly(name="", address: string) {
+  public static async watchOnly(address: string, name="") {
     return await watchOnly(
       address,
       name, 
@@ -437,7 +437,7 @@ export class RegTestWallet extends WifWallet {
     dbName = dbName ? dbName :  CashAddressNetworkPrefix.regtest
     return await newRandom(name, dbName, CashAddressNetworkPrefix.regtest);
   }
-  public static async watchOnly(name="", address: string) {
+  public static async watchOnly(address: string, name="") {
     return await watchOnly(
       address,
       name, 
