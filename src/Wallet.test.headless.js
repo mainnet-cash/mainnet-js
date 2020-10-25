@@ -127,7 +127,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await TestNetWallet.fromWif(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.slice(0,9)).toBe("bchtest:q");
+    expect(result.slice(0, 9)).toBe("bchtest:q");
   });
 
   test(`Should return testnet balance`, async () => {

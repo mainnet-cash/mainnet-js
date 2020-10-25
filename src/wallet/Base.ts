@@ -27,7 +27,7 @@ export class BaseWallet {
 
   constructor(name = "", networkPrefix: CashAddressNetworkPrefix) {
     this.name = name;
-    
+
     this.networkPrefix = networkPrefix;
     this.networkType =
       this.networkPrefix === CashAddressNetworkPrefix.mainnet
