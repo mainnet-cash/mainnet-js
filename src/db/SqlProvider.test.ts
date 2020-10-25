@@ -6,12 +6,11 @@ import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
  * @jest-environment jsdom
  */
 test("Store and retrieve a Regtest wallet", async () => {
-  let db = new SqlProvider("regtest");
+  let db = new SqlProvider("regtest2");
   await db.init();
-  let w1 = await RegTestWallet.newRandom();
-  w1.name = "dave";
+  let w1 = await RegTestWallet.newRandom("dave");
   await db.addWallet(w1.name, w1.getSerializedWallet());
-  let w2 = await db.getWallet(w1.name);
+  let w2 = await db.getWallet("dave");
   expect(w1.name).toBe(w2!.name);
   expect(w1.getSerializedWallet()).toBe(w2!.wallet);
   db.close();
@@ -20,8 +19,7 @@ test("Store and retrieve a Regtest wallet", async () => {
 test("Store and retrieve a Testnet wallet", async () => {
     let db = new SqlProvider("testnet");
     await db.init();
-    let w1 = await TestNetWallet.newRandom();
-    w1.name = "dave";
+    let w1 = await TestNetWallet.newRandom("dave");
     await db.addWallet(w1.name, w1.getSerializedWallet());
     let w2 = await db.getWallet(w1.name);
     expect(w1.name).toBe(w2!.name);
@@ -38,9 +36,9 @@ test("Should handle basic sql injection", async () => {
 
     let db = new SqlProvider(";DELETE table still_here");
     await db.init();
-    let alice = await RegTestWallet.newRandom();
-    let bob = await RegTestWallet.newRandom();
-    let charlie = await RegTestWallet.newRandom();
+    let alice = await RegTestWallet.newRandom("alice");
+    let bob = await RegTestWallet.newRandom("bob");
+    let charlie = await RegTestWallet.newRandom("charlie");
     await db.addWallet("alice", alice.getSerializedWallet());
     await db.addWallet("bob", bob.getSerializedWallet());
     await db.addWallet("charlie", charlie.getSerializedWallet());

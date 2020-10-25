@@ -13,14 +13,15 @@ export default class SqlProvider implements StorageProvider {
     this.db = new Pool();
   }
 
-  public async init(): Promise<boolean> {
+  public async init(): Promise<StorageProvider> {
     let createWalletTable = format('CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );', this.dbName);
-    const res = this.db.query(createWalletTable);
-    return res;
+    const res = await this.db.query(createWalletTable);
+    return this;
   }
 
-  public async close(): Promise<boolean> {
-    return this.db.end();
+  public async close(): Promise<StorageProvider> {
+    await this.db.end();
+    return this
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {

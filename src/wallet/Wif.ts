@@ -352,15 +352,16 @@ export class Wallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.mainnet);
   }
 
+  // TODO refactor
   public static async fromWif(walletImportFormatString: string) {
     return await fromWif(
-      this.name, 
       walletImportFormatString,
-      CashAddressNetworkPrefix.mainnet
+      name, 
+      CashAddressNetworkPrefix.mainnet,
     );
   }
-  public static async fromId(walletId: string) {
-    return await fromId(this.name, walletId, CashAddressNetworkPrefix.mainnet);
+  public static async fromId(walletId: string, name='') {
+    return await fromId(walletId, name, CashAddressNetworkPrefix.mainnet);
   }
   public static async named(name='', dbName?){
     dbName = dbName ? dbName :  CashAddressNetworkPrefix.mainnet
@@ -370,10 +371,10 @@ export class Wallet extends WifWallet {
     dbName = dbName ? dbName :  CashAddressNetworkPrefix.mainnet
     return await newRandom(name, dbName, CashAddressNetworkPrefix.mainnet);
   }
-  public static async watchOnly(name, walletImportFormatString: string) {
+  public static async watchOnly(name="", address: string) {
     return await watchOnly(
+      address,
       name, 
-      walletImportFormatString,
       CashAddressNetworkPrefix.mainnet
     );
   }
@@ -385,26 +386,29 @@ export class TestNetWallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.testnet);
   }
   
+  // TODO refactor
   public static async fromWif(walletImportFormatString: string) {
     return await fromWif(
-      this.name, 
       walletImportFormatString,
-      CashAddressNetworkPrefix.testnet
+      name, 
+      CashAddressNetworkPrefix.testnet,
     );
   }
-  public static async fromId(walletId: string) {
-    return await fromId(this.name, walletId, CashAddressNetworkPrefix.testnet);
+  public static async fromId(walletId: string, name='') {
+    return await fromId(walletId, name, CashAddressNetworkPrefix.testnet);
   }
-  public static async named(name:string, dbName?){
-    return await named(name, CashAddressNetworkPrefix.testnet, dbName)
+  public static async named(name='', dbName?){
+    dbName = dbName ? dbName :  CashAddressNetworkPrefix.testnet
+    return await named(name, dbName, CashAddressNetworkPrefix.testnet)
   }
   public static async newRandom(name='', dbName?) {
-    return await newRandom(name, CashAddressNetworkPrefix.testnet,  dbName );
+    dbName = dbName ? dbName :  CashAddressNetworkPrefix.testnet
+    return await newRandom(name, dbName, CashAddressNetworkPrefix.testnet);
   }
-  public static async watchOnly(name='', walletImportFormatString: string) {
+  public static async watchOnly(name="", address: string) {
     return await watchOnly(
+      address,
       name, 
-      walletImportFormatString,
       CashAddressNetworkPrefix.testnet
     );
   }
@@ -415,26 +419,29 @@ export class RegTestWallet extends WifWallet {
     super(name, CashAddressNetworkPrefix.regtest);
   }
 
-  public static async fromWif(walletImportFormatString: string) {
+  // TODO refactor
+  public static async fromWif(walletImportFormatString: string, name='') {
     return await fromWif(
-      this.name, 
       walletImportFormatString,
-      CashAddressNetworkPrefix.regtest
+      name, 
+      CashAddressNetworkPrefix.regtest,
     );
   }
-  public static async fromId(walletId: string) {
-    return await fromId(this.name, walletId, CashAddressNetworkPrefix.regtest);
+  public static async fromId(walletId: string, name='') {
+    return await fromId(walletId, name, CashAddressNetworkPrefix.regtest);
   }
-  public static async named(name:string, dbName?){
-    return await named(name, CashAddressNetworkPrefix.regtest, dbName)
+  public static async named(name='', dbName?){
+    dbName = dbName ? dbName :  CashAddressNetworkPrefix.regtest
+    return await named(name, dbName, CashAddressNetworkPrefix.regtest)
   }
   public static async newRandom(name='', dbName?) {
-    return await newRandom(name, CashAddressNetworkPrefix.regtest,  dbName );
+    dbName = dbName ? dbName :  CashAddressNetworkPrefix.regtest
+    return await newRandom(name, dbName, CashAddressNetworkPrefix.regtest);
   }
-  public static async watchOnly(name, walletImportFormatString: string) {
+  public static async watchOnly(name="", address: string) {
     return await watchOnly(
+      address,
       name, 
-      walletImportFormatString,
       CashAddressNetworkPrefix.regtest
     );
   }

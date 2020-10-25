@@ -4,16 +4,16 @@ export default interface StorageProvider {
   /**
    * Ensure the database exists and is open
    * @throws {Error} If the wallet could not be opened.
-   * @returns if the operation was successful.
+   * @returns the storage provider
    */
-  init(): Promise<boolean>;
+  init(): Promise<StorageProvider>;
 
   /**
    * Manually close the database
    * @throws {Error} If the wallet could not be opened.
-   * @returns if the operation was successful.
+   * @returns the storage provider
    */
-  close(): Promise<boolean>;
+  close(): Promise<StorageProvider>;
 
   /**
    * Add a wallet to the database

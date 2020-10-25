@@ -16,11 +16,11 @@ export default class IndexedDBProvider
   }
 
   public async init() {
-    return true;
+    return this;
   }
 
   public async close() {
-    return false;
+    return this;
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {
