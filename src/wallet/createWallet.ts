@@ -45,17 +45,21 @@ export async function createWallet(body: WalletRequest): Promise<WifWallet> {
   // Named wallets are saved in the database
   if (body.name) {
     if (body.network) {
-      wallet = await named(body.name, networkMap[body.network])
+      wallet = await named(body.name, networkMap[body.network]);
       if (wallet.network != body.network) {
-        throw Error(`A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`)
+        throw Error(
+          `A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`
+        );
       }
       if (body.type) {
         if (wallet.walletType != body.type) {
-          throw Error(`A wallet already exists with name ${body.name}, but with type ${wallet.walletType} not ${body.type}, per request`)
+          throw Error(
+            `A wallet already exists with name ${body.name}, but with type ${wallet.walletType} not ${body.type}, per request`
+          );
         }
       }
     } else {
-      wallet = await named(body.name)
+      wallet = await named(body.name);
     }
   }
   // This handles unsaved/unnamed wallets
@@ -123,7 +127,7 @@ export async function walletFromId(
       break;
     case "watch":
       await wallet.initializeWatchOnly(wallet.networkPrefix + ":" + walletData);
-      break;      
+      break;
     case "hd":
       throw Error("Heuristic Wallets are not implemented");
     default:

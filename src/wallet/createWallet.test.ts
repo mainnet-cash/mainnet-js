@@ -27,15 +27,18 @@ describe(`Test creation of wallet from walletId`, () => {
     let w = await walletFromId(
       "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
     );
-    expect(w.cashaddr).toBe("bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22");
+    expect(w.cashaddr).toBe(
+      "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
+    );
   });
-
 
   test("Create a watch only mainnet wallet from string id", async () => {
     let w = await walletFromId(
       "watch:mainnet:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"
     );
-    expect(w.cashaddr).toBe("bitcoincash:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5");
+    expect(w.cashaddr).toBe(
+      "bitcoincash:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"
+    );
   });
 
   describe(`Errors from walletId`, () => {
@@ -86,34 +89,37 @@ describe(`Test creation of wallet from walletId`, () => {
         expect(e.message).toBe("The wallet type: q2k was not understood");
       }
     });
-
   });
-
 });
 
 describe(`Tests named wallet creation`, () => {
-
   test("Expect a nameless named wallet to error", async () => {
     expect.assertions(1);
     try {
       await named("");
     } catch (e) {
-      expect(e.message).toBe(
-        "Named wallets must have a non-empty name"
-      );
+      expect(e.message).toBe("Named wallets must have a non-empty name");
     }
   });
 
   test("Expect force saving over a named wallet to fail", async () => {
     expect.assertions(1);
     try {
-      await named("duplicate_name", CashAddressNetworkPrefix.regtest, "dup_test");
-      await named("duplicate_name", CashAddressNetworkPrefix.regtest, "dup_test", true);
+      await named(
+        "duplicate_name",
+        CashAddressNetworkPrefix.regtest,
+        "dup_test"
+      );
+      await named(
+        "duplicate_name",
+        CashAddressNetworkPrefix.regtest,
+        "dup_test",
+        true
+      );
     } catch (e) {
       expect(e.message).toBe(
         "A wallet with the name duplicate_name already exists in dup_test"
       );
     }
   });
-
 });
