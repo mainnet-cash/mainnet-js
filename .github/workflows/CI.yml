@@ -54,6 +54,7 @@ jobs:
         run: |
           yarn
           yarn format
+          yarn build
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
         with:
@@ -75,7 +76,6 @@ jobs:
         node-version: 14
     - uses: microsoft/playwright-github-action@v1
     - run: npm install
-    - run: npm run build
     - run: npm run test
     - run: npm run test:api
     - run: npm run test:browser
