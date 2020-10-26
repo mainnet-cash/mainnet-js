@@ -40,7 +40,7 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "build": "npx webpack",
-    "demo": "npx reload --dir=demo/"
+    "demo": "npx reload --dir=demo/ "
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
