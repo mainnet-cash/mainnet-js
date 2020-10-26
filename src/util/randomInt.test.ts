@@ -6,10 +6,10 @@ test("get a random int", async () => {
 });
 
 test("average some random ints", async () => {
-    let average = 0
-    for(let i=0; i<100; i++){
-        average += getRandomInt(1000)/100;
-    }
-    expect(average).toBeGreaterThan(400);
-    expect(average).toBeLessThan(600);
-  });
+  let average = 0;
+  for (let i = 0; i < 100; i++) {
+    average += getRandomInt(1000) / 100;
+  }
+  expect(average).toBeGreaterThan(400);
+  expect(average).toBeLessThan(600);
+});
