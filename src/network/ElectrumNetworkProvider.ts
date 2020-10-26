@@ -1,4 +1,3 @@
-import { binToHex, instantiateSha256, Sha256 } from "@bitauth/libauth";
 import {
   ElectrumCluster,
   ElectrumTransport,
@@ -6,7 +5,7 @@ import {
   RequestResponse,
 } from "electrum-cash";
 import NetworkProvider from "./NetworkProvider";
-import { Utxo, Network } from "../interface";
+import { Utxo, Network, ElectrumBalance } from "../interface";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   private electrum: ElectrumCluster;
@@ -152,6 +151,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }));
 
     return utxos;
+  }
+
+  async getBalance(address: string): Promise<number> {
+    const result = (await this.performRequest(
+      "blockchain.address.get_balance",
+      address
+    )) as ElectrumBalance;
+
+    return result.confirmed + result.unconfirmed
   }
 
   async getBlockHeight(): Promise<number> {
