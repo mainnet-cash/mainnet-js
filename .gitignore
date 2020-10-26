@@ -4,7 +4,6 @@
 node_modules
 .env.testnet
 .env.mainnet
-bin
 generated/serve/*.log
 generated/client/*
 *.log
