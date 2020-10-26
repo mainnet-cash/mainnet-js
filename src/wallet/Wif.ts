@@ -136,24 +136,26 @@ export class WifWallet extends BaseWallet {
     return await new this()._fromId(walletId);
   }
 
-  public _fromId = async (
-    walletId: string,
-  ): Promise<this | Error> => {
-    let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
+  public _fromId = async (walletId: string): Promise<this | Error> => {
+    let [walletType, networkGiven, privateImport]: string[] = walletId.split(
+      ":"
+    );
     if (this.walletType != walletType) {
-        throw Error(
-          `Wallet type ${walletType} was passed to ${this.walletType} wallet`
-        );
-      }
+      throw Error(
+        `Wallet type ${walletType} was passed to ${this.walletType} wallet`
+      );
+    }
     if (networkPrefixMap[this.networkPrefix] != networkGiven) {
       throw Error(
-        `Network prefix ${networkGiven} to a ${networkPrefixMap[this.networkPrefix]} wallet`
+        `Network prefix ${networkGiven} to a ${
+          networkPrefixMap[this.networkPrefix]
+        } wallet`
       );
     }
     return this.initialize(privateImport);
   };
 
-  public static async named(name:string, dbName?: string, force?: boolean) {
+  public static async named(name: string, dbName?: string, force?: boolean) {
     return new this()._named(name, dbName, force);
   }
 

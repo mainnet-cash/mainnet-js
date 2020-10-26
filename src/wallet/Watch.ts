@@ -1,13 +1,13 @@
 import { BaseWallet } from "./Base";
 import { UnitEnum, WalletTypeEnum } from "./enum";
 import { qrAddress, Image } from "../qr/Qr";
-import { networkPrefixMap  } from "./createWallet";
+import { networkPrefixMap } from "./createWallet";
 
 import {
-    balanceFromSatoshi,
-    balanceResponseFromSatoshi,
-    BalanceResponse,
-  } from "../util/balanceObjectFromSatoshi";
+  balanceFromSatoshi,
+  balanceResponseFromSatoshi,
+  BalanceResponse,
+} from "../util/balanceObjectFromSatoshi";
 
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
@@ -28,7 +28,7 @@ export class WatchWallet extends BaseWallet {
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
       addressBase = addressComponents.shift() as string;
-      this.cashaddr = addressBase
+      this.cashaddr = addressBase;
     } else {
       addressPrefix = addressComponents.shift() as string;
       addressBase = addressComponents.shift() as string;
@@ -39,24 +39,26 @@ export class WatchWallet extends BaseWallet {
           );
         }
       }
-      this.cashaddr = `${addressPrefix}:${addressBase}`
+      this.cashaddr = `${addressPrefix}:${addressBase}`;
     }
 
     return this;
   }
 
-  public _fromId = async (
-    walletId: string,
-  ): Promise<this | Error> => {
-    let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
+  public _fromId = async (walletId: string): Promise<this | Error> => {
+    let [walletType, networkGiven, privateImport]: string[] = walletId.split(
+      ":"
+    );
     if (this.walletType != walletType) {
-        throw Error(
-          `walletType ${walletType} passed to a ${this.walletType} wallet`
-        );
-      }
+      throw Error(
+        `walletType ${walletType} passed to a ${this.walletType} wallet`
+      );
+    }
     if (networkPrefixMap[this.networkPrefix] != networkGiven) {
       throw Error(
-        `Network prefix ${networkGiven} to a ${networkPrefixMap[this.networkPrefix]} wallet`
+        `Network prefix ${networkGiven} to a ${
+          networkPrefixMap[this.networkPrefix]
+        } wallet`
       );
     }
     return this.initialize(privateImport);
@@ -74,8 +76,8 @@ export class WatchWallet extends BaseWallet {
     return qrAddress(this.cashaddr as string);
   }
 
-  public getBalanceFromNetwork(): Promise<number>{
-      return this.provider!.getBalance(this.cashaddr!)
+  public getBalanceFromNetwork(): Promise<number> {
+    return this.provider!.getBalance(this.cashaddr!);
   }
 
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
@@ -83,7 +85,9 @@ export class WatchWallet extends BaseWallet {
       const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
       return await balanceFromSatoshi(await this.getBalanceFromNetwork(), unit);
     } else {
-      return await balanceResponseFromSatoshi(await this.getBalanceFromNetwork());
+      return await balanceResponseFromSatoshi(
+        await this.getBalanceFromNetwork()
+      );
     }
   }
 
@@ -96,7 +100,9 @@ export class WatchWallet extends BaseWallet {
   }
 
   generate(): Promise<this | Error> {
-    return new Promise(()=>{return this});
+    return new Promise(() => {
+      return this;
+    });
   }
 }
 

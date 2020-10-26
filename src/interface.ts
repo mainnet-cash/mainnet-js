@@ -23,7 +23,6 @@ export interface Utxo {
   coinbase?: boolean;
 }
 
-
 export interface ElectrumBalance {
   confirmed: number;
   unconfirmed: number;

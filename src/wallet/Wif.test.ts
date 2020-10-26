@@ -90,7 +90,7 @@ describe(`Tests named wallet creation`, () => {
       await RegTestWifWallet.named("duplicate_name", "dup_test", true);
     } catch (e) {
       expect(e.message).toBe(
-        'A wallet with the name duplicate_name already exists in dup_test'
+        "A wallet with the name duplicate_name already exists in dup_test"
       );
     }
   });

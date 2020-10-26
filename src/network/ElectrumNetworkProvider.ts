@@ -159,7 +159,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       address
     )) as ElectrumBalance;
 
-    return result.confirmed + result.unconfirmed
+    return result.confirmed + result.unconfirmed;
   }
 
   async getBlockHeight(): Promise<number> {

@@ -5,7 +5,6 @@ import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
 
-
 describe(`Test WifWallet library`, () => {
   /**
    * Create the browser and page context
@@ -141,8 +140,6 @@ describe(`Test WifWallet library`, () => {
       );
     }
   });
-
-  
 
   test("Send a transaction on the regression network", async () => {
     // Build Alice's wallet from WifWallet Import Format string, send some sats
