@@ -21,32 +21,32 @@ test("Create a watch only mainnet wallet from string id", async () => {
 });
 
 test("Should get the regtest wallet balance", async () => {
-    // Build Alice's wallet from WifWallet Import Format string, send some sats
-    if (!process.env.ADDRESS) {
-      throw Error("Attempted to pass an empty address");
-    } else {
-      let alice = (await RegTestWatchWallet.initialize(
-        process.env.ADDRESS
-      )) as RegTestWatchWallet; // insert WIF from #1
-      // Build Bob's wallet from a public address, check his balance.
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * bchParam.subUnits
-      );
-    }
-  });
+  // Build Alice's wallet from WifWallet Import Format string, send some sats
+  if (!process.env.ADDRESS) {
+    throw Error("Attempted to pass an empty address");
+  } else {
+    let alice = (await RegTestWatchWallet.initialize(
+      process.env.ADDRESS
+    )) as RegTestWatchWallet; // insert WIF from #1
+    // Build Bob's wallet from a public address, check his balance.
+    const aliceBalance = (await alice.getBalance()) as BalanceResponse;
+    expect(aliceBalance.bch).toBeGreaterThan(5000);
+    expect(await alice.getBalance("sat")).toBeGreaterThan(
+      5000 * bchParam.subUnits
+    );
+  }
+});
 
-  test("Should get the testnet wallet balance", async () => {
-    // Build Alice's wallet from WifWallet Import Format string, send some sats
-    if (!process.env.PRIVATE_WIF) {
-      throw Error("Attempted to pass an empty WIF");
-    } else {
-      let alice = (await TestNetWatchWallet.initialize(
-        process.env.ALICE_TESTNET_ADDRESS
-      )) as TestNetWatchWallet; // insert WIF from #1
-      // Build Bob's wallet from a public address, check his balance.
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.sat).toBeGreaterThan(2000);
-    }
-  });
+test("Should get the testnet wallet balance", async () => {
+  // Build Alice's wallet from WifWallet Import Format string, send some sats
+  if (!process.env.PRIVATE_WIF) {
+    throw Error("Attempted to pass an empty WIF");
+  } else {
+    let alice = (await TestNetWatchWallet.initialize(
+      process.env.ALICE_TESTNET_ADDRESS
+    )) as TestNetWatchWallet; // insert WIF from #1
+    // Build Bob's wallet from a public address, check his balance.
+    const aliceBalance = (await alice.getBalance()) as BalanceResponse;
+    expect(aliceBalance.sat).toBeGreaterThan(2000);
+  }
+});

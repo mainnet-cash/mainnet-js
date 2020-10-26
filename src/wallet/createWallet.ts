@@ -62,7 +62,7 @@ export async function createWallet(body: WalletRequest): Promise<any> {
   let networkType = body.network ? body.network : "mainnet";
 
   // Named wallets are saved in the database
-  if (body.name && body.name.length>0) {
+  if (body.name && body.name.length > 0) {
     wallet = await walletClassMap[walletType][networkType]().named(body.name);
     if (wallet.network != networkType) {
       throw Error(
@@ -79,10 +79,9 @@ export async function createWallet(body: WalletRequest): Promise<any> {
   // This handles unsaved/unnamed wallets
   else {
     let walletClass = walletClassMap[walletType][networkType]();
-    wallet = await new walletClass()
-    return wallet.generate()
+    wallet = await new walletClass();
+    return wallet.generate();
   }
-  
 }
 
 /**

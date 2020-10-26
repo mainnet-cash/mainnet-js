@@ -4,14 +4,18 @@ import { RegTestWifWallet, TestNetWifWallet, WifWallet } from "../wallet/Wif";
  * @jest-environment jsdom
  */
 test("Store and retrieve a Regtest wallet", async () => {
-
-  let w1 = await RegTestWifWallet.named("Basic Regtest","db-test") as RegTestWifWallet;
+  let w1 = (await RegTestWifWallet.named(
+    "Basic Regtest",
+    "db-test"
+  )) as RegTestWifWallet;
   expect(w1.name).toBe("Basic Regtest");
   expect(w1.network).toBe("regtest");
   expect(w1.walletType).toBe("wif");
-  expect(w1.toString().slice(0,13)).toBe("wif:regtest:c");
-  let w1Again = await RegTestWifWallet.named("Basic Regtest","db-test") as RegTestWifWallet;
-
+  expect(w1.toString().slice(0, 13)).toBe("wif:regtest:c");
+  let w1Again = (await RegTestWifWallet.named(
+    "Basic Regtest",
+    "db-test"
+  )) as RegTestWifWallet;
 
   expect(w1.name).toBe(w1Again.name);
   expect(w1.network).toBe(w1Again.network);
@@ -21,14 +25,18 @@ test("Store and retrieve a Regtest wallet", async () => {
 });
 
 test("Store and retrieve a TestNet wallet", async () => {
-
-  let w1 = await TestNetWifWallet.named("Basic Testnet Wallet","db-test") as TestNetWifWallet;
+  let w1 = (await TestNetWifWallet.named(
+    "Basic Testnet Wallet",
+    "db-test"
+  )) as TestNetWifWallet;
   expect(w1.name).toBe("Basic Testnet Wallet");
   expect(w1.network).toBe("testnet");
   expect(w1.walletType).toBe("wif");
-  expect(w1.toString().slice(0,13)).toBe("wif:testnet:c");
-  let w1Again = await TestNetWifWallet.named("Basic Testnet Wallet","db-test") as TestNetWifWallet;
-
+  expect(w1.toString().slice(0, 13)).toBe("wif:testnet:c");
+  let w1Again = (await TestNetWifWallet.named(
+    "Basic Testnet Wallet",
+    "db-test"
+  )) as TestNetWifWallet;
 
   expect(w1.name).toBe(w1Again.name);
   expect(w1.network).toBe(w1Again.network);
@@ -38,14 +46,12 @@ test("Store and retrieve a TestNet wallet", async () => {
 });
 
 test("Store and retrieve a wif wallet", async () => {
-
-  let w1 = await WifWallet.named("Wif Wallet","db-test") as WifWallet;
+  let w1 = (await WifWallet.named("Wif Wallet", "db-test")) as WifWallet;
   expect(w1.name).toBe("Wif Wallet");
   expect(w1.network).toBe("mainnet");
   expect(w1.walletType).toBe("wif");
-  expect(w1.toString().slice(0,12)).toBe("wif:mainnet:");
-  let w1Again = await WifWallet.named("Wif Wallet","db-test") as WifWallet;
-
+  expect(w1.toString().slice(0, 12)).toBe("wif:mainnet:");
+  let w1Again = (await WifWallet.named("Wif Wallet", "db-test")) as WifWallet;
 
   expect(w1.name).toBe(w1Again.name);
   expect(w1.network).toBe(w1Again.network);

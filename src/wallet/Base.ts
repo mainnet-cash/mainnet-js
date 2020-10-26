@@ -98,7 +98,7 @@ export class BaseWallet implements WalletInterface {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
-    this.name = name
+    this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
     await db.init();
