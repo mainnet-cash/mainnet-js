@@ -54,6 +54,7 @@ jobs:
         run: |
           yarn
           yarn format
+          yarn build
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
         with:
@@ -65,7 +66,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [chromium] # firefox, webkit
         os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     steps:
@@ -73,11 +74,11 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 14
-    - run: docker/build.sh
     - uses: microsoft/playwright-github-action@v1
     - run: npm install
     - run: npm run build
     - run: npm run test
+    - run: npm run test:api
     - run: npm run test:browser
       env:
         BROWSER: ${{ matrix.browser }}
@@ -89,8 +90,7 @@ jobs:
     - uses: actions/checkout@master
     - uses: actions/setup-node@master
       with:
-        node-version: '14'
-    - run: docker/build.sh        
+        node-version: '14'     
     - run: npm install
     - uses: paambaati/codeclimate-action@v2.5.7
       env:

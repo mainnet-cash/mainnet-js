@@ -69,7 +69,7 @@ describe(`Wallet should function in the browser`, () => {
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Network prefix regtest to a bchtest wallet"
+        "page.evaluate: Evaluation failed: Error: Network prefix regtest to a testnet wallet"
       );
     }
   });
@@ -97,11 +97,11 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should create mainnet wallet`, async () => {
-    let params = { name: "Alice's TestNet", type: "wif", network: "mainnet" };
     const result = await page.evaluate(async (p) => {
-      return await createWalletResponse(p);
-    }, params);
-    expect(result.cashaddr.slice(0, 13)).toBe("bitcoincash:q");
+      let w = await Wallet.newRandom();
+      return w.getDepositAddress();
+    });
+    expect(result.slice(0, 13)).toBe("bitcoincash:q");
   });
 
   test(`Should return deposit address from testnet wallet`, async () => {
@@ -127,7 +127,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await TestNetWallet.fromWif(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.slice(0, 9)).toBe("bchtest:q");
   });
 
   test(`Should return testnet balance`, async () => {
