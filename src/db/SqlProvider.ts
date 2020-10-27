@@ -52,7 +52,7 @@ export default class SqlProvider implements StorageProvider {
   public async getWallet(name: string): Promise<WalletI | undefined> {
     let text = format("SELECT * FROM %I WHERE name = $1", this.dbName);
     let result = await this.db.query(text, [name]);
-    let w = await result.rows[0];
+    let w = result.rows[0];
     return w;
   }
 }

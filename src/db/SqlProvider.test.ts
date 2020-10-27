@@ -1,5 +1,5 @@
 import { default as SqlProvider } from "./SqlProvider";
-import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
+import { RegTestWifWallet, TestNetWifWallet, WifWallet } from "../wallet/Wif";
 
 /**
  * @jest-environment jsdom
@@ -7,59 +7,67 @@ import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new SqlProvider("regtest2");
   await db.init();
-  let w1 = await RegTestWallet.newRandom("dave");
-  await db.addWallet(w1.name, w1.getSerializedWallet());
+  let w1 = await RegTestWifWallet.newRandom();
+  w1.name = "dave";
+  await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet("dave");
   expect(w1.name).toBe(w2!.name);
-  expect(w1.getSerializedWallet()).toBe(w2!.wallet);
+  expect(w1.toString()).toBe(w2!.wallet);
   db.close();
 });
 
 test("Store and retrieve a Testnet wallet", async () => {
   let db = new SqlProvider("testnet");
   await db.init();
-  let w1 = await TestNetWallet.newRandom("dave");
-  await db.addWallet(w1.name, w1.getSerializedWallet());
+  let w1 = await TestNetWifWallet.newRandom();
+  w1.name = "dave";
+  await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet(w1.name);
   expect(w1.name).toBe(w2!.name);
-  expect(w1.getSerializedWallet()).toBe(w2!.wallet);
+  expect(w1.toString()).toBe(w2!.wallet);
+  db.close();
+});
+
+test("Store and retrieve a Wif wallet", async () => {
+  let db = new SqlProvider("mainnet");
+  await db.init();
+  let w1 = await WifWallet.newRandom();
+  w1.name = "dave";
+  await db.addWallet(w1.name, w1.toString());
+  let w2 = await db.getWallet(w1.name);
+  expect(w1.name).toBe(w2!.name);
+  expect(w1.toString()).toBe(w2!.wallet);
   db.close();
 });
 
 test("Should handle basic sql injection", async () => {
   let sh = new SqlProvider("still_here");
   await sh.init();
-  let w1 = await Wallet.newRandom();
-  await sh.addWallet("okay", w1.getSerializedWallet());
+  let w1 = await WifWallet.newRandom();
+  await sh.addWallet("okay", w1.toString());
 
   let db = new SqlProvider(";DELETE table still_here");
   await db.init();
-  let alice = await RegTestWallet.newRandom();
-  let bob = await RegTestWallet.newRandom();
-  let charlie = await RegTestWallet.newRandom();
-  await db.addWallet("alice", alice.getSerializedWallet());
-  await db.addWallet("bob", bob.getSerializedWallet());
-  await db.addWallet("charlie", charlie.getSerializedWallet());
+  let alice = await RegTestWifWallet.newRandom();
+  let bob = await RegTestWifWallet.newRandom();
+  let charlie = await RegTestWifWallet.newRandom();
+  await db.addWallet("alice", alice.toString());
+  await db.addWallet("bob", bob.toString());
+  await db.addWallet("charlie", charlie.toString());
   let beforeWallets = await db.getWallets();
   expect(beforeWallets.length).toBe(3);
-  let dave = await RegTestWallet.newRandom();
-  await db.addWallet(
-    "; DELETE * FROM wallet limit 10;",
-    dave.getSerializedWallet()
-  );
+  let dave = await RegTestWifWallet.newRandom();
+  await db.addWallet("; DELETE * FROM wallet limit 10;", dave.toString());
   await db.addWallet(
     "' or 1=1; DELETE * FROM wallet limit 10;",
-    dave.getSerializedWallet()
+    dave.toString()
   );
   await db.addWallet(
     "; DELETE FROM wallet WHERE GUID ='' OR '' = '';",
-    dave.getSerializedWallet()
+    dave.toString()
   );
-  await db.addWallet("' or 1=1; TRUNCATE wallet;", dave.getSerializedWallet());
-  await db.addWallet(
-    "' or 1=1; DROP table Wallet;",
-    dave.getSerializedWallet()
-  );
+  await db.addWallet("' or 1=1; TRUNCATE wallet;", dave.toString());
+  await db.addWallet("' or 1=1; DROP table Wallet;", dave.toString());
   let wallets = await db.getWallets();
   expect(wallets.length).toBe(8);
   let otherTableWallets = await sh.getWallets();

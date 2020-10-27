@@ -18,7 +18,6 @@ describe("Test Mine Endpoints", () => {
    */
   it("Should mine a number of blocks to a given address", async () => {
     const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
-      name: "Bobs Regtest One Time Wallet",
       type: "wif",
       network: "regtest",
     });

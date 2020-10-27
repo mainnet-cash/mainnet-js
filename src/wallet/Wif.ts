@@ -16,6 +16,8 @@ import { BaseWallet } from "./Base";
 
 import { PrivateKey } from "../interface";
 
+import { networkPrefixMap } from "./createWallet";
+
 import {
   SendMaxRequest,
   SendRequest,
@@ -33,8 +35,6 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { getStorageProvider } from "../db/util";
-import { fromId, fromWif, named, watchOnly, newRandom } from "./createWallet";
 import { qrAddress, Image } from "../qr/Qr";
 import { asSendRequestObject } from "../util/asSendRequestObject";
 import { checkWifNetwork } from "../util/checkWifNetwork";
@@ -64,44 +64,30 @@ export class WifWallet extends BaseWallet {
     this.walletType = WalletTypeEnum.Wif;
   }
 
-  // Initialize wallet from a cash addr
-  public async initializeWatchOnly(address: string) {
-    if (address.startsWith("bitcoincash:") && this.networkType === "testnet") {
-      throw Error("a testnet address cannot be watched from a mainnet Wallet");
-    } else if (
-      !address.startsWith("bitcoincash:") &&
-      this.networkType === "mainnet"
-    ) {
-      throw Error("a mainnet address cannot be watched from a testnet Wallet");
-    }
-    this.cashaddr = address;
-  }
-
   // Initialize wallet from Wallet Import Format
-  public async initializeWIF(
-    walletImportFormatString: string
-  ): Promise<void | Error> {
+  public async initialize(secret: string): Promise<this | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
-    let result = decodePrivateKeyWif(sha256, walletImportFormatString);
+    let result = decodePrivateKeyWif(sha256, secret);
 
     const hasError = typeof result === "string";
     if (hasError) {
       throw Error(result as string);
     }
-    checkWifNetwork(walletImportFormatString, this.networkType);
+    checkWifNetwork(secret, this.networkType);
     let resultData: PrivateKey = result as PrivateKey;
     this.privateKey = resultData.privateKey;
-    this.privateKeyWif = walletImportFormatString;
+    this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
     this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
     )) as string;
+    return this;
   }
 
-  public async generateWif(): Promise<void | Error> {
+  public async generate(): Promise<this | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
@@ -128,6 +114,7 @@ export class WifWallet extends BaseWallet {
       this.privateKey,
       this.networkPrefix
     )) as string;
+    return this;
   }
 
   public async send(
@@ -143,6 +130,40 @@ export class WifWallet extends BaseWallet {
     } catch (e) {
       throw e;
     }
+  }
+
+  public static async fromId(walletId: string) {
+    return await new this()._fromId(walletId);
+  }
+
+  public _fromId = async (walletId: string): Promise<this | Error> => {
+    let [walletType, networkGiven, privateImport]: string[] = walletId.split(
+      ":"
+    );
+    if (this.walletType != walletType) {
+      throw Error(
+        `Wallet type ${walletType} was passed to ${this.walletType} wallet`
+      );
+    }
+    if (networkPrefixMap[this.networkPrefix] != networkGiven) {
+      throw Error(
+        `Network prefix ${networkGiven} to a ${
+          networkPrefixMap[this.networkPrefix]
+        } wallet`
+      );
+    }
+    return this.initialize(privateImport);
+  };
+
+  public static async named(name: string, dbName?: string, force?: boolean) {
+    return new this()._named(name, dbName, force);
+  }
+
+  public static async newRandom(name = "", dbName?: string) {
+    return new this()._newRandom(name, dbName);
+  }
+  public static async initialize(secret) {
+    return new this().initialize(secret);
   }
 
   public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
@@ -168,19 +189,6 @@ export class WifWallet extends BaseWallet {
       unit: "sat",
     });
     return await this._processSendRequests([sendRequest], true);
-  }
-
-  public getSerializedWallet() {
-    switch (this.walletType) {
-      case "wif": {
-        return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
-      }
-      case "watch": {
-        return `${this.walletType}:${this.network}:${this.cashaddr}`;
-      }
-      default:
-        return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
-    }
   }
 
   public getDepositAddress() {
@@ -218,7 +226,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public toString() {
-    return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
+    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 
   public async getMaxAmountToSend({
@@ -355,90 +363,16 @@ export class WifWallet extends BaseWallet {
   }
 }
 
-export class Wallet extends WifWallet {
-  constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.mainnet);
-  }
-
-  // TODO refactor
-  public static async fromWif(walletImportFormatString: string) {
-    return await fromWif(
-      walletImportFormatString,
-      name,
-      CashAddressNetworkPrefix.mainnet
-    );
-  }
-  public static async fromId(walletId: string, name = "") {
-    return await fromId(walletId, name, CashAddressNetworkPrefix.mainnet);
-  }
-  public static async named(name = "", dbName?) {
-    dbName = dbName ? dbName : CashAddressNetworkPrefix.mainnet;
-    return await named(name, dbName, CashAddressNetworkPrefix.mainnet);
-  }
-  public static async newRandom(name = "", dbName?) {
-    dbName = dbName ? dbName : CashAddressNetworkPrefix.mainnet;
-    return await newRandom(name, dbName, CashAddressNetworkPrefix.mainnet);
-  }
-  public static async watchOnly(address: string, name = "") {
-    return await watchOnly(address, name, CashAddressNetworkPrefix.mainnet);
-  }
-}
-
-export class TestNetWallet extends WifWallet {
+export class TestNetWifWallet extends WifWallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet);
   }
-
-  // TODO refactor
-  public static async fromWif(walletImportFormatString: string) {
-    return await fromWif(
-      walletImportFormatString,
-      name,
-      CashAddressNetworkPrefix.testnet
-    );
-  }
-  public static async fromId(walletId: string, name = "") {
-    return await fromId(walletId, name, CashAddressNetworkPrefix.testnet);
-  }
-  public static async named(name = "", dbName?) {
-    dbName = dbName ? dbName : CashAddressNetworkPrefix.testnet;
-    return await named(name, dbName, CashAddressNetworkPrefix.testnet);
-  }
-  public static async newRandom(name = "", dbName?) {
-    dbName = dbName ? dbName : CashAddressNetworkPrefix.testnet;
-    return await newRandom(name, dbName, CashAddressNetworkPrefix.testnet);
-  }
-  public static async watchOnly(address: string, name = "") {
-    return await watchOnly(address, name, CashAddressNetworkPrefix.testnet);
-  }
 }
 
-export class RegTestWallet extends WifWallet {
+export class RegTestWifWallet extends WifWallet {
+  static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
-  }
-
-  // TODO refactor
-  public static async fromWif(walletImportFormatString: string, name = "") {
-    return await fromWif(
-      walletImportFormatString,
-      name,
-      CashAddressNetworkPrefix.regtest
-    );
-  }
-  public static async fromId(walletId: string, name = "") {
-    return await fromId(walletId, name, CashAddressNetworkPrefix.regtest);
-  }
-  public static async named(name = "", dbName?) {
-    dbName = dbName ? dbName : CashAddressNetworkPrefix.regtest;
-    return await named(name, dbName, CashAddressNetworkPrefix.regtest);
-  }
-  public static async newRandom(name = "", dbName?) {
-    dbName = dbName ? dbName : CashAddressNetworkPrefix.regtest;
-    return await newRandom(name, dbName, CashAddressNetworkPrefix.regtest);
-  }
-  public static async watchOnly(address: string, name = "") {
-    return await watchOnly(address, name, CashAddressNetworkPrefix.regtest);
   }
 }
