@@ -101,6 +101,7 @@ export class BaseWallet implements WalletInterface {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
+    checkContextSafety(this);
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
@@ -137,4 +138,14 @@ export class BaseWallet implements WalletInterface {
       return this.generate();
     }
   };
+}
+
+const checkContextSafety = function(wallet: BaseWallet){
+     if(process){
+       if(process.env.ALLOW_MAINNET_USER_WALLETS!==`true`){
+        if(wallet.networkType===NetworkType.Mainnet){
+          throw Error(`Refusing to save wallet in an open public database, set ALLOW_MAINNET_USER_WALLETS="true" if this service has been secured`)
+        }
+       }
+     }
 }

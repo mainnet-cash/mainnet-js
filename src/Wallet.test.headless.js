@@ -177,7 +177,7 @@ describe(`Wallet should function in the browser`, () => {
               unit: "sat",
             },
           ]);
-          return bob.sendMax({ cashaddr: alice.cashaddr });
+          return bob.sendMax(alice.cashaddr);
         },
         [process.env.ALICE_TESTNET_WALLET_ID]
       );
