@@ -3,7 +3,6 @@
 
 // import { getStorageProvider } from "../db/util";
 import { NetworkEnum, WalletTypeEnum } from "./enum";
-import { WatchWallet, TestNetWatchWallet, RegTestWatchWallet } from "./Watch";
 import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
 
 interface WalletRequest {
