@@ -34,7 +34,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should load module`, async () => {
     expect(page).not.toBeNull();
     const result = await page.evaluate(async () => {
-      return await typeof TestNetWifWallet;
+      return await typeof TestNetWallet;
     });
     expect(result).toEqual("function");
   });
@@ -65,7 +65,7 @@ describe(`Wallet should function in the browser`, () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
-        return await TestNetWifWallet.fromId(`wif:regtest:${wif}`);
+        return await TestNetWallet.fromId(`wif:regtest:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
@@ -78,11 +78,11 @@ describe(`Wallet should function in the browser`, () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
-        return await TestNetWifWallet.fromId(`hd:testnet:${wif}`);
+        return await TestNetWallet.fromId(`hd:testnet:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to wif wallet"
+        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to single address wallet"
       );
     }
   });
@@ -90,7 +90,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create a random testnet wallet`, async () => {
     let params = {};
     const result = await page.evaluate(async (p) => {
-      let w = await TestNetWifWallet.newRandom();
+      let w = await TestNetWallet.newRandom();
       return w.getDepositAddress();
     }, params);
     expect(result.slice(0, 9)).toBe("bchtest:q");
@@ -98,7 +98,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should create mainnet wallet`, async () => {
     const result = await page.evaluate(async (p) => {
-      let w = await WifWallet.newRandom();
+      let w = await Wallet.newRandom();
       return w.getDepositAddress();
     });
     expect(result.slice(0, 13)).toBe("bitcoincash:q");
@@ -106,7 +106,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await TestNetWifWallet.initialize(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
     expect(result.slice(0, 10)).toBe("bchtest:qp");
@@ -114,7 +114,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit qr from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await TestNetWifWallet.initialize(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositQr();
     }, process.env.PRIVATE_WIF);
     expect(
@@ -124,7 +124,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await TestNetWifWallet.initialize(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
     expect(result.slice(0, 9)).toBe("bchtest:q");
@@ -133,7 +133,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should return watch testnet balance`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
-        const alice = await TestNetWatchWallet.initialize(addr);
+        const alice = await TestNetWallet.watchOnly(addr);
         return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result).toBeGreaterThan(0);
@@ -148,7 +148,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should return testnet balance in usd`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
-        const alice = await TestNetWatchWallet.initialize(addr);
+        const alice = await TestNetWallet.watchOnly(addr);
         return alice.getBalance("usd");
       }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result).toBeGreaterThan(0);

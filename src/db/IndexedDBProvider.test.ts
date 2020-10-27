@@ -1,5 +1,5 @@
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
-import { RegTestWifWallet, TestNetWifWallet, WifWallet } from "../wallet/Wif";
+import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 
 /**
  * @jest-environment jsdom
@@ -7,7 +7,7 @@ import { RegTestWifWallet, TestNetWifWallet, WifWallet } from "../wallet/Wif";
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new IndexedDBProvider("regtest-db");
   await db.init();
-  let w1 = await RegTestWifWallet.newRandom();
+  let w1 = await RegTestWallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet("dave");
@@ -21,7 +21,7 @@ test("Store and retrieve a Testnet wallet", async () => {
   await db.init();
   // passing a name to newRandom should save the wallet,
   // but we want to save it manually in this case
-  let w1 = await TestNetWifWallet.newRandom();
+  let w1 = await TestNetWallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet("dave");
@@ -33,7 +33,7 @@ test("Store and retrieve a Testnet wallet", async () => {
 test("Store and retrieve a Mainnet wallet", async () => {
   let db = new IndexedDBProvider("mainnet-db");
   await db.init();
-  let w1 = await WifWallet.newRandom();
+  let w1 = await Wallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet(w1.name);
