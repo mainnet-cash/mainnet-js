@@ -19,7 +19,6 @@ import { PrivateKey } from "../interface";
 import { networkPrefixMap } from "./createWallet";
 
 import {
-  SendMaxRequest,
   SendRequest,
   SendRequestArray,
   SendResponse,
@@ -166,9 +165,9 @@ export class WifWallet extends BaseWallet {
     return new this().initialize(secret);
   }
 
-  public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
+  public async sendMax(cashaddr: string): Promise<SendResponse> {
     try {
-      let result = await this.sendMaxRaw(sendMaxRequest);
+      let result = await this.sendMaxRaw(cashaddr);
       let resp = new SendResponse({});
       resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
@@ -178,13 +177,13 @@ export class WifWallet extends BaseWallet {
     }
   }
 
-  public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
+  public async sendMaxRaw(cashaddr: string) {
     let maxSpendableAmount = await this.getMaxAmountToSend({});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
     }
     let sendRequest = new SendRequest({
-      cashaddr: sendMaxRequest.cashaddr,
+      cashaddr: cashaddr,
       value: maxSpendableAmount.sat,
       unit: "sat",
     });

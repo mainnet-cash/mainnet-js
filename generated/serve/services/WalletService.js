@@ -148,7 +148,7 @@ const sendMax = ({ sendMaxRequest }) =>
         throw Error("Could not derive wallet");
       }
       let cashaddr = sendMaxRequest.cashaddr;
-      let resp = await wallet.sendMax({ cashaddr: cashaddr });
+      let resp = await wallet.sendMax(cashaddr);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);

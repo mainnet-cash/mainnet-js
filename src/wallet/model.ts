@@ -40,14 +40,6 @@ export class UtxoResponse {
   "utxos"?: Array<UtxoItem>;
 }
 
-export class SendMaxRequest {
-  cashaddr: string;
-
-  constructor({ cashaddr }) {
-    this.cashaddr = cashaddr;
-  }
-}
-
 export class SendResponse {
   txId?: string;
   balance?: BalanceResponse;
