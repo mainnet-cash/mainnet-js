@@ -79,6 +79,7 @@ describe("Test Wallet Endpoints", () => {
   });
 
   it("Should error saving a named Mainnet wallet with the API", async () => {
+    process.env.ALLOW_MAINNET_USER_WALLETS = "false"
     let req = new mockApi.WalletRequest();
     req.name = "A simple Mainnet Wallet";
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
@@ -86,9 +87,8 @@ describe("Test Wallet Endpoints", () => {
 
     let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
-    console.log(JSON.stringify(resp))
     expect(resp.statusCode).toBe(500);
-    expect(resp.text).toBe("Refusing to save wallet in an open public database, set ALLOW_MAINNET_USER_WALLETS=\"true\" if this service has been secured");
+    expect(resp.text).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
   });
 
   it("Should create an unnamed Mainnet wallet with the API", async () => {
