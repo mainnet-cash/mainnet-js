@@ -45,11 +45,11 @@ describe(`Test Wallet library`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await RegTestWallet.fromWIF(
+      let alice = (await RegTestWallet.fromWIF(
         process.env.PRIVATE_WIF
-      ) as RegTestWallet; // insert WIF from #1
+      )) as RegTestWallet; // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
-      const aliceBalance = (await alice.getBalance() as BalanceResponse);
+      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
       expect(await alice.getBalance("sat")).toBeGreaterThan(
         5000 * bchParam.subUnits

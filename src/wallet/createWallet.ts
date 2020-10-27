@@ -36,7 +36,7 @@ var walletClassMap = {
     regtest: () => {
       return RegTestWallet;
     },
-  }
+  },
 };
 
 export const networkPrefixMap = {

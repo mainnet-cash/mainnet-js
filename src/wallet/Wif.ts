@@ -169,7 +169,8 @@ export class Wallet extends BaseWallet {
     }
     if (networkPrefixMap[this.networkPrefix] != networkGiven) {
       throw Error(
-        `Network prefix ${networkGiven} to a ${networkPrefixMap[this.networkPrefix]
+        `Network prefix ${networkGiven} to a ${
+          networkPrefixMap[this.networkPrefix]
         } wallet`
       );
     }
@@ -179,7 +180,7 @@ export class Wallet extends BaseWallet {
       case "watch":
         return this.watchOnly(privateImport);
       case "seed":
-        throw new Error("Not implemented")
+        throw new Error("Not implemented");
       default:
         return this.fromWIF(privateImport);
     }

@@ -1,8 +1,6 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
-import { bchParam } from "../chain"
-import {
-  BalanceResponse,
-} from "../util/balanceObjectFromSatoshi";
+import { bchParam } from "../chain";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
@@ -60,7 +58,9 @@ describe(`Test creation of wallet from walletId`, () => {
           "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
       } catch (e) {
-        expect(e.message).toBe("Wallet type hd was passed to single address wallet");
+        expect(e.message).toBe(
+          "Wallet type hd was passed to single address wallet"
+        );
       }
     });
 
@@ -71,7 +71,9 @@ describe(`Test creation of wallet from walletId`, () => {
           "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
       } catch (e) {
-        expect(e.message).toBe("Wallet type q2k was passed to single address wallet");
+        expect(e.message).toBe(
+          "Wallet type q2k was passed to single address wallet"
+        );
       }
     });
   });
@@ -104,7 +106,7 @@ describe(`Watch only Wallets`, () => {
   test("Create a watch only testnet wallet from string id", async () => {
     let w = (await TestNetWallet.fromId(
       "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
-    ) as Wallet);
+    )) as Wallet;
     expect(w.network).toBe("testnet");
     expect(w.networkPrefix).toBe("bchtest");
     expect(w.cashaddr).toBe("qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22");

@@ -13,7 +13,6 @@ import { browserNotSupported } from "../util/browserNotSupported";
 import { StorageProvider } from "../db";
 
 export default interface WalletInterface {
-  
   /**
    * generate should randomly create a new wallet
    * @returns A randomly generated instance.
