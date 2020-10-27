@@ -13,7 +13,7 @@ export async function getUsdRate(): Promise<number> {
       );
       return response.data["data"]["BCH"];
     } catch (e2) {
-      return e2
+      return e2;
     }
   }
 }

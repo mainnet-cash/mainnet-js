@@ -140,12 +140,14 @@ export class BaseWallet implements WalletInterface {
   };
 }
 
-const checkContextSafety = function(wallet: BaseWallet){
-     if(process){
-       if(process.env.ALLOW_MAINNET_USER_WALLETS!==`true`){
-        if(wallet.networkType===NetworkType.Mainnet){
-          throw Error(`Refusing to save wallet in an open public database, set ALLOW_MAINNET_USER_WALLETS="true" if this service has been secured`)
-        }
-       }
-     }
-}
+const checkContextSafety = function (wallet: BaseWallet) {
+  if (process) {
+    if (process.env.ALLOW_MAINNET_USER_WALLETS !== `true`) {
+      if (wallet.networkType === NetworkType.Mainnet) {
+        throw Error(
+          `Refusing to save wallet in an open public database, set ALLOW_MAINNET_USER_WALLETS="true" if this service has been secured`
+        );
+      }
+    }
+  }
+};
