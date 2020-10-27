@@ -93,6 +93,7 @@ jobs:
       with:
         node-version: '14'     
     - run: npm install
+    - run: npm run build
     - uses: paambaati/codeclimate-action@v2.5.7
       with:
         coverageCommand: npm run coverage

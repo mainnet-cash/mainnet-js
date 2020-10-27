@@ -141,11 +141,11 @@ export class BaseWallet implements WalletInterface {
 }
 
 const checkContextSafety = function (wallet: BaseWallet) {
-  if (process) {
-    if (process.env.ALLOW_MAINNET_USER_WALLETS !== `true`) {
+  if (typeof process !== "undefined") {
+    if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.networkType === NetworkType.Mainnet) {
         throw Error(
-          `Refusing to save wallet in an open public database, set ALLOW_MAINNET_USER_WALLETS="true" if this service has been secured`
+          `Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private`
         );
       }
     }

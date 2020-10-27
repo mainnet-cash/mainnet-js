@@ -45,6 +45,7 @@ test("Store and retrieve a TestNet wallet", async () => {
   expect(w1.toString()).toBe(w1Again.toString());
 });
 
+
 test("Store and retrieve a wif wallet", async () => {
   let w1 = (await WifWallet.named("Wif Wallet", "db-test")) as WifWallet;
   expect(w1.name).toBe("Wif Wallet");
@@ -58,4 +59,16 @@ test("Store and retrieve a wif wallet", async () => {
   expect(w1.cashaddr).toBe(w1Again.cashaddr);
   expect(w1.privateKeyWif).toBe(w1Again.privateKeyWif);
   expect(w1.toString()).toBe(w1Again.toString());
+});
+
+test("Expect Error passing mainnet wallet to error", async () => {
+  expect.assertions(1);
+  try {
+    process.env.ALLOW_MAINNET_USER_WALLETS="false"
+    await WifWallet.named("Wif Wallet", "db-test");
+  } catch (e) {
+    expect(e.message).toBe(
+      "Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private"
+    );
+  }
 });
