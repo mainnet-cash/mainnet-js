@@ -1,5 +1,5 @@
 module.exports = {
-  rootDir: "./",
+  rootDir: "../",
   collectCoverage: true,
 
   collectCoverageFrom: [
@@ -12,7 +12,7 @@ module.exports = {
     ".*/src/.*\\.test\\.{ts,js}",
     ".*/src/.*\\.test\\.headless\\.js",
   ],
-  roots: ["<rootDir>/src"],
+  roots: ["<rootDir>/generated/serve/"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",

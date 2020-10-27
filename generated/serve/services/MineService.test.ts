@@ -4,11 +4,11 @@ var request = require("supertest");
 
 var app;
 
-describe("Post Endpoints", () => {
+describe("Test Mine Endpoints", () => {
+
   beforeAll(async function () {
     app = await server.getServer().launch();  
   });
-
   afterEach(function () {
     app.close();
   });
@@ -18,7 +18,6 @@ describe("Post Endpoints", () => {
    */
   it("Should mine a number of blocks to a given address", async () => {
     const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
-      name: "Bobs Regtest One Time Wallet",
       type: "wif",
       network: "regtest",
     });

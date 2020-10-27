@@ -5,15 +5,20 @@ export function checkWifNetwork(
   networkType: NetworkType
 ) {
   if (
-    (walletImportFormatString[0] === "L" ||
-      walletImportFormatString[0] === "K") &&
-    networkType !== NetworkType.Mainnet
+    !(
+      walletImportFormatString[0] === "L" || walletImportFormatString[0] === "K"
+    ) &&
+    networkType === NetworkType.Mainnet
   ) {
-    throw Error("attempted to pass a testnet Wif to a mainnet wallet");
+    throw Error(
+      `Mainnet type wif ${walletImportFormatString} passed, should start with L or K`
+    );
   } else if (
-    walletImportFormatString[0] === "c" &&
-    networkType !== NetworkType.Testnet
+    walletImportFormatString[0] !== "c" &&
+    networkType === NetworkType.Testnet
   ) {
-    throw Error("attempted to pass a mainnet Wif to a testnet wallet");
+    throw Error(
+      `Testnet type wif ${walletImportFormatString} passed, should start with c`
+    );
   }
 }
