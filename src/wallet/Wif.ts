@@ -165,7 +165,7 @@ export class WifWallet extends BaseWallet {
     return new this().initialize(secret);
   }
 
-  public async sendMax(cashaddr:string): Promise<SendResponse> {
+  public async sendMax(cashaddr: string): Promise<SendResponse> {
     try {
       let result = await this.sendMaxRaw(cashaddr);
       let resp = new SendResponse({});
@@ -177,7 +177,7 @@ export class WifWallet extends BaseWallet {
     }
   }
 
-  public async sendMaxRaw(cashaddr:string) {
+  public async sendMaxRaw(cashaddr: string) {
     let maxSpendableAmount = await this.getMaxAmountToSend({});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
