@@ -13,13 +13,7 @@ import { browserNotSupported } from "../util/browserNotSupported";
 import { StorageProvider } from "../db";
 
 export default interface WalletInterface {
-  /**
-   * initialize should create a wallet from the relevant data
-   * @param secret The private or relevant data for the wallet
-   * @returns An instance initialized with a secret.
-   */
-  initialize(secret: string): Promise<any>;
-
+  
   /**
    * generate should randomly create a new wallet
    * @returns A randomly generated instance.

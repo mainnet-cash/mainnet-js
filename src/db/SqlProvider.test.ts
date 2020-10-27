@@ -1,5 +1,5 @@
 import { default as SqlProvider } from "./SqlProvider";
-import { RegTestWifWallet, TestNetWifWallet, WifWallet } from "../wallet/Wif";
+import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 
 /**
  * @jest-environment jsdom
@@ -7,7 +7,7 @@ import { RegTestWifWallet, TestNetWifWallet, WifWallet } from "../wallet/Wif";
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new SqlProvider("regtest2");
   await db.init();
-  let w1 = await RegTestWifWallet.newRandom();
+  let w1 = await RegTestWallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet("dave");
@@ -19,7 +19,7 @@ test("Store and retrieve a Regtest wallet", async () => {
 test("Store and retrieve a Testnet wallet", async () => {
   let db = new SqlProvider("testnet");
   await db.init();
-  let w1 = await TestNetWifWallet.newRandom();
+  let w1 = await TestNetWallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet(w1.name);
@@ -31,7 +31,7 @@ test("Store and retrieve a Testnet wallet", async () => {
 test("Store and retrieve a Wif wallet", async () => {
   let db = new SqlProvider("mainnet");
   await db.init();
-  let w1 = await WifWallet.newRandom();
+  let w1 = await Wallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
   let w2 = await db.getWallet(w1.name);
@@ -43,20 +43,20 @@ test("Store and retrieve a Wif wallet", async () => {
 test("Should handle basic sql injection", async () => {
   let sh = new SqlProvider("still_here");
   await sh.init();
-  let w1 = await WifWallet.newRandom();
+  let w1 = await Wallet.newRandom();
   await sh.addWallet("okay", w1.toString());
 
   let db = new SqlProvider(";DELETE table still_here");
   await db.init();
-  let alice = await RegTestWifWallet.newRandom();
-  let bob = await RegTestWifWallet.newRandom();
-  let charlie = await RegTestWifWallet.newRandom();
+  let alice = await RegTestWallet.newRandom();
+  let bob = await RegTestWallet.newRandom();
+  let charlie = await RegTestWallet.newRandom();
   await db.addWallet("alice", alice.toString());
   await db.addWallet("bob", bob.toString());
   await db.addWallet("charlie", charlie.toString());
   let beforeWallets = await db.getWallets();
   expect(beforeWallets.length).toBe(3);
-  let dave = await RegTestWifWallet.newRandom();
+  let dave = await RegTestWallet.newRandom();
   await db.addWallet("; DELETE * FROM wallet limit 10;", dave.toString());
   await db.addWallet(
     "' or 1=1; DELETE * FROM wallet limit 10;",

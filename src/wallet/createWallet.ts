@@ -4,7 +4,7 @@
 // import { getStorageProvider } from "../db/util";
 import { NetworkEnum, WalletTypeEnum } from "./enum";
 import { WatchWallet, TestNetWatchWallet, RegTestWatchWallet } from "./Watch";
-import { WifWallet, TestNetWifWallet, RegTestWifWallet } from "./Wif";
+import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
 
 interface WalletRequest {
   name?: string;
@@ -28,26 +28,15 @@ var networkMap = {
 var walletClassMap = {
   wif: {
     mainnet: () => {
-      return WifWallet;
+      return Wallet;
     },
     testnet: () => {
-      return TestNetWifWallet;
+      return TestNetWallet;
     },
     regtest: () => {
-      return RegTestWifWallet;
+      return RegTestWallet;
     },
-  },
-  watch: {
-    mainnet: () => {
-      return WatchWallet;
-    },
-    testnet: () => {
-      return TestNetWatchWallet;
-    },
-    regtest: () => {
-      return RegTestWatchWallet;
-    },
-  },
+  }
 };
 
 export const networkPrefixMap = {
@@ -100,7 +89,7 @@ export async function createWalletResponse(
   }
 }
 
-function asJsonResponse(wallet: WifWallet): WalletResponse {
+function asJsonResponse(wallet: Wallet): WalletResponse {
   return {
     name: wallet.name,
     cashaddr: wallet.cashaddr as string,
@@ -118,6 +107,6 @@ export async function walletFromId(walletId: string): Promise<any> {
     type: WalletTypeEnum[walletType],
   } as WalletRequest;
   let wallet = await createWallet(walletRequest);
-  await wallet.initialize(walletData);
+  await wallet.fromWIF(walletData);
   return wallet;
 }
