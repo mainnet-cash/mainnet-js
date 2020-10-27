@@ -141,7 +141,7 @@ export class BaseWallet implements WalletInterface {
 }
 
 const checkContextSafety = function (wallet: BaseWallet) {
-  if (process) {
+  if (typeof process !== "undefined") {
     if (process.env.ALLOW_MAINNET_USER_WALLETS !== `true`) {
       if (wallet.networkType === NetworkType.Mainnet) {
         throw Error(
