@@ -98,7 +98,11 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should create mainnet wallet`, async () => {
     const result = await page.evaluate(async (p) => {
+<<<<<<< HEAD
       let w = await WifWallet.newRandom();
+=======
+      let w = await Wallet.newRandom();
+>>>>>>> upstream/feature/37-named-wallets
       return w.getDepositAddress();
     });
     expect(result.slice(0, 13)).toBe("bitcoincash:q");
