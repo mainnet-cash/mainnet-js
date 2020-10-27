@@ -44,18 +44,3 @@ test("Store and retrieve a TestNet wallet", async () => {
   expect(w1.privateKeyWif).toBe(w1Again.privateKeyWif);
   expect(w1.toString()).toBe(w1Again.toString());
 });
-
-test("Store and retrieve a wif wallet", async () => {
-  let w1 = (await WifWallet.named("Wif Wallet", "db-test")) as WifWallet;
-  expect(w1.name).toBe("Wif Wallet");
-  expect(w1.network).toBe("mainnet");
-  expect(w1.walletType).toBe("wif");
-  expect(w1.toString().slice(0, 12)).toBe("wif:mainnet:");
-  let w1Again = (await WifWallet.named("Wif Wallet", "db-test")) as WifWallet;
-
-  expect(w1.name).toBe(w1Again.name);
-  expect(w1.network).toBe(w1Again.network);
-  expect(w1.cashaddr).toBe(w1Again.cashaddr);
-  expect(w1.privateKeyWif).toBe(w1Again.privateKeyWif);
-  expect(w1.toString()).toBe(w1Again.toString());
-});
