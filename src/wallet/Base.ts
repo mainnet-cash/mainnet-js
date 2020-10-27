@@ -11,20 +11,23 @@ import { getStorageProvider } from "../db/util";
 import { NetworkEnum, NetworkType } from "./enum";
 import { browserNotSupported } from "../util/browserNotSupported";
 import { StorageProvider } from "../db";
-import { networkPrefixMap } from "./createWallet";
 
 export default interface WalletInterface {
   /**
+   * initialize should create a wallet from the relevant data
+   * @param secret The private or relevant data for the wallet
    * @returns An instance initialized with a secret.
    */
   initialize(secret: string): Promise<any>;
 
   /**
+   * generate should randomly create a new wallet
    * @returns A randomly generated instance.
    */
-  generate(secret: string): Promise<any>;
+  generate(): Promise<any>;
 
   /**
+   * toString should retrun a serialized representation of the Wallet
    * @returns returns a serialized representation of the wallet
    */
   toString(): string;
