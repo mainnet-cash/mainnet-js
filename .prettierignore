@@ -1,4 +1,6 @@
-bin/
+.github/
+.nyc_output/
+coverage/
 demo/
 dist/
 generated/

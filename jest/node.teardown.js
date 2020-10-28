@@ -1,10 +1,8 @@
-module.exports = async function () {
-  // stop bchd
-  global.bchDaemon.stdio.forEach((s) => s.pause());
-  global.bchDaemon.kill();
-  console.log("stopped bchd");
+const child_process = require("child_process");
 
-  global.mainnetServer.stdio.forEach((s) => s.pause());
-  global.mainnetServer.kill();
-  console.log("stopped express");
+module.exports = async function () {
+  // Stop regtest server
+  global.fulcrumRegtest.stdio.forEach((s) => s.pause());
+  child_process.spawnSync("./jest/docker/stop.sh", null, { shell: false });
+  console.log("stopped regtest node");
 };

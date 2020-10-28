@@ -1,5 +1,5 @@
-export * from './contractApi';
-import { ContractApi } from './contractApi';
+export * from './mineApi';
+import { MineApi } from './mineApi';
 export * from './walletApi';
 import { WalletApi } from './walletApi';
 import * as http from 'http';
@@ -13,4 +13,4 @@ export class HttpError extends Error {
 
 export { RequestFile } from '../model/models';
 
-export const APIS = [ContractApi, WalletApi];
+export const APIS = [MineApi, WalletApi];

@@ -1,15 +1,25 @@
 module.exports = {
+  verbose: true,
   rootDir: "../",
-  preset: "jest-puppeteer",
+  preset: "jest-playwright-preset",
+  collectCoverageFrom: [
+    "**/*.{js,jsx,ts}",
+    "!**/node_modules/**",
+    "!**/generated/**",
+  ],
+  coveragePathIgnorePatterns: [
+    ".*/src/.*\\.d\\.ts",
+    ".*/src/.*\\.test\\.{ts,js}",
+    ".*/src/.*\\.test\\.headless\\.js",
+  ],
   roots: ["<rootDir>/src"],
-  testMatch: ["**/?(*.)+(spec|test|headless).[t|j]s"],
-  testPathIgnorePatterns: ["/node_modules/", "dist"], //
-  testEnvironment: "jsdom",
-  setupFiles: ["fake-indexeddb/auto"],
-  setupFilesAfterEnv: ["<rootDir>/jest/browser.puppeteer.js"],
+  testMatch: ["**/?(*.)+(test.headless).[t|j]s"],
+  testPathIgnorePatterns: ["/node_modules/"], //
+  testEnvironment: "node",
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },
   globalSetup: "<rootDir>/jest/browser.setup.js",
-  globalTeardown: "<rootDir>/jest/node.teardown.js",
+  globalTeardown: "<rootDir>/jest/browser.teardown.js",
+  testTimeout: 30000,
 };

@@ -1,6 +1,18 @@
 module.exports = {
   rootDir: "./",
-  roots: ["<rootDir>/src", "<rootDir>/express/"],
+  collectCoverage: true,
+
+  collectCoverageFrom: [
+    "**/*.{js,jsx,ts}",
+    "!**/node_modules/**",
+    "!**/generated/**",
+  ],
+  coveragePathIgnorePatterns: [
+    ".*/src/.*\\.d\\.ts",
+    ".*/src/.*\\.test\\.{ts,js}",
+    ".*/src/.*\\.test\\.headless\\.js",
+  ],
+  roots: ["<rootDir>/src"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
@@ -14,5 +26,5 @@ module.exports = {
   globalTeardown: "<rootDir>/jest/node.teardown.js",
   verbose: true,
   maxConcurrency: 1,
-  testTimeout: 15000,
+  testTimeout: 65000,
 };

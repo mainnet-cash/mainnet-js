@@ -1,31 +1,26 @@
 import localVarRequest from 'request';
 
-export * from './amount';
+export * from './balanceRequest';
 export * from './balanceResponse';
-export * from './cashaddr';
-export * from './contract';
 export * from './depositAddressResponse';
 export * from './escrowAction';
 export * from './escrowFinalizeRequest';
 export * from './escrowRequest';
 export * from './escrowResponse';
 export * from './maxAmountToSendRequest';
-export * from './network';
-export * from './outpoint';
+export * from './mineRequest';
 export * from './scalableVectorGraphic';
 export * from './sendMaxRequest';
 export * from './sendMaxResponse';
 export * from './sendRequest';
 export * from './sendRequestItem';
 export * from './sendResponse';
+export * from './serializedSendRequest';
 export * from './serializedWallet';
-export * from './toCashaddr';
-export * from './transactionId';
 export * from './utxo';
 export * from './utxoResponse';
 export * from './walletRequest';
 export * from './walletResponse';
-export * from './walletType';
 export * from './zeroBalanceResponse';
 
 import * as fs from 'fs';
@@ -41,32 +36,27 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
-import { Amount } from './amount';
+import { BalanceRequest } from './balanceRequest';
 import { BalanceResponse } from './balanceResponse';
-import { Cashaddr } from './cashaddr';
-import { Contract } from './contract';
 import { DepositAddressResponse } from './depositAddressResponse';
 import { EscrowAction } from './escrowAction';
 import { EscrowFinalizeRequest } from './escrowFinalizeRequest';
 import { EscrowRequest } from './escrowRequest';
 import { EscrowResponse } from './escrowResponse';
 import { MaxAmountToSendRequest } from './maxAmountToSendRequest';
-import { Network } from './network';
-import { Outpoint } from './outpoint';
+import { MineRequest } from './mineRequest';
 import { ScalableVectorGraphic } from './scalableVectorGraphic';
 import { SendMaxRequest } from './sendMaxRequest';
 import { SendMaxResponse } from './sendMaxResponse';
 import { SendRequest } from './sendRequest';
 import { SendRequestItem } from './sendRequestItem';
 import { SendResponse } from './sendResponse';
+import { SerializedSendRequest } from './serializedSendRequest';
 import { SerializedWallet } from './serializedWallet';
-import { ToCashaddr } from './toCashaddr';
-import { TransactionId } from './transactionId';
 import { Utxo } from './utxo';
 import { UtxoResponse } from './utxoResponse';
 import { WalletRequest } from './walletRequest';
 import { WalletResponse } from './walletResponse';
-import { WalletType } from './walletType';
 import { ZeroBalanceResponse } from './zeroBalanceResponse';
 
 /* tslint:disable:no-unused-variable */
@@ -82,41 +72,35 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
-        "Amount.UnitEnum": Amount.UnitEnum,
-        "EscrowAction": EscrowAction,
-        "Network.NetworkEnum": Network.NetworkEnum,
-        "WalletRequest.TypeEnum": WalletRequest.TypeEnum,
+        "BalanceRequest.UnitEnum": BalanceRequest.UnitEnum,
+        "SendRequestItem.UnitEnum": SendRequestItem.UnitEnum,
+        "Utxo.UnitEnum": Utxo.UnitEnum,
         "WalletRequest.NetworkEnum": WalletRequest.NetworkEnum,
+        "WalletRequest.TypeEnum": WalletRequest.TypeEnum,
         "WalletResponse.NetworkEnum": WalletResponse.NetworkEnum,
-        "WalletType.TypeEnum": WalletType.TypeEnum,
 }
 
 let typeMap: {[index: string]: any} = {
-    "Amount": Amount,
+    "BalanceRequest": BalanceRequest,
     "BalanceResponse": BalanceResponse,
-    "Cashaddr": Cashaddr,
-    "Contract": Contract,
     "DepositAddressResponse": DepositAddressResponse,
     "EscrowFinalizeRequest": EscrowFinalizeRequest,
     "EscrowRequest": EscrowRequest,
     "EscrowResponse": EscrowResponse,
     "MaxAmountToSendRequest": MaxAmountToSendRequest,
-    "Network": Network,
-    "Outpoint": Outpoint,
+    "MineRequest": MineRequest,
     "ScalableVectorGraphic": ScalableVectorGraphic,
     "SendMaxRequest": SendMaxRequest,
     "SendMaxResponse": SendMaxResponse,
     "SendRequest": SendRequest,
     "SendRequestItem": SendRequestItem,
     "SendResponse": SendResponse,
+    "SerializedSendRequest": SerializedSendRequest,
     "SerializedWallet": SerializedWallet,
-    "ToCashaddr": ToCashaddr,
-    "TransactionId": TransactionId,
     "Utxo": Utxo,
     "UtxoResponse": UtxoResponse,
     "WalletRequest": WalletRequest,
     "WalletResponse": WalletResponse,
-    "WalletType": WalletType,
     "ZeroBalanceResponse": ZeroBalanceResponse,
 }
 

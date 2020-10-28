@@ -1,10 +1,9 @@
 const merge = require("deepmerge");
-
 var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "development",
+  mode: "production",
   module: {
     rules: [
       {
@@ -16,9 +15,10 @@ const baseConfig = {
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
-  devtool: "source-map",
-  output: {
-    library: "mainnet",
+  optimization: {
+    minimize: true,
+    mangleWasmImports: true,
+    usedExports: true,
   },
 };
 
@@ -27,6 +27,8 @@ const nodeConfig = {
   output: {
     filename: `mainnet-node-${packageJson.version}.js`,
     path: __dirname + "/dist",
+    libraryTarget: "umd",
+    library: "mainnet",
   },
 };
 
@@ -36,20 +38,27 @@ const browserConfig = {
     filename: `mainnet-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
-    library: "mainnet",
   },
   resolve: {
     alias: {
       assert: false,
+      buffer: false,
       child_process: false,
       crypto: false,
+      dns: false,
       fs: false,
-      "grpc-bchrpc-node": "grpc-bchrpc-browser",
+      http: false,
+      https: false,
+      net: false,
       os: false,
       path: false,
+      pg: false,
+      "pg-native": false,
       stream: false,
+      tls: false,
       util: false,
       url: false,
+      zlib: false,
     },
   },
 };
@@ -60,26 +69,44 @@ const webWorkerConfig = {
     filename: `mainnet-webworker-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
-    library: "mainnet",
   },
   resolve: {
     alias: {
       assert: false,
+      buffer: false,
       child_process: false,
       crypto: false,
+      dns: false,
       fs: false,
-      "grpc-bchrpc-node": "grpc-bchrpc-browser",
+      http: false,
+      https: false,
+      net: false,
       os: false,
       path: false,
+      pg: false,
+      "pg-native": false,
       stream: false,
+      tls: false,
       util: false,
       url: false,
+      zlib: false,
     },
   },
 };
 
+const browserTestDiff = {
+  output: {
+    filename: `mainnet.js`,
+    path: __dirname + "/jest/playwright",
+  },
+};
+
+const browserTestConfig = merge(browserConfig, browserTestDiff);
+
+// Join configurations with the base configuration
 module.exports = [
   nodeConfig,
   browserConfig,
-  //webWorkerConfig
+  browserTestConfig,
+  webWorkerConfig,
 ].map((c) => merge(baseConfig, c));

@@ -1,4 +1,3 @@
-import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { UnitEnum } from "./enum";
 
@@ -9,71 +8,44 @@ import { UnitEnum } from "./enum";
 
 export class SendRequest {
   cashaddr: string;
-  amount: Amount;
+  value: number;
+  unit: UnitEnum;
 
-  constructor({ cashaddr, amount }: { cashaddr: string; amount: Amount }) {
+  constructor({
+    cashaddr,
+    value,
+    unit,
+  }: {
+    cashaddr: string;
+    value: number;
+    unit: UnitEnum;
+  }) {
     this.cashaddr = cashaddr;
-    this.amount = new Amount(amount);
+    this.value = value;
+    this.unit = unit.toLocaleLowerCase() as UnitEnum;
   }
 }
 
-export class Utxo {
+export type SendRequestArray = Array<string | number | UnitEnum>;
+
+export class UtxoItem {
   "index"?: number;
-  "amount": Amount;
+  "value": number;
+  "unit": UnitEnum;
   "utxoId": string;
-  "transactionId": string;
+  "txId": string;
 }
 
 export class UtxoResponse {
-  "utxos"?: Array<Utxo>;
-}
-
-export class Amount {
-  value: number;
-  unit: UnitEnum;
-  constructor({ value, unit }: { value: number; unit: UnitEnum }) {
-    this.value = value;
-    this.unit = unit;
-  }
-
-  public inSatoshi(): BigInt | Error {
-    switch (this.unit) {
-      case UnitEnum.Satoshi:
-        return BigInt(this.value);
-      case UnitEnum.Sat:
-        return BigInt(this.value);
-      case UnitEnum.Sats:
-        return BigInt(this.value);
-      case UnitEnum.Satoshis:
-        return BigInt(this.value);
-      case UnitEnum.Bch:
-        return BigInt(this.value * bchParam.subUnits);
-      default:
-        throw Error("Unit of value not defined");
-    }
-  }
-}
-
-export class SendMaxRequest {
-  cashaddr: string;
-
-  constructor({ cashaddr }) {
-    this.cashaddr = cashaddr;
-  }
+  "utxos"?: Array<UtxoItem>;
 }
 
 export class SendResponse {
-  transactionId?: string;
+  txId?: string;
   balance?: BalanceResponse;
 
-  constructor({
-    transactionId,
-    balance,
-  }: {
-    transactionId?: string;
-    balance?: any;
-  }) {
-    this.transactionId = transactionId;
+  constructor({ txId, balance }: { txId?: string; balance?: any }) {
+    this.txId = txId;
     this.balance = new BalanceResponse(balance);
   }
 }

@@ -1,78 +1,134 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
-import { GrpcClient } from "grpc-bchrpc-node";
+import {
+  MainnetProvider,
+  TestnetProvider,
+  RegtestProvider,
+} from "../network/default";
+import { NetworkProvider } from "../network";
+import { getStorageProvider } from "../db/util";
+
 import { NetworkEnum, NetworkType } from "./enum";
+import { StorageProvider } from "../db";
+
+export const networkPrefixMap = {
+  bitcoincash: "mainnet",
+  bchtest: "testnet",
+  bchreg: "regtest",
+};
+
+export default interface WalletInterface {
+  /**
+   * generate should randomly create a new wallet
+   * @returns A randomly generated instance.
+   */
+  generate(): Promise<any>;
+
+  /**
+   * toString should retrun a serialized representation of the Wallet
+   * @returns returns a serialized representation of the wallet
+   */
+  toString(): string;
+}
 
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
  */
-export class BaseWallet {
-  client?: GrpcClient;
+export class BaseWallet implements WalletInterface {
+  provider?: NetworkProvider;
+  storage?: StorageProvider;
   isTestnet?: boolean;
   name: string;
   networkPrefix: CashAddressNetworkPrefix;
   networkType: NetworkType;
   network: NetworkEnum;
 
-  constructor(name = "", networkPrefix: CashAddressNetworkPrefix, url = "") {
+  constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
     this.name = name;
+
     this.networkPrefix = networkPrefix;
     this.networkType =
       this.networkPrefix === CashAddressNetworkPrefix.mainnet
         ? NetworkType.Mainnet
         : NetworkType.Testnet;
-    switch (networkPrefix) {
-      case CashAddressNetworkPrefix.mainnet:
-        this.network = NetworkEnum.Mainnet;
-        break;
-      case CashAddressNetworkPrefix.testnet:
-        this.network = NetworkEnum.Testnet;
-        break;
+
+    this.isTestnet = this.networkType === "testnet" ? true : false;
+    switch (this.networkPrefix) {
       case CashAddressNetworkPrefix.regtest:
+        this.provider = RegtestProvider();
         this.network = NetworkEnum.Regtest;
         break;
+      case CashAddressNetworkPrefix.testnet:
+        this.provider = TestnetProvider();
+        this.network = NetworkEnum.Testnet;
+        break;
       default:
-        throw Error("could not map cashaddr prefix to network");
-    }
-    this.isTestnet = this.networkType === "testnet" ? true : false;
-    if (this.isTestnet) {
-      switch (this.networkPrefix) {
-        case CashAddressNetworkPrefix.regtest:
-          url = `${process.env.HOST_IP}:${process.env.GRPC_PORT}`;
-          const cert = `${process.env.BCHD_BIN_DIRECTORY}/${process.env.RPC_CERT}`;
-          const host = `${process.env.HOST}`;
-          this.client = new GrpcClient({
-            url: url,
-            testnet: true,
-            rootCertPath: cert,
-            options: {
-              "grpc.ssl_target_name_override": host,
-              "grpc.default_authority": host,
-              "grpc.max_receive_message_length": -1,
-            },
-          });
-          break;
-        case CashAddressNetworkPrefix.testnet:
-          url = "https://bchd-testnet.greyh.at:18335";
-          this.client = new GrpcClient({
-            url: url,
-            testnet: true,
-            options: {
-              "grpc.max_receive_message_length": -1,
-            },
-          });
-          break;
-      }
-    } else {
-      url = "https://bchd.greyh.at:8335";
-      this.client = new GrpcClient({
-        url: url,
-        testnet: false,
-        options: {
-          "grpc.max_receive_message_length": -1,
-        },
-      });
+        this.provider = this.provider = MainnetProvider();
+        this.network = NetworkEnum.Mainnet;
     }
   }
+
+
+  generate(): Promise<this | Error> {
+    throw Error("Cannot generate with the baseWallet class");
+  }
+
+  _named = async (
+    name: string,
+    dbName?: string,
+    forceNew = false
+  ): Promise<this | Error> => {
+    if (name.length === 0) {
+      throw Error("Named wallets must have a non-empty name");
+    }
+    checkContextSafety(this);
+    this.name = name;
+    dbName = dbName ? dbName : (this.networkPrefix as string);
+    let db = getStorageProvider(dbName);
+    await db.init();
+    let savedWallet = await db.getWallet(name);
+    if (savedWallet) {
+      await db.close();
+      if (forceNew) {
+        throw Error(
+          `A wallet with the name ${name} already exists in ${dbName}`
+        );
+      }
+      return this._fromId(savedWallet.wallet);
+    } else {
+      let wallet = await this.generate();
+      await db.addWallet(wallet.name, wallet.toString());
+      await db.close();
+      return wallet;
+    }
+  };
+
+  public _fromId(secret?: string): Promise<this | Error> {
+    secret;
+    throw Error("Cannot parse id on BaseWallet class");
+  }
+
+  public _newRandom = async (
+    name: string,
+    dbName?: string
+  ): Promise<this | Error> => {
+    if (name.length > 0) {
+      return this._named(name, dbName);
+    } else {
+      return this.generate();
+    }
+  };
 }
+
+const checkContextSafety = function (wallet: BaseWallet) {
+  if (typeof process !== "undefined") {
+    if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
+      if (wallet.networkType === NetworkType.Mainnet) {
+        throw Error(
+          `Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private`
+        );
+      }
+    }
+  }
+};

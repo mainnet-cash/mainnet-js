@@ -195,7 +195,7 @@
               const wif = document.getElementById("wif").value;
               console.log("Generating");
               alice
-                .fromWIF(wif)
+                .fromWif(wif)
                 .then(() => {
                   console.log("Wif:      " + alice.privateKeyWif);
                   console.log("cashaddr: " + alice.cashaddr);
