@@ -9,8 +9,13 @@ import { NetworkProvider } from "../network";
 import { getStorageProvider } from "../db/util";
 
 import { NetworkEnum, NetworkType } from "./enum";
-import { browserNotSupported } from "../util/browserNotSupported";
 import { StorageProvider } from "../db";
+
+export const networkPrefixMap = {
+  bitcoincash: "mainnet",
+  bchtest: "testnet",
+  bchreg: "regtest",
+};
 
 export default interface WalletInterface {
   /**
@@ -48,39 +53,22 @@ export class BaseWallet implements WalletInterface {
         ? NetworkType.Mainnet
         : NetworkType.Testnet;
 
-    switch (networkPrefix) {
-      case CashAddressNetworkPrefix.mainnet:
-        this.network = NetworkEnum.Mainnet;
-        break;
-      case CashAddressNetworkPrefix.testnet:
-        this.network = NetworkEnum.Testnet;
-        break;
+    this.isTestnet = this.networkType === "testnet" ? true : false;
+    switch (this.networkPrefix) {
       case CashAddressNetworkPrefix.regtest:
+        this.provider = RegtestProvider();
         this.network = NetworkEnum.Regtest;
         break;
+      case CashAddressNetworkPrefix.testnet:
+        this.provider = TestnetProvider();
+        this.network = NetworkEnum.Testnet;
+        break;
       default:
+        this.provider = this.provider = MainnetProvider();
         this.network = NetworkEnum.Mainnet;
-    }
-    this.isTestnet = this.networkType === "testnet" ? true : false;
-    if (this.isTestnet) {
-      switch (this.networkPrefix) {
-        case CashAddressNetworkPrefix.regtest:
-          browserNotSupported();
-          this.provider = RegtestProvider();
-          break;
-        case CashAddressNetworkPrefix.testnet:
-          this.provider = TestnetProvider();
-          break;
-      }
-    } else {
-      this.provider = MainnetProvider();
     }
   }
 
-  initialize(secret?: string): Promise<this | Error> {
-    secret;
-    throw Error("Cannot initialize the baseWallet class");
-  }
 
   generate(): Promise<this | Error> {
     throw Error("Cannot generate with the baseWallet class");

@@ -1,7 +1,3 @@
-// // Unstable?
-// import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-
-// import { getStorageProvider } from "../db/util";
 import { NetworkEnum, WalletTypeEnum } from "./enum";
 import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
 
@@ -17,12 +13,6 @@ interface WalletResponse {
   walletId: string;
   network?: NetworkEnum;
 }
-
-var networkMap = {
-  mainnet: "bitcoincash",
-  testnet: "bchtest",
-  regtest: "bchreg",
-};
 
 var walletClassMap = {
   wif: {
