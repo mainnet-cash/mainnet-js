@@ -17,7 +17,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - name: Generate ${{ matrix.language }}
-        run: npm run api:build:client php
+        run: npm run api:build:client ${{ matrix.language }}
       - name: Commit to ${{ matrix.language }} repository
         uses: drud/action-cross-commit@master
         with:
