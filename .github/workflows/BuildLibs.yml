@@ -3,7 +3,7 @@ name: Generate and save libraries
 on:
   push:
     branches:
-      - build-libs
+      - master
 jobs:
   build_libs:
     strategy:
