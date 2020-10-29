@@ -16,11 +16,11 @@ jobs:
       - name: Commit to PHP repository
         uses: drud/action-cross-commit@master
         with:
-          source-folder: config
+          source-folder: generated/client/php
           destination-repository: https://readcash:${{ secrets.user_token }}@github.com/mainnet-cash/mainnet-php-generated
           destination-folder: .
           destination-branch: master
           git-user: "Auto-Generated"
           git-user-email: hello@mainnet.cash
           git-commit-message: "Generated"
-          excludes: README.md:.git:path/deeper/in/the/repo
+          excludes: .git:path/deeper/in/the/repo
