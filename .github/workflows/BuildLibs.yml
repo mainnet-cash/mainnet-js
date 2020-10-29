@@ -1,0 +1,26 @@
+name: Generate and save libraries
+
+on:
+  push:
+    branches:
+      - build-libs
+jobs:
+  deploy_unstable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - name: Generate PHP
+        run: npm run api:build:client php
+      - name: Commit to PHP repository
+        uses: drud/action-cross-commit@master
+        with:
+          source-folder: config
+          destination-repository: https://readcash:${{ secrets.user_token }}@github.com/mainnet-cash/mainnet-php-generated
+          destination-folder: .
+          destination-branch: master
+          git-user: "Auto-Generated"
+          git-user-email: hello@mainnet.cash
+          git-commit-message: "Generated"
+          excludes: README.md:.git:path/deeper/in/the/repo
