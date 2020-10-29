@@ -17,7 +17,7 @@ jobs:
         uses: drud/action-cross-commit@master
         with:
           source-folder: generated/client/php
-          destination-repository: https://readcash:${{ secrets.user_token }}@github.com/mainnet-cash/mainnet-php-generated
+          destination-repository: https://readcash:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-php-generated
           destination-folder: .
           destination-branch: master
           git-user: "Auto-Generated"
