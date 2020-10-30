@@ -4,7 +4,7 @@ require("dotenv").config({ path: ".env.testnet" });
 
 const { spawn } = require("child_process");
 const http = require("http");
-const { pingBchn, getRegtestUtxos } = require("../util/generateBlock");
+const { pingBchn, getRegtestUtxos } = require("./util/generateBlock");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,7 +16,9 @@ module.exports = async function () {
   console.log("Starting regtest network...");
 
   if (global.fulcrumRegtest === undefined) {
-    global.fulcrumRegtest = spawn("./docker/start.sh", null, { shell: false });
+    global.fulcrumRegtest = spawn("./jest/docker/start.sh", null, {
+      shell: false,
+    });
     console.log("... OKAY");
   } else {
     console.log("... docker already running");

@@ -6,7 +6,14 @@ args.shift(); // remove cli.ts
 
 (async () => {
     let command = args.shift();
-    let dockerArgs = [`run`, `--rm`, `--user`, `${process.geteuid()}:${process.getegid()}`, `-v`, `${process.cwd()}:/local`, `2qxx/openapi-generator`, `generate`, `-i`, `/local/swagger/v1/api.yml`, `-g`, command, `-o`, `/local/generated/client/${command}`]
+    let dockerArgs = [`run`, `--rm`, `--user`, `${process.geteuid()}:${process.getegid()}`, 
+    `-v`, `${process.cwd()}:/local`, 
+    `2qxx/openapi-generator`, 
+    `generate`,
+    `--git-repo-id=mainnet-${command}-generated`, 
+    `--git-user-id=mainnet-cash`,
+     `-i`, `/local/swagger/v1/api.yml`, `-g`, command,
+     `-o`, `/local/generated/client/${command}`]
     let additionalProperties = []
     switch (command) {
         case "php":

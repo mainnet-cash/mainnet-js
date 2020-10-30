@@ -16,8 +16,9 @@ import { BaseWallet } from "./Base";
 
 import { PrivateKey } from "../interface";
 
+import { networkPrefixMap } from "./createWallet";
+
 import {
-  SendMaxRequest,
   SendRequest,
   SendRequestArray,
   SendResponse,
@@ -48,10 +49,10 @@ import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
-export class WifWallet extends BaseWallet {
+export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
-  publicKeyCompressed?: Uint8Array;
   privateKey?: Uint8Array;
+  uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
   walletType?: WalletTypeEnum;
   cashaddr?: string;
@@ -62,44 +63,53 @@ export class WifWallet extends BaseWallet {
     this.walletType = WalletTypeEnum.Wif;
   }
 
-  // Initialize wallet from a cash addr
-  public async initializeWatchOnly(address: string) {
-    if (address.startsWith("bitcoincash:") && this.networkType === "testnet") {
-      throw Error("a testnet address cannot be watched from a mainnet Wallet");
-    } else if (
-      !address.startsWith("bitcoincash:") &&
-      this.networkType === "mainnet"
-    ) {
-      throw Error("a mainnet address cannot be watched from a testnet Wallet");
-    }
-    this.cashaddr = address;
-  }
-
   // Initialize wallet from Wallet Import Format
-  public async initializeWIF(
-    walletImportFormatString: string
-  ): Promise<void | Error> {
+  public async fromWIF(secret: string): Promise<this | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
-    let result = decodePrivateKeyWif(sha256, walletImportFormatString);
+    let result = decodePrivateKeyWif(sha256, secret);
 
     const hasError = typeof result === "string";
     if (hasError) {
       throw Error(result as string);
     }
-    checkWifNetwork(walletImportFormatString, this.networkType);
+    checkWifNetwork(secret, this.networkType);
     let resultData: PrivateKey = result as PrivateKey;
     this.privateKey = resultData.privateKey;
-    this.privateKeyWif = walletImportFormatString;
+    this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
     this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
     )) as string;
+    return this;
   }
 
-  public async generateWif(): Promise<void | Error> {
+  // Initialize a watch only wallet from a cash addr
+  public async watchOnly(address: string) {
+    let addressComponents = address.split(":");
+    let addressPrefix, addressBase;
+    if (addressComponents.length === 1) {
+      addressBase = addressComponents.shift() as string;
+      this.cashaddr = addressBase;
+    } else {
+      addressPrefix = addressComponents.shift() as string;
+      addressBase = addressComponents.shift() as string;
+      if (addressPrefix in networkPrefixMap) {
+        if (networkPrefixMap[addressPrefix] != this.network) {
+          throw Error(
+            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
+          );
+        }
+      }
+      this.cashaddr = `${addressPrefix}:${addressBase}`;
+    }
+
+    return this;
+  }
+
+  public async generate(): Promise<this | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
@@ -114,17 +124,19 @@ export class WifWallet extends BaseWallet {
         window.crypto.getRandomValues(new Uint8Array(32))
       );
     }
-    this.privateKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.privateKeyWif = encodePrivateKeyWif(
       sha256,
       this.privateKey,
       this.networkType
     );
+    checkWifNetwork(this.privateKeyWif, this.networkType);
     this.walletType = WalletTypeEnum.Wif;
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
     )) as string;
+    return this;
   }
 
   public async send(
@@ -142,9 +154,56 @@ export class WifWallet extends BaseWallet {
     }
   }
 
-  public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
+  public static async fromId(walletId: string) {
+    return await new this()._fromId(walletId);
+  }
+
+  public _fromId = async (walletId: string): Promise<this | Error> => {
+    let [walletType, networkGiven, privateImport]: string[] = walletId.split(
+      ":"
+    );
+    if (!["watch", "wif", "seed"].includes(walletType)) {
+      throw Error(
+        `Wallet type ${walletType} was passed to single address wallet`
+      );
+    }
+    if (networkPrefixMap[this.networkPrefix] != networkGiven) {
+      throw Error(
+        `Network prefix ${networkGiven} to a ${
+          networkPrefixMap[this.networkPrefix]
+        } wallet`
+      );
+    }
+    switch (walletType) {
+      case "wif":
+        return this.fromWIF(privateImport);
+      case "watch":
+        return this.watchOnly(privateImport);
+      case "seed":
+        throw new Error("Not implemented");
+      default:
+        return this.fromWIF(privateImport);
+    }
+  };
+
+  public static async named(name: string, dbName?: string, force?: boolean) {
+    return new this()._named(name, dbName, force);
+  }
+
+  public static async newRandom(name = "", dbName?: string) {
+    return new this()._newRandom(name, dbName);
+  }
+  public static async fromWIF(wif): Promise<any> {
+    return new this().fromWIF(wif);
+  }
+
+  public static async watchOnly(address) {
+    return new this().watchOnly(address);
+  }
+
+  public async sendMax(cashaddr: string): Promise<SendResponse> {
     try {
-      let result = await this.sendMaxRaw(sendMaxRequest);
+      let result = await this.sendMaxRaw(cashaddr);
       let resp = new SendResponse({});
       resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
@@ -154,21 +213,17 @@ export class WifWallet extends BaseWallet {
     }
   }
 
-  public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
+  public async sendMaxRaw(cashaddr: string) {
     let maxSpendableAmount = await this.getMaxAmountToSend({});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
     }
     let sendRequest = new SendRequest({
-      cashaddr: sendMaxRequest.cashaddr,
+      cashaddr: cashaddr,
       value: maxSpendableAmount.sat,
       unit: "sat",
     });
     return await this._processSendRequests([sendRequest], true);
-  }
-
-  public getSerializedWallet() {
-    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 
   public getDepositAddress() {
@@ -206,7 +261,7 @@ export class WifWallet extends BaseWallet {
   }
 
   public toString() {
-    return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
+    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 
   public async getMaxAmountToSend({
@@ -343,112 +398,16 @@ export class WifWallet extends BaseWallet {
   }
 }
 
-const newRandom = async (network: CashAddressNetworkPrefix) => {
-  let w = new WifWallet("", network);
-  await w.generateWif();
-  return w;
-};
-
-const fromId = async (walletId: string, network: CashAddressNetworkPrefix) => {
-  let [walletType, networkGiven, privateImport]: string[] = walletId.split(":");
-  if (walletType != "wif") {
-    throw Error(`Wallet type ${walletType} was passed to wif wallet`);
-  }
-  if (network != networkGiven) {
-    throw Error(`Network prefix ${networkGiven} to a ${network} wallet`);
-  }
-  return fromWif(privateImport, network);
-};
-const fromWif = async (
-  walletImportFormatString: string,
-  network: CashAddressNetworkPrefix
-) => {
-  let w = new WifWallet("", network);
-  await w.initializeWIF(walletImportFormatString);
-  return w;
-};
-
-const watchOnly = async (
-  walletImportFormatString: string,
-  network: CashAddressNetworkPrefix
-) => {
-  let w = new WifWallet("", network);
-  await w.initializeWatchOnly(walletImportFormatString);
-  return w;
-};
-
-export class Wallet extends WifWallet {
-  constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.mainnet);
-  }
-
-  public static async fromWif(walletImportFormatString: string) {
-    return await fromWif(
-      walletImportFormatString,
-      CashAddressNetworkPrefix.mainnet
-    );
-  }
-  public static async fromId(walletId: string) {
-    return await fromId(walletId, CashAddressNetworkPrefix.mainnet);
-  }
-  public static async newRandom() {
-    return await newRandom(CashAddressNetworkPrefix.mainnet);
-  }
-  public static async watchOnly(walletImportFormatString: string) {
-    return await watchOnly(
-      walletImportFormatString,
-      CashAddressNetworkPrefix.mainnet
-    );
-  }
-}
-
-export class TestNetWallet extends WifWallet {
+export class TestNetWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.testnet;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet);
   }
-
-  public static async fromWif(walletImportFormatString: string) {
-    return await fromWif(
-      walletImportFormatString,
-      CashAddressNetworkPrefix.testnet
-    );
-  }
-  public static async fromId(walletId: string) {
-    return await fromId(walletId, CashAddressNetworkPrefix.testnet);
-  }
-  public static async newRandom() {
-    return await newRandom(CashAddressNetworkPrefix.testnet);
-  }
-  public static async watchOnly(walletImportFormatString: string) {
-    return await watchOnly(
-      walletImportFormatString,
-      CashAddressNetworkPrefix.testnet
-    );
-  }
 }
 
-export class RegTestWallet extends WifWallet {
+export class RegTestWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
-  }
-
-  public static async fromWif(walletImportFormatString: string) {
-    return await fromWif(
-      walletImportFormatString,
-      CashAddressNetworkPrefix.regtest
-    );
-  }
-  public static async fromId(walletId: string) {
-    return await fromId(walletId, CashAddressNetworkPrefix.regtest);
-  }
-  public static async newRandom() {
-    return await newRandom(CashAddressNetworkPrefix.regtest);
-  }
-
-  public static async watchOnly(walletImportFormatString: string) {
-    return await watchOnly(
-      walletImportFormatString,
-      CashAddressNetworkPrefix.regtest
-    );
   }
 }

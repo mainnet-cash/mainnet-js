@@ -69,7 +69,7 @@ describe(`Wallet should function in the browser`, () => {
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Network prefix regtest to a bchtest wallet"
+        "page.evaluate: Evaluation failed: Error: Network prefix regtest to a testnet wallet"
       );
     }
   });
@@ -78,11 +78,11 @@ describe(`Wallet should function in the browser`, () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
-        return await RegTestWallet.fromId(`hd:regtest:${wif}`);
+        return await TestNetWallet.fromId(`hd:testnet:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to wif wallet"
+        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to single address wallet"
       );
     }
   });
@@ -97,16 +97,16 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should create mainnet wallet`, async () => {
-    let params = { name: "Alice's TestNet", type: "wif", network: "mainnet" };
     const result = await page.evaluate(async (p) => {
-      return await createWalletResponse(p);
-    }, params);
-    expect(result.cashaddr.slice(0, 13)).toBe("bitcoincash:q");
+      let w = await Wallet.newRandom();
+      return w.getDepositAddress();
+    });
+    expect(result.slice(0, 13)).toBe("bitcoincash:q");
   });
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await TestNetWallet.fromWif(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
     expect(result.slice(0, 10)).toBe("bchtest:qp");
@@ -114,7 +114,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit qr from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await TestNetWallet.fromWif(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositQr();
     }, process.env.PRIVATE_WIF);
     expect(
@@ -124,19 +124,19 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await TestNetWallet.fromWif(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.slice(0, 9)).toBe("bchtest:q");
   });
 
-  test(`Should return testnet balance`, async () => {
+  test(`Should return watch testnet balance`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
         const alice = await TestNetWallet.watchOnly(addr);
-        return alice.getBalance();
+        return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
-      expect(result.sat).toBeGreaterThan(0);
+      expect(result).toBeGreaterThan(0);
     } else {
       expect.assertions(1);
       console.warn(
@@ -177,7 +177,7 @@ describe(`Wallet should function in the browser`, () => {
               unit: "sat",
             },
           ]);
-          return bob.sendMax({ cashaddr: alice.cashaddr });
+          return bob.sendMax(alice.cashaddr);
         },
         [process.env.ALICE_TESTNET_WALLET_ID]
       );
