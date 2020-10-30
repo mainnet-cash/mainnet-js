@@ -99,7 +99,6 @@ https://openapi-generator.tech/docs/generators/
 If you need additionalProperties passed to the client generator, these may be added in
 he [wrapper script](swagger/generate.js)
 
-
 # Configuration Variables
 
 ## Express
@@ -112,19 +111,17 @@ he [wrapper script](swagger/generate.js)
 
 ### Database
 
+Postgres configuration is passed url encoded
 
-Postgres configuration is passed  url encoded
+    DATABASE_URL='postgres://postgres:trusted@localhost:15432/wallet'
 
-    DATABASE_URL='postgres://postgres:trusted@localhost:15432/wallet' 
-
-By default, the API service assumes it is connected to a secured private postgres database.  If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true.
+By default, the API service assumes it is connected to a secured private postgres database. If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true.
 
     ALLOW_MAINNET_USER_WALLETS=true
 
-
 ## Wallet Behavior
 
-**In nodejs only**, Controls the number responses from electrum-cash nodes that must be in agreement for a  network response to return
+**In nodejs only**, Controls the number responses from electrum-cash nodes that must be in agreement for a network response to return
 
     CLUSTER_CONFIDENCE=1
 
