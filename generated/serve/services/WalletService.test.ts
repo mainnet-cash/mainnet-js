@@ -1,5 +1,4 @@
 
-import * as mockApi from "../../client/typescript-mock/api";
 import { bchParam } from "../../../src/chain";
 
 var server = require("../")
@@ -49,10 +48,11 @@ describe("Test Wallet Endpoints", () => {
    * createWallet
    */
   it("Should create a Regtest wallet form the API", async () => {
-    let req = new mockApi.WalletRequest();
-    req.name = "A simple Regtest Wallet";
-    req.type = mockApi.WalletRequest.TypeEnum.Wif;
-    req.network = mockApi.WalletRequest.NetworkEnum.Regtest;
+    let req = {
+      name:"A simple Testnet Wallet",
+    type : "wif",
+    network:"regtest"
+  }
     let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
@@ -63,11 +63,11 @@ describe("Test Wallet Endpoints", () => {
   });
 
   it("Should create a Testnet wallet with the API", async () => {
-    let req = new mockApi.WalletRequest();
-    req.name = "A simple Testnet Wallet";
-
-    req.type = mockApi.WalletRequest.TypeEnum.Wif;
-    req.network = mockApi.WalletRequest.NetworkEnum.Testnet;
+    let req = {
+      name:"A simple Testnet Wallet",
+    type : "wif",
+    network:"testnet"
+  }
 
     let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
@@ -80,10 +80,11 @@ describe("Test Wallet Endpoints", () => {
 
   it("Should error saving a named Mainnet wallet with the API", async () => {
     process.env.ALLOW_MAINNET_USER_WALLETS = "false"
-    let req = new mockApi.WalletRequest();
-    req.name = "A simple Mainnet Wallet";
-    req.type = mockApi.WalletRequest.TypeEnum.Wif;
-    req.network = mockApi.WalletRequest.NetworkEnum.Mainnet;
+    let req = {
+      name:"A simple Mainnet Wallet",
+    type : "wif",
+    network:"mainnet"
+  }
 
     let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
@@ -92,10 +93,13 @@ describe("Test Wallet Endpoints", () => {
   });
 
   it("Should create an unnamed Mainnet wallet with the API", async () => {
-    let req = new mockApi.WalletRequest();
-    req.type = mockApi.WalletRequest.TypeEnum.Wif;
-    req.network = mockApi.WalletRequest.NetworkEnum.Mainnet;
+    
+    let req = {
+    type : "wif",
+    network:"mainnet"
+  }
 
+    
     let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
@@ -105,9 +109,7 @@ describe("Test Wallet Endpoints", () => {
   });
 
   it("Should create a mainnet wallet on empty request", async () => {
-    let req = new mockApi.WalletRequest();
-
-    let resp = await request(app).post("/v1/wallet/create").send(req);
+    let resp = await request(app).post("/v1/wallet/create").send({});
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
@@ -155,8 +157,8 @@ describe("Test Wallet Endpoints", () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
-        type: mockApi.WalletRequest.TypeEnum.Wif,
-        network: mockApi.WalletRequest.NetworkEnum.Regtest,
+        type: "wif",
+        network: "regtest",
       });
 
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
@@ -192,8 +194,8 @@ describe("Test Wallet Endpoints", () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
-        type: mockApi.WalletRequest.TypeEnum.Wif,
-        network: mockApi.WalletRequest.NetworkEnum.Regtest,
+        type: "wif",
+        network: "regtest",
       });
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
@@ -227,10 +229,11 @@ describe("Test Wallet Endpoints", () => {
    */
 
   it("Should send all available funds", async () => {
-    let bobWalletReq = new mockApi.WalletRequest();
-    bobWalletReq.name = "A Bobs Regtest Wallet";
-    bobWalletReq.type = mockApi.WalletRequest.TypeEnum.Wif;
-    bobWalletReq.network = mockApi.WalletRequest.NetworkEnum.Regtest;
+    let bobWalletReq = {
+      name:"A Bobs Regtest Wallet",
+  type:"wif", 
+  network:"regtest"
+};
 
     const bobsWalletResp = await request(app)
       .post("/v1/wallet/create")

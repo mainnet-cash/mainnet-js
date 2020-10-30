@@ -22,13 +22,23 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       return;
     }
 
+    // Allow users to configure the cluster confidence
+    let confidence;
+    if (typeof process !== "undefined") {
+      confidence = process.env.CLUSTER_CONFIDENCE
+        ? process.env.CLUSTER_CONFIDENCE
+        : 3;
+    } else {
+      confidence = 3;
+    }
+
     if (network === Network.MAINNET) {
       // Initialize a 2-of-3 Electrum Cluster with 6 reliable hardcoded servers
       // using the first three servers as "priority" servers
       this.electrum = new ElectrumCluster(
         "Mainnet",
         "1.4.1",
-        2,
+        confidence,
         3,
         ClusterOrder.PRIORITY,
         550
@@ -46,25 +56,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         false
       );
       this.electrum.addServer(
-        "electrum.imaginary.cash",
-        50002,
-        ElectrumTransport.TCP_TLS.Scheme,
-        false
-      );
-      this.electrum.addServer(
-        "blackie.c3-soft.com",
-        50002,
-        ElectrumTransport.TCP_TLS.Scheme,
-        false
-      );
-      this.electrum.addServer(
         "bch.imaginary.cash",
-        50004,
-        ElectrumTransport.WSS.Scheme,
-        false
-      );
-      this.electrum.addServer(
-        "blackie.c3-soft.com",
         50004,
         ElectrumTransport.WSS.Scheme,
         false
@@ -75,30 +67,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         ElectrumTransport.WSS.Scheme,
         false
       );
-      this.electrum.addServer(
-        "electroncash.dk",
-        50004,
-        ElectrumTransport.WSS.Scheme,
-        false
-      );
-      this.electrum.addServer(
-        "bch.loping.net",
-        50004,
-        ElectrumTransport.WSS.Scheme,
-        false
-      );
-      this.electrum.addServer(
-        "electrum.imaginary.cash",
-        50004,
-        ElectrumTransport.WSS.Scheme,
-        false
-      );
     } else if (network === Network.TESTNET) {
       // Initialize a 1-of-2 Electrum Cluster with 2 hardcoded servers
       this.electrum = new ElectrumCluster(
         "CashScript Application",
         "1.4.1",
-        1,
+        confidence,
         1,
         undefined
       );
