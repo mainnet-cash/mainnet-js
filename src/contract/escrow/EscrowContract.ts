@@ -1,18 +1,26 @@
-import {Contract, Sig, TxOptions} from "cashscript";
-import { createWalletFromCashaddr } from "../../wallet/createWallet"
-import { BaseWallet } from "../../wallet/Base"
+import { Contract, SignatureTemplate, CashCompiler, 
+    ElectrumNetworkProvider,
+    Argument, 
+} from "cashscript";
+import {
+    ElectrumCluster,
+    ElectrumTransport,
+    ClusterOrder,
+  } from "electrum-cash";
+import { decodeCashAddress } from "@bitauth/libauth"
+import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 
 export class EscrowContract {
 
-    private buyer: BaseWallet;
-    private arbiter: BaseWallet;
-    private seller: BaseWallet;
-​
+    private buyerPKH: Uint8Array;
+    private arbiterPKH: Uint8Array;
+    private sellerPKH: Uint8Array;
+
     constructor({sellerCashaddr, buyerCashaddr, arbiterCashaddr}:{sellerCashaddr: string, buyerCashaddr: string, arbiterCashaddr: string}) {
         
-        this.buyer = createWalletFromCashaddr(buyerCashaddr)
-        this.arbiter = createWalletFromCashaddr(arbiterCashaddr)
-        this.seller = createWalletFromCashaddr(sellerCashaddr)
+        this.buyerPKH = derivePublicKeyHash(buyerCashaddr)
+        this.arbiterPKH = derivePublicKeyHash(arbiterCashaddr)
+        this.sellerPKH = derivePublicKeyHash(sellerCashaddr)
     }
 ​
     public getAddress() {
@@ -20,35 +28,33 @@ export class EscrowContract {
         return instance.address;
     }
 ​
-    public async run(wif: string, funcName: string, getHexOnly = false, utxo_txid = null) {
-        //const bitbox = new BITBOX();
+    public async run(wif: string, funcName: string, getHexOnly = false, utxo_txid?: string) {
+        
         const instance = this.getContactInstance();
-​
         let fee = 700;
-​
-        const arbiterEcPair = bitbox.ECPair.fromWIF(wif);
-        const s = new Sig(arbiterEcPair);
+        console.log(utxo_txid)
+
+        const sig = new SignatureTemplate(wif);
 ​
         let func;
-        let toCashAddr;
-        if(funcName == 'donate') {
-            func = instance.functions.donate;
-            toCashAddr = this.seller.cashaddr;
+        let publicKeyHash;
+        if(funcName == 'spend') {
+            func = instance.functions.spend;
+            publicKeyHash = this.sellerPKH;
         } else if(funcName == 'refund') {
             func = instance.functions.refund;
-            toCashAddr = this.buyer.cashaddr;
+            publicKeyHash = this.buyerPKH;
         } else {
             throw new Error(`function ${funcName} is not defined`);
         }
 ​
         const method = getHexOnly ? 'getTxHex' : 'send';
 ​
-        let funcInstance = func(this.nonce, fee, bitbox.ECPair.toPublicKey(arbiterEcPair), s);
-        const utxo = await funcInstance.getFirstUtxo(utxo_txid);
+        let funcInstance = func(fee, this.arbiterPKH, sig);
+        const utxo = ​(await instance.getUtxos()).shift()
         if(utxo) {
-            const options = {utxos: [utxo]} as TxOptions;
             try {
-                const tx: any = await funcInstance[method]([{to: toCashAddr, amount: utxo.satoshis}], options); // should work
+                const tx: any = await funcInstance[method]([{to: publicKeyHash, amount: utxo.satoshis}]).from(utxo); // should work
             } catch (e) {
                 let fee;
                 const matcher = /Insufficient balance: available \((\d+)\) < needed \((\d+)\)./;
@@ -57,8 +63,8 @@ export class EscrowContract {
                     fee = needed - available;
                     // console.log(`Will send ${utxo.satoshis} sats, with ${fee} sats fee`);
 ​
-                    funcInstance = func(this.nonce, fee, bitbox.ECPair.toPublicKey(arbiterEcPair), s);
-                    const tx: any = await funcInstance[method]([{to: toCashAddr, amount: utxo.satoshis - fee}], options); // should work
+                    funcInstance = func(fee, this.arbiterPKH, sig);
+                    const tx: any = await funcInstance[method]([{to: publicKeyHash, amount: utxo.satoshis - fee}]).from(utxo); // should work
                     if(!getHexOnly) {
                         return {tx: tx.txid, fee: fee, utxo: utxo};
                     } else {
@@ -72,16 +78,32 @@ export class EscrowContract {
 ​
     private getContactInstance() {
         const contractText = this.getContractText();
-        const FundingContract: Contract = Contract.compile(contractText, 'mainnet');
-        return FundingContract.new(this.seller.publicKeyHash, this.buyer.publicKeyHash, this.arbiter.publicKeyHash);
+        const artifact  = CashCompiler.compileString(contractText);
+        const parameters: Argument[] = [this.arbiterPKH, this.buyerPKH, this.sellerPKH]
+        let cluster = new ElectrumCluster(
+            "CashScript Application",
+            "1.4.1",
+            1,
+            1,
+            ClusterOrder.RANDOM,
+            1020
+          );
+          cluster.addServer(
+            "127.0.0.1",
+            60003,
+            ElectrumTransport.WS.Scheme,
+            false
+          );
+        const provider = new ElectrumNetworkProvider('testnet', cluster);  
+             
+        return new Contract(artifact, parameters, provider);
     }
 ​
     private getContractText() {
         return `
-            pragma cashscript ^0.3.1;
-​
-            contract FundingContract(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, string nonce) {
-                function donate(int fee, pubkey arbiterPk, sig s) {
+            pragma cashscript ^0.5.3;
+            contract FundingContract(bytes20 arbiterPkh, bytes20 buyerPkh, bytes20 sellerPkh) {
+                function spend(int fee, pubkey arbiterPk, sig s) {
                     require(int(tx.version) >= 2);
                     require(hash160(arbiterPk) == arbiterPkh);
                     require(checkSig(s, arbiterPk));

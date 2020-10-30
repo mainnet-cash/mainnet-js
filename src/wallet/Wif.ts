@@ -51,6 +51,7 @@ const sha256Promise = instantiateSha256();
 
 export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
+  publicKeyHash?: Uint8Array;
   privateKey?: Uint8Array;
   uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
@@ -78,7 +79,7 @@ export class Wallet extends BaseWallet {
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
-    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix

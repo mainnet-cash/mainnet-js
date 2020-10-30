@@ -118,7 +118,6 @@ export function prepareInputs(
 export async function prepareOutputs(outputs: SendRequest[]) {
   let lockedOutputs: any[] = [];
   for (const output of outputs) {
-    // TODO move this to transaction/Wif
     let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
     if (
       !outputLockingBytecode.hasOwnProperty("bytecode") ||
