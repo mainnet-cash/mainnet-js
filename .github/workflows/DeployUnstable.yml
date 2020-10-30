@@ -18,6 +18,13 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "14.x"
+      - name: build
+        run: |
+          yarn
+          yarn build          
       - name: Copy and commit certain files for Dokku
         run: |
           cp dokku/* .

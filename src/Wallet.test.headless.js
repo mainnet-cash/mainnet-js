@@ -31,6 +31,14 @@ describe(`Wallet should function in the browser`, () => {
     expect(await page.title()).toEqual("Load module for playwright");
   });
 
+  test(`Should load module`, async () => {
+    expect(page).not.toBeNull();
+    const result = await page.evaluate(async () => {
+      return await typeof TestNetWallet;
+    });
+    expect(result).toEqual("function");
+  });
+
   test(`Should throw error on regtest wallet`, async () => {
     expect.assertions(1);
     let params = { name: "Alice's TestNet", type: "wif", network: "regtest" };
@@ -53,12 +61,47 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.cashaddr.slice(0, 9)).toBe("bchtest:q");
   });
 
-  test(`Should create mainnet wallet`, async () => {
-    let params = { name: "Alice's TestNet", type: "wif", network: "mainnet" };
+  test(`Should throw Error on regtest wif to Testnet`, async () => {
+    expect.assertions(1);
+    try {
+      const result = await page.evaluate(async (wif) => {
+        return await TestNetWallet.fromId(`wif:regtest:${wif}`);
+      }, process.env.PRIVATE_WIF);
+    } catch (e) {
+      expect(e.message.split("\n")[0]).toBe(
+        "page.evaluate: Evaluation failed: Error: Network prefix regtest to a testnet wallet"
+      );
+    }
+  });
+
+  test(`Should throw Error on regtest hd to regtest wif`, async () => {
+    expect.assertions(1);
+    try {
+      const result = await page.evaluate(async (wif) => {
+        return await TestNetWallet.fromId(`hd:testnet:${wif}`);
+      }, process.env.PRIVATE_WIF);
+    } catch (e) {
+      expect(e.message.split("\n")[0]).toBe(
+        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to single address wallet"
+      );
+    }
+  });
+
+  test(`Should create a random testnet wallet`, async () => {
+    let params = {};
     const result = await page.evaluate(async (p) => {
-      return await createWalletResponse(p);
+      let w = await TestNetWallet.newRandom();
+      return w.getDepositAddress();
     }, params);
-    expect(result.cashaddr.slice(0, 13)).toBe("bitcoincash:q");
+    expect(result.slice(0, 9)).toBe("bchtest:q");
+  });
+
+  test(`Should create mainnet wallet`, async () => {
+    const result = await page.evaluate(async (p) => {
+      let w = await Wallet.newRandom();
+      return w.getDepositAddress();
+    });
+    expect(result.slice(0, 13)).toBe("bitcoincash:q");
   });
 
   test(`Should return deposit address from testnet wallet`, async () => {
@@ -66,7 +109,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.slice(0, 10)).toBe("bchtest:qp");
   });
 
   test(`Should return deposit qr from testnet wallet`, async () => {
@@ -84,16 +127,16 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.cashaddr.startsWith("bchtest:qp")).toBeTruthy();
+    expect(result.slice(0, 9)).toBe("bchtest:q");
   });
 
-  test(`Should return testnet balance`, async () => {
+  test(`Should return watch testnet balance`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
         const alice = await TestNetWallet.watchOnly(addr);
-        return alice.getBalance();
+        return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
-      expect(result.sat).toBeGreaterThan(0);
+      expect(result).toBeGreaterThan(0);
     } else {
       expect.assertions(1);
       console.warn(
@@ -121,7 +164,7 @@ describe(`Wallet should function in the browser`, () => {
     if (process.env.ALICE_TESTNET_WALLET_ID) {
       const result = await page.evaluate(
         async (args) => {
-          const alice = await walletFromIdString(args[0]);
+          const alice = await walletFromId(args[0]);
           const bob = await createWallet({
             type: "wif",
             network: "testnet",
@@ -134,7 +177,7 @@ describe(`Wallet should function in the browser`, () => {
               unit: "sat",
             },
           ]);
-          return bob.sendMax({ cashaddr: alice.cashaddr });
+          return bob.sendMax(alice.cashaddr);
         },
         [process.env.ALICE_TESTNET_WALLET_ID]
       );

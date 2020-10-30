@@ -22,7 +22,7 @@ export class SendRequest {
   }) {
     this.cashaddr = cashaddr;
     this.value = value;
-    this.unit = unit;
+    this.unit = unit.toLocaleLowerCase() as UnitEnum;
   }
 }
 
@@ -33,33 +33,19 @@ export class UtxoItem {
   "value": number;
   "unit": UnitEnum;
   "utxoId": string;
-  "transactionId": string;
+  "txId": string;
 }
 
 export class UtxoResponse {
   "utxos"?: Array<UtxoItem>;
 }
 
-export class SendMaxRequest {
-  cashaddr: string;
-
-  constructor({ cashaddr }) {
-    this.cashaddr = cashaddr;
-  }
-}
-
 export class SendResponse {
-  transactionId?: string;
+  txId?: string;
   balance?: BalanceResponse;
 
-  constructor({
-    transactionId,
-    balance,
-  }: {
-    transactionId?: string;
-    balance?: any;
-  }) {
-    this.transactionId = transactionId;
+  constructor({ txId, balance }: { txId?: string; balance?: any }) {
+    this.txId = txId;
     this.balance = new BalanceResponse(balance);
   }
 }

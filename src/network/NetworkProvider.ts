@@ -14,6 +14,13 @@ export default interface NetworkProvider {
   getUtxos(address: string): Promise<Utxo[]>;
 
   /**
+   * Retrieve all balance of an address in satoshi
+   * @param address The CashAddress for which we wish to retrieve UTXOs.
+   * @returns the balance.
+   */
+  getBalance(address: string): Promise<number>;
+
+  /**
    * @returns The current block height.
    */
   getBlockHeight(): Promise<number>;

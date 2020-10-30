@@ -22,3 +22,8 @@ export interface Utxo {
   height?: number;
   coinbase?: boolean;
 }
+
+export interface ElectrumBalance {
+  confirmed: number;
+  unconfirmed: number;
+}

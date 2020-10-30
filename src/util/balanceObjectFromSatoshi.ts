@@ -49,6 +49,12 @@ export async function balanceFromSatoshi(
       return value / bchParam.subUnits;
     case UnitEnum.SAT:
       return value;
+    case UnitEnum.SATS:
+      return value;
+    case UnitEnum.SATOSHI:
+      return value;
+    case UnitEnum.SATOSHIS:
+      return value;
     case UnitEnum.USD:
       return (value / bchParam.subUnits) * (await getUsdRate());
     default:

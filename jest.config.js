@@ -12,7 +12,7 @@ module.exports = {
     ".*/src/.*\\.test\\.{ts,js}",
     ".*/src/.*\\.test\\.headless\\.js",
   ],
-  roots: ["<rootDir>/src", "<rootDir>/express/"],
+  roots: ["<rootDir>/src"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
