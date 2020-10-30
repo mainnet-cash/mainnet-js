@@ -4,10 +4,10 @@ ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update
 
-# Install requirements for node-gyp
+# Install requirements for libpq
 USER root
 WORKDIR /
-RUN apt-get update && apt-get install -y python3 make gcc g++
+RUN apt-get update && apt-get install -y --fix-missing postgresql postgresql-client libpq-dev
 
 # Install Node and yarn
 USER root
