@@ -7,7 +7,7 @@ RUN apt-get update
 # Install requirements for node-gyp
 USER root
 WORKDIR /
-RUN apt-get install -y python3 make gcc g++
+RUN apt-get update && apt-get install -y python3 make gcc g++
 
 # Install Node and yarn
 USER root
