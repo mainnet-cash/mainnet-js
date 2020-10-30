@@ -78,7 +78,8 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.walletId!.startsWith("wif:testnet:c")).toBeTruthy();
   });
 
-  it("Should create a Mainnet wallet with the API", async () => {
+  it("Should error saving a named Mainnet wallet with the API", async () => {
+    process.env.ALLOW_MAINNET_USER_WALLETS = "false"
     let req = new mockApi.WalletRequest();
     req.name = "A simple Mainnet Wallet";
     req.type = mockApi.WalletRequest.TypeEnum.Wif;
@@ -86,9 +87,18 @@ describe("Test Wallet Endpoints", () => {
 
     let resp = await request(app).post("/v1/wallet/create").send(req);
     const body = resp.body;
+    expect(resp.statusCode).toBe(500);
+    expect(resp.text).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
+  });
 
+  it("Should create an unnamed Mainnet wallet with the API", async () => {
+    let req = new mockApi.WalletRequest();
+    req.type = mockApi.WalletRequest.TypeEnum.Wif;
+    req.network = mockApi.WalletRequest.NetworkEnum.Mainnet;
+
+    let resp = await request(app).post("/v1/wallet/create").send(req);
+    const body = resp.body;
     expect(resp.statusCode).toBe(200);
-    expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
     expect(body!.walletId!.startsWith("wif:mainnet:")).toBeTruthy();

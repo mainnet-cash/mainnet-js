@@ -14,13 +14,6 @@ import { StorageProvider } from "../db";
 
 export default interface WalletInterface {
   /**
-   * initialize should create a wallet from the relevant data
-   * @param secret The private or relevant data for the wallet
-   * @returns An instance initialized with a secret.
-   */
-  initialize(secret: string): Promise<any>;
-
-  /**
    * generate should randomly create a new wallet
    * @returns A randomly generated instance.
    */
@@ -101,6 +94,7 @@ export class BaseWallet implements WalletInterface {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
+    checkContextSafety(this);
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
@@ -138,3 +132,15 @@ export class BaseWallet implements WalletInterface {
     }
   };
 }
+
+const checkContextSafety = function (wallet: BaseWallet) {
+  if (typeof process !== "undefined") {
+    if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
+      if (wallet.networkType === NetworkType.Mainnet) {
+        throw Error(
+          `Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private`
+        );
+      }
+    }
+  }
+};

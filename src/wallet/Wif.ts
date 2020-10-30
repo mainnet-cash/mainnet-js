@@ -19,7 +19,6 @@ import { PrivateKey } from "../interface";
 import { networkPrefixMap } from "./createWallet";
 
 import {
-  SendMaxRequest,
   SendRequest,
   SendRequestArray,
   SendResponse,
@@ -50,7 +49,7 @@ import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
-export class WifWallet extends BaseWallet {
+export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
   privateKey?: Uint8Array;
   uncompressedPrivateKey?: Uint8Array;
@@ -65,7 +64,7 @@ export class WifWallet extends BaseWallet {
   }
 
   // Initialize wallet from Wallet Import Format
-  public async initialize(secret: string): Promise<this | Error> {
+  public async fromWIF(secret: string): Promise<this | Error> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, secret);
@@ -84,6 +83,29 @@ export class WifWallet extends BaseWallet {
       this.privateKey,
       this.networkPrefix
     )) as string;
+    return this;
+  }
+
+  // Initialize a watch only wallet from a cash addr
+  public async watchOnly(address: string) {
+    let addressComponents = address.split(":");
+    let addressPrefix, addressBase;
+    if (addressComponents.length === 1) {
+      addressBase = addressComponents.shift() as string;
+      this.cashaddr = addressBase;
+    } else {
+      addressPrefix = addressComponents.shift() as string;
+      addressBase = addressComponents.shift() as string;
+      if (addressPrefix in networkPrefixMap) {
+        if (networkPrefixMap[addressPrefix] != this.network) {
+          throw Error(
+            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
+          );
+        }
+      }
+      this.cashaddr = `${addressPrefix}:${addressBase}`;
+    }
+
     return this;
   }
 
@@ -140,9 +162,9 @@ export class WifWallet extends BaseWallet {
     let [walletType, networkGiven, privateImport]: string[] = walletId.split(
       ":"
     );
-    if (this.walletType != walletType) {
+    if (!["watch", "wif", "seed"].includes(walletType)) {
       throw Error(
-        `Wallet type ${walletType} was passed to ${this.walletType} wallet`
+        `Wallet type ${walletType} was passed to single address wallet`
       );
     }
     if (networkPrefixMap[this.networkPrefix] != networkGiven) {
@@ -152,7 +174,16 @@ export class WifWallet extends BaseWallet {
         } wallet`
       );
     }
-    return this.initialize(privateImport);
+    switch (walletType) {
+      case "wif":
+        return this.fromWIF(privateImport);
+      case "watch":
+        return this.watchOnly(privateImport);
+      case "seed":
+        throw new Error("Not implemented");
+      default:
+        return this.fromWIF(privateImport);
+    }
   };
 
   public static async named(name: string, dbName?: string, force?: boolean) {
@@ -162,13 +193,17 @@ export class WifWallet extends BaseWallet {
   public static async newRandom(name = "", dbName?: string) {
     return new this()._newRandom(name, dbName);
   }
-  public static async initialize(secret) {
-    return new this().initialize(secret);
+  public static async fromWIF(wif): Promise<any> {
+    return new this().fromWIF(wif);
   }
 
-  public async sendMax(sendMaxRequest: SendMaxRequest): Promise<SendResponse> {
+  public static async watchOnly(address) {
+    return new this().watchOnly(address);
+  }
+
+  public async sendMax(cashaddr: string): Promise<SendResponse> {
     try {
-      let result = await this.sendMaxRaw(sendMaxRequest);
+      let result = await this.sendMaxRaw(cashaddr);
       let resp = new SendResponse({});
       resp.txId = result;
       resp.balance = (await this.getBalance()) as BalanceResponse;
@@ -178,13 +213,13 @@ export class WifWallet extends BaseWallet {
     }
   }
 
-  public async sendMaxRaw(sendMaxRequest: SendMaxRequest) {
+  public async sendMaxRaw(cashaddr: string) {
     let maxSpendableAmount = await this.getMaxAmountToSend({});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
     }
     let sendRequest = new SendRequest({
-      cashaddr: sendMaxRequest.cashaddr,
+      cashaddr: cashaddr,
       value: maxSpendableAmount.sat,
       unit: "sat",
     });
@@ -363,14 +398,14 @@ export class WifWallet extends BaseWallet {
   }
 }
 
-export class TestNetWifWallet extends WifWallet {
+export class TestNetWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet);
   }
 }
 
-export class RegTestWifWallet extends WifWallet {
+export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);

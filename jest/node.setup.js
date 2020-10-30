@@ -4,7 +4,7 @@ require("dotenv").config({ path: ".env.testnet" });
 
 const { spawn } = require("child_process");
 const http = require("http");
-const { pingBchn, getRegtestUtxos } = require("../util/generateBlock");
+const { pingBchn, getRegtestUtxos } = require("./util/generateBlock");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
