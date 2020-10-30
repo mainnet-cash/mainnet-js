@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM debian:latest
 
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -7,7 +7,7 @@ RUN apt-get update
 # Install requirements for libpq
 USER root
 WORKDIR /
-RUN apt-get update && apt-get install -y --fix-missing postgresql postgresql-client libpq-dev make gcc g++
+RUN apt-get update && apt-get install -y --fix-missing postgresql postgresql-client libpq-dev make gcc g++ 
 
 # Install Node and yarn
 USER root
@@ -30,6 +30,7 @@ WORKDIR /app/
 COPY package.json /app/
 COPY yarn.lock /app/
 RUN yarn
+RUN yarn build
 
 ## Copy the rest of the application
 USER appuser
