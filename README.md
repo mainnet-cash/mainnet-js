@@ -117,7 +117,7 @@ Postgres configuration is passed  url encoded
 
     DATABASE_URL='postgres://postgres:trusted@localhost:15432/wallet' 
 
-By default, the API service assumes it is connected to a secured private postgres database.  If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true
+By default, the API service assumes it is connected to a secured private postgres database.  If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true.
 
     ALLOW_MAINNET_USER_WALLETS=true
 

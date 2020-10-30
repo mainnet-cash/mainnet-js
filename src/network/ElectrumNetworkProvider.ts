@@ -27,9 +27,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     if (typeof process !== "undefined") {
       confidence = process.env.CLUSTER_CONFIDENCE
         ? process.env.CLUSTER_CONFIDENCE
-        : 3;
+        : 1;
     } else {
-      confidence = 3;
+      confidence = 1;
     }
 
     if (network === Network.MAINNET) {
