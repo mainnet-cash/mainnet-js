@@ -3,6 +3,7 @@
 coverage/
 demo/
 dist/
+jest/playwright/
 generated/
 node_modules/
 swagger/
