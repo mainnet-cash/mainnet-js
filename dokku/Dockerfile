@@ -38,4 +38,4 @@ COPY --chown=appuser:appuser . /app/
 RUN yarn build
 RUN yarn
 
-CMD bash -lc "echo $WORKERS workers will be run; npm run serve:cluster"
+CMD bash -lc "echo $WORKERS workers will be run; npm run api:build:server"
