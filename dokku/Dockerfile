@@ -30,12 +30,12 @@ WORKDIR /app/
 COPY package.json /app/
 COPY yarn.lock /app/
 RUN yarn
-RUN yarn build
+
 
 ## Copy the rest of the application
 USER appuser
 COPY --chown=appuser:appuser . /app/
-
+RUN yarn build
 RUN yarn
 
 CMD bash -lc "echo $WORKERS workers will be run; npm run serve:cluster"
