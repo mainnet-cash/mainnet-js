@@ -2,13 +2,9 @@ openapi: 3.0.1
 info:
   contact:
     email: hello@mainnet.cash
-  description: |
-    A developer friendly bitcoin cash wallet api
-
-    This API is currently in active development, breaking changes may
-    be made prior to official release of version 1.
-
-    **Important:** This library is in active development
+  description: "A high-level developer friendly bitcoin cash wallet api\nThis API\
+    \ is currently in active development, breaking changes may \nbe made prior to\
+    \ official release of version 1.\n\n**Important:** This library is in active development\n"
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
@@ -43,7 +39,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WalletRequest'
-        description: Request a new random wallet
+        description: Request a new new random wallet
         required: true
       responses:
         "200":
@@ -55,7 +51,7 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: Create a new wallet
+      summary: create a new wallet
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -125,7 +121,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
           description: "A Qr code image data encoded string in the src field suitable\
-            \ for inclusion in html using:\n    - \\<img src\\=\\\"{response.src}\"\
+            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
             \\>                \n"
       summary: Get receiving cash address as a qrcode
       tags:
@@ -156,6 +152,28 @@ paths:
           content: {}
           description: Invalid network for given address
       summary: Get maximum spendable amount
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/utxo:
+    post:
+      operationId: utxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request detailed list of unspent transaction outputs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtxoResponse'
+          description: successful operation
+      summary: Get detailed information about unspent outputs (utxos)
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -237,61 +255,6 @@ paths:
       x-eov-operation-handler: controllers/MineController
 components:
   schemas:
-    EscrowRequest:
-      example:
-        arbiterAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        buyerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        sellerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-      properties:
-        buyerAddr:
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
-          type: string
-        arbiterAddr:
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
-          type: string
-        sellerAddr:
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
-          type: string
-      required:
-      - walletId
-    CashaddrFormat:
-      example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-      pattern: ((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}
-      type: string
-    EscrowResponse:
-      allOf:
-      - $ref: '#/components/schemas/Contract'
-      required:
-      - contractId
-    Contract:
-      example:
-        contractId: contractId
-      properties:
-        contractId:
-          description: |
-            serialized contract
-          type: string
-      required:
-      - contractId
-    UtxoResponse:
-      example:
-        utxos:
-        - amount:
-            unit: sat
-            value: 100
-          index: 0.8008281904610115
-        - amount:
-            unit: sat
-            value: 100
-          index: 0.8008281904610115
-      properties:
-        utxos:
-          items:
-            $ref: '#/components/schemas/Utxo'
-          type: array
     Utxo:
       example:
         utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
@@ -643,7 +606,7 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
         balance:
-          $ref: '#/components/schemas/BalanceResponse'
+          $ref: '#/components/schemas/ZeroBalanceResponse'
       type: object
     SendResponse:
       example:
@@ -658,24 +621,5 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
         balance:
-          $ref: '#/components/schemas/ZeroBalanceResponse'
+          $ref: '#/components/schemas/BalanceResponse'
       type: object
-    ZeroBalanceResponse:
-      example:
-        bch: 0
-        sat: 0
-        usd: 0
-      properties:
-        bch:
-          description: Amount in whole Bitcoin Cash
-          example: 0
-          format: float
-          type: number
-        sat:
-          description: Amount in satoshis
-          example: 0
-          type: integer
-        usd:
-          description: Amount in United States Dollars
-          example: 0
-          type: number
