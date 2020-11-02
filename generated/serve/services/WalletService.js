@@ -41,7 +41,6 @@ const createWallet = ({ walletRequest }) => new Promise(
       let resp = await mainnet.createWalletResponse(walletRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(JSON.stringify(e));
       reject(
         Service.rejectResponse(e.message || "Invalid input", e.status || 500)
       );

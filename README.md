@@ -98,3 +98,59 @@ https://openapi-generator.tech/docs/generators/
 
 If you need additionalProperties passed to the client generator, these may be added in
 he [wrapper script](swagger/generate.js)
+
+# Configuration Variables
+
+## Express
+
+    PORT=3000  # The port express will run on
+    URL_PATH   # The url express is serving from
+
+    WORKERS=10 # How many threads to run express on
+    TIMEOUT=60 # sets the default timeout for requests
+
+### Database
+
+Postgres configuration is passed url encoded
+
+    DATABASE_URL='postgres://postgres:trusted@localhost:15432/wallet'
+
+By default, the API service assumes it is connected to a secured private postgres database. If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true.
+
+    ALLOW_MAINNET_USER_WALLETS=true
+
+## Wallet Behavior
+
+**In nodejs only**, Controls the number responses from electrum-cash nodes that must be in agreement for a network response to return
+
+    CLUSTER_CONFIDENCE=1
+
+## Mining
+
+If you would like to mine some regtest coins, the following environment variables are used:
+
+    RPC_USER="alice"
+    RPC_PASS="password"
+    RPC_PORT=18443
+    RPC_HOST=bitcoind
+
+The above variables should be configured already in `.env.regtest` for integration tests against docker services
+
+## Regtest Wallet
+
+Below are the public and private keys for a regtest wallet
+
+    ADDRESS="bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+    ADDRESS_LEGACY="18uVyRcvE7RdR9WFLyD1kMPjehKxyE91in"
+    PRIVATE_WIF="cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    PRIVATE_SEED="pink wash guitar agree screen suspect soon misery dog menu issue recipe"
+
+## Testnet Wallet
+
+For now, testnet integration tests use static wallets:
+
+    ALICE_TESTNET_ADDRESS   # A testnet address    ALICE_TESTNET_WALLET_ID # A wallet in mainnet serialized format
+    BOB_TESTNET_ADDRESS     # A wallet for the Bob
+    BOB_TESTNET_WALLET_ID   # His serialized walletId
+
+These will be removed at a later date when an API is configured.

@@ -217,7 +217,7 @@ describe(`Test Wallet library`, () => {
   });
 
   test("Should get a large number of utxos", async () => {
-    let reid = (await Wallet.watchOnly("bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2")) as Wallet;
+    let reid = await Wallet.watchOnly("bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2");
     const reidBalance = (await reid.getBalance()) as BalanceResponse;
     const reidUtxos = (await reid.getUtxos())
     expect(reidUtxos.utxos!.length).toBeGreaterThan(0);
