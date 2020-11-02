@@ -69,7 +69,6 @@ export class BaseWallet implements WalletInterface {
     }
   }
 
-
   generate(): Promise<this | Error> {
     throw Error("Cannot generate with the baseWallet class");
   }
