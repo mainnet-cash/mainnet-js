@@ -8,7 +8,7 @@ import {
     ElectrumTransport,
     ClusterOrder,
 } from "electrum-cash";
-import { decodeCashAddress, instantiateSecp256k1 } from "@bitauth/libauth"
+import { binToHex, decodeCashAddress, instantiateSecp256k1 } from "@bitauth/libauth"
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 
 export class EscrowContract {
@@ -16,12 +16,16 @@ export class EscrowContract {
     private buyerPKH: Uint8Array;
     private arbiterPKH: Uint8Array;
     private sellerPKH: Uint8Array;
+    private buyerCashaddr: string;
+    private sellerCashaddr: string;
 
     constructor({ sellerCashaddr, buyerCashaddr, arbiterCashaddr }: { sellerCashaddr: string, buyerCashaddr: string, arbiterCashaddr: string }) {
 
         this.buyerPKH = derivePublicKeyHash(buyerCashaddr)
         this.arbiterPKH = derivePublicKeyHash(arbiterCashaddr)
         this.sellerPKH = derivePublicKeyHash(sellerCashaddr)
+        this.buyerCashaddr = buyerCashaddr
+        this.sellerCashaddr = sellerCashaddr
     }
 
     public getAddress() {
@@ -58,9 +62,9 @@ export class EscrowContract {
         }
         let address
         if(funcName.startsWith("spend")){
-            address = this.sellerPKH
+            address = this.sellerCashaddr
         }else if(funcName.startsWith("refund")){
-            address = this.buyerPKH
+            address = this.buyerCashaddr
         }
         
         const method = getHexOnly ? 'getTxHex' : 'send';

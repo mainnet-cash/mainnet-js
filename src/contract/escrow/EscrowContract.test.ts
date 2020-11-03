@@ -17,13 +17,13 @@ describe(`Test Escrow Contracts`, () => {
             value: 500000,
             unit: "satoshis",
         }])
-        await funder.send([{
-            cashaddr: arbiter.getDepositAddress()!,
-            value: 5000,
-            unit: "satoshis",
-        }])
+        // await funder.send([{
+        //     cashaddr: arbiter.getDepositAddress()!,
+        //     value: 5000,
+        //     unit: "satoshis",
+        // }])
 
-        expect(await arbiter.getBalance('sat')).toBe(5000);
+        // expect(await arbiter.getBalance('sat')).toBe(5000);
         expect(await buyer.getBalance('sat')).toBe(500000);
         let escrow = new EscrowContract(
             {

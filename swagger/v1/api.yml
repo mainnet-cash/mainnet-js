@@ -1,4 +1,3 @@
- 
 openapi: 3.0.1
 info:
   contact:
@@ -7,7 +6,6 @@ info:
     A high-level developer friendly bitcoin cash wallet api
     This API is currently in active development, breaking changes may 
     be made prior to official release of version 1.
-
     **Important:** This library is in active development
   license:
     name: MIT Licence
