@@ -46,7 +46,7 @@ describe(`Wallet should function in the browser`, () => {
     }, params);
     expect(result.cashaddr.slice(0, 8)).toBe("bchreg:q");
   });
-  
+
   test(`Should create testnet wallet`, async () => {
     let params = { name: "Alice's TestNet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
