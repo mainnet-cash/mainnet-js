@@ -160,8 +160,8 @@ describe(`Test Wallet library`, () => {
           unit: "satoshis",
         },
       ]);
-      expect(sendResponse!.txId!.length).toBe(64)
-      expect(sendResponse.balance!.bch).toBeGreaterThan(0.01)
+      expect(sendResponse!.txId!.length).toBe(64);
+      expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
       expect(bobBalance.sat).toBe(1100);
@@ -217,12 +217,16 @@ describe(`Test Wallet library`, () => {
   });
 
   test("Should get a large number of utxos", async () => {
-    let reid = await Wallet.watchOnly("bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2");
+    let reid = await Wallet.watchOnly(
+      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+    );
     const reidBalance = (await reid.getBalance()) as BalanceResponse;
-    const reidUtxos = (await reid.getUtxos())
+    const reidUtxos = await reid.getUtxos();
     expect(reidUtxos.utxos!.length).toBeGreaterThan(0);
 
-    expect(reid.getDepositAddress()!).toBe("bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2");
+    expect(reid.getDepositAddress()!).toBe(
+      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+    );
     expect(reidBalance.bch).toBeGreaterThan(0);
     expect(reidBalance.usd).toBeGreaterThan(0);
     expect(typeof (await reid.getBalance("sat"))).toBe("number");
@@ -260,7 +264,7 @@ describe(`Test Wallet library`, () => {
     // Build Bob's wallet from a public address, check his balance.
 
     const sendMaxResponse = await bob.sendMax(alice.cashaddr);
-    expect(sendMaxResponse.txId.length).toBe(64)
+    expect(sendMaxResponse.txId.length).toBe(64);
 
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);

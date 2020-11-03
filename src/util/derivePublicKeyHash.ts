@@ -1,8 +1,7 @@
-
-
-import { 
-    decodeCashAddressFormat,
-    decodeCashAddressFormatWithoutPrefix } from "@bitauth/libauth";
+import {
+  decodeCashAddressFormat,
+  decodeCashAddressFormatWithoutPrefix,
+} from "@bitauth/libauth";
 
 /**
  * Helper function to convert an address to a locking script

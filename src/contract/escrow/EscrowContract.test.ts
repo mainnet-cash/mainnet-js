@@ -1,10 +1,10 @@
-import { EscrowContract } from "./EscrowContract"
-import { RegTestWallet } from "../../wallet/Wif"
+import { EscrowContract } from "./EscrowContract";
+import { RegTestWallet } from "../../wallet/Wif";
 import { Contract } from "cashscript";
 
 describe(`Test Escrow Contracts`, () => {
+  test("Should create a contract", async () => {
 
-    test("Should create a contract", async () => {
 
         let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF) as RegTestWallet
 
@@ -54,5 +54,4 @@ describe(`Test Escrow Contracts`, () => {
         expect(await seller.getBalance('sat')).toBeGreaterThan(20);
     });
 
-
-})
+});
