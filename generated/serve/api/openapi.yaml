@@ -4,7 +4,7 @@ info:
     email: hello@mainnet.cash
   description: "A high-level developer friendly bitcoin cash wallet api\nThis API\
     \ is currently in active development, breaking changes may \nbe made prior to\
-    \ official release of version 1.\n\n**Important:** This library is in active development\n"
+    \ official release of version 1.\n**Important:** This library is in active development\n"
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
