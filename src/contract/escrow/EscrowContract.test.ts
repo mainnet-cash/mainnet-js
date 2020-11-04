@@ -38,17 +38,13 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // spend the escrow contract
-    await escrow.run(
-      buyer.privateKeyWif!,
-      "spendByBuyer"
-    );
+    await escrow.run(buyer.privateKeyWif!, "spendByBuyer");
     expect(await escrow.getBalance()).toBe(0);
     expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
 
     // spend the sellers funds to another wallet
-    await seller.sendMax(seller2.getDepositAddress()!)
+    await seller.sendMax(seller2.getDepositAddress()!);
     expect(await seller2.getBalance("sat")).toBeGreaterThan(446000);
-
   });
 
   test("Should allow arbiter to spend to seller", async () => {
@@ -91,7 +87,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
 
     // spend the sellers funds to another wallet
-    await seller.sendMax(seller2.getDepositAddress()!)
+    await seller.sendMax(seller2.getDepositAddress()!);
     expect(await seller2.getBalance("sat")).toBeGreaterThan(446000);
   });
 
@@ -135,7 +131,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await buyer.getBalance("sat")).toBeGreaterThan(448000);
 
     // spend the sellers funds to another wallet
-    await buyer.sendMax(buyer2.getDepositAddress()!)
+    await buyer.sendMax(buyer2.getDepositAddress()!);
     expect(await buyer2.getBalance("sat")).toBeGreaterThan(446000);
   });
 
@@ -179,7 +175,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await buyer.getBalance("sat")).toBeGreaterThan(448000);
 
     // spend the sellers funds to another wallet
-    await buyer.sendMax(buyer2.getDepositAddress()!)
+    await buyer.sendMax(buyer2.getDepositAddress()!);
     expect(await buyer2.getBalance("sat")).toBeGreaterThan(446000);
   });
 
@@ -219,7 +215,7 @@ describe(`Test Escrow Contracts`, () => {
       // refund the escrow contract
       await escrow.run(buyer.privateKeyWif!, "refundByArbiter");
     } catch (e) {
-      expect(e.message.split('\n')[0]).toBe(
+      expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
       );
     }
@@ -261,12 +257,11 @@ describe(`Test Escrow Contracts`, () => {
       // refund the escrow contract
       await escrow.run(seller.privateKeyWif!, "spendByArbiter");
     } catch (e) {
-      expect(e.message.split('\n')[0]).toBe(
+      expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
       );
     }
   });
-
 
   test("Should throw error on spend by seller", async () => {
     expect.assertions(1);
@@ -304,7 +299,7 @@ describe(`Test Escrow Contracts`, () => {
       // refund the escrow contract
       await escrow.run(seller.privateKeyWif!, "spendByArbiter");
     } catch (e) {
-      expect(e.message.split('\n')[0]).toBe(
+      expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
       );
     }
