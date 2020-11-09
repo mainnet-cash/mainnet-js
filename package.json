@@ -39,7 +39,7 @@
     "test:server": "npx jest generated/serve/services/WalletService.test.ts --runInBand --detectOpenHandles",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "build": "npx webpack",
+    "build": "npx webpack && cp -v dist/mainnet*.js generated/serve/lib/mainnet",
     "demo": "npx reload --dir=demo/"
   },
   "devDependencies": {
