@@ -1,14 +1,11 @@
 import { EscrowContract } from "./EscrowContract";
 
-
 interface EscrowRequest {
-    sellerAddr: string;
-    buyerAddr: string;
-    arbiterAddr: string;
+  sellerAddr: string;
+  buyerAddr: string;
+  arbiterAddr: string;
 }
 
 interface EscrowResponse {
-    contractId: string
+  contractId: string;
 }
-
-

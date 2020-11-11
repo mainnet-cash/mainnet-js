@@ -1,37 +1,36 @@
 //import { ElectrumNetworkProvider } from "cashscript";
-import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider"
+import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
 import {
   ElectrumCluster,
   ElectrumTransport,
-  ClusterOrder
+  ClusterOrder,
 } from "electrum-cash";
-import {  Network } from "../interface";
+import { Network } from "../interface";
 
 export function getNetworkProvider(network = "mainnet") {
   switch (network) {
     case Network.MAINNET:
-      return getProvider()
+      return getProvider();
     case Network.TESTNET:
-      return getTestnetProvider()
+      return getTestnetProvider();
     case Network.REGTEST:
-      return getRegtestProvider()
+      return getRegtestProvider();
     default:
-      return getProvider()
+      return getProvider();
   }
-
 }
 export function getRegtestProvider() {
-  let cluster = getRegtestCluster()
+  let cluster = getRegtestCluster();
   return new ElectrumNetworkProvider("regtest", cluster);
 }
 
 export function getTestnetProvider() {
-  let cluster = getTestnetCluster()
+  let cluster = getTestnetCluster();
   return new ElectrumNetworkProvider("testnet", cluster);
 }
 
 export function getProvider() {
-  let cluster = getCluster()
+  let cluster = getCluster();
   return new ElectrumNetworkProvider("mainnet", cluster);
 }
 
@@ -45,11 +44,11 @@ function getConfidence() {
   } else {
     confidence = 1;
   }
-  return confidence
+  return confidence;
 }
 
 function getCluster() {
-  let confidence = getConfidence()
+  let confidence = getConfidence();
   let electrum = new ElectrumCluster(
     "Mainnet",
     "1.4.1",
@@ -82,11 +81,11 @@ function getCluster() {
     ElectrumTransport.WSS.Scheme,
     false
   );
-  return electrum
+  return electrum;
 }
 
 function getTestnetCluster() {
-  let confidence = getConfidence()
+  let confidence = getConfidence();
   // Initialize a 1-of-2 Electrum Cluster with 2 hardcoded servers
   let electrum = new ElectrumCluster(
     "CashScript Application",
@@ -107,7 +106,7 @@ function getTestnetCluster() {
     ElectrumTransport.WSS.Scheme,
     false
   );
-  return electrum
+  return electrum;
 }
 
 function getRegtestCluster() {
@@ -120,11 +119,6 @@ function getRegtestCluster() {
     ClusterOrder.RANDOM,
     1020
   );
-  electrum.addServer(
-    "127.0.0.1",
-    60003,
-    ElectrumTransport.WS.Scheme,
-    false
-  );
+  electrum.addServer("127.0.0.1", 60003, ElectrumTransport.WS.Scheme, false);
   return electrum;
 }

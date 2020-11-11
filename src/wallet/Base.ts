@@ -1,15 +1,11 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
-import {
-  getNetworkProvider,
-} from "../network/default";
+import { getNetworkProvider } from "../network/default";
 import { NetworkProvider } from "cashscript";
 import { getStorageProvider } from "../db/util";
 
 import { NetworkEnum, NetworkType, networkPrefixMap } from "../enum";
 import { StorageProvider } from "../db";
-
-
 
 export default interface WalletInterface {
   /**
@@ -61,7 +57,6 @@ export class BaseWallet implements WalletInterface {
         this.network = NetworkEnum.Mainnet;
         this.provider = getNetworkProvider();
     }
-    
   }
 
   generate(): Promise<this | Error> {

@@ -11,11 +11,11 @@ import {
  * @returns a locking script corresponding to the passed address
  */
 export function derivePublicKeyHash(address: string): Uint8Array {
-  let result
-  if(address.includes(":")){
+  let result;
+  if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
-  }else{
-    result = decodeCashAddressFormatWithoutPrefix(address)
+  } else {
+    result = decodeCashAddressFormatWithoutPrefix(address);
   }
 
   if (typeof result === "string") throw new Error(result);
@@ -25,13 +25,12 @@ export function derivePublicKeyHash(address: string): Uint8Array {
 }
 
 export function derivePrefix(address: string): string {
-  let result
-  if(address.includes(":")){
+  let result;
+  if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
-  }else{
-    result = decodeCashAddressFormatWithoutPrefix(address)
+  } else {
+    result = decodeCashAddressFormatWithoutPrefix(address);
   }
-
 
   if (typeof result === "string") throw new Error(result);
 

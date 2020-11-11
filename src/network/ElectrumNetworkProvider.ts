@@ -1,8 +1,5 @@
-import {
-  ElectrumCluster,
-  RequestResponse,
-} from "electrum-cash";
-import { NetworkProvider } from 'cashscript';
+import { ElectrumCluster, RequestResponse } from "electrum-cash";
+import { NetworkProvider } from "cashscript";
 //import { default as NetworkProvider } from "./NetworkProvider";
 import { Utxo, ElectrumBalance } from "../interface";
 import { Network } from "../interface";
@@ -101,7 +98,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
     let result;
     try {
-      result = await this.electrum.request(name, ...parameters)
+      result = await this.electrum.request(name, ...parameters);
     } finally {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {
