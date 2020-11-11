@@ -1,8 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { Service } from "./Service";
-
-// @ts-ignore
-import * as core from "express-serve-static-core";
+const Service = require('./Service');
 
 /**
 * Create an escrow contract
@@ -10,7 +7,7 @@ import * as core from "express-serve-static-core";
 * escrowRequest EscrowRequest Request a new escrow contract
 * returns EscrowResponse
 * */
-export const createEscrow = ({ escrowRequest }) => new Promise(
+const createEscrow = ({ escrowRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
@@ -18,7 +15,7 @@ export const createEscrow = ({ escrowRequest }) => new Promise(
       }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || "Invalid input",
+        e.message || 'Invalid input',
         e.status || 405,
       ));
     }
@@ -27,10 +24,10 @@ export const createEscrow = ({ escrowRequest }) => new Promise(
 /**
 * Finalize an escrow contract
 *
-* escrowFinalizeRequest EscrowFinalizeRequest 
+* escrowFinalizeRequest EscrowFinalizeRequest null
 * returns EscrowResponse
 * */
-export const escrowFinalize = ({ escrowFinalizeRequest }) => new Promise(
+const escrowFinalize = ({ escrowFinalizeRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
@@ -38,7 +35,7 @@ export const escrowFinalize = ({ escrowFinalizeRequest }) => new Promise(
       }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || "Invalid input",
+        e.message || 'Invalid input',
         e.status || 405,
       ));
     }
@@ -51,7 +48,7 @@ export const escrowFinalize = ({ escrowFinalizeRequest }) => new Promise(
 * contract Contract 
 * returns UtxoResponse
 * */
-export const escrowUtxos = ({ contract }) => new Promise(
+const escrowUtxos = ({ contract }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
@@ -59,9 +56,15 @@ export const escrowUtxos = ({ contract }) => new Promise(
       }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || "Invalid input",
+        e.message || 'Invalid input',
         e.status || 405,
       ));
     }
   },
 );
+
+module.exports = {
+  createEscrow,
+  escrowFinalize,
+  escrowUtxos,
+};

@@ -19,7 +19,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should return the balance from a regtest wallet", async () => {
     const resp = await request(app)
-      .post("/v1/wallet/balance")
+      .post("/wallet/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       });
@@ -33,7 +33,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should return the balance from a regtest wallet in satoshi", async () => {
     const resp = await request(app)
-      .post("/v1/wallet/balance")
+      .post("/wallet/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         unit: "sat",
@@ -53,7 +53,7 @@ describe("Test Wallet Endpoints", () => {
     type : "wif",
     network:"regtest"
   }
-    let resp = await request(app).post("/v1/wallet/create").send(req);
+    let resp = await request(app).post("/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.name).toBe(req.name);
@@ -69,7 +69,7 @@ describe("Test Wallet Endpoints", () => {
     network:"testnet"
   }
 
-    let resp = await request(app).post("/v1/wallet/create").send(req);
+    let resp = await request(app).post("/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.name).toBe(req.name);
@@ -86,7 +86,7 @@ describe("Test Wallet Endpoints", () => {
     network:"mainnet"
   }
 
-    let resp = await request(app).post("/v1/wallet/create").send(req);
+    let resp = await request(app).post("/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(500);
     expect(resp.text).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
@@ -100,7 +100,7 @@ describe("Test Wallet Endpoints", () => {
   }
 
     
-    let resp = await request(app).post("/v1/wallet/create").send(req);
+    let resp = await request(app).post("/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
     expect(body!.network).toBe(req.network);
@@ -109,7 +109,7 @@ describe("Test Wallet Endpoints", () => {
   });
 
   it("Should create a mainnet wallet on empty request", async () => {
-    let resp = await request(app).post("/v1/wallet/create").send({});
+    let resp = await request(app).post("/wallet/create").send({});
     const body = resp.body;
 
     expect(resp.statusCode).toBe(200);
@@ -123,7 +123,7 @@ describe("Test Wallet Endpoints", () => {
    */
 
   it("Should return the deposit address from a regtest wallet", async () => {
-    let resp = await request(app).post("/v1/wallet/deposit_address").send({
+    let resp = await request(app).post("/wallet/deposit_address").send({
       walletId:
         "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     });
@@ -137,7 +137,7 @@ describe("Test Wallet Endpoints", () => {
    * depositQr
    */
   it("Should get the deposit qr from a regtest wallet", async () => {
-    let resp = await request(app).post("/v1/wallet/deposit_qr").send({
+    let resp = await request(app).post("/wallet/deposit_qr").send({
       walletId:
         `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
@@ -156,7 +156,7 @@ describe("Test Wallet Endpoints", () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
+      const bobsWalletResp = await request(app).post("/wallet/create").send({
         type: "wif",
         network: "regtest",
       });
@@ -164,7 +164,7 @@ describe("Test Wallet Endpoints", () => {
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
       const sendResp = await request(app)
-        .post("/v1/wallet/send")
+        .post("/wallet/send")
         .send({
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
           to: [
@@ -176,7 +176,7 @@ describe("Test Wallet Endpoints", () => {
           ],
         });
 
-      let resp = await request(app).post("/v1/wallet/max_amount_to_send").send({
+      let resp = await request(app).post("/wallet/max_amount_to_send").send({
         walletId: bobsWalletResp.body.walletId,
       });
       const body = resp.body;
@@ -193,14 +193,14 @@ describe("Test Wallet Endpoints", () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
+      const bobsWalletResp = await request(app).post("/wallet/create").send({
         type: "wif",
         network: "regtest",
       });
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
       const sendResp = await request(app)
-        .post("/v1/wallet/send")
+        .post("/wallet/send")
         .send({
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
           to: [{
@@ -210,7 +210,7 @@ describe("Test Wallet Endpoints", () => {
           }]
         });
 
-      const resp = await request(app).post("/v1/wallet/balance").send({
+      const resp = await request(app).post("/wallet/balance").send({
         walletId: bobsWalletResp.body.walletId,
       });
 
@@ -236,11 +236,11 @@ describe("Test Wallet Endpoints", () => {
 };
 
     const bobsWalletResp = await request(app)
-      .post("/v1/wallet/create")
+      .post("/wallet/create")
       .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
 
-    let initialResp = await request(app).post("/v1/wallet/send").send({
+    let initialResp = await request(app).post("/wallet/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       to: [{
         cashaddr: bobsWallet.cashaddr,
@@ -252,7 +252,7 @@ describe("Test Wallet Endpoints", () => {
       console.log(initialResp.error.text);
     }
     let resp = await request(app)
-      .post("/v1/wallet/send_max")
+      .post("/wallet/send_max")
       .send({
         walletId: bobsWallet.walletId,
         cashaddr: process.env.ADDRESS as string,
@@ -271,7 +271,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should return the unspent transaction outputs for a regtest wallet", async () => {
     const resp = await request(app)
-      .post("/v1/wallet/utxo")
+      .post("/wallet/utxo")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       });

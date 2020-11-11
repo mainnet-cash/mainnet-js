@@ -1,5 +1,5 @@
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-import { UnitEnum } from "./enum";
+import { UnitEnum } from "../enum";
 
 // These are the minimal models used to provide types for the express server
 //

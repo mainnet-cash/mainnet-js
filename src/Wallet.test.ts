@@ -1,4 +1,5 @@
-import { UnitEnum, WalletTypeEnum } from "./wallet/enum";
+import { WalletTypeEnum } from "./wallet/enum";
+import { UnitEnum } from "./enum";
 import { bchParam } from "./chain";
 import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
 import { createWallet } from "./wallet/createWallet";

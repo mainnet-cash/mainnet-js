@@ -3,7 +3,7 @@ var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "production",
+  mode: "development",
   module: {
     rules: [
       {
@@ -16,7 +16,7 @@ const baseConfig = {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
   optimization: {
-    minimize: true,
+    minimize: false,
     mangleWasmImports: true,
     usedExports: true,
   },
@@ -41,11 +41,12 @@ const browserConfig = {
   },
   resolve: {
     alias: {
-      assert: false,
       buffer: false,
+      "bufferutil": false,
       child_process: false,
       crypto: false,
       dns: false,
+      events: require.resolve("events/"),
       fs: false,
       http: false,
       https: false,
@@ -57,11 +58,11 @@ const browserConfig = {
       "pg-native": false,
       stream: false,
       tls: false,
-      util: false,
+      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
-    },
-  },
+    }
+  }
 };
 
 const webWorkerConfig = {
@@ -73,11 +74,12 @@ const webWorkerConfig = {
   },
   resolve: {
     alias: {
-      assert: false,
       buffer: false,
+      "bufferutil": false,
       child_process: false,
       crypto: false,
       dns: false,
+      events: require.resolve("events/"),
       fs: false,
       http: false,
       https: false,
@@ -89,11 +91,11 @@ const webWorkerConfig = {
       "pg-native": false,
       stream: false,
       tls: false,
-      util: false,
+      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
-    },
-  },
+    }
+  }
 };
 
 const browserTestDiff = {

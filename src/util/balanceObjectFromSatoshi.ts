@@ -1,6 +1,6 @@
 import { bchParam } from "../chain";
 import { getUsdRate } from "./getUsdRate";
-import { UnitEnum } from "../wallet/enum";
+import { UnitEnum } from "../enum";
 
 export class BalanceResponse {
   bch?: number;

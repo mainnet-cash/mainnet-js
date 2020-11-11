@@ -2,30 +2,41 @@ import {
   Artifact,
   CashCompiler,
   Contract as CSContract,
-  ElectrumNetworkProvider,
 } from "cashscript";
-import {
-  instantiateRipemd160,
-  instantiateSha256,
-  Ripemd160,
-  Sha256,
-} from "@bitauth/libauth";
-import { Network } from "../interface";
+import { NetworkEnum } from "../enum";
 
-export class Contract {
+import { default as ElectrumNetworkProvider } from "../network/ElectrumNetworkProvider"
+
+export default interface ContractInterface {
+   /**
+   * toString should retrun a serialized representation of the contract
+   * @returns returns a serialized representation of the contract
+   */
+  toString(): string;
+}
+
+export class Contract implements ContractInterface{
   private script: string;
   private parameters: Object;
   private artifact?: Artifact;
   private contract?: CSContract;
   private provider?: ElectrumNetworkProvider;
-  private network: string;
+  public network: string;
 
-  constructor(script: string, parameters: any, network?: string) {
+  constructor(script: string, parameters: any, network: string) {
     this.script = script;
     this.parameters = parameters;
-    this.network = network ? network : "mainnet";
+    this.network = network ? network : "mainnet"
   }
 
+  static fromId({contractId}: {
+    contractId: string;
+  }) {
+    contractId
+    throw Error("cannot instantiate the base contract with fromId")
+  }
+
+  
   public fromCashScript() {
     this.artifact = CashCompiler.compileFile(this.script);
     this.contract = new CSContract(this.artifact, [], this.provider);
@@ -39,4 +50,5 @@ export class Contract {
   public call(method: string, args) {
     this.contract!.functions[method](args);
   }
+
 }

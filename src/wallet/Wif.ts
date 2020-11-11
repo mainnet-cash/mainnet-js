@@ -10,13 +10,14 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { UnitEnum, WalletTypeEnum } from "./enum";
+import { WalletTypeEnum } from "./enum";
+import { UnitEnum } from "../enum";
 
 import { BaseWallet } from "./Base";
 
 import { PrivateKey } from "../interface";
 
-import { networkPrefixMap } from "./createWallet";
+import { networkPrefixMap } from "../enum";
 
 import {
   SendRequest,

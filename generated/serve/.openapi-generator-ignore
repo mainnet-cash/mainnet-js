@@ -23,8 +23,10 @@
 #!docs/README.md
 
 services/index.js
+services/ContractService.js
 services/WalletService.js
 services/MineService.js
+services/*.test.ts
 package.json
 index.js
 config.js

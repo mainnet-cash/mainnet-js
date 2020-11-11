@@ -1,8 +1,36 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
-import { Contract } from "cashscript";
+import { NetworkEnum } from "../../enum";
 
 describe(`Test Escrow Contracts`, () => {
+
+  test("Should serialize and deserialize", async () => {
+    let funder = (await RegTestWallet.fromWIF(
+      process.env.PRIVATE_WIF
+    )) as RegTestWallet;
+
+    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
+    
+    let escrow = new EscrowContract({
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!
+    });
+    let escrow2 = new EscrowContract({
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!
+    });
+    expect(escrow.toString()).toBe(escrow2.toString())
+    console.log(escrow2.getAddress())
+    expect(escrow.getAddress()).toBe(escrow2.getAddress())
+
+    let escrow3 = EscrowContract.fromId({contractId:escrow.toString()})
+    expect(escrow.getAddress()).toBe(escrow3.getAddress())
+  });
+
   test("Should allow buyer to spend to seller", async () => {
     let funder = (await RegTestWallet.fromWIF(
       process.env.PRIVATE_WIF
@@ -12,7 +40,6 @@ describe(`Test Escrow Contracts`, () => {
     let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
     let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
     let seller2 = (await RegTestWallet.newRandom()) as RegTestWallet;
-
     await funder.send([
       {
         cashaddr: buyer.getDepositAddress()!,
@@ -22,11 +49,11 @@ describe(`Test Escrow Contracts`, () => {
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
-      arbiterCashaddr: arbiter.getDepositAddress()!,
-      buyerCashaddr: buyer.getDepositAddress()!,
-      sellerCashaddr: seller.getDepositAddress()!,
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!
     });
-
+    expect(escrow.getAddress()!.slice(0,8)).toBe("bchreg:p");
     // fund the escrow contract
     await buyer.send([
       {
@@ -35,6 +62,7 @@ describe(`Test Escrow Contracts`, () => {
         unit: "satoshis",
       },
     ]);
+    
     expect(await escrow.getBalance()).toBe(450000);
 
     // spend the escrow contract
@@ -66,9 +94,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
-      arbiterCashaddr: arbiter.getDepositAddress()!,
-      buyerCashaddr: buyer.getDepositAddress()!,
-      sellerCashaddr: seller.getDepositAddress()!,
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!
     });
 
     // fund the escrow contract
@@ -110,9 +138,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
-      arbiterCashaddr: arbiter.getDepositAddress()!,
-      buyerCashaddr: buyer.getDepositAddress()!,
-      sellerCashaddr: seller.getDepositAddress()!,
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!
     });
 
     // fund the escrow contract
@@ -154,9 +182,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
-      arbiterCashaddr: arbiter.getDepositAddress()!,
-      buyerCashaddr: buyer.getDepositAddress()!,
-      sellerCashaddr: seller.getDepositAddress()!,
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!
     });
 
     // fund the escrow contract
@@ -198,11 +226,12 @@ describe(`Test Escrow Contracts`, () => {
         },
       ]);
       let escrow = new EscrowContract({
-        arbiterCashaddr: arbiter.getDepositAddress()!,
-        buyerCashaddr: buyer.getDepositAddress()!,
-        sellerCashaddr: seller.getDepositAddress()!,
+        arbiterAddr: arbiter.getDepositAddress()!,
+        buyerAddr: buyer.getDepositAddress()!,
+        sellerAddr: seller.getDepositAddress()!
       });
 
+      
       // fund the escrow contract
       await buyer.send([
         {
@@ -240,9 +269,9 @@ describe(`Test Escrow Contracts`, () => {
         },
       ]);
       let escrow = new EscrowContract({
-        arbiterCashaddr: arbiter.getDepositAddress()!,
-        buyerCashaddr: buyer.getDepositAddress()!,
-        sellerCashaddr: seller.getDepositAddress()!,
+        arbiterAddr: arbiter.getDepositAddress()!,
+        buyerAddr: buyer.getDepositAddress()!,
+        sellerAddr: seller.getDepositAddress()!
       });
 
       // fund the escrow contract
@@ -282,9 +311,9 @@ describe(`Test Escrow Contracts`, () => {
         },
       ]);
       let escrow = new EscrowContract({
-        arbiterCashaddr: arbiter.getDepositAddress()!,
-        buyerCashaddr: buyer.getDepositAddress()!,
-        sellerCashaddr: seller.getDepositAddress()!,
+        arbiterAddr: arbiter.getDepositAddress()!,
+        buyerAddr: buyer.getDepositAddress()!,
+        sellerAddr: seller.getDepositAddress()!
       });
 
       // fund the escrow contract

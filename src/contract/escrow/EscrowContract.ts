@@ -1,40 +1,65 @@
 import {
-  Contract,
+  Contract as CashscriptContract,
   SignatureTemplate,
   CashCompiler,
-  ElectrumNetworkProvider,
   Argument,
 } from "cashscript";
-import {
-  ElectrumCluster,
-  ElectrumTransport,
-  ClusterOrder,
-} from "electrum-cash";
 import { instantiateSecp256k1 } from "@bitauth/libauth";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
+import { Contract } from "../Contract";
 import { Utxo } from "../../interface";
+import { Network } from "../../interface"
+import { derivedNetwork } from "../util"
 
-export class EscrowContract {
+import { getNetworkProvider } from "../../network/default";
+
+export class EscrowContract extends Contract {
   private buyerPKH: Uint8Array;
   private arbiterPKH: Uint8Array;
   private sellerPKH: Uint8Array;
-  private buyerCashaddr: string;
-  private sellerCashaddr: string;
+  private buyerAddr: string;
+  private arbiterAddr: string;
+  private sellerAddr: string;
 
   constructor({
-    sellerCashaddr,
-    buyerCashaddr,
-    arbiterCashaddr,
+    sellerAddr,
+    buyerAddr,
+    arbiterAddr
   }: {
-    sellerCashaddr: string;
-    buyerCashaddr: string;
-    arbiterCashaddr: string;
+    sellerAddr: string;
+    buyerAddr: string;
+    arbiterAddr: string;
   }) {
-    this.buyerPKH = derivePublicKeyHash(buyerCashaddr);
-    this.arbiterPKH = derivePublicKeyHash(arbiterCashaddr);
-    this.sellerPKH = derivePublicKeyHash(sellerCashaddr);
-    this.buyerCashaddr = buyerCashaddr;
-    this.sellerCashaddr = sellerCashaddr;
+    let args = {
+      sellerAddr,
+      buyerAddr,
+      arbiterAddr
+    }
+    const network = derivedNetwork(Object.values(args))
+    super(
+      EscrowContract.getContractText(),
+      args,
+      network
+    );
+    this.buyerPKH = derivePublicKeyHash(buyerAddr);
+    this.arbiterPKH = derivePublicKeyHash(arbiterAddr);
+    this.sellerPKH = derivePublicKeyHash(sellerAddr);
+    this.buyerAddr = buyerAddr;
+    this.arbiterAddr = arbiterAddr;
+    this.sellerAddr = sellerAddr;
+    this.network = network
+  }
+
+  static create({
+    sellerAddr,
+    buyerAddr,
+    arbiterAddr
+  }: {
+    sellerAddr: string;
+    buyerAddr: string;
+    arbiterAddr: string;
+  }) {
+    return new this({ sellerAddr, buyerAddr, arbiterAddr })
   }
 
   public getAddress() {
@@ -49,6 +74,23 @@ export class EscrowContract {
   public getBalance() {
     const instance = this.getContactInstance();
     return instance.getBalance();
+  }
+
+  public toString(){
+    return  `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`
+  }
+
+  public static fromId({contractId}:{contractId:string}){
+    let contractArgs = contractId.split(":")
+    if(contractArgs.shift()!=="escrow"){
+      throw Error("attempted to pass non escrow contract id to an escrow contract")
+    }
+    contractArgs = contractArgs.filter(word => !["bitcoincash","bchtest","bchreg"].includes(word));
+    return EscrowContract.create({
+      sellerAddr: contractArgs.shift()!,
+      buyerAddr: contractArgs.shift()!,
+      arbiterAddr: contractArgs.shift()!,
+    })
   }
 
   public async run(
@@ -74,9 +116,9 @@ export class EscrowContract {
 
     let address;
     if (funcName.startsWith("spend")) {
-      address = this.sellerCashaddr;
+      address = this.sellerAddr;
     } else if (funcName.startsWith("refund")) {
-      address = this.buyerCashaddr;
+      address = this.buyerAddr;
     }
 
     const method = getHexOnly ? "getTxHex" : "send";
@@ -121,32 +163,29 @@ export class EscrowContract {
     }
   }
 
+  private getArtifact(){
+    const contractText = EscrowContract.getContractText();
+    return CashCompiler.compileString(contractText);
+  }
+
   private getContactInstance() {
-    const contractText = this.getContractText();
-    const artifact = CashCompiler.compileString(contractText);
+    
+    let artifact = this.getArtifact()
+
     const parameters: Argument[] = [
       this.arbiterPKH,
       this.buyerPKH,
       this.sellerPKH,
     ];
-    let cluster = new ElectrumCluster(
-      "CashScript Application",
-      "1.4.1",
-      1,
-      1,
-      ClusterOrder.RANDOM,
-      1020
-    );
-    cluster.addServer("127.0.0.1", 60003, ElectrumTransport.WS.Scheme, false);
-    const provider = new ElectrumNetworkProvider("testnet", cluster);
+    const provider = getNetworkProvider(this.network)
 
-    return new Contract(artifact, parameters, provider);
+    return new CashscriptContract(artifact, parameters, provider);
   }
 
-  private getContractText() {
+  private static getContractText() {
     return `
             pragma cashscript ^0.5.3;
-            contract FundingContract(bytes20 arbiterPkh, bytes20 buyerPkh, bytes20 sellerPkh) {
+            contract EscrowContract(bytes20 arbiterPkh, bytes20 buyerPkh, bytes20 sellerPkh) {
 
                 function spendByArbiter(int fee, pubkey signingPk, sig s) {
                     require(hash160(signingPk) == arbiterPkh);

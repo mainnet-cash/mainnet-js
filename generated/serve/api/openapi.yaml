@@ -2,9 +2,13 @@ openapi: 3.0.1
 info:
   contact:
     email: hello@mainnet.cash
-  description: "A high-level developer friendly bitcoin cash wallet api\nThis API\
-    \ is currently in active development, breaking changes may \nbe made prior to\
-    \ official release of version 1.\n**Important:** This library is in active development\n"
+  description: |
+    A developer friendly bitcoin cash wallet api
+
+    This API is currently in active development, breaking changes may
+    be made prior to official release of version 1.
+
+    **Important:** This library is in active development
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
@@ -18,19 +22,122 @@ servers:
 - description: unstable service (for development)
   url: https://rest-unstable.mainnet.cash/
 - description: local development server via npm run serve
-  url: http://localhost:3000/v1
+  url: http://localhost:3000/
 tags:
 - description: Interact with wallets
   externalDocs:
     description: Find out more
-    url: /api-doc/#/wallet/
+    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
   name: wallet
+- description: Mine regtest coins
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/mine/
+  name: mine
 - description: Interact with contracts
   externalDocs:
     description: Find out more
-    url: /api-doc/#/contract/
+    url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
   name: contract
 paths:
+  /contract/escrow/create:
+    post:
+      operationId: createEscrow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EscrowRequest'
+        description: Request a new escrow contract
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EscrowResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Create an escrow contract
+      tags:
+      - contract
+      x-eov-operation-handler: controllers/ContractController
+  /contract/escrow/utxos:
+    post:
+      description: "Returns all UTXOs that can be spent by the \ncontract. Both confirmed\
+        \ and unconfirmed UTXOs are included.\n"
+      operationId: escrowUtxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contract'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtxoResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: List specific utxos in a contract
+      tags:
+      - contract
+      x-eov-operation-handler: controllers/ContractController
+  /contract/escrow/call:
+    post:
+      operationId: escrowCall
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EscrowCallRequest'
+        description: "null"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EscrowResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Finalize an escrow contract
+      tags:
+      - contract
+      x-eov-operation-handler: controllers/ContractController
+  /mine:
+    post:
+      operationId: mine
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MineRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  description: a list of block hashes
+                  type: string
+                type: array
+          description: request accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Mine regtest coins to a specified address
+      tags:
+      - mine
+      x-eov-operation-handler: controllers/MineController
   /wallet/create:
     post:
       operationId: createWallet
@@ -228,31 +335,6 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
-  /mine:
-    post:
-      operationId: mine
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MineRequest'
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  description: a list of block hashes
-                  type: string
-                type: array
-          description: request accepted
-        "400":
-          content: {}
-          description: Invalid Request
-      summary: Mine regtest coins to a specified address
-      tags:
-      - mine
-      x-eov-operation-handler: controllers/MineController
 components:
   schemas:
     Utxo:
@@ -356,6 +438,78 @@ components:
           description: Amount in United States Dollars
           example: 0
           type: number
+    Contract:
+      example:
+        contractId: contractId
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+      required:
+      - contractId
+    EscrowRequest:
+      example:
+        arbiterAddr: bchtest:qpsm4nm7talhxhl05mlhms3ys43u76rn0ttdv3qg2u
+        buyerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        sellerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      properties:
+        buyerAddr:
+          description: The cashaddress of the buyer
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        arbiterAddr:
+          description: The cashaddress of the arbiter
+          example: bchtest:qpsm4nm7talhxhl05mlhms3ys43u76rn0ttdv3qg2u
+        sellerAddr:
+          description: The cashaddress of the seller
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      required:
+      - arbiterAddr
+      - buyerAddr
+      - sellerAddr
+    EscrowResponse:
+      example:
+        contractId: contractId
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+    EscrowCallRequest:
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        contractId: contractId
+        action: complete
+        utxoIds:
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+        walletId:
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        action:
+          description: Action for finalization of contract.
+          enum:
+          - spend
+          - refund
+          example: complete
+          type: string
+        utxoIds:
+          items:
+            description: The hash of a transaction and index of the utxo
+            example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+            type: string
+          type: array
+      required:
+      - action
+      - contractId
+      - walletId
     ScalableVectorGraphic:
       example:
         src: data:image/svg+xml;base64,PD94bWwgdm... ==**

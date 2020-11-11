@@ -13,7 +13,7 @@ services:
     container_name: bitcoind
     ports:
       - "18443:18443"
-    expose: [60003]
+    expose: [18443]
     volumes:
       - bitcoin-data:/data
     networks:
@@ -28,8 +28,9 @@ services:
     image: cculianu/fulcrum
     command: /bin/sh -c "/bin/sleep 5 && Fulcrum /tmp/fulcrum.conf"
     ports:
+      - "60001:60001"
       - "60003:60003"
-    expose: [60003]
+    expose: [60001, 60003]
     depends_on:
       - bitcoin-mine
     networks:

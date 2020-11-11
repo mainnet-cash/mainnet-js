@@ -1,4 +1,5 @@
-import { NetworkEnum, WalletTypeEnum } from "./enum";
+import { WalletTypeEnum } from "./enum";
+import { NetworkEnum } from "../enum";
 import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
 
 interface WalletRequest {
@@ -26,12 +27,6 @@ var walletClassMap = {
       return RegTestWallet;
     },
   },
-};
-
-export const networkPrefixMap = {
-  bitcoincash: "mainnet",
-  bchtest: "testnet",
-  bchreg: "regtest",
 };
 
 export async function createWallet(body: WalletRequest): Promise<any> {

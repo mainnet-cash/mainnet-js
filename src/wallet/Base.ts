@@ -1,21 +1,15 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
 import {
-  MainnetProvider,
-  TestnetProvider,
-  RegtestProvider,
+  getNetworkProvider,
 } from "../network/default";
-import { NetworkProvider } from "../network";
+import { NetworkProvider } from "cashscript";
 import { getStorageProvider } from "../db/util";
 
-import { NetworkEnum, NetworkType } from "./enum";
+import { NetworkEnum, NetworkType, networkPrefixMap } from "../enum";
 import { StorageProvider } from "../db";
 
-export const networkPrefixMap = {
-  bitcoincash: "mainnet",
-  bchtest: "testnet",
-  bchreg: "regtest",
-};
+
 
 export default interface WalletInterface {
   /**
@@ -56,17 +50,18 @@ export class BaseWallet implements WalletInterface {
     this.isTestnet = this.networkType === "testnet" ? true : false;
     switch (this.networkPrefix) {
       case CashAddressNetworkPrefix.regtest:
-        this.provider = RegtestProvider();
         this.network = NetworkEnum.Regtest;
+        this.provider = getNetworkProvider("regtest");
         break;
       case CashAddressNetworkPrefix.testnet:
-        this.provider = TestnetProvider();
         this.network = NetworkEnum.Testnet;
+        this.provider = getNetworkProvider("testnet");
         break;
       default:
-        this.provider = this.provider = MainnetProvider();
         this.network = NetworkEnum.Mainnet;
+        this.provider = getNetworkProvider();
     }
+    
   }
 
   generate(): Promise<this | Error> {
