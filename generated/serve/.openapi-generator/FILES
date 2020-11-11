@@ -1,6 +1,7 @@
 .eslintrc.json
 README.md
 api/openapi.yaml
+controllers/ContractController.js
 controllers/Controller.js
 controllers/MineController.js
 controllers/WalletController.js

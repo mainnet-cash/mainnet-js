@@ -1,0 +1,22 @@
+pragma cashscript ^0.5.0;
+
+contract Escrow(bytes20 buyerPkh, bytes20 sellerPkh, bytes20 arbiterPkh, string nonce) {
+    function complete(string nonce2, int fee, pubkey pk, sig s) {
+        require(int(tx.version) >= 2);
+        require(nonce == nonce2);
+        require(hash160(pk) == buyerPkh || hash160(pk) == arbiterPkh);
+        require(checkSig(s, pk));
+        int amount1 = int(bytes(tx.value)) - fee;
+        bytes34 out1 = new OutputP2PKH(bytes8(amount1), sellerPkh);
+        require(hash256(out1) == tx.hashOutputs);
+    }
+    function refund(string nonce2, int fee, pubkey pk, sig s) {
+        require(int(tx.version) >= 2);
+        require(nonce == nonce2);
+        require(hash160(pk) == sellerPkh || hash160(pk) == arbiterPkh);
+        require(checkSig(s, arbiterPk));
+        int amount1 = int(bytes(tx.value)) - fee;
+        bytes34 out1 = new OutputP2PKH(bytes8(amount1), buyerPkh);
+        require(hash256(out1) == tx.hashOutputs);
+    }
+}

@@ -10,13 +10,14 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { UnitEnum, WalletTypeEnum } from "./enum";
+import { WalletTypeEnum } from "./enum";
+import { UnitEnum } from "../enum";
 
 import { BaseWallet } from "./Base";
 
 import { PrivateKey } from "../interface";
 
-import { networkPrefixMap } from "./createWallet";
+import { networkPrefixMap } from "../enum";
 
 import {
   SendRequest,
@@ -51,6 +52,7 @@ const sha256Promise = instantiateSha256();
 
 export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
+  publicKeyHash?: Uint8Array;
   privateKey?: Uint8Array;
   uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
@@ -78,7 +80,7 @@ export class Wallet extends BaseWallet {
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
-    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
