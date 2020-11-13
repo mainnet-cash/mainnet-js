@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const mainnet = require("../../../dist/mainnet-node-0.0.1-rc");
+const mainnet = require("../lib/mainnet/mainnet-node-0.0.1-rc");
 /**
 * Mine regtest coins to a specified address
 *
