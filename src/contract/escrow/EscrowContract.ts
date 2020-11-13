@@ -5,11 +5,11 @@ import {
   Argument,
 } from "cashscript";
 import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { Contract } from "../Contract";
 import { Utxo } from "../../interface";
-import { Network } from "../../interface"
-import { derivedNetwork } from "../util"
+import { derivedNetwork } from "../../util/deriveNetwork"
+import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
+import { sanitizeAddress } from "../../util/sanitizeAddress";
 
 import { getNetworkProvider } from "../../network/default";
 
@@ -44,9 +44,9 @@ export class EscrowContract extends Contract {
     this.buyerPKH = derivePublicKeyHash(buyerAddr);
     this.arbiterPKH = derivePublicKeyHash(arbiterAddr);
     this.sellerPKH = derivePublicKeyHash(sellerAddr);
-    this.buyerAddr = buyerAddr;
-    this.arbiterAddr = arbiterAddr;
-    this.sellerAddr = sellerAddr;
+    this.buyerAddr = sanitizeAddress(buyerAddr);
+    this.arbiterAddr = sanitizeAddress(arbiterAddr);
+    this.sellerAddr = sanitizeAddress(sellerAddr);
     this.network = network
   }
 
@@ -80,7 +80,7 @@ export class EscrowContract extends Contract {
     return  `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`
   }
 
-  public static fromId({contractId}:{contractId:string}){
+  public static fromId(contractId:string){
     let contractArgs = contractId.split(":")
     if(contractArgs.shift()!=="escrow"){
       throw Error("attempted to pass non escrow contract id to an escrow contract")

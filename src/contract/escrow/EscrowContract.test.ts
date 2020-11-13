@@ -1,6 +1,5 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
-import { NetworkEnum } from "../../enum";
 
 describe(`Test Escrow Contracts`, () => {
 
@@ -24,10 +23,9 @@ describe(`Test Escrow Contracts`, () => {
       sellerAddr: seller.getDepositAddress()!
     });
     expect(escrow.toString()).toBe(escrow2.toString())
-    console.log(escrow2.getAddress())
     expect(escrow.getAddress()).toBe(escrow2.getAddress())
 
-    let escrow3 = EscrowContract.fromId({contractId:escrow.toString()})
+    let escrow3 = EscrowContract.fromId(escrow.toString())
     expect(escrow.getAddress()).toBe(escrow3.getAddress())
   });
 

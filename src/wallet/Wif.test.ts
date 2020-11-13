@@ -1,6 +1,7 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
+import { walletFromId } from "./createWallet"
 
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
@@ -109,8 +110,25 @@ describe(`Watch only Wallets`, () => {
     )) as Wallet;
     expect(w.network).toBe("testnet");
     expect(w.networkPrefix).toBe("bchtest");
-    expect(w.cashaddr).toBe("qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22");
+    expect(w.cashaddr).toBe("bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22");
   });
+
+  
+  test("Create a watch only regtest wallet from string id", async () => {
+    
+    let w = (await RegTestWallet.fromId("watch:regtest:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt")) as Wallet;
+      if (!w) {
+        throw Error("Could not derive wallet");
+      }
+
+    // the balance unit may also be empty
+    let unit
+    expect(((await w.getBalance(unit)) as BalanceResponse ).sat).toBe(0);
+    expect(w.network).toBe("regtest");
+    expect(w.networkPrefix).toBe("bchreg");
+    expect(w.cashaddr).toBe("bchreg:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt");
+  });
+
 
   test("Create a watch only mainnet wallet from string id", async () => {
     let w = (await Wallet.fromId(
@@ -118,7 +136,7 @@ describe(`Watch only Wallets`, () => {
     )) as Wallet;
     expect(w.network).toBe("mainnet");
     expect(w.networkPrefix).toBe("bitcoincash");
-    expect(w.cashaddr).toBe("qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5");
+    expect(w.cashaddr).toBe("bitcoincash:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5");
   });
 
   test("Should get the regtest wallet balance", async () => {

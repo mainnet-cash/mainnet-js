@@ -46,6 +46,7 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
+import { derivePrefix } from "../util/derivePublicKeyHash";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -161,7 +162,7 @@ export class Wallet extends BaseWallet {
   }
 
   public _fromId = async (walletId: string): Promise<this | Error> => {
-    let [walletType, networkGiven, privateImport]: string[] = walletId.split(
+    let [walletType, networkGiven, privateImport, address]: string[] = walletId.split(
       ":"
     );
     if (!["watch", "wif", "seed"].includes(walletType)) {
@@ -180,7 +181,12 @@ export class Wallet extends BaseWallet {
       case "wif":
         return this.fromWIF(privateImport);
       case "watch":
-        return this.watchOnly(privateImport);
+        if(address){
+          address = `${privateImport}:${address}`
+        }else{
+          address = `${derivePrefix(privateImport)}:${privateImport}`
+        }
+        return this.watchOnly(address);
       case "seed":
         throw new Error("Not implemented");
       default:

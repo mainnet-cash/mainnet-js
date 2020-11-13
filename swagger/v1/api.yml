@@ -103,7 +103,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EscrowResponse"
+                $ref: "#/components/schemas/EscrowCallResponse"
           description: successful operation
         "405":
           content: {}
@@ -457,8 +457,10 @@ components:
         action: 
           description: Action for finalization of contract.
           enum:
-            - spend
-            - refund
+            - spendByBuyer
+            - spendByArbiter
+            - refundByArbiter
+            - refundBySeller
           example: complete
           type: string
         utxoIds:
