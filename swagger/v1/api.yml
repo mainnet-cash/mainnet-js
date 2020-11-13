@@ -472,7 +472,18 @@ components:
       required:
         - contractId
         - walletId
-        - action               
+        - action   
+    EscrowCallResponse:
+      properties:
+        contractId:
+            type: string
+            description:  | 
+              serialized contract
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call     
     ScalableVectorGraphic:
       properties:
         src:
