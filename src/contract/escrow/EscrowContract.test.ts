@@ -21,11 +21,11 @@ describe(`Test Escrow Contracts`, () => {
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
     });
-    expect(escrow.toString()).toBe(escrow2.toString())
-    expect(escrow.getAddress()).toBe(escrow2.getAddress())
+    expect(escrow.toString()).toBe(escrow2.toString());
+    expect(escrow.getAddress()).toBe(escrow2.getAddress());
 
-    let escrow3 = EscrowContract.fromId(escrow.toString())
-    expect(escrow.getAddress()).toBe(escrow3.getAddress())
+    let escrow3 = EscrowContract.fromId(escrow.toString());
+    expect(escrow.getAddress()).toBe(escrow3.getAddress());
   });
 
   test("Should allow buyer to spend to seller", async () => {

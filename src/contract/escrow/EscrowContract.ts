@@ -7,7 +7,7 @@ import {
 import { instantiateSecp256k1 } from "@bitauth/libauth";
 import { Contract } from "../Contract";
 import { Utxo } from "../../interface";
-import { derivedNetwork } from "../../util/deriveNetwork"
+import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
 
@@ -43,7 +43,7 @@ export class EscrowContract extends Contract {
     this.buyerAddr = sanitizeAddress(buyerAddr);
     this.arbiterAddr = sanitizeAddress(arbiterAddr);
     this.sellerAddr = sanitizeAddress(sellerAddr);
-    this.network = network
+    this.network = network;
   }
 
   static create({
@@ -76,10 +76,12 @@ export class EscrowContract extends Contract {
     return `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`;
   }
 
-  public static fromId(contractId:string){
-    let contractArgs = contractId.split(":")
-    if(contractArgs.shift()!=="escrow"){
-      throw Error("attempted to pass non escrow contract id to an escrow contract")
+  public static fromId(contractId: string) {
+    let contractArgs = contractId.split(":");
+    if (contractArgs.shift() !== "escrow") {
+      throw Error(
+        "attempted to pass non escrow contract id to an escrow contract"
+      );
     }
     contractArgs = contractArgs.filter(
       (word) => !["bitcoincash", "bchtest", "bchreg"].includes(word)

@@ -5,9 +5,9 @@ import { default as ElectrumNetworkProvider } from "../network/ElectrumNetworkPr
 
 export default interface ContractInterface {
   /**
-  * toString should return a serialized representation of the contract
-  * @returns returns a serialized representation of the contract
-  */
+   * toString should return a serialized representation of the contract
+   * @returns returns a serialized representation of the contract
+   */
   toString(): string;
   getAddress(): string | Error;
 }
@@ -19,7 +19,7 @@ export class Contract implements ContractInterface {
   private contract?: CSContract;
   private provider?: ElectrumNetworkProvider;
   public network: string;
-  private address?: string
+  private address?: string;
 
   constructor(script: string, parameters: any, network: string) {
     this.script = script;
@@ -29,14 +29,14 @@ export class Contract implements ContractInterface {
 
   // @ts-ignore
   static fromId(contractId: string) {
-    throw Error("cannot instantiate the base contract with fromId")
+    throw Error("cannot instantiate the base contract with fromId");
   }
 
   public getAddress() {
     if (this.address) {
-      return this.address
+      return this.address;
     } else {
-      throw Error("cannot get address of the base type contract")
+      throw Error("cannot get address of the base type contract");
     }
   }
 

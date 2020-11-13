@@ -162,9 +162,12 @@ export class Wallet extends BaseWallet {
   }
 
   public _fromId = async (walletId: string): Promise<this | Error> => {
-    let [walletType, networkGiven, privateImport, address]: string[] = walletId.split(
-      ":"
-    );
+    let [
+      walletType,
+      networkGiven,
+      privateImport,
+      address,
+    ]: string[] = walletId.split(":");
     if (!["watch", "wif", "seed"].includes(walletType)) {
       throw Error(
         `Wallet type ${walletType} was passed to single address wallet`
@@ -181,10 +184,10 @@ export class Wallet extends BaseWallet {
       case "wif":
         return this.fromWIF(privateImport);
       case "watch":
-        if(address){
-          address = `${privateImport}:${address}`
-        }else{
-          address = `${derivePrefix(privateImport)}:${privateImport}`
+        if (address) {
+          address = `${privateImport}:${address}`;
+        } else {
+          address = `${derivePrefix(privateImport)}:${privateImport}`;
         }
         return this.watchOnly(address);
       case "seed":
