@@ -104,7 +104,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EscrowResponse'
+                $ref: '#/components/schemas/EscrowCallResponse'
           description: successful operation
         "405":
           content: {}
@@ -512,6 +512,20 @@ components:
       - action
       - contractId
       - walletId
+    EscrowCallResponse:
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        contractId: contractId
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+        walletId:
+          description: "ID that is returned in `wallet` field of /wallet call    \
+            \ \n"
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
     ScalableVectorGraphic:
       example:
         src: data:image/svg+xml;base64,PD94bWwgdm... ==**
