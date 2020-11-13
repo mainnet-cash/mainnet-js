@@ -1,11 +1,11 @@
 import { EscrowContract } from "./escrow";
-import { Contract } from "./Contract"
+import { Contract } from "./Contract";
 
 
 var contactClassMap = {
-    escrow: () => {
-        return EscrowContract;
-    }
+  escrow: () => {
+    return EscrowContract;
+  },
 };
 
 

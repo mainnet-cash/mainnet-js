@@ -24,7 +24,7 @@ export class EscrowContract extends Contract {
   constructor({
     sellerAddr,
     buyerAddr,
-    arbiterAddr
+    arbiterAddr,
   }: {
     sellerAddr: string;
     buyerAddr: string;
@@ -33,14 +33,10 @@ export class EscrowContract extends Contract {
     let args = {
       sellerAddr,
       buyerAddr,
-      arbiterAddr
-    }
-    const network = derivedNetwork(Object.values(args))
-    super(
-      EscrowContract.getContractText(),
-      args,
-      network
-    );
+      arbiterAddr,
+    };
+    const network = derivedNetwork(Object.values(args));
+    super(EscrowContract.getContractText(), args, network);
     this.buyerPKH = derivePublicKeyHash(buyerAddr);
     this.arbiterPKH = derivePublicKeyHash(arbiterAddr);
     this.sellerPKH = derivePublicKeyHash(sellerAddr);
@@ -53,13 +49,13 @@ export class EscrowContract extends Contract {
   static create({
     sellerAddr,
     buyerAddr,
-    arbiterAddr
+    arbiterAddr,
   }: {
     sellerAddr: string;
     buyerAddr: string;
     arbiterAddr: string;
   }) {
-    return new this({ sellerAddr, buyerAddr, arbiterAddr })
+    return new this({ sellerAddr, buyerAddr, arbiterAddr });
   }
 
   public getAddress() {
@@ -76,8 +72,8 @@ export class EscrowContract extends Contract {
     return instance.getBalance();
   }
 
-  public toString(){
-    return  `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`
+  public toString() {
+    return `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`;
   }
 
   public static fromId(contractId:string){
@@ -85,12 +81,14 @@ export class EscrowContract extends Contract {
     if(contractArgs.shift()!=="escrow"){
       throw Error("attempted to pass non escrow contract id to an escrow contract")
     }
-    contractArgs = contractArgs.filter(word => !["bitcoincash","bchtest","bchreg"].includes(word));
+    contractArgs = contractArgs.filter(
+      (word) => !["bitcoincash", "bchtest", "bchreg"].includes(word)
+    );
     return EscrowContract.create({
       sellerAddr: contractArgs.shift()!,
       buyerAddr: contractArgs.shift()!,
       arbiterAddr: contractArgs.shift()!,
-    })
+    });
   }
 
   public async run(
@@ -163,21 +161,20 @@ export class EscrowContract extends Contract {
     }
   }
 
-  private getArtifact(){
+  private getArtifact() {
     const contractText = EscrowContract.getContractText();
     return CashCompiler.compileString(contractText);
   }
 
   private getContactInstance() {
-    
-    let artifact = this.getArtifact()
+    let artifact = this.getArtifact();
 
     const parameters: Argument[] = [
       this.arbiterPKH,
       this.buyerPKH,
       this.sellerPKH,
     ];
-    const provider = getNetworkProvider(this.network)
+    const provider = getNetworkProvider(this.network);
 
     return new CashscriptContract(artifact, parameters, provider);
   }

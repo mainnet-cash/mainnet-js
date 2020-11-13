@@ -41,10 +41,9 @@ export function derivePrefix(address: string): string {
 
   if(address.includes(":")){
     result = decodeCashAddressFormat(address);
-  }else{
-    result = decodeCashAddressFormatWithoutPrefix(address)
+  } else {
+    result = decodeCashAddressFormatWithoutPrefix(address);
   }
-
 
   if (typeof result === "string") throw new Error(result);
 

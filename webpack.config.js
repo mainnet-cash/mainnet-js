@@ -42,7 +42,7 @@ const browserConfig = {
   resolve: {
     alias: {
       buffer: false,
-      "bufferutil": false,
+      bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
@@ -61,8 +61,8 @@ const browserConfig = {
       util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
-    }
-  }
+    },
+  },
 };
 
 const webWorkerConfig = {
@@ -75,7 +75,7 @@ const webWorkerConfig = {
   resolve: {
     alias: {
       buffer: false,
-      "bufferutil": false,
+      bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
@@ -94,8 +94,8 @@ const webWorkerConfig = {
       util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
-    }
-  }
+    },
+  },
 };
 
 const browserTestDiff = {

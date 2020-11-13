@@ -1,15 +1,11 @@
-import {
-  Artifact,
-  CashCompiler,
-  Contract as CSContract,
-} from "cashscript";
+import { Artifact, CashCompiler, Contract as CSContract } from "cashscript";
 import { NetworkEnum } from "../enum";
 
-import { default as ElectrumNetworkProvider } from "../network/ElectrumNetworkProvider"
+import { default as ElectrumNetworkProvider } from "../network/ElectrumNetworkProvider";
 
 export default interface ContractInterface {
   /**
-  * toString should retrun a serialized representation of the contract
+  * toString should return a serialized representation of the contract
   * @returns returns a serialized representation of the contract
   */
   toString(): string;
@@ -28,7 +24,7 @@ export class Contract implements ContractInterface {
   constructor(script: string, parameters: any, network: string) {
     this.script = script;
     this.parameters = parameters;
-    this.network = network ? network : "mainnet"
+    this.network = network ? network : "mainnet";
   }
 
   // @ts-ignore
@@ -57,5 +53,4 @@ export class Contract implements ContractInterface {
   public call(method: string, args) {
     this.contract!.functions[method](args);
   }
-
 }

@@ -1,19 +1,19 @@
 // Currently in sync with Node.js lib/internal/util/types.js
 // https://github.com/nodejs/node/commit/112cc7c27551254aa2b17098fb774867f05ed0d9
 
-'use strict';
+"use strict";
 
-var isArgumentsObject = require('is-arguments');
-var isGeneratorFunction = require('is-generator-function');
-var whichTypedArray = require('which-typed-array');
-var isTypedArray = require('is-typed-array');
+var isArgumentsObject = require("is-arguments");
+var isGeneratorFunction = require("is-generator-function");
+var whichTypedArray = require("which-typed-array");
+var isTypedArray = require("is-typed-array");
 
 function uncurryThis(f) {
   return f.call.bind(f);
 }
 
-var BigIntSupported = typeof BigInt !== 'undefined';
-var SymbolSupported = typeof Symbol !== 'undefined';
+var BigIntSupported = typeof BigInt !== "undefined";
+var SymbolSupported = typeof Symbol !== "undefined";
 
 var ObjectToString = uncurryThis(Object.prototype.toString);
 
@@ -30,13 +30,13 @@ if (SymbolSupported) {
 }
 
 function checkBoxedPrimitive(value, prototypeValueOf) {
-  if (typeof value !== 'object') {
+  if (typeof value !== "object") {
     return false;
   }
   try {
     prototypeValueOf(value);
     return true;
-  } catch(e) {
+  } catch (e) {
     return false;
   }
 }
@@ -48,135 +48,114 @@ exports.isTypedArray = isTypedArray;
 // Taken from here and modified for better browser support
 // https://github.com/sindresorhus/p-is-promise/blob/cda35a513bda03f977ad5cde3a079d237e82d7ef/index.js
 function isPromise(input) {
-	return (
-		(
-			typeof Promise !== 'undefined' &&
-			input instanceof Promise
-		) ||
-		(
-			input !== null &&
-			typeof input === 'object' &&
-			typeof input.then === 'function' &&
-			typeof input.catch === 'function'
-		)
-	);
+  return (
+    (typeof Promise !== "undefined" && input instanceof Promise) ||
+    (input !== null &&
+      typeof input === "object" &&
+      typeof input.then === "function" &&
+      typeof input.catch === "function")
+  );
 }
 exports.isPromise = isPromise;
 
 function isArrayBufferView(value) {
-  if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) {
+  if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView) {
     return ArrayBuffer.isView(value);
   }
 
-  return (
-    isTypedArray(value) ||
-    isDataView(value)
-  );
+  return isTypedArray(value) || isDataView(value);
 }
 exports.isArrayBufferView = isArrayBufferView;
 
-
 function isUint8Array(value) {
-  return whichTypedArray(value) === 'Uint8Array';
+  return whichTypedArray(value) === "Uint8Array";
 }
 exports.isUint8Array = isUint8Array;
 
 function isUint8ClampedArray(value) {
-  return whichTypedArray(value) === 'Uint8ClampedArray';
+  return whichTypedArray(value) === "Uint8ClampedArray";
 }
 exports.isUint8ClampedArray = isUint8ClampedArray;
 
 function isUint16Array(value) {
-  return whichTypedArray(value) === 'Uint16Array';
+  return whichTypedArray(value) === "Uint16Array";
 }
 exports.isUint16Array = isUint16Array;
 
 function isUint32Array(value) {
-  return whichTypedArray(value) === 'Uint32Array';
+  return whichTypedArray(value) === "Uint32Array";
 }
 exports.isUint32Array = isUint32Array;
 
 function isInt8Array(value) {
-  return whichTypedArray(value) === 'Int8Array';
+  return whichTypedArray(value) === "Int8Array";
 }
 exports.isInt8Array = isInt8Array;
 
 function isInt16Array(value) {
-  return whichTypedArray(value) === 'Int16Array';
+  return whichTypedArray(value) === "Int16Array";
 }
 exports.isInt16Array = isInt16Array;
 
 function isInt32Array(value) {
-  return whichTypedArray(value) === 'Int32Array';
+  return whichTypedArray(value) === "Int32Array";
 }
 exports.isInt32Array = isInt32Array;
 
 function isFloat32Array(value) {
-  return whichTypedArray(value) === 'Float32Array';
+  return whichTypedArray(value) === "Float32Array";
 }
 exports.isFloat32Array = isFloat32Array;
 
 function isFloat64Array(value) {
-  return whichTypedArray(value) === 'Float64Array';
+  return whichTypedArray(value) === "Float64Array";
 }
 exports.isFloat64Array = isFloat64Array;
 
 function isBigInt64Array(value) {
-  return whichTypedArray(value) === 'BigInt64Array';
+  return whichTypedArray(value) === "BigInt64Array";
 }
 exports.isBigInt64Array = isBigInt64Array;
 
 function isBigUint64Array(value) {
-  return whichTypedArray(value) === 'BigUint64Array';
+  return whichTypedArray(value) === "BigUint64Array";
 }
 exports.isBigUint64Array = isBigUint64Array;
 
 function isMapToString(value) {
-  return ObjectToString(value) === '[object Map]';
+  return ObjectToString(value) === "[object Map]";
 }
-isMapToString.working = (
-  typeof Map !== 'undefined' &&
-  isMapToString(new Map())
-);
+isMapToString.working = typeof Map !== "undefined" && isMapToString(new Map());
 
 function isMap(value) {
-  if (typeof Map === 'undefined') {
+  if (typeof Map === "undefined") {
     return false;
   }
 
-  return isMapToString.working
-    ? isMapToString(value)
-    : value instanceof Map;
+  return isMapToString.working ? isMapToString(value) : value instanceof Map;
 }
 exports.isMap = isMap;
 
 function isSetToString(value) {
-  return ObjectToString(value) === '[object Set]';
+  return ObjectToString(value) === "[object Set]";
 }
-isSetToString.working = (
-  typeof Set !== 'undefined' &&
-  isSetToString(new Set())
-);
+isSetToString.working = typeof Set !== "undefined" && isSetToString(new Set());
 function isSet(value) {
-  if (typeof Set === 'undefined') {
+  if (typeof Set === "undefined") {
     return false;
   }
 
-  return isSetToString.working
-    ? isSetToString(value)
-    : value instanceof Set;
+  return isSetToString.working ? isSetToString(value) : value instanceof Set;
 }
 exports.isSet = isSet;
 
 function isWeakMapToString(value) {
-  return ObjectToString(value) === '[object WeakMap]';
+  return ObjectToString(value) === "[object WeakMap]";
 }
-isWeakMapToString.working = (
-  typeof WeakMap !== 'undefined' &&
-  isWeakMapToString(new WeakMap())
-);
+isWeakMapToString.working =
+  typeof WeakMap !== "undefined" && isWeakMapToString(new WeakMap());
 function isWeakMap(value) {
-  if (typeof WeakMap === 'undefined') {
+  if (typeof WeakMap === "undefined") {
     return false;
   }
 
@@ -187,26 +166,23 @@ function isWeakMap(value) {
 exports.isWeakMap = isWeakMap;
 
 function isWeakSetToString(value) {
-  return ObjectToString(value) === '[object WeakSet]';
+  return ObjectToString(value) === "[object WeakSet]";
 }
-isWeakSetToString.working = (
-  typeof WeakSet !== 'undefined' &&
-  isWeakSetToString(new WeakSet())
-);
+isWeakSetToString.working =
+  typeof WeakSet !== "undefined" && isWeakSetToString(new WeakSet());
 function isWeakSet(value) {
   return isWeakSetToString(value);
 }
 exports.isWeakSet = isWeakSet;
 
 function isArrayBufferToString(value) {
-  return ObjectToString(value) === '[object ArrayBuffer]';
+  return ObjectToString(value) === "[object ArrayBuffer]";
 }
-isArrayBufferToString.working = (
-  typeof ArrayBuffer !== 'undefined' &&
-  isArrayBufferToString(new ArrayBuffer())
-);
+isArrayBufferToString.working =
+  typeof ArrayBuffer !== "undefined" &&
+  isArrayBufferToString(new ArrayBuffer());
 function isArrayBuffer(value) {
-  if (typeof ArrayBuffer === 'undefined') {
+  if (typeof ArrayBuffer === "undefined") {
     return false;
   }
 
@@ -217,15 +193,14 @@ function isArrayBuffer(value) {
 exports.isArrayBuffer = isArrayBuffer;
 
 function isDataViewToString(value) {
-  return ObjectToString(value) === '[object DataView]';
+  return ObjectToString(value) === "[object DataView]";
 }
-isDataViewToString.working = (
-  typeof ArrayBuffer !== 'undefined' &&
-  typeof DataView !== 'undefined' &&
-  isDataViewToString(new DataView(new ArrayBuffer(1), 0, 1))
-);
+isDataViewToString.working =
+  typeof ArrayBuffer !== "undefined" &&
+  typeof DataView !== "undefined" &&
+  isDataViewToString(new DataView(new ArrayBuffer(1), 0, 1));
 function isDataView(value) {
-  if (typeof DataView === 'undefined') {
+  if (typeof DataView === "undefined") {
     return false;
   }
 
@@ -236,14 +211,13 @@ function isDataView(value) {
 exports.isDataView = isDataView;
 
 function isSharedArrayBufferToString(value) {
-  return ObjectToString(value) === '[object SharedArrayBuffer]';
+  return ObjectToString(value) === "[object SharedArrayBuffer]";
 }
-isSharedArrayBufferToString.working = (
-  typeof SharedArrayBuffer !== 'undefined' &&
-  isSharedArrayBufferToString(new SharedArrayBuffer())
-);
+isSharedArrayBufferToString.working =
+  typeof SharedArrayBuffer !== "undefined" &&
+  isSharedArrayBufferToString(new SharedArrayBuffer());
 function isSharedArrayBuffer(value) {
-  if (typeof SharedArrayBuffer === 'undefined') {
+  if (typeof SharedArrayBuffer === "undefined") {
     return false;
   }
 
@@ -254,27 +228,27 @@ function isSharedArrayBuffer(value) {
 exports.isSharedArrayBuffer = isSharedArrayBuffer;
 
 function isAsyncFunction(value) {
-  return ObjectToString(value) === '[object AsyncFunction]';
+  return ObjectToString(value) === "[object AsyncFunction]";
 }
 exports.isAsyncFunction = isAsyncFunction;
 
 function isMapIterator(value) {
-  return ObjectToString(value) === '[object Map Iterator]';
+  return ObjectToString(value) === "[object Map Iterator]";
 }
 exports.isMapIterator = isMapIterator;
 
 function isSetIterator(value) {
-  return ObjectToString(value) === '[object Set Iterator]';
+  return ObjectToString(value) === "[object Set Iterator]";
 }
 exports.isSetIterator = isSetIterator;
 
 function isGeneratorObject(value) {
-  return ObjectToString(value) === '[object Generator]';
+  return ObjectToString(value) === "[object Generator]";
 }
 exports.isGeneratorObject = isGeneratorObject;
 
 function isWebAssemblyCompiledModule(value) {
-  return ObjectToString(value) === '[object WebAssembly.Module]';
+  return ObjectToString(value) === "[object WebAssembly.Module]";
 }
 exports.isWebAssemblyCompiledModule = isWebAssemblyCompiledModule;
 
@@ -315,18 +289,18 @@ function isBoxedPrimitive(value) {
 exports.isBoxedPrimitive = isBoxedPrimitive;
 
 function isAnyArrayBuffer(value) {
-  return typeof Uint8Array !== 'undefined' && (
-    isArrayBuffer(value) ||
-    isSharedArrayBuffer(value)
+  return (
+    typeof Uint8Array !== "undefined" &&
+    (isArrayBuffer(value) || isSharedArrayBuffer(value))
   );
 }
 exports.isAnyArrayBuffer = isAnyArrayBuffer;
 
-['isProxy', 'isExternal', 'isModuleNamespaceObject'].forEach(function(method) {
+["isProxy", "isExternal", "isModuleNamespaceObject"].forEach(function (method) {
   Object.defineProperty(exports, method, {
     enumerable: false,
-    value: function() {
-      throw new Error(method + ' is not supported in userland');
-    }
+    value: function () {
+      throw new Error(method + " is not supported in userland");
+    },
   });
 });

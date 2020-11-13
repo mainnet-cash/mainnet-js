@@ -1,24 +1,23 @@
-
 // Here there are two network types, mainnet and all other networks
 export enum NetworkType {
-    Mainnet = "mainnet",
-    Testnet = "testnet",
-  }
+  Mainnet = "mainnet",
+  Testnet = "testnet",
+}
 
-  export enum NetworkEnum {
-    Mainnet = <any>"mainnet",
-    Testnet = <any>"testnet",
-    Regtest = <any>"regtest",
-    Simtest = <any>"simtest",
-  }
+export enum NetworkEnum {
+  Mainnet = <any>"mainnet",
+  Testnet = <any>"testnet",
+  Regtest = <any>"regtest",
+  Simtest = <any>"simtest",
+}
 
-  export const networkPrefixMap = {
-    bitcoincash: "mainnet",
-    bchtest: "testnet",
-    bchreg: "regtest",
-  };
-  
-  const literal = <L extends string>(l: L): L => l;
+export const networkPrefixMap = {
+  bitcoincash: "mainnet",
+  bchtest: "testnet",
+  bchreg: "regtest",
+};
+
+const literal = <L extends string>(l: L): L => l;
 
 export const UnitEnum = {
   BCH: literal("bch"),
