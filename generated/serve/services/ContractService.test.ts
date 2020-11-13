@@ -14,47 +14,106 @@ describe("Test Contract Services", () => {
   });
 
   /**
-   * test mining blocks
+   * integration test for create & spendByBuyer 
    */
-  it("Should mine a number of blocks to a given address", async () => {
-    let funder = (await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      )) as RegTestWallet
-      funder.send
-    let buyer =  (await RegTestWallet.newRandom()) as RegTestWallet
-    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet
-    let seller = (await RegTestWallet.newRandom()) as RegTestWallet
-    await funder.send([
-        {
-          cashaddr: buyer.getDepositAddress()!,
-          value: 500000,
-          unit: "satoshis",
-        },
-      ]);
-
+  it("Should should allow buyer to release funds", async () => {
+    let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
+    let buyer =  (await RegTestWallet.fromId(buyerId)) as RegTestWallet
+    let arbiter = (await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")) as RegTestWallet
+    let seller = (await RegTestWallet.watchOnly('bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e')) as RegTestWallet
+    
     const contractResp = await request(app).post("/contract/escrow/create").send({
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
       sellerAddr: seller.getDepositAddress()
     });
-
+    
     expect(contractResp.statusCode).toEqual(200);
+    expect(contractResp.body.contractId).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8");
+    expect(contractResp.body.address).toEqual("bchreg:prddwfmk63tzsucl0mkftn4f0ydsy5wascfd4qf8h5");
     
+    let contractId = contractResp.body.contractId
+    let contractAddress = contractResp.body.address
+
+
+    const sendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: buyerId,
+          to: [
+            {
+              cashaddr: contractAddress,
+              unit: 'satoshis',
+              value: 20000,
+            },
+          ],
+        });
+
+    const respSpend = await request(app).post("/contract/escrow/call").send({
+      contractId: contractId,
+      walletId: buyerId,
+      action: "spendByBuyer"
+    });
     
-    // const contractId = contractResp.body.contractId;
-    // const resp = await request(app).post("/contract/escrow/call").send({
-    //   contractId: contractId,
-    //   walletId: buyer.toString(),
-    //   method: "spendByBuyer",
-    // });
+    expect(respSpend.statusCode).toEqual(200);
+    expect(respSpend.body.txId.length).toEqual(64);
+    expect(respSpend.body.hex.length).toBeGreaterThan(1000);
 
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-    // const bobBalanceResp = await request(app).post("/contract/escrow/balance").send({
-    //   walletId: bobsWalletResp.body.walletId,
-    // });
+    const resp = await request(app)
+      .post("/wallet/balance")
+      .send({
+        walletId: `watch:regtest:${seller.getDepositAddress()}`,
+      });
 
-    // expect(resp.statusCode).toEqual(200);
-    // expect(resp.body.length).toEqual(15);
-    // expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(50 * 15);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.sat).toBeGreaterThan(18000);
+
   });
+
+  /**
+   * integration test for create and utxos 
+   */
+  it("Should should get utxos on a contract address", async () => {
+    let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
+    let buyer =  (await RegTestWallet.fromId(buyerId)) as RegTestWallet
+    let arbiter = (await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")) as RegTestWallet
+    let seller = (await RegTestWallet.watchOnly('bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e')) as RegTestWallet
+    
+    const contractResp = await request(app).post("/contract/escrow/create").send({
+      buyerAddr: buyer.getDepositAddress(),
+      arbiterAddr: arbiter.getDepositAddress(),
+      sellerAddr: seller.getDepositAddress()
+    });
+    
+    expect(contractResp.statusCode).toEqual(200);
+    expect(contractResp.body.contractId).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8");
+    expect(contractResp.body.address).toEqual("bchreg:prddwfmk63tzsucl0mkftn4f0ydsy5wascfd4qf8h5");
+    
+    let contractId = contractResp.body.contractId
+    let contractAddress = contractResp.body.address
+
+
+    const sendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: buyerId,
+          to: [
+            {
+              cashaddr: contractAddress,
+              unit: 'satoshis',
+              value: 20000,
+            },
+          ],
+        });
+
+    const utxoResp = await request(app).post("/contract/escrow/utxos").send({
+      contractId: contractId,
+    });
+    
+    expect(utxoResp.statusCode).toEqual(200);
+    expect(utxoResp.body["0"].txid.length).toEqual(64);
+
+
+  });
+  
 });

@@ -12,8 +12,8 @@ const createEscrow = async (request, response) => {
   await Controller.handleRequest(request, response, service.createEscrow);
 };
 
-const escrowCall = async (request, response) => {
-  await Controller.handleRequest(request, response, service.escrowCall);
+const escrowFn = async (request, response) => {
+  await Controller.handleRequest(request, response, service.escrowFn);
 };
 
 const escrowUtxos = async (request, response) => {
@@ -23,6 +23,6 @@ const escrowUtxos = async (request, response) => {
 
 module.exports = {
   createEscrow,
-  escrowCall,
+  escrowFn,
   escrowUtxos,
 };

@@ -4,17 +4,21 @@ import {
 } from "@bitauth/libauth";
 
 /**
- * Helper function to convert an address to a locking script
+ * Helper function to convert an address to a hash
  *
- * @param address   Address to convert to locking script
+ * @param address   Address to convert to a hash
  *
- * @returns a locking script corresponding to the passed address
+ * @returns a public key hash corresponding to the passed address
  */
 export function derivePublicKeyHash(address: string): Uint8Array {
   let result;
+
+  // If the address has a prefix decode it as is
   if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
-  } else {
+  }
+  // otherwise, derive the network from the address without prefix
+  else {
     result = decodeCashAddressFormatWithoutPrefix(address);
   }
 
@@ -24,8 +28,16 @@ export function derivePublicKeyHash(address: string): Uint8Array {
   return result.hash;
 }
 
+/**
+ * Helper function to convert an address prefix
+ *
+ * @param address   Address with or without prefix
+ *
+ * @returns the address prefix
+ */
 export function derivePrefix(address: string): string {
   let result;
+
   if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
   } else {

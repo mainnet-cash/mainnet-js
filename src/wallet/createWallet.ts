@@ -91,6 +91,6 @@ export async function walletFromId(walletId: string): Promise<any> {
     type: WalletTypeEnum[walletType],
   } as WalletRequest;
   let wallet = await createWallet(walletRequest);
-  await wallet.fromWIF(walletData);
+  await wallet._fromId(walletId);
   return wallet;
 }

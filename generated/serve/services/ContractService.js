@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-
+const mainnet = require("../../../dist/mainnet-node-0.0.1-rc");
 /**
 * Create an escrow contract
 *
@@ -10,9 +10,9 @@ const Service = require('./Service');
 const createEscrow = ({ escrowRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        escrowRequest,
-      }));
+      escrowRequest.type = 'escrow'
+      let resp = await mainnet.createContractResponse(escrowRequest);
+      resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -21,17 +21,31 @@ const createEscrow = ({ escrowRequest }) => new Promise(
     }
   },
 );
+
+
 /**
 * Finalize an escrow contract
 *
-* escrowFinalizeRequest EscrowFinalizeRequest null
-* returns EscrowResponse
+* contractFnRequest ContractFnRequest null
+* returns ContractFnResponse
 * */
-const escrowFinalize = ({ escrowFinalizeRequest }) => new Promise(
+const escrowFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
+      let contract = await mainnet.contractFromId(contractFnRequest.contractId);
+      let wallet = await mainnet.walletFromId(contractFnRequest.walletId)
+      
+      let resp = await contract.run(
+        wallet.privateKeyWif,
+        contractFnRequest.action, 
+        contractFnRequest.getHexOnly, 
+        contractFnRequest.utxos 
+        );
+
       resolve(Service.successResponse({
-        escrowFinalizeRequest,
+        contractId: contractFnRequest.contractId, 
+        txId: resp.txid,
+        hex: resp.hex
       }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -48,23 +62,23 @@ const escrowFinalize = ({ escrowFinalizeRequest }) => new Promise(
 * contract Contract 
 * returns UtxoResponse
 * */
-const escrowUtxos = ({ contract }) => new Promise(
+const escrowUtxos = ({contract}) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        contract,
-      }));
+      let c = await mainnet.contractFromId(contract.contractId);
+      let resp = await c.getUtxos();
+      resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
+      console.log(e);
+      reject(
+        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+      );
     }
   },
 );
 
 module.exports = {
   createEscrow,
-  escrowFinalize,
+  escrowFn,
   escrowUtxos,
 };

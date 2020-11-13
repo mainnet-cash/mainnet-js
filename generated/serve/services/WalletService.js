@@ -16,6 +16,7 @@ const balance = ({ balanceRequest }) => new Promise(
         throw Error("Could not derive wallet");
       }
 
+      // the balance unit may also be empty
       let resp = await wallet.getBalance(balanceRequest.unit);
       if (typeof resp === "number") {
         resolve(Service.successResponse(resp.toString()));

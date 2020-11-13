@@ -5,11 +5,11 @@ import {
   Argument,
 } from "cashscript";
 import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { Contract } from "../Contract";
 import { Utxo } from "../../interface";
-import { Network } from "../../interface";
-import { derivedNetwork } from "../util";
+import { derivedNetwork } from "../../util/deriveNetwork";
+import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
+import { sanitizeAddress } from "../../util/sanitizeAddress";
 
 import { getNetworkProvider } from "../../network/default";
 
@@ -40,12 +40,13 @@ export class EscrowContract extends Contract {
     this.buyerPKH = derivePublicKeyHash(buyerAddr);
     this.arbiterPKH = derivePublicKeyHash(arbiterAddr);
     this.sellerPKH = derivePublicKeyHash(sellerAddr);
-    this.buyerAddr = buyerAddr;
-    this.arbiterAddr = arbiterAddr;
-    this.sellerAddr = sellerAddr;
+    this.buyerAddr = sanitizeAddress(buyerAddr);
+    this.arbiterAddr = sanitizeAddress(arbiterAddr);
+    this.sellerAddr = sanitizeAddress(sellerAddr);
     this.network = network;
   }
 
+  // Static convenience constructor
   static create({
     sellerAddr,
     buyerAddr,
@@ -72,17 +73,21 @@ export class EscrowContract extends Contract {
     return instance.getBalance();
   }
 
+  // Serialize the contract
   public toString() {
     return `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`;
   }
 
-  public static fromId({ contractId }: { contractId: string }) {
+  // Deserialize from a string
+  public static fromId(contractId: string) {
     let contractArgs = contractId.split(":");
     if (contractArgs.shift() !== "escrow") {
       throw Error(
         "attempted to pass non escrow contract id to an escrow contract"
       );
     }
+
+    // Filter off the prefixes in this case since they are serialized with colons
     contractArgs = contractArgs.filter(
       (word) => !["bitcoincash", "bchtest", "bchreg"].includes(word)
     );
@@ -100,7 +105,7 @@ export class EscrowContract extends Contract {
     utxos?: Utxo[]
   ) {
     const instance = this.getContactInstance();
-    let fee = 1200;
+    let fee = 1400;
 
     const sig = new SignatureTemplate(wif);
 
@@ -121,10 +126,12 @@ export class EscrowContract extends Contract {
       address = this.buyerAddr;
     }
 
+    // If getHexOnly is true, just return the tx hex, otherwise submit to the network
     const method = getHexOnly ? "getTxHex" : "send";
 
     const balance = await instance.getBalance();
 
+    // If no utxos were provided, automatically get them
     if (typeof utxos === "undefined") {
       utxos = await instance.getUtxos();
     }
