@@ -26,18 +26,26 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 /**
 * Finalize an escrow contract
 *
-* escrowCallRequest EscrowFinalizeRequest null
-* returns EscrowCallResponse
+* contractFnRequest ContractFnRequest null
+* returns ContractFnResponse
 * */
-const escrowCall = ({ escrowCallRequest }) => new Promise(
+const escrowFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.contractFromId(escrowCallRequest.contractId);
-      let wallet = await mainnet.walletFromId(escrowCallRequest.walletId)
-      let action = escrowCallRequest.action 
-      let resp = await contract.run(wallet.privateKeyWif,action);
+      let contract = await mainnet.contractFromId(contractFnRequest.contractId);
+      let wallet = await mainnet.walletFromId(contractFnRequest.walletId)
+      
+      let resp = await contract.run(
+        wallet.privateKeyWif,
+        contractFnRequest.action, 
+        contractFnRequest.getHexOnly, 
+        contractFnRequest.utxos 
+        );
+
       resolve(Service.successResponse({
-        resp
+        contractId: contractFnRequest.contractId, 
+        txId: resp.txid,
+        hex: resp.hex
       }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -54,11 +62,11 @@ const escrowCall = ({ escrowCallRequest }) => new Promise(
 * contract Contract 
 * returns UtxoResponse
 * */
-const escrowUtxos = ({ serializedContract }) => new Promise(
+const escrowUtxos = ({contract}) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.escrowFromId(serializedContract.contractId);
-      let resp = await contract.getUtxos();
+      let c = await mainnet.contractFromId(contract.contractId);
+      let resp = await c.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
@@ -71,6 +79,6 @@ const escrowUtxos = ({ serializedContract }) => new Promise(
 
 module.exports = {
   createEscrow,
-  escrowCall,
+  escrowFn,
   escrowUtxos,
 };
