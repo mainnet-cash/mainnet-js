@@ -16,9 +16,10 @@ import http from 'http';
 
 /* tslint:disable:no-unused-locals */
 import { Contract } from '../model/contract';
-import { EscrowCallRequest } from '../model/escrowCallRequest';
+import { ContractFnRequest } from '../model/contractFnRequest';
+import { ContractFnResponse } from '../model/contractFnResponse';
+import { ContractResponse } from '../model/contractResponse';
 import { EscrowRequest } from '../model/escrowRequest';
-import { EscrowResponse } from '../model/escrowResponse';
 import { UtxoResponse } from '../model/utxoResponse';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
@@ -95,7 +96,7 @@ export class ContractApi {
      * @summary Create an escrow contract
      * @param escrowRequest Request a new escrow contract
      */
-    public async createEscrow (escrowRequest: EscrowRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: EscrowResponse;  }> {
+    public async createEscrow (escrowRequest: EscrowRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: ContractResponse;  }> {
         const localVarPath = this.basePath + '/contract/escrow/create';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -143,12 +144,12 @@ export class ContractApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: EscrowResponse;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: ContractResponse;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "EscrowResponse");
+                        body = ObjectSerializer.deserialize(body, "ContractResponse");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
@@ -162,9 +163,9 @@ export class ContractApi {
     /**
      * 
      * @summary Finalize an escrow contract
-     * @param escrowCallRequest null
+     * @param contractFnRequest null
      */
-    public async escrowCall (escrowCallRequest: EscrowCallRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: EscrowResponse;  }> {
+    public async escrowFn (contractFnRequest: ContractFnRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: ContractFnResponse;  }> {
         const localVarPath = this.basePath + '/contract/escrow/call';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -177,9 +178,9 @@ export class ContractApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'escrowCallRequest' is not null or undefined
-        if (escrowCallRequest === null || escrowCallRequest === undefined) {
-            throw new Error('Required parameter escrowCallRequest was null or undefined when calling escrowCall.');
+        // verify required parameter 'contractFnRequest' is not null or undefined
+        if (contractFnRequest === null || contractFnRequest === undefined) {
+            throw new Error('Required parameter contractFnRequest was null or undefined when calling escrowFn.');
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -193,7 +194,7 @@ export class ContractApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(escrowCallRequest, "EscrowCallRequest")
+            body: ObjectSerializer.serialize(contractFnRequest, "ContractFnRequest")
         };
 
         let authenticationPromise = Promise.resolve();
@@ -212,12 +213,12 @@ export class ContractApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: EscrowResponse;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: ContractFnResponse;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "EscrowResponse");
+                        body = ObjectSerializer.deserialize(body, "ContractFnResponse");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
