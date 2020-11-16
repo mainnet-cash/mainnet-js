@@ -487,7 +487,7 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         contractId: contractId
-        action: complete
+        action: spend
         utxoIds:
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
@@ -505,11 +505,9 @@ components:
         action:
           description: Action for finalization of contract.
           enum:
-          - spendByBuyer
-          - spendByArbiter
-          - refundByArbiter
-          - refundBySeller
-          example: complete
+          - spend
+          - refund
+          example: spend
           type: string
         getHexOnly:
           description: |
