@@ -505,8 +505,10 @@ components:
         action:
           description: Action for finalization of contract.
           enum:
-          - spend
-          - refund
+          - spendByBuyer
+          - spendByArbiter
+          - refundByArbiter
+          - refundBySeller
           example: complete
           type: string
         getHexOnly:
