@@ -1,0 +1,242 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+
+name: Publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: yarn
+      - run: yarn build
+
+  # Build docker image with mainnet REST API server for self hosting
+  # More info in generated/serve/docker/README.md
+  publish-docker:
+    continue-on-error: true
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Build project
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: yarn
+      - run: yarn build
+
+      # Setup environment
+      - name: Set TAG_NAME env
+        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Login to docker hub
+        uses: docker/login-action@v1.6.0
+        with:
+          username: mainnet
+          password: ${{secrets.DOCKERHUB_PASSWORD}}
+
+      # Actual job
+      - name: Build docker image
+        run: docker build ./generated/serve/docker --tag mainnet/mainnet-rest:${{ env.TAG_NAME }} --build-arg GIT_REPO=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} --build-arg GIT_COMMIT=${GITHUB_SHA}
+
+      - name: Push image to docker hub
+        run: docker push mainnet/mainnet-rest:${{ env.TAG_NAME }}
+
+
+  # Deploy REST API to https://rest-unstable.mainnet.cash
+  # Done by pushing to deploy branch on github, this will trigger the deploy action
+  # Requires COMMIT_USER_TOKEN github secret to be set which allows you to commit to another repository
+  publish-unstable:
+    continue-on-error: true
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Setup environment
+      - name: Set REPO_USER env
+        run: echo "REPO_USER=$(echo $GITHUB_REPOSITORY | cut -d / -f1)" >> $GITHUB_ENV
+      - name: Set REPO_NAME env
+        run: echo "REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d / -f2)" >> $GITHUB_ENV
+
+      # Actual job
+      - name: Clone repo, merge master into deploy, push deploy to repo
+        run: |
+          git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/${GITHUB_REPOSITORY} ${{ env.REPO_NAME }}
+          cd ${{ env.REPO_NAME }}
+          git config --global user.email "ci@github.com"
+          git config --global user.name "Github CI"
+          git fetch origin deploy
+          git checkout deploy
+          git merge master
+          git push origin deploy
+
+
+  # Publish mainnet-js package on npm
+  # Requires NPM_TOKEN github secret to be set
+  publish-npm:
+    continue-on-error: true
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Build project
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: yarn
+      - run: yarn build
+
+      # Setup environment
+      - name: Check if NPM_TOKEN is set
+        run: |
+            if [ -n $NPM_TOKEN ]; then HAS_NPM_TOKEN='true' ; fi
+            echo "HAS_NPM_TOKEN=${HAS_NPM_TOKEN}" >> $GITHUB_ENV
+      - name: Publish to npm
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+
+      # Actual job
+      - if: env.HAS_NPM_TOKEN == false
+        run: echo "NPM_TOKEN secret not set, skipping publishing"
+      - if: env.HAS_NPM_TOKEN
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+  # Build a matrix of API clients: php, python and go
+  # After being built, the clients are commited to their repositories, new tag and github release are created for them
+  # Requires COMMIT_USER_TOKEN github secret to be set which allows you to commit to another repository
+  buid-client:
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        language: [php, python, go]
+    runs-on: ubuntu-latest
+    steps:
+      # Setup environment
+      - uses: actions/checkout@v2
+      - name: Set REPO_USER env
+        run: echo "REPO_USER=$(echo $GITHUB_REPOSITORY | cut -d / -f1)" >> $GITHUB_ENV
+      - name: Set REPO_NAME env
+        run: echo "REPO_NAME=mainnet-${{ matrix.language }}-generated" >> $GITHUB_ENV
+      - name: Set TAG_NAME env
+        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      # Actual job
+      - name: Generate ${{ matrix.language }}
+        run: npm run api:build:client ${{ matrix.language }}
+      - name: Commit to ${{ matrix.language }} repository
+        uses: drud/action-cross-commit@master
+        with:
+          source-folder: generated/client/${{ matrix.language }}
+          destination-repository: https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/${{ env.REPO_USER }}/${{ env.REPO_NAME }}
+          destination-folder: .
+          destination-branch: master
+          git-user: "Auto-Generated"
+          git-user-email: hello@mainnet.cash
+          git-commit-message: "Generated"
+      - name: Create new tag
+        run: |
+          git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/${{ env.REPO_USER }}/${{ env.REPO_NAME }} ${{ env.REPO_NAME }}
+          cd ${{ env.REPO_NAME }}
+          git config --global user.email "ci@github.com"
+          git config --global user.name "Github CI"
+          git tag -f ${{ env.TAG_NAME }}
+          git push -f origin ${{ env.TAG_NAME }}
+          echo "TAG_SHA=$(git log -n1 --format=format:'%H')" >> $GITHUB_ENV
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.COMMIT_USER_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ env.TAG_NAME }}
+          repo: mainnet-${{ matrix.language }}-generated
+          commitish: ${{ env.TAG_SHA }}
+          owner: ${{ env.REPO_USER }}
+          body: |
+            Release ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+
+  # Publish python API client to PyPI
+  # Requires PYPI_TOKEN github secret to be set
+  publish-python:
+    continue-on-error: true
+    needs: buid-client
+    runs-on: ubuntu-latest
+    steps:
+      # Setup environment
+      - name: Set REPO_USER env
+        run: echo "REPO_USER=$(echo $GITHUB_REPOSITORY | cut -d / -f1)" >> $GITHUB_ENV
+      - name: Set REPO_NAME env
+        run: echo "REPO_NAME=mainnet-python-generated" >> $GITHUB_ENV
+      - name: Set TAG_NAME env
+        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      # Actual job
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Checkout python repository
+        uses: actions/checkout@v2
+        with:
+          repository: '${{ env.REPO_USER }}/${{ env.REPO_NAME }}'
+
+      - run: |
+            python3 -m pip install --user --upgrade setuptools wheel
+            sed -i.bak "s#1.0.0#${{ env.TAG_NAME }}#g" setup.py
+            python3 setup.py sdist bdist_wheel
+
+      - name: Check if pypi token is set
+        run: |
+            if [ -n $PYPI_TOKEN ]; then HAS_PYPI_TOKEN='true' ; fi
+            echo "HAS_PYPI_TOKEN=${HAS_PYPI_TOKEN}" >> $GITHUB_ENV
+        env:
+          PYPI_TOKEN: "${{ secrets.PYPI_TOKEN }}"
+
+      - if: env.HAS_PYPI_TOKEN == false
+        run: echo "PYPI_TOKEN secret not set, skipping publishing"
+      - if: env.HAS_PYPI_TOKEN
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+
+  publish-php:
+    continue-on-error: true
+    needs: buid-client
+    runs-on: ubuntu-latest
+    steps:
+      # Setup environment
+      - name: Check if packagist token is set
+        run: |
+            if [ -n $PACKAGIST_TOKEN ]; then HAS_PACKAGIST_TOKEN='true' ; fi
+            echo "HAS_PACKAGIST_TOKEN=${HAS_PACKAGIST_TOKEN}" >> $GITHUB_ENV
+        env:
+          PACKAGIST_TOKEN: "${{ secrets.PACKAGIST_TOKEN }}"
+
+      # Actual job
+      - if: env.HAS_PACKAGIST_TOKEN == false
+        run: echo "PACKAGIST_TOKEN secret not set, skipping publishing"
+      - if: env.HAS_PACKAGIST_TOKEN
+        uses: indiesdev/curl@v1
+        with:
+          url: https://packagist.org/api/update-package?username=mainnet-cash&apiToken=${{ secrets.PACKAGIST_TOKEN }}
+          method: 'POST'
+          accept: 200,201,202,204
+          headers: '{ "content-type": "application/json" }'
+          body: '{"repository":{"url":"https://packagist.org/packages/mainnet-cash/mainnet-php-generated"}}'
