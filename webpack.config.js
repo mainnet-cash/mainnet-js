@@ -3,7 +3,7 @@ var packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "development",
+  mode: "production",
   module: {
     rules: [
       {

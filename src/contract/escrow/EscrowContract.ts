@@ -1,17 +1,8 @@
-import {
-  Contract as CashscriptContract,
-  SignatureTemplate,
-  CashCompiler,
-  Argument,
-} from "cashscript";
-import { instantiateSecp256k1 } from "@bitauth/libauth";
 import { Contract } from "../Contract";
-import { Utxo } from "../../interface";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
-
-import { getNetworkProvider } from "../../network/default";
+import { Utxo } from "../../interface";
 
 export class EscrowContract extends Contract {
   private buyerPKH: Uint8Array;
@@ -44,6 +35,7 @@ export class EscrowContract extends Contract {
     this.arbiterAddr = sanitizeAddress(arbiterAddr);
     this.sellerAddr = sanitizeAddress(sellerAddr);
     this.network = network;
+    this.parameters = [this.arbiterPKH, this.buyerPKH, this.sellerPKH];
   }
 
   // Static convenience constructor
@@ -57,20 +49,6 @@ export class EscrowContract extends Contract {
     arbiterAddr: string;
   }) {
     return new this({ sellerAddr, buyerAddr, arbiterAddr });
-  }
-
-  public getAddress() {
-    const instance = this.getContactInstance();
-    return instance.address;
-  }
-
-  public getUtxos() {
-    const instance = this.getContactInstance();
-    return instance.getUtxos();
-  }
-  public getBalance() {
-    const instance = this.getContactInstance();
-    return instance.getBalance();
   }
 
   // Serialize the contract
@@ -104,131 +82,39 @@ export class EscrowContract extends Contract {
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
-    const instance = this.getContactInstance();
-    let fee = 1400;
-
-    const sig = new SignatureTemplate(wif);
-
-    const secp256k1 = await instantiateSecp256k1();
-    let publicKey = sig.getPublicKey(secp256k1);
-
-    let func;
-    if (typeof instance.functions[funcName] === "function") {
-      func = instance.functions[funcName];
-    } else {
-      throw Error(`${funcName} is not a contract method`);
-    }
-
-    let address;
+    let outputAddress;
     if (funcName.startsWith("spend")) {
-      address = this.sellerAddr;
+      outputAddress = this.sellerAddr;
     } else if (funcName.startsWith("refund")) {
-      address = this.buyerAddr;
-    }
-
-    // If getHexOnly is true, just return the tx hex, otherwise submit to the network
-    const method = getHexOnly ? "getTxHex" : "send";
-
-    const balance = await instance.getBalance();
-
-    // If no utxos were provided, automatically get them
-    if (typeof utxos === "undefined") {
-      utxos = await instance.getUtxos();
-    }
-
-    if (utxos.length > 0) {
-      try {
-        let funcInstance = func(fee, publicKey, sig)
-          .to(address, balance - fee)
-          .from(utxos);
-        const tx = await funcInstance.withHardcodedFee(fee)[method]();
-        if (getHexOnly) {
-          return { tx: tx.txid, fee: fee, utxo: utxos };
-        } else {
-          return tx;
-        }
-      } catch (e) {
-        const matcher = /Insufficient balance: available \((\d+)\) < needed \((\d+)\)./;
-        if (e.message.match(matcher)) {
-          const [, available, needed] = e.message.match(matcher);
-          fee = needed - available;
-          let funcInstance = func(fee, publicKey, sig)
-            .to(address, balance - fee)
-            .from(utxos);
-          let tx = await funcInstance.withHardcodedFee(fee)[method]();
-          if (getHexOnly) {
-            return { tx: tx.txid, fee: fee, utxo: utxos };
-          } else {
-            return tx;
-          }
-        } else {
-          throw Error(e);
-        }
-      }
+      outputAddress = this.buyerAddr;
     } else {
-      throw Error("There were no UTXOs provided or available on the contract");
+      throw Error("Could not determine output address");
     }
+    return await this._run(wif, funcName, outputAddress, getHexOnly, utxos);
   }
 
-  private getArtifact() {
-    const contractText = EscrowContract.getContractText();
-    return CashCompiler.compileString(contractText);
-  }
-
-  private getContactInstance() {
-    let artifact = this.getArtifact();
-
-    const parameters: Argument[] = [
-      this.arbiterPKH,
-      this.buyerPKH,
-      this.sellerPKH,
-    ];
-    const provider = getNetworkProvider(this.network);
-
-    return new CashscriptContract(artifact, parameters, provider);
-  }
-
-  private static getContractText() {
+  static getContractText() {
     return `
             pragma cashscript ^0.5.3;
             contract EscrowContract(bytes20 arbiterPkh, bytes20 buyerPkh, bytes20 sellerPkh) {
 
-                function spendByArbiter(int fee, pubkey signingPk, sig s) {
-                    require(hash160(signingPk) == arbiterPkh);
+                function spend(int fee, pubkey signingPk, sig s) {
+                    require(hash160(signingPk) == arbiterPkh || hash160(signingPk) == buyerPkh);
                     require(checkSig(s, signingPk));
                     
                     int amount1 = int(bytes(tx.value)) - fee;
                     bytes34 out1 = new OutputP2PKH(bytes8(amount1), sellerPkh);
-                    require(hash256(out1) == tx.hashOutputs);
-                }
-                
-                function refundByArbiter(int fee, pubkey signingPk, sig s) {
-                    require(hash160(signingPk) == arbiterPkh);
-                    require(checkSig(s, signingPk));
-                    
-                    int amount1 = int(bytes(tx.value)) - fee;
-                    bytes34 out1 = new OutputP2PKH(bytes8(amount1), buyerPkh);
                     require(hash256(out1) == tx.hashOutputs);
                 }
 
-                function spendByBuyer(int fee, pubkey signingPk, sig s) {
-                    require(hash160(signingPk) == buyerPkh);
-                    require(checkSig(s, signingPk));
-                    
-                    int amount1 = int(bytes(tx.value)) - fee;
-                    bytes34 out1 = new OutputP2PKH(bytes8(amount1), sellerPkh);
-                    require(hash256(out1) == tx.hashOutputs);
-                }
-                
-                function refundBySeller(int fee, pubkey signingPk, sig s) {
-                    require(hash160(signingPk) == sellerPkh);
+                function refund(int fee, pubkey signingPk, sig s) {
+                    require(hash160(signingPk) == arbiterPkh||hash160(signingPk) == sellerPkh);
                     require(checkSig(s, signingPk));
                     
                     int amount1 = int(bytes(tx.value)) - fee;
                     bytes34 out1 = new OutputP2PKH(bytes8(amount1), buyerPkh);
                     require(hash256(out1) == tx.hashOutputs);
                 }
-                                
             }
         `;
   }

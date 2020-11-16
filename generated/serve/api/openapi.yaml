@@ -103,6 +103,10 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - contractId: escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8
+              - walletId: wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+              - action: spend
               schema:
                 $ref: '#/components/schemas/ContractFnResponse'
           description: successful operation

@@ -4,7 +4,7 @@ const os = require('os');
 const config = {
   ROOT_DIR: __dirname,
   URL_PORT: process.env.PORT ? parseInt(process.env.PORT) : 3000,
-  URL_PATH: process.env.URL_PATH ? process.env.URL_PATH : "http://localhost/",
+  URL_PATH: process.env.URL_PATH ? process.env.URL_PATH : "http://localhost",
   TIMEOUT: process.env.TIMEOUT ? parseInt(process.env.TIMEOUT) : 60,
   WORKERS: process.env.WORKERS ? parseInt(process.env.WORKERS) : 10,
   BASE_VERSION: '',

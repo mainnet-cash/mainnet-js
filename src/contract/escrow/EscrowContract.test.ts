@@ -63,7 +63,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // spend the escrow contract
-    await escrow.run(buyer.privateKeyWif!, "spendByBuyer");
+    await escrow.run(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
     expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
 
@@ -107,7 +107,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // spend the escrow contract
-    await escrow.run(arbiter.privateKeyWif!, "spendByArbiter");
+    await escrow.run(arbiter.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
     expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
 
@@ -151,7 +151,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    await escrow.run(seller.privateKeyWif!, "refundBySeller");
+    await escrow.run(seller.privateKeyWif!, "refund");
     expect(await escrow.getBalance()).toBe(0);
     expect(await buyer.getBalance("sat")).toBeGreaterThan(448000);
 
@@ -195,7 +195,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    await escrow.run(arbiter.privateKeyWif!, "refundByArbiter");
+    await escrow.run(arbiter.privateKeyWif!, "refund");
     expect(await escrow.getBalance()).toBe(0);
     expect(await buyer.getBalance("sat")).toBeGreaterThan(448000);
 
@@ -238,7 +238,7 @@ describe(`Test Escrow Contracts`, () => {
       ]);
 
       // refund the escrow contract
-      await escrow.run(buyer.privateKeyWif!, "refundByArbiter");
+      await escrow.run(buyer.privateKeyWif!, "refund");
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
@@ -280,49 +280,7 @@ describe(`Test Escrow Contracts`, () => {
       ]);
 
       // refund the escrow contract
-      await escrow.run(seller.privateKeyWif!, "spendByArbiter");
-    } catch (e) {
-      expect(e.message.split("\n")[0]).toBe(
-        "Error: Transaction failed with reason: the transaction was rejected by network rules."
-      );
-    }
-  });
-
-  test("Should throw error on spend by seller", async () => {
-    expect.assertions(1);
-    try {
-      let funder = (await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      )) as RegTestWallet;
-
-      let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-      let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-      let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
-
-      await funder.send([
-        {
-          cashaddr: buyer.getDepositAddress()!,
-          value: 500000,
-          unit: "satoshis",
-        },
-      ]);
-      let escrow = new EscrowContract({
-        arbiterAddr: arbiter.getDepositAddress()!,
-        buyerAddr: buyer.getDepositAddress()!,
-        sellerAddr: seller.getDepositAddress()!,
-      });
-
-      // fund the escrow contract
-      await buyer.send([
-        {
-          cashaddr: escrow.getAddress()!,
-          value: 450000,
-          unit: "satoshis",
-        },
-      ]);
-
-      // refund the escrow contract
-      await escrow.run(seller.privateKeyWif!, "spendByArbiter");
+      await escrow.run(seller.privateKeyWif!, "spend");
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
