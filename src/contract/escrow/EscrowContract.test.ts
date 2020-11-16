@@ -287,5 +287,4 @@ describe(`Test Escrow Contracts`, () => {
       );
     }
   });
-
 });

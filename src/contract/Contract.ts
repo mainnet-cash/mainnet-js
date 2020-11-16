@@ -1,5 +1,11 @@
 import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { Argument, Artifact, CashCompiler, Contract as CashScriptContract, SignatureTemplate } from "cashscript";
+import {
+  Argument,
+  Artifact,
+  CashCompiler,
+  Contract as CashScriptContract,
+  SignatureTemplate,
+} from "cashscript";
 import { default as ElectrumNetworkProvider } from "../network/ElectrumNetworkProvider";
 import { getNetworkProvider } from "../network/default";
 import { Utxo } from "../interface";
@@ -16,8 +22,7 @@ export default interface ContractInterface {
    * getContractText should return the cashscript text
    * @returns returns contract in script as a string
    */
-  getContractText(): string|Error ;
-
+  getContractText(): string | Error;
 }
 
 export class Contract implements ContractInterface {
@@ -40,19 +45,18 @@ export class Contract implements ContractInterface {
     throw Error("cannot instantiate the base contract with fromId");
   }
 
-  
-  getContractText():string|Error {
-    return this.script
+  getContractText(): string | Error {
+    return this.script;
   }
 
   getArtifact() {
-      const contractText = this.getContractText();
-      if(typeof contractText === "string"){
-        return CashCompiler.compileString(contractText);  
-      }else{
-        throw contractText
-      }
-    }  
+    const contractText = this.getContractText();
+    if (typeof contractText === "string") {
+      return CashCompiler.compileString(contractText);
+    } else {
+      throw contractText;
+    }
+  }
 
   public getAddress() {
     const instance = this.getContactInstance();
@@ -92,7 +96,7 @@ export class Contract implements ContractInterface {
   public async _run(
     wif: string,
     funcName: string,
-    outputAddress:string,
+    outputAddress: string,
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
@@ -154,5 +158,4 @@ export class Contract implements ContractInterface {
       throw Error("There were no UTXOs provided or available on the contract");
     }
   }
-
 }

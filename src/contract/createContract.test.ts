@@ -5,7 +5,6 @@ import {
 } from "./createContract";
 
 describe(`Create Contract Tests`, () => {
-
   test("Should create an escrow contract", async () => {
     let contract = await createContract({
       type: "escrow",

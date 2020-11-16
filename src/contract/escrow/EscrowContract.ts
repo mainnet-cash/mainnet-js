@@ -35,11 +35,7 @@ export class EscrowContract extends Contract {
     this.arbiterAddr = sanitizeAddress(arbiterAddr);
     this.sellerAddr = sanitizeAddress(sellerAddr);
     this.network = network;
-    this.parameters = [
-      this.arbiterPKH,
-      this.buyerPKH,
-      this.sellerPKH,
-    ];
+    this.parameters = [this.arbiterPKH, this.buyerPKH, this.sellerPKH];
   }
 
   // Static convenience constructor
@@ -54,7 +50,6 @@ export class EscrowContract extends Contract {
   }) {
     return new this({ sellerAddr, buyerAddr, arbiterAddr });
   }
-
 
   // Serialize the contract
   public toString() {
@@ -87,22 +82,15 @@ export class EscrowContract extends Contract {
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
-    let outputAddress
+    let outputAddress;
     if (funcName.startsWith("spend")) {
-      outputAddress = this.sellerAddr
+      outputAddress = this.sellerAddr;
     } else if (funcName.startsWith("refund")) {
-      outputAddress = this.buyerAddr
+      outputAddress = this.buyerAddr;
     } else {
-      throw Error("Could not determine output address")
+      throw Error("Could not determine output address");
     }
-    return await this._run(
-        wif,
-        funcName,
-        outputAddress,
-        getHexOnly,
-        utxos
-      )
-    
+    return await this._run(wif, funcName, outputAddress, getHexOnly, utxos);
   }
 
   static getContractText() {
