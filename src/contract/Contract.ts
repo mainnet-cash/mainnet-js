@@ -101,7 +101,7 @@ export class Contract implements ContractInterface {
     utxos?: Utxo[]
   ) {
     const instance = this.getContactInstance();
-    let fee = 1400;
+    let fee = 1800;
 
     const sig = new SignatureTemplate(wif);
 
