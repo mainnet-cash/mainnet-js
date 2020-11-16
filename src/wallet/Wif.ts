@@ -10,13 +10,14 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { UnitEnum, WalletTypeEnum } from "./enum";
+import { WalletTypeEnum } from "./enum";
+import { UnitEnum } from "../enum";
 
 import { BaseWallet } from "./Base";
 
 import { PrivateKey } from "../interface";
 
-import { networkPrefixMap } from "./createWallet";
+import { networkPrefixMap } from "../enum";
 
 import {
   SendRequest,
@@ -45,12 +46,14 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
+import { derivePrefix } from "../util/derivePublicKeyHash";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
 export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
+  publicKeyHash?: Uint8Array;
   privateKey?: Uint8Array;
   uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
@@ -78,7 +81,7 @@ export class Wallet extends BaseWallet {
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
-    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
+    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.cashaddr = (await deriveCashaddr(
       this.privateKey,
       this.networkPrefix
@@ -159,9 +162,12 @@ export class Wallet extends BaseWallet {
   }
 
   public _fromId = async (walletId: string): Promise<this | Error> => {
-    let [walletType, networkGiven, privateImport]: string[] = walletId.split(
-      ":"
-    );
+    let [
+      walletType,
+      networkGiven,
+      privateImport,
+      address,
+    ]: string[] = walletId.split(":");
     if (!["watch", "wif", "seed"].includes(walletType)) {
       throw Error(
         `Wallet type ${walletType} was passed to single address wallet`
@@ -178,7 +184,12 @@ export class Wallet extends BaseWallet {
       case "wif":
         return this.fromWIF(privateImport);
       case "watch":
-        return this.watchOnly(privateImport);
+        if (address) {
+          address = `${privateImport}:${address}`;
+        } else {
+          address = `${derivePrefix(privateImport)}:${privateImport}`;
+        }
+        return this.watchOnly(address);
       case "seed":
         throw new Error("Not implemented");
       default:

@@ -1,5 +1,7 @@
 import { SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "./amountInSatoshi";
+
+// This function sums a list of send request objects
 export async function sumSendRequestAmounts(requests: SendRequest[]) {
   if (requests) {
     const balanceArray: (BigInt | Error)[] = await Promise.all(
