@@ -21,5 +21,5 @@ module.exports = {
   },
   globalSetup: "<rootDir>/jest/browser.setup.js",
   globalTeardown: "<rootDir>/jest/browser.teardown.js",
-  testTimeout: 3600000,
+  testTimeout: 30000,
 };

@@ -14,6 +14,6 @@ export function derivedNetwork(addresses: string[]) {
   } else if (networkSet.size === 0) {
     throw Error("No address network was derived");
   } else {
-    return [...networkSet.values()][0];
+    return networkSet.values().next().value
   }
 }
