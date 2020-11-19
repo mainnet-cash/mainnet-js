@@ -1,9 +1,9 @@
-//import { ElectrumNetworkProvider } from "cashscript";
-import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
+import { default as ElectrumProvider } from "./ElectrumNetworkProvider";
 import {
   ElectrumCluster,
   ElectrumTransport,
   ClusterOrder,
+  ElectrumClient,
 } from "electrum-cash";
 import { Network } from "../interface";
 
@@ -20,18 +20,18 @@ export function getNetworkProvider(network = "mainnet") {
   }
 }
 export function getRegtestProvider() {
-  let cluster = getRegtestCluster();
-  return new ElectrumNetworkProvider("regtest", cluster);
+  let client = getRegtestClient();
+  return new ElectrumProvider(client, "regtest");
 }
 
 export function getTestnetProvider() {
   let cluster = getTestnetCluster();
-  return new ElectrumNetworkProvider("testnet", cluster);
+  return new ElectrumProvider(cluster, "testnet");
 }
 
 export function getProvider() {
   let cluster = getCluster();
-  return new ElectrumNetworkProvider("mainnet", cluster);
+  return new ElectrumProvider(cluster, "mainnet");
 }
 
 function getConfidence() {
@@ -109,16 +109,15 @@ function getTestnetCluster() {
   return electrum;
 }
 
-function getRegtestCluster() {
+function getRegtestClient() {
   //
-  let electrum = new ElectrumCluster(
+  let electrum = new ElectrumClient(
     "CashScript Application",
     "1.4.1",
-    1,
-    1,
-    ClusterOrder.RANDOM,
+    "127.0.0.1",
+    60003,
+    ElectrumTransport.WS.Scheme,
     1020
   );
-  electrum.addServer("127.0.0.1", 60003, ElectrumTransport.WS.Scheme, false);
   return electrum;
 }

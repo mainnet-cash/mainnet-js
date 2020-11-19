@@ -40,4 +40,11 @@ export default interface NetworkProvider {
    * @returns The transaction ID corresponding to the broadcast transaction.
    */
   sendRawTransaction(txHex: string): Promise<string>;
+
+  /**
+   * Function to wait for connection to be ready
+   * @param timeout number of milliseconds to wait before throwing error
+   * @returns true when ready, or an error
+   */
+  ready(timeout?: number): Promise<boolean | Error>;
 }

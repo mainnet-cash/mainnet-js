@@ -1,5 +1,6 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
+import { delay } from "../../util/delay";
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
@@ -177,6 +178,7 @@ describe(`Test Escrow Contracts`, () => {
         unit: "satoshis",
       },
     ]);
+    delay(1250)
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
@@ -222,6 +224,7 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
+      delay(550)
       let escrow = new EscrowContract({
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
@@ -278,7 +281,6 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
-
       // refund the escrow contract
       await escrow.run(seller.privateKeyWif!, "spend");
     } catch (e) {
