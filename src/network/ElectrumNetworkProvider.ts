@@ -1,26 +1,28 @@
-import { ElectrumCluster, ElectrumClient, RequestResponse , ConnectionStatus} from "electrum-cash";
+import {
+  ElectrumCluster,
+  ElectrumClient,
+  RequestResponse,
+  ConnectionStatus,
+} from "electrum-cash";
 import { NetworkProvider } from "cashscript";
 import { Utxo, ElectrumBalance } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
-  public electrum: ElectrumCluster|ElectrumClient;
+  public electrum: ElectrumCluster | ElectrumClient;
   public concurrentRequests: number = 0;
 
   constructor(
-    electrum: ElectrumCluster|ElectrumClient,
+    electrum: ElectrumCluster | ElectrumClient,
     public network: Network = Network.MAINNET,
     private manualConnectionManagement?: boolean
   ) {
-    
     if (electrum) {
       this.electrum = electrum;
       return;
     } else {
-      throw new Error(
-        `A electrum-cash cluster or client is required.`
-      );
+      throw new Error(`A electrum-cash cluster or client is required.`);
     }
   }
 
@@ -65,14 +67,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async sendRawTransaction(txHex: string): Promise<string> {
-    let result =  (await this.performRequest(
+    let result = (await this.performRequest(
       "blockchain.transaction.broadcast",
       txHex
     )) as string;
 
     // This assumes the fulcrum server is configured with a 0.5s delay
-    await delay(1050)
-    return result
+    await delay(1050);
+    return result;
   }
 
   private async performRequest(
@@ -117,62 +119,64 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return true;
   }
 
-  async ready(): Promise<boolean|unknown> {
-    return this.isElectrumClient() ? this.readyClient() : this.readyCluster()
+  async ready(): Promise<boolean | unknown> {
+    return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
   }
   async connect(): Promise<boolean[]> {
-    return this.isElectrumClient() ? this.connectClient() : this.connectCluster()
+    return this.isElectrumClient()
+      ? this.connectClient()
+      : this.connectCluster();
   }
   async disconnect(): Promise<boolean[]> {
-    return this.isElectrumClient() ? this.disconnectClient() : this.disconnectCluster()
+    return this.isElectrumClient()
+      ? this.disconnectClient()
+      : this.disconnectCluster();
   }
 
-  isElectrumClient(): boolean{
-    return this.electrum.constructor.name === 'ElectrumClient'
+  isElectrumClient(): boolean {
+    return this.electrum.constructor.name === "ElectrumClient";
   }
 
-  async readyClient(timeout?:number): Promise<boolean|unknown> {
+  async readyClient(timeout?: number): Promise<boolean | unknown> {
     timeout = typeof timeout !== "undefined" ? timeout : 3000;
 
-    let connectPromise = (async () => {
-        while((this.electrum as ElectrumClient).connection.status!==ConnectionStatus.CONNECTED){
-            await delay(100);
-        }
-        return true
-    })
+    let connectPromise = async () => {
+      while (
+        (this.electrum as ElectrumClient).connection.status !==
+        ConnectionStatus.CONNECTED
+      ) {
+        await delay(100);
+      }
+      return true;
+    };
 
- 
     // @ts-ignore
     let timeoutPromise = new Promise((resolve, reject) => {
-        let id = setTimeout(() => {
-          clearTimeout(id);
-          reject(`Client Connection Request timeout after ${timeout}ms`)
-        }, timeout)
-      }) 
-    
-    return Promise.race([
-        connectPromise(),
-        timeoutPromise
-      ])
+      let id = setTimeout(() => {
+        clearTimeout(id);
+        reject(`Client Connection Request timeout after ${timeout}ms`);
+      }, timeout);
+    });
+
+    return Promise.race([connectPromise(), timeoutPromise]);
   }
 
-
-  async readyCluster(timeout?:number): Promise<boolean|unknown> {
+  async readyCluster(timeout?: number): Promise<boolean | unknown> {
     timeout = typeof timeout !== "undefined" ? timeout : 3000;
 
     // @ts-ignore
     let timeoutPromise = new Promise((none, reject) => {
       let id = setTimeout(() => {
         clearTimeout(id);
-        reject(`Cluster connection request timeout after ${timeout}`)
-      }, timeout)
-    })    
-    
+        reject(`Cluster connection request timeout after ${timeout}`);
+      }, timeout);
+    });
+
     // Race the call to connect with an error
     return Promise.race([
-        (this.electrum as ElectrumCluster).ready(),
-      timeoutPromise
-    ])
+      (this.electrum as ElectrumCluster).ready(),
+      timeoutPromise,
+    ]);
   }
 
   async connectCluster(): Promise<boolean[]> {
@@ -198,8 +202,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async disconnectClient(): Promise<boolean[]> {
     return [await (this.electrum as ElectrumClient).disconnect()];
   }
-
-  
 }
 
 interface ElectrumUtxo {
