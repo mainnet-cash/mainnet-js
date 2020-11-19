@@ -1,4 +1,4 @@
-import { default as ElectrumProvider } from "./ElectrumNetworkProvider";
+import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
 import {
   ElectrumCluster,
   ElectrumTransport,
@@ -21,17 +21,17 @@ export function getNetworkProvider(network = "mainnet") {
 }
 export function getRegtestProvider() {
   let client = getRegtestClient();
-  return new ElectrumProvider(client, "regtest");
+  return new ElectrumNetworkProvider(client, "regtest");
 }
 
 export function getTestnetProvider() {
   let cluster = getTestnetCluster();
-  return new ElectrumProvider(cluster, "testnet");
+  return new ElectrumNetworkProvider(cluster, "testnet");
 }
 
 export function getProvider() {
   let cluster = getCluster();
-  return new ElectrumProvider(cluster, "mainnet");
+  return new ElectrumNetworkProvider(cluster, "mainnet");
 }
 
 function getConfidence() {

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const mainnet = require("mainnet-js");
+const mainnet = require("mainnet");
 /**
 * Create an escrow contract
 *
