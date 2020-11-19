@@ -178,7 +178,7 @@ describe(`Test Escrow Contracts`, () => {
         unit: "satoshis",
       },
     ]);
-    delay(1250)
+    delay(1250);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
@@ -224,7 +224,7 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
-      delay(550)
+      delay(550);
       let escrow = new EscrowContract({
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
