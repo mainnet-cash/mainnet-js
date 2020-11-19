@@ -3,7 +3,6 @@ import { RegTestWallet } from "../../wallet/Wif";
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
-
     let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
     let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
     let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
