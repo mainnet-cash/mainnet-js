@@ -23,7 +23,7 @@
     "api:serve": "node generated/serve/serve.js",
     "api:serve:cluster": "node generated/serve/cluster.js",
     "cli": "npx ts-node src/cli.ts",
-    "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent npm run cover:merge",
+    "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent npm run cover",
     "cover": "npm run cover:core && npm run cover:report",
     "cover:core": "nyc --silent npm run test",
     "cover:browser": "nyc --silent --no-clean npm run test:browser",
