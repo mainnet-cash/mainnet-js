@@ -3,9 +3,6 @@ import { RegTestWallet } from "../../wallet/Wif";
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
-    let funder = (await RegTestWallet.fromWIF(
-      process.env.PRIVATE_WIF
-    )) as RegTestWallet;
 
     let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
     let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
@@ -278,7 +275,6 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
-
       // refund the escrow contract
       await escrow.run(seller.privateKeyWif!, "spend");
     } catch (e) {
