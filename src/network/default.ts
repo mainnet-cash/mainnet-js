@@ -8,11 +8,11 @@ import {
 import { Network } from "../interface";
 import { emitWarning } from "process";
 
-export function persistentNetwork(network="mainnet", useCluster=false){
-  let provider = getNetworkProvider(network, useCluster)
+export function persistentNetwork(network = "mainnet", useCluster = false) {
+  let provider = getNetworkProvider(network, useCluster);
 }
 
-export function getNetworkProvider(network = "mainnet", useCluster=false) {
+export function getNetworkProvider(network = "mainnet", useCluster = false) {
   switch (network) {
     case Network.MAINNET:
       return getProvider(useCluster);
@@ -25,20 +25,20 @@ export function getNetworkProvider(network = "mainnet", useCluster=false) {
   }
 }
 
-export function getRegtestProvider(useCluster:boolean) {
-  if(useCluster){
-    throw emitWarning("The regtest provider will only use a single client")
+export function getRegtestProvider(useCluster: boolean) {
+  if (useCluster) {
+    throw emitWarning("The regtest provider will only use a single client");
   }
   let c = getRegtestClient();
   return new ElectrumNetworkProvider(c, "regtest");
 }
 
-export function getTestnetProvider(useCluster:boolean) {
-  let c = useCluster? getTestnetCluster() : getTestnetClient();
+export function getTestnetProvider(useCluster: boolean) {
+  let c = useCluster ? getTestnetCluster() : getTestnetClient();
   return new ElectrumNetworkProvider(c, "testnet");
 }
 
-export function getProvider(useCluster:boolean) {
+export function getProvider(useCluster: boolean) {
   let c = useCluster ? getClient() : getClient();
   return new ElectrumNetworkProvider(c, "mainnet");
 }

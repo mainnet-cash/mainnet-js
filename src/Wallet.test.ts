@@ -10,7 +10,7 @@ describe(`Test Wallet library`, () => {
   /**
    * Create the browser and page context
    */
-  beforeEach(async () => { });
+  beforeEach(async () => {});
 
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -217,8 +217,6 @@ describe(`Test Wallet library`, () => {
     expect(await alice.getBalance("sat")).toBe(0);
   });
 
-
-
   test("Send a transaction on testnet, send it  back", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
@@ -273,5 +271,4 @@ describe(`Test Wallet library`, () => {
     expect(reidBalance.usd).toBeGreaterThan(0);
     expect(typeof (await reid.getBalance("sat"))).toBe("number");
   });
-  
 });

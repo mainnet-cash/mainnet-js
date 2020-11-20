@@ -1,5 +1,3 @@
-import { getGlobalNamespace } from "../util/getGlobalNamespace"
+import { getGlobalNamespace } from "../util/getGlobalNamespace";
 
-export default class Connection {
-
-} 
+export default class Connection {}
