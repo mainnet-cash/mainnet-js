@@ -6,32 +6,41 @@ import {
   ElectrumClient,
 } from "electrum-cash";
 import { Network } from "../interface";
+import { emitWarning } from "process";
 
-export function getNetworkProvider(network = "mainnet") {
+export function persistentNetwork(network="mainnet", useCluster=false){
+  let provider = getNetworkProvider(network, useCluster)
+}
+
+export function getNetworkProvider(network = "mainnet", useCluster=false) {
   switch (network) {
     case Network.MAINNET:
-      return getProvider();
+      return getProvider(useCluster);
     case Network.TESTNET:
-      return getTestnetProvider();
+      return getTestnetProvider(useCluster);
     case Network.REGTEST:
-      return getRegtestProvider();
+      return getRegtestProvider(useCluster);
     default:
-      return getProvider();
+      return getProvider(useCluster);
   }
 }
-export function getRegtestProvider() {
-  let client = getRegtestClient();
-  return new ElectrumNetworkProvider(client, "regtest");
+
+export function getRegtestProvider(useCluster:boolean) {
+  if(useCluster){
+    throw emitWarning("The regtest provider will only use a single client")
+  }
+  let c = getRegtestClient();
+  return new ElectrumNetworkProvider(c, "regtest");
 }
 
-export function getTestnetProvider() {
-  let cluster = getTestnetCluster();
-  return new ElectrumNetworkProvider(cluster, "testnet");
+export function getTestnetProvider(useCluster:boolean) {
+  let c = useCluster? getTestnetCluster() : getTestnetClient();
+  return new ElectrumNetworkProvider(c, "testnet");
 }
 
-export function getProvider() {
-  let cluster = getCluster();
-  return new ElectrumNetworkProvider(cluster, "mainnet");
+export function getProvider(useCluster:boolean) {
+  let c = useCluster ? getClient() : getClient();
+  return new ElectrumNetworkProvider(c, "mainnet");
 }
 
 function getConfidence() {
@@ -109,6 +118,32 @@ function getTestnetCluster() {
   return electrum;
 }
 
+function getClient() {
+  //
+  let electrum = new ElectrumClient(
+    "CashScript Application",
+    "1.4.1",
+    "bch.imaginary.cash",
+    50002,
+    ElectrumTransport.TCP_TLS.Scheme,
+    28020
+  );
+  return electrum;
+}
+
+function getTestnetClient() {
+  //
+  let electrum = new ElectrumClient(
+    "CashScript Application",
+    "1.4.1",
+    "electroncash.de",
+    60004,
+    ElectrumTransport.WSS.Scheme,
+    1020
+  );
+  return electrum;
+}
+
 function getRegtestClient() {
   //
   let electrum = new ElectrumClient(
@@ -117,7 +152,7 @@ function getRegtestClient() {
     "127.0.0.1",
     60003,
     ElectrumTransport.WS.Scheme,
-    1020
+    28020
   );
   return electrum;
 }

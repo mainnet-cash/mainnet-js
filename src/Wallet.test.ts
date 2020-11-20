@@ -10,7 +10,7 @@ describe(`Test Wallet library`, () => {
   /**
    * Create the browser and page context
    */
-  beforeEach(async () => {});
+  beforeEach(async () => { });
 
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -142,7 +142,7 @@ describe(`Test Wallet library`, () => {
     }
   });
 
-  test("Send a transaction on the regression network", async () => {
+  test("Should send a transaction on the regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
@@ -217,21 +217,7 @@ describe(`Test Wallet library`, () => {
     expect(await alice.getBalance("sat")).toBe(0);
   });
 
-  //   test("Should get a large number of utxos", async () => {
-  //     let reid = await Wallet.watchOnly(
-  //       "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
-  //     );
-  //     const reidBalance = (await reid.getBalance()) as BalanceResponse;
-  //     const reidUtxos = await reid.getUtxos();
-  //     expect(reidUtxos.utxos!.length).toBeGreaterThan(0);
 
-  //     expect(reid.getDepositAddress()!).toBe(
-  //       "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
-  //     );
-  //     expect(reidBalance.bch).toBeGreaterThan(0);
-  //     expect(reidBalance.usd).toBeGreaterThan(0);
-  //     expect(typeof (await reid.getBalance("sat"))).toBe("number");
-  //   });
 
   test("Send a transaction on testnet, send it  back", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -270,4 +256,22 @@ describe(`Test Wallet library`, () => {
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
   });
+
+  test("Should get a large number of utxos", async () => {
+    let reid = await Wallet.watchOnly(
+      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+    );
+    //reid.provider = getClientProvider()
+    const reidBalance = (await reid.getBalance()) as BalanceResponse;
+    const reidUtxos = await reid.getUtxos();
+    expect(reidUtxos.utxos!.length).toBeGreaterThan(0);
+
+    expect(reid.getDepositAddress()!).toBe(
+      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+    );
+    expect(reidBalance.bch).toBeGreaterThan(0);
+    expect(reidBalance.usd).toBeGreaterThan(0);
+    expect(typeof (await reid.getBalance("sat"))).toBe("number");
+  });
+  
 });
