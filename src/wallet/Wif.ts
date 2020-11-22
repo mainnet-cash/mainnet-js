@@ -197,18 +197,22 @@ export class Wallet extends BaseWallet {
     }
   };
 
-  public static named(name: string, dbName?: string, force?: boolean):Promise<Wallet> {
+  public static named(
+    name: string,
+    dbName?: string,
+    force?: boolean
+  ): Promise<Wallet> {
     return new this()._named(name, dbName, force);
   }
 
-  public static newRandom(name = "", dbName?: string):Promise<Wallet> {
+  public static newRandom(name = "", dbName?: string): Promise<Wallet> {
     return new this()._newRandom(name, dbName);
   }
   public static fromWIF(wif): Promise<Wallet> {
     return new this().fromWIF(wif);
   }
 
-  public static watchOnly(address):Promise<Wallet> {
+  public static watchOnly(address): Promise<Wallet> {
     return new this().watchOnly(address);
   }
 

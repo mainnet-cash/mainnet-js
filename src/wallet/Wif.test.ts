@@ -149,9 +149,7 @@ describe(`Watch only Wallets`, () => {
     if (!process.env.ADDRESS) {
       throw Error("Attempted to pass an empty address");
     } else {
-      let alice = await RegTestWallet.watchOnly(
-        process.env.ADDRESS
-      ); // insert WIF from #1
+      let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);

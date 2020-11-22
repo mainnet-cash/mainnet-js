@@ -48,6 +48,15 @@ export default interface NetworkProvider {
    */
   ready(timeout?: number): Promise<boolean | unknown>;
 
-  connect(): Promise<boolean[]> 
-  disconnect(): Promise<boolean[]> 
+  /**
+   * Function to connect manually if using persistent connections
+   * @returns array of connection boolean successes, or throws error
+   */
+  connect(): Promise<boolean[]>;
+
+  /**
+   * Function to disconnect manually if using persistent connections
+   * @returns array of connection boolean successes, or throws error
+   */
+  disconnect(): Promise<boolean[]>;
 }

@@ -20,9 +20,9 @@ export const networkPrefixMap = {
 };
 
 export const prefixFromNetworkMap = {
-  "mainnet": CashAddressNetworkPrefix.mainnet,
-  "testnet": CashAddressNetworkPrefix.testnet,
-  "regtest": CashAddressNetworkPrefix.regtest,
+  mainnet: CashAddressNetworkPrefix.mainnet,
+  testnet: CashAddressNetworkPrefix.testnet,
+  regtest: CashAddressNetworkPrefix.regtest,
 };
 
 const literal = <L extends string>(l: L): L => l;

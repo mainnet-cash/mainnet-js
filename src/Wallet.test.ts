@@ -10,16 +10,14 @@ describe(`Test Wallet library`, () => {
   /**
    * Create the browser and page context
    */
-  beforeEach(async () => { });
+  beforeEach(async () => {});
 
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      ); // insert WIF from #1
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
@@ -30,9 +28,7 @@ describe(`Test Wallet library`, () => {
   });
 
   test("Should get a random regtest wallet", async () => {
-    let alice = await RegTestWallet.newRandom(
-      "alice_random"
-    );
+    let alice = await RegTestWallet.newRandom("alice_random");
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
     const aliceBalance = (await alice.getBalance()) as BalanceResponse;
@@ -46,9 +42,7 @@ describe(`Test Wallet library`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      ); // insert WIF from #1
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
@@ -75,9 +69,7 @@ describe(`Test Wallet library`, () => {
 
   test("Should get a wallet fromId", async () => {
     let alice = await Wallet.newRandom();
-    let alice2 = await Wallet.fromId(
-      `wif:mainnet:${alice.privateKeyWif}`
-    );
+    let alice2 = await Wallet.fromId(`wif:mainnet:${alice.privateKeyWif}`);
     expect(alice2.cashaddr).toBe(alice.cashaddr);
     expect(alice.getDepositAddress()!.slice(0, 13)).toBe("bitcoincash:q");
   });
@@ -147,9 +139,7 @@ describe(`Test Wallet library`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      ); // insert WIF from #1
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
       const bob = await createWallet({
         type: WalletTypeEnum.Wif,
         network: "regtest",
@@ -174,9 +164,7 @@ describe(`Test Wallet library`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      ); // insert WIF from #1
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
       const bob = await createWallet({
         type: WalletTypeEnum.Wif,
         network: "regtest",
@@ -195,9 +183,7 @@ describe(`Test Wallet library`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      ); // insert WIF from #1
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
       const bob = await createWallet({
         network: "regtest",
       });
@@ -216,8 +202,6 @@ describe(`Test Wallet library`, () => {
     expect(aliceBalance.usd).toBe(0);
     expect(await alice.getBalance("sat")).toBe(0);
   });
-
-
 
   test("Send a transaction on testnet, send it  back", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -273,5 +257,4 @@ describe(`Test Wallet library`, () => {
     expect(reidBalance.usd).toBeGreaterThan(0);
     expect(typeof (await reid.getBalance("sat"))).toBe("number");
   });
-
 });

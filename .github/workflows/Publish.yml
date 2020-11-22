@@ -27,11 +27,6 @@ jobs:
     steps:
       # Build project
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14
-      - run: yarn
-      - run: yarn build
 
       # Setup environment
       - name: Set TAG_NAME env
@@ -91,14 +86,14 @@ jobs:
         with:
           node-version: 14
       - run: yarn
-      - run: yarn build
+      - run: NODE_ENV=production yarn build
 
       # Setup environment
       - name: Check if NPM_TOKEN is set
         run: |
             if [ -n $NPM_TOKEN ]; then HAS_NPM_TOKEN='true' ; fi
             echo "HAS_NPM_TOKEN=${HAS_NPM_TOKEN}" >> $GITHUB_ENV
-      - name: Publish to npm
+      - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: 14
@@ -108,9 +103,50 @@ jobs:
       - if: env.HAS_NPM_TOKEN == false
         run: echo "NPM_TOKEN secret not set, skipping publishing"
       - if: env.HAS_NPM_TOKEN
+        name: Publish to npm
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+
+  # Publish mainnet-js package on bunny cdn
+  # Requires CDN_FTP_UPLOAD github secret to be set
+  publish-bunny:
+    continue-on-error: true
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Build project
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: yarn
+      - run: NODE_ENV=production yarn build
+
+      # Setup environment
+      - name: Check if CDN_FTP_UPLOAD is set
+        run: |
+            if [ -n $CDN_FTP_UPLOAD ]; then HAS_CDN_FTP_UPLOAD='true' ; fi
+            echo "HAS_CDN_FTP_UPLOAD=${HAS_CDN_FTP_UPLOAD}" >> $GITHUB_ENV
+      - name: Setup node 14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+
+      # Actual job
+      - if: env.HAS_CDN_FTP_UPLOAD == false
+        run: echo "CDN_FTP_UPLOAD secret not set, skipping publishing"
+      - if: env.HAS_CDN_FTP_UPLOAD
+        name: Publish to bunny cdn
+        uses: sebastianpopp/ftp-action@releases/v2
+        with:
+          host: storage.bunnycdn.com
+          user: mainnet-js
+          password: ${{ secrets.CDN_FTP_UPLOAD }}
+          localDir: "dist"
+
 
   # Build a matrix of API clients: php, python and go
   # After being built, the clients are commited to their repositories, new tag and github release are created for them
@@ -240,3 +276,4 @@ jobs:
           accept: 200,201,202,204
           headers: '{ "content-type": "application/json" }'
           body: '{"repository":{"url":"https://packagist.org/packages/mainnet-cash/mainnet-php-generated"}}'
+          timeout: 10000

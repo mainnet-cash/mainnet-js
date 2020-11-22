@@ -9,7 +9,11 @@ import { Network } from "../interface";
 import { emitWarning } from "process";
 import { default as NetworkProvider } from "./NetworkProvider";
 
-export function getNetworkProvider(network = "mainnet", useCluster=false, manualConnectionManagement=false) {
+export function getNetworkProvider(
+  network = "mainnet",
+  useCluster = false,
+  manualConnectionManagement = false
+) {
   switch (network) {
     case Network.MAINNET:
       return getProvider(useCluster, manualConnectionManagement);
@@ -22,20 +26,29 @@ export function getNetworkProvider(network = "mainnet", useCluster=false, manual
   }
 }
 
-export function getRegtestProvider(useCluster:boolean, manualConnectionManagement=false):NetworkProvider {
-  if(useCluster){
-    throw emitWarning("The regtest provider will only use a single client")
+export function getRegtestProvider(
+  useCluster: boolean,
+  manualConnectionManagement = false
+): NetworkProvider {
+  if (useCluster) {
+    throw emitWarning("The regtest provider will only use a single client");
   }
   let c = getRegtestClient();
   return new ElectrumNetworkProvider(c, "regtest", manualConnectionManagement);
 }
 
-export function getTestnetProvider(useCluster:boolean, manualConnectionManagement=false):NetworkProvider {
-  let c = useCluster? getTestnetCluster() : getTestnetClient();
+export function getTestnetProvider(
+  useCluster: boolean,
+  manualConnectionManagement = false
+): NetworkProvider {
+  let c = useCluster ? getTestnetCluster() : getTestnetClient();
   return new ElectrumNetworkProvider(c, "testnet", manualConnectionManagement);
 }
 
-export function getProvider(useCluster:boolean, manualConnectionManagement=false):NetworkProvider {
+export function getProvider(
+  useCluster: boolean,
+  manualConnectionManagement = false
+): NetworkProvider {
   let c = useCluster ? getCluster() : getClient();
   return new ElectrumNetworkProvider(c, "mainnet", manualConnectionManagement);
 }

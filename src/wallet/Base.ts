@@ -98,10 +98,7 @@ export class BaseWallet implements WalletInterface {
     throw Error("Cannot parse id on BaseWallet class");
   }
 
-  public _newRandom = async (
-    name: string,
-    dbName?: string
-  ): Promise<this> => {
+  public _newRandom = async (name: string, dbName?: string): Promise<this> => {
     if (name.length > 0) {
       return this._named(name, dbName);
     } else {

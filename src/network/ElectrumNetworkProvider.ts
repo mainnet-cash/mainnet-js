@@ -87,8 +87,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       this.concurrentRequests += 1;
     }
 
-
-
     await this.ready();
 
     let result;
@@ -101,8 +99,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         this.concurrentRequests -= 1;
       }
     }
-
-
 
     if (result instanceof Error) throw result;
 
@@ -124,7 +120,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async ready(): Promise<boolean | unknown> {
     return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
   }
-
   async connect(): Promise<boolean[]> {
     return this.isElectrumClient()
       ? this.connectClient()

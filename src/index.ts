@@ -5,4 +5,3 @@ export * from "./wallet/Wif";
 export * from "./wallet/createWallet";
 
 export let bch: any;
-
