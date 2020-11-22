@@ -144,13 +144,13 @@ jobs:
       - if: env.HAS_CDN_FTP_UPLOAD == false
         run: echo "CDN_FTP_UPLOAD secret not set, skipping publishing"
       - if: env.HAS_CDN_FTP_UPLOAD
-        name: Publish to bunny
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        name: Publish to bunny cdn
+        uses: sebastianpopp/ftp-action@releases/v2
         with:
-          server: storage.bunnycdn.com
-          local-dir: ./dist/
-          username: mainnet-js
+          host: storage.bunnycdn.com
+          user: mainnet-js
           password: ${{ secrets.CDN_FTP_UPLOAD }}
+          localDir: "dist"
 
 
   # Build a matrix of API clients: php, python and go
