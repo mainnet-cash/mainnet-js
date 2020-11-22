@@ -27,11 +27,6 @@ jobs:
     steps:
       # Build project
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14
-      - run: yarn
-      - run: yarn build
 
       # Setup environment
       - name: Set TAG_NAME env
@@ -91,7 +86,7 @@ jobs:
         with:
           node-version: 14
       - run: yarn
-      - run: yarn build
+      - run: NODE_ENV=production yarn build
 
       # Setup environment
       - name: Check if NPM_TOKEN is set
@@ -127,7 +122,7 @@ jobs:
         with:
           node-version: 14
       - run: yarn
-      - run: yarn build
+      - run: NODE_ENV=production yarn build
 
       # Setup environment
       - name: Check if CDN_FTP_UPLOAD is set
@@ -281,3 +276,4 @@ jobs:
           accept: 200,201,202,204
           headers: '{ "content-type": "application/json" }'
           body: '{"repository":{"url":"https://packagist.org/packages/mainnet-cash/mainnet-php-generated"}}'
+          timeout: 10000
