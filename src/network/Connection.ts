@@ -1,5 +1,4 @@
 import { default as NetworkProvider } from "./NetworkProvider";
-import { default as StorageProvider } from "../db/StorageProvider";
 import { getNetworkProvider } from "./default";
 import { Network } from "../interface";
 import { Wallet } from "../wallet/Wif";
@@ -7,11 +6,7 @@ import { walletClassMap } from "../wallet/createWallet";
 import { prefixFromNetworkMap } from "../enum";
 import { getStorageProvider } from "../db/util";
 import {
-  CashAddressNetworkPrefix,
-  instantiateSecp256k1,
-  instantiateSha256,
-  Secp256k1,
-  Sha256,
+  CashAddressNetworkPrefix
 } from "@bitauth/libauth";
 
 export class Connection {
