@@ -116,8 +116,8 @@ const browserTestConfig = merge(browserConfig, browserTestDiff);
 
 let config = baseConfig;
 
-if (process.env.NODE_ENV == 'production') {
-  console.log('Running webpack in production mode')
+if (process.env.NODE_ENV == "production") {
+  console.log("Running webpack in production mode");
   config = merge(baseConfig, prodConfig);
 }
 
