@@ -21,7 +21,6 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   testEnvironment: "node",
-  setupFiles: ["fake-indexeddb/auto"],
   globalSetup: "<rootDir>/jest/node.setup.js",
   globalTeardown: "<rootDir>/jest/node.teardown.js",
   verbose: true,

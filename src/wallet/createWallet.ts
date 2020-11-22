@@ -15,7 +15,7 @@ interface WalletResponse {
   network?: NetworkEnum;
 }
 
-var walletClassMap = {
+export const walletClassMap = {
   wif: {
     mainnet: () => {
       return Wallet;

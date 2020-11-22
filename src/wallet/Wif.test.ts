@@ -5,23 +5,23 @@ import { walletFromId } from "./createWallet";
 
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
-    let w = (await RegTestWallet.fromId(
+    let w = await RegTestWallet.fromId(
       "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
-    )) as RegTestWallet;
+    );
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
   });
 
   test("Get a testnet wallet from string id", async () => {
-    let w = (await TestNetWallet.fromId(
+    let w = await TestNetWallet.fromId(
       "wif:testnet:cPS12C2bpGHtKjS5NXNyWyTGGRMPk7D7pjp5JfgxRKWyFnWoDyZg"
-    )) as TestNetWallet;
+    );
     expect(w.cashaddr!.startsWith("bchtest:")).toBeTruthy();
   });
 
   test("Get a mainnet wallet from string id", async () => {
-    let w = (await Wallet.fromId(
+    let w = await Wallet.fromId(
       "wif:mainnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
-    )) as Wallet;
+    );
     expect(w.cashaddr!.startsWith("bitcoincash")).toBeTruthy();
   });
 
@@ -105,9 +105,9 @@ describe(`Tests named wallet creation`, () => {
 
 describe(`Watch only Wallets`, () => {
   test("Create a watch only testnet wallet from string id", async () => {
-    let w = (await TestNetWallet.fromId(
+    let w = await TestNetWallet.fromId(
       "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
-    )) as Wallet;
+    );
     expect(w.network).toBe("testnet");
     expect(w.networkPrefix).toBe("bchtest");
     expect(w.cashaddr).toBe(
@@ -116,9 +116,9 @@ describe(`Watch only Wallets`, () => {
   });
 
   test("Create a watch only regtest wallet from string id", async () => {
-    let w = (await RegTestWallet.fromId(
+    let w = await RegTestWallet.fromId(
       "watch:regtest:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt"
-    )) as Wallet;
+    );
     if (!w) {
       throw Error("Could not derive wallet");
     }
@@ -134,9 +134,9 @@ describe(`Watch only Wallets`, () => {
   });
 
   test("Create a watch only mainnet wallet from string id", async () => {
-    let w = (await Wallet.fromId(
+    let w = await Wallet.fromId(
       "watch:mainnet:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"
-    )) as Wallet;
+    );
     expect(w.network).toBe("mainnet");
     expect(w.networkPrefix).toBe("bitcoincash");
     expect(w.cashaddr).toBe(
@@ -149,9 +149,7 @@ describe(`Watch only Wallets`, () => {
     if (!process.env.ADDRESS) {
       throw Error("Attempted to pass an empty address");
     } else {
-      let alice = (await RegTestWallet.watchOnly(
-        process.env.ADDRESS
-      )) as RegTestWallet; // insert WIF from #1
+      let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
@@ -166,9 +164,9 @@ describe(`Watch only Wallets`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = (await TestNetWallet.watchOnly(
+      let alice = await TestNetWallet.watchOnly(
         process.env.ALICE_TESTNET_ADDRESS
-      )) as TestNetWallet; // insert WIF from #1
+      ); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.sat).toBeGreaterThan(2000);
