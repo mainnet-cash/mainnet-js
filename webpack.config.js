@@ -1,9 +1,9 @@
 const merge = require("deepmerge");
-var packageJson = require("./package.json");
+const packageJson = require("./package.json");
 
 const baseConfig = {
   entry: "./src/index.ts",
-  mode: "production",
+  mode: "development",
   module: {
     rules: [
       {
@@ -19,6 +19,13 @@ const baseConfig = {
     minimize: false,
     mangleWasmImports: true,
     usedExports: true,
+  },
+};
+
+const prodConfig = {
+  mode: "production",
+  optimization: {
+    minimize: true,
   },
 };
 
@@ -107,10 +114,17 @@ const browserTestDiff = {
 
 const browserTestConfig = merge(browserConfig, browserTestDiff);
 
+let config = baseConfig;
+
+if (process.env.NODE_ENV == 'production') {
+  console.log('Running webpack in production mode')
+  config = merge(baseConfig, prodConfig);
+}
+
 // Join configurations with the base configuration
 module.exports = [
   nodeConfig,
   browserConfig,
   browserTestConfig,
   webWorkerConfig,
-].map((c) => merge(baseConfig, c));
+].map((c) => merge(config, c));
