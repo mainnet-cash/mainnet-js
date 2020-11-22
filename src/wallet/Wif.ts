@@ -67,7 +67,7 @@ export class Wallet extends BaseWallet {
   }
 
   // Initialize wallet from Wallet Import Format
-  public async fromWIF(secret: string): Promise<this | Error> {
+  public async fromWIF(secret: string): Promise<this> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     let result = decodePrivateKeyWif(sha256, secret);
@@ -112,7 +112,7 @@ export class Wallet extends BaseWallet {
     return this;
   }
 
-  public async generate(): Promise<this | Error> {
+  public async generate(): Promise<this> {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
@@ -161,7 +161,7 @@ export class Wallet extends BaseWallet {
     return await new this()._fromId(walletId);
   }
 
-  public _fromId = async (walletId: string): Promise<this | Error> => {
+  public _fromId = async (walletId: string): Promise<this> => {
     let [
       walletType,
       networkGiven,
@@ -197,18 +197,18 @@ export class Wallet extends BaseWallet {
     }
   };
 
-  public static async named(name: string, dbName?: string, force?: boolean) {
+  public static named(name: string, dbName?: string, force?: boolean):Promise<Wallet> {
     return new this()._named(name, dbName, force);
   }
 
-  public static async newRandom(name = "", dbName?: string) {
+  public static newRandom(name = "", dbName?: string):Promise<Wallet> {
     return new this()._newRandom(name, dbName);
   }
-  public static async fromWIF(wif): Promise<any> {
+  public static fromWIF(wif): Promise<Wallet> {
     return new this().fromWIF(wif);
   }
 
-  public static async watchOnly(address) {
+  public static watchOnly(address):Promise<Wallet> {
     return new this().watchOnly(address);
   }
 

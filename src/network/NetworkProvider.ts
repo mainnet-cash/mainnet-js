@@ -46,5 +46,8 @@ export default interface NetworkProvider {
    * @param timeout number of milliseconds to wait before throwing error
    * @returns true when ready, or an error
    */
-  ready(timeout?: number): Promise<boolean | Error>;
+  ready(timeout?: number): Promise<boolean | unknown>;
+
+  connect(): Promise<boolean[]> 
+  disconnect(): Promise<boolean[]> 
 }

@@ -7,40 +7,37 @@ import {
 } from "electrum-cash";
 import { Network } from "../interface";
 import { emitWarning } from "process";
+import { default as NetworkProvider } from "./NetworkProvider";
 
-export function persistentNetwork(network="mainnet", useCluster=false){
-  let provider = getNetworkProvider(network, useCluster)
-}
-
-export function getNetworkProvider(network = "mainnet", useCluster=false) {
+export function getNetworkProvider(network = "mainnet", useCluster=false, manualConnectionManagement=false) {
   switch (network) {
     case Network.MAINNET:
-      return getProvider(useCluster);
+      return getProvider(useCluster, manualConnectionManagement);
     case Network.TESTNET:
-      return getTestnetProvider(useCluster);
+      return getTestnetProvider(useCluster, manualConnectionManagement);
     case Network.REGTEST:
-      return getRegtestProvider(useCluster);
+      return getRegtestProvider(useCluster, manualConnectionManagement);
     default:
-      return getProvider(useCluster);
+      return getProvider(useCluster, manualConnectionManagement);
   }
 }
 
-export function getRegtestProvider(useCluster:boolean) {
+export function getRegtestProvider(useCluster:boolean, manualConnectionManagement=false):NetworkProvider {
   if(useCluster){
     throw emitWarning("The regtest provider will only use a single client")
   }
   let c = getRegtestClient();
-  return new ElectrumNetworkProvider(c, "regtest");
+  return new ElectrumNetworkProvider(c, "regtest", manualConnectionManagement);
 }
 
-export function getTestnetProvider(useCluster:boolean) {
+export function getTestnetProvider(useCluster:boolean, manualConnectionManagement=false):NetworkProvider {
   let c = useCluster? getTestnetCluster() : getTestnetClient();
-  return new ElectrumNetworkProvider(c, "testnet");
+  return new ElectrumNetworkProvider(c, "testnet", manualConnectionManagement);
 }
 
-export function getProvider(useCluster:boolean) {
-  let c = useCluster ? getClient() : getClient();
-  return new ElectrumNetworkProvider(c, "mainnet");
+export function getProvider(useCluster:boolean, manualConnectionManagement=false):NetworkProvider {
+  let c = useCluster ? getCluster() : getClient();
+  return new ElectrumNetworkProvider(c, "mainnet", manualConnectionManagement);
 }
 
 function getConfidence() {
@@ -64,7 +61,7 @@ function getCluster() {
     confidence,
     3,
     ClusterOrder.PRIORITY,
-    550
+    50000
   );
   electrum.addServer(
     "fulcrum.fountainhead.cash",
@@ -101,7 +98,7 @@ function getTestnetCluster() {
     "1.4.1",
     confidence,
     1,
-    undefined
+    50000
   );
   electrum.addServer(
     "blackie.c3-soft.com",
@@ -126,7 +123,7 @@ function getClient() {
     "bch.imaginary.cash",
     50002,
     ElectrumTransport.TCP_TLS.Scheme,
-    28020
+    50000
   );
   return electrum;
 }
@@ -152,7 +149,7 @@ function getRegtestClient() {
     "127.0.0.1",
     60003,
     ElectrumTransport.WS.Scheme,
-    28020
+    550
   );
   return electrum;
 }
