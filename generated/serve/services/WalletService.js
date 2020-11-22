@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const mainnet = require("../../../dist/mainnet-node-0.0.1-rc");
+const mainnet = require("mainnet");
 
 /**
 * Get total balance for wallet
@@ -16,6 +16,7 @@ const balance = ({ balanceRequest }) => new Promise(
         throw Error("Could not derive wallet");
       }
 
+      // the balance unit may also be empty
       let resp = await wallet.getBalance(balanceRequest.unit);
       if (typeof resp === "number") {
         resolve(Service.successResponse(resp.toString()));

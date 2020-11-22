@@ -1,5 +1,6 @@
 const axios = require("axios");
 
+// Attempt to get the usd rate from some web app
 export async function getUsdRate(): Promise<number> {
   try {
     let response = await axios.get(

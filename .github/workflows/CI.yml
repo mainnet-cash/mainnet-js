@@ -2,19 +2,19 @@ name: CI
 
 on:
   push:
-    branches: 
+    branches:
       - master
-      - feature/*    
-      - develop  
+      - feature/*
+      - develop
   pull_request:
-    branches: 
-      - master    
+    branches:
+      - master
 env:
   ALICE_TESTNET_ADDRESS: ${{ secrets.ALICE_TESTNET_ADDRESS }}
   ALICE_TESTNET_WALLET_ID: ${{ secrets.ALICE_TESTNET_WALLET_ID }}
   BOB_TESTNET_ADDRESS: ${{ secrets.BOB_TESTNET_ADDRESS }}
-  BOB_TESTNET_WALLET_ID: ${{ secrets.BOB_TESTNET_WALLET_ID }}      
-  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}      
+  BOB_TESTNET_WALLET_ID: ${{ secrets.BOB_TESTNET_WALLET_ID }}
+  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -90,7 +90,7 @@ jobs:
     - uses: actions/checkout@master
     - uses: actions/setup-node@master
       with:
-        node-version: '14'     
+        node-version: '14'
     - run: npm install
     - run: npm run build
     - uses: paambaati/codeclimate-action@v2.5.7

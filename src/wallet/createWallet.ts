@@ -1,8 +1,5 @@
-// // Unstable?
-// import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-
-// import { getStorageProvider } from "../db/util";
-import { NetworkEnum, WalletTypeEnum } from "./enum";
+import { WalletTypeEnum } from "./enum";
+import { NetworkEnum } from "../enum";
 import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
 
 interface WalletRequest {
@@ -18,12 +15,6 @@ interface WalletResponse {
   network?: NetworkEnum;
 }
 
-var networkMap = {
-  mainnet: "bitcoincash",
-  testnet: "bchtest",
-  regtest: "bchreg",
-};
-
 var walletClassMap = {
   wif: {
     mainnet: () => {
@@ -36,12 +27,6 @@ var walletClassMap = {
       return RegTestWallet;
     },
   },
-};
-
-export const networkPrefixMap = {
-  bitcoincash: "mainnet",
-  bchtest: "testnet",
-  bchreg: "regtest",
 };
 
 export async function createWallet(body: WalletRequest): Promise<any> {
@@ -106,6 +91,6 @@ export async function walletFromId(walletId: string): Promise<any> {
     type: WalletTypeEnum[walletType],
   } as WalletRequest;
   let wallet = await createWallet(walletRequest);
-  await wallet.fromWIF(walletData);
+  await wallet._fromId(walletId);
   return wallet;
 }

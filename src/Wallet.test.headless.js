@@ -39,18 +39,12 @@ describe(`Wallet should function in the browser`, () => {
     expect(result).toEqual("function");
   });
 
-  test(`Should throw error on regtest wallet`, async () => {
-    expect.assertions(1);
-    let params = { name: "Alice's TestNet", type: "wif", network: "regtest" };
-    try {
-      const result = await page.evaluate(async (p) => {
-        return await createWalletResponse(p);
-      }, params);
-    } catch (e) {
-      expect(e.message.slice(0, 97)).toBe(
-        "page.evaluate: Evaluation failed: Error: This usage is not supported in the browser at this time."
-      );
-    }
+  test(`Should create regtest wallet`, async () => {
+    let params = { name: "Alice's Regtest", type: "wif", network: "regtest" };
+    const result = await page.evaluate(async (p) => {
+      return await createWalletResponse(p);
+    }, params);
+    expect(result.cashaddr.slice(0, 8)).toBe("bchreg:q");
   });
 
   test(`Should create testnet wallet`, async () => {

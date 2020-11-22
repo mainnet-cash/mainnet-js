@@ -6,6 +6,10 @@ let args = process.argv.slice(); // remove ts-node
 args.shift(); // remove ts-node
 args.shift(); // remove cli.ts
 
+// This is an UNSUPPORTED feature for developers
+// Please upstream any additions you find useful.
+// There is ZERO support for this feature
+
 (async () => {
   let command = args.shift();
   let w;

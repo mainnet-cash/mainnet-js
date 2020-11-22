@@ -1,15 +1,10 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
-import {
-  MainnetProvider,
-  TestnetProvider,
-  RegtestProvider,
-} from "../network/default";
-import { NetworkProvider } from "../network";
+import { getNetworkProvider } from "../network/default";
+import { NetworkProvider } from "cashscript";
 import { getStorageProvider } from "../db/util";
 
-import { NetworkEnum, NetworkType } from "./enum";
-import { browserNotSupported } from "../util/browserNotSupported";
+import { NetworkEnum, NetworkType, networkPrefixMap } from "../enum";
 import { StorageProvider } from "../db";
 
 export default interface WalletInterface {
@@ -48,38 +43,20 @@ export class BaseWallet implements WalletInterface {
         ? NetworkType.Mainnet
         : NetworkType.Testnet;
 
-    switch (networkPrefix) {
-      case CashAddressNetworkPrefix.mainnet:
-        this.network = NetworkEnum.Mainnet;
+    this.isTestnet = this.networkType === "testnet" ? true : false;
+    switch (this.networkPrefix) {
+      case CashAddressNetworkPrefix.regtest:
+        this.network = NetworkEnum.Regtest;
+        this.provider = getNetworkProvider("regtest");
         break;
       case CashAddressNetworkPrefix.testnet:
         this.network = NetworkEnum.Testnet;
-        break;
-      case CashAddressNetworkPrefix.regtest:
-        this.network = NetworkEnum.Regtest;
+        this.provider = getNetworkProvider("testnet");
         break;
       default:
         this.network = NetworkEnum.Mainnet;
+        this.provider = getNetworkProvider();
     }
-    this.isTestnet = this.networkType === "testnet" ? true : false;
-    if (this.isTestnet) {
-      switch (this.networkPrefix) {
-        case CashAddressNetworkPrefix.regtest:
-          browserNotSupported();
-          this.provider = RegtestProvider();
-          break;
-        case CashAddressNetworkPrefix.testnet:
-          this.provider = TestnetProvider();
-          break;
-      }
-    } else {
-      this.provider = MainnetProvider();
-    }
-  }
-
-  initialize(secret?: string): Promise<this | Error> {
-    secret;
-    throw Error("Cannot initialize the baseWallet class");
   }
 
   generate(): Promise<this | Error> {

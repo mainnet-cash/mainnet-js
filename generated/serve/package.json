@@ -1,11 +1,12 @@
 {
-  "name":  "mainnet-cash",
+  "name": "mainnet-cash",
   "version": "0.0.1-rc",
   "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development ",
   "main": "index.js",
   "scripts": {
     "prestart": "npm install",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "npx jest --detectOpenHandles"
   },
   "keywords": [
     "openapi-generator",
@@ -16,11 +17,13 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",
+    "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-openapi-validator": "^3.9.1",
     "js-yaml": "^3.3.0",
+    "mainnet": "file:../..",
     "ono": "^5.0.1",
     "openapi-sampler": "^1.0.0-beta.15",
     "swagger-ui-express": "^4.0.2",

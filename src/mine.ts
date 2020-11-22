@@ -1,5 +1,15 @@
 const { spawnSync } = require("child_process");
 
+/**
+ * Mine blocks to a regtest address
+ *
+ * @param cashaddr - the address to mine to
+ * @param blocks - the number of blocks to mine
+ *
+ * @remarks
+ * This function assumes a local regtest bitcoin node with RPC_* matching the docker configuration
+ */
+
 export async function mine({
   cashaddr,
   blocks,

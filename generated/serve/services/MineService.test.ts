@@ -18,19 +18,19 @@ describe("Test Mine Endpoints", () => {
    * test mining blocks
    */
   it("Should mine a number of blocks to a given address", async () => {
-    const bobsWalletResp = await request(app).post("/v1/wallet/create").send({
+    const bobsWalletResp = await request(app).post("/wallet/create").send({
       type: "wif",
       network: "regtest",
     });
 
     const bobsCashaddr = bobsWalletResp.body.cashaddr;
-    const resp = await request(app).post("/v1/mine").send({
+    const resp = await request(app).post("/mine").send({
       cashaddr: bobsCashaddr,
       blocks: 15,
     });
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    const bobBalanceResp = await request(app).post("/v1/wallet/balance").send({
+    const bobBalanceResp = await request(app).post("/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
 

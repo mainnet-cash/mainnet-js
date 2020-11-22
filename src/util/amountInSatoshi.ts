@@ -1,5 +1,5 @@
 import { bchParam } from "../chain";
-import { UnitEnum } from "../wallet/enum";
+import { UnitEnum } from "../enum";
 import { getUsdRate } from "./getUsdRate";
 
 export async function amountInSatoshi(
