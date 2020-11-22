@@ -281,3 +281,4 @@ jobs:
           accept: 200,201,202,204
           headers: '{ "content-type": "application/json" }'
           body: '{"repository":{"url":"https://packagist.org/packages/mainnet-cash/mainnet-php-generated"}}'
+          timeout: 10000
