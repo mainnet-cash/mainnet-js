@@ -1,7 +1,6 @@
 const { spawnSync } = require("child_process");
 const electron = require("electrum-cash");
 const cashscript = require("cashscript");
-const { JSON_SCHEMA } = require("js-yaml");
 
 async function getRegtestUtxos(address) {
   try {

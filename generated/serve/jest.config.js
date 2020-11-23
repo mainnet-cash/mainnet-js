@@ -1,18 +1,18 @@
 module.exports = {
-  rootDir: "../",
+  rootDir: "./",
   collectCoverage: true,
 
   collectCoverageFrom: [
-    "**/*.{js,jsx,ts}",
+    "services/*.{js}",
     "!**/node_modules/**",
     "!**/generated/**",
   ],
   coveragePathIgnorePatterns: [
-    ".*/src/.*\\.d\\.ts",
-    ".*/src/.*\\.test\\.{ts,js}",
-    ".*/src/.*\\.test\\.headless\\.js",
+    ".*/services/.*\\.d\\.ts",
+    ".*/services/.*\\.test\\.{ts,js}",
+    ".*/services/.*\\.test\\.headless\\.js",
   ],
-  roots: ["<rootDir>/generated/serve/"],
+  roots: ["<rootDir>/"],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
@@ -21,7 +21,6 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   testEnvironment: "node",
-  setupFiles: ["fake-indexeddb/auto"],
   globalSetup: "<rootDir>/jest/node.setup.js",
   globalTeardown: "<rootDir>/jest/node.teardown.js",
   verbose: true,

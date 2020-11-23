@@ -3,3 +3,5 @@ export * from "./mine";
 export * from "./contract";
 export * from "./wallet/Wif";
 export * from "./wallet/createWallet";
+
+export let bch: any;

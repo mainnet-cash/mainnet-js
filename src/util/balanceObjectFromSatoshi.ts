@@ -43,7 +43,6 @@ export async function balanceFromSatoshi(
   value: number,
   unit?: UnitEnum
 ): Promise<number> {
-  let response: number;
   switch (unit) {
     case UnitEnum.BCH:
       return value / bchParam.subUnits;

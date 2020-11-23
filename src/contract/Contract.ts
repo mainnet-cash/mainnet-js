@@ -4,9 +4,11 @@ import {
   Artifact,
   CashCompiler,
   Contract as CashScriptContract,
+  Transaction as CashScriptTransaction,
   SignatureTemplate,
+  NetworkProvider,
 } from "cashscript";
-import { default as ElectrumNetworkProvider } from "../network/ElectrumNetworkProvider";
+//import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getNetworkProvider } from "../network/default";
 import { Utxo } from "../interface";
 
@@ -28,16 +30,18 @@ export default interface ContractInterface {
 export class Contract implements ContractInterface {
   private script: string;
   public parameters: Argument[];
-  private artifact?: Artifact;
-  private contract?: CashScriptContract;
-  private provider?: ElectrumNetworkProvider;
+  private artifact: Artifact;
+  private contract: CashScriptContract;
+  private provider?: NetworkProvider;
   public network: string;
-  private address?: string;
 
   constructor(script: string, parameters: any, network: string) {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
+    this.artifact = this.getArtifact();
+    this.provider = getNetworkProvider(this.network);
+    this.contract = this.getContactInstance();
   }
 
   // @ts-ignore
@@ -50,7 +54,7 @@ export class Contract implements ContractInterface {
   }
 
   getArtifact() {
-    const contractText = this.getContractText();
+    const contractText = this.script;
     if (typeof contractText === "string") {
       return CashCompiler.compileString(contractText);
     } else {
@@ -59,24 +63,23 @@ export class Contract implements ContractInterface {
   }
 
   public getAddress() {
-    const instance = this.getContactInstance();
-    return instance.address;
+    return this.contract.address;
   }
 
   public getUtxos() {
-    const instance = this.getContactInstance();
-    return instance.getUtxos();
+    return this.contract.getUtxos();
   }
 
   public getBalance() {
-    const instance = this.getContactInstance();
-    return instance.getBalance();
+    return this.contract.getBalance();
   }
 
   private getContactInstance() {
-    let artifact = this.getArtifact();
-    const provider = getNetworkProvider(this.network);
-    return new CashScriptContract(artifact, this.parameters, provider);
+    return new CashScriptContract(
+      this.artifact,
+      this.parameters,
+      this.provider
+    );
   }
 
   public fromCashScript() {
@@ -90,7 +93,7 @@ export class Contract implements ContractInterface {
   }
 
   public call(method: string, args) {
-    this.contract!.functions[method](args);
+    this.contract.functions[method](args);
   }
 
   public async _run(
@@ -100,8 +103,7 @@ export class Contract implements ContractInterface {
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
-    const instance = this.getContactInstance();
-    let fee = 1800;
+    let feePerByte = 1;
 
     const sig = new SignatureTemplate(wif);
 
@@ -109,50 +111,46 @@ export class Contract implements ContractInterface {
     let publicKey = sig.getPublicKey(secp256k1);
 
     let func;
-    if (typeof instance.functions[funcName] === "function") {
-      func = instance.functions[funcName];
+    if (typeof this.contract.functions[funcName] === "function") {
+      func = this.contract.functions[funcName];
     } else {
       throw Error(`${funcName} is not a contract method`);
     }
 
     // If getHexOnly is true, just return the tx hex, otherwise submit to the network
-    const method = getHexOnly ? "getTxHex" : "send";
+    const method = getHexOnly ? "build" : "send";
 
     const balance = await this.getBalance();
 
     // If no utxos were provided, automatically get them
     if (typeof utxos === "undefined") {
-      utxos = await instance.getUtxos();
+      utxos = await this.contract.getUtxos();
     }
 
     if (utxos.length > 0) {
       try {
+        // Create a estimate transaction with zero fees, sending zero balance
+        let estimatorInstance = func(0, publicKey, sig)
+          .to(outputAddress, 10)
+          .from(utxos);
+        const estimatedTxHex = (await estimatorInstance
+          .withFeePerByte(feePerByte)
+          ["build"]()) as string;
+
+        // Use the feePerByte to get the exact fee for the transaction length
+        let fee = (estimatedTxHex.length * feePerByte) / 2;
         let funcInstance = func(fee, publicKey, sig)
           .to(outputAddress, balance - fee)
           .from(utxos);
-        const tx = await funcInstance.withHardcodedFee(fee)[method]();
+        let tx = await funcInstance.withFeePerByte(feePerByte)[method]();
+
         if (getHexOnly) {
-          return { tx: tx.txid, fee: fee, utxo: utxos };
+          return { tx: tx.txid, utxo: utxos };
         } else {
           return tx;
         }
       } catch (e) {
-        const matcher = /Insufficient balance: available \((\d+)\) < needed \((\d+)\)./;
-        if (e.message.match(matcher)) {
-          const [, available, needed] = e.message.match(matcher);
-          fee = needed - available;
-          let funcInstance = func(fee, publicKey, sig)
-            .to(outputAddress, balance - fee)
-            .from(utxos);
-          let tx = await funcInstance.withHardcodedFee(fee)[method]();
-          if (getHexOnly) {
-            return { tx: tx.txid, fee: fee, utxo: utxos };
-          } else {
-            return tx;
-          }
-        } else {
-          throw Error(e);
-        }
+        throw Error(e);
       }
     } else {
       throw Error("There were no UTXOs provided or available on the contract");

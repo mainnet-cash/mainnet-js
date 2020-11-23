@@ -15,7 +15,7 @@ interface WalletResponse {
   network?: NetworkEnum;
 }
 
-var walletClassMap = {
+export const walletClassMap = {
   wif: {
     mainnet: () => {
       return Wallet;
@@ -83,7 +83,7 @@ function asJsonResponse(wallet: Wallet): WalletResponse {
 }
 
 export async function walletFromId(walletId: string): Promise<any> {
-  let [walletType, network, walletData]: string[] = walletId.split(":");
+  let [walletType, network]: string[] = walletId.split(":");
 
   let walletRequest = {
     name: "",
