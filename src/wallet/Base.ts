@@ -75,7 +75,7 @@ export class BaseWallet implements WalletInterface {
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
-    if(db){
+    if (db) {
       await db.init();
       let savedWallet = await db.getWallet(name);
       if (savedWallet) {
@@ -92,11 +92,9 @@ export class BaseWallet implements WalletInterface {
         await db.close();
         return wallet;
       }
-    }else{
+    } else {
       return await this.generate();
     }
-
-
   };
 
   public _fromId(secret?: string): Promise<this> {

@@ -86,7 +86,7 @@ export class Contract implements ContractInterface {
     return this;
   }
 
-  public static fromCashScript(script:string, parameters, network:string) {
+  public static fromCashScript(script: string, parameters, network: string) {
     return new this(script, parameters, network).fromCashScript();
   }
 
@@ -101,7 +101,6 @@ export class Contract implements ContractInterface {
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
-
     const sig = new SignatureTemplate(wif);
     const secp256k1 = await instantiateSecp256k1();
     let publicKey = sig.getPublicKey(secp256k1);
@@ -135,14 +134,14 @@ export class Contract implements ContractInterface {
           ["build"]()) as string;
 
         // Use the feePerByte to get the fee for the transaction length
-        const fee = Math.round((estimatedTxHex.length * 2 * feePerByte));
+        const fee = Math.round(estimatedTxHex.length * 2 * feePerByte);
         let funcInstance = func(fee, publicKey, sig)
           .to(outputAddress, balance - fee)
           .from(utxos);
         let tx = await funcInstance.withHardcodedFee(fee)[method]();
 
         if (getHexOnly) {
-          return { tx: tx.txid, fee:fee, utxo: utxos };
+          return { tx: tx.txid, fee: fee, utxo: utxos };
         } else {
           return tx;
         }
