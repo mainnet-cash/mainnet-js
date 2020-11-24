@@ -66,7 +66,7 @@ describe("Test Contract Services", () => {
       });
 
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.sat).toBeGreaterThan(18000);
+    expect(resp.body.sat).toBeGreaterThan(16700);
 
   });
 

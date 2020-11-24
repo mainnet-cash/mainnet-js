@@ -5,6 +5,10 @@ export function getStorageProvider(dbName: string) {
   if (typeof process === "undefined") {
     return new IndexedDBProvider(dbName);
   } else {
-    return new SqlProvider(dbName);
-  }
+    if("DATABASE_URL" in process.env){
+      return new SqlProvider(dbName);
+    }else{
+      return undefined
+    }
+  } 
 }

@@ -4,11 +4,9 @@ import {
   Artifact,
   CashCompiler,
   Contract as CashScriptContract,
-  Transaction as CashScriptTransaction,
   SignatureTemplate,
   NetworkProvider,
 } from "cashscript";
-//import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getNetworkProvider } from "../network/default";
 import { Utxo } from "../interface";
 
@@ -32,7 +30,7 @@ export class Contract implements ContractInterface {
   public parameters: Argument[];
   private artifact: Artifact;
   private contract: CashScriptContract;
-  private provider?: NetworkProvider;
+  private provider: NetworkProvider;
   public network: string;
 
   constructor(script: string, parameters: any, network: string) {
@@ -88,7 +86,7 @@ export class Contract implements ContractInterface {
     return this;
   }
 
-  public static fromCashScript(script, parameters, network?) {
+  public static fromCashScript(script:string, parameters, network:string) {
     return new this(script, parameters, network).fromCashScript();
   }
 
@@ -103,10 +101,8 @@ export class Contract implements ContractInterface {
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
-    let feePerByte = 1;
 
     const sig = new SignatureTemplate(wif);
-
     const secp256k1 = await instantiateSecp256k1();
     let publicKey = sig.getPublicKey(secp256k1);
 
@@ -129,8 +125,9 @@ export class Contract implements ContractInterface {
 
     if (utxos.length > 0) {
       try {
-        // Create a estimate transaction with zero fees, sending nominal balance
-        let estimatorInstance = func(0, publicKey, sig)
+        const feePerByte = 1;
+        // Create an estimate transaction with zero fees, sending nominal balance
+        const estimatorInstance = func(0, publicKey, sig)
           .to(outputAddress, 10)
           .from(utxos);
         const estimatedTxHex = (await estimatorInstance
@@ -138,14 +135,14 @@ export class Contract implements ContractInterface {
           ["build"]()) as string;
 
         // Use the feePerByte to get the fee for the transaction length
-        let fee = (estimatedTxHex.length * feePerByte) / 2;
+        const fee = Math.round((estimatedTxHex.length * 2 * feePerByte));
         let funcInstance = func(fee, publicKey, sig)
           .to(outputAddress, balance - fee)
           .from(utxos);
-        let tx = await funcInstance.withFeePerByte(feePerByte)[method]();
+        let tx = await funcInstance.withHardcodedFee(fee)[method]();
 
         if (getHexOnly) {
-          return { tx: tx.txid, utxo: utxos };
+          return { tx: tx.txid, fee:fee, utxo: utxos };
         } else {
           return tx;
         }

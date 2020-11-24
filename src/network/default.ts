@@ -1,4 +1,3 @@
-//import { ElectrumNetworkProvider } from "cashscript";
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
 import {
   ElectrumCluster,
