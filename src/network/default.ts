@@ -74,7 +74,7 @@ function getCluster() {
     confidence,
     3,
     ClusterOrder.PRIORITY,
-    50000
+    110000
   );
   electrum.addServer(
     "fulcrum.fountainhead.cash",
