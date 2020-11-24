@@ -1,7 +1,6 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-import { walletFromId } from "./createWallet";
 
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {

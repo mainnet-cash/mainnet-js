@@ -4,7 +4,7 @@ import { getNetworkProvider } from "../network/default";
 import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getStorageProvider } from "../db/util";
 
-import { NetworkEnum, NetworkType, networkPrefixMap } from "../enum";
+import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 
 export default interface WalletInterface {
@@ -75,21 +75,25 @@ export class BaseWallet implements WalletInterface {
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
-    await db.init();
-    let savedWallet = await db.getWallet(name);
-    if (savedWallet) {
-      await db.close();
-      if (forceNew) {
-        throw Error(
-          `A wallet with the name ${name} already exists in ${dbName}`
-        );
+    if (db) {
+      await db.init();
+      let savedWallet = await db.getWallet(name);
+      if (savedWallet) {
+        await db.close();
+        if (forceNew) {
+          throw Error(
+            `A wallet with the name ${name} already exists in ${dbName}`
+          );
+        }
+        return this._fromId(savedWallet.wallet);
+      } else {
+        let wallet = await this.generate();
+        await db.addWallet(wallet.name, wallet.toString());
+        await db.close();
+        return wallet;
       }
-      return this._fromId(savedWallet.wallet);
     } else {
-      let wallet = await this.generate();
-      await db.addWallet(wallet.name, wallet.toString());
-      await db.close();
-      return wallet;
+      return await this.generate();
     }
   };
 

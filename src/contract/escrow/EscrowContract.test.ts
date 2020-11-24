@@ -40,9 +40,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
+      sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
-      sellerAddr: seller.getDepositAddress()!,
     });
     expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
@@ -59,7 +59,7 @@ describe(`Test Escrow Contracts`, () => {
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(446500);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
@@ -101,11 +101,11 @@ describe(`Test Escrow Contracts`, () => {
     // spend the escrow contract
     await escrow.run(arbiter.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(445000);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
-    expect(await seller2.getBalance("sat")).toBeGreaterThan(446000);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(445000);
   });
 
   test("Should allow seller to refund to buyer", async () => {
