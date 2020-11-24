@@ -129,7 +129,7 @@ export class Contract implements ContractInterface {
 
     if (utxos.length > 0) {
       try {
-        // Create a estimate transaction with zero fees, sending zero balance
+        // Create a estimate transaction with zero fees, sending nominal balance
         let estimatorInstance = func(0, publicKey, sig)
           .to(outputAddress, 10)
           .from(utxos);
@@ -137,7 +137,7 @@ export class Contract implements ContractInterface {
           .withFeePerByte(feePerByte)
           ["build"]()) as string;
 
-        // Use the feePerByte to get the exact fee for the transaction length
+        // Use the feePerByte to get the fee for the transaction length
         let fee = (estimatedTxHex.length * feePerByte) / 2;
         let funcInstance = func(fee, publicKey, sig)
           .to(outputAddress, balance - fee)
