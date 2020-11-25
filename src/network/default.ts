@@ -1,56 +1,49 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
-import {
-  ElectrumCluster,
-  ElectrumTransport,
-  ClusterOrder,
-  ElectrumClient,
-} from "electrum-cash";
-import { Network } from "../interface";
-import { emitWarning } from "process";
+import { ElectrumCluster, ElectrumClient } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider";
+import * as config from "./constant";
+import { parseElectrumUrl } from "./util";
+import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
+import { Network } from "../interface";
+
+const APPLICATION_USER_AGENT = "mainnet-js";
+const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
 
 export function getNetworkProvider(
-  network = "mainnet",
-  useCluster = false,
+  network: Network = Network.MAINNET,
+  servers?: string[] | string,
   manualConnectionManagement = false
-) {
-  switch (network) {
-    case Network.MAINNET:
-      return getProvider(useCluster, manualConnectionManagement);
-    case Network.TESTNET:
-      return getTestnetProvider(useCluster, manualConnectionManagement);
-    case Network.REGTEST:
-      return getRegtestProvider(useCluster, manualConnectionManagement);
-    default:
-      return getProvider(useCluster, manualConnectionManagement);
+): NetworkProvider {
+  let useCluster;
+  servers = servers ? servers : config.defaultServers[network];
+  // If the user has passed a single string, assume a single client connection
+
+  if (typeof servers === "string") {
+    servers = [servers as string];
+    useCluster = false;
   }
-}
-
-export function getRegtestProvider(
-  useCluster: boolean,
-  manualConnectionManagement = false
-): NetworkProvider {
-  if (useCluster) {
-    throw emitWarning("The regtest provider will only use a single client");
+  // Otherwise assume a list of servers has been passed
+  else {
+    servers = servers;
+    useCluster = servers.length > 1;
   }
-  let c = getRegtestClient();
-  return new ElectrumNetworkProvider(c, "regtest", manualConnectionManagement);
-}
-
-export function getTestnetProvider(
-  useCluster: boolean,
-  manualConnectionManagement = false
-): NetworkProvider {
-  let c = useCluster ? getTestnetCluster() : getTestnetClient();
-  return new ElectrumNetworkProvider(c, "testnet", manualConnectionManagement);
-}
-
-export function getProvider(
-  useCluster: boolean,
-  manualConnectionManagement = false
-): NetworkProvider {
-  let c = useCluster ? getCluster() : getClient();
-  return new ElectrumNetworkProvider(c, "mainnet", manualConnectionManagement);
+  if (servers) {
+    let c;
+    if (useCluster) {
+      const clusterParams = config.clusterParams[network];
+      clusterParams['confidence'] = getConfidence();
+      c = getCluster(servers, clusterParams);
+    } else {
+      c = getClient(servers);
+    }
+    return new ElectrumNetworkProvider(
+      c,
+      network,
+      manualConnectionManagement
+    );
+  } else {
+    throw Error("No servers provided, defaults not available.");
+  }
 }
 
 function getConfidence() {
@@ -66,103 +59,41 @@ function getConfidence() {
   return confidence;
 }
 
-function getCluster() {
-  let confidence = getConfidence();
-  let electrum = new ElectrumCluster(
-    "Mainnet",
-    "1.4.1",
-    confidence,
-    3,
-    ClusterOrder.PRIORITY,
-    110000
-  );
-  electrum.addServer(
-    "fulcrum.fountainhead.cash",
-    50002,
-    ElectrumTransport.TCP_TLS.Scheme,
-    false
-  );
-  electrum.addServer(
-    "bch.imaginary.cash",
-    50002,
-    ElectrumTransport.TCP_TLS.Scheme,
-    false
-  );
-  electrum.addServer(
-    "bch.imaginary.cash",
-    50004,
-    ElectrumTransport.WSS.Scheme,
-    false
-  );
-  electrum.addServer(
-    "electroncash.de",
-    60002,
-    ElectrumTransport.WSS.Scheme,
-    false
-  );
+// Create a cluster give a list of servers and parameters
+function getCluster(servers: string[], params) {
+  let electrum = getElectrumCluster(params);
+
+  for (const s of servers) {
+    let url = parseElectrumUrl(s);
+    electrum.addServer(url.host, url.port, url.scheme, false);
+  }
   return electrum;
 }
 
-function getTestnetCluster() {
-  let confidence = getConfidence();
-  // Initialize a 1-of-2 Electrum Cluster with 2 hardcoded servers
-  let electrum = new ElectrumCluster(
-    "CashScript Application",
-    "1.4.1",
-    confidence,
-    1,
-    50000
-  );
-  electrum.addServer(
-    "blackie.c3-soft.com",
-    60004,
-    ElectrumTransport.WSS.Scheme,
-    false
-  );
-  electrum.addServer(
-    "electroncash.de",
-    60004,
-    ElectrumTransport.WSS.Scheme,
-    false
-  );
-  return electrum;
+// create a client with a list of servers
+function getClient(servers: string[]) {
+  let url = parseElectrumUrl(servers[0]);
+  return getElectrumClient(url, 50000);
 }
 
-function getClient() {
-  //
-  let electrum = new ElectrumClient(
-    "CashScript Application",
-    "1.4.1",
-    "bch.imaginary.cash",
-    50002,
-    ElectrumTransport.TCP_TLS.Scheme,
-    50000
+function getElectrumCluster(params: ElectrumClusterParams) {
+  return new ElectrumCluster(
+    APPLICATION_USER_AGENT,
+    ELECTRUM_CASH_PROTOCOL_VERSION,
+    params.confidence,
+    params.distribution,
+    params.order,
+    params.timeout
   );
-  return electrum;
 }
 
-function getTestnetClient() {
-  //
-  let electrum = new ElectrumClient(
-    "CashScript Application",
-    "1.4.1",
-    "electroncash.de",
-    60004,
-    ElectrumTransport.WSS.Scheme,
-    1020
+function getElectrumClient(params: ElectrumHostParams, timeout) {
+  return new ElectrumClient(
+    APPLICATION_USER_AGENT,
+    ELECTRUM_CASH_PROTOCOL_VERSION,
+    params.host,
+    params.port,
+    params.scheme,
+    timeout
   );
-  return electrum;
-}
-
-function getRegtestClient() {
-  //
-  let electrum = new ElectrumClient(
-    "CashScript Application",
-    "1.4.1",
-    "127.0.0.1",
-    60003,
-    ElectrumTransport.WS.Scheme,
-    550
-  );
-  return electrum;
 }
