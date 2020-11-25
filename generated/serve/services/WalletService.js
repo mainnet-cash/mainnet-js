@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const mainnet = require("mainnet");
+const mainnet = require("mainnet-js");
 
 /**
 * Get total balance for wallet
