@@ -23,7 +23,7 @@ jobs:
           node-version: "14.x"
       - name: build
         run: |
-          yarn
+          yarn --production
           yarn build      
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
