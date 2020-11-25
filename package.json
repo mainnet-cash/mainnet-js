@@ -8,9 +8,9 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.0.2.js",
+  "main": "dist/mainnet-node-0.0.3.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
