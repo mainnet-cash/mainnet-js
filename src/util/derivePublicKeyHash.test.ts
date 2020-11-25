@@ -1,4 +1,4 @@
-import { derivePublicKeyHash, derivePrefix } from "./derivePublicKeyHash";
+import { derivePrefix } from "./derivePublicKeyHash";
 
 test("Should return the prefix", async () => {
   let prefix1 = derivePrefix(

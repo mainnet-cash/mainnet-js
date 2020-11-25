@@ -1,10 +1,10 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 // GrpcClient is swapped out by webpack for a web module
 import { getNetworkProvider } from "../network/default";
-import { NetworkProvider } from "cashscript";
+import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getStorageProvider } from "../db/util";
 
-import { NetworkEnum, NetworkType, networkPrefixMap } from "../enum";
+import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 
 export default interface WalletInterface {
@@ -59,7 +59,7 @@ export class BaseWallet implements WalletInterface {
     }
   }
 
-  generate(): Promise<this | Error> {
+  generate(): Promise<this> {
     throw Error("Cannot generate with the baseWallet class");
   }
 
@@ -67,7 +67,7 @@ export class BaseWallet implements WalletInterface {
     name: string,
     dbName?: string,
     forceNew = false
-  ): Promise<this | Error> => {
+  ): Promise<this> => {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
@@ -75,33 +75,34 @@ export class BaseWallet implements WalletInterface {
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
-    await db.init();
-    let savedWallet = await db.getWallet(name);
-    if (savedWallet) {
-      await db.close();
-      if (forceNew) {
-        throw Error(
-          `A wallet with the name ${name} already exists in ${dbName}`
-        );
+    if (db) {
+      await db.init();
+      let savedWallet = await db.getWallet(name);
+      if (savedWallet) {
+        await db.close();
+        if (forceNew) {
+          throw Error(
+            `A wallet with the name ${name} already exists in ${dbName}`
+          );
+        }
+        return this._fromId(savedWallet.wallet);
+      } else {
+        let wallet = await this.generate();
+        await db.addWallet(wallet.name, wallet.toString());
+        await db.close();
+        return wallet;
       }
-      return this._fromId(savedWallet.wallet);
     } else {
-      let wallet = await this.generate();
-      await db.addWallet(wallet.name, wallet.toString());
-      await db.close();
-      return wallet;
+      return await this.generate();
     }
   };
 
-  public _fromId(secret?: string): Promise<this | Error> {
+  public _fromId(secret?: string): Promise<this> {
     secret;
     throw Error("Cannot parse id on BaseWallet class");
   }
 
-  public _newRandom = async (
-    name: string,
-    dbName?: string
-  ): Promise<this | Error> => {
+  public _newRandom = async (name: string, dbName?: string): Promise<this> => {
     if (name.length > 0) {
       return this._named(name, dbName);
     } else {

@@ -83,10 +83,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<RequestResponse> {
     // Only connect the cluster when no concurrent requests are running
     if (this.shouldConnect()) {
-      this.connect();
+      await this.connect();
+      this.concurrentRequests += 1;
     }
-
-    this.concurrentRequests += 1;
 
     await this.ready();
 
@@ -97,10 +96,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {
         await this.disconnect();
+        this.concurrentRequests -= 1;
       }
     }
-
-    this.concurrentRequests -= 1;
 
     if (result instanceof Error) throw result;
 

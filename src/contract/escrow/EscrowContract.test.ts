@@ -3,9 +3,9 @@ import { RegTestWallet } from "../../wallet/Wif";
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
-    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
 
     let escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
@@ -25,14 +25,12 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow buyer to spend to seller", async () => {
-    let funder = (await RegTestWallet.fromWIF(
-      process.env.PRIVATE_WIF
-    )) as RegTestWallet;
+    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
-    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller2 = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
+    let seller2 = await RegTestWallet.newRandom();
     await funder.send([
       {
         cashaddr: buyer.getDepositAddress()!,
@@ -42,9 +40,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
+      sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
-      sellerAddr: seller.getDepositAddress()!,
     });
     expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
@@ -61,7 +59,7 @@ describe(`Test Escrow Contracts`, () => {
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(446500);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
@@ -69,14 +67,12 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow arbiter to spend to seller", async () => {
-    let funder = (await RegTestWallet.fromWIF(
-      process.env.PRIVATE_WIF
-    )) as RegTestWallet;
+    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
-    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller2 = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
+    let seller2 = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -105,22 +101,20 @@ describe(`Test Escrow Contracts`, () => {
     // spend the escrow contract
     await escrow.run(arbiter.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(448000);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(445000);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
-    expect(await seller2.getBalance("sat")).toBeGreaterThan(446000);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(445000);
   });
 
   test("Should allow seller to refund to buyer", async () => {
-    let funder = (await RegTestWallet.fromWIF(
-      process.env.PRIVATE_WIF
-    )) as RegTestWallet;
+    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
-    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer2 = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let buyer2 = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -157,14 +151,12 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow arbiter to refund to buyer", async () => {
-    let funder = (await RegTestWallet.fromWIF(
-      process.env.PRIVATE_WIF
-    )) as RegTestWallet;
+    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
-    let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let buyer2 = (await RegTestWallet.newRandom()) as RegTestWallet;
-    let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let buyer2 = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -203,13 +195,11 @@ describe(`Test Escrow Contracts`, () => {
   test("Should fail on refund by buyer", async () => {
     expect.assertions(1);
     try {
-      let funder = (await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      )) as RegTestWallet;
+      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
-      let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-      let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-      let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
+      let arbiter = await RegTestWallet.newRandom();
+      let buyer = await RegTestWallet.newRandom();
+      let seller = await RegTestWallet.newRandom();
 
       await funder.send([
         {
@@ -245,13 +235,11 @@ describe(`Test Escrow Contracts`, () => {
   test("Should throw error on spend by seller", async () => {
     expect.assertions(1);
     try {
-      let funder = (await RegTestWallet.fromWIF(
-        process.env.PRIVATE_WIF
-      )) as RegTestWallet;
+      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
-      let arbiter = (await RegTestWallet.newRandom()) as RegTestWallet;
-      let buyer = (await RegTestWallet.newRandom()) as RegTestWallet;
-      let seller = (await RegTestWallet.newRandom()) as RegTestWallet;
+      let arbiter = await RegTestWallet.newRandom();
+      let buyer = await RegTestWallet.newRandom();
+      let seller = await RegTestWallet.newRandom();
 
       await funder.send([
         {
