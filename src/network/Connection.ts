@@ -4,10 +4,7 @@ import { Network } from "../interface";
 import { Wallet } from "../wallet/Wif";
 import { walletClassMap } from "../wallet/createWallet";
 import { prefixFromNetworkMap } from "../enum";
-import { getStorageProvider } from "../db/util";
-import {
-  CashAddressNetworkPrefix
-} from "@bitauth/libauth";
+import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
 export class Connection {
   public network: Network;

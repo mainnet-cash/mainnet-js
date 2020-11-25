@@ -29,11 +29,9 @@ export default class IndexedDBProvider
     return this.transaction("rw", this.db, async () => {
       // Make sure we have something in DB:
       if ((await this.db.where({ name: name }).count()) === 0) {
-        const id = await this.db
-          .add({ name: name, wallet: wallet })
-          .catch((e) => {
-            throw Error(e);
-          });
+        await this.db.add({ name: name, wallet: wallet }).catch((e) => {
+          throw Error(e);
+        });
         return true;
       } else {
         return false;

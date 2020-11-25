@@ -5,12 +5,9 @@ import { sanitizeAddress } from "../../util/sanitizeAddress";
 import { Utxo } from "../../interface";
 
 export class EscrowContract extends Contract {
-  private buyerPKH: Uint8Array;
-  private arbiterPKH: Uint8Array;
-  private sellerPKH: Uint8Array;
-  private buyerAddr: string;
-  private arbiterAddr: string;
   private sellerAddr: string;
+  private arbiterAddr: string;
+  private buyerAddr: string;
 
   constructor({
     sellerAddr,
@@ -21,21 +18,21 @@ export class EscrowContract extends Contract {
     buyerAddr: string;
     arbiterAddr: string;
   }) {
-    let args = {
-      sellerAddr,
-      buyerAddr,
-      arbiterAddr,
-    };
+    // Put the arguments in contract order
+    let args = [sellerAddr, buyerAddr, arbiterAddr];
+
+    // Derive the network from addresses given or throw error if not on same network
     const network = derivedNetwork(Object.values(args));
-    super(EscrowContract.getContractText(), args, network);
-    this.buyerPKH = derivePublicKeyHash(buyerAddr);
-    this.arbiterPKH = derivePublicKeyHash(arbiterAddr);
-    this.sellerPKH = derivePublicKeyHash(sellerAddr);
-    this.buyerAddr = sanitizeAddress(buyerAddr);
-    this.arbiterAddr = sanitizeAddress(arbiterAddr);
-    this.sellerAddr = sanitizeAddress(sellerAddr);
-    this.network = network;
-    this.parameters = [this.arbiterPKH, this.buyerPKH, this.sellerPKH];
+
+    // Transform the arguments given to Public Key Hashes
+    let rawContractArgs = args.map((x) => derivePublicKeyHash(x));
+
+    super(EscrowContract.getContractText(), rawContractArgs, network);
+
+    // Assure all addresses are prefixed and lowercase
+    [this.sellerAddr, this.buyerAddr, this.arbiterAddr] = args.map((x) =>
+      sanitizeAddress(x)
+    );
   }
 
   // Static convenience constructor
@@ -96,7 +93,7 @@ export class EscrowContract extends Contract {
   static getContractText() {
     return `
             pragma cashscript ^0.5.3;
-            contract EscrowContract(bytes20 arbiterPkh, bytes20 buyerPkh, bytes20 sellerPkh) {
+            contract EscrowContract(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh) {
 
                 function spend(int fee, pubkey signingPk, sig s) {
                     require(hash160(signingPk) == arbiterPkh || hash160(signingPk) == buyerPkh);
