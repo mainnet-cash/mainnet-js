@@ -8,7 +8,7 @@ import {
   NetworkProvider,
 } from "cashscript";
 import { getNetworkProvider } from "../network/default";
-import { Utxo } from "../interface";
+import { Network, Utxo } from "../interface";
 
 export default interface ContractInterface {
   /**
@@ -31,9 +31,9 @@ export class Contract implements ContractInterface {
   private artifact: Artifact;
   private contract: CashScriptContract;
   private provider: NetworkProvider;
-  public network: string;
+  public network: Network;
 
-  constructor(script: string, parameters: any, network: string) {
+  constructor(script: string, parameters: any, network: Network) {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
@@ -86,7 +86,7 @@ export class Contract implements ContractInterface {
     return this;
   }
 
-  public static fromCashScript(script: string, parameters, network: string) {
+  public static fromCashScript(script: string, parameters, network: Network) {
     return new this(script, parameters, network).fromCashScript();
   }
 
