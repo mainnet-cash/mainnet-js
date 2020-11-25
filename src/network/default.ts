@@ -31,16 +31,12 @@ export function getNetworkProvider(
     let c;
     if (useCluster) {
       const clusterParams = config.clusterParams[network];
-      clusterParams['confidence'] = getConfidence();
+      clusterParams["confidence"] = getConfidence();
       c = getCluster(servers, clusterParams);
     } else {
       c = getClient(servers);
     }
-    return new ElectrumNetworkProvider(
-      c,
-      network,
-      manualConnectionManagement
-    );
+    return new ElectrumNetworkProvider(c, network, manualConnectionManagement);
   } else {
     throw Error("No servers provided, defaults not available.");
   }
