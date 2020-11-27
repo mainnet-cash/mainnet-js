@@ -10,7 +10,7 @@ export function connect(
   servers: string[] | string,
   network: Network = Network.MAINNET
 ) {
-  globalThis["bch"] = new Connection(network,servers);
+  globalThis["bch"] = new Connection(network, servers);
   globalThis["bch"].ready();
 }
 
