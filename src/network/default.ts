@@ -16,31 +16,33 @@ export function getNetworkProvider(
 ): NetworkProvider {
   let useCluster;
   servers = servers ? servers : config.defaultServers[network];
-  // If the user has passed a single string, assume a single client connection
 
+  // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {
     servers = [servers as string];
     useCluster = false;
   }
-  // Otherwise assume a list of servers has been passed
+
+  // Otherwise, assume a list of servers has been passed
   else {
     servers = servers;
     useCluster = servers.length > 1;
   }
+
+  // There were server(s)
   if (servers) {
-    let c;
+    let clusterOrClient;
+    // There were multiple servers
     if (useCluster) {
       const clusterParams = config.clusterParams[network];
-      clusterParams['confidence'] = getConfidence();
-      c = getCluster(servers, clusterParams);
-    } else {
-      c = getClient(servers);
+      clusterParams["confidence"] = getConfidence();
+      clusterOrClient = getCluster(servers, clusterParams);
+    } 
+    // The server is a single string in an array
+    else {
+      clusterOrClient = getClient(servers);
     }
-    return new ElectrumNetworkProvider(
-      c,
-      network,
-      manualConnectionManagement
-    );
+    return new ElectrumNetworkProvider(clusterOrClient, network, manualConnectionManagement);
   } else {
     throw Error("No servers provided, defaults not available.");
   }
@@ -87,7 +89,7 @@ function getElectrumCluster(params: ElectrumClusterParams) {
   );
 }
 
-function getElectrumClient(params: ElectrumHostParams, timeout) {
+function getElectrumClient(params: ElectrumHostParams, timeout:number) {
   return new ElectrumClient(
     APPLICATION_USER_AGENT,
     ELECTRUM_CASH_PROTOCOL_VERSION,
