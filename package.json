@@ -8,9 +8,9 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.0.3.js",
+  "main": "dist/mainnet-node-0.0.4.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -37,7 +37,8 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "build": "npx webpack && cp -v dist/mainnet*.js generated/serve/lib/mainnet",
-    "demo": "npx reload --dir=demo/"
+    "demo": "npx reload --dir=demo/",
+    "reload": "npx reload --dir=jest/playwright"
   },
   "devDependencies": {
     "events": "^3.2.0",
