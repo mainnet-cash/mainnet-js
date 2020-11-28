@@ -54,7 +54,7 @@ test("Should create regtest wallet", async () => {
   expect(BCHr.network).toBe("regtest");
   let wallet = await BCHr.Wallet();
   expect(wallet.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
-  expect(wallet.getBalance('sat')).toBe(0);
+  expect(await wallet.getBalance('sat')).toBe(0);
   expect(wallet.provider!.network).toBe("regtest");
   expect(wallet.network).toBe("regtest");
   await BCHr.disconnect();
@@ -67,7 +67,7 @@ test("Should create testnet wallet", async () => {
   expect(BCHt.network).toBe("testnet");
   let wallet = await BCHt.Wallet();
   expect(wallet.getDepositAddress()!.slice(0, 9)).toBe("bchtest:q");
-  expect(wallet.getBalance('sat')).toEqual(0);
+  expect(await wallet.getBalance('sat')).toEqual(0);
   expect(wallet.provider!.network).toBe("testnet");
   expect(wallet.network).toBe("testnet");
   await BCHt.disconnect();

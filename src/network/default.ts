@@ -12,7 +12,8 @@ const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
 export function getNetworkProvider(
   network: Network = Network.MAINNET,
   servers?: string[] | string,
-  manualConnectionManagement = false
+  manualConnectionManagement = false,
+  options?: ElectrumClusterParams
 ): NetworkProvider {
   let useCluster;
   servers = servers ? servers : config.defaultServers[network];
@@ -34,8 +35,9 @@ export function getNetworkProvider(
     let clusterOrClient;
     // There were multiple servers
     if (useCluster) {
-      const clusterParams = config.clusterParams[network];
+      let clusterParams = config.clusterParams[network];
       clusterParams["confidence"] = getConfidence();
+      clusterParams = Object.assign({}, clusterParams, options)
       clusterOrClient = getCluster(servers, clusterParams);
     } 
     // The server is a single string in an array

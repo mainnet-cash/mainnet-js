@@ -17,7 +17,7 @@ describe(`Test Escrow Contracts`, () => {
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
     });
-    expect(escrow.toString()).toBe(escrow2.toString());
+    expect(escrow.toString().slice(0,-20)).toBe(escrow2.toString().slice(0,-20));
     expect(escrow.getAddress()).toBe(escrow2.getAddress());
 
     let escrow3 = EscrowContract.fromId(escrow.toString());
@@ -31,14 +31,6 @@ describe(`Test Escrow Contracts`, () => {
     let buyer = await RegTestWallet.newRandom();
     let seller = await RegTestWallet.newRandom();
     let seller2 = await RegTestWallet.newRandom();
-    await funder.send([
-      {
-        cashaddr: buyer.getDepositAddress()!,
-        value: 500000,
-        unit: "satoshis",
-      },
-    ]);
-    expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
       sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
@@ -46,24 +38,31 @@ describe(`Test Escrow Contracts`, () => {
     });
     expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
-    await buyer.send([
+    await funder.send([
       {
         cashaddr: escrow.getAddress()!,
-        value: 450000,
+        value: 6400,
+        unit: "satoshis",
+      },
+    ]);
+    await funder.send([
+      {
+        cashaddr: escrow.getAddress()!,
+        value: 6400,
         unit: "satoshis",
       },
     ]);
 
-    expect(await escrow.getBalance()).toBe(450000);
+    expect(await escrow.getBalance()).toBeGreaterThan(12700);
 
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend");
-    expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(446500);
+    expect(await escrow.getBalance()).toBe(6400);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(3179);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
-    expect(await seller2.getBalance("sat")).toBeGreaterThan(446000);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(1000);
   });
 
   test("Should allow arbiter to spend to seller", async () => {

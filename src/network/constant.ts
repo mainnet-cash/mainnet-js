@@ -22,7 +22,7 @@ export const defaultServers = {
 
 export const clusterParams = {
   mainnet: {
-    distribution: 3,
+    distribution: 2,
     order: ClusterOrder.PRIORITY,
     timeout: 110000,
   },

@@ -94,6 +94,8 @@ export class Contract implements ContractInterface {
     this.contract.functions[method](args);
   }
 
+
+  // TODO refactor, split out fee estimator, amount estimator
   public async _run(
     wif: string,
     funcName: string,
@@ -115,12 +117,13 @@ export class Contract implements ContractInterface {
     // If getHexOnly is true, just return the tx hex, otherwise submit to the network
     const method = getHexOnly ? "build" : "send";
 
-    const balance = await this.getBalance();
+    //const balance = await this.getBalance();
 
     // If no utxos were provided, automatically get them
     if (typeof utxos === "undefined") {
       utxos = await this.contract.getUtxos();
     }
+    const balance = utxos[0].satoshis
 
     if (utxos.length > 0) {
       try {
@@ -128,17 +131,23 @@ export class Contract implements ContractInterface {
         // Create an estimate transaction with zero fees, sending nominal balance
         const estimatorInstance = func(0, publicKey, sig)
           .to(outputAddress, 10)
-          .from(utxos);
+          .from(utxos[0]);
         const estimatedTxHex = (await estimatorInstance
           .withFeePerByte(feePerByte)
           ["build"]()) as string;
 
         // Use the feePerByte to get the fee for the transaction length
         const fee = Math.round(estimatedTxHex.length * 2 * feePerByte);
+        console.log(`${utxos.length} : ${fee} + ${(balance - fee)} = ${balance}`)
+        if((balance - fee) < 0){
+          throw Error("The contract transaction requires greater fee then available contract balance")
+        }
         let funcInstance = func(fee, publicKey, sig)
-          .to(outputAddress, balance - fee)
-          .from(utxos);
-        let tx = await funcInstance.withHardcodedFee(fee)[method]();
+        .withHardcodedFee(fee)
+        .from(utxos[0])
+        .to(outputAddress, balance - fee);
+          
+        let tx = await funcInstance[method]();
 
         if (getHexOnly) {
           return { tx: tx.txid, fee: fee, utxo: utxos };
