@@ -120,6 +120,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async ready(): Promise<boolean | unknown> {
     return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
   }
+
   async connect(): Promise<boolean[]> {
     return this.isElectrumClient()
       ? this.connectClient()
@@ -132,7 +133,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   isElectrumClient(): boolean {
-    return this.electrum.constructor.name === "ElectrumClient";
+    return this.electrum.hasOwnProperty('connection');
   }
 
   async readyClient(timeout?: number): Promise<boolean | unknown> {

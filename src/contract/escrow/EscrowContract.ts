@@ -50,7 +50,7 @@ export class EscrowContract extends Contract {
 
   // Serialize the contract
   public toString() {
-    return `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}`;
+    return `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}:${encodeURIComponent(JSON.stringify(this.getArtifact()))}`;
   }
 
   // Deserialize from a string
@@ -95,22 +95,20 @@ export class EscrowContract extends Contract {
             pragma cashscript ^0.5.3;
             contract EscrowContract(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh) {
 
-                function spend(int fee, pubkey signingPk, sig s) {
+                function spend(int amount, pubkey signingPk, sig s) {
                     require(hash160(signingPk) == arbiterPkh || hash160(signingPk) == buyerPkh);
                     require(checkSig(s, signingPk));
                     
-                    int amount1 = int(bytes(tx.value)) - fee;
-                    bytes34 out1 = new OutputP2PKH(bytes8(amount1), sellerPkh);
-                    require(hash256(out1) == tx.hashOutputs);
+                    bytes34 output = new OutputP2PKH(bytes8(amount), sellerPkh);
+                    require(hash256(output) == tx.hashOutputs);
                 }
 
-                function refund(int fee, pubkey signingPk, sig s) {
+                function refund(int amount, pubkey signingPk, sig s) {
                     require(hash160(signingPk) == arbiterPkh||hash160(signingPk) == sellerPkh);
                     require(checkSig(s, signingPk));
-                    
-                    int amount1 = int(bytes(tx.value)) - fee;
-                    bytes34 out1 = new OutputP2PKH(bytes8(amount1), buyerPkh);
-                    require(hash256(out1) == tx.hashOutputs);
+    
+                    bytes34 output = new OutputP2PKH(bytes8(amount), buyerPkh);
+                    require(hash256(output) == tx.hashOutputs);
                 }
             }
         `;

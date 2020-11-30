@@ -21,7 +21,7 @@ test("Should create a persistent network connection", async () => {
 
 test("Should create a persistent network cluster connection", async () => {
   process.setMaxListeners(0);
-  let bch = new Connection("mainnet", true);
+  let bch = new Connection();
   await bch.ready();
   let height = await bch.networkProvider.getBlockHeight();
   expect(height).toBeGreaterThan(5000);
@@ -51,8 +51,24 @@ test("Should create regtest wallet", async () => {
   process.setMaxListeners(0);
   let BCHr = new Connection("regtest");
   await BCHr.ready();
-  let regtestWallet = await BCHr.Wallet();
-  expect(regtestWallet.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
-  expect(regtestWallet.provider!.network).toBe("regtest");
+  expect(BCHr.network).toBe("regtest");
+  let wallet = await BCHr.Wallet();
+  expect(wallet.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
+  expect(await wallet.getBalance('sat')).toBe(0);
+  expect(wallet.provider!.network).toBe("regtest");
+  expect(wallet.network).toBe("regtest");
   await BCHr.disconnect();
+});
+
+test("Should create testnet wallet", async () => {
+  process.setMaxListeners(0);
+  let BCHt = new Connection("testnet");
+  await BCHt.ready();
+  expect(BCHt.network).toBe("testnet");
+  let wallet = await BCHt.Wallet();
+  expect(wallet.getDepositAddress()!.slice(0, 9)).toBe("bchtest:q");
+  expect(await wallet.getBalance('sat')).toEqual(0);
+  expect(wallet.provider!.network).toBe("testnet");
+  expect(wallet.network).toBe("testnet");
+  await BCHt.disconnect();
 });

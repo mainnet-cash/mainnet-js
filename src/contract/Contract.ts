@@ -8,7 +8,7 @@ import {
   NetworkProvider,
 } from "cashscript";
 import { getNetworkProvider } from "../network/default";
-import { Utxo } from "../interface";
+import { Network, Utxo } from "../interface";
 
 export default interface ContractInterface {
   /**
@@ -31,9 +31,9 @@ export class Contract implements ContractInterface {
   private artifact: Artifact;
   private contract: CashScriptContract;
   private provider: NetworkProvider;
-  public network: string;
+  public network: Network;
 
-  constructor(script: string, parameters: any, network: string) {
+  constructor(script: string, parameters: any, network: Network) {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
@@ -86,7 +86,7 @@ export class Contract implements ContractInterface {
     return this;
   }
 
-  public static fromCashScript(script:string, parameters, network:string) {
+  public static fromCashScript(script: string, parameters, network: Network) {
     return new this(script, parameters, network).fromCashScript();
   }
 
@@ -94,6 +94,8 @@ export class Contract implements ContractInterface {
     this.contract.functions[method](args);
   }
 
+
+  // TODO refactor, split out fee estimator, amount estimator
   public async _run(
     wif: string,
     funcName: string,
@@ -101,7 +103,6 @@ export class Contract implements ContractInterface {
     getHexOnly = false,
     utxos?: Utxo[]
   ) {
-
     const sig = new SignatureTemplate(wif);
     const secp256k1 = await instantiateSecp256k1();
     let publicKey = sig.getPublicKey(secp256k1);
@@ -116,35 +117,37 @@ export class Contract implements ContractInterface {
     // If getHexOnly is true, just return the tx hex, otherwise submit to the network
     const method = getHexOnly ? "build" : "send";
 
-    const balance = await this.getBalance();
-
     // If no utxos were provided, automatically get them
     if (typeof utxos === "undefined") {
       utxos = await this.contract.getUtxos();
     }
-
     if (utxos.length > 0) {
       try {
         const feePerByte = 1;
         // Create an estimate transaction with zero fees, sending nominal balance
-        const estimatorInstance = func(0, publicKey, sig)
-          .to(outputAddress, 10)
+        const estimatorTransaction = func(10, publicKey, sig)
+          .to([{ to: outputAddress, amount: 10 }])
           .from(utxos);
-        const estimatedTxHex = (await estimatorInstance
-          .withFeePerByte(feePerByte)
+        const estimatedTxHex = (await estimatorTransaction
+          .withHardcodedFee(10)
           ["build"]()) as string;
 
         // Use the feePerByte to get the fee for the transaction length
-        const fee = Math.round((estimatedTxHex.length * 2 * feePerByte));
-        let funcInstance = func(fee, publicKey, sig)
-          .to(outputAddress, balance - fee)
-          .from(utxos);
-        let tx = await funcInstance.withHardcodedFee(fee)[method]();
+        const fee = Math.round(estimatedTxHex.length * 2 * feePerByte);
+        const balance = await this.getBalance();
+        const amount = balance-fee
+        if((balance - fee) < 0){
+          throw Error("The contract transaction requires greater fee then available contract balance")
+        }
+        let transaction = func(amount, publicKey, sig)
+        .withHardcodedFee(fee)
+        .to( outputAddress, amount )
+        let txResult = await transaction[method]();
 
         if (getHexOnly) {
-          return { tx: tx.txid, fee:fee, utxo: utxos };
+          return { tx: txResult.txid, fee:fee, utxo: utxos };
         } else {
-          return tx;
+          return txResult;
         }
       } catch (e) {
         throw Error(e);
