@@ -95,8 +95,6 @@ export class BaseWallet implements WalletInterface {
     } else {
       return await this.generate();
     }
-
-
   };
 
   public _fromId(secret?: string): Promise<this> {
