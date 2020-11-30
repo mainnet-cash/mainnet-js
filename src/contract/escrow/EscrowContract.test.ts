@@ -19,7 +19,9 @@ describe(`Test Escrow Contracts`, () => {
       sellerAddr: seller.getDepositAddress()!,
       amount: 19500
     });
-    expect(escrow.toString().slice(0,-20)).toBe(escrow2.toString().slice(0,-20));
+    expect(escrow.toString().slice(0, -20)).toBe(
+      escrow2.toString().slice(0, -20)
+    );
     expect(escrow.getAddress()).toBe(escrow2.getAddress());
 
     let escrow3 = EscrowContract.fromId(escrow.toString());

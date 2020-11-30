@@ -148,7 +148,7 @@ export class Contract implements ContractInterface {
         let txResult = await transaction[method]();
 
         if (getHexOnly) {
-          return { tx: txResult.txid, fee:fee, utxo: utxos };
+          return { tx: txResult.txid, fee: fee, utxo: utxos };
         } else {
           return txResult;
         }

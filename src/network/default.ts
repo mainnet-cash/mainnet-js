@@ -37,14 +37,18 @@ export function getNetworkProvider(
     if (useCluster) {
       let clusterParams = config.clusterParams[network];
       clusterParams["confidence"] = getConfidence();
-      clusterParams = Object.assign({}, clusterParams, options)
+      clusterParams = Object.assign({}, clusterParams, options);
       clusterOrClient = getCluster(servers, clusterParams);
-    } 
+    }
     // The server is a single string in an array
     else {
       clusterOrClient = getClient(servers);
     }
-    return new ElectrumNetworkProvider(clusterOrClient, network, manualConnectionManagement);
+    return new ElectrumNetworkProvider(
+      clusterOrClient,
+      network,
+      manualConnectionManagement
+    );
   } else {
     throw Error("No servers provided, defaults not available.");
   }
@@ -91,7 +95,7 @@ function getElectrumCluster(params: ElectrumClusterParams) {
   );
 }
 
-function getElectrumClient(params: ElectrumHostParams, timeout:number) {
+function getElectrumClient(params: ElectrumHostParams, timeout: number) {
   return new ElectrumClient(
     APPLICATION_USER_AGENT,
     ELECTRUM_CASH_PROTOCOL_VERSION,

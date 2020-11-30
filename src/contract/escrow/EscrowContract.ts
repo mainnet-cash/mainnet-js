@@ -61,7 +61,10 @@ export class EscrowContract extends Contract {
 
   // Serialize the contract
   public toString() {
-    return `escrow:${this.sellerAddr}:${this.buyerAddr}:${this.arbiterAddr}:${this.amount}:${this.nonce}:${encodeURIComponent(JSON.stringify(this.getArtifact()))}`;
+    return `escrow:${this.sellerAddr}:${this.buyerAddr}:
+    ${this.amount}:${this.nonce}:${
+      this.arbiterAddr
+    }:${encodeURIComponent(JSON.stringify(this.getArtifact()))}`;
   }
 
   // Deserialize from a string
