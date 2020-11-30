@@ -25,12 +25,14 @@ describe("Test Contract Services", () => {
     const contractResp = await request(app).post("/contract/escrow/create").send({
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
-      sellerAddr: seller.getDepositAddress()
+      sellerAddr: seller.getDepositAddress(),
+      amount: 16000,
+      nonce: 1
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8:%7B%22contractName%22%3A%22EscrowContract");
-    expect(contractResp.body.address).toEqual("bchreg:pp8luxqhtevkx7vn8n7a7dm8uvgpv4epcv8wkndhuk");
+    expect(contractResp.body.contractId.slice(0,198)).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8:16000:1:%7B%22contractName%22%3A%22Escrow");
+    expect(contractResp.body.address).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
     
     let contractId = contractResp.body.contractId
     let contractAddress = contractResp.body.address
@@ -82,12 +84,14 @@ describe("Test Contract Services", () => {
     const contractResp = await request(app).post("/contract/escrow/create").send({
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
-      sellerAddr: seller.getDepositAddress()
+      sellerAddr: seller.getDepositAddress(),
+      amount: 16000,
+      nonce: 1
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8:%7B%22contractName%22%3A%22EscrowContract");
-    expect(contractResp.body.address).toEqual("bchreg:pp8luxqhtevkx7vn8n7a7dm8uvgpv4epcv8wkndhuk");
+    expect(contractResp.body.contractId.slice(0,198)).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8:16000:1:%7B%22contractName%22%3A%22Escrow");
+    expect(contractResp.body.address).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
     
     let contractId = contractResp.body.contractId
     let contractAddress = contractResp.body.address

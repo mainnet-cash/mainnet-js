@@ -437,10 +437,19 @@ components:
         sellerAddr:
           example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
           description: The cashaddress of the seller
+        amount:
+          description: Numeric amount to be transferred by the contract in satoshi, amount must be less than 21 BCH.
+          type: number
+          example: 10000    
+        nonce:
+          description: A unique value added to the contract, which allows the contract to be different from an otherwise identical contract, i.e. two monthly orders.
+          type: number
+          example: 808 
       required:
         - buyerAddr
         - arbiterAddr
         - sellerAddr
+        - amount
     ContractResponse:
       properties:
         contractId:

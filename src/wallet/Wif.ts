@@ -256,9 +256,9 @@ export class Wallet extends BaseWallet {
     return  await this.provider.getUtxos(address);
   }
 
-  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
-    if (rawUnit) {
-      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
+  public async getBalance(unit?: string): Promise<BalanceResponse | number> {
+    if (unit) {
+      
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());

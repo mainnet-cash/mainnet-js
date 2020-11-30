@@ -94,19 +94,32 @@ export class Contract implements ContractInterface {
     this.contract.functions[method](args);
   }
 
+  private async estimateFee(func, publicKey, sig, outputAddress, utxos){
+    const feePerByte = 1;
+        // Create an estimate transaction with zero fees, sending nominal balance
+        const estimatorTransaction = func(publicKey, sig, 10, 0)
+          .to([{ to: outputAddress, amount: 10 }])
+          .from(utxos);
+        const estimatedTxHex = (await estimatorTransaction
+          .withHardcodedFee(10)
+          ["build"]()) as string;
 
+        // Use the feePerByte to get the fee for the transaction length
+        return Math.round(estimatedTxHex.length * 2 * feePerByte);
+  }
   // TODO refactor, split out fee estimator, amount estimator
-  public async _run(
+  public async _spendMax(
     wif: string,
     funcName: string,
     outputAddress: string,
     getHexOnly = false,
-    utxos?: Utxo[]
+    utxos?: Utxo[],
+    nonce?: number
   ) {
     const sig = new SignatureTemplate(wif);
     const secp256k1 = await instantiateSecp256k1();
     let publicKey = sig.getPublicKey(secp256k1);
-
+    nonce = nonce ? nonce : 0
     let func;
     if (typeof this.contract.functions[funcName] === "function") {
       func = this.contract.functions[funcName];
@@ -123,23 +136,13 @@ export class Contract implements ContractInterface {
     }
     if (utxos.length > 0) {
       try {
-        const feePerByte = 1;
-        // Create an estimate transaction with zero fees, sending nominal balance
-        const estimatorTransaction = func(10, publicKey, sig)
-          .to([{ to: outputAddress, amount: 10 }])
-          .from(utxos);
-        const estimatedTxHex = (await estimatorTransaction
-          .withHardcodedFee(10)
-          ["build"]()) as string;
-
-        // Use the feePerByte to get the fee for the transaction length
-        const fee = Math.round(estimatedTxHex.length * 2 * feePerByte);
+        const fee = await this.estimateFee(func, publicKey, sig, outputAddress, utxos)
         const balance = await this.getBalance();
         const amount = balance-fee
         if((balance - fee) < 0){
-          throw Error("The contract transaction requires greater fee then available contract balance")
+          throw Error("The contract transaction requires a greater fee then available with contract balance")
         }
-        let transaction = func(amount, publicKey, sig)
+        let transaction = func(publicKey, sig, amount, nonce)
         .withHardcodedFee(fee)
         .to( outputAddress, amount )
         let txResult = await transaction[method]();

@@ -11,11 +11,13 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 19500
     });
     let escrow2 = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 19500
     });
     expect(escrow.toString().slice(0,-20)).toBe(escrow2.toString().slice(0,-20));
     expect(escrow.getAddress()).toBe(escrow2.getAddress());
@@ -35,6 +37,7 @@ describe(`Test Escrow Contracts`, () => {
       sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
+      amount: 9500
     });
     expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
@@ -65,11 +68,11 @@ describe(`Test Escrow Contracts`, () => {
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(6500);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
-    expect(await seller2.getBalance("sat")).toBeGreaterThan(5500);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(9500);
   });
 
   test("Should allow arbiter to spend to seller", async () => {
@@ -92,6 +95,8 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount:445000,
+      nonce: 12
     });
 
     // fund the escrow contract
@@ -134,6 +139,8 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 446000,
+      nonce: 13
     });
 
     // fund the escrow contract
@@ -176,6 +183,8 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 446000,
+      nonce: 22
     });
 
     // fund the escrow contract
@@ -218,6 +227,8 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
+        amount: 40000,
+        nonce: 3
       });
 
       // fund the escrow contract
@@ -258,6 +269,8 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
+        amount: 40000,
+        nonce: 3
       });
 
       // fund the escrow contract
