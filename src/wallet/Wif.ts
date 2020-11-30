@@ -253,7 +253,7 @@ export class Wallet extends BaseWallet {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
-    return  await this.provider.getUtxos(address);
+    return await this.provider.getUtxos(address);
   }
 
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {

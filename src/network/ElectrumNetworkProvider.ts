@@ -133,7 +133,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   isElectrumClient(): boolean {
-    return this.electrum.hasOwnProperty('connection');
+    return this.electrum.hasOwnProperty("connection");
   }
 
   async readyClient(timeout?: number): Promise<boolean | unknown> {

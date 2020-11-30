@@ -94,7 +94,6 @@ export class Contract implements ContractInterface {
     this.contract.functions[method](args);
   }
 
-
   // TODO refactor, split out fee estimator, amount estimator
   public async _run(
     wif: string,
@@ -135,17 +134,19 @@ export class Contract implements ContractInterface {
         // Use the feePerByte to get the fee for the transaction length
         const fee = Math.round(estimatedTxHex.length * 2 * feePerByte);
         const balance = await this.getBalance();
-        const amount = balance-fee
-        if((balance - fee) < 0){
-          throw Error("The contract transaction requires greater fee then available contract balance")
+        const amount = balance - fee;
+        if (balance - fee < 0) {
+          throw Error(
+            "The contract transaction requires greater fee then available contract balance"
+          );
         }
         let transaction = func(amount, publicKey, sig)
-        .withHardcodedFee(fee)
-        .to( outputAddress, amount )
+          .withHardcodedFee(fee)
+          .to(outputAddress, amount);
         let txResult = await transaction[method]();
 
         if (getHexOnly) {
-          return { tx: txResult.txid, fee:fee, utxo: utxos };
+          return { tx: txResult.txid, fee: fee, utxo: utxos };
         } else {
           return txResult;
         }
