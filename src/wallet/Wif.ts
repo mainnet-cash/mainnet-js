@@ -258,7 +258,6 @@ export class Wallet extends BaseWallet {
 
   public async getBalance(unit?: string): Promise<BalanceResponse | number> {
     if (unit) {
-      
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());

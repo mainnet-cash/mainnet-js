@@ -5,7 +5,6 @@ import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
 import { Utxo } from "../../interface";
 
-
 interface ContractArguments {
   sellerAddr: string;
   buyerAddr: string;
@@ -26,26 +25,28 @@ export class EscrowContract extends Contract {
     buyerAddr,
     arbiterAddr,
     amount,
-    nonce
+    nonce,
   }: ContractArguments) {
     // Put the arguments in contract order
     let addressArgs = [sellerAddr, buyerAddr, arbiterAddr];
 
     // Derive the network from addresses given or throw error if not on same network
     const network = derivedNetwork(Object.values(addressArgs));
-    const tmpNonce = nonce ? nonce : 0
+    const tmpNonce = nonce ? nonce : 0;
     // Transform the arguments given to Public Key Hashes
-    let rawContractArgs = addressArgs.map((x) => { return derivePublicKeyHash(x) }) as any[];
-    rawContractArgs.push(amount)
-    rawContractArgs.push(tmpNonce)
+    let rawContractArgs = addressArgs.map((x) => {
+      return derivePublicKeyHash(x);
+    }) as any[];
+    rawContractArgs.push(amount);
+    rawContractArgs.push(tmpNonce);
     super(EscrowContract.getContractText(), rawContractArgs, network);
 
     // Assure all addresses are prefixed and lowercase
     [this.sellerAddr, this.buyerAddr, this.arbiterAddr] = addressArgs.map((x) =>
       sanitizeAddress(x)
     );
-    this.nonce = tmpNonce
-    this.amount = amount
+    this.nonce = tmpNonce;
+    this.amount = amount;
   }
 
   // Static convenience constructor
@@ -54,7 +55,7 @@ export class EscrowContract extends Contract {
     buyerAddr,
     arbiterAddr,
     amount,
-    nonce
+    nonce,
   }: ContractArguments) {
     return new this({ sellerAddr, buyerAddr, arbiterAddr, amount, nonce });
   }
@@ -62,9 +63,9 @@ export class EscrowContract extends Contract {
   // Serialize the contract
   public toString() {
     return `escrow:${this.sellerAddr}:${this.buyerAddr}:
-    ${this.amount}:${this.nonce}:${
-      this.arbiterAddr
-    }:${encodeURIComponent(JSON.stringify(this.getArtifact()))}`;
+    ${this.amount}:${this.nonce}:${this.arbiterAddr}:${encodeURIComponent(
+      JSON.stringify(this.getArtifact())
+    )}`;
   }
 
   // Deserialize from a string
@@ -85,9 +86,9 @@ export class EscrowContract extends Contract {
       buyerAddr: parsedArgs.shift()!,
       arbiterAddr: parsedArgs.shift()!,
       amount: parseInt(parsedArgs.shift()!),
-    }
+    };
     if (parsedArgs.length > 0) {
-      args['nonce'] = parseInt(parsedArgs.shift()!)
+      args["nonce"] = parseInt(parsedArgs.shift()!);
     }
     return EscrowContract.create(args);
   }
@@ -106,7 +107,14 @@ export class EscrowContract extends Contract {
     } else {
       throw Error("Could not determine output address");
     }
-    return await this._spendMax(wif, funcName, outputAddress, getHexOnly, utxos, this.nonce);
+    return await this._spendMax(
+      wif,
+      funcName,
+      outputAddress,
+      getHexOnly,
+      utxos,
+      this.nonce
+    );
   }
 
   static getContractText() {
