@@ -3,8 +3,7 @@ import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
 import { UtxoI } from "../../interface";
-import { EscrowArguments } from "./interface"
-
+import { EscrowArguments } from "./interface";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
@@ -38,7 +37,7 @@ export class EscrowContract extends Contract {
     [this.sellerAddr, this.buyerAddr, this.arbiterAddr] = addressArgs.map((x) =>
       sanitizeAddress(x)
     );
-    
+
     this.nonce = tmpNonce;
     this.amount = amount;
   }
@@ -53,7 +52,6 @@ export class EscrowContract extends Contract {
   }: EscrowArguments) {
     return new this({ sellerAddr, buyerAddr, arbiterAddr, amount, nonce });
   }
-
 
   public async run(
     wif: string,

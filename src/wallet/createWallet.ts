@@ -1,7 +1,6 @@
 import { WalletTypeEnum } from "./enum";
 import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
-import { WalletRequestI, WalletResponseI } from "./interface"
-
+import { WalletRequestI, WalletResponseI } from "./interface";
 
 export const walletClassMap = {
   wif: {
