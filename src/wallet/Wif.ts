@@ -10,14 +10,11 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { WalletTypeEnum } from "./enum";
+import { networkPrefixMap } from "../enum"
+import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
-
-import { PrivateKeyI } from "../interface";
-
-import { networkPrefixMap } from "../enum";
-
+import { WalletTypeEnum } from "./enum";
 import {
   SendRequest,
   SendRequestArray,
@@ -26,7 +23,6 @@ import {
   UtxoResponse,
 } from "./model";
 
-import { UtxoI } from "../interface";
 
 import {
   buildEncodedTransaction,
@@ -34,15 +30,17 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress, Image } from "../qr/Qr";
+import { qrAddress } from "../qr/Qr";
+import { ImageI } from "../qr/interface";
 import { asSendRequestObject } from "../util/asSendRequestObject";
-import { checkWifNetwork } from "../util/checkWifNetwork";
-import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi";
+import { checkWifNetwork } from "../util/checkWifNetwork";
+import { deriveCashaddr } from "../util/deriveCashaddr";
+
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { derivePrefix } from "../util/derivePublicKeyHash";
@@ -244,7 +242,7 @@ export class Wallet extends BaseWallet {
     return this.cashaddr;
   }
 
-  public getDepositQr(): Image {
+  public getDepositQr(): ImageI {
     return qrAddress(this.cashaddr as string);
   }
 
