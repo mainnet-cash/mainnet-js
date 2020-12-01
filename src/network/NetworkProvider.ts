@@ -1,4 +1,4 @@
-import { UtxoI, Network } from "../interface";
+import { Tx, UtxoI, Network } from "../interface";
 
 export default interface NetworkProvider {
   /**
@@ -28,10 +28,19 @@ export default interface NetworkProvider {
   /**
    * Retrieve the Hex transaction details for a given transaction ID.
    * @param txid Hex transaction ID.
+   * @param verbose Whether a verbose coin-specific response is required.
    * @throws {Error} If the transaction does not exist
    * @returns The full hex transaction for the provided transaction ID.
    */
   getRawTransaction(txid: string): Promise<string>;
+
+  /**
+   * Retrieve a verbose coin-specific response transaction details for a given transaction ID.
+   * @param txid Hex transaction ID.
+   * @throws {Error} If the transaction does not exist
+   * @returns The full hex transaction for the provided transaction ID.
+   */
+  getRawTransactionObject(txid: string): Promise<any>;
 
   /**
    * Broadcast a raw hex transaction to the Bitcoin Cash network.
@@ -40,6 +49,30 @@ export default interface NetworkProvider {
    * @returns The transaction ID corresponding to the broadcast transaction.
    */
   sendRawTransaction(txHex: string): Promise<string>;
+
+  /**
+   * Return the confirmed and unconfirmed history of a Bitcoin Cash address.
+   * @param address The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the transaction was not accepted by the network.
+   * @returns Array of transactions.
+   */
+  getHistory(address: string): Promise<Tx[]>;
+
+  /**
+   * Subscribe to the address change events
+   * @param address The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the transaction was not accepted by the network.
+   * @returns nothing.
+   */
+  subscribeToAddress(address: string, callback: (data: any) => void): Promise<void>;
+
+  /**
+   * Unsubscribe from the address change events
+   * @param address The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the transaction was not accepted by the network.
+   * @returns nothing.
+   */
+  unsubscribeFromAddress(address: string, callback: (data: any) => void): Promise<void>;
 
   /**
    * Function to wait for connection to be ready
