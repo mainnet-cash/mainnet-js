@@ -1,19 +1,7 @@
 import { WalletTypeEnum } from "./enum";
-import { NetworkEnum } from "../enum";
 import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
+import { WalletRequestI, WalletResponseI } from "./interface"
 
-interface WalletRequest {
-  name?: string;
-  network?: string;
-  type?: WalletTypeEnum;
-}
-
-interface WalletResponse {
-  name: string;
-  cashaddr: string;
-  walletId: string;
-  network?: NetworkEnum;
-}
 
 export const walletClassMap = {
   wif: {
@@ -29,7 +17,7 @@ export const walletClassMap = {
   },
 };
 
-export async function createWallet(body: WalletRequest): Promise<any> {
+export async function createWallet(body: WalletRequestI): Promise<any> {
   let wallet;
   let walletType = body.type ? body.type : "wif";
   let networkType = body.network ? body.network : "mainnet";
@@ -63,8 +51,8 @@ export async function createWallet(body: WalletRequest): Promise<any> {
  * @returns A new wallet object
  */
 export async function createWalletResponse(
-  walletRequest: WalletRequest
-): Promise<WalletResponse> {
+  walletRequest: WalletRequestI
+): Promise<WalletResponseI> {
   let wallet = await createWallet(walletRequest);
   if (wallet) {
     return asJsonResponse(wallet);
@@ -73,7 +61,7 @@ export async function createWalletResponse(
   }
 }
 
-function asJsonResponse(wallet: Wallet): WalletResponse {
+function asJsonResponse(wallet: Wallet): WalletResponseI {
   return {
     name: wallet.name,
     cashaddr: wallet.cashaddr as string,
@@ -89,7 +77,7 @@ export async function walletFromId(walletId: string): Promise<any> {
     name: "",
     network: network,
     type: WalletTypeEnum[walletType],
-  } as WalletRequest;
+  } as WalletRequestI;
   let wallet = await createWallet(walletRequest);
   await wallet._fromId(walletId);
   return wallet;

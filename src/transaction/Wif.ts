@@ -12,7 +12,7 @@ import {
   AnyCompilationEnvironment,
   AuthenticationProgramStateBCH,
 } from "@bitauth/libauth";
-import { Utxo } from "../interface";
+import { UtxoI } from "../interface";
 
 import { SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
@@ -21,7 +21,7 @@ import { sumUtxoValue } from "../util/sumUtxoValue";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
-  inputs: Utxo[],
+  inputs: UtxoI[],
   outputs: SendRequest[],
   signingKey: Uint8Array,
   fee: number = 0,
@@ -76,7 +76,7 @@ export async function buildP2pkhNonHdTransaction(
 }
 
 export function prepareInputs(
-  inputs: Utxo[],
+  inputs: UtxoI[],
   compiler: Compiler<
     TransactionContextCommon,
     AnyCompilationEnvironment<TransactionContextCommon>,
@@ -142,11 +142,11 @@ export async function prepareOutputs(outputs: SendRequest[]) {
 }
 
 export async function getSuitableUtxos(
-  unspentOutputs: Utxo[],
+  unspentOutputs: UtxoI[],
   amountRequired: BigInt | undefined,
   bestHeight: number
 ) {
-  let suitableUtxos: Utxo[] = [];
+  let suitableUtxos: UtxoI[] = [];
   let amountAvailable = 0n;
   for (const u of unspentOutputs) {
     if (u.coinbase && u.height && bestHeight) {
@@ -181,7 +181,7 @@ export async function getFeeAmount({
   sendRequests,
   privateKey,
 }: {
-  utxos: Utxo[];
+  utxos: UtxoI[];
   sendRequests: SendRequest[];
   privateKey: Uint8Array;
 }) {
@@ -204,7 +204,7 @@ export async function getFeeAmount({
 
 // Build encoded transaction
 export async function buildEncodedTransaction(
-  fundingUtxos: Utxo[],
+  fundingUtxos: UtxoI[],
   sendRequests: SendRequest[],
   privateKey: Uint8Array,
   fee: number = 0,

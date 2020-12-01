@@ -26,6 +26,7 @@ describe(`Test Escrow Contracts`, () => {
 
     let escrow3 = EscrowContract.fromId(escrow.toString());
     expect(escrow.getAddress()).toBe(escrow3.getAddress());
+    
   });
 
   test("Should allow buyer to spend to seller", async () => {

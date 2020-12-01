@@ -5,7 +5,7 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { NetworkProvider } from "cashscript";
-import { Utxo, ElectrumBalance } from "../interface";
+import { UtxoI, ElectrumBalanceI } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
 
@@ -26,7 +26,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  async getUtxos(address: string): Promise<Utxo[]> {
+  async getUtxos(address: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
       address
@@ -46,7 +46,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     const result = (await this.performRequest(
       "blockchain.address.get_balance",
       address
-    )) as ElectrumBalance;
+    )) as ElectrumBalanceI;
 
     return result.confirmed + result.unconfirmed;
   }

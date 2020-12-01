@@ -1,4 +1,4 @@
-import { Utxo, Network } from "../interface";
+import { UtxoI, Network } from "../interface";
 
 export default interface NetworkProvider {
   /**
@@ -11,7 +11,7 @@ export default interface NetworkProvider {
    * @param address The CashAddress for which we wish to retrieve UTXOs.
    * @returns List of UTXOs spendable by the provided address.
    */
-  getUtxos(address: string): Promise<Utxo[]>;
+  getUtxos(address: string): Promise<UtxoI[]>;
 
   /**
    * Retrieve all balance of an address in satoshi

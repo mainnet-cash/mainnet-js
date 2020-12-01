@@ -3,29 +3,17 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 import { getNetworkProvider } from "../network/default";
 import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getStorageProvider } from "../db/util";
-
+import { WalletI } from "./interface";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 
-export default interface WalletInterface {
-  /**
-   * generate should randomly create a new wallet
-   * @returns A randomly generated instance.
-   */
-  generate(): Promise<any>;
 
-  /**
-   * toString should retrun a serialized representation of the Wallet
-   * @returns returns a serialized representation of the wallet
-   */
-  toString(): string;
-}
 
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
  */
-export class BaseWallet implements WalletInterface {
+export class BaseWallet implements WalletI {
   provider?: NetworkProvider;
   storage?: StorageProvider;
   isTestnet?: boolean;

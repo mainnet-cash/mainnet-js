@@ -1,4 +1,4 @@
-import { instantiateSecp256k1 } from "@bitauth/libauth";
+import { instantiateSecp256k1, binToHex } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,
@@ -8,24 +8,13 @@ import {
   NetworkProvider,
 } from "cashscript";
 import { getNetworkProvider } from "../network/default";
-import { Network, Utxo } from "../interface";
+import { Network, UtxoI } from "../interface";
+import { ContractI } from "./interface";
+import { atob, btoa } from "../util/base64";
+import {castParametersFromConstructor } from "./util"
+import {GROUP_DELIMITER, ROW_DELIMITER} from "../constant"
 
-export default interface ContractInterface {
-  /**
-   * toString should return a serialized representation of the contract
-   * @returns returns a serialized representation of the contract
-   */
-  toString(): string;
-  getAddress(): string | Error;
-
-  /**
-   * getContractText should return the cashscript text
-   * @returns returns contract in script as a string
-   */
-  getContractText(): string | Error;
-}
-
-export class Contract implements ContractInterface {
+export class Contract implements ContractI {
   private script: string;
   public parameters: Argument[];
   private artifact: Artifact;
@@ -42,10 +31,6 @@ export class Contract implements ContractInterface {
     this.contract = this.getContactInstance();
   }
 
-  // @ts-ignore
-  static fromId(contractId: string) {
-    throw Error("cannot instantiate the base contract with fromId");
-  }
 
   getContractText(): string | Error {
     return this.script;
@@ -55,9 +40,36 @@ export class Contract implements ContractInterface {
     const contractText = this.script;
     if (typeof contractText === "string") {
       return CashCompiler.compileString(contractText);
-    } else {
+    } 
+    // If the contract text is not a string, it's an error to be thrown
+    else {
       throw contractText;
     }
+  }
+
+  private getSerializedParameters(){
+    return this.parameters.map(a=> btoa(a.toString())).join(ROW_DELIMITER)
+  }
+ 
+
+  private getSerializedScript(){
+    return btoa(this.script)
+  }
+
+  // Serialize the contract
+  public toString() {
+    return [this.network, this.getSerializedParameters(), this.getSerializedScript()].join(GROUP_DELIMITER)
+  }
+
+  // Deserialize from a string
+  public static fromId(contractId: string) {
+    let [network, serializedParams, serializedScript ] = contractId.split(GROUP_DELIMITER);
+    let script = atob(serializedScript)
+    let contractTemplate = CashCompiler.compileString(script)
+    let paramStrings = serializedParams.split(ROW_DELIMITER).map((s) => atob(s))
+    let params = castParametersFromConstructor(paramStrings, contractTemplate.constructorInputs)
+  
+    return new Contract(script, params, network as Network)   
   }
 
   public getAddress() {
@@ -113,7 +125,7 @@ export class Contract implements ContractInterface {
     funcName: string,
     outputAddress: string,
     getHexOnly = false,
-    utxos?: Utxo[],
+    utxos?: UtxoI[],
     nonce?: number
   ) {
     const sig = new SignatureTemplate(wif);

@@ -11,11 +11,10 @@ import {
 } from "@bitauth/libauth";
 
 import { WalletTypeEnum } from "./enum";
-import { UnitEnum } from "../enum";
 
 import { BaseWallet } from "./Base";
 
-import { PrivateKey } from "../interface";
+import { PrivateKeyI } from "../interface";
 
 import { networkPrefixMap } from "../enum";
 
@@ -27,7 +26,7 @@ import {
   UtxoResponse,
 } from "./model";
 
-import { Utxo } from "../interface";
+import { UtxoI } from "../interface";
 
 import {
   buildEncodedTransaction,
@@ -77,7 +76,7 @@ export class Wallet extends BaseWallet {
       throw Error(result as string);
     }
     checkWifNetwork(secret, this.networkType);
-    let resultData: PrivateKey = result as PrivateKey;
+    let resultData: PrivateKeyI = result as PrivateKeyI;
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
@@ -249,7 +248,7 @@ export class Wallet extends BaseWallet {
     return qrAddress(this.cashaddr as string);
   }
 
-  public async getAddressUtxos(address: string): Promise<Utxo[]> {
+  public async getAddressUtxos(address: string): Promise<UtxoI[]> {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
@@ -324,7 +323,7 @@ export class Wallet extends BaseWallet {
     let utxos = await this.getAddressUtxos(this.cashaddr);
     let resp = new UtxoResponse();
     resp.utxos = await Promise.all(
-      utxos.map(async (o: Utxo) => {
+      utxos.map(async (o: UtxoI) => {
         let utxo = new UtxoItem();
         utxo.unit = "sat";
         utxo.value = o.satoshis;

@@ -1,16 +1,13 @@
 import { EscrowContract } from "./escrow";
 import { Contract } from "./Contract";
-
+import { ContractResponseI } from "./interface"
 var contactClassMap = {
   escrow: () => {
     return EscrowContract;
   },
 };
 
-interface ContractResponse {
-  contractId: string;
-  address: string;
-}
+
 
 const contractClassMap = {
   escrow: () => {
@@ -18,7 +15,7 @@ const contractClassMap = {
   },
 };
 
-export async function createContract(body: any): Promise<any> {
+export async function createContract(body: any): Promise<Contract> {
   let contractType = body.type;
 
   // This handles unsaved/unnamed wallets
@@ -32,11 +29,8 @@ export async function createContract(body: any): Promise<any> {
  * @param contractId A serialized contractId string
  * @returns A new contract object
  */
-export async function contractFromId(contractId: string): Promise<any> {
-  let contractArgs: string[] = contractId.split(":");
-  let contractType = contractArgs.shift();
-  const contractClass = contactClassMap[contractType!]();
-  return await contractClass.fromId(contractId);
+export async function contractFromId(contractId: string): Promise<Contract> {
+  return Contract.fromId(contractId);
 }
 
 /**
@@ -46,7 +40,7 @@ export async function contractFromId(contractId: string): Promise<any> {
  */
 export async function createContractResponse(
   request: any
-): Promise<ContractResponse> {
+): Promise<ContractResponseI> {
   let contract = await createContract(request);
   if (contract) {
     return asJsonResponse(contract);
@@ -55,7 +49,7 @@ export async function createContractResponse(
   }
 }
 
-function asJsonResponse(contract: Contract): ContractResponse {
+function asJsonResponse(contract: Contract): ContractResponseI {
   return {
     contractId: contract.toString(),
     address: contract.getAddress(),

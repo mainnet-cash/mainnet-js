@@ -31,7 +31,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8:16000:1:%7B%22contractName%22%3A%22Escrow");
+    expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
     expect(contractResp.body.address).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
     
     let contractId = contractResp.body.contractId
@@ -90,7 +90,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("escrow:bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0:bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8:16000:1:%7B%22contractName%22%3A%22Escrow");
+    expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
     expect(contractResp.body.address).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
     
     let contractId = contractResp.body.contractId

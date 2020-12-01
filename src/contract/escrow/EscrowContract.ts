@@ -3,15 +3,9 @@ import { amountInSatoshi } from "../../util/amountInSatoshi";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
-import { Utxo } from "../../interface";
+import { UtxoI } from "../../interface";
+import { EscrowArguments } from "./interface"
 
-interface ContractArguments {
-  sellerAddr: string;
-  buyerAddr: string;
-  arbiterAddr: string;
-  amount: number;
-  nonce?: number;
-}
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
@@ -26,7 +20,7 @@ export class EscrowContract extends Contract {
     arbiterAddr,
     amount,
     nonce,
-  }: ContractArguments) {
+  }: EscrowArguments) {
     // Put the arguments in contract order
     let addressArgs = [sellerAddr, buyerAddr, arbiterAddr];
 
@@ -45,6 +39,7 @@ export class EscrowContract extends Contract {
     [this.sellerAddr, this.buyerAddr, this.arbiterAddr] = addressArgs.map((x) =>
       sanitizeAddress(x)
     );
+    
     this.nonce = tmpNonce;
     this.amount = amount;
   }
@@ -56,51 +51,16 @@ export class EscrowContract extends Contract {
     arbiterAddr,
     amount,
     nonce,
-  }: ContractArguments) {
+  }: EscrowArguments) {
     return new this({ sellerAddr, buyerAddr, arbiterAddr, amount, nonce });
   }
 
-  // Serialize the contract
-  public toString() {
-    return `escrow:`+
-    `${this.sellerAddr}:`+
-    `${this.buyerAddr}:`+
-    `${this.arbiterAddr}:`+
-    `${this.amount}:`+
-    `${this.nonce}:` +
-    `${encodeURIComponent(JSON.stringify(this.getArtifact()))}`;
-  }
-
-  // Deserialize from a string
-  public static fromId(contractId: string) {
-    let parsedArgs = contractId.split(":");
-    if (parsedArgs.shift() !== "escrow") {
-      throw Error(
-        "attempted to pass non escrow contract id to an escrow contract"
-      );
-    }
-
-    // Filter off the prefixes in this case since they are serialized with colons
-    parsedArgs = parsedArgs.filter(
-      (word) => !["bitcoincash", "bchtest", "bchreg"].includes(word)
-    );
-    let args: ContractArguments = {
-      sellerAddr: parsedArgs.shift()!,
-      buyerAddr: parsedArgs.shift()!,
-      arbiterAddr: parsedArgs.shift()!,
-      amount: parseInt(parsedArgs.shift()!),
-    };
-    if (parsedArgs.length > 0) {
-      args["nonce"] = parseInt(parsedArgs.shift()!);
-    }
-    return EscrowContract.create(args);
-  }
 
   public async run(
     wif: string,
     funcName: string,
     getHexOnly = false,
-    utxos?: Utxo[]
+    utxos?: UtxoI[]
   ) {
     let outputAddress;
     if (funcName.startsWith("spend")) {
@@ -121,9 +81,8 @@ export class EscrowContract extends Contract {
   }
 
   static getContractText() {
-    return `
-            pragma cashscript ^0.5.3;
-            contract EscrowContract(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
+    return `pragma cashscript ^0.5.3;
+            contract escrow(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
 
                 function spend(pubkey signingPk, sig s, int amount, int nonce) {
                     require(hash160(signingPk) == arbiterPkh || hash160(signingPk) == buyerPkh);
