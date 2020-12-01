@@ -7,8 +7,6 @@ import { WalletI } from "./interface";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 
-
-
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet

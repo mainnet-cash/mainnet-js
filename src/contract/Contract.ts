@@ -11,8 +11,8 @@ import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
 import { ContractI } from "./interface";
 import { atob, btoa } from "../util/base64";
-import {castParametersFromConstructor } from "./util"
-import {GROUP_DELIMITER, ROW_DELIMITER} from "../constant"
+import { castParametersFromConstructor } from "./util";
+import { GROUP_DELIMITER, ROW_DELIMITER } from "../constant";
 
 export class Contract implements ContractI {
   private script: string;
@@ -31,7 +31,6 @@ export class Contract implements ContractI {
     this.contract = this.getContactInstance();
   }
 
-
   getContractText(): string | Error {
     return this.script;
   }
@@ -40,36 +39,46 @@ export class Contract implements ContractI {
     const contractText = this.script;
     if (typeof contractText === "string") {
       return CashCompiler.compileString(contractText);
-    } 
+    }
     // If the contract text is not a string, it's an error to be thrown
     else {
       throw contractText;
     }
   }
 
-  private getSerializedParameters(){
-    return this.parameters.map(a=> btoa(a.toString())).join(ROW_DELIMITER)
+  private getSerializedParameters() {
+    return this.parameters.map((a) => btoa(a.toString())).join(ROW_DELIMITER);
   }
- 
 
-  private getSerializedScript(){
-    return btoa(this.script)
+  private getSerializedScript() {
+    return btoa(this.script);
   }
 
   // Serialize the contract
   public toString() {
-    return [this.network, this.getSerializedParameters(), this.getSerializedScript()].join(GROUP_DELIMITER)
+    return [
+      this.network,
+      this.getSerializedParameters(),
+      this.getSerializedScript(),
+    ].join(GROUP_DELIMITER);
   }
 
   // Deserialize from a string
   public static fromId(contractId: string) {
-    let [network, serializedParams, serializedScript ] = contractId.split(GROUP_DELIMITER);
-    let script = atob(serializedScript)
-    let contractTemplate = CashCompiler.compileString(script)
-    let paramStrings = serializedParams.split(ROW_DELIMITER).map((s) => atob(s))
-    let params = castParametersFromConstructor(paramStrings, contractTemplate.constructorInputs)
-  
-    return new Contract(script, params, network as Network)   
+    let [network, serializedParams, serializedScript] = contractId.split(
+      GROUP_DELIMITER
+    );
+    let script = atob(serializedScript);
+    let contractTemplate = CashCompiler.compileString(script);
+    let paramStrings = serializedParams
+      .split(ROW_DELIMITER)
+      .map((s) => atob(s));
+    let params = castParametersFromConstructor(
+      paramStrings,
+      contractTemplate.constructorInputs
+    );
+
+    return new Contract(script, params, network as Network);
   }
 
   public getAddress() {

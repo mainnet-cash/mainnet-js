@@ -5,8 +5,6 @@ import {
 } from "./createContract";
 
 describe(`Create Contract Tests`, () => {
-
-  
   test("Should create an escrow contract", async () => {
     let contract = await createContract({
       type: "escrow",
@@ -19,12 +17,11 @@ describe(`Create Contract Tests`, () => {
     expect(contract.getAddress()).toBe(
       "bchtest:pqx9kffugfzrrl3z94f8h35g7cj7ma85ls92csf2s6"
     );
-    expect(contract.toString().length).toBeGreaterThan(30)
+    expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString()).toBe(
       (await contractFromId(contract.toString())).toString()
     );
-    expect(contract.toString().slice(0,8)).toBe("testnet␝"
-    );
+    expect(contract.toString().slice(0, 8)).toBe("testnet␝");
   });
 
   test("Should create return a contract object", async () => {
@@ -45,8 +42,6 @@ describe(`Create Contract Tests`, () => {
   });
 
   test("Should create a contract from serialized id", async () => {
-    
-
     let createResponse = await createContractResponse({
       type: "escrow",
       sellerAddr: "bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e",
@@ -56,9 +51,7 @@ describe(`Create Contract Tests`, () => {
       nonce: 1,
     });
 
-    let response = await contractFromId(
-      createResponse.contractId
-    );
+    let response = await contractFromId(createResponse.contractId);
     expect(response.getAddress()).toBe(createResponse.address);
     expect(response.toString().slice(0, 201)).toBe(
       createResponse.contractId.slice(0, 201)
