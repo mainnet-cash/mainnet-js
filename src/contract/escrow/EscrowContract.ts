@@ -1,5 +1,4 @@
 import { Contract } from "../Contract";
-import { amountInSatoshi } from "../../util/amountInSatoshi";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
