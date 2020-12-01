@@ -75,3 +75,18 @@ test("Should handle basic sql injection", async () => {
   db.close();
   sh.close();
 });
+
+// test("Store and retrieve a webhook", async () => {
+//   let db = new SqlProvider("testnet");
+//   await db.init();
+//   await db.addWebHook("transaction:in:123123123", "https://mysite.com/api/webhook");
+//   let webHook = await db.getWebHook("transaction:in:123123123");
+//   expect(webHook!.tx_id).toBe("transaction:in:123123123");
+//   expect(webHook!.hook_url).toBe("https://mysite.com/api/webhook");
+//   expect(new Date() >= webHook!.expires_at);
+
+//   let allHooks = await db.getWebHooks();
+//   expect(allHooks.length == 1);
+
+//   db.close();
+// });

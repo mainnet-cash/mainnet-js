@@ -263,6 +263,15 @@ export class Wallet extends BaseWallet {
     }
   }
 
+  public async watchBalance(callback: (any) => void): Promise<void> {
+    let subscribeCallback = async (data) => {
+      console.log(data);
+      let balance = await this.getBalance();
+      callback(balance);
+    };
+    return this.provider!.subscribeToAddress(this.cashaddr!, subscribeCallback);
+  }
+
   // Gets balance by summing value in all utxos in stats
   public async getBalanceFromUtxos(): Promise<number> {
     const utxos = await this.getAddressUtxos(this.cashaddr!);
