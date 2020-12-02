@@ -123,13 +123,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async connect(): Promise<boolean[]> {
     return this.isElectrumClient()
-      ? this.connectClient()
-      : this.connectCluster();
+      ? await this.connectClient()
+      : await this.connectCluster();
   }
   async disconnect(): Promise<boolean[]> {
     return this.isElectrumClient()
-      ? this.disconnectClient()
-      : this.disconnectCluster();
+      ? await this.disconnectClient()
+      : await this.disconnectCluster();
   }
 
   isElectrumClient(): boolean {
@@ -182,7 +182,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     try {
       return await (this.electrum as ElectrumCluster).startup();
     } catch (e) {
-      return [false];
+      throw Error(e)
     }
   }
 
@@ -190,7 +190,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     try {
       return [await (this.electrum as ElectrumClient).connect()];
     } catch (e) {
-      return [false];
+      throw Error(e)
     }
   }
 
