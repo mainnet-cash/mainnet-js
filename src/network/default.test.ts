@@ -9,3 +9,25 @@ test("Should connect to the default cluster", async () => {
   );
   expect(bal).toBeGreaterThan(1313545598);
 });
+
+
+test("Should connect to the default testnet cluster", async () => {
+  let provider =  getNetworkProvider("testnet");
+
+  expect(provider.network).toBe("testnet");
+  const bal = await provider.getBalance(
+    process.env.ALICE_TESTNET_ADDRESS!
+  );
+  expect(bal).toBeGreaterThan(100);
+});
+
+
+test("Should connect to the default regtest client", async () => {
+  let provider =  getNetworkProvider("regtest");
+
+  expect(provider.network).toBe("regtest");
+  const bal = await provider.getBalance(
+    process.env.ADDRESS!
+  );
+  expect(bal).toBeGreaterThan(100);
+});
