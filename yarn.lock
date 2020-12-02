@@ -268,6 +268,11 @@
   resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.17.2.tgz#8abc0917f03fe1fafb0814c787787e120a74a1c6"
   integrity sha512-Jo3wFdhtEfJCi9lOPrHJL5Yvk3z68aBWlrf1Y8l4vWFox9rKjWnOnQYOSwwtKvBcd5kg54JrUpolq/H8hSVYLQ==
 
+"@bitauth/libauth@^1.17.3":
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.17.3.tgz#4a29ff6a8b157d10050f0ba3c0f5a062805536d6"
+  integrity sha512-F8RewY6td3fyIQaUTMO1lV/aWLotB3HZ0UWKRCC+4pJbNCKlh8WLNNkiIPAFn6Mf3sPgYgrUnS3YlLRqMhzv7g==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -2114,6 +2119,17 @@ electrum-cash@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/electrum-cash/-/electrum-cash-2.0.4.tgz#926158323b9dbf6563298a32864d9a2a1a0deca0"
   integrity sha512-9l4/MpHvJEvnfTqTM5/acPMosTC2lwmgl8JBAsOPJ417DgkUQV73yE3WqmTTvON+pBetj11hOUVAkpkaJv0X0A==
+  dependencies:
+    "@types/ws" "^7.2.6"
+    async-mutex "^0.2.4"
+    debug "^4.1.1"
+    isomorphic-ws "^4.0.1"
+    ws "^7.3.1"
+
+electrum-cash@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/electrum-cash/-/electrum-cash-2.0.6.tgz#005aa46ddace872696a89d918640ff6254a1ddaa"
+  integrity sha512-+o0Hqcl0eCwd9fvCJpWn4yV3gYX874uCGpwpwNbZuEU9ipY5ft9iU0IfuFghUN6/AuCcsE6f8JkVOjuTjmfF5Q==
   dependencies:
     "@types/ws" "^7.2.6"
     async-mutex "^0.2.4"
