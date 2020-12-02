@@ -502,9 +502,11 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         contractId: contractId
         action: spend
+        to: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         utxoIds:
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        nonce: 808
         getHexOnly: true
       properties:
         contractId:
@@ -523,6 +525,10 @@ components:
           - refund
           example: spend
           type: string
+        to:
+          description: output for the transaction
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
         getHexOnly:
           description: |
             getHexOnly (default:false), if true, will cause only the transaction hex to be returned; if false, the transaction will be sent to the network
@@ -533,6 +539,12 @@ components:
             example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
             type: string
           type: array
+        nonce:
+          description: A unique value added to the contract, which allows the contract
+            to be different from an otherwise identical contract, i.e. two monthly
+            orders.
+          example: 808
+          type: number
       required:
       - action
       - contractId
