@@ -10,7 +10,7 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { networkPrefixMap } from "../enum"
+import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
@@ -22,7 +22,6 @@ import {
   UtxoItem,
   UtxoResponse,
 } from "./model";
-
 
 import {
   buildEncodedTransaction,
