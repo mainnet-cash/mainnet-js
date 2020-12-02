@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 import StorageProvider from "./StorageProvider";
-import { WalletI, WebHookI, WebHook } from "./interface";
+import { WalletI } from "./interface";
 
 export default class IndexedDBProvider
   extends Dexie
@@ -10,7 +10,7 @@ export default class IndexedDBProvider
   public constructor(dbName: string) {
     super(dbName);
     this.version(2).stores({
-      wallet: "++id,name,wallet"
+      wallet: "++id,name,wallet",
     });
     this.db = this.table("wallet");
   }
@@ -29,11 +29,9 @@ export default class IndexedDBProvider
     return this.transaction("rw", this.db, async () => {
       // Make sure we have something in DB:
       if ((await this.db.where({ name: name }).count()) === 0) {
-        const id = await this.db
-          .add({ name: name, wallet: wallet })
-          .catch((e) => {
-            throw Error(e);
-          });
+        await this.db.add({ name: name, wallet: wallet }).catch((e) => {
+          throw Error(e);
+        });
         return true;
       } else {
         return false;
