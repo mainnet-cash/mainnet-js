@@ -1,7 +1,8 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-
+import { getNetworkProvider } from "../network/default";
+import { Network } from "cashscript";
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -170,5 +171,29 @@ describe(`Watch only Wallets`, () => {
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.sat).toBeGreaterThan(2000);
     }
+  });
+
+  test("Should wait for transaction", async () => {
+    let provider = getNetworkProvider(Network.TESTNET, undefined, true);
+    provider.connect()
+
+    const aliceWallet = await TestNetWallet.fromId(process.env.ALICE_TESTNET_WALLET_ID!);
+    const bobWallet = await TestNetWallet.newRandom();
+
+    aliceWallet.provider = provider;
+    bobWallet.provider = provider;
+
+    setTimeout(() => aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 1000,
+        unit: "satoshis",
+      },
+    ]), 120000);
+
+    let tx = await bobWallet.waitForTransaction();
+    console.log(tx);
+    await bobWallet.sendMax(aliceWallet.cashaddr!);
+    provider.disconnect();
   });
 });
