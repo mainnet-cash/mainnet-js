@@ -17,9 +17,14 @@ export async function createContract(body: any): Promise<Contract> {
   let contractType = body.type;
 
   // This handles unsaved/unnamed wallets
-  let contractClass = contractClassMap[contractType]();
-  let contract = await contractClass.create(body);
-  return contract;
+  if(contractType in contractClassMap){
+    let contractClass = contractClassMap[contractType]();
+    let contract = await contractClass.create(body);
+    return contract;  
+  }
+  else{
+    return contractFromId(body.contractId)
+  }
 }
 
 /**

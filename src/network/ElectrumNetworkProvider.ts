@@ -182,7 +182,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     try {
       return await (this.electrum as ElectrumCluster).startup();
     } catch (e) {
-      return [];
+      return [false];
     }
   }
 
@@ -190,7 +190,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     try {
       return [await (this.electrum as ElectrumClient).connect()];
     } catch (e) {
-      return [];
+      return [false];
     }
   }
 
