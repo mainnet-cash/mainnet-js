@@ -55,10 +55,10 @@ export class Connection {
     }
   }
 
-  public async WalletFromWif(secret:string): Promise<Wallet> {
+  public async WalletFromWif(secret: string): Promise<Wallet> {
     let walletClass = walletClassMap["wif"][this.network]();
     let wallet = walletClass.fromWIF(secret);
-    let walletResult = await wallet
+    let walletResult = await wallet;
     if (walletResult instanceof Error) {
       throw walletResult;
     } else {
