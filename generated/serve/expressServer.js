@@ -10,9 +10,11 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const { OpenApiValidator } = require('express-openapi-validator');
 const logger = require('./logger');
-const timeout = require('connect-timeout'); 
+const timeout = require('connect-timeout');
 const config = require('./config');
 const mainnet = require("mainnet-js");
+
+const wsServer = require('./wsServer');
 
 class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
@@ -78,10 +80,15 @@ class ExpressServer {
           });
         });
         await mainnet.initProviders()
-        return this.app.listen(this.port);
+        const server = this.app.listen(this.port);
+        server.on('upgrade', (request, socket, head) => {
+          wsServer.handleUpgrade(request, socket, head, socket => {
+            wsServer.emit('connection', socket, request);
+          });
+        });
+        return server;
       });
   }
-
 
   async close() {
     await mainnet.disconnectProviders();
