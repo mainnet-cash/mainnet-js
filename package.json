@@ -8,9 +8,9 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.0.2.js",
+  "main": "dist/mainnet-node-0.0.4.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -62,7 +62,7 @@
     "util": "^0.12.3"
   },
   "dependencies": {
-    "@bitauth/libauth": "^1.17.2",
+    "@bitauth/libauth": "^1.17.3",
     "@types/js-yaml": "^3.12.5",
     "@types/node": "^14.11.8",
     "@types/pg": "^7.14.5",
@@ -71,7 +71,7 @@
     "cashscript": "^0.5.5",
     "dexie": "^3.0.2",
     "dotenv": "^8.2.0",
-    "electrum-cash": "^2.0.4",
+    "electrum-cash": "^2.0.6",
     "parse-database-url": "^0.3.0",
     "pg": "^8.4.1",
     "pg-format": "^1.0.4",

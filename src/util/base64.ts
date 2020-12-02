@@ -1,6 +1,6 @@
 export function btoa(data: string) {
   if (typeof process === "undefined") {
-    return btoa(data);
+    return globalThis.btoa(data);
   } else {
     const btoa = (str: string) => {
       return Buffer.from(str).toString("base64");
@@ -11,7 +11,7 @@ export function btoa(data: string) {
 
 export function atob(data: string) {
   if (typeof process === "undefined") {
-    return atob(data);
+    return globalThis.atob(data);
   } else {
     const atob = (str: string) => {
       return Buffer.from(str, "base64").toString("binary");

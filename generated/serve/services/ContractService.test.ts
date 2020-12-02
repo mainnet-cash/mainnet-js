@@ -22,17 +22,19 @@ describe("Test Contract Services", () => {
     let arbiter = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
     let seller = await RegTestWallet.watchOnly('bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e')
     
+    // TODO fix nonce.
     const contractResp = await request(app).post("/contract/escrow/create").send({
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
       sellerAddr: seller.getDepositAddress(),
       amount: 16000,
-      nonce: 1
+      nonce: 0
     });
+    
     
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.address).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
+    expect(contractResp.body.address).toEqual("bchreg:pzcvrpwyrsyf2zvlvdyhyghanl0dcsxv9yghmr0j4v");
     
     let contractId = contractResp.body.contractId
     let contractAddress = contractResp.body.address
@@ -46,7 +48,7 @@ describe("Test Contract Services", () => {
             {
               cashaddr: contractAddress,
               unit: 'satoshis',
-              value: 20000,
+              value: 21000,
             },
           ],
         });
@@ -54,9 +56,10 @@ describe("Test Contract Services", () => {
     const respSpend = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
-      action: "spend"
+      action: "spend",
+      to: seller.getDepositAddress()
     });
-    
+
     expect(respSpend.statusCode).toEqual(200);
     expect(respSpend.body.txId.length).toEqual(64);
     expect(respSpend.body.hex.length).toBeGreaterThan(1000);

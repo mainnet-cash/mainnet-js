@@ -1,11 +1,6 @@
 import { EscrowContract } from "./escrow";
 import { Contract } from "./Contract";
 import { ContractResponseI } from "./interface";
-var contactClassMap = {
-  escrow: () => {
-    return EscrowContract;
-  },
-};
 
 const contractClassMap = {
   escrow: () => {
@@ -15,7 +10,6 @@ const contractClassMap = {
 
 export async function createContract(body: any): Promise<Contract> {
   let contractType = body.type;
-
   // This handles unsaved/unnamed wallets
   if (contractType in contractClassMap) {
     let contractClass = contractClassMap[contractType]();

@@ -129,7 +129,7 @@ export class Contract implements ContractI {
     return Math.round(estimatedTxHex.length * 2 * feePerByte);
   }
   // TODO refactor, split out fee estimator, amount estimator
-  public async _spendMax(
+  public async _sendMax(
     wif: string,
     funcName: string,
     outputAddress: string,

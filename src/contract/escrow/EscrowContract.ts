@@ -56,18 +56,20 @@ export class EscrowContract extends Contract {
   public async run(
     wif: string,
     funcName: string,
+    outputAddress?: string,
     getHexOnly = false,
     utxos?: UtxoI[]
   ) {
-    let outputAddress;
-    if (funcName.startsWith("spend")) {
-      outputAddress = this.sellerAddr;
-    } else if (funcName.startsWith("refund")) {
-      outputAddress = this.buyerAddr;
-    } else {
-      throw Error("Could not determine output address");
+    if(!outputAddress){
+      if (funcName.startsWith("spend")) {
+        outputAddress = this.sellerAddr;
+      } else if (funcName.startsWith("refund")) {
+        outputAddress = this.buyerAddr;
+      } else {
+        throw Error("Could not determine output address");
+      }  
     }
-    return await this._spendMax(
+    return await this._sendMax(
       wif,
       funcName,
       outputAddress,
