@@ -16,6 +16,8 @@ const mainnet = require("mainnet-js");
 
 const wsServer = require('./wsServer');
 
+const wsServer = require('./wsServer');
+
 class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
     this.port = port;
