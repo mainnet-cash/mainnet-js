@@ -3,7 +3,6 @@ import { WebHookI } from "../db/interface";
 
 import { Network } from "../interface";
 import { Connection } from "../network/Connection";
-
 const axios = require('axios').default
 
 export default class WebhookWorker {
@@ -25,13 +24,22 @@ export default class WebhookWorker {
     await this.db.init();
 
     await this.evictOldHooks();
+    await this.pickupHooks();
     setTimeout(async() => {
       await this.evictOldHooks();
+      await this.pickupHooks();
     }, 5*60*1000);
+  }
 
+  async pickupHooks(start: boolean = false): Promise<void> {
     let hooks = await this.db.getWebHooks();
     for (let hook of hooks) {
-      this.activeHooks.set(hook.id, hook);
+      if (!this.activeHooks.has(hook.id)) {
+        this.activeHooks.set(hook.id, hook);
+        if (start) {
+          this.startHook(hook);
+        }
+      }
     }
   }
 
