@@ -10,6 +10,10 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
+import { UnitEnum } from "../enum";
+
+import { Tx } from "../interface";
+
 import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
 
@@ -43,6 +47,7 @@ import { deriveCashaddr } from "../util/deriveCashaddr";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { derivePrefix } from "../util/derivePublicKeyHash";
+import { resolve } from "path";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -252,8 +257,22 @@ export class Wallet extends BaseWallet {
     return await this.provider.getUtxos(address);
   }
 
-  public async getBalance(unit?: string): Promise<BalanceResponse | number> {
-    if (unit) {
+  public async getHistory(): Promise<Tx[]> {
+    return await this.provider!.getHistory(this.cashaddr!);
+  }
+
+  public async getLastTransaction(confirmedOnly: boolean = false): Promise<any> {
+    let history: Tx[] = await this.getHistory();
+    if (confirmedOnly) {
+      history = history.filter(val => val.height > 0);
+    }
+    const [lastTx] = history.slice(-1);
+    return this.provider!.getRawTransactionObject(lastTx.tx_hash);
+  }
+
+  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+    if (rawUnit) {
+      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
@@ -261,12 +280,28 @@ export class Wallet extends BaseWallet {
   }
 
   public async watchBalance(callback: (any) => void): Promise<void> {
-    let subscribeCallback = async (data) => {
-      console.log(data);
+    let subscribeCallback = async () => {
       let balance = await this.getBalance();
       callback(balance);
     };
     return this.provider!.subscribeToAddress(this.cashaddr!, subscribeCallback);
+  }
+
+  public async waitForTransaction(): Promise<any> {
+    return new Promise(async (resolve) => {
+      const subscribeCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== this.cashaddr!) {
+            console.error("Addressess do not match", addr, this.cashaddr!);
+          }
+          let lastTx = await this.getLastTransaction();
+          await this.provider!.unsubscribeFromAddress(this.cashaddr!, subscribeCallback);
+          resolve(lastTx);
+        }
+      };
+      await this.provider!.subscribeToAddress(this.cashaddr!, subscribeCallback);
+    });
   }
 
   // Gets balance by summing value in all utxos in stats
