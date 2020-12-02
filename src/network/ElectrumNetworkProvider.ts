@@ -121,15 +121,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
   }
 
-  async connect(): Promise<boolean[]> {
+  connect(): Promise<void[]> {
     return this.isElectrumClient()
-      ? await this.connectClient()
-      : await this.connectCluster();
+      ? this.connectClient()
+      : this.connectCluster();
   }
-  async disconnect(): Promise<boolean[]> {
+  disconnect(): Promise<boolean[]> {
     return this.isElectrumClient()
-      ? await this.disconnectClient()
-      : await this.disconnectCluster();
+      ? this.disconnectClient()
+      : this.disconnectCluster();
   }
 
   isElectrumClient(): boolean {
@@ -178,15 +178,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     ]);
   }
 
-  async connectCluster(): Promise<boolean[]> {
+  async connectCluster(): Promise<void[]> {
     try {
-      return await (this.electrum as ElectrumCluster).startup();
+      return (this.electrum as ElectrumCluster).startup();
     } catch (e) {
       throw Error(e)
     }
   }
 
-  async connectClient(): Promise<boolean[]> {
+  async connectClient(): Promise<void[]> {
     try {
       return [await (this.electrum as ElectrumClient).connect()];
     } catch (e) {

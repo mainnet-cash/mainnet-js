@@ -52,7 +52,7 @@ export default interface NetworkProvider {
    * Function to connect manually if using persistent connections
    * @returns array of connection boolean successes, or throws error
    */
-  connect(): Promise<boolean[]>;
+  connect(): Promise<void[]>;
 
   /**
    * Function to disconnect manually if using persistent connections

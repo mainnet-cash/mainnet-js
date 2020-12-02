@@ -52,9 +52,9 @@ test("Should create regtest wallet", async () => {
   let BCHr = new Connection("regtest");
   await BCHr.ready();
   expect(BCHr.network).toBe("regtest");
-  let wallet = await BCHr.Wallet();
+  let wallet = await BCHr.WalletFromWif(process.env.PRIVATE_WIF!);
   expect(wallet.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
-  expect(await wallet.getBalance("sat")).toBe(0);
+  expect(await wallet.getBalance("bch")).toBeGreaterThan(200);
   expect(wallet.provider!.network).toBe("regtest");
   expect(wallet.network).toBe("regtest");
   await BCHr.disconnect();
