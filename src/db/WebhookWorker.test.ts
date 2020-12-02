@@ -17,6 +17,8 @@ let bobWif = "";
  */
 
 // mock axios requests
+describe("Webhook worker tests", () => {
+
 beforeAll(async () => {
   if (process.env.ALICE_TESTNET_ADDRESS) {
     alice = process.env.ALICE_TESTNET_ADDRESS as string;
@@ -49,15 +51,6 @@ beforeAll(async () => {
 
     if (url === "http://example.com/fail")
       return Promise.reject({status: 503});
-
-    // if (url === "http://example.com/pass")
-    //   return Promise.resolve({status: 200});
-
-    // if (url === "http://example.com/alice")
-    //   return Promise.resolve({status: 200});
-
-    // if (url === "http://example.com/bob")
-    //   return Promise.resolve({status: 200});
 
     return Promise.resolve({status: 200});
   });
@@ -241,4 +234,6 @@ test("Test recurrent hook for outgoing transactions", async () => {
   } catch (e) {
     console.log(e, e.stack, e.message);
   }
+});
+
 });

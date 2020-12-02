@@ -1,6 +1,7 @@
 import { Connection } from "./Connection";
 import { Wallet, TestNetWallet } from "../wallet/Wif";
-import { getTestnetProvider } from "../network/default";
+import { getNetworkProvider } from "../network/default";
+import { Network } from "cashscript";
 
 test("subcribe to address", async () => {
   process.setMaxListeners(0);
@@ -45,11 +46,10 @@ test("subcribe to muliple addresses bug", async () => {
 });
 
 test("Watch wallet balance", async () => {
-  return;
   let w = await TestNetWallet.fromId(
     "wif:testnet:cQg8TvWc1pZdEh5svFh4AnKjyonZmtjZuTz7xaGXrZTgqScb6vef"
   );
-  w.provider = getTestnetProvider(false, true);
+  w.provider = getNetworkProvider(Network.TESTNET, undefined, true);
   w.provider!.connect();
 
   await w.watchBalance((balance) => console.log(balance));
