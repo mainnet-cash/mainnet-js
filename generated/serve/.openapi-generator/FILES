@@ -5,7 +5,9 @@ controllers/ContractController.js
 controllers/Controller.js
 controllers/MineController.js
 controllers/WalletController.js
+controllers/WebhookController.js
 controllers/index.js
 logger.js
 services/Service.js
+services/WebhookService.js
 utils/openapiRouter.js

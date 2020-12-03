@@ -10,4 +10,8 @@ generated/client/*
 src/**/*.d.ts
 src/**/*.js
 src/**/*.js.map
+coverage
+genserated/serve/coverage
+jest/playwright/mainnet.js
+dist
 

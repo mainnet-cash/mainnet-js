@@ -39,7 +39,37 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
   name: contract
+- description: Create webhooks
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
+  name: webhook
 paths:
+  /webhook/watch_address_tranasctions:
+    post:
+      operationId: watchAddressTranasctions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchAddressRequest'
+        description: Create a new webhook to watch address transactions
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchAddressResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Create a new webhook to watch address transactions.
+      tags:
+      - webhook
+      x-eov-operation-handler: controllers/WebhookController
   /contract/escrow/create:
     post:
       operationId: createEscrow
@@ -66,8 +96,9 @@ paths:
       x-eov-operation-handler: controllers/ContractController
   /contract/escrow/utxos:
     post:
-      description: "Returns all UTXOs that can be spent by the \ncontract. Both confirmed\
-        \ and unconfirmed UTXOs are included.\n"
+      description: |
+        Returns all UTXOs that can be spent by the
+        contract. Both confirmed and unconfirmed UTXOs are included.
       operationId: escrowUtxos
       requestBody:
         content:
@@ -230,9 +261,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: "A Qr code image data encoded string in the src field suitable\
-            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
-            \\>                \n"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
       tags:
       - wallet
@@ -422,6 +453,59 @@ components:
           description: Amount in United States Dollars
           example: 438.02
           type: number
+    WatchAddressRequest:
+      example:
+        recurrence: recurrent
+        address: testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        type: transaction:in,out
+        url: http://example.com/webhook
+        duration_sec: 86400
+      properties:
+        address:
+          description: |
+            Cash address to watch
+          example: testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        url:
+          description: Url to be called when configured action is triggered
+          example: http://example.com/webhook
+          type: string
+        type:
+          default: transaction:in,out
+          description: Type of watch operation
+          enum:
+          - transaction:in
+          - transaction:out
+          - transaction:in,out
+          example: transaction:in,out
+          type: string
+        recurrence:
+          default: once
+          description: Action recurrence. Indicates if webhook should be triggered
+            recurrently until expire or only once
+          enum:
+          - once
+          - recurrent
+          example: recurrent
+          type: string
+        duration_sec:
+          default: 86400
+          description: Duration of the webhook lifetime in seconds before it will
+            expire.
+          example: 86400
+          type: number
+      required:
+      - address
+      - url
+    WatchAddressResponse:
+      example:
+        id: 1
+      properties:
+        id:
+          description: Webhook Id created in the system
+          example: 1
+          format: integer
+          type: number
     ZeroBalanceResponse:
       example:
         bch: 0
@@ -573,9 +657,10 @@ components:
         title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       properties:
         src:
-          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
-            \ ==**\"\\>      \n"
+          description: |
+            A Qr code image data in svg format as utf-8 encoded string.
+            Suitable for inclusion in html using:
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
           example: data:image/svg+xml;base64,PD94bWwgdm... ==**
           type: string
         title:

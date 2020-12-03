@@ -1,8 +1,8 @@
 const ws = require('ws');
 const config = require('./config');
 
-const mainnet = require("./lib/mainnet/mainnet-node-0.0.4");
-// const mainnet = require("mainnet");
+// const mainnet = require("./lib/mainnet/mainnet-node-0.0.4");
+const mainnet = require("mainnet-js");
 
 const host = config.URL_PATH.match('(https?://)?(.*)')[2]
 const port = config.URL_PORT;
