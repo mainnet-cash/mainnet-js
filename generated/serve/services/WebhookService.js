@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
+const mainnet = require("mainnet-js");
 
 /**
 * Create a new webhook to watch address transactions. 
@@ -10,8 +11,9 @@ const Service = require('./Service');
 const watchAddressTranasctions = ({ watchAddressRequest }) => new Promise(
   async (resolve, reject) => {
     try {
+      let id = await mainnet.watchAddressTranasctions({ ...watchAddressRequest })
       resolve(Service.successResponse({
-        watchAddressRequest,
+        id: id,
       }));
     } catch (e) {
       reject(Service.rejectResponse(

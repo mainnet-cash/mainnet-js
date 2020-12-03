@@ -59,6 +59,12 @@ export default class WebhookWorker {
     }
   }
 
+  async registerWebhook(params: any): Promise<number> {
+    const webhook = await this.db.addWebHook(params.address, params.url, params.type, params.recurrence, params.duration_sec);
+    await this.startHook(webhook);
+    return webhook.id!;
+  }
+
   async start(): Promise<void> {
     for (const [key, hook] of this.activeHooks) {
       this.startHook(hook);
@@ -179,4 +185,9 @@ export default class WebhookWorker {
       return false;
     }
   }
+}
+
+export const webhook = new WebhookWorker(Network.TESTNET);
+export const watchAddressTranasctions = async (params: any): Promise<number> => {
+  return await webhook.registerWebhook(params);
 }
