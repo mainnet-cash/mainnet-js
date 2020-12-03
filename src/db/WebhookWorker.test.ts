@@ -22,7 +22,7 @@ describe("Webhook worker tests", () => {
 beforeAll(async () => {
   if (process.env.ALICE_TESTNET_ADDRESS) {
     alice = process.env.ALICE_TESTNET_ADDRESS as string;
-    aliceWif = process.env.ALICE_TESTNET_WALLET_ID as string
+    aliceWif = process.env.ALICE_TESTNET_WALLET_ID as string;
     bob = process.env.BOB_TESTNET_ADDRESS as string;
     bobWif = process.env.BOB_TESTNET_WALLET_ID as string;
   } else {

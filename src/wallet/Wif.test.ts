@@ -189,7 +189,7 @@ describe(`Watch only Wallets`, () => {
         value: 1000,
         unit: "satoshis",
       },
-    ]), 120000);
+    ]), 1);
 
     let tx = await bobWallet.waitForTransaction();
     console.log(tx);
