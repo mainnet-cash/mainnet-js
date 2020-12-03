@@ -194,6 +194,6 @@ describe(`Watch only Wallets`, () => {
     let tx = await bobWallet.waitForTransaction();
     console.log(tx);
     await bobWallet.sendMax(aliceWallet.cashaddr!);
-    provider.disconnect();
+    await provider.disconnect();
   });
 });

@@ -83,11 +83,11 @@ export default class SqlProvider implements StorageProvider {
     duration_sec = duration_sec > expireTimeout ? expireTimeout : duration_sec * 1000;
     const expires_at = new Date((new Date()).getTime() + duration_sec);
     let text = format(
-      "INSERT into %I (address,type,recurrence,hook_url,status,last_tx,expires_at,hash) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
+      "INSERT into %I (address,type,recurrence,hook_url,status,last_tx,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;",
       this.webHookTable
     );
 
-     const result = await this.db.query(text, [address,type,recurrence,hook_url,"","",expires_at.toISOString(),""]);
+     const result = await this.db.query(text, [address,type,recurrence,hook_url,"","",expires_at.toISOString()]);
      return result.rows[0].id;
   }
 
@@ -122,7 +122,6 @@ export default class SqlProvider implements StorageProvider {
     let text = format("UPDATE %I SET last_tx = $1 WHERE id = $2;", this.webHookTable);
     await this.db.query(text, [last_tx, id]);
   }
-
 
   public async deleteWebHook(id: number): Promise<void> {
     let text = format("DELETE FROM %I WHERE id = $1;", this.webHookTable);
