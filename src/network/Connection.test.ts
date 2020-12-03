@@ -25,8 +25,8 @@ test("Should create a persistent network connection", async () => {
   await BCHr.ready();
   let height = await BCHr.networkProvider.getBlockHeight();
   expect(height).toBeGreaterThan(114);
-  
-  for(let i=0; i< 1000; i++){
+
+  for (let i = 0; i < 1000; i++) {
     let wallet = await BCHr.Wallet();
     expect(await wallet.getBalance("sat")).toBe(0);
   }
@@ -35,8 +35,7 @@ test("Should create a persistent network connection", async () => {
 });
 
 test("Should be this much slower without a persistent connection", async () => {
-  
-  for(let i=0; i< 1000; i++){
+  for (let i = 0; i < 1000; i++) {
     let wallet = await RegTestWallet.newRandom();
     expect(await wallet.getBalance("sat")).toBe(0);
   }
