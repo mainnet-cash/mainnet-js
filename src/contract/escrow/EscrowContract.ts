@@ -60,14 +60,14 @@ export class EscrowContract extends Contract {
     getHexOnly = false,
     utxos?: UtxoI[]
   ) {
-    if(!outputAddress){
+    if (!outputAddress) {
       if (funcName.startsWith("spend")) {
         outputAddress = this.sellerAddr;
       } else if (funcName.startsWith("refund")) {
         outputAddress = this.buyerAddr;
       } else {
         throw Error("Could not determine output address");
-      }  
+      }
     }
     return await this._sendMax(
       wif,
