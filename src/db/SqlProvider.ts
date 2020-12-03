@@ -32,8 +32,7 @@ export default class SqlProvider implements StorageProvider {
         "hook_url TEXT,"+
         "status TEXT,"+
         "last_tx TEXT,"+
-        "expires_at DATE,"+
-        "hash TEXT"+
+        "expires_at DATE"+
       ");",
       this.webHookTable
     );
