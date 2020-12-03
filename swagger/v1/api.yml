@@ -96,7 +96,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ContractFnRequest"
-        description: 
         required: true
       responses:
         "200":
@@ -124,9 +123,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/MineRequest"
-        required:
-          - cashaddr
-          - blocks        
       responses:
         "200":
           content:
@@ -665,25 +661,6 @@ components:
           items:
             $ref: "#/components/schemas/SendRequestItem"
       type: object
-    SerializedSendRequest:
-      properties:
-        walletId:
-          type: string
-          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-        to: 
-          type: array
-          items:
-            type: array
-            items:
-              oneOf:
-                - string
-                - number
-            description: | 
-              And array of send parameters, in the form:
-              [cashaddr, value, unit]
-            example: "[bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t, 100, 'sat']"
     SendRequestItem:
       properties:
         cashaddr:

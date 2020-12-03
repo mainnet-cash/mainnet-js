@@ -2,7 +2,7 @@ import { ClusterOrder } from "electrum-cash";
 
 export const mainnetServers = [
   "https://fulcrum.fountainhead.cash:50002",
-  "https://bch.imaginary.cash:50002",
+  //"https://bch.imaginary.cash:50002",
   //"wss://bch.imaginary.cash:50004",
   //"wss://electroncash.de:60002",
 ];
