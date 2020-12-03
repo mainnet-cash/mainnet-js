@@ -433,7 +433,7 @@ components:
       properties:
         address:
           type: string
-          example: "testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          example: "bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2"
           description: |
             Cash address to watch
         url:

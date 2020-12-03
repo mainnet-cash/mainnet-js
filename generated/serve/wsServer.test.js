@@ -2,6 +2,7 @@ const ws = require('ws');
 const config = require('./config');
 const ExpressServer = require('./expressServer');
 
+
 test("Test watchBalance ws method", async () => {
   let expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
   expressServer.launch();

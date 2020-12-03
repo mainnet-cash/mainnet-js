@@ -111,7 +111,7 @@ test("Test non-recurrent hook to be deleted after successful call", async () => 
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/success", "transaction:in", "once");
+    const hookId = (await db.addWebHook(bobWallet.cashaddr!, "http://example.com/success", "transaction:in", "once")).id!;
 
     await worker.init();
     await worker.start();
@@ -143,7 +143,7 @@ test("Test non-recurrent hook to be not deleted after failed call", async () => 
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/fail", "transaction:in", "once");
+    const hookId = (await db.addWebHook(bobWallet.cashaddr!, "http://example.com/fail", "transaction:in", "once")).id!;
 
     await worker.init();
     await worker.start();
@@ -176,7 +176,7 @@ test("Test recurrent hook for incoming transaction", async () =>{
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:in", "recurrent");
+    const hookId = (await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:in", "recurrent")).id!;
 
     await worker.init();
     await worker.start();
@@ -208,7 +208,7 @@ test("Test recurrent hook for outgoing transactions", async () => {
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:out", "recurrent");
+    const hookId = (await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:out", "recurrent")).id!;
 
     await worker.init();
     await worker.start();
@@ -240,7 +240,7 @@ test("Test should pickup transactions happened while offline", async () => {
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:in", "recurrent");
+    const hookId = (await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:in", "recurrent")).id!;
 
     await worker.init();
     await worker.start();
