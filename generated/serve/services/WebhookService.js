@@ -16,6 +16,7 @@ const watchAddressTranasctions = ({ watchAddressRequest }) => new Promise(
         id: id,
       }));
     } catch (e) {
+      console.log(e, e.message, e.stack);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
