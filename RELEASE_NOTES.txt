@@ -5,4 +5,4 @@ Newest changes
 
 0.0.4
 -----
-Added the first implementation of escrow contracts
+...
