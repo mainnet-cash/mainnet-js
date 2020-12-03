@@ -95,7 +95,7 @@ test("Test empty hook db", async () =>{
 });
 
 test("Test starting with expired hook", async () => {
-  await db.addWebHook(alice, "transaction:in", "http://example.com/pass", "once", -1000);
+  await db.addWebHook(alice, "http://example.com/pass", "transaction:in", "once", -1000);
 
   try {
     await worker.init();
@@ -111,7 +111,7 @@ test("Test non-recurrent hook to be deleted after successful call", async () => 
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "transaction:in", "http://example.com/success", "once");
+    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/success", "transaction:in", "once");
 
     await worker.init();
     await worker.start();
@@ -143,7 +143,7 @@ test("Test non-recurrent hook to be not deleted after failed call", async () => 
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "transaction:in", "http://example.com/fail", "once");
+    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/fail", "transaction:in", "once");
 
     await worker.init();
     await worker.start();
@@ -176,7 +176,7 @@ test("Test recurrent hook for incoming transaction", async () =>{
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "transaction:in", "http://example.com/bob", "recurrent");
+    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:in", "recurrent");
 
     await worker.init();
     await worker.start();
@@ -208,7 +208,7 @@ test("Test recurrent hook for outgoing transactions", async () => {
   try {
     const aliceWallet = await TestNetWallet.fromId(aliceWif);
     const bobWallet = await TestNetWallet.newRandom();
-    const hookId = await db.addWebHook(bobWallet.cashaddr!, "transaction:out", "http://example.com/bob", "recurrent");
+    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:out", "recurrent");
 
     await worker.init();
     await worker.start();
@@ -231,6 +231,73 @@ test("Test recurrent hook for outgoing transactions", async () => {
       await worker.destroy();
       resolve(true);
     }, 10000));
+  } catch (e) {
+    console.log(e, e.stack, e.message);
+  }
+});
+
+test("Test should pickup transactions happened while offline", async () => {
+  try {
+    const aliceWallet = await TestNetWallet.fromId(aliceWif);
+    const bobWallet = await TestNetWallet.newRandom();
+    const hookId = await db.addWebHook(bobWallet.cashaddr!, "http://example.com/bob", "transaction:in", "recurrent");
+
+    await worker.init();
+    await worker.start();
+
+    // initial transaction
+    await aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 1000,
+        unit: "satoshis",
+      },
+    ]);
+
+    // wait worker to process
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // shutdown
+    await worker.destroy();
+
+    let hook = await db.getWebHook(hookId);
+    console.log(hook);
+    expect(hook!.status).not.toBe("");
+    expect(hook!.last_tx).not.toBe("");
+
+    // make two more transactions "offline"
+    await aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 1000,
+        unit: "satoshis",
+      },
+    ]);
+
+    await aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 1000,
+        unit: "satoshis",
+      },
+    ]);
+
+    // wait worker to process the transactions occured while offline
+    worker = new WebhookWorker("testnet");
+    await worker.init();
+    await worker.start();
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // return funds
+    await bobWallet.sendMax(aliceWallet.cashaddr!);
+
+    await new Promise(resolve => setTimeout(async () => {
+      await db.deleteWebHook(hookId);
+      expect(responses["http://example.com/bob"].length).toBe(3);
+      expect(worker.activeHooks.size).toBe(1);
+      await worker.destroy();
+      resolve(true);
+    }, 1000));
   } catch (e) {
     console.log(e, e.stack, e.message);
   }

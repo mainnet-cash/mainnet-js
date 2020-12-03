@@ -76,7 +76,7 @@ export default class SqlProvider implements StorageProvider {
     return w;
   }
 
-  public async addWebHook(address: string, type?: string, hook_url: string, recurrence?: string, duration_sec?: number): Promise<number> {
+  public async addWebHook(address: string, hook_url: string, type?: string, recurrence?: string, duration_sec?: number): Promise<number> {
     type = type || "transaction:in,out";
     recurrence = recurrence || "once";
     const expireTimeout = Number(process.env.WEBHOOK_EXPIRE_TIMEOUT_SECONDS) || 86400;

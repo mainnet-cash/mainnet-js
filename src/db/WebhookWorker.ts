@@ -30,6 +30,12 @@ export default class WebhookWorker {
     }, 5*60*1000);
   }
 
+  async destroy(): Promise<void> {
+    await this.stop();
+    await this.connection.disconnect();
+    await this.db.close();
+  }
+
   async pickupHooks(start: boolean = false): Promise<void> {
     const hooks: WebHookI[]  = await this.db.getWebHooks();
     for (const hook of hooks) {
@@ -40,12 +46,6 @@ export default class WebhookWorker {
         }
       }
     }
-  }
-
-  async destroy(): Promise<void> {
-    await this.stop();
-    await this.connection.disconnect();
-    await this.db.close();
   }
 
   async evictOldHooks(): Promise<void> {
@@ -72,7 +72,11 @@ export default class WebhookWorker {
       if (typeof data === "string") {
         // subscription acknowledgement notification with current status
         status = data;
-        return;
+
+        // we should skip fetching transactions for freshly registered hooks upon acknowledements
+        if (hook.status === "" && hook.last_tx === "") {
+          return;
+        }
       } else if (data instanceof Array) {
         status = data[1];
         if (data[0] !== hook.address) {
