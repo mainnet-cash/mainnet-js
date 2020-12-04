@@ -1,4 +1,3 @@
-import { util } from "prettier";
 import { parseElectrumUrl } from "./util";
 
 test("Should parse various electrum urls", async () => {

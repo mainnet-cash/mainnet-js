@@ -29,7 +29,7 @@ export const clusterParams = {
   testnet: {
     distribution: 1,
     order: ClusterOrder.PRIORITY,
-    timeout: 25000,
+    timeout: 50000,
   },
   regtest: {
     distribution: 1,

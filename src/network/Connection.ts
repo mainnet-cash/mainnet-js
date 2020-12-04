@@ -1,8 +1,6 @@
 import { default as NetworkProvider } from "./NetworkProvider";
 import { getNetworkProvider } from "./default";
 import { Network } from "../interface";
-import { Wallet } from "../wallet/Wif";
-import { walletClassMap } from "../wallet/createWallet";
 import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
