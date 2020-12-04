@@ -6,13 +6,22 @@ import { walletClassMap } from "../wallet/createWallet";
 import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-export function connect(
-  servers: string[] | string,
-  network: Network = Network.MAINNET
-) {
-  globalThis["bch"] = new Connection(network, servers);
-  globalThis["bch"].ready();
+
+export async function initProviders(){
+  globalThis.BCH = new Connection()
+  await globalThis.BCH.ready()
+  globalThis.BCHt = new Connection("testnet")
+  await globalThis.BCHt.ready()
+  globalThis.BCHr = new Connection("regtest")
+  await globalThis.BCHr.ready()
 }
+
+export async function disconnectProviders(){
+  await globalThis.BCH.disconnect()
+  await globalThis.BCHt.disconnect()
+  await globalThis.BCHr.disconnect()
+}
+
 
 export class Connection {
   public network: Network;
@@ -42,28 +51,5 @@ export class Connection {
       throw Error(e);
     }
   }
-
-  public async Wallet(name = ""): Promise<Wallet> {
-    let walletClass = walletClassMap["wif"][this.network]();
-    let wallet = new walletClass(name);
-    let walletResult = await wallet.generate();
-    if (walletResult instanceof Error) {
-      throw walletResult;
-    } else {
-      walletResult.provider = this.networkProvider;
-      return walletResult;
-    }
-  }
-
-  public async WalletFromWif(secret: string): Promise<Wallet> {
-    let walletClass = walletClassMap["wif"][this.network]();
-    let wallet = walletClass.fromWIF(secret);
-    let walletResult = await wallet;
-    if (walletResult instanceof Error) {
-      throw walletResult;
-    } else {
-      walletResult.provider = this.networkProvider;
-      return walletResult;
-    }
-  }
+  
 }

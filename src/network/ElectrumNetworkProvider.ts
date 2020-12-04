@@ -199,7 +199,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async disconnectClient(): Promise<boolean[]> {
-    return [await (this.electrum as ElectrumClient).disconnect()];
+    return [await (this.electrum as ElectrumClient).disconnect(true)];
   }
 }
 

@@ -8,7 +8,7 @@ export const mainnetServers = [
 ];
 
 export const testnetServers = [
-  "wss://blackie.c3-soft.com:60004",
+  //"wss://blackie.c3-soft.com:60004",
   "wss://electroncash.de:60004",
 ];
 
@@ -24,12 +24,12 @@ export const clusterParams = {
   mainnet: {
     distribution: 2,
     order: ClusterOrder.PRIORITY,
-    timeout: 110000,
+    timeout: 45000,
   },
   testnet: {
     distribution: 1,
     order: ClusterOrder.PRIORITY,
-    timeout: 50000,
+    timeout: 25000,
   },
   regtest: {
     distribution: 1,
