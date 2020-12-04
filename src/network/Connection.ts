@@ -6,22 +6,20 @@ import { walletClassMap } from "../wallet/createWallet";
 import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-
-export async function initProviders(){
-  globalThis.BCH = new Connection()
-  await globalThis.BCH.ready()
-  globalThis.BCHt = new Connection("testnet")
-  await globalThis.BCHt.ready()
-  globalThis.BCHr = new Connection("regtest")
-  await globalThis.BCHr.ready()
+export async function initProviders() {
+  globalThis.BCH = new Connection();
+  await globalThis.BCH.ready();
+  globalThis.BCHt = new Connection("testnet");
+  await globalThis.BCHt.ready();
+  globalThis.BCHr = new Connection("regtest");
+  await globalThis.BCHr.ready();
 }
 
-export async function disconnectProviders(){
-  await globalThis.BCH.disconnect()
-  await globalThis.BCHt.disconnect()
-  await globalThis.BCHr.disconnect()
+export async function disconnectProviders() {
+  await globalThis.BCH.disconnect();
+  await globalThis.BCHt.disconnect();
+  await globalThis.BCHr.disconnect();
 }
-
 
 export class Connection {
   public network: Network;
@@ -51,5 +49,4 @@ export class Connection {
       throw Error(e);
     }
   }
-  
 }

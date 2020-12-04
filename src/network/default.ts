@@ -9,42 +9,41 @@ import { Network } from "../interface";
 const APPLICATION_USER_AGENT = "mainnet-js";
 const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
 
-function getGlobalProvider(network: Network):NetworkProvider|void{
-
-  let accessor:string
-  switch(network){
+function getGlobalProvider(network: Network): NetworkProvider | void {
+  let accessor: string;
+  switch (network) {
     case Network.MAINNET:
-      accessor = "BCH"
+      accessor = "BCH";
       break;
     case Network.TESTNET:
-    accessor = "BCHt"
+      accessor = "BCHt";
       break;
     case Network.REGTEST:
-    accessor = "BCHr"
+      accessor = "BCHr";
       break;
   }
-  if(globalThis[accessor]){
-    return globalThis[accessor].networkProvider 
-  }else{
-    return 
+  if (globalThis[accessor]) {
+    return globalThis[accessor].networkProvider;
+  } else {
+    return;
   }
 }
-
 
 export function getNetworkProvider(
   network: Network = Network.MAINNET,
   servers?: string[] | string,
-  manualConnectionManagement?:boolean,
+  manualConnectionManagement?: boolean,
   options?: ElectrumClusterParams
 ): NetworkProvider {
-  
   let useCluster;
-  manualConnectionManagement = manualConnectionManagement? manualConnectionManagement : false
+  manualConnectionManagement = manualConnectionManagement
+    ? manualConnectionManagement
+    : false;
   servers = servers ? servers : config.defaultServers[network];
-  
-  let globalProvider = getGlobalProvider(network)
-  if(globalProvider){
-    return globalProvider
+
+  let globalProvider = getGlobalProvider(network);
+  if (globalProvider) {
+    return globalProvider;
   }
   // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {

@@ -4,4 +4,3 @@ export * from "./mine";
 export * from "./network";
 export * from "./wallet/Wif";
 export * from "./wallet/createWallet";
-
