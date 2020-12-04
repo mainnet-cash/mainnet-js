@@ -12,6 +12,7 @@ const { OpenApiValidator } = require('express-openapi-validator');
 const logger = require('./logger');
 const timeout = require('connect-timeout'); 
 const config = require('./config');
+const mainnet = require("mainnet-js");
 
 class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
@@ -76,12 +77,14 @@ class ExpressServer {
             errors: err.errors || '',
           });
         });
+        await mainnet.initProviders()
         return this.app.listen(this.port);
       });
   }
 
 
   async close() {
+    await mainnet.disconnectProviders();
     if (this.server !== undefined) {
       await this.server.close();
       console.log(`Server on port ${this.port} shut down`);
