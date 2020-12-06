@@ -139,6 +139,21 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
+  test(`Should return watch named balance`, async () => {
+    if (process.env.ALICE_TESTNET_ADDRESS) {
+      const result = await page.evaluate(async (addr) => {
+        const alice = await TestNetWallet.named("alice");
+        return alice.getBalance("sat");
+      }, process.env.ALICE_TESTNET_ADDRESS);
+      expect(result).toBe(0);
+    } else {
+      expect.assertions(1);
+      console.warn(
+        "SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env"
+      );
+    }
+  });
+
   test(`Should return testnet balance in usd`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {

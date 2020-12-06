@@ -1,6 +1,6 @@
 import { WalletImportFormatType } from "@bitauth/libauth";
 
-export interface PrivateKey {
+export interface PrivateKeyI {
   privateKey: Uint8Array;
   type: WalletImportFormatType;
 }
@@ -15,7 +15,7 @@ export const Network = {
 };
 export type Network = typeof Network[keyof typeof Network];
 
-export interface Utxo {
+export interface UtxoI {
   txid: string;
   vout: number;
   satoshis: number;
@@ -23,7 +23,7 @@ export interface Utxo {
   coinbase?: boolean;
 }
 
-export interface ElectrumBalance {
+export interface ElectrumBalanceI {
   confirmed: number;
   unconfirmed: number;
 }

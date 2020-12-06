@@ -1,8 +1,21 @@
 Newest changes
 --------------
 
+Known Issues: 
+- Nonces are *not* propagated correctly from POSTs to escrow/call
+- UTXOs *may not* be propagated correctly from POSTs to escrow/call
+
+Features:
+- General Cashscript contract serialization/deserialization
+- Network providers are created global in scope (BCH, BCHt, BCHr) with the function initProviders()
+- All wallets and contracts will use the global providers if available.
+- Express server now uses network providers from global scope declared once at service start.
+
 ...
 
 0.0.4
 -----
+
+- Bugfix: fix function that determines if a network provider is using a electrum cluster or single electrum client.
+
 ...

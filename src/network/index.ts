@@ -1,2 +1,2 @@
 export { getNetworkProvider } from "./default";
-export { Connection } from "./Connection";
+export { Connection, initProviders, disconnectProviders } from "./Connection";

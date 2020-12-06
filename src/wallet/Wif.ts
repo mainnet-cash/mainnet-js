@@ -10,15 +10,11 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { WalletTypeEnum } from "./enum";
-import { UnitEnum } from "../enum";
+import { networkPrefixMap } from "../enum";
+import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
-
-import { PrivateKey } from "../interface";
-
-import { networkPrefixMap } from "../enum";
-
+import { WalletTypeEnum } from "./enum";
 import {
   SendRequest,
   SendRequestArray,
@@ -27,23 +23,23 @@ import {
   UtxoResponse,
 } from "./model";
 
-import { Utxo } from "../interface";
-
 import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress, Image } from "../qr/Qr";
+import { qrAddress } from "../qr/Qr";
+import { ImageI } from "../qr/interface";
 import { asSendRequestObject } from "../util/asSendRequestObject";
-import { checkWifNetwork } from "../util/checkWifNetwork";
-import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi";
+import { checkWifNetwork } from "../util/checkWifNetwork";
+import { deriveCashaddr } from "../util/deriveCashaddr";
+
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { derivePrefix } from "../util/derivePublicKeyHash";
@@ -77,7 +73,7 @@ export class Wallet extends BaseWallet {
       throw Error(result as string);
     }
     checkWifNetwork(secret, this.networkType);
-    let resultData: PrivateKey = result as PrivateKey;
+    let resultData: PrivateKeyI = result as PrivateKeyI;
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
@@ -245,24 +241,19 @@ export class Wallet extends BaseWallet {
     return this.cashaddr;
   }
 
-  public getDepositQr(): Image {
+  public getDepositQr(): ImageI {
     return qrAddress(this.cashaddr as string);
   }
 
-  public async getAddressUtxos(address: string): Promise<Utxo[]> {
+  public async getAddressUtxos(address: string): Promise<UtxoI[]> {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
-    const res = await this.provider.getUtxos(address);
-    if (!res) {
-      throw Error("No Utxo response from server");
-    }
-    return res;
+    return await this.provider.getUtxos(address);
   }
 
-  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
-    if (rawUnit) {
-      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
+  public async getBalance(unit?: string): Promise<BalanceResponse | number> {
+    if (unit) {
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
@@ -329,7 +320,7 @@ export class Wallet extends BaseWallet {
     let utxos = await this.getAddressUtxos(this.cashaddr);
     let resp = new UtxoResponse();
     resp.utxos = await Promise.all(
-      utxos.map(async (o: Utxo) => {
+      utxos.map(async (o: UtxoI) => {
         let utxo = new UtxoItem();
         utxo.unit = "sat";
         utxo.value = o.satoshis;

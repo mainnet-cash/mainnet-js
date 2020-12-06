@@ -1,72 +1,39 @@
-import { Connection } from "./Connection";
-import { Wallet } from "../wallet/Wif";
+import { initProviders, disconnectProviders } from "./Connection";
+import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 
-test("Should create a persistent network connection", async () => {
-  process.setMaxListeners(0);
-  let bch = new Connection();
-  await bch.ready();
-  let height = await bch.networkProvider.getBlockHeight();
-  expect(height).toBeGreaterThan(5000);
-  let wallet = await bch.Wallet();
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  await bch.disconnect();
+beforeAll(async () => {
+  await initProviders();
 });
 
-test("Should create a persistent network cluster connection", async () => {
-  process.setMaxListeners(0);
-  let bch = new Connection();
-  await bch.ready();
-  let height = await bch.networkProvider.getBlockHeight();
-  expect(height).toBeGreaterThan(5000);
-  let wallet = await bch.Wallet();
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  await bch.disconnect();
+afterAll(async () => {
+  await disconnectProviders();
 });
 
-test("Should be this much slower without a persistent connection", async () => {
+test("Should connect to mainnet", async () => {
+  process.setMaxListeners(0);
+
+  let height = await globalThis.BCH.getBlockHeight();
+  expect(height).toBeGreaterThan(5000);
   let wallet = await Wallet.newRandom();
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
-  expect(await wallet.getBalance("sat")).toBe(0);
+  expect(wallet.provider == globalThis.BCH).toBeTruthy();
   expect(await wallet.getBalance("sat")).toBe(0);
 });
 
-test("Should create regtest wallet", async () => {
-  process.setMaxListeners(0);
-  let BCHr = new Connection("regtest");
-  await BCHr.ready();
-  expect(BCHr.network).toBe("regtest");
-  let regtestWallet = await BCHr.Wallet();
-  expect(regtestWallet.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
-  expect(regtestWallet.provider!.network).toBe("regtest");
-  expect(regtestWallet.network).toBe("regtest");
-  await BCHr.disconnect();
+test("Should use global provider when creating standard wallet", async () => {
+  let height = await globalThis.BCHt.getBlockHeight();
+  expect(height).toBeGreaterThan(114);
+  let wallet = await TestNetWallet.newRandom();
+  expect(wallet.provider == globalThis.BCHt).toBeTruthy();
+  expect(await wallet.getBalance("sat")).toBe(0);
 });
 
-test("Should create testnet wallet", async () => {
+test("Should lower overhead in creating wallets", async () => {
   process.setMaxListeners(0);
-  let BCHt = new Connection("testnet");
-  await BCHt.ready();
-  expect(BCHt.network).toBe("testnet");
-  let wallet = await BCHt.Wallet();
-  expect(wallet.getDepositAddress()!.slice(0, 9)).toBe("bchtest:q");
-  expect(wallet.provider!.network).toBe("testnet");
-  expect(wallet.network).toBe("testnet");
-  await BCHt.disconnect();
+  let height = await globalThis.BCHr.getBlockHeight();
+  expect(height).toBeGreaterThan(114);
+  for (let i = 0; i < 1000; i++) {
+    let wallet = await RegTestWallet.newRandom();
+    expect(wallet.provider == globalThis.BCHr).toBeTruthy();
+    expect(await wallet.getBalance("sat")).toBe(0);
+  }
 });

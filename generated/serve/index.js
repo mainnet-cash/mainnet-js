@@ -1,7 +1,7 @@
 const config = require('./config');
 const logger = require('./logger');
 const ExpressServer = require('./expressServer');
-
+const mainnet = require("mainnet-js");
 const launchServer = async () => {
   try {
     this.expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
@@ -19,9 +19,12 @@ const getServer = () => {
   return expressServer
 }
 
-
-function startServer() {
-  launchServer().catch(e => logger_1.logger.error(e));
+const  killElectrum =  async () => {
+  return mainnet.disconnectProviders()
 }
 
-module.exports = { startServer , getServer };
+function startServer() {
+  launchServer().catch(e => logger.error(e));
+}
+
+module.exports = { startServer , getServer , killElectrum};

@@ -9,7 +9,8 @@ describe("Test Mine Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();  
   });
-  afterEach(function () {
+  afterAll(async function () {
+    await server.killElectrum()
     app.close();
   });
 

@@ -5,7 +5,7 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { NetworkProvider } from "cashscript";
-import { Utxo, ElectrumBalance } from "../interface";
+import { UtxoI, ElectrumBalanceI } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
 
@@ -26,7 +26,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  async getUtxos(address: string): Promise<Utxo[]> {
+  async getUtxos(address: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
       address
@@ -46,7 +46,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     const result = (await this.performRequest(
       "blockchain.address.get_balance",
       address
-    )) as ElectrumBalance;
+    )) as ElectrumBalanceI;
 
     return result.confirmed + result.unconfirmed;
   }
@@ -120,12 +120,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async ready(): Promise<boolean | unknown> {
     return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
   }
-  async connect(): Promise<boolean[]> {
+
+  connect(): Promise<void[]> {
     return this.isElectrumClient()
       ? this.connectClient()
       : this.connectCluster();
   }
-  async disconnect(): Promise<boolean[]> {
+  disconnect(): Promise<boolean[]> {
     return this.isElectrumClient()
       ? this.disconnectClient()
       : this.disconnectCluster();
@@ -177,19 +178,19 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     ]);
   }
 
-  async connectCluster(): Promise<boolean[]> {
+  async connectCluster(): Promise<void[]> {
     try {
-      return await (this.electrum as ElectrumCluster).startup();
+      return (this.electrum as ElectrumCluster).startup();
     } catch (e) {
-      return [];
+      throw Error(e);
     }
   }
 
-  async connectClient(): Promise<boolean[]> {
+  async connectClient(): Promise<void[]> {
     try {
       return [await (this.electrum as ElectrumClient).connect()];
     } catch (e) {
-      return [];
+      throw Error(e);
     }
   }
 
@@ -198,7 +199,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async disconnectClient(): Promise<boolean[]> {
-    return [await (this.electrum as ElectrumClient).disconnect()];
+    return [await (this.electrum as ElectrumClient).disconnect(true)];
   }
 }
 

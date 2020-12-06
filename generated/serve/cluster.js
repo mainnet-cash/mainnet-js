@@ -1,8 +1,6 @@
 const config = require('./config');
 const cluster = require('cluster');
 const app = require("./index")
-const ExpressServer = require('./expressServer');
-
 
 
 if (cluster.isMaster) {

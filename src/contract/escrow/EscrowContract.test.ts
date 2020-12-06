@@ -11,13 +11,17 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 19500,
     });
     let escrow2 = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 19500,
     });
-    expect(escrow.toString()).toBe(escrow2.toString());
+    expect(escrow.toString().slice(0, -20)).toBe(
+      escrow2.toString().slice(0, -20)
+    );
     expect(escrow.getAddress()).toBe(escrow2.getAddress());
 
     let escrow3 = EscrowContract.fromId(escrow.toString());
@@ -31,39 +35,46 @@ describe(`Test Escrow Contracts`, () => {
     let buyer = await RegTestWallet.newRandom();
     let seller = await RegTestWallet.newRandom();
     let seller2 = await RegTestWallet.newRandom();
-    await funder.send([
-      {
-        cashaddr: buyer.getDepositAddress()!,
-        value: 500000,
-        unit: "satoshis",
-      },
-    ]);
-    expect(await buyer.getBalance("sat")).toBe(500000);
     let escrow = new EscrowContract({
       sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
+      amount: 9500,
     });
     expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
-    await buyer.send([
+    await funder.send([
       {
         cashaddr: escrow.getAddress()!,
-        value: 450000,
+        value: 6400,
+        unit: "satoshis",
+      },
+    ]);
+    await funder.send([
+      {
+        cashaddr: escrow.getAddress()!,
+        value: 6400,
+        unit: "satoshis",
+      },
+    ]);
+    await funder.send([
+      {
+        cashaddr: escrow.getAddress()!,
+        value: 6400,
         unit: "satoshis",
       },
     ]);
 
-    expect(await escrow.getBalance()).toBe(450000);
+    expect(await escrow.getBalance()).toBeGreaterThan(12000);
 
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
-    expect(await seller.getBalance("sat")).toBeGreaterThan(446500);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
-    expect(await seller2.getBalance("sat")).toBeGreaterThan(446000);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(9500);
   });
 
   test("Should allow arbiter to spend to seller", async () => {
@@ -86,6 +97,8 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 445000,
+      nonce: 12,
     });
 
     // fund the escrow contract
@@ -128,6 +141,8 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 446000,
+      nonce: 13,
     });
 
     // fund the escrow contract
@@ -170,6 +185,8 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
+      amount: 446000,
+      nonce: 22,
     });
 
     // fund the escrow contract
@@ -212,6 +229,8 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
+        amount: 40000,
+        nonce: 3,
       });
 
       // fund the escrow contract
@@ -252,6 +271,8 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
+        amount: 40000,
+        nonce: 3,
       });
 
       // fund the escrow contract

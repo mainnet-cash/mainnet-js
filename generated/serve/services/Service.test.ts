@@ -1,4 +1,4 @@
-import { getServer } from "../index";
+import { getServer , killElectrum} from "../index";
 var request = require("supertest");
 
 var app;
@@ -7,8 +7,9 @@ describe("Post Endpoints", () => {
   beforeAll(async function () {
     app = await getServer().launch();
   });
-  afterEach(function () {
+  afterAll(async function () {
     app.close();
+    await killElectrum()
   });
 
   /**

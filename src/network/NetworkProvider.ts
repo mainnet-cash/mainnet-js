@@ -1,4 +1,4 @@
-import { Utxo, Network } from "../interface";
+import { UtxoI, Network } from "../interface";
 
 export default interface NetworkProvider {
   /**
@@ -11,7 +11,7 @@ export default interface NetworkProvider {
    * @param address The CashAddress for which we wish to retrieve UTXOs.
    * @returns List of UTXOs spendable by the provided address.
    */
-  getUtxos(address: string): Promise<Utxo[]>;
+  getUtxos(address: string): Promise<UtxoI[]>;
 
   /**
    * Retrieve all balance of an address in satoshi
@@ -52,7 +52,7 @@ export default interface NetworkProvider {
    * Function to connect manually if using persistent connections
    * @returns array of connection boolean successes, or throws error
    */
-  connect(): Promise<boolean[]>;
+  connect(): Promise<void[]>;
 
   /**
    * Function to disconnect manually if using persistent connections

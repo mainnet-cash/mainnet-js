@@ -97,7 +97,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ContractFnRequest'
-        description: "null"
         required: true
       responses:
         "200":
@@ -455,8 +454,10 @@ components:
     EscrowRequest:
       example:
         arbiterAddr: bchtest:qpsm4nm7talhxhl05mlhms3ys43u76rn0ttdv3qg2u
+        amount: 10000
         buyerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         sellerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        nonce: 808
       properties:
         buyerAddr:
           description: The cashaddress of the buyer
@@ -467,7 +468,19 @@ components:
         sellerAddr:
           description: The cashaddress of the seller
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        amount:
+          description: Numeric amount to be transferred by the contract in satoshi,
+            amount must be less than 21 BCH.
+          example: 10000
+          type: number
+        nonce:
+          description: A unique value added to the contract, which allows the contract
+            to be different from an otherwise identical contract, i.e. two monthly
+            orders.
+          example: 808
+          type: number
       required:
+      - amount
       - arbiterAddr
       - buyerAddr
       - sellerAddr
@@ -488,9 +501,11 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         contractId: contractId
         action: spend
+        to: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         utxoIds:
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        nonce: 808
         getHexOnly: true
       properties:
         contractId:
@@ -509,6 +524,10 @@ components:
           - refund
           example: spend
           type: string
+        to:
+          description: output for the transaction
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
         getHexOnly:
           description: |
             getHexOnly (default:false), if true, will cause only the transaction hex to be returned; if false, the transaction will be sent to the network
@@ -519,6 +538,12 @@ components:
             example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
             type: string
           type: array
+        nonce:
+          description: A unique value added to the contract, which allows the contract
+            to be different from an otherwise identical contract, i.e. two monthly
+            orders.
+          example: 808
+          type: number
       required:
       - action
       - contractId
@@ -732,22 +757,6 @@ components:
             $ref: '#/components/schemas/SendRequestItem'
           type: array
       type: object
-    SerializedSendRequest:
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        to:
-          items:
-            description: |
-              And array of send parameters, in the form:
-              [cashaddr, value, unit]
-            example: '[bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t, 100, ''sat'']'
-            items: {}
-            type: array
-          type: array
     SendRequestItem:
       example:
         cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
