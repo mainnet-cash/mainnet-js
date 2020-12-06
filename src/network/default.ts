@@ -23,7 +23,7 @@ function getGlobalProvider(network: Network): NetworkProvider | void {
       break;
   }
   if (globalThis[accessor]) {
-    return globalThis[accessor].networkProvider;
+    return globalThis[accessor];
   } else {
     return;
   }

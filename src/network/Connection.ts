@@ -9,8 +9,8 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 async function initProvider(network: Network) {
   const ticker = networkTickerMap[network]
   if (!(ticker in globalThis)) {
-    globalThis[ticker] = new Connection(network);
-    return globalThis[ticker].ready();
+    let conn = new Connection(network);
+    return globalThis[ticker] = (await conn.ready()).networkProvider;
   } else {
     console.warn(`Ignoring attempt to reinitialize non-existent ${network} provider`)
     return true
@@ -56,11 +56,13 @@ export class Connection {
   public async ready() {
     await this.networkProvider.connect();
     await this.networkProvider.ready();
+    return this
   }
 
   public async disconnect() {
     try {
       await this.networkProvider.disconnect();
+      return this
     } catch (e) {
       throw Error(e);
     }
