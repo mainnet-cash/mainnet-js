@@ -1,4 +1,12 @@
 import { ClusterOrder } from "electrum-cash";
+import { Network } from "../interface";
+
+
+export const networkTickerMap = {
+  "mainnet": "BCH" ,
+  "testnet": "BCHt", 
+  "regtest": "BCHr", 
+}
 
 export const mainnetServers = [
   "https://fulcrum.fountainhead.cash:50002",

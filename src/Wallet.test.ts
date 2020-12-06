@@ -74,17 +74,6 @@ describe(`Test Wallet library`, () => {
     expect(alice.getDepositAddress()!.slice(0, 13)).toBe("bitcoincash:q");
   });
 
-  test("Should throw error on wif/network mismatch", async () => {
-    expect.assertions(1);
-    try {
-      await Wallet.fromId(`wif:mainnet:${process.env.PRIVATE_WIF}`);
-    } catch (e) {
-      expect(e.message).toBe(
-        "Mainnet type wif cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6 passed, should start with L or K"
-      );
-    }
-  });
-
   test("Should also throw error on wif/network mismatch", async () => {
     expect.assertions(1);
     try {

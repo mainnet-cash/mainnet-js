@@ -1,22 +1,44 @@
 import { default as NetworkProvider } from "./NetworkProvider";
 import { getNetworkProvider } from "./default";
 import { Network } from "../interface";
+import { networkTickerMap } from "./constant";
 import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-export async function initProviders() {
-  globalThis.BCH = new Connection();
-  await globalThis.BCH.ready();
-  globalThis.BCHt = new Connection("testnet");
-  await globalThis.BCHt.ready();
-  globalThis.BCHr = new Connection("regtest");
-  await globalThis.BCHr.ready();
+
+async function initProvider(network: Network) {
+  const ticker = networkTickerMap[network]
+  if (!(ticker in globalThis)) {
+    globalThis[ticker] = new Connection(network);
+    return globalThis[ticker].ready();
+  } else {
+    console.warn(`Ignoring attempt to reinitialize non-existent ${network} provider`)
+    return true
+  }
 }
 
-export async function disconnectProviders() {
-  await globalThis.BCH.disconnect();
-  await globalThis.BCHt.disconnect();
-  await globalThis.BCHr.disconnect();
+export async function initProviders(networks?: Network[]) {
+  networks = networks ? networks : Object.keys(networkTickerMap) as Network[]
+  let initPromises = networks.map(n => initProvider(n))
+  await Promise.all(initPromises).catch(e => {
+    console.warn(`Error establishing a persistent connection. ${e}`)
+  })
+}
+
+async function disconnectProvider(network: Network) {
+  const ticker = networkTickerMap[network]
+  if ((ticker in globalThis)) {
+    return globalThis[ticker].disconnect()
+  } else {
+    console.warn(`Ignoring attempt to disconnect non-existent ${network} provider`)
+    return true
+  }
+}
+
+export async function disconnectProviders(networks?: Network[]) {
+  networks = networks ? networks : Object.keys(networkTickerMap) as Network[]
+  let disconnectPromises = networks.map(n => disconnectProvider(n))
+  await Promise.all(disconnectPromises)
 }
 
 export class Connection {
@@ -32,12 +54,8 @@ export class Connection {
   }
 
   public async ready() {
-    try {
-      await this.networkProvider.connect();
-      await this.networkProvider.ready();
-    } catch (e) {
-      throw Error(e);
-    }
+    await this.networkProvider.connect();
+    await this.networkProvider.ready();
   }
 
   public async disconnect() {
