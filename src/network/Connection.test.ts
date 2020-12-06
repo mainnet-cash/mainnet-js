@@ -27,11 +27,10 @@ test("Should throw warning if called again", async () => {
 
 test("Should use global provider when creating standard wallet", async () => {
   let height = await globalThis.BCHt.networkProvider.getBlockHeight();
-  expect(height).toBeGreaterThan(114);  
+  expect(height).toBeGreaterThan(114);
   let wallet = await TestNetWallet.newRandom();
-  expect(wallet.provider==globalThis.BCHt.networkProvider).toBeTruthy()
+  expect(wallet.provider == globalThis.BCHt.networkProvider).toBeTruthy();
   expect(await wallet.getBalance("sat")).toBe(0);
-
 });
 
 test("Should lower overhead in creating wallets", async () => {
