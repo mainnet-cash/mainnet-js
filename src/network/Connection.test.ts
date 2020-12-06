@@ -1,4 +1,4 @@
-import { Connection, initProviders, disconnectProviders } from "./Connection";
+import { initProviders, disconnectProviders } from "./Connection";
 import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 
 beforeAll(async () => {
@@ -19,15 +19,12 @@ test("Should connect to mainnet", async () => {
   expect(await wallet.getBalance("sat")).toBe(0);
 });
 
-
-
 test("Should use global provider when creating standard wallet", async () => {
   let height = await globalThis.BCHt.getBlockHeight();
-  expect(height).toBeGreaterThan(114);  
+  expect(height).toBeGreaterThan(114);
   let wallet = await TestNetWallet.newRandom();
-  expect(wallet.provider==globalThis.BCHt).toBeTruthy()
+  expect(wallet.provider == globalThis.BCHt).toBeTruthy();
   expect(await wallet.getBalance("sat")).toBe(0);
-
 });
 
 test("Should lower overhead in creating wallets", async () => {

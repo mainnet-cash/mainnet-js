@@ -5,40 +5,43 @@ import { networkTickerMap } from "./constant";
 import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-
 async function initProvider(network: Network) {
-  const ticker = networkTickerMap[network]
+  const ticker = networkTickerMap[network];
   if (!(ticker in globalThis)) {
     let conn = new Connection(network);
-    return globalThis[ticker] = (await conn.ready()).networkProvider;
+    return (globalThis[ticker] = (await conn.ready()).networkProvider);
   } else {
-    console.warn(`Ignoring attempt to reinitialize non-existent ${network} provider`)
-    return true
+    console.warn(
+      `Ignoring attempt to reinitialize non-existent ${network} provider`
+    );
+    return true;
   }
 }
 
 export async function initProviders(networks?: Network[]) {
-  networks = networks ? networks : Object.keys(networkTickerMap) as Network[]
-  let initPromises = networks.map(n => initProvider(n))
-  await Promise.all(initPromises).catch(e => {
-    console.warn(`Error establishing a persistent connection. ${e}`)
-  })
+  networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
+  let initPromises = networks.map((n) => initProvider(n));
+  await Promise.all(initPromises).catch((e) => {
+    console.warn(`Error establishing a persistent connection. ${e}`);
+  });
 }
 
 async function disconnectProvider(network: Network) {
-  const ticker = networkTickerMap[network]
-  if ((ticker in globalThis)) {
-    return globalThis[ticker].disconnect()
+  const ticker = networkTickerMap[network];
+  if (ticker in globalThis) {
+    return globalThis[ticker].disconnect();
   } else {
-    console.warn(`Ignoring attempt to disconnect non-existent ${network} provider`)
-    return true
+    console.warn(
+      `Ignoring attempt to disconnect non-existent ${network} provider`
+    );
+    return true;
   }
 }
 
 export async function disconnectProviders(networks?: Network[]) {
-  networks = networks ? networks : Object.keys(networkTickerMap) as Network[]
-  let disconnectPromises = networks.map(n => disconnectProvider(n))
-  await Promise.all(disconnectPromises)
+  networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
+  let disconnectPromises = networks.map((n) => disconnectProvider(n));
+  await Promise.all(disconnectPromises);
 }
 
 export class Connection {
@@ -56,13 +59,13 @@ export class Connection {
   public async ready() {
     await this.networkProvider.connect();
     await this.networkProvider.ready();
-    return this
+    return this;
   }
 
   public async disconnect() {
     try {
       await this.networkProvider.disconnect();
-      return this
+      return this;
     } catch (e) {
       throw Error(e);
     }
