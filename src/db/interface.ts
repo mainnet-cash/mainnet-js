@@ -4,7 +4,7 @@ export interface WalletI {
   wallet: string;
 }
 
-export interface WebHookI {
+export interface WebhookI {
   id?: number;
   address: string;
   type: string;

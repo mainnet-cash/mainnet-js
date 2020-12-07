@@ -1,4 +1,4 @@
-import { Tx, UtxoI, Network } from "../interface";
+import { TxI, UtxoI, Network } from "../interface";
 
 export default interface NetworkProvider {
   /**
@@ -56,7 +56,7 @@ export default interface NetworkProvider {
    * @throws {Error} If the transaction was not accepted by the network.
    * @returns Array of transactions.
    */
-  getHistory(address: string): Promise<Tx[]>;
+  getHistory(address: string): Promise<TxI[]>;
 
   /**
    * Subscribe to the address change events

@@ -1,45 +1,45 @@
 import { default as SqlProvider } from "../db/SqlProvider";
-import { WebHookI } from "../db/interface";
+import { WebhookI } from "../db/interface";
 
-import { Network, Tx } from "../interface";
-import { Connection } from "../network/Connection";
+import { Network, TxI } from "../interface";
+import NetworkProvider from "../network/NetworkProvider";
 import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
+import { getNetworkProvider } from "../network";
 
 const axios = require('axios').default
 
 export default class WebhookWorker {
-  activeHooks: Map<number, WebHookI> = new Map();
+  activeHooks: Map<number, WebhookI> = new Map();
   callbacks: Map<number, (data: any | string | Array<string>) => void> = new Map();
-  connection: Connection;
+  provider: NetworkProvider;
   db: SqlProvider;
-  network: Network;
 
   constructor(network: Network = Network.MAINNET) {
-    this.network = network;
-    this.connection = new Connection(this.network);
-    this.db = new SqlProvider(this.network);
+    this.provider = getNetworkProvider(network, undefined, true);
+    this.db = new SqlProvider(network);
   }
 
   async init(): Promise<void> {
-    await this.connection.ready();
     await this.db.init();
 
     await this.evictOldHooks();
     await this.pickupHooks();
-    setTimeout(async() => {
+    setTimeout(async () => {
       await this.evictOldHooks();
       await this.pickupHooks();
-    }, 5*60*1000);
+    }, 5 * 60 * 1000);
   }
 
   async destroy(): Promise<void> {
     await this.stop();
-    await this.connection.disconnect();
     await this.db.close();
+
+    // do not disconnect persistent connections
+    // await this.provider.disconnect();
   }
 
   async pickupHooks(start: boolean = false): Promise<void> {
-    const hooks: WebHookI[]  = await this.db.getWebHooks();
+    const hooks: WebhookI[] = await this.db.getWebhooks();
     for (const hook of hooks) {
       if (!this.activeHooks.has(hook.id!)) {
         this.activeHooks.set(hook.id!, hook);
@@ -51,18 +51,18 @@ export default class WebhookWorker {
   }
 
   async evictOldHooks(): Promise<void> {
-    const hooks: WebHookI[] = await this.db.getWebHooks();
+    const hooks: WebhookI[] = await this.db.getWebhooks();
     for (const hook of hooks) {
       if (new Date() >= hook.expires_at) {
         console.log("Evicting expired hook with id", hook.id);
         await this.stopHook(hook);
-        await this.db.deleteWebHook(hook.id!);
+        await this.db.deleteWebhook(hook.id!);
       }
     }
   }
 
   async registerWebhook(params: any): Promise<number> {
-    const webhook = await this.db.addWebHook(params.address, params.url, params.type, params.recurrence, params.duration_sec);
+    const webhook = await this.db.addWebhook(params.address, params.url, params.type, params.recurrence, params.duration_sec);
     await this.startHook(webhook);
     return webhook.id!;
   }
@@ -73,7 +73,7 @@ export default class WebhookWorker {
     }
   }
 
-  async startHook(hook: WebHookI): Promise<void> {
+  async startHook(hook: WebhookI): Promise<void> {
     const callback = async (data: string | Array<string>) => {
       // console.log(data);
       let status: string = "";
@@ -88,7 +88,7 @@ export default class WebhookWorker {
       } else if (data instanceof Array) {
         status = data[1];
         if (data[0] !== hook.address) {
-          console.log("Address missmatch, skipping");
+          console.warn("Address missmatch, skipping", data[0], hook.address);
           return;
         }
       }
@@ -99,17 +99,17 @@ export default class WebhookWorker {
     }
 
     this.callbacks.set(hook.id!, callback);
-    await this.connection.networkProvider.subscribeToAddress(hook.address, callback);
+    await this.provider.subscribeToAddress(hook.address, callback);
   }
 
-  async webhookHandler(hook: WebHookI, status: string): Promise<void> {
+  async webhookHandler(hook: WebhookI, status: string): Promise<void> {
     // console.log("Dispatching action for a webhook", JSON.stringify(hook));
 
     // get transactions
-    const history: Tx[] = await this.connection.networkProvider.getHistory(hook.address);
+    const history: TxI[] = await this.provider.getHistory(hook.address);
     // console.log("Got history", history);
     // figure out which transactions to send to the hook
-    let txs: Tx[] = []
+    let txs: TxI[] = []
     const idx: number = history.findIndex(val => val.tx_hash === hook.last_tx);
     if (idx >= 0) {
       // send all after last tracked
@@ -127,10 +127,10 @@ export default class WebhookWorker {
       // watching transactions
       let result: boolean = false;
 
-      if (hook.type.indexOf("transaction:") > 0) {
+      if (hook.type.indexOf("transaction:") >= 0) {
         // console.log("Getting raw tx", tx.tx_hash);
-        const rawTx: any = await this.connection.networkProvider.getRawTransactionObject(tx.tx_hash);
-        const parentTxs: any[] = await Promise.all(rawTx.vin.map(t => this.connection.networkProvider.getRawTransactionObject(t.txid)));
+        const rawTx: any = await this.provider.getRawTransactionObject(tx.tx_hash);
+        const parentTxs: any[] = await Promise.all(rawTx.vin.map(t => this.provider.getRawTransactionObject(t.txid)));
         // console.log("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some(val => val.scriptPubKey.addresses.includes(hook.address));
         const haveAddressInParentOutputs: boolean = parentTxs.some(parent => parent.vout.some(val => val.scriptPubKey.addresses.includes(hook.address)));
@@ -149,9 +149,9 @@ export default class WebhookWorker {
           // not interested in this transaction
           continue;
         }
-      } else if (hook.type.indexOf("balance")) {
+      } else if (hook.type.indexOf("balance") >= 0) {
         // watching address balance
-        const balanceSat = await this.connection.networkProvider!.getBalance(hook.address)
+        const balanceSat = await this.provider!.getBalance(hook.address)
         const balanceObject = await balanceResponseFromSatoshi(balanceSat);
         result = await this.postWebHook(hook.hook_url, balanceObject);
       }
@@ -163,17 +163,17 @@ export default class WebhookWorker {
       }
 
       hook.last_tx = tx.tx_hash;
-      await this.db.setWebHookLastTx(hook.id!, tx.tx_hash);
+      await this.db.setWebhookLastTx(hook.id!, tx.tx_hash);
     }
 
     if (shouldUpdateStatus) {
       hook.status = status;
-      await this.db.setWebHookStatus(hook.id!, status);
+      await this.db.setWebhookStatus(hook.id!, status);
     }
 
     if (hook.recurrence === "once" && !hookCallFailed) {
       await this.stopHook(hook);
-      await this.db.deleteWebHook(hook.id!);
+      await this.db.deleteWebhook(hook.id!);
     }
   }
 
@@ -183,9 +183,9 @@ export default class WebhookWorker {
     }
   }
 
-  async stopHook(hook: WebHookI): Promise<void> {
+  async stopHook(hook: WebhookI): Promise<void> {
     if (this.activeHooks.has(hook.id!)) {
-      await this.connection.networkProvider.unsubscribeFromAddress(hook.address, this.callbacks.get(hook.id!)!);
+      await this.provider.unsubscribeFromAddress(hook.address, this.callbacks.get(hook.id!)!);
       this.activeHooks.delete(hook.id!);
       this.callbacks.delete(hook.id!);
     }
@@ -203,7 +203,7 @@ export default class WebhookWorker {
   }
 }
 
-export const webhook = new WebhookWorker(Network.TESTNET);
+export const webhook = new WebhookWorker();
 webhook.init();
 export const watchAddress = async (params: any): Promise<number> => {
   return await webhook.registerWebhook(params);

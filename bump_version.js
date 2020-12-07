@@ -11,29 +11,32 @@ const types = [
   "prerelease",
 ];
 
-// update package.json
-let package = require("./package.json");
-let version = package.version;
-console.log("Package version:", version);
-
 let newVersion = undefined;
 
-if (semver.valid(process.argv[2])) {
-  newVersion = process.argv[2];
-} else {
-  let bumpType = types.includes(process.argv[2]) ? process.argv[2] : "patch";
-  let preType = process.argv[3];
-  newVersion = semver.inc(package.version, bumpType, preType);
-}
+// update package.json
+const files = ["./package.json", "./generated/serve/package.json"]
+files.forEach((file) => {
+  let package = require(file);
+  let version = package.version;
+  console.log("Package version:", version);
 
-console.log("Updating to version:", newVersion);
-package.main = package.main.replace(version, newVersion);
-package.version = newVersion;
 
-fs.writeFileSync("./package.json", JSON.stringify(package, null, 2));
+  if (semver.valid(process.argv[2])) {
+    newVersion = process.argv[2];
+  } else {
+    let bumpType = types.includes(process.argv[2]) ? process.argv[2] : "patch";
+    let preType = process.argv[3];
+    newVersion = semver.inc(package.version, bumpType, preType);
+  }
 
-swag = ["./swagger/v1/api.yml", "./generated/serve/api/openapi.yaml"];
+  console.log("Updating to version:", newVersion);
+  package.main = package.main.replace(version, newVersion);
+  package.version = newVersion;
 
+  fs.writeFileSync(file, JSON.stringify(package, null, 2) + "\n");
+});
+
+const swag = ["./swagger/v1/api.yml", "./generated/serve/api/openapi.yaml"];
 swag.forEach((val) => {
   fs.writeFileSync(
     val,

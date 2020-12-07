@@ -1,7 +1,7 @@
 Newest changes
 --------------
 
-Known Issues: 
+Known Issues:
 - Nonces are *not* propagated correctly from POSTs to escrow/call
 - UTXOs *may not* be propagated correctly from POSTs to escrow/call
 
@@ -17,5 +17,8 @@ Features:
 -----
 
 - Bugfix: fix function that determines if a network provider is using a electrum cluster or single electrum client.
-
+- New provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress
+- New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
+- Add webhooks for watching balance and transactions - REST Endpoint /webhook/watch_address
+- Add websockets for watching balance and transactions - REST Endpoint /api/v1/wallet, methods watchBalance, waitForTransaction
 ...
