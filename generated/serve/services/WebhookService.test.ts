@@ -16,10 +16,11 @@ describe("Test Webhook Endpoints", () => {
    */
   it("Should register a webhook", async () => {
     const resp = await request(app)
-      .post("/webhook/watch_address_tranasctions")
+      .post("/webhook/watch_address")
       .send({
         address: 'testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22',
-        url: 'http://example.com/'
+        url: 'http://example.com/',
+        type: 'balance'
       });
     expect(resp.statusCode).toEqual(200);
     expect(resp.id).toBeGreaterThan(0);

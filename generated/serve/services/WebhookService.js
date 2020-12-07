@@ -8,10 +8,10 @@ const mainnet = require("mainnet-js");
 * watchAddressRequest WatchAddressRequest Create a new webhook to watch address transactions
 * returns WatchAddressResponse
 * */
-const watchAddressTranasctions = ({ watchAddressRequest }) => new Promise(
+const watchAddress = ({ watchAddressRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let id = await mainnet.watchAddressTranasctions({ ...watchAddressRequest })
+      let id = await mainnet.watchAddress({ ...watchAddressRequest })
       resolve(Service.successResponse({
         id: id,
       }));
@@ -26,5 +26,5 @@ const watchAddressTranasctions = ({ watchAddressRequest }) => new Promise(
 );
 
 module.exports = {
-  watchAddressTranasctions,
+  watchAddress,
 };
