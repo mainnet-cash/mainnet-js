@@ -50,7 +50,7 @@ tags:
     url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
   name: webhook
 paths:
-  /webhook/watch_address_tranasctions:
+  /webhook/watch_address:
     post:
       operationId: watchAddressTranasctions
       requestBody:
@@ -58,7 +58,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WatchAddressRequest'
-        description: Create a new webhook to watch address transactions
+        description: |
+          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url' -
+          'transaction:in' for incoming only, 'transaction:out' for outgoing only and 'transaction:in,out' both for incoming and outgoing transactions.
+          'balance' will post the object according to 'BalanceResponse' schema
         required: true
       responses:
         "200":
@@ -71,7 +74,7 @@ paths:
           content: {}
           description: Invalid input
       summary: |
-        Create a new webhook to watch address transactions.
+        Create a webhook to watch address balance and transactions.
       tags:
       - webhook
       x-eov-operation-handler: controllers/WebhookController
@@ -493,6 +496,7 @@ components:
           - transaction:in
           - transaction:out
           - transaction:in,out
+          - balance
           example: transaction:in,out
           type: string
         recurrence:
@@ -512,6 +516,7 @@ components:
           type: number
       required:
       - address
+      - type
       - url
     WatchAddressResponse:
       example:
