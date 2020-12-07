@@ -32,7 +32,7 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 const escrowFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.contractFromId(contractFnRequest.contractId);
+      let contract = await mainnet.EscrowContract.fromId(contractFnRequest.contractId);
       let wallet = await mainnet.walletFromId(contractFnRequest.walletId)
       
       let resp = await contract._sendMax(
@@ -40,7 +40,8 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
         contractFnRequest.action, 
         contractFnRequest.to,
         contractFnRequest.getHexOnly, 
-        contractFnRequest.utxos
+        contractFnRequest.utxoIds,
+        contractFnRequest.nonce,
         );
 
       resolve(Service.successResponse({
