@@ -8,11 +8,14 @@ test("subcribe to address", async () => {
   let BCH = new Connection("testnet");
   await BCH.ready();
   try {
-    await BCH.networkProvider.subscribeToAddress("bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u", async (data) => {
-      console.log("First", data);
-    });
+    await BCH.networkProvider.subscribeToAddress(
+      "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
+      async (data) => {
+        console.log("First", data);
+      }
+    );
 
-    await new Promise( resolve => setTimeout(resolve, 1000) );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (e) {
     console.log(e, e.message, e.stack);
   } finally {
@@ -27,17 +30,23 @@ test("subcribe to muliple addresses bug", async () => {
   try {
     let response1 = undefined;
     let response2 = undefined;
-    await BCH.networkProvider.subscribeToAddress("bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u", async (data) => {
-      console.log("First", data);
-      response1 = data;
-    });
+    await BCH.networkProvider.subscribeToAddress(
+      "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
+      async (data) => {
+        console.log("First", data);
+        response1 = data;
+      }
+    );
 
-    await BCH.networkProvider.subscribeToAddress("bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9", async (data) => {
-      console.log("Second", data);
-      response2 = data;
-    });
+    await BCH.networkProvider.subscribeToAddress(
+      "bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9",
+      async (data) => {
+        console.log("Second", data);
+        response2 = data;
+      }
+    );
 
-    await new Promise( resolve => setTimeout(resolve, 1000) );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (e) {
     console.log(e, e.message, e.stack);
   } finally {
@@ -53,5 +62,5 @@ test("Watch wallet balance", async () => {
   w.provider!.connect();
 
   await w.watchBalance((balance) => console.log(balance));
-  await new Promise( resolve => setTimeout(resolve, 1000) );
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 });

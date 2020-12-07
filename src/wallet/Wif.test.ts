@@ -175,21 +175,27 @@ describe(`Watch only Wallets`, () => {
 
   test("Should wait for transaction", async () => {
     let provider = getNetworkProvider(Network.TESTNET, undefined, true);
-    provider.connect()
+    provider.connect();
 
-    const aliceWallet = await TestNetWallet.fromId(process.env.ALICE_TESTNET_WALLET_ID!);
+    const aliceWallet = await TestNetWallet.fromId(
+      process.env.ALICE_TESTNET_WALLET_ID!
+    );
     const bobWallet = await TestNetWallet.newRandom();
 
     aliceWallet.provider = provider;
     bobWallet.provider = provider;
 
-    setTimeout(() => aliceWallet.send([
-      {
-        cashaddr: bobWallet.cashaddr!,
-        value: 1000,
-        unit: "satoshis",
-      },
-    ]), 1);
+    setTimeout(
+      () =>
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      1
+    );
 
     let tx = await bobWallet.waitForTransaction();
     console.log(tx);

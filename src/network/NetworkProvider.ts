@@ -64,7 +64,10 @@ export default interface NetworkProvider {
    * @throws {Error} If the transaction was not accepted by the network.
    * @returns nothing.
    */
-  subscribeToAddress(address: string, callback: (data: any) => void): Promise<void>;
+  subscribeToAddress(
+    address: string,
+    callback: (data: any) => void
+  ): Promise<void>;
 
   /**
    * Unsubscribe from the address change events
@@ -72,7 +75,10 @@ export default interface NetworkProvider {
    * @throws {Error} If the transaction was not accepted by the network.
    * @returns nothing.
    */
-  unsubscribeFromAddress(address: string, callback: (data: any) => void): Promise<void>;
+  unsubscribeFromAddress(
+    address: string,
+    callback: (data: any) => void
+  ): Promise<void>;
 
   /**
    * Function to wait for connection to be ready

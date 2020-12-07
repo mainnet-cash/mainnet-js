@@ -14,12 +14,11 @@ const types = [
 let newVersion = undefined;
 
 // update package.json
-const files = ["./package.json", "./generated/serve/package.json"]
+const files = ["./package.json", "./generated/serve/package.json"];
 files.forEach((file) => {
   let package = require(file);
   let version = package.version;
   console.log("Package version:", version);
-
 
   if (semver.valid(process.argv[2])) {
     newVersion = process.argv[2];
