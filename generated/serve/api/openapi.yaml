@@ -472,7 +472,7 @@ components:
     WatchAddressRequest:
       example:
         recurrence: recurrent
-        address: testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        address: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
         type: transaction:in,out
         url: http://example.com/webhook
         duration_sec: 86400
@@ -480,7 +480,7 @@ components:
         address:
           description: |
             Cash address to watch
-          example: testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
           type: string
         url:
           description: Url to be called when configured action is triggered
