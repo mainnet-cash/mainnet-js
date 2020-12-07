@@ -36,7 +36,7 @@
     "test:new": "npx jest src/network/Connection.test.ts",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "build": "npx webpack && cp -v dist/mainnet*.js generated/serve/lib/mainnet",
+    "build": "npx webpack",
     "demo": "npx reload --dir=demo/",
     "reload": "npx reload --dir=jest/playwright"
   },
