@@ -3,6 +3,8 @@ import { WebHookI } from "../db/interface";
 
 import { Network, Tx } from "../interface";
 import { Connection } from "../network/Connection";
+import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
+
 const axios = require('axios').default
 
 export default class WebhookWorker {
@@ -92,73 +94,87 @@ export default class WebhookWorker {
       }
 
       if (status != hook.status) {
-        // console.log("Dispatching action for a webhook", JSON.stringify(hook));
-
-        // get transactions
-        const history: Tx[] = await this.connection.networkProvider.getHistory(hook.address);
-        // console.log("Got history", history);
-        // figure out which transactions to send to the hook
-        let txs: Tx[] = []
-        const idx: number = history.findIndex(val => val.tx_hash === hook.last_tx);
-        if (idx >= 0) {
-          // send all after last tracked
-          txs = history.slice(idx + 1, -1);
-        } else {
-          // send the last only if no tracking was done
-          txs = history.slice(-1);
-        }
-
-        let shouldUpdateStatus: boolean = true;
-        let hookCallFailed: boolean = false;
-
-        for (const tx of txs) {
-          // console.log("Getting raw tx", tx.tx_hash);
-          const rawTx: any = await this.connection.networkProvider.getRawTransactionObject(tx.tx_hash);
-          const parentTxs:any[] = await Promise.all(rawTx.vin.map(t => this.connection.networkProvider.getRawTransactionObject(t.txid)));
-          // console.log("Got raw tx", JSON.stringify(rawTx, null, 2));
-          const haveAddressInOutputs: boolean = rawTx.vout.some(val => val.scriptPubKey.addresses.includes(hook.address));
-          const haveAddressInParentOutputs: boolean = parentTxs.some(parent => parent.vout.some(val => val.scriptPubKey.addresses.includes(hook.address)));
-
-          const wantsIn: boolean = hook.type.indexOf("in") >= 0;
-          const wantsOut: boolean = hook.type.indexOf("out") >= 0;
-
-          const txDirection: string = haveAddressInParentOutputs && haveAddressInOutputs ? "transaction:in,out" :
-            haveAddressInParentOutputs ? "transaction:out" : "transaction:in";
-
-          let result: boolean = false;
-          if (wantsIn && haveAddressInOutputs) {
-            result = await this.postWebHook(hook.hook_url, txDirection, rawTx);
-          } else if (wantsOut && haveAddressInParentOutputs) {
-            result = await this.postWebHook(hook.hook_url, txDirection, rawTx);
-          } else {
-            // not interested in this transaction
-            continue;
-          }
-
-          if (!result) {
-            console.log("Failed to execute webhook", hook, rawTx);
-            shouldUpdateStatus = false;
-            hookCallFailed = true;
-          }
-
-          hook.last_tx = tx.tx_hash;
-          await this.db.setWebHookLastTx(hook.id!, tx.tx_hash);
-        }
-
-        if (shouldUpdateStatus) {
-          hook.status = status;
-          await this.db.setWebHookStatus(hook.id!, status);
-        }
-
-        if (hook.recurrence === "once" && !hookCallFailed) {
-          await this.stopHook(hook);
-          await this.db.deleteWebHook(hook.id!);
-        }
+        await this.webhookHandler(hook, status);
       }
     }
 
     this.callbacks.set(hook.id!, callback);
     await this.connection.networkProvider.subscribeToAddress(hook.address, callback);
+  }
+
+  async webhookHandler(hook: WebHookI, status: string): Promise<void> {
+    // console.log("Dispatching action for a webhook", JSON.stringify(hook));
+
+    // get transactions
+    const history: Tx[] = await this.connection.networkProvider.getHistory(hook.address);
+    // console.log("Got history", history);
+    // figure out which transactions to send to the hook
+    let txs: Tx[] = []
+    const idx: number = history.findIndex(val => val.tx_hash === hook.last_tx);
+    if (idx >= 0) {
+      // send all after last tracked
+      txs = history.slice(idx + 1, -1);
+    } else {
+      // send the last only if no tracking was done
+      txs = history.slice(-1);
+    }
+
+    let shouldUpdateStatus: boolean = true;
+    let hookCallFailed: boolean = false;
+    let hookPostData: any = {};
+
+    for (const tx of txs) {
+      // watching transactions
+      let result: boolean = false;
+
+      if (hook.type.indexOf("transaction:") > 0) {
+        // console.log("Getting raw tx", tx.tx_hash);
+        const rawTx: any = await this.connection.networkProvider.getRawTransactionObject(tx.tx_hash);
+        const parentTxs: any[] = await Promise.all(rawTx.vin.map(t => this.connection.networkProvider.getRawTransactionObject(t.txid)));
+        // console.log("Got raw tx", JSON.stringify(rawTx, null, 2));
+        const haveAddressInOutputs: boolean = rawTx.vout.some(val => val.scriptPubKey.addresses.includes(hook.address));
+        const haveAddressInParentOutputs: boolean = parentTxs.some(parent => parent.vout.some(val => val.scriptPubKey.addresses.includes(hook.address)));
+
+        const wantsIn: boolean = hook.type.indexOf("in") >= 0;
+        const wantsOut: boolean = hook.type.indexOf("out") >= 0;
+
+        const txDirection: string = haveAddressInParentOutputs && haveAddressInOutputs ? "transaction:in,out" :
+          haveAddressInParentOutputs ? "transaction:out" : "transaction:in";
+
+        if (wantsIn && haveAddressInOutputs) {
+          result = await this.postWebHook(hook.hook_url, { direction: txDirection, data: rawTx });
+        } else if (wantsOut && haveAddressInParentOutputs) {
+          result = await this.postWebHook(hook.hook_url, { direction: txDirection, data: rawTx });
+        } else {
+          // not interested in this transaction
+          continue;
+        }
+      } else if (hook.type.indexOf("balance")) {
+        // watching address balance
+        const balanceSat = await this.connection.networkProvider!.getBalance(hook.address)
+        const balanceObject = await balanceResponseFromSatoshi(balanceSat);
+        result = await this.postWebHook(hook.hook_url, balanceObject);
+      }
+
+      if (!result) {
+        console.debug("Failed to execute webhook", hook);
+        shouldUpdateStatus = false;
+        hookCallFailed = true;
+      }
+
+      hook.last_tx = tx.tx_hash;
+      await this.db.setWebHookLastTx(hook.id!, tx.tx_hash);
+    }
+
+    if (shouldUpdateStatus) {
+      hook.status = status;
+      await this.db.setWebHookStatus(hook.id!, status);
+    }
+
+    if (hook.recurrence === "once" && !hookCallFailed) {
+      await this.stopHook(hook);
+      await this.db.deleteWebHook(hook.id!);
+    }
   }
 
   async stop(): Promise<void> {
@@ -175,19 +191,20 @@ export default class WebhookWorker {
     }
   }
 
-  async postWebHook(url: string, direction: string, data: any): Promise<boolean> {
+  async postWebHook(url: string, data: any): Promise<boolean> {
     try {
-      await axios.post(url, { direction: direction, tx: data });
-      console.log("Posted webhook", url, direction);
+      await axios.post(url, data);
+      console.debug("Posted webhook", url, data);
       return true;
     } catch (e) {
-      console.log("Failed to post webhook", url);
+      console.debug("Failed to post webhook", url);
       return false;
     }
   }
 }
 
 export const webhook = new WebhookWorker(Network.TESTNET);
-export const watchAddressTranasctions = async (params: any): Promise<number> => {
+webhook.init();
+export const watchAddress = async (params: any): Promise<number> => {
   return await webhook.registerWebhook(params);
 }

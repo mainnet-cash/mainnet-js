@@ -9,5 +9,4 @@ controllers/WebhookController.js
 controllers/index.js
 logger.js
 services/Service.js
-services/WebhookService.js
 utils/openapiRouter.js
