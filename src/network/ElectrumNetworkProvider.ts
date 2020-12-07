@@ -5,7 +5,7 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { NetworkProvider } from "cashscript";
-import { Tx, UtxoI, ElectrumBalanceI } from "../interface";
+import { TxI, UtxoI, ElectrumBalanceI } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
 
@@ -86,11 +86,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  async getHistory(address: string): Promise<Tx[]> {
+  async getHistory(address: string): Promise<TxI[]> {
     const result = (await this.performRequest(
       "blockchain.address.get_history",
       address
-    )) as Tx[];
+    )) as TxI[];
 
     return result;
   }

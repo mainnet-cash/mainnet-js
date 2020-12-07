@@ -12,7 +12,7 @@ import {
 
 import { UnitEnum } from "../enum";
 
-import { Tx } from "../interface";
+import { TxI } from "../interface";
 
 import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
@@ -260,12 +260,12 @@ export class Wallet extends BaseWallet {
     return await this.provider.getUtxos(address);
   }
 
-  public async getHistory(): Promise<Tx[]> {
+  public async getHistory(): Promise<TxI[]> {
     return await this.provider!.getHistory(this.cashaddr!);
   }
 
   public async getLastTransaction(confirmedOnly: boolean = false): Promise<any> {
-    let history: Tx[] = await this.getHistory();
+    let history: TxI[] = await this.getHistory();
     if (confirmedOnly) {
       history = history.filter(val => val.height > 0);
     }

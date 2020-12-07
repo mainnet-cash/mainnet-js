@@ -12,7 +12,7 @@ test("subcribe to address", async () => {
       console.log("First", data);
     });
 
-    await new Promise( resolve => setTimeout(resolve, 100000) );
+    await new Promise( resolve => setTimeout(resolve, 1000) );
   } catch (e) {
     console.log(e, e.message, e.stack);
   } finally {
@@ -37,7 +37,7 @@ test("subcribe to muliple addresses bug", async () => {
       response2 = data;
     });
 
-    await new Promise( resolve => setTimeout(resolve, 100000) );
+    await new Promise( resolve => setTimeout(resolve, 1000) );
   } catch (e) {
     console.log(e, e.message, e.stack);
   } finally {
@@ -53,5 +53,5 @@ test("Watch wallet balance", async () => {
   w.provider!.connect();
 
   await w.watchBalance((balance) => console.log(balance));
-  await new Promise( resolve => setTimeout(resolve, 100000) );
+  await new Promise( resolve => setTimeout(resolve, 1000) );
 });

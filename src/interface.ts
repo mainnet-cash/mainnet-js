@@ -28,7 +28,7 @@ export interface ElectrumBalanceI {
   unconfirmed: number;
 }
 
-export interface Tx {
+export interface TxI {
   tx_hash: string;
   height: number;
   fee?: number;
