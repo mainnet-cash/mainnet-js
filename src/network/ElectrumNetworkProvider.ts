@@ -59,7 +59,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return height;
   }
 
-  async getRawTransaction(txid: string, verbose: boolean = false): Promise<string> {
+  async getRawTransaction(
+    txid: string,
+    verbose: boolean = false
+  ): Promise<string> {
     return (await this.performRequest(
       "blockchain.transaction.get",
       txid,
@@ -95,7 +98,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  async subscribeToAddress(address: string, callback: (data: any) => void): Promise<void> {
+  async subscribeToAddress(
+    address: string,
+    callback: (data: any) => void
+  ): Promise<void> {
     await this.subscribeRequest(
       "blockchain.address.subscribe",
       callback,
@@ -103,8 +109,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     );
   }
 
-
-  async unsubscribeFromAddress(address: string, callback: (data: any) => void): Promise<void> {
+  async unsubscribeFromAddress(
+    address: string,
+    callback: (data: any) => void
+  ): Promise<void> {
     await this.unsubscribeRequest(
       "blockchain.address.subscribe",
       callback,
@@ -155,7 +163,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
     let result;
     try {
-      result = await this.electrum.subscribe(callback, methodName, ...parameters);
+      result = await this.electrum.subscribe(
+        callback,
+        methodName,
+        ...parameters
+      );
     } finally {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {
@@ -184,7 +196,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
     let result;
     try {
-      result = await this.electrum.unsubscribe(callback, methodName, ...parameters);
+      result = await this.electrum.unsubscribe(
+        callback,
+        methodName,
+        ...parameters
+      );
     } finally {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {

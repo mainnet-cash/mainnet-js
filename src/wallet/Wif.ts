@@ -261,10 +261,12 @@ export class Wallet extends BaseWallet {
     return await this.provider!.getHistory(this.cashaddr!);
   }
 
-  public async getLastTransaction(confirmedOnly: boolean = false): Promise<any> {
+  public async getLastTransaction(
+    confirmedOnly: boolean = false
+  ): Promise<any> {
     let history: TxI[] = await this.getHistory();
     if (confirmedOnly) {
-      history = history.filter(val => val.height > 0);
+      history = history.filter((val) => val.height > 0);
     }
     const [lastTx] = history.slice(-1);
     return this.provider!.getRawTransactionObject(lastTx.tx_hash);
@@ -296,11 +298,17 @@ export class Wallet extends BaseWallet {
             console.error("Addressess do not match", addr, this.cashaddr!);
           }
           let lastTx = await this.getLastTransaction();
-          await this.provider!.unsubscribeFromAddress(this.cashaddr!, subscribeCallback);
+          await this.provider!.unsubscribeFromAddress(
+            this.cashaddr!,
+            subscribeCallback
+          );
           resolve(lastTx);
         }
       };
-      await this.provider!.subscribeToAddress(this.cashaddr!, subscribeCallback);
+      await this.provider!.subscribeToAddress(
+        this.cashaddr!,
+        subscribeCallback
+      );
     });
   }
 

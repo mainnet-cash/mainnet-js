@@ -6,11 +6,14 @@ import NetworkProvider from "../network/NetworkProvider";
 import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
 import { getNetworkProvider } from "../network";
 
-const axios = require('axios').default
+const axios = require("axios").default;
 
 export default class WebhookWorker {
   activeHooks: Map<number, WebhookI> = new Map();
-  callbacks: Map<number, (data: any | string | Array<string>) => void> = new Map();
+  callbacks: Map<
+    number,
+    (data: any | string | Array<string>) => void
+  > = new Map();
   provider: NetworkProvider;
   db: SqlProvider;
 
@@ -62,7 +65,13 @@ export default class WebhookWorker {
   }
 
   async registerWebhook(params: any): Promise<number> {
-    const webhook = await this.db.addWebhook(params.address, params.url, params.type, params.recurrence, params.duration_sec);
+    const webhook = await this.db.addWebhook(
+      params.address,
+      params.url,
+      params.type,
+      params.recurrence,
+      params.duration_sec
+    );
     await this.startHook(webhook);
     return webhook.id!;
   }
@@ -96,7 +105,7 @@ export default class WebhookWorker {
       if (status != hook.status) {
         await this.webhookHandler(hook, status);
       }
-    }
+    };
 
     this.callbacks.set(hook.id!, callback);
     await this.provider.subscribeToAddress(hook.address, callback);
@@ -109,8 +118,10 @@ export default class WebhookWorker {
     const history: TxI[] = await this.provider.getHistory(hook.address);
     // console.log("Got history", history);
     // figure out which transactions to send to the hook
-    let txs: TxI[] = []
-    const idx: number = history.findIndex(val => val.tx_hash === hook.last_tx);
+    let txs: TxI[] = [];
+    const idx: number = history.findIndex(
+      (val) => val.tx_hash === hook.last_tx
+    );
     if (idx >= 0) {
       // send all after last tracked
       txs = history.slice(idx + 1, -1);
@@ -129,29 +140,49 @@ export default class WebhookWorker {
 
       if (hook.type.indexOf("transaction:") >= 0) {
         // console.log("Getting raw tx", tx.tx_hash);
-        const rawTx: any = await this.provider.getRawTransactionObject(tx.tx_hash);
-        const parentTxs: any[] = await Promise.all(rawTx.vin.map(t => this.provider.getRawTransactionObject(t.txid)));
+        const rawTx: any = await this.provider.getRawTransactionObject(
+          tx.tx_hash
+        );
+        const parentTxs: any[] = await Promise.all(
+          rawTx.vin.map((t) => this.provider.getRawTransactionObject(t.txid))
+        );
         // console.log("Got raw tx", JSON.stringify(rawTx, null, 2));
-        const haveAddressInOutputs: boolean = rawTx.vout.some(val => val.scriptPubKey.addresses.includes(hook.address));
-        const haveAddressInParentOutputs: boolean = parentTxs.some(parent => parent.vout.some(val => val.scriptPubKey.addresses.includes(hook.address)));
+        const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
+          val.scriptPubKey.addresses.includes(hook.address)
+        );
+        const haveAddressInParentOutputs: boolean = parentTxs.some((parent) =>
+          parent.vout.some((val) =>
+            val.scriptPubKey.addresses.includes(hook.address)
+          )
+        );
 
         const wantsIn: boolean = hook.type.indexOf("in") >= 0;
         const wantsOut: boolean = hook.type.indexOf("out") >= 0;
 
-        const txDirection: string = haveAddressInParentOutputs && haveAddressInOutputs ? "transaction:in,out" :
-          haveAddressInParentOutputs ? "transaction:out" : "transaction:in";
+        const txDirection: string =
+          haveAddressInParentOutputs && haveAddressInOutputs
+            ? "transaction:in,out"
+            : haveAddressInParentOutputs
+            ? "transaction:out"
+            : "transaction:in";
 
         if (wantsIn && haveAddressInOutputs) {
-          result = await this.postWebHook(hook.hook_url, { direction: txDirection, data: rawTx });
+          result = await this.postWebHook(hook.hook_url, {
+            direction: txDirection,
+            data: rawTx,
+          });
         } else if (wantsOut && haveAddressInParentOutputs) {
-          result = await this.postWebHook(hook.hook_url, { direction: txDirection, data: rawTx });
+          result = await this.postWebHook(hook.hook_url, {
+            direction: txDirection,
+            data: rawTx,
+          });
         } else {
           // not interested in this transaction
           continue;
         }
       } else if (hook.type.indexOf("balance") >= 0) {
         // watching address balance
-        const balanceSat = await this.provider!.getBalance(hook.address)
+        const balanceSat = await this.provider!.getBalance(hook.address);
         const balanceObject = await balanceResponseFromSatoshi(balanceSat);
         result = await this.postWebHook(hook.hook_url, balanceObject);
       }
@@ -185,7 +216,10 @@ export default class WebhookWorker {
 
   async stopHook(hook: WebhookI): Promise<void> {
     if (this.activeHooks.has(hook.id!)) {
-      await this.provider.unsubscribeFromAddress(hook.address, this.callbacks.get(hook.id!)!);
+      await this.provider.unsubscribeFromAddress(
+        hook.address,
+        this.callbacks.get(hook.id!)!
+      );
       this.activeHooks.delete(hook.id!);
       this.callbacks.delete(hook.id!);
     }
@@ -207,4 +241,4 @@ export const webhook = new WebhookWorker();
 webhook.init();
 export const watchAddress = async (params: any): Promise<number> => {
   return await webhook.registerWebhook(params);
-}
+};
