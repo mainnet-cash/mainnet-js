@@ -28,7 +28,7 @@ files.forEach((file) => {
     newVersion = semver.inc(package.version, bumpType, preType);
   }
 
-  console.log("Updating to version:", newVersion);
+  console.log(`Updating ${file} to version: ${newVersion}`);
   package.main = package.main.replace(version, newVersion);
   package.version = newVersion;
 
