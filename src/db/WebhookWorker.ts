@@ -16,9 +16,10 @@ export default class WebhookWorker {
   > = new Map();
   provider: NetworkProvider;
   db: SqlProvider;
+  interval: any = undefined;
 
   constructor(network: Network = Network.MAINNET) {
-    this.provider = getNetworkProvider(network, undefined, true);
+    this.provider = getNetworkProvider(network);
     this.db = new SqlProvider(network);
   }
 
@@ -26,19 +27,22 @@ export default class WebhookWorker {
     await this.db.init();
 
     await this.evictOldHooks();
-    await this.pickupHooks();
-    setTimeout(async () => {
-      await this.evictOldHooks();
-      await this.pickupHooks();
-    }, 5 * 60 * 1000);
+    await this.pickupHooks(true);
+    if (!this.interval) {
+      this.interval = setInterval(async () => {
+        await this.evictOldHooks();
+        await this.pickupHooks(true);
+      }, 5 * 60 * 1000);
+    }
   }
 
   async destroy(): Promise<void> {
     await this.stop();
-    await this.db.close();
+    clearInterval(this.interval);
+    this.interval = undefined;
 
-    // do not disconnect persistent connections
-    // await this.provider.disconnect();
+    // do not close db since pool will become invalidated
+    // await this.db.close();
   }
 
   async pickupHooks(start: boolean = false): Promise<void> {
@@ -47,7 +51,7 @@ export default class WebhookWorker {
       if (!this.activeHooks.has(hook.id!)) {
         this.activeHooks.set(hook.id!, hook);
         if (start) {
-          this.startHook(hook);
+          await this.startHook(hook);
         }
       }
     }
@@ -57,14 +61,14 @@ export default class WebhookWorker {
     const hooks: WebhookI[] = await this.db.getWebhooks();
     for (const hook of hooks) {
       if (new Date() >= hook.expires_at) {
-        console.log("Evicting expired hook with id", hook.id);
+        console.debug("Evicting expired hook with id", hook.id);
         await this.stopHook(hook);
         await this.db.deleteWebhook(hook.id!);
       }
     }
   }
 
-  async registerWebhook(params: any): Promise<number> {
+  async registerWebhook(params: any, start: boolean = true): Promise<number> {
     const webhook = await this.db.addWebhook(
       params.address,
       params.url,
@@ -72,19 +76,36 @@ export default class WebhookWorker {
       params.recurrence,
       params.duration_sec
     );
-    await this.startHook(webhook);
+    if (start) {
+      this.activeHooks.set(webhook.id!, webhook);
+      await this.startHook(webhook);
+    }
     return webhook.id!;
   }
 
-  async start(): Promise<void> {
-    for (const [key, hook] of this.activeHooks) {
-      this.startHook(hook);
+  async getWebhook(id: number): Promise<WebhookI | undefined> {
+    if (this.activeHooks.has(id)) {
+      return this.activeHooks.get(id)!;
     }
+
+    return await this.db.getWebhook(id);
+  }
+
+  async deleteWebhook(id: number): Promise<void> {
+    if (this.activeHooks.has(id)) {
+      await this.stopHook(this.activeHooks.get(id)!);
+    }
+    await this.db.deleteWebhook(id);
+  }
+
+  async deleteAllWebhooks(): Promise<void> {
+    await this.stop();
+    await this.db.clearWebhooks();
   }
 
   async startHook(hook: WebhookI): Promise<void> {
-    const callback = async (data: string | Array<string>) => {
-      // console.log(data);
+    const webhookCallback = async (data: string | Array<string>) => {
+      // console.debug(data);
       let status: string = "";
       if (typeof data === "string") {
         // subscription acknowledgement notification with current status
@@ -97,7 +118,7 @@ export default class WebhookWorker {
       } else if (data instanceof Array) {
         status = data[1];
         if (data[0] !== hook.address) {
-          console.warn("Address missmatch, skipping", data[0], hook.address);
+          // console.warn("Address missmatch, skipping", data[0], hook.address);
           return;
         }
       }
@@ -107,16 +128,16 @@ export default class WebhookWorker {
       }
     };
 
-    this.callbacks.set(hook.id!, callback);
-    await this.provider.subscribeToAddress(hook.address, callback);
+    this.callbacks.set(hook.id!, webhookCallback);
+    await this.provider.subscribeToAddress(hook.address, webhookCallback);
   }
 
   async webhookHandler(hook: WebhookI, status: string): Promise<void> {
-    // console.log("Dispatching action for a webhook", JSON.stringify(hook));
+    // console.debug("Dispatching action for a webhook", JSON.stringify(hook));
 
     // get transactions
     const history: TxI[] = await this.provider.getHistory(hook.address);
-    // console.log("Got history", history);
+    // console.debug("Got history", history);
     // figure out which transactions to send to the hook
     let txs: TxI[] = [];
     const idx: number = history.findIndex(
@@ -124,7 +145,7 @@ export default class WebhookWorker {
     );
     if (idx >= 0) {
       // send all after last tracked
-      txs = history.slice(idx + 1, -1);
+      txs = history.slice(idx + 1);
     } else {
       // send the last only if no tracking was done
       txs = history.slice(-1);
@@ -132,21 +153,20 @@ export default class WebhookWorker {
 
     let shouldUpdateStatus: boolean = true;
     let hookCallFailed: boolean = false;
-    let hookPostData: any = {};
 
     for (const tx of txs) {
       // watching transactions
       let result: boolean = false;
 
       if (hook.type.indexOf("transaction:") >= 0) {
-        // console.log("Getting raw tx", tx.tx_hash);
+        // console.debug("Getting raw tx", tx.tx_hash);
         const rawTx: any = await this.provider.getRawTransactionObject(
           tx.tx_hash
         );
         const parentTxs: any[] = await Promise.all(
           rawTx.vin.map((t) => this.provider.getRawTransactionObject(t.txid))
         );
-        // console.log("Got raw tx", JSON.stringify(rawTx, null, 2));
+        // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
           val.scriptPubKey.addresses.includes(hook.address)
         );
@@ -236,9 +256,3 @@ export default class WebhookWorker {
     }
   }
 }
-
-export const webhook = new WebhookWorker();
-webhook.init();
-export const watchAddress = async (params: any): Promise<number> => {
-  return await webhook.registerWebhook(params);
-};

@@ -8,37 +8,45 @@ export default class SqlProvider implements StorageProvider {
   private db;
   private walletTable: string;
   private webhookTable: string;
+  private isInit = false;
 
   public constructor(walletTable?: string) {
     this.walletTable = walletTable ? walletTable : "wallet";
     this.webhookTable = "webhook";
-    var dbConfig = parseDbUrl(process.env["DATABASE_URL"]);
+    var dbConfig = parseDbUrl(process.env.DATABASE_URL);
     this.db = new Pool(dbConfig);
   }
 
   public async init(): Promise<StorageProvider> {
-    let createWalletTable = format(
-      "CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );",
-      this.walletTable
-    );
-    const resWallet = this.db.query(createWalletTable);
+    if (!this.isInit) {
+      this.isInit = true;
 
-    let createWebhookTable = format(
-      "CREATE TABLE IF NOT EXISTS %I (" +
-        "id SERIAL PRIMARY KEY," +
-        "address TEXT," +
-        "type TEXT," +
-        "recurrence TEXT," +
-        "hook_url TEXT," +
-        "status TEXT," +
-        "last_tx TEXT," +
-        "expires_at DATE" +
-        ");",
-      this.webhookTable
-    );
-    const resWebhook = this.db.query(createWebhookTable);
+      let createWalletTable = format(
+        "CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );",
+        this.walletTable
+      );
+      const resWallet = await this.db.query(createWalletTable);
 
-    return resWallet && resWebhook;
+      let createWebhookTable = format(
+        "CREATE TABLE IF NOT EXISTS %I (" +
+          "id SERIAL PRIMARY KEY," +
+          "address TEXT," +
+          "type TEXT," +
+          "recurrence TEXT," +
+          "hook_url TEXT," +
+          "status TEXT," +
+          "last_tx TEXT," +
+          "expires_at DATE" +
+          ");",
+        this.webhookTable
+      );
+      const resWebhook = await this.db.query(createWebhookTable);
+
+      if (!resWallet || !resWebhook)
+        throw new Error("Failed to init SqlProvider");
+    }
+
+    return this;
   }
 
   public async close(): Promise<StorageProvider> {

@@ -294,23 +294,24 @@ export class Wallet extends BaseWallet {
 
   public async waitForTransaction(): Promise<any> {
     return new Promise(async (resolve) => {
-      const subscribeCallback = async (data) => {
+      const waitForTransactionCallback = async (data) => {
         if (data instanceof Array) {
           let addr = data[0] as string;
           if (addr !== this.cashaddr!) {
-            console.error("Addressess do not match", addr, this.cashaddr!);
+            // console.error("Addressess do not match", addr, this.cashaddr!);
+            return;
           }
           let lastTx = await this.getLastTransaction();
           await this.provider!.unsubscribeFromAddress(
             this.cashaddr!,
-            subscribeCallback
+            waitForTransactionCallback
           );
           resolve(lastTx);
         }
       };
       await this.provider!.subscribeToAddress(
         this.cashaddr!,
-        subscribeCallback
+        waitForTransactionCallback
       );
     });
   }

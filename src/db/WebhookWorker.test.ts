@@ -6,13 +6,10 @@ import { initProviders, disconnectProviders } from "../network/Connection";
 
 import { Wallet, RegTestWallet } from "../wallet/Wif";
 
-let db: SqlProvider;
 let worker: WebhookWorker;
 let responses: any = {};
 let alice = "";
 let aliceWif = "";
-let bob = "";
-let bobWif = "";
 
 /**
  * @jest-environment jsdom
@@ -21,60 +18,61 @@ let bobWif = "";
 // mock axios requests
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
-    await initProviders([Network.REGTEST]);
-
-    if (process.env.PRIVATE_WIF) {
-      alice = process.env.ADDRESS as string;
-      aliceWif = `wif:regtest:${process.env.PRIVATE_WIF}` as string;
-    } else {
-      console.error(
-        "regtest env vars not set"
-      );
-    }
-
-    axios.interceptors.request.use((config) => {
-      if (config.url!.indexOf("example.com")) {
-        config.url = "x" + config.url!;
+    try {
+      if (process.env.PRIVATE_WIF) {
+        alice = process.env.ADDRESS!;
+        aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+      } else {
+        console.error("regtest env vars not set");
       }
-      return config;
-    });
 
-    axios.interceptors.response.use(
-      (response) => {
-        return response;
-      },
-      (error) => {
-        let url = error.config.url!.slice(1);
-
-        if (url in responses) {
-          responses[url].push(error);
-        } else {
-          responses[url] = [error];
+      axios.interceptors.request.use((config) => {
+        if (config.url!.indexOf("example.com")) {
+          config.url = "x" + config.url!;
         }
+        return config;
+      });
 
-        if (url === "http://example.com/fail")
-          return Promise.reject({ status: 503 });
+      axios.interceptors.response.use(
+        (response) => {
+          return response;
+        },
+        (error) => {
+          let url = error.config.url!.slice(1);
 
-        return Promise.resolve({ status: 200 });
-      }
-    );
+          if (url in responses) {
+            responses[url].push(error);
+          } else {
+            responses[url] = [error];
+          }
+
+          if (url === "http://example.com/fail")
+            return Promise.reject({ status: 503 });
+
+          return Promise.resolve({ status: 200 });
+        }
+      );
+
+      await initProviders([Network.REGTEST]);
+      worker = new WebhookWorker(Network.REGTEST);
+      await worker.init();
+    } catch (e) {
+      throw e;
+    }
   });
 
   beforeEach(async () => {
-    db = new SqlProvider(Network.REGTEST);
-    await db.init();
-    await db.clearWebhooks();
-
-    worker = new WebhookWorker(Network.REGTEST);
+    worker.deleteAllWebhooks();
   });
 
   afterEach(async () => {
-    await db.close();
     responses = {};
   });
 
   afterAll(async () => {
+    await worker.destroy();
     await disconnectProviders([Network.REGTEST]);
+    await worker.db.close();
   });
 
   test("Test posting hook", async () => {
@@ -89,14 +87,12 @@ describe("Webhook worker tests", () => {
 
   test("Test empty hook db", async () => {
     try {
-      await worker.init();
-      await worker.start();
       await new Promise((resolve) =>
         setTimeout(async () => {
+          expect(worker.activeHooks.size).toBe(0);
           expect(responses).toStrictEqual({});
-          await worker.destroy();
           resolve(true);
-        }, 2000)
+        }, 0)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);
@@ -105,18 +101,22 @@ describe("Webhook worker tests", () => {
   });
 
   test("Test starting with expired hook", async () => {
-    await db.addWebhook(
-      alice,
-      "http://example.com/pass",
-      "transaction:in",
-      "once",
-      -1000
+    await worker.registerWebhook(
+      {
+        address: alice,
+        url: "http://example.com/pass",
+        type: "transaction:in",
+        recurrence: "once",
+        duration_sec: -1000,
+      },
+      false
     );
 
+    await worker.init();
+
     try {
-      await worker.init();
-      await worker.start();
       expect(worker.activeHooks.size).toBe(0);
+      expect((await worker.db.getWebhooks()).length).toBe(0);
       expect(responses).toStrictEqual({});
     } catch (e) {
       console.log(e, e.stack, e.message);
@@ -128,37 +128,32 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = (
-        await db.addWebhook(
-          bobWallet.cashaddr!,
-          "http://example.com/success",
-          "transaction:in",
-          "once"
-        )
-      ).id!;
+      const hookId = await worker.registerWebhook({
+        address: bobWallet.cashaddr!,
+        url: "http://example.com/success",
+        type: "transaction:in",
+        recurrence: "once",
+      });
 
-      await worker.init();
-      await worker.start();
-
-      let sendResponse1 = await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
+      await bobWallet.waitForTransaction();
 
       // return funds
-      let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
+      // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          await db.deleteWebhook(hookId);
           expect(responses["http://example.com/success"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
-          await worker.destroy();
+
           resolve(true);
-        }, 10000)
+        }, 3000)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);
@@ -170,38 +165,31 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = (
-        await db.addWebhook(
-          bobWallet.cashaddr!,
-          "http://example.com/fail",
-          "transaction:in",
-          "once"
-        )
-      ).id!;
+      const hookId = await worker.registerWebhook({
+        address: bobWallet.cashaddr!,
+        url: "http://example.com/fail",
+        type: "transaction:in",
+        recurrence: "once",
+      });
 
-      await worker.init();
-      await worker.start();
-
-      let sendResponse1 = await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
+      await bobWallet.waitForTransaction();
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          await db.deleteWebhook(hookId);
           expect(responses["http://example.com/fail"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
-          await worker.destroy();
 
           // return funds
-          let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
-
+          // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
           resolve(true);
-        }, 5000)
+        }, 3000)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);
@@ -213,37 +201,32 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = (
-        await db.addWebhook(
-          bobWallet.cashaddr!,
-          "http://example.com/bob",
-          "transaction:in",
-          "recurrent"
-        )
-      ).id!;
+      const hookId = await worker.registerWebhook({
+        address: bobWallet.cashaddr!,
+        url: "http://example.com/bob",
+        type: "transaction:in",
+        recurrence: "recurrent",
+      });
 
-      await worker.init();
-      await worker.start();
-
-      let sendResponse1 = await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
+      await bobWallet.waitForTransaction();
 
       // return funds
-      let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
+      // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          await db.deleteWebhook(hookId);
           expect(responses["http://example.com/bob"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
-          await worker.destroy();
+
           resolve(true);
-        }, 10000)
+        }, 3000)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);
@@ -255,37 +238,33 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = (
-        await db.addWebhook(
-          bobWallet.cashaddr!,
-          "http://example.com/bob",
-          "transaction:out",
-          "recurrent"
-        )
-      ).id!;
+      const hookId = await worker.registerWebhook({
+        address: bobWallet.cashaddr!,
+        url: "http://example.com/bob",
+        type: "transaction:out",
+        recurrence: "recurrent",
+      });
 
-      await worker.init();
-      await worker.start();
-
-      let sendResponse1 = await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
+      await bobWallet.waitForTransaction();
 
       // return funds
-      let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
+      bobWallet.sendMax(aliceWallet.cashaddr!);
+      await aliceWallet.waitForTransaction();
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          await db.deleteWebhook(hookId);
           expect(responses["http://example.com/bob"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
-          await worker.destroy();
+
           resolve(true);
-        }, 10000)
+        }, 3000)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);
@@ -297,20 +276,15 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = (
-        await db.addWebhook(
-          bobWallet.cashaddr!,
-          "http://example.com/bob",
-          "transaction:in",
-          "recurrent"
-        )
-      ).id!;
-
-      await worker.init();
-      await worker.start();
+      const hookId = await worker.registerWebhook({
+        address: bobWallet.cashaddr!,
+        url: "http://example.com/bob",
+        type: "transaction:in",
+        recurrence: "recurrent",
+      });
 
       // initial transaction
-      await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
@@ -318,53 +292,46 @@ describe("Webhook worker tests", () => {
         },
       ]);
 
+      await bobWallet.waitForTransaction();
+
       // wait worker to process, updating the status of the hook
-      for (let i = 0; i < 5; i++)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // shutdown
-      await worker.destroy();
-
-      let hook = await db.getWebhook(hookId);
+      let hook = await worker.getWebhook(hookId);
       expect(hook!.status).not.toBe("");
       expect(hook!.last_tx).not.toBe("");
 
+      // shutdown
+      await worker.destroy();
+      expect(worker.activeHooks.size).toBe(0);
+
       // make two more transactions "offline"
-      await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
+      await bobWallet.waitForTransaction();
 
-      await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
-
-      for (let i = 0; i < 5; i++)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      await bobWallet.waitForTransaction();
 
       // wait worker to process the transactions occured while offline
-      worker = new WebhookWorker(Network.REGTEST);
       await worker.init();
-      await worker.start();
-      for (let i = 0; i < 5; i++)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // return funds
-      await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          await db.deleteWebhook(hookId);
-          expect(responses["http://example.com/bob"].length).toBe(3);
           expect(worker.activeHooks.size).toBe(1);
-          await worker.destroy();
+          expect(responses["http://example.com/bob"].length).toBe(3);
+
           resolve(true);
         }, 3000)
       );
@@ -378,35 +345,32 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = (
-        await db.addWebhook(
-          bobWallet.cashaddr!,
-          "http://example.com/watchBalance",
-          "balance"
-        )
-      ).id!;
+      const hookId = await worker.registerWebhook({
+        address: bobWallet.cashaddr!,
+        url: "http://example.com/watchBalance",
+        type: "balance",
+        recurrence: "once",
+      });
 
-      await worker.init();
-      await worker.start();
-
-      let sendResponse1 = await aliceWallet.send([
+      aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
         },
       ]);
+      await bobWallet.waitForTransaction();
+
       // return funds
-      let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
+      // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          await db.deleteWebhook(hookId);
           expect(responses["http://example.com/watchBalance"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
-          await worker.destroy();
+
           resolve(true);
-        }, 5000)
+        }, 3000)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);
