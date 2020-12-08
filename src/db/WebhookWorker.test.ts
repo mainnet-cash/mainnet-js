@@ -4,7 +4,7 @@ import { default as axios } from "axios";
 import { Network } from "../interface";
 import { initProviders, disconnectProviders } from "../network/Connection";
 
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
+import { Wallet, RegTestWallet } from "../wallet/Wif";
 
 let db: SqlProvider;
 let worker: WebhookWorker;
@@ -21,16 +21,14 @@ let bobWif = "";
 // mock axios requests
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
-    await initProviders([Network.TESTNET]);
+    await initProviders([Network.REGTEST]);
 
-    if (process.env.ALICE_TESTNET_ADDRESS) {
-      alice = process.env.ALICE_TESTNET_ADDRESS as string;
-      aliceWif = process.env.ALICE_TESTNET_WALLET_ID as string;
-      bob = process.env.BOB_TESTNET_ADDRESS as string;
-      bobWif = process.env.BOB_TESTNET_WALLET_ID as string;
+    if (process.env.PRIVATE_WIF) {
+      alice = process.env.ADDRESS as string;
+      aliceWif = `wif:regtest:${process.env.PRIVATE_WIF}` as string;
     } else {
       console.error(
-        "ALICE_TESTNET_ADDRESS and BOB_TESTNET_ADDRESS env vars not set"
+        "regtest env vars not set"
       );
     }
 
@@ -63,11 +61,11 @@ describe("Webhook worker tests", () => {
   });
 
   beforeEach(async () => {
-    db = new SqlProvider(Network.TESTNET);
+    db = new SqlProvider(Network.REGTEST);
     await db.init();
     await db.clearWebhooks();
 
-    worker = new WebhookWorker(Network.TESTNET);
+    worker = new WebhookWorker(Network.REGTEST);
   });
 
   afterEach(async () => {
@@ -76,7 +74,7 @@ describe("Webhook worker tests", () => {
   });
 
   afterAll(async () => {
-    await disconnectProviders([Network.TESTNET]);
+    await disconnectProviders([Network.REGTEST]);
   });
 
   test("Test posting hook", async () => {
@@ -128,8 +126,8 @@ describe("Webhook worker tests", () => {
 
   test("Test non-recurrent hook to be deleted after successful call", async () => {
     try {
-      const aliceWallet = await TestNetWallet.fromId(aliceWif);
-      const bobWallet = await TestNetWallet.fromId(bobWif);
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
       const hookId = (
         await db.addWebhook(
           bobWallet.cashaddr!,
@@ -170,8 +168,8 @@ describe("Webhook worker tests", () => {
 
   test("Test non-recurrent hook to be not deleted after failed call", async () => {
     try {
-      const aliceWallet = await TestNetWallet.fromId(aliceWif);
-      const bobWallet = await TestNetWallet.fromId(bobWif);
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
       const hookId = (
         await db.addWebhook(
           bobWallet.cashaddr!,
@@ -213,8 +211,8 @@ describe("Webhook worker tests", () => {
 
   test("Test recurrent hook for incoming transaction", async () => {
     try {
-      const aliceWallet = await TestNetWallet.fromId(aliceWif);
-      const bobWallet = await TestNetWallet.fromId(bobWif);
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
       const hookId = (
         await db.addWebhook(
           bobWallet.cashaddr!,
@@ -255,8 +253,8 @@ describe("Webhook worker tests", () => {
 
   test("Test recurrent hook for outgoing transactions", async () => {
     try {
-      const aliceWallet = await TestNetWallet.fromId(aliceWif);
-      const bobWallet = await TestNetWallet.fromId(bobWif);
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
       const hookId = (
         await db.addWebhook(
           bobWallet.cashaddr!,
@@ -297,8 +295,8 @@ describe("Webhook worker tests", () => {
 
   test("Test should pickup transactions happened while offline", async () => {
     try {
-      const aliceWallet = await TestNetWallet.fromId(aliceWif);
-      const bobWallet = await TestNetWallet.fromId(bobWif);
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
       const hookId = (
         await db.addWebhook(
           bobWallet.cashaddr!,
@@ -352,7 +350,7 @@ describe("Webhook worker tests", () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // wait worker to process the transactions occured while offline
-      worker = new WebhookWorker(Network.TESTNET);
+      worker = new WebhookWorker(Network.REGTEST);
       await worker.init();
       await worker.start();
       for (let i = 0; i < 5; i++)
@@ -378,8 +376,8 @@ describe("Webhook worker tests", () => {
 
   test("Test non-recurrent watch balance hook", async () => {
     try {
-      const aliceWallet = await TestNetWallet.fromId(aliceWif);
-      const bobWallet = await TestNetWallet.fromId(bobWif);
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
       const hookId = (
         await db.addWebhook(
           bobWallet.cashaddr!,
