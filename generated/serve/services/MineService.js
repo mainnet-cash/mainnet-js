@@ -15,7 +15,7 @@ const mine = ({ mineRequest }) => new Promise(
     } catch (e) {
       console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },

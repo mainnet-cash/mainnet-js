@@ -25,7 +25,7 @@ const balance = ({ balanceRequest }) => new Promise(
       }
     } catch (e) {
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
@@ -43,7 +43,7 @@ const createWallet = ({ walletRequest }) => new Promise(
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
@@ -66,7 +66,7 @@ const depositAddress = ({ serializedWallet }) =>
     } catch (e) {
       console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   });
@@ -87,7 +87,7 @@ const depositQr = ({ serializedWallet }) =>
     } catch (e) {
       console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   });
@@ -108,7 +108,7 @@ const maxAmountToSend = ({ maxAmountToSendRequest }) => new
   } catch (e) {
     console.log(e);
     reject(
-      Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+      Service.rejectResponse(e, e.status || 500)
     );
   }
 });
@@ -129,7 +129,7 @@ const send = ({ sendRequest }) => new Promise(
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
@@ -153,7 +153,7 @@ const sendMax = ({ sendMaxRequest }) =>
     } catch (e) {
       console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   });
@@ -174,7 +174,7 @@ const utxos = ({ serializedWallet }) => new Promise(
     } catch (e) {
       console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
