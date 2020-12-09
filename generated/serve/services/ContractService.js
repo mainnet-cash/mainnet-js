@@ -15,7 +15,7 @@ const createEscrow = ({ escrowRequest }) => new Promise(
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
+        e,
         e.status || 405,
       ));
     }
@@ -51,8 +51,8 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
       }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+        e,
+        e.status || 500,
       ));
     }
   },
@@ -71,9 +71,9 @@ const escrowUtxos = ({contract}) => new Promise(
       let resp = await c.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e);
+
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },

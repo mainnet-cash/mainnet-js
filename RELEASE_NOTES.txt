@@ -1,9 +1,6 @@
 Newest changes
 --------------
 
-Known Issues: 
-- UTXOs *may not* be propagated correctly from POSTs to escrow/call
-
 Features:
 - General Cashscript contract serialization/deserialization
 - Network providers are created global in scope (BCH, BCHt, BCHr) with the function initProviders()

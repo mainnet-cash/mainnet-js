@@ -57,9 +57,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContractResponse'
           description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
       summary: Create an escrow contract
       tags:
       - contract
@@ -109,9 +112,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContractFnResponse'
           description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
       summary: Finalize an escrow contract
       tags:
       - contract
@@ -422,6 +428,12 @@ components:
           description: Amount in United States Dollars
           example: 438.02
           type: number
+    Error:
+      properties:
+        message:
+          type: string
+        stack:
+          type: string
     ZeroBalanceResponse:
       example:
         bch: 0
