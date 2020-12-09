@@ -12,9 +12,8 @@ import { Network, UtxoI } from "../interface";
 import { ContractI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { castParametersFromConstructor } from "./util";
-import { sumUtxoValue } from "../util/sumUtxoValue"
+import { sumUtxoValue } from "../util/sumUtxoValue";
 import { GROUP_DELIMITER, ROW_DELIMITER } from "../constant";
-
 
 export class Contract implements ContractI {
   private script: string;

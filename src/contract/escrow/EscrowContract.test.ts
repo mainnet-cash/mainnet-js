@@ -1,6 +1,6 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
-import { serializeUtxo } from "../../util/serializeUtxo"
+import { serializeUtxo } from "../../util/serializeUtxo";
 import { spliceOperations } from "@bitauth/libauth";
 
 describe(`Test Escrow Contracts`, () => {
@@ -117,9 +117,8 @@ describe(`Test Escrow Contracts`, () => {
     ]);
 
     expect(await escrow.getBalance()).toBeGreaterThan(18000);
-    let utxos = (await escrow.getUtxos()).slice(0,2)
+    let utxos = (await escrow.getUtxos()).slice(0, 2);
 
-    
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend", undefined, false, utxos);
     expect(await escrow.getBalance()).toBe(9400);
