@@ -4,7 +4,7 @@ export interface ContractI {
    * @returns returns a serialized representation of the contract
    */
   toString(): string;
-  getAddress(): string | Error;
+  getDepositAddress(): string | Error;
 
   /**
    * getContractText should return the cashscript text
@@ -15,5 +15,5 @@ export interface ContractI {
 
 export interface ContractResponseI {
   contractId: string;
-  address: string;
+  cashaddr: string;
 }

@@ -33,7 +33,6 @@
     "test:api": "npm i --cwd generated/serve/ --prefix generated/serve/ && npm run test --cwd generated/serve/ --prefix generated/serve/",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
     "test:wallet": "npx jest --detectOpenHandles",
-    "test:new": "npx jest src/network/Connection.test.ts",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "build": "npx webpack && cp -v dist/mainnet*.js generated/serve/lib/mainnet",

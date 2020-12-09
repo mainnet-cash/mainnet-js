@@ -12,6 +12,7 @@ import { Network, UtxoI } from "../interface";
 import { ContractI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { castParametersFromConstructor } from "./util";
+import { sumUtxoValue } from "../util/sumUtxoValue";
 import { GROUP_DELIMITER, ROW_DELIMITER } from "../constant";
 
 export class Contract implements ContractI {
@@ -81,7 +82,7 @@ export class Contract implements ContractI {
     return new Contract(script, params, network as Network);
   }
 
-  public getAddress() {
+  public getDepositAddress() {
     return this.contract.address;
   }
 
@@ -164,7 +165,8 @@ export class Contract implements ContractI {
           outputAddress,
           utxos
         );
-        const balance = await this.getBalance();
+        const balance = await sumUtxoValue(utxos);
+
         const amount = balance - fee;
         if (balance - fee < 0) {
           throw Error(
@@ -173,6 +175,7 @@ export class Contract implements ContractI {
         }
         let transaction = func(publicKey, sig, amount, nonce)
           .withHardcodedFee(fee)
+          .from(utxos)
           .to(outputAddress, amount);
         let txResult = await transaction[method]();
 
