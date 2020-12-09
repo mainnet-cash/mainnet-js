@@ -1,5 +1,7 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
+import { serializeUtxo } from "../../util/serializeUtxo";
+import { spliceOperations } from "@bitauth/libauth";
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
@@ -22,10 +24,10 @@ describe(`Test Escrow Contracts`, () => {
     expect(escrow.toString().slice(0, -20)).toBe(
       escrow2.toString().slice(0, -20)
     );
-    expect(escrow.getAddress()).toBe(escrow2.getAddress());
+    expect(escrow.getDepositAddress()).toBe(escrow2.getDepositAddress());
 
     let escrow3 = EscrowContract.fromId(escrow.toString());
-    expect(escrow.getAddress()).toBe(escrow3.getAddress());
+    expect(escrow.getDepositAddress()).toBe(escrow3.getDepositAddress());
   });
 
   test("Should allow buyer to spend to seller", async () => {
@@ -41,25 +43,25 @@ describe(`Test Escrow Contracts`, () => {
       buyerAddr: buyer.getDepositAddress()!,
       amount: 9500,
     });
-    expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
+    expect(escrow.getDepositAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 6400,
         unit: "satoshis",
       },
     ]);
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 6400,
         unit: "satoshis",
       },
     ]);
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 6400,
         unit: "satoshis",
       },
@@ -70,6 +72,56 @@ describe(`Test Escrow Contracts`, () => {
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
+    expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
+
+    // spend the sellers funds to another wallet
+    await seller.sendMax(seller2.getDepositAddress()!);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(9500);
+  });
+
+  test("Should allow buyer to spend specific utxos to seller", async () => {
+    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
+
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
+    let seller2 = await RegTestWallet.newRandom();
+    let escrow = new EscrowContract({
+      sellerAddr: seller.getDepositAddress()!,
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      amount: 9500,
+    });
+    expect(escrow.getDepositAddress()!.slice(0, 8)).toBe("bchreg:p");
+    // fund the escrow contract
+    await funder.send([
+      {
+        cashaddr: escrow.getDepositAddress()!,
+        value: 9400,
+        unit: "satoshis",
+      },
+    ]);
+    await funder.send([
+      {
+        cashaddr: escrow.getDepositAddress()!,
+        value: 9400,
+        unit: "satoshis",
+      },
+    ]);
+    await funder.send([
+      {
+        cashaddr: escrow.getDepositAddress()!,
+        value: 9400,
+        unit: "satoshis",
+      },
+    ]);
+
+    expect(await escrow.getBalance()).toBeGreaterThan(18000);
+    let utxos = (await escrow.getUtxos()).slice(0, 2);
+
+    // spend the escrow contract
+    await escrow.run(buyer.privateKeyWif!, "spend", undefined, false, utxos);
+    expect(await escrow.getBalance()).toBe(9400);
     expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
 
     // spend the sellers funds to another wallet
@@ -104,7 +156,7 @@ describe(`Test Escrow Contracts`, () => {
     // fund the escrow contract
     await buyer.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 450000,
         unit: "satoshis",
       },
@@ -148,7 +200,7 @@ describe(`Test Escrow Contracts`, () => {
     // fund the escrow contract
     await buyer.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 450000,
         unit: "satoshis",
       },
@@ -192,7 +244,7 @@ describe(`Test Escrow Contracts`, () => {
     // fund the escrow contract
     await buyer.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 450000,
         unit: "satoshis",
       },
@@ -236,7 +288,7 @@ describe(`Test Escrow Contracts`, () => {
       // fund the escrow contract
       await buyer.send([
         {
-          cashaddr: escrow.getAddress()!,
+          cashaddr: escrow.getDepositAddress()!,
           value: 450000,
           unit: "satoshis",
         },
@@ -278,7 +330,7 @@ describe(`Test Escrow Contracts`, () => {
       // fund the escrow contract
       await buyer.send([
         {
-          cashaddr: escrow.getAddress()!,
+          cashaddr: escrow.getDepositAddress()!,
           value: 450000,
           unit: "satoshis",
         },

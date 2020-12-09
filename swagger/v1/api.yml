@@ -22,7 +22,7 @@ servers:
   - url: https://rest-unstable.mainnet.cash/
     description: unstable service (for development)
   - url: http://localhost:3000/
-    description: local development server via npm run serve
+    description: local development server via npm run api:serve
 tags:
   - name: wallet
     description: Interact with wallets
@@ -57,9 +57,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/ContractResponse"
           description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
       summary: Create an escrow contract
       tags:
         - contract
@@ -108,9 +111,12 @@ paths:
                 - walletId: "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
                 - action: "spend"
           description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
       summary: Finalize an escrow contract
       tags:
         - contract
@@ -399,6 +405,12 @@ components:
           type: number
           example: 438.02
           description: Amount in United States Dollars
+    Error:
+      properties:
+        message:
+          type: string
+        stack:
+          type: string
     ZeroBalanceResponse:
       properties:
         bch:
@@ -425,13 +437,13 @@ components:
     EscrowRequest:
       properties:
         buyerAddr:
-          example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+          example: "bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah"
           description: The cashaddress of the buyer
         arbiterAddr:
-          example: "bchtest:qpsm4nm7talhxhl05mlhms3ys43u76rn0ttdv3qg2u" 
+          example: "bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt" 
           description: The cashaddress of the arbiter      
         sellerAddr:
-          example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+          example: "bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2"
           description: The cashaddress of the seller
         amount:
           description: Numeric amount to be transferred by the contract in satoshi, amount must be less than 21 BCH.
@@ -452,7 +464,7 @@ components:
             type: string
             description:  | 
               serialized contract
-        address:
+        cashaddr:
           example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
           description: The funding address for the contract
     ContractFnRequest:
@@ -485,8 +497,8 @@ components:
           type: array
           items:
               type: string
-              example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0"
-              description: The hash of a transaction and index of the utxo 
+              example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000"
+              description: The hash of a transaction and index of the utxo and amount in satoshi
         nonce:
           description: A unique value added to the contract, which allows the contract to be different from an otherwise identical contract, i.e. two monthly orders.
           type: number
