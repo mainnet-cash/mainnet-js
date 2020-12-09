@@ -14,7 +14,7 @@ describe(`Create Contract Tests`, () => {
       amount: 5000,
     });
 
-    expect(contract.getAddress()).toBe(
+    expect(contract.getDepositAddress()).toBe(
       "bchtest:pqx9kffugfzrrl3z94f8h35g7cj7ma85ls92csf2s6"
     );
     expect(contract.toString().length).toBeGreaterThan(30);
@@ -33,7 +33,7 @@ describe(`Create Contract Tests`, () => {
       amount: 5000,
     });
 
-    expect(response.address).toBe(
+    expect(response.cashaddr).toBe(
       "bchtest:pqx9kffugfzrrl3z94f8h35g7cj7ma85ls92csf2s6"
     );
     expect(response.contractId).toBe(
@@ -52,7 +52,7 @@ describe(`Create Contract Tests`, () => {
     });
 
     let response = await contractFromId(createResponse.contractId);
-    expect(response.getAddress()).toBe(createResponse.address);
+    expect(response.getDepositAddress()).toBe(createResponse.cashaddr);
     expect(response.toString().slice(0, 201)).toBe(
       createResponse.contractId.slice(0, 201)
     );

@@ -38,10 +38,10 @@ describe("Test Contract Services", () => {
     
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.address).toEqual("bchreg:ppeuugad5yac7yv3zy2a4eautgt8tsmzg5spak929e");
+    expect(contractResp.body.cashaddr).toEqual("bchreg:ppeuugad5yac7yv3zy2a4eautgt8tsmzg5spak929e");
     
     let contractId = contractResp.body.contractId
-    let contractAddress = contractResp.body.address
+    let contractAddress = contractResp.body.cashaddr
 
 
     const sendResp = await request(app)
@@ -99,10 +99,10 @@ describe("Test Contract Services", () => {
     
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.address).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
+    expect(contractResp.body.cashaddr).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
     
     let contractId = contractResp.body.contractId
-    let contractAddress = contractResp.body.address
+    let contractAddress = contractResp.body.cashaddr
 
 
     const sendResp = await request(app)
@@ -149,10 +149,10 @@ describe("Test Contract Services", () => {
     
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.address).toEqual("bchreg:pr3rrjygr2nl259n8u8p7tkywpawm0zdyyw44kwcv6");
+    expect(contractResp.body.cashaddr).toEqual("bchreg:pr3rrjygr2nl259n8u8p7tkywpawm0zdyyw44kwcv6");
     
     let contractId = contractResp.body.contractId
-    let contractAddress = contractResp.body.address
+    let contractAddress = contractResp.body.cashaddr
 
 
     const sendResp = await request(app)

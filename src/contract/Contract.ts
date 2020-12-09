@@ -83,7 +83,7 @@ export class Contract implements ContractI {
     return new Contract(script, params, network as Network);
   }
 
-  public getAddress() {
+  public getDepositAddress() {
     return this.contract.address;
   }
 

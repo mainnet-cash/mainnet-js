@@ -24,10 +24,10 @@ describe(`Test Escrow Contracts`, () => {
     expect(escrow.toString().slice(0, -20)).toBe(
       escrow2.toString().slice(0, -20)
     );
-    expect(escrow.getAddress()).toBe(escrow2.getAddress());
+    expect(escrow.getDepositAddress()).toBe(escrow2.getDepositAddress());
 
     let escrow3 = EscrowContract.fromId(escrow.toString());
-    expect(escrow.getAddress()).toBe(escrow3.getAddress());
+    expect(escrow.getDepositAddress()).toBe(escrow3.getDepositAddress());
   });
 
   test("Should allow buyer to spend to seller", async () => {
@@ -43,25 +43,25 @@ describe(`Test Escrow Contracts`, () => {
       buyerAddr: buyer.getDepositAddress()!,
       amount: 9500,
     });
-    expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
+    expect(escrow.getDepositAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 6400,
         unit: "satoshis",
       },
     ]);
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 6400,
         unit: "satoshis",
       },
     ]);
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 6400,
         unit: "satoshis",
       },
@@ -92,25 +92,25 @@ describe(`Test Escrow Contracts`, () => {
       buyerAddr: buyer.getDepositAddress()!,
       amount: 9500,
     });
-    expect(escrow.getAddress()!.slice(0, 8)).toBe("bchreg:p");
+    expect(escrow.getDepositAddress()!.slice(0, 8)).toBe("bchreg:p");
     // fund the escrow contract
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 9400,
         unit: "satoshis",
       },
     ]);
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 9400,
         unit: "satoshis",
       },
     ]);
     await funder.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 9400,
         unit: "satoshis",
       },
@@ -157,7 +157,7 @@ describe(`Test Escrow Contracts`, () => {
     // fund the escrow contract
     await buyer.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 450000,
         unit: "satoshis",
       },
@@ -201,7 +201,7 @@ describe(`Test Escrow Contracts`, () => {
     // fund the escrow contract
     await buyer.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 450000,
         unit: "satoshis",
       },
@@ -245,7 +245,7 @@ describe(`Test Escrow Contracts`, () => {
     // fund the escrow contract
     await buyer.send([
       {
-        cashaddr: escrow.getAddress()!,
+        cashaddr: escrow.getDepositAddress()!,
         value: 450000,
         unit: "satoshis",
       },
@@ -289,7 +289,7 @@ describe(`Test Escrow Contracts`, () => {
       // fund the escrow contract
       await buyer.send([
         {
-          cashaddr: escrow.getAddress()!,
+          cashaddr: escrow.getDepositAddress()!,
           value: 450000,
           unit: "satoshis",
         },
@@ -331,7 +331,7 @@ describe(`Test Escrow Contracts`, () => {
       // fund the escrow contract
       await buyer.send([
         {
-          cashaddr: escrow.getAddress()!,
+          cashaddr: escrow.getDepositAddress()!,
           value: 450000,
           unit: "satoshis",
         },
