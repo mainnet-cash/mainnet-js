@@ -1,1 +1,1 @@
-export { serializeUtxo , deserializeUtxo } from "./serializeUtxo"
+export { serializeUtxo, deserializeUtxo } from "./serializeUtxo";
