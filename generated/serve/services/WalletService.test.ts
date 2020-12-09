@@ -90,7 +90,7 @@ describe("Test Wallet Endpoints", () => {
     let resp = await request(app).post("/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(500);
-    expect(resp.text).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
+    expect(resp.body).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
   });
 
   it("Should create an unnamed Mainnet wallet with the API", async () => {
