@@ -1,6 +1,7 @@
 import { UtxoI } from "../interface";
 
 export async function sumUtxoValue(utxos: UtxoI[]) {
+  
   if (utxos.length > 0) {
     const balanceArray: number[] = await Promise.all(
       utxos.map(async (o: UtxoI) => {
