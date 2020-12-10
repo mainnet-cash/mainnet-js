@@ -27,7 +27,6 @@ class Controller {
         "code":error.code,
         "message":error.error.message
       })
-      response.json(error.error);
     } else {
       response.end(error.error || error.message);
     }
