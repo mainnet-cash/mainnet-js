@@ -22,7 +22,7 @@ export interface WalletI {
   generate(): Promise<any>;
 
   /**
-   * toString should retrun a serialized representation of the Wallet
+   * toString should return a serialized representation of the Wallet
    * @returns returns a serialized representation of the wallet
    */
   toString(): string;

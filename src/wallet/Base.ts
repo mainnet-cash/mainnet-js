@@ -1,5 +1,4 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-// GrpcClient is swapped out by webpack for a web module
 import { getNetworkProvider } from "../network/default";
 import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getStorageProvider } from "../db/util";
@@ -45,10 +44,25 @@ export class BaseWallet implements WalletI {
     }
   }
 
+  /**
+   * generate creates a new wallet
+   * @throws {Error} if called on BaseWallet
+   */
+
   generate(): Promise<this> {
     throw Error("Cannot generate with the baseWallet class");
   }
 
+  /**
+   * _named (internal) get a named wallet from the database or create a new one
+   *
+   * @param {string} name              name of the wallet
+   * @param {string} dbName            database name the wallet is stored in
+   * @param {boolean} forceNew         attempt to overwrite an existing wallet
+   *
+   * @throws {Error} if forceNew is true and the wallet already exists
+   * @returns a promise to a named wallet
+   */
   _named = async (
     name: string,
     dbName?: string,
@@ -57,24 +71,26 @@ export class BaseWallet implements WalletI {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
-    checkContextSafety(this);
+    _checkContextSafety(this);
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
     if (db) {
       await db.init();
-      let savedWallet = await db.getWallet(name);
-      if (savedWallet) {
+      let savedWalletRecord = await db.getWallet(name);
+      if (savedWalletRecord) {
         await db.close();
         if (forceNew) {
           throw Error(
             `A wallet with the name ${name} already exists in ${dbName}`
           );
         }
-        return this._fromId(savedWallet.wallet);
+        let recoveredWallet = await this._fromId(savedWalletRecord.wallet);
+        recoveredWallet.name = savedWalletRecord.name;
+        return recoveredWallet;
       } else {
         let wallet = await this.generate();
-        await db.addWallet(wallet.name, wallet.toString());
+        await db.addWallet(wallet.name, wallet.toDbString());
         await db.close();
         return wallet;
       }
@@ -83,11 +99,29 @@ export class BaseWallet implements WalletI {
     }
   };
 
+  /**
+   * _fromId (internal) creates a wallet from serialized string
+   * @throws {Error} if called on BaseWallet
+   */
   public _fromId(secret?: string): Promise<this> {
     secret;
     throw Error("Cannot parse id on BaseWallet class");
   }
 
+  /**
+   * toDbString store the serialized version of the wallet in the database, not just the name
+   * @throws {Error} if called on BaseWallet
+   */
+  public toDbString(): string {
+    throw Error("toDbString called on base wallet, which is not serializable");
+  }
+
+  /**
+   * _newRandom (internal) if the wallet is named, get or create it; otherwise create a random
+   * unnamed wallet
+   * @param {string} name              name of the wallet
+   * @param {string} dbName            database name the wallet is stored in
+   */
   public _newRandom = async (name: string, dbName?: string): Promise<this> => {
     if (name.length > 0) {
       return this._named(name, dbName);
@@ -97,7 +131,12 @@ export class BaseWallet implements WalletI {
   };
 }
 
-const checkContextSafety = function (wallet: BaseWallet) {
+/**
+ * _checkContextSafety (internal) if running in nodejs, will disable saving
+ * mainnet wallets on public servers if ALLOW_MAINNET_USER_WALLETS is set to false
+ * @param {BaseWallet} wallet        a wallet
+ */
+const _checkContextSafety = function (wallet: BaseWallet) {
   if (typeof process !== "undefined") {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.networkType === NetworkType.Mainnet) {
