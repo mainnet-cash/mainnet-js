@@ -158,10 +158,12 @@ describe("Test Wallet Endpoints", () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       const bobsWalletResp = await request(app).post("/wallet/create").send({
+        name: "bobs wallet",
         type: "wif",
         network: "regtest",
       });
 
+      expect(bobsWalletResp.body.walletId).toBe("named:regtest:bobs wallet");
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
       const sendResp = await request(app)

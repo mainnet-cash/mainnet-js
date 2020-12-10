@@ -30,7 +30,7 @@ describe("Post Endpoints", () => {
   });
 
   /**
-   * redirect to docs
+   * Should timeout
    */
   it("Should timeout", async () => {
     const resp = await request(app).get("/timeout").send();

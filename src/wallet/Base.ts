@@ -54,7 +54,8 @@ export class BaseWallet implements WalletI {
   }
 
   /**
-   * _named (internal) get a named wallet from the database or create a new one
+   * _named (internal) get a named wallet from the database or create a new one.
+   * Note: this function should behave identically if 
    *
    * @param {string} name              name of the wallet
    * @param {string} dbName            database name the wallet is stored in
