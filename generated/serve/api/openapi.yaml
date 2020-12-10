@@ -147,6 +147,58 @@ paths:
       tags:
       - mine
       x-eov-operation-handler: controllers/MineController
+  /util/convert:
+    post:
+      operationId: convert
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                value:
+                  example: 100
+                  type: number
+                from:
+                  description: Provided value unit of account.
+                  enum:
+                  - bch
+                  - usd
+                  - bit
+                  - bits
+                  - sat
+                  - sats
+                  - satoshi
+                  - satoshis
+                  example: sat
+                  type: string
+                to:
+                  description: Unit of account to be returned
+                  enum:
+                  - bch
+                  - usd
+                  - bit
+                  - bits
+                  - sat
+                  - sats
+                  - satoshi
+                  - satoshis
+                  example: usd
+                  type: string
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                description: If a unit of account is passed, a plain number is returned.
+                type: number
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new wallet
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/create:
     post:
       operationId: createWallet
