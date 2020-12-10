@@ -23,6 +23,10 @@ class Controller {
   static sendError(response, error) {
     response.status(error.code || 500);
     if (error.error instanceof Object) {
+      response.json({
+        "code":error.code,
+        "message":error.error.message
+      })
       response.json(error.error);
     } else {
       response.end(error.error || error.message);
