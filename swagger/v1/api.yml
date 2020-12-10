@@ -144,6 +144,59 @@ paths:
           description: Invalid Request
       tags:
         - mine 
+  /util/convert:
+    post:
+      operationId: convert 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                value:
+                  type: number
+                  example: 100    
+                from:
+                  description:
+                    Provided value unit of account.
+                  enum:
+                    - bch
+                    - usd
+                    - bit
+                    - bits
+                    - sat
+                    - sats
+                    - satoshi
+                    - satoshis
+                  example: sat
+                  type: string  
+                to:
+                  description:
+                    Unit of account to be returned
+                  enum:
+                    - bch
+                    - usd
+                    - bit
+                    - bits
+                    - sat
+                    - sats
+                    - satoshi
+                    - satoshis
+                  example: usd
+                  type: string 
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: number
+                description: If a unit of account is passed, a plain number is returned.
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new wallet
+      tags:
+        - wallet                
   /wallet/create:
     post:
       operationId: createWallet

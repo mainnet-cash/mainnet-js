@@ -27,6 +27,7 @@ services/ContractService.js
 services/WalletService.js
 services/MineService.js
 services/*.test.ts
+controllers/Controller.js
 package.json
 index.js
 config.js
