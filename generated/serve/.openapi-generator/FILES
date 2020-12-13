@@ -7,6 +7,4 @@ controllers/UtilController.js
 controllers/WalletController.js
 controllers/index.js
 logger.js
-services/Service.js
-services/UtilService.js
 utils/openapiRouter.js
