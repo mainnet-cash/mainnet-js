@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
-const mainnet = require("mainnet-js");
 
 /**
-* convert value base units
+* create a new wallet
 *
 * convertRequest ConvertRequest  (optional)
 * returns BigDecimal
@@ -11,12 +10,14 @@ const mainnet = require("mainnet-js");
 const convert = ({ convertRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.convertObject(convertRequest)
-      resolve(Service.successResponse(resp.toString()));
+      resolve(Service.successResponse({
+        convertRequest,
+      }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
