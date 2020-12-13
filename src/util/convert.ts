@@ -20,3 +20,7 @@ export async function convert(
     return satoshiToAmount(satoshi, to);
  
 }
+
+export async function convertObject({value, from , to}:{value:number, from:any, to:any}){
+  return await convert(value, from, to)
+}
