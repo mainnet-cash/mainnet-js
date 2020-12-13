@@ -12,10 +12,6 @@ const balance = async (request, response) => {
   await Controller.handleRequest(request, response, service.balance);
 };
 
-const convert = async (request, response) => {
-  await Controller.handleRequest(request, response, service.convert);
-};
-
 const createWallet = async (request, response) => {
   await Controller.handleRequest(request, response, service.createWallet);
 };
@@ -47,7 +43,6 @@ const utxos = async (request, response) => {
 
 module.exports = {
   balance,
-  convert,
   createWallet,
   depositAddress,
   depositQr,
