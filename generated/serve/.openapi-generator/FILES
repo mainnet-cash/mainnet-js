@@ -3,8 +3,10 @@ README.md
 api/openapi.yaml
 controllers/ContractController.js
 controllers/MineController.js
+controllers/UtilController.js
 controllers/WalletController.js
 controllers/index.js
 logger.js
 services/Service.js
+services/UtilService.js
 utils/openapiRouter.js
