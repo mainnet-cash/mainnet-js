@@ -1,11 +1,13 @@
 .idea
 .DS_Store
 .vscode
-node_modules
 .env.testnet
 .env.mainnet
 generated/serve/*.log
+generated/serve/coverage
+generated/serve/node_modules
 generated/client/*
+node_modules
 *.log
 src/**/*.d.ts
 src/**/*.js

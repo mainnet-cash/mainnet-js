@@ -26,7 +26,6 @@ describe("Test Contract Services", () => {
     let arbiter = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
     let seller = await RegTestWallet.watchOnly('bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e')
     
-
     const contractResp = await request(app).post("/contract/escrow/create").send({
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),

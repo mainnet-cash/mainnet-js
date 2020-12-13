@@ -25,7 +25,7 @@ const balance = ({ balanceRequest }) => new Promise(
       }
     } catch (e) {
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
@@ -43,7 +43,7 @@ const createWallet = ({ walletRequest }) => new Promise(
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
@@ -64,9 +64,8 @@ const depositAddress = ({ serializedWallet }) =>
       resp = {cashaddr:resp}
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   });
@@ -85,9 +84,8 @@ const depositQr = ({ serializedWallet }) =>
       let resp = await wallet.getDepositQr(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   });
@@ -106,9 +104,8 @@ const maxAmountToSend = ({ maxAmountToSendRequest }) => new
     let resp = await wallet.getMaxAmountToSend(args);
     resolve(Service.successResponse({ ...resp }));
   } catch (e) {
-    console.log(e);
     reject(
-      Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+      Service.rejectResponse(e, e.status || 500)
     );
   }
 });
@@ -129,7 +126,7 @@ const send = ({ sendRequest }) => new Promise(
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },
@@ -151,9 +148,8 @@ const sendMax = ({ sendMaxRequest }) =>
       let resp = await wallet.sendMax(cashaddr);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   });
@@ -172,9 +168,8 @@ const utxos = ({ serializedWallet }) => new Promise(
       let resp = await wallet.getUtxos(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },

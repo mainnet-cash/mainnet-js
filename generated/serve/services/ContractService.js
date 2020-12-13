@@ -55,7 +55,7 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
         e.status || 500,
       ));
     }
-  },
+   },
 );
 /**
 * List specific utxos in a contract

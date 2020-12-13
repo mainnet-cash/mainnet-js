@@ -6,7 +6,7 @@ export async function sumSendRequestAmounts(requests: SendRequest[]) {
   if (requests) {
     const balanceArray: (BigInt | Error)[] = await Promise.all(
       requests.map(async (r: SendRequest) => {
-        return await amountInSatoshi(r.value, r.unit);
+        return BigInt(await amountInSatoshi(r.value, r.unit));
       })
     );
     const balance = balanceArray.reduce(sumBalance, 0n);
