@@ -2,15 +2,14 @@ import { bchParam } from "../chain";
 import { UnitEnum } from "../enum";
 import { getUsdRate } from "./getUsdRate";
 
-
 /**
-   * converts given value and unit into satoshi
-   *
-   * @param {value} number           some value
-   * @param {rawUnit} any            the unit of value
-   *
-   * @returns a promise to the value in satoshi
-   */
+ * converts given value and unit into satoshi
+ *
+ * @param {value} number           some value
+ * @param {rawUnit} any            the unit of value
+ *
+ * @returns a promise to the value in satoshi
+ */
 
 export async function amountInSatoshi(
   value: number,
