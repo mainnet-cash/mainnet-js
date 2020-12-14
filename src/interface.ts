@@ -33,3 +33,8 @@ export interface TxI {
   height: number;
   fee?: number;
 }
+
+export interface HeaderI {
+  height: number;
+  hex: string;
+}

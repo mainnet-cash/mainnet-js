@@ -5,9 +5,10 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { NetworkProvider } from "cashscript";
-import { TxI, UtxoI, ElectrumBalanceI } from "../interface";
+import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
+import { add } from "winston";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -70,6 +71,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     )) as string;
   }
 
+  // gets the decoded transaction in human readable form
   async getRawTransactionObject(txid: string): Promise<any> {
     return (await this.performRequest(
       "blockchain.transaction.get",
@@ -89,6 +91,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
+  // Get transaction history of a given address
   async getHistory(address: string): Promise<TxI[]> {
     const result = (await this.performRequest(
       "blockchain.address.get_history",
@@ -96,6 +99,49 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     )) as TxI[];
 
     return result;
+  }
+
+  // Wait for the next block or a block at given blockchain height.
+  public async waitForBlock(height?: number): Promise<HeaderI> {
+    return new Promise(async (resolve) => {
+      let acknowledged = false;
+      const waitForBlockCallback = async (header: any) => {
+        if (!acknowledged) {
+          acknowledged = true;
+          return;
+        }
+
+        header = header instanceof Array ? header[0] : header;
+
+        if (height === undefined || header.height >= height!) {
+          await this.unsubscribeFromHeaders(waitForBlockCallback);
+          resolve(header);
+        }
+      };
+      await this.subscribeToHeaders(
+        waitForBlockCallback
+      );
+    });
+  }
+
+  // subscribe to notifications sent when new block is found, the block header is sent to callback
+  async subscribeToHeaders(
+    callback: (header: HeaderI) => void
+  ): Promise<void> {
+    await this.subscribeRequest(
+      "blockchain.headers.subscribe",
+      callback
+    );
+  }
+
+  // unsubscribe to notifications sent when new block is found
+  async unsubscribeFromHeaders(
+    callback: (header: HeaderI) => void
+  ): Promise<void> {
+    await this.unsubscribeRequest(
+      "blockchain.headers.subscribe",
+      callback
+    );
   }
 
   async subscribeToAddress(

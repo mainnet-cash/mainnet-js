@@ -1,3 +1,5 @@
+import { TxI } from "../interface";
+
 export interface WalletI {
   id?: number;
   name: string;
@@ -11,6 +13,7 @@ export interface WebhookI {
   recurrence: string;
   hook_url: string;
   status: string;
-  last_tx: string;
+  last_height: number;
+  tx_seen: Array<TxI>;
   expires_at: Date;
 }

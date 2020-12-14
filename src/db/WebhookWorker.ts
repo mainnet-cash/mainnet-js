@@ -40,9 +40,6 @@ export default class WebhookWorker {
     await this.stop();
     clearInterval(this.interval);
     this.interval = undefined;
-
-    // do not close db since pool will become invalidated
-    // await this.db.close();
   }
 
   async pickupHooks(start: boolean = false): Promise<void> {
@@ -112,7 +109,7 @@ export default class WebhookWorker {
         status = data;
 
         // we should skip fetching transactions for freshly registered hooks upon acknowledements
-        if (hook.status === "" && hook.last_tx === "") {
+        if (hook.status === "") {
           return;
         }
       } else if (data instanceof Array) {
@@ -137,18 +134,27 @@ export default class WebhookWorker {
 
     // get transactions
     const history: TxI[] = await this.provider.getHistory(hook.address);
-    // console.debug("Got history", history);
+
     // figure out which transactions to send to the hook
     let txs: TxI[] = [];
-    const idx: number = history.findIndex(
-      (val) => val.tx_hash === hook.last_tx
-    );
-    if (idx >= 0) {
-      // send all after last tracked
-      txs = history.slice(idx + 1);
-    } else {
-      // send the last only if no tracking was done
+
+    if (status === "") {
+      // send the last transaction only if no tracking was done
       txs = history.slice(-1);
+    } else {
+      // update height of transactions, which are now confirmed
+      hook.tx_seen = hook.tx_seen.map(seenTx => {
+        if (seenTx.height <= 0) {
+          const histTxIndex = history.findIndex(val => val.tx_hash === seenTx.tx_hash);
+          if (histTxIndex >= -1) {
+            seenTx.height = history[histTxIndex].height;
+          }
+        }
+        return seenTx;
+      });
+
+      const seenHashes = hook.tx_seen.map(val => val.tx_hash);
+      txs = history.filter(val => (val.height >= hook.last_height || val.height <= 0) && !seenHashes.includes(val.tx_hash));
     }
 
     let shouldUpdateStatus: boolean = true;
@@ -207,24 +213,36 @@ export default class WebhookWorker {
         result = await this.postWebHook(hook.hook_url, balanceObject);
       }
 
-      if (!result) {
+      if (result) {
+        // hook.last_tx = tx.tx_hash;
+        hook.tx_seen.push(tx);
+        await this.db.setWebhookSeenTxLastHeight(hook.id!, hook.tx_seen, hook.last_height);
+        // await this.db.setWebhookSeenTx(hook.id!, tx.tx_hash);
+      } else {
         console.debug("Failed to execute webhook", hook);
         shouldUpdateStatus = false;
         hookCallFailed = true;
       }
-
-      hook.last_tx = tx.tx_hash;
-      await this.db.setWebhookLastTx(hook.id!, tx.tx_hash);
     }
 
+    // successful run
     if (shouldUpdateStatus) {
+      if (hook.recurrence === "once") {
+        await this.stopHook(hook);
+        await this.db.deleteWebhook(hook.id!);
+        return;
+      }
+
       hook.status = status;
       await this.db.setWebhookStatus(hook.id!, status);
-    }
 
-    if (hook.recurrence === "once" && !hookCallFailed) {
-      await this.stopHook(hook);
-      await this.db.deleteWebhook(hook.id!);
+      // update last_height and truncate tx_seen
+      const maxHeight = Math.max(...hook.tx_seen.map(val => val.height));
+      if (maxHeight >= hook.last_height) {
+        hook.last_height = maxHeight;
+        hook.tx_seen = hook.tx_seen.filter(val => val.height === maxHeight || val.height <= 0);
+        await this.db.setWebhookSeenTxLastHeight(hook.id!, hook.tx_seen, hook.last_height);
+      }
     }
   }
 

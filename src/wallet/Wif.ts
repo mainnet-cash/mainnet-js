@@ -260,10 +260,12 @@ export class Wallet extends BaseWallet {
     return await this.provider.getUtxos(address);
   }
 
+  // gets transaction history of this wallet
   public async getHistory(): Promise<TxI[]> {
     return await this.provider!.getHistory(this.cashaddr!);
   }
 
+  // gets last transaction of this wallet
   public async getLastTransaction(
     confirmedOnly: boolean = false
   ): Promise<any> {
@@ -275,6 +277,7 @@ export class Wallet extends BaseWallet {
     return this.provider!.getRawTransactionObject(lastTx.tx_hash);
   }
 
+  // gets wallet balance in sats, bch and usd
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
@@ -284,6 +287,7 @@ export class Wallet extends BaseWallet {
     }
   }
 
+  // sets up a callback to be called upon wallet's balance change
   public async watchBalance(callback: (any) => void): Promise<void> {
     let subscribeCallback = async () => {
       let balance = await this.getBalance();
@@ -292,6 +296,7 @@ export class Wallet extends BaseWallet {
     return this.provider!.subscribeToAddress(this.cashaddr!, subscribeCallback);
   }
 
+  // waits for next transaction, program execution is halted
   public async waitForTransaction(): Promise<any> {
     return new Promise(async (resolve) => {
       const waitForTransactionCallback = async (data) => {

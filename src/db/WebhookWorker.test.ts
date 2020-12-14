@@ -5,6 +5,7 @@ import { Network } from "../interface";
 import { initProviders, disconnectProviders } from "../network/Connection";
 
 import { Wallet, RegTestWallet } from "../wallet/Wif";
+import { mine } from "../mine";
 
 let worker: WebhookWorker;
 let responses: any = {};
@@ -299,11 +300,16 @@ describe("Webhook worker tests", () => {
 
       let hook = await worker.getWebhook(hookId);
       expect(hook!.status).not.toBe("");
-      expect(hook!.last_tx).not.toBe("");
+      expect(hook!.tx_seen).not.toBe([]);
+      const tx = hook!.tx_seen[0];
 
       // shutdown
       await worker.destroy();
       expect(worker.activeHooks.size).toBe(0);
+
+      // also mine a block while offline
+      await mine({ cashaddr: process.env.ADDRESS!, blocks: 1 });
+      await worker.provider.waitForBlock();
 
       // make two more transactions "offline"
       aliceWallet.send([
@@ -329,12 +335,47 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
+          hook = await worker.getWebhook(hookId);
+          const seenTx = hook!.tx_seen.find(val => val.tx_hash === tx.tx_hash);
+          expect(seenTx).toBeDefined();
+          expect(seenTx!.height).toBeGreaterThan(0);
+          expect(seenTx!.height).not.toBe(tx.height);
+
           expect(worker.activeHooks.size).toBe(1);
           expect(responses["http://example.com/bob"].length).toBe(3);
 
           resolve(true);
         }, 3000)
       );
+
+      // mine some more blocks
+      await mine({ cashaddr: process.env.ADDRESS!, blocks: 3 });
+      await worker.provider.waitForBlock();
+
+      aliceWallet.send([
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ]);
+      await bobWallet.waitForTransaction();
+
+      // mine some more blocks
+      await mine({ cashaddr: process.env.ADDRESS!, blocks: 3 });
+      await worker.provider.waitForBlock();
+
+      await new Promise((resolve) =>
+      setTimeout(async () => {
+        hook = await worker.getWebhook(hookId);
+        expect(hook!.tx_seen.length).toBe(1);
+
+        expect(worker.activeHooks.size).toBe(1);
+        expect(responses["http://example.com/bob"].length).toBe(4);
+
+        resolve(true);
+      }, 3000)
+    );
     } catch (e) {
       console.log(e, e.stack, e.message);
       throw e;

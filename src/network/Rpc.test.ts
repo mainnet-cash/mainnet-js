@@ -1,7 +1,16 @@
-import { Connection } from "./Connection";
-import { Wallet, TestNetWallet } from "../wallet/Wif";
+import { Connection, disconnectProviders, initProviders } from "./Connection";
+import { Wallet, TestNetWallet, RegTestWallet } from "../wallet/Wif";
 import { getNetworkProvider } from "../network/default";
 import { Network } from "cashscript";
+import { mine } from "../mine";
+
+beforeAll(async () => {
+  await initProviders([Network.REGTEST]);
+});
+
+afterAll(async () => {
+  await disconnectProviders([Network.REGTEST]);
+});
 
 test("subcribe to address", async () => {
   process.setMaxListeners(0);
@@ -63,4 +72,46 @@ test("Watch wallet balance", async () => {
 
   await w.watchBalance((balance) => console.log(balance));
   await new Promise((resolve) => setTimeout(resolve, 1000));
+});
+
+test("Wait for block timeout", async () => {
+  const provider = getNetworkProvider(Network.REGTEST);
+  let promiseResult;
+  const timeout = new Promise((resolve) => setTimeout(resolve, 1000, 'timeout'));
+  await Promise.race([provider.waitForBlock(), timeout]).then(result => promiseResult = result);
+  expect(promiseResult).toBe("timeout");
+});
+
+test("Wait for block success", async () => {
+  const provider = getNetworkProvider(Network.REGTEST);
+
+  const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+  const aliceWallet = await RegTestWallet.fromId(aliceWif);
+  const bobWallet = await RegTestWallet.newRandom();
+
+  await aliceWallet.send([
+    {
+      cashaddr: bobWallet.cashaddr!,
+      value: 1000,
+      unit: "satoshis",
+    },
+  ]);
+
+  const height = await provider.getBlockHeight();
+
+  new Promise((resolve) => setTimeout(() => {
+    mine({ cashaddr: process.env.ADDRESS!, blocks: 1 });
+    resolve(true);
+  }, 100));
+
+  let header = await provider.waitForBlock();
+  expect(header.height).toBe(height + 1)
+
+  new Promise((resolve) => setTimeout(() => {
+    mine({ cashaddr: process.env.ADDRESS!, blocks: 2 });
+    resolve(true);
+  }, 100));
+
+  header = await provider.waitForBlock(height + 3);
+  expect(header.height).toBe(height + 3)
 });

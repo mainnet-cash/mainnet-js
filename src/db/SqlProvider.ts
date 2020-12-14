@@ -2,6 +2,7 @@ import StorageProvider from "./StorageProvider";
 import { WalletI, WebhookI } from "./interface";
 import { Pool } from "pg";
 import { default as format } from "pg-format";
+import { TxI } from "../interface";
 var parseDbUrl = require("parse-database-url");
 
 export default class SqlProvider implements StorageProvider {
@@ -35,7 +36,8 @@ export default class SqlProvider implements StorageProvider {
           "recurrence TEXT," +
           "hook_url TEXT," +
           "status TEXT," +
-          "last_tx TEXT," +
+          "tx_seen JSON," +
+          "last_height INTEGER," +
           "expires_at DATE" +
           ");",
         this.webhookTable
@@ -100,7 +102,7 @@ export default class SqlProvider implements StorageProvider {
       duration_sec > expireTimeout ? expireTimeout : duration_sec * 1000;
     const expires_at = new Date(new Date().getTime() + duration_sec);
     let text = format(
-      "INSERT into %I (address,type,recurrence,hook_url,status,last_tx,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;",
+      "INSERT into %I (address,type,recurrence,hook_url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
       this.webhookTable
     );
 
@@ -110,7 +112,8 @@ export default class SqlProvider implements StorageProvider {
       recurrence,
       hook_url,
       "",
-      "",
+      "[]",
+      0,
       expires_at.toISOString(),
     ]);
     return result.rows[0];
@@ -146,12 +149,12 @@ export default class SqlProvider implements StorageProvider {
     await this.db.query(text, [status, id]);
   }
 
-  public async setWebhookLastTx(id: number, last_tx: string): Promise<void> {
+  public async setWebhookSeenTxLastHeight(id: number, tx_seen: Array<TxI>, last_height: number): Promise<void> {
     let text = format(
-      "UPDATE %I SET last_tx = $1 WHERE id = $2;",
+      "UPDATE %I SET tx_seen = $1, last_height = $2 WHERE id = $3;",
       this.webhookTable
     );
-    await this.db.query(text, [last_tx, id]);
+    await this.db.query(text, [JSON.stringify(tx_seen), last_height, id]);
   }
 
   public async deleteWebhook(id: number): Promise<void> {

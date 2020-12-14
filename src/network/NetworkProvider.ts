@@ -1,4 +1,4 @@
-import { TxI, UtxoI, Network } from "../interface";
+import { TxI, UtxoI, Network, HeaderI } from "../interface";
 
 export default interface NetworkProvider {
   /**
@@ -57,6 +57,13 @@ export default interface NetworkProvider {
    * @returns Array of transactions.
    */
   getHistory(address: string): Promise<TxI[]>;
+
+  /**
+   * Wait for the next block or a block at given blockchain height.
+   * @param height If specified, waits for blockchain to reach this height.
+   * @returns Block header.
+   */
+  waitForBlock(height?: number): Promise<HeaderI>;
 
   /**
    * Subscribe to the address change events
