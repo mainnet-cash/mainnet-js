@@ -22,11 +22,9 @@
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
 
-services/index.js
-services/ContractService.js
-services/WalletService.js
-services/MineService.js
+services/*.js
 services/*.test.ts
+controllers/Controller.js
 package.json
 index.js
 config.js

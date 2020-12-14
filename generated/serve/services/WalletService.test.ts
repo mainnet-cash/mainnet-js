@@ -60,7 +60,7 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bchreg:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:regtest:c")).toBeTruthy();
+    expect(body!.walletId).toBe("named:regtest:A simple Testnet Wallet");
   });
 
   it("Should create a Testnet wallet with the API", async () => {
@@ -76,7 +76,7 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bchtest:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:testnet:c")).toBeTruthy();
+    expect(body!.walletId).toBe("named:testnet:A simple Testnet Wallet");
   });
 
   it("Should error saving a named Mainnet wallet with the API", async () => {
@@ -90,7 +90,7 @@ describe("Test Wallet Endpoints", () => {
     let resp = await request(app).post("/wallet/create").send(req);
     const body = resp.body;
     expect(resp.statusCode).toBe(500);
-    expect(resp.body).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
+    expect(resp.body.message).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
   });
 
   it("Should create an unnamed Mainnet wallet with the API", async () => {
@@ -158,10 +158,12 @@ describe("Test Wallet Endpoints", () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       const bobsWalletResp = await request(app).post("/wallet/create").send({
+        name: "bobs wallet",
         type: "wif",
         network: "regtest",
       });
 
+      expect(bobsWalletResp.body.walletId).toBe("named:regtest:bobs wallet");
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
       const sendResp = await request(app)

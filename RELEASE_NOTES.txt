@@ -7,7 +7,12 @@ Features:
 - All wallets and contracts will use the global providers if available.
 - Express server now uses network providers from global scope declared once at service start.
 - Escrow contracts
-- Express server returns json instead of text errors.
+- Express server return JSON instead of text errors.
+- Named wallets now return id as "named:wif:<THE_NAME>" format
+- Initial utility endpoint for currency conversion.
+- Added convert utility function and supporting satoshiToAmount 
+- Unit conversions are now done as numbers.
+- Use stock latest openapitools/openapi-generator-cli instead of fork for local validation and building
 
 ...
 

@@ -158,13 +158,8 @@ export class Wallet extends BaseWallet {
   }
 
   public _fromId = async (walletId: string): Promise<this> => {
-    let [
-      walletType,
-      networkGiven,
-      privateImport,
-      address,
-    ]: string[] = walletId.split(":");
-    if (!["watch", "wif", "seed"].includes(walletType)) {
+    let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
+    if (!["named", "seed", "watch", "wif"].includes(walletType)) {
       throw Error(
         `Wallet type ${walletType} was passed to single address wallet`
       );
@@ -178,18 +173,26 @@ export class Wallet extends BaseWallet {
     }
     switch (walletType) {
       case "wif":
-        return this.fromWIF(privateImport);
+        return this.fromWIF(arg1);
       case "watch":
-        if (address) {
-          address = `${privateImport}:${address}`;
+        let sanitizedAddress;
+        if (arg2) {
+          sanitizedAddress = `${arg1}:${arg2}`;
         } else {
-          address = `${derivePrefix(privateImport)}:${privateImport}`;
+          sanitizedAddress = `${derivePrefix(arg1)}:${arg1}`;
         }
-        return this.watchOnly(address);
+        return this.watchOnly(sanitizedAddress);
+      case "named":
+        if (arg2) {
+          return this._named(arg1, arg2);
+        } else {
+          return this._named(arg1);
+        }
+
       case "seed":
         throw new Error("Not implemented");
       default:
-        return this.fromWIF(privateImport);
+        return this.fromWIF(arg1);
     }
   };
 
@@ -266,7 +269,19 @@ export class Wallet extends BaseWallet {
     return await sumUtxoValue(utxos);
   }
 
+  // Returns the serialized wallet as a string
+  // If storing in a database, set asNamed to false to store secrets
+  // In all other cases, the a named wallet is deserialized from the database
+  //  by the name key
   public toString() {
+    if (this.name) {
+      return `named:${this.network}:${this.name}`;
+    } else {
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    }
+  }
+
+  public toDbString() {
     return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 

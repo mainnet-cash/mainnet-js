@@ -17,8 +17,8 @@
     "dist/*.js.map"
   ],
   "scripts": {
-    "api:validate": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator validate -i /local/swagger/v1/api.yml",
-    "api:build:server": "docker run --rm -v ${PWD}:/local 2qxx/openapi-generator generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/generated/serve",
+    "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
+    "api:build:server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/generated/serve",
     "api:build:client": "node swagger/generate.js",
     "api:serve": "npm i --production --cwd generated/serve/ --prefix generated/serve/ && node generated/serve/serve.js",
     "api:serve:cluster": "npm i --production --cwd generated/serve/ --prefix generated/serve/ && node  generated/serve/cluster.js",
