@@ -8,4 +8,11 @@ controllers/WalletController.js
 controllers/WebhookController.js
 controllers/index.js
 logger.js
+services/ContractService.js
+services/MineService.js
+services/Service.js
+services/UtilService.js
+services/WalletService.js
+services/WebhookService.js
+services/index.js
 utils/openapiRouter.js

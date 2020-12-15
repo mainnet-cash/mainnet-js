@@ -37,7 +37,8 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.17.2",
     "loadtest": "^5.1.2",
-    "mocha": "^7.1.1"
+    "mocha": "^7.1.1",
+    "superwstest": "^1.3.0"
   },
   "eslintConfig": {
     "env": {

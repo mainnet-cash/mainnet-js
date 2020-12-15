@@ -44,6 +44,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
+  - name: webhook
+    description: Create webhooks
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
 paths:
   /webhook/watch_address:
     post:
@@ -72,7 +77,6 @@ paths:
         Create a webhook to watch address balance and transactions.
       tags:
         - webhook
-
   /contract/escrow/create:
     post:
       operationId: createEscrow

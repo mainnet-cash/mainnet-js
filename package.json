@@ -30,7 +30,7 @@
     "cover:api": "nyc --silent --no-clean npm run test:api",
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "test": "npx jest --runInBand --detectOpenHandles",
-    "test:api": "npm i --cwd generated/serve/ --prefix generated/serve/ && npm run test --cwd generated/serve/ --prefix generated/serve/",
+    "test:api": "npm i --cwd generated/serve/ --prefix generated/serve/ && npm run test --cwd generated/serve/ --prefix generated/serve/ --runInBand",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
     "test:wallet": "npx jest --detectOpenHandles",
     "format": "prettier --write .",

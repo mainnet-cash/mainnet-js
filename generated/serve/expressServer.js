@@ -14,7 +14,7 @@ const timeout = require('connect-timeout');
 const config = require('./config');
 const mainnet = require("mainnet-js");
 
-const wsServer = require('./wsServer');
+const makeWsServer = require('./wsServer');
 
 class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
@@ -50,7 +50,7 @@ class ExpressServer {
     this.app.get('/', (req, res) => {
       res.redirect(301, '/api-docs');
     });
-    
+
     this.app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(this.docSchema));
     this.app.get("/timeout", (req, res) => {});
     this.app.get('/login-redirect', (req, res) => {
@@ -81,11 +81,13 @@ class ExpressServer {
         });
         await mainnet.initProviders()
         const server = this.app.listen(this.port);
+        const wsServer = makeWsServer(server);
         server.on('upgrade', (request, socket, head) => {
           wsServer.handleUpgrade(request, socket, head, socket => {
             wsServer.emit('connection', socket, request);
           });
         });
+
         return server;
       });
   }

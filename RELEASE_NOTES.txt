@@ -18,7 +18,7 @@ Features:
 
 0.0.5
 -----
-- New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress
+- New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress, subscribeToHeaders, unsubscribeFromHeaders, waitForBlock
 - New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
 - Add webhooks for watching balance and transactions - REST Endpoint /webhook/watch_address
 - Add websockets for watching balance and transactions - REST Endpoint /api/v1/wallet, methods watchBalance, waitForTransaction
