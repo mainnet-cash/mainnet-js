@@ -142,12 +142,14 @@ export default class WebhookWorker {
       // send the last transaction only if no tracking was done
       txs = history.slice(-1);
     } else {
+      // reverse history for faster search
+      const revHistory = history.reverse();
       // update height of transactions, which are now confirmed
       hook.tx_seen = hook.tx_seen.map(seenTx => {
         if (seenTx.height <= 0) {
-          const histTxIndex = history.findIndex(val => val.tx_hash === seenTx.tx_hash);
-          if (histTxIndex >= -1) {
-            seenTx.height = history[histTxIndex].height;
+          const histTx = revHistory.find(val => val.tx_hash === seenTx.tx_hash);
+          if (histTx) {
+            seenTx.height = histTx.height;
           }
         }
         return seenTx;
@@ -158,7 +160,6 @@ export default class WebhookWorker {
     }
 
     let shouldUpdateStatus: boolean = true;
-    let hookCallFailed: boolean = false;
 
     for (const tx of txs) {
       // watching transactions
@@ -214,14 +215,11 @@ export default class WebhookWorker {
       }
 
       if (result) {
-        // hook.last_tx = tx.tx_hash;
         hook.tx_seen.push(tx);
         await this.db.setWebhookSeenTxLastHeight(hook.id!, hook.tx_seen, hook.last_height);
-        // await this.db.setWebhookSeenTx(hook.id!, tx.tx_hash);
       } else {
         console.debug("Failed to execute webhook", hook);
         shouldUpdateStatus = false;
-        hookCallFailed = true;
       }
     }
 
