@@ -336,7 +336,9 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           hook = await worker.getWebhook(hookId);
-          const seenTx = hook!.tx_seen.find(val => val.tx_hash === tx.tx_hash);
+          const seenTx = hook!.tx_seen.find(
+            (val) => val.tx_hash === tx.tx_hash
+          );
           expect(seenTx).toBeDefined();
           expect(seenTx!.height).toBeGreaterThan(0);
           expect(seenTx!.height).not.toBe(tx.height);
@@ -366,16 +368,16 @@ describe("Webhook worker tests", () => {
       await worker.provider.waitForBlock();
 
       await new Promise((resolve) =>
-      setTimeout(async () => {
-        hook = await worker.getWebhook(hookId);
-        expect(hook!.tx_seen.length).toBe(1);
+        setTimeout(async () => {
+          hook = await worker.getWebhook(hookId);
+          expect(hook!.tx_seen.length).toBe(1);
 
-        expect(worker.activeHooks.size).toBe(1);
-        expect(responses["http://example.com/bob"].length).toBe(4);
+          expect(worker.activeHooks.size).toBe(1);
+          expect(responses["http://example.com/bob"].length).toBe(4);
 
-        resolve(true);
-      }, 3000)
-    );
+          resolve(true);
+        }, 3000)
+      );
     } catch (e) {
       console.log(e, e.stack, e.message);
       throw e;

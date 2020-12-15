@@ -145,9 +145,11 @@ export default class WebhookWorker {
       // reverse history for faster search
       const revHistory = history.reverse();
       // update height of transactions, which are now confirmed
-      hook.tx_seen = hook.tx_seen.map(seenTx => {
+      hook.tx_seen = hook.tx_seen.map((seenTx) => {
         if (seenTx.height <= 0) {
-          const histTx = revHistory.find(val => val.tx_hash === seenTx.tx_hash);
+          const histTx = revHistory.find(
+            (val) => val.tx_hash === seenTx.tx_hash
+          );
           if (histTx) {
             seenTx.height = histTx.height;
           }
@@ -155,8 +157,12 @@ export default class WebhookWorker {
         return seenTx;
       });
 
-      const seenHashes = hook.tx_seen.map(val => val.tx_hash);
-      txs = history.filter(val => (val.height >= hook.last_height || val.height <= 0) && !seenHashes.includes(val.tx_hash));
+      const seenHashes = hook.tx_seen.map((val) => val.tx_hash);
+      txs = history.filter(
+        (val) =>
+          (val.height >= hook.last_height || val.height <= 0) &&
+          !seenHashes.includes(val.tx_hash)
+      );
     }
 
     let shouldUpdateStatus: boolean = true;
@@ -216,7 +222,11 @@ export default class WebhookWorker {
 
       if (result) {
         hook.tx_seen.push(tx);
-        await this.db.setWebhookSeenTxLastHeight(hook.id!, hook.tx_seen, hook.last_height);
+        await this.db.setWebhookSeenTxLastHeight(
+          hook.id!,
+          hook.tx_seen,
+          hook.last_height
+        );
       } else {
         console.debug("Failed to execute webhook", hook);
         shouldUpdateStatus = false;
@@ -235,11 +245,17 @@ export default class WebhookWorker {
       await this.db.setWebhookStatus(hook.id!, status);
 
       // update last_height and truncate tx_seen
-      const maxHeight = Math.max(...hook.tx_seen.map(val => val.height));
+      const maxHeight = Math.max(...hook.tx_seen.map((val) => val.height));
       if (maxHeight >= hook.last_height) {
         hook.last_height = maxHeight;
-        hook.tx_seen = hook.tx_seen.filter(val => val.height === maxHeight || val.height <= 0);
-        await this.db.setWebhookSeenTxLastHeight(hook.id!, hook.tx_seen, hook.last_height);
+        hook.tx_seen = hook.tx_seen.filter(
+          (val) => val.height === maxHeight || val.height <= 0
+        );
+        await this.db.setWebhookSeenTxLastHeight(
+          hook.id!,
+          hook.tx_seen,
+          hook.last_height
+        );
       }
     }
   }

@@ -149,7 +149,11 @@ export default class SqlProvider implements StorageProvider {
     await this.db.query(text, [status, id]);
   }
 
-  public async setWebhookSeenTxLastHeight(id: number, tx_seen: Array<TxI>, last_height: number): Promise<void> {
+  public async setWebhookSeenTxLastHeight(
+    id: number,
+    tx_seen: Array<TxI>,
+    last_height: number
+  ): Promise<void> {
     let text = format(
       "UPDATE %I SET tx_seen = $1, last_height = $2 WHERE id = $3;",
       this.webhookTable

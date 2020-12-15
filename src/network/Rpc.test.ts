@@ -77,8 +77,12 @@ test("Watch wallet balance", async () => {
 test("Wait for block timeout", async () => {
   const provider = getNetworkProvider(Network.REGTEST);
   let promiseResult;
-  const timeout = new Promise((resolve) => setTimeout(resolve, 1000, 'timeout'));
-  await Promise.race([provider.waitForBlock(), timeout]).then(result => promiseResult = result);
+  const timeout = new Promise((resolve) =>
+    setTimeout(resolve, 1000, "timeout")
+  );
+  await Promise.race([provider.waitForBlock(), timeout]).then(
+    (result) => (promiseResult = result)
+  );
   expect(promiseResult).toBe("timeout");
 });
 
@@ -99,19 +103,23 @@ test("Wait for block success", async () => {
 
   const height = await provider.getBlockHeight();
 
-  new Promise((resolve) => setTimeout(() => {
-    mine({ cashaddr: process.env.ADDRESS!, blocks: 1 });
-    resolve(true);
-  }, 100));
+  new Promise((resolve) =>
+    setTimeout(() => {
+      mine({ cashaddr: process.env.ADDRESS!, blocks: 1 });
+      resolve(true);
+    }, 100)
+  );
 
   let header = await provider.waitForBlock();
-  expect(header.height).toBe(height + 1)
+  expect(header.height).toBe(height + 1);
 
-  new Promise((resolve) => setTimeout(() => {
-    mine({ cashaddr: process.env.ADDRESS!, blocks: 2 });
-    resolve(true);
-  }, 100));
+  new Promise((resolve) =>
+    setTimeout(() => {
+      mine({ cashaddr: process.env.ADDRESS!, blocks: 2 });
+      resolve(true);
+    }, 100)
+  );
 
   header = await provider.waitForBlock(height + 3);
-  expect(header.height).toBe(height + 3)
+  expect(header.height).toBe(height + 3);
 });

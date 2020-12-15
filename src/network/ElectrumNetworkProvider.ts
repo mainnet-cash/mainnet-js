@@ -118,30 +118,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
           resolve(header);
         }
       };
-      await this.subscribeToHeaders(
-        waitForBlockCallback
-      );
+      await this.subscribeToHeaders(waitForBlockCallback);
     });
   }
 
   // subscribe to notifications sent when new block is found, the block header is sent to callback
-  async subscribeToHeaders(
-    callback: (header: HeaderI) => void
-  ): Promise<void> {
-    await this.subscribeRequest(
-      "blockchain.headers.subscribe",
-      callback
-    );
+  async subscribeToHeaders(callback: (header: HeaderI) => void): Promise<void> {
+    await this.subscribeRequest("blockchain.headers.subscribe", callback);
   }
 
   // unsubscribe to notifications sent when new block is found
   async unsubscribeFromHeaders(
     callback: (header: HeaderI) => void
   ): Promise<void> {
-    await this.unsubscribeRequest(
-      "blockchain.headers.subscribe",
-      callback
-    );
+    await this.unsubscribeRequest("blockchain.headers.subscribe", callback);
   }
 
   async subscribeToAddress(
