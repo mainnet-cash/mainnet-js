@@ -1,65 +1,65 @@
 const ws = require('ws');
 const config = require('./config');
-const ExpressServer = require('./expressServer');
+const server = require("./");
 
+let alice = process.env.ADDRESS;
+let aliceWif = `wif:regtest:${process.env.PRIVATE_WIF}`
 
-test("Test watchBalance ws method", async () => {
-  let expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
-  expressServer.launch();
-
-  const wsClient = new ws(`ws://localhost:${config.URL_PORT}/api/v1/wallet`);
-
-  wsClient.on('open', () => {
-    wsClient.send(JSON.stringify({ method: "watchBalance", data: { address: "testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"}}));
+describe("Test websocket server methods", () => {
+  beforeAll(async function () {
+    app = await server.startServer();
+  });
+  afterAll(async function () {
+    await server.killElectrum()
+    app.close();
   });
 
-  wsClient.on('message', (message) => {
-    console.log(message);
+  test("Test watchBalance ws method", async () => {
+    const wsClient = new ws(`ws://localhost:${config.URL_PORT}/api/v1/wallet`);
+    let response;
+
+    wsClient.on('open', () => {
+      wsClient.send(JSON.stringify({ method: "watchBalance", data: { address: alice}}));
+    });
+
+    wsClient.on('message', (message) => {
+      response = message;
+    });
+
+    await new Promise(resolve => setTimeout(resolve), 3000);
+    console.log(response);
+    expect(response.bch).toBeDefined();
+    expect(response.bch).toBeGreaterThan(0.1);
   });
 
-  await new Promise(resolve => setTimeout(async () => {
-    await expressServer.close();
-    resolve();
-  }, 3000));
-});
+  // test("Test concurrent ws watchBalance", async () => {
+  //   const wsClient = new ws(`ws://localhost:${config.URL_PORT}/api/v1/wallet`);
 
-test("Test concurrent ws watchBalance", async () => {
-  let expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
-  expressServer.launch();
+  //   wsClient.on('open', () => {
+  //     wsClient.send(JSON.stringify({ method: "watchBalance", data: { address: "testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22" } }));
+  //     wsClient.send(JSON.stringify({ method: "watchBalance", data: { address: "testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22" } }));
+  //   });
 
-  const wsClient = new ws(`ws://localhost:${config.URL_PORT}/api/v1/wallet`);
+  //   wsClient.on('message', (message) => {
+  //     console.log(message);
+  //   });
 
-  wsClient.on('open', () => {
-    wsClient.send(JSON.stringify({ method: "watchBalance", data: { address: "testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22" } }));
-    wsClient.send(JSON.stringify({ method: "watchBalance", data: { address: "testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22" } }));
+  //   await new Promise(resolve => setTimeout(async () => {
+  //     resolve();
+  //   }, 3000));
+  // });
+
+  test("Test waitForTransaction ws method", async () => {
+    const wsClient = new ws(`ws://localhost:${config.URL_PORT}/api/v1/wallet`);
+
+    wsClient.on('open', () => {
+      wsClient.send(JSON.stringify({ method: "waitForTransaction", data: { address: alice } }));
+    });
+
+    wsClient.on('message', (message) => {
+      console.log(message);
+    });
+
+    await new Promise(resolve => setTimeout(resolve), 3000);
   });
-
-  wsClient.on('message', (message) => {
-    console.log(message);
-  });
-
-  await new Promise(resolve => setTimeout(async () => {
-    await expressServer.close();
-    resolve();
-  }, 3000));
-});
-
-test("Test waitForTransaction ws method", async () => {
-  let expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
-  expressServer.launch();
-
-  const wsClient = new ws(`ws://localhost:${config.URL_PORT}/api/v1/wallet`);
-
-  wsClient.on('open', () => {
-    wsClient.send(JSON.stringify({ method: "waitForTransaction", data: { address: "testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22" } }));
-  });
-
-  wsClient.on('message', (message) => {
-    console.log(message);
-  });
-
-  await new Promise(resolve => setTimeout(async () => {
-    await expressServer.close();
-    resolve();
-  }, 3000));
 });
