@@ -12,6 +12,7 @@ describe("Test Webhook Endpoints", () => {
   afterAll(async function () {
     await server.killElectrum()
     app.close();
+    await new mainnet.WebhookWorker.db.close();
   });
 
   /**
