@@ -9,7 +9,7 @@ import {
   encodePrivateKeyWif,
   deriveHdPrivateNodeFromSeed,
   generatePrivateKey,
-  instantiateBIP32Crypto
+  instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
 import * as bip39 from "bip39";
@@ -55,7 +55,7 @@ export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
   privateKey?: Uint8Array;
-  mnemonic? : string;
+  mnemonic?: string;
   uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
   walletType?: WalletTypeEnum;
@@ -118,13 +118,13 @@ export class Wallet extends BaseWallet {
     const secp256k1 = await secp256k1Promise;
 
     const crypto = await instantiateBIP32Crypto();
-    this.mnemonic = bip39.generateMnemonic()
+    this.mnemonic = bip39.generateMnemonic();
     let seed = bip39.mnemonicToSeedSync(this.mnemonic!);
-    let hdNode  = deriveHdPrivateNodeFromSeed(crypto, seed)
-    if(!hdNode.valid){
-      throw Error("Invalid private key derived from mnemonic seed")
-    }else{
-      this.privateKey = hdNode.privateKey
+    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    if (!hdNode.valid) {
+      throw Error("Invalid private key derived from mnemonic seed");
+    } else {
+      this.privateKey = hdNode.privateKey;
     }
     this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.privateKeyWif = encodePrivateKeyWif(
