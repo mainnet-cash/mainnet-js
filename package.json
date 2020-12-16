@@ -40,6 +40,12 @@
     "reload": "npx reload --dir=jest/playwright"
   },
   "devDependencies": {
+    "@types/bip39": "^3.0.0",
+    "@types/jest": "^26.0.14",
+    "@types/js-yaml": "^3.12.5",
+    "@types/node": "^14.11.8",
+    "@types/pg": "^7.14.5",
+    "@types/pg-format": "^1.0.1",
     "events": "^3.2.0",
     "fake-indexeddb": "^3.1.2",
     "jest": "^26.5.3",
@@ -60,13 +66,9 @@
   },
   "dependencies": {
     "@bitauth/libauth": "^1.17.2",
-    "@types/jest": "^26.0.14",
-    "@types/js-yaml": "^3.12.5",
-    "@types/node": "^14.11.8",
-    "@types/pg": "^7.14.5",
-    "@types/pg-format": "^1.0.1",
     "assert": "^2.0.0",
     "axios": "^0.20.0",
+    "bip39": "^3.0.3",
     "cashscript": "^0.5.5",
     "deepmerge": "^4.2.2",
     "dexie": "^3.0.2",

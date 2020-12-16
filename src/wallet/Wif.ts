@@ -44,7 +44,6 @@ import {
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import { derivePrefix } from "../util/derivePublicKeyHash";
-import { generateRandomBytes } from "../util/randomBytes";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 
