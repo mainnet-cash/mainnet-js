@@ -4,6 +4,8 @@ import { getNetworkProvider } from "../network/default";
 import { Network } from "cashscript";
 import { mine } from "../mine";
 
+const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+
 beforeAll(async () => {
   await initProviders([Network.REGTEST]);
 });
@@ -13,44 +15,41 @@ afterAll(async () => {
 });
 
 test("subcribe to address", async () => {
-  process.setMaxListeners(0);
-  let BCH = new Connection("testnet");
-  await BCH.ready();
+  const provider = getNetworkProvider(Network.REGTEST);
   try {
-    await BCH.networkProvider.subscribeToAddress(
+    await provider.subscribeToAddress(
       "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
       async (data) => {
-        console.log("First", data);
+        expect(data).not.toBe("");
       }
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (e) {
     console.log(e, e.message, e.stack);
-  } finally {
-    await BCH.disconnect();
   }
 });
 
 test("subcribe to muliple addresses bug", async () => {
-  process.setMaxListeners(0);
-  let BCH = new Connection("testnet");
-  await BCH.ready();
+  const provider = getNetworkProvider(Network.REGTEST);
+
   try {
     let response1 = undefined;
     let response2 = undefined;
-    await BCH.networkProvider.subscribeToAddress(
+    await provider.subscribeToAddress(
       "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
       async (data) => {
-        console.log("First", data);
+        // console.log("First", data);
+        expect(data).not.toBe("");
         response1 = data;
       }
     );
 
-    await BCH.networkProvider.subscribeToAddress(
+    await provider.subscribeToAddress(
       "bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9",
       async (data) => {
-        console.log("Second", data);
+        // console.log("Second", data);
+        expect(data).not.toBe("");
         response2 = data;
       }
     );
@@ -58,20 +57,21 @@ test("subcribe to muliple addresses bug", async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (e) {
     console.log(e, e.message, e.stack);
-  } finally {
-    await BCH.disconnect();
   }
 });
 
 test("Watch wallet balance", async () => {
-  let w = await TestNetWallet.fromId(
-    "wif:testnet:cQg8TvWc1pZdEh5svFh4AnKjyonZmtjZuTz7xaGXrZTgqScb6vef"
-  );
-  w.provider = getNetworkProvider(Network.TESTNET, undefined, true);
-  w.provider!.connect();
+  const aliceWallet = await RegTestWallet.fromId(aliceWif);
 
-  await w.watchBalance((balance) => console.log(balance));
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  let result = false;
+  await aliceWallet.watchBalance((balance) => {
+    expect(balance.bch).toBeGreaterThan(0);
+    result = true;
+    // stop watching
+    return true;
+  });
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  expect(result).toBe(true);
 });
 
 test("Wait for block timeout", async () => {
@@ -89,9 +89,9 @@ test("Wait for block timeout", async () => {
 test("Wait for block success", async () => {
   const provider = getNetworkProvider(Network.REGTEST);
 
-  const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
   const aliceWallet = await RegTestWallet.fromId(aliceWif);
   const bobWallet = await RegTestWallet.newRandom();
+  const minerWallet = await RegTestWallet.newRandom();
 
   await aliceWallet.send([
     {
@@ -103,23 +103,21 @@ test("Wait for block success", async () => {
 
   const height = await provider.getBlockHeight();
 
-  new Promise((resolve) =>
-    setTimeout(() => {
-      mine({ cashaddr: process.env.ADDRESS!, blocks: 1 });
-      resolve(true);
-    }, 100)
+  setTimeout(
+    async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
+    2000
   );
 
   let header = await provider.waitForBlock();
   expect(header.height).toBe(height + 1);
 
-  new Promise((resolve) =>
-    setTimeout(() => {
-      mine({ cashaddr: process.env.ADDRESS!, blocks: 2 });
-      resolve(true);
-    }, 100)
+  setTimeout(
+    async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
+    2000
   );
 
-  header = await provider.waitForBlock(height + 3);
-  expect(header.height).toBe(height + 3);
+  header = await provider.waitForBlock(height + 2);
+  expect(header.height).toBe(height + 2);
+
+  await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
 });

@@ -174,13 +174,12 @@ describe(`Watch only Wallets`, () => {
   });
 
   test("Should wait for transaction", async () => {
-    let provider = getNetworkProvider(Network.TESTNET, undefined, true);
+    let provider = getNetworkProvider(Network.REGTEST, undefined, true);
     provider.connect();
 
-    const aliceWallet = await TestNetWallet.fromId(
-      process.env.ALICE_TESTNET_WALLET_ID!
-    );
-    const bobWallet = await TestNetWallet.newRandom();
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
 
     aliceWallet.provider = provider;
     bobWallet.provider = provider;
@@ -198,7 +197,7 @@ describe(`Watch only Wallets`, () => {
     );
 
     let tx = await bobWallet.waitForTransaction();
-    console.log(tx);
+    expect(tx.hash).not.toBe("");
     await bobWallet.sendMax(aliceWallet.cashaddr!);
     await provider.disconnect();
   });

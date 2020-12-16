@@ -58,7 +58,7 @@ export default class WebhookWorker {
     const hooks: WebhookI[] = await this.db.getWebhooks();
     for (const hook of hooks) {
       if (new Date() >= hook.expires_at) {
-        console.debug("Evicting expired hook with id", hook.id);
+        // console.debug("Evicting expired hook with id", hook.id);
         await this.stopHook(hook);
         await this.db.deleteWebhook(hook.id!);
       }
@@ -228,7 +228,7 @@ export default class WebhookWorker {
           hook.last_height
         );
       } else {
-        console.debug("Failed to execute webhook", hook);
+        // console.debug("Failed to execute webhook", hook);
         shouldUpdateStatus = false;
       }
     }
@@ -280,10 +280,10 @@ export default class WebhookWorker {
   async postWebHook(url: string, data: any): Promise<boolean> {
     try {
       await axios.post(url, data);
-      console.debug("Posted webhook", url, data);
+      // console.debug("Posted webhook", url, data);
       return true;
     } catch (e) {
-      console.debug("Failed to post webhook", url);
+      // console.debug("Failed to post webhook", url);
       return false;
     }
   }

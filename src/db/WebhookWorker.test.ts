@@ -277,6 +277,7 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
+      const minerWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
         address: bobWallet.cashaddr!,
         url: "http://example.com/bob",
@@ -292,11 +293,10 @@ describe("Webhook worker tests", () => {
           unit: "satoshis",
         },
       ]);
-
       await bobWallet.waitForTransaction();
 
       // wait worker to process, updating the status of the hook
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       let hook = await worker.getWebhook(hookId);
       expect(hook!.status).not.toBe("");
@@ -307,8 +307,11 @@ describe("Webhook worker tests", () => {
       await worker.destroy();
       expect(worker.activeHooks.size).toBe(0);
 
-      // also mine a block while offline
-      await mine({ cashaddr: process.env.ADDRESS!, blocks: 1 });
+      // also mine a block while offline)
+      setTimeout(
+        async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
+        2000
+      );
       await worker.provider.waitForBlock();
 
       // make two more transactions "offline"
@@ -347,11 +350,14 @@ describe("Webhook worker tests", () => {
           expect(responses["http://example.com/bob"].length).toBe(3);
 
           resolve(true);
-        }, 3000)
+        }, 10000)
       );
 
       // mine some more blocks
-      await mine({ cashaddr: process.env.ADDRESS!, blocks: 3 });
+      setTimeout(
+        async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
+        2000
+      );
       await worker.provider.waitForBlock();
 
       aliceWallet.send([
@@ -364,7 +370,10 @@ describe("Webhook worker tests", () => {
       await bobWallet.waitForTransaction();
 
       // mine some more blocks
-      await mine({ cashaddr: process.env.ADDRESS!, blocks: 3 });
+      setTimeout(
+        async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
+        2000
+      );
       await worker.provider.waitForBlock();
 
       await new Promise((resolve) =>
@@ -376,7 +385,7 @@ describe("Webhook worker tests", () => {
           expect(responses["http://example.com/bob"].length).toBe(4);
 
           resolve(true);
-        }, 3000)
+        }, 5000)
       );
     } catch (e) {
       console.log(e, e.stack, e.message);

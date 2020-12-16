@@ -61,21 +61,21 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getRawTransaction(
-    txid: string,
+    txHash: string,
     verbose: boolean = false
   ): Promise<string> {
     return (await this.performRequest(
       "blockchain.transaction.get",
-      txid,
+      txHash,
       verbose
     )) as string;
   }
 
   // gets the decoded transaction in human readable form
-  async getRawTransactionObject(txid: string): Promise<any> {
+  async getRawTransactionObject(txHash: string): Promise<any> {
     return (await this.performRequest(
       "blockchain.transaction.get",
-      txid,
+      txHash,
       true
     )) as Object;
   }

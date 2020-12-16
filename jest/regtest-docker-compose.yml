@@ -3,7 +3,7 @@ version: "3.7"
 services:
   bitcoind:
     image: zquestz/bitcoin-cash-node
-    command: bitcoind -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
+    command: bitcoind -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
       interval: 1m30s

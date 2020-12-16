@@ -288,12 +288,22 @@ export class Wallet extends BaseWallet {
   }
 
   // sets up a callback to be called upon wallet's balance change
-  public async watchBalance(callback: (any) => void): Promise<void> {
-    let subscribeCallback = async () => {
-      let balance = await this.getBalance();
-      callback(balance);
+  public async watchBalance(
+    callback: (balance: BalanceResponse) => boolean
+  ): Promise<void> {
+    let watchBalanceCallback = async () => {
+      const balance = (await this.getBalance(undefined)) as BalanceResponse;
+      if (callback(balance)) {
+        this.provider!.unsubscribeFromAddress(
+          this.cashaddr!,
+          watchBalanceCallback
+        );
+      }
     };
-    return this.provider!.subscribeToAddress(this.cashaddr!, subscribeCallback);
+    return this.provider!.subscribeToAddress(
+      this.cashaddr!,
+      watchBalanceCallback
+    );
   }
 
   // waits for next transaction, program execution is halted
@@ -303,7 +313,6 @@ export class Wallet extends BaseWallet {
         if (data instanceof Array) {
           let addr = data[0] as string;
           if (addr !== this.cashaddr!) {
-            // console.error("Addressess do not match", addr, this.cashaddr!);
             return;
           }
           let lastTx = await this.getLastTransaction();
