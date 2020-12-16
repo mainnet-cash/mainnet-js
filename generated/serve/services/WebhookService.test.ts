@@ -3,7 +3,7 @@ var request = require("supertest");
 
 var app;
 
-const mainnet = require("mainnet-js");
+var mainnet = require("mainnet-js");
 
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
