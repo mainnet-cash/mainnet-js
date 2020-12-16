@@ -7,8 +7,12 @@ import {
   CashAddressNetworkPrefix,
   decodePrivateKeyWif,
   encodePrivateKeyWif,
+  deriveHdPrivateNodeFromSeed,
   generatePrivateKey,
+  instantiateBIP32Crypto
 } from "@bitauth/libauth";
+
+import * as bip39 from "bip39";
 
 import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
@@ -39,10 +43,10 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
-
+import { derivePrefix } from "../util/derivePublicKeyHash";
+import { generateRandomBytes } from "../util/randomBytes";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
-import { derivePrefix } from "../util/derivePublicKeyHash";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -51,6 +55,7 @@ export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
   privateKey?: Uint8Array;
+  mnemonic? : string;
   uncompressedPrivateKey?: Uint8Array;
   privateKeyWif?: string;
   walletType?: WalletTypeEnum;
@@ -112,16 +117,14 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
-    // nodejs
-    if (typeof process !== "undefined") {
-      let crypto = require("crypto");
-      this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
-    }
-    // window, webworkers, service workers
-    else {
-      this.privateKey = generatePrivateKey(() =>
-        window.crypto.getRandomValues(new Uint8Array(32))
-      );
+    const crypto = await instantiateBIP32Crypto();
+    this.mnemonic = bip39.generateMnemonic()
+    let seed = bip39.mnemonicToSeedSync(this.mnemonic!);
+    let hdNode  = deriveHdPrivateNodeFromSeed(crypto, seed)
+    if(!hdNode.valid){
+      throw Error("Invalid private key derived from mnemonic seed")
+    }else{
+      this.privateKey = hdNode.privateKey
     }
     this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     this.privateKeyWif = encodePrivateKeyWif(
