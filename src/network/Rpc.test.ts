@@ -118,6 +118,4 @@ test("Wait for block success", async () => {
 
   header = await provider.waitForBlock(height + 2);
   expect(header.height).toBe(height + 2);
-
-  await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
 });
