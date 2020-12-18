@@ -208,7 +208,7 @@ test("Should cancel watching balance", async () => {
   initProviders([Network.REGTEST]);
   const aliceWallet = await RegTestWallet.newRandom();
 
-  let cancel = await aliceWallet.watchBalance(() => { });
+  let cancel = await aliceWallet.watchBalance(() => {});
 
   await cancel();
 

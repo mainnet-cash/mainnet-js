@@ -277,7 +277,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
   disconnect(): Promise<boolean[]> {
     if (this.subscriptions > 0) {
-      console.warn(`Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`);
+      console.warn(
+        `Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`
+      );
     }
     return this.isElectrumClient()
       ? this.disconnectClient()
