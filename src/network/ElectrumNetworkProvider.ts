@@ -20,6 +20,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ) {
     if (electrum) {
       this.electrum = electrum;
+
       return;
     } else {
       throw new Error(`A electrum-cash cluster or client is required.`);
@@ -119,6 +120,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async ready(): Promise<boolean | unknown> {
     return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
+  }
+
+  getInfo(): string[] {
+    return [this.electrum.toString()];
   }
 
   connect(): Promise<void[]> {

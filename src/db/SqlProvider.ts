@@ -1,15 +1,17 @@
 import StorageProvider from "./StorageProvider";
 import { WalletI } from "./interface";
-import { Pool } from "pg";
+import { Pool, PoolConfig } from "pg";
 import { default as format } from "pg-format";
 var parseDbUrl = require("parse-database-url");
 
 export default class SqlProvider implements StorageProvider {
   private db;
+  private config?: string;
   private dbName: string;
 
   public constructor(dbName?: string) {
     this.dbName = dbName ? dbName : "wallet";
+    this.config = process.env["DATABASE_URL"];
     var dbConfig = parseDbUrl(process.env["DATABASE_URL"]);
     this.db = new Pool(dbConfig);
   }
@@ -26,6 +28,10 @@ export default class SqlProvider implements StorageProvider {
   public async close(): Promise<StorageProvider> {
     await this.db.end();
     return this;
+  }
+
+  public getInfo(): string {
+    return this.config!;
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {

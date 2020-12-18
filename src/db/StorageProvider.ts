@@ -16,6 +16,13 @@ export default interface StorageProvider {
   close(): Promise<StorageProvider>;
 
   /**
+   * Returns information about the storage provider
+   * @throws {Error} If there is no info
+   * @returns string
+   */
+  getInfo(): string;
+
+  /**
    * Add a wallet to the database
    * @param name A user defined name for the wallet, and the walletId.
    * @param wallet String used to reconstruct the wallet.

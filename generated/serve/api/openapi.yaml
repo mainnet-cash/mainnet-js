@@ -759,6 +759,8 @@ components:
           example: USD
           type: string
     WalletRequest:
+      allOf:
+      - $ref: '#/components/schemas/WalletType'
       example:
         type: wif
         network: testnet
@@ -776,14 +778,6 @@ components:
           - regtest
           - simtest
           example: testnet
-          type: string
-        type:
-          description: Wallet type, either a single wallet with private key (wif)
-            or a Hierarchical Deterministic wallet determined from a seed.
-          enum:
-          - wif
-          - hd
-          example: wif
           type: string
       type: object
     SendRequest:
@@ -869,4 +863,16 @@ components:
           - satoshi
           - satoshis
           example: sat
+          type: string
+    WalletType:
+      properties:
+        type:
+          description: Wallet type, either a mnemonic seed single address wallet,
+            a simple private key (wif) or a Hierarchical Deterministic wallet determined
+            from a seed.
+          enum:
+          - wif
+          - hd
+          - seed
+          example: seed
           type: string

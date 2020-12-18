@@ -59,4 +59,11 @@ export default interface NetworkProvider {
    * @returns array of connection boolean successes, or throws error
    */
   disconnect(): Promise<boolean[]>;
+
+  /**
+   * Returns information about the network provider
+   * @throws {Error} If there is no info
+   * @returns string[]
+   */
+  getInfo(): string[];
 }

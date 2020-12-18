@@ -687,16 +687,9 @@ components:
               - simtest
             example: testnet
             type: string
-        type:
-          description:
-            Wallet type, either a single wallet with private key (wif)
-            or a Hierarchical Deterministic wallet determined from a seed.
-          enum:
-            - wif
-            - hd
-          example: wif
-          type: string
       type: object
+      allOf:
+       - $ref: "#/components/schemas/WalletType"
     SendRequest:
       properties:
         walletId:
@@ -760,3 +753,15 @@ components:
           type: string 
       discriminator:
         propertyName: unit_type
+    WalletType:
+      properties:
+        type:
+            description:
+              Wallet type, either a mnemonic seed single address wallet, a simple private key (wif)
+              or a Hierarchical Deterministic wallet determined from a seed.
+            enum:
+              - wif
+              - hd
+              - seed
+            example: seed
+            type: string

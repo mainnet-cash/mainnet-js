@@ -102,6 +102,55 @@ describe(`Tests named wallet creation`, () => {
   });
 });
 
+describe(`Mnemonic wallet creation`, () => {
+  test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
+    let w = await Wallet.fromId(
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    expect(w.cashaddr!).toBe(
+      "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59"
+    );
+    expect(w.privateKeyWif!).toBe(
+      "L4p2b9VAf8k5aUahF1JCJUzZkgNEAqLfq8DDdQiyAprQAKSbu8hf"
+    );
+    expect(w.getSeed().seed).toBe(
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
+  });
+
+  test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
+    let w = await TestNetWallet.fromId(
+      "seed:testnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    expect(w.cashaddr!).toBe(
+      "bchtest:qqaz6s295ncfs53m86qj0uw6sl8u2kuw0ymst35fx4"
+    );
+    expect(w.privateKeyWif!).toBe(
+      "cV6NTLu255SZ5iCNkVHezNGDH5qv6CanJpgBPqYgJU13NNKJhRs1"
+    );
+    expect(w.getSeed().seed).toBe(
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    expect(w.getSeed().derivationPath).toBe("m/44'/1'/0'/0/0");
+  });
+  test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
+    let w = await RegTestWallet.fromId(
+      "seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    expect(w.cashaddr!).toBe(
+      "bchreg:qqaz6s295ncfs53m86qj0uw6sl8u2kuw0ypvash69n"
+    );
+    expect(w.privateKeyWif!).toBe(
+      "cV6NTLu255SZ5iCNkVHezNGDH5qv6CanJpgBPqYgJU13NNKJhRs1"
+    );
+    expect(w.getSeed().seed).toBe(
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    expect(w.getSeed().derivationPath).toBe("m/44'/1'/0'/0/0");
+  });
+});
+
 describe(`Watch only Wallets`, () => {
   test("Create a watch only testnet wallet from string id", async () => {
     let w = await TestNetWallet.fromId(

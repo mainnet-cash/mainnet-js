@@ -202,7 +202,7 @@ describe(`Test Wallet library`, () => {
       process.env.ALICE_TESTNET_WALLET_ID
     );
     const bob = await createWallet({
-      type: WalletTypeEnum.Wif,
+      type: WalletTypeEnum.Seed,
       network: "testnet",
       name: "Bob's random wallet",
     });
@@ -224,7 +224,7 @@ describe(`Test Wallet library`, () => {
     // Build Bob's wallet from a public address, check his balance.
 
     const sendMaxResponse = await bob.sendMax(alice.cashaddr);
-    expect(sendMaxResponse.txId.length).toBe(64);
+    expect(sendMaxResponse.txId!.length).toBe(64);
 
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
