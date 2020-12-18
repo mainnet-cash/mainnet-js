@@ -19,7 +19,7 @@ export default class WebhookWorker {
   interval: any = undefined;
 
   constructor(network: Network = Network.MAINNET) {
-    this.provider = getNetworkProvider(network);
+    this.provider = getNetworkProvider(network, undefined, true);
     this.db = new SqlProvider(network);
   }
 
@@ -58,7 +58,7 @@ export default class WebhookWorker {
     const hooks: WebhookI[] = await this.db.getWebhooks();
     for (const hook of hooks) {
       if (new Date() >= hook.expires_at) {
-        // console.debug("Evicting expired hook with id", hook.id);
+        // console.debug("Evicting expired hook with id", hook.id, new Date(), hook.expires_at);
         await this.stopHook(hook);
         await this.db.deleteWebhook(hook.id!);
       }
@@ -237,7 +237,7 @@ export default class WebhookWorker {
     if (shouldUpdateStatus) {
       if (hook.recurrence === "once") {
         await this.stopHook(hook);
-        await this.db.deleteWebhook(hook.id!);
+        await this.deleteWebhook(hook.id!);
         return;
       }
 

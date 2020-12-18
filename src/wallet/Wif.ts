@@ -52,6 +52,8 @@ import { resolve } from "path";
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
 
+type WatchBalanceCancel = () => void;
+
 export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
@@ -288,22 +290,28 @@ export class Wallet extends BaseWallet {
   }
 
   // sets up a callback to be called upon wallet's balance change
+  // can be cancelled by calling the function returned from this one
   public async watchBalance(
-    callback: (balance: BalanceResponse) => boolean
-  ): Promise<void> {
-    let watchBalanceCallback = async () => {
-      const balance = (await this.getBalance(undefined)) as BalanceResponse;
-      if (callback(balance)) {
-        this.provider!.unsubscribeFromAddress(
-          this.cashaddr!,
-          watchBalanceCallback
-        );
-      }
+    callback: (balance: BalanceResponse) => boolean | void
+  ): Promise<WatchBalanceCancel> {
+    let watchBalanceCallback: () => void;
+    let cancel: WatchBalanceCancel = async () => {
+      await this.provider!.unsubscribeFromAddress(
+        this.cashaddr!,
+        watchBalanceCallback
+      );
     };
-    return this.provider!.subscribeToAddress(
+
+    watchBalanceCallback = async () => {
+      const balance = (await this.getBalance(undefined)) as BalanceResponse;
+      await callback(balance);
+    };
+    await this.provider!.subscribeToAddress(
       this.cashaddr!,
       watchBalanceCallback
     );
+
+    return cancel;
   }
 
   // waits for next transaction, program execution is halted

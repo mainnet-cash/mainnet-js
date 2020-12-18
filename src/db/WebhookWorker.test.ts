@@ -339,6 +339,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           hook = await worker.getWebhook(hookId);
+          expect(hook).toBeDefined();
           const seenTx = hook!.tx_seen.find(
             (val) => val.tx_hash === tx.tx_hash
           );
@@ -350,7 +351,7 @@ describe("Webhook worker tests", () => {
           expect(responses["http://example.com/bob"].length).toBe(3);
 
           resolve(true);
-        }, 10000)
+        }, 20000)
       );
 
       // mine some more blocks

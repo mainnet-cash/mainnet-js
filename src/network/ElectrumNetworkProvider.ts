@@ -13,6 +13,7 @@ import { add } from "winston";
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
   public concurrentRequests: number = 0;
+  public subscriptions: number = 0;
 
   constructor(
     electrum: ElectrumCluster | ElectrumClient,
@@ -204,6 +205,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         methodName,
         ...parameters
       );
+      this.subscriptions += 1;
     } finally {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {
@@ -237,6 +239,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         methodName,
         ...parameters
       );
+      this.subscriptions -= 1;
     } finally {
       // Always disconnect the cluster, also if the request fails
       if (this.shouldDisconnect()) {
@@ -259,6 +262,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   private shouldDisconnect(): boolean {
     if (this.manualConnectionManagement) return false;
     if (this.concurrentRequests !== 1) return false;
+    if (this.subscriptions !== 0) return false;
     return true;
   }
 
@@ -272,6 +276,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       : this.connectCluster();
   }
   disconnect(): Promise<boolean[]> {
+    if (this.subscriptions > 0) {
+      console.warn(`Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`);
+    }
     return this.isElectrumClient()
       ? this.disconnectClient()
       : this.disconnectCluster();

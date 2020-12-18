@@ -38,7 +38,7 @@ export default class SqlProvider implements StorageProvider {
           "status TEXT," +
           "tx_seen JSON," +
           "last_height INTEGER," +
-          "expires_at DATE" +
+          "expires_at TIMESTAMPTZ" +
           ");",
         this.webhookTable
       );
@@ -96,11 +96,11 @@ export default class SqlProvider implements StorageProvider {
     type = type || "transaction:in,out";
     recurrence = recurrence || "once";
     const expireTimeout =
-      Number(process.env.WEBhOOK_EXPIRE_TIMEOUT_SECONDS) || 86400;
+      Number(process.env.WEBHOOK_EXPIRE_TIMEOUT_SECONDS) || 86400;
     duration_sec = duration_sec || expireTimeout;
     duration_sec =
-      duration_sec > expireTimeout ? expireTimeout : duration_sec * 1000;
-    const expires_at = new Date(new Date().getTime() + duration_sec);
+      duration_sec > expireTimeout ? expireTimeout : duration_sec;
+    const expires_at = new Date(new Date().getTime() + (duration_sec*1000));
     let text = format(
       "INSERT into %I (address,type,recurrence,hook_url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
       this.webhookTable

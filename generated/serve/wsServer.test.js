@@ -14,8 +14,8 @@ describe("Test websocket server methods", () => {
     app = await server.getServer().launch();
   });
   afterAll(async function () {
-    await server.killElectrum()
     app.close();
+    await server.killElectrum()
   });
 
   test("Test watchBalance ws method", async () => {

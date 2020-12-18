@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "npm install",
     "start": "node cluster.js",
-    "test": "npx jest --detectOpenHandles"
+    "test": "TIMEOUT=10 npx jest --detectOpenHandles --runInBand --forceExit"
   },
   "keywords": [
     "openapi-generator",

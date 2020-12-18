@@ -87,6 +87,9 @@ class ExpressServer {
             wsServer.emit('connection', socket, request);
           });
         });
+        server.on('close', () => {
+          wsServer.close();
+        });
 
         return server;
       });

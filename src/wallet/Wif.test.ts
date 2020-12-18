@@ -3,6 +3,7 @@ import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { getNetworkProvider } from "../network/default";
 import { Network } from "cashscript";
+import { disconnectProviders, initProviders } from "../network";
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -201,4 +202,15 @@ describe(`Watch only Wallets`, () => {
     await bobWallet.sendMax(aliceWallet.cashaddr!);
     await provider.disconnect();
   });
+});
+
+test("Should cancel watching balance", async () => {
+  initProviders([Network.REGTEST]);
+  const aliceWallet = await RegTestWallet.newRandom();
+
+  let cancel = await aliceWallet.watchBalance(() => { });
+
+  await cancel();
+
+  disconnectProviders([Network.REGTEST]);
 });
