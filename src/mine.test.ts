@@ -1,12 +1,10 @@
 import { mine } from "./mine";
+import { RegTestWallet } from "./wallet/Wif";
 
 describe(`Test Mining on Regtest`, () => {
   test("Should mine two blocks", async () => {
-    if (!process.env.ADDRESS) {
-      throw Error("Attempted to pass an empty Address");
-    } else {
-      let response = await mine({ cashaddr: process.env.ADDRESS, blocks: 2 });
-      expect(response.length).toBe(2);
-    }
+    const minerWallet = await RegTestWallet.newRandom();
+    const response = await mine({ cashaddr: minerWallet.cashaddr!, blocks: 2 });
+    expect(response.length).toBe(2);
   });
 });

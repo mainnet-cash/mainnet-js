@@ -8,9 +8,9 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.0.4.js",
+  "main": "dist/mainnet-node-0.0.5.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -29,13 +29,13 @@
     "cover:browser": "nyc --silent --no-clean npm run test:browser",
     "cover:api": "nyc --silent --no-clean npm run test:api",
     "cover:report": "nyc report --reporter=lcov --reporter=text",
-    "test": "npx jest --runInBand --detectOpenHandles",
-    "test:api": "npm i --cwd generated/serve/ --prefix generated/serve/ && npm run test --cwd generated/serve/ --prefix generated/serve/",
+    "test": "npx jest --runInBand --detectOpenHandles --forceExit",
+    "test:api": "npm i --cwd generated/serve/ --prefix generated/serve/ && npm run test --cwd generated/serve/ --prefix generated/serve/ --runInBand",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
     "test:wallet": "npx jest --detectOpenHandles",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "build": "npx webpack && cp -v dist/mainnet*.js generated/serve/lib/mainnet",
+    "build": "npx webpack",
     "demo": "npx reload --dir=demo/",
     "reload": "npx reload --dir=jest/playwright"
   },
