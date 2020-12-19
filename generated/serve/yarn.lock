@@ -1895,7 +1895,7 @@ lru-cache@^6.0.0:
     yallist "^4.0.0"
 
 mainnet-js@../../:
-  version "0.1.0"
+  version "0.1.1"
   dependencies:
     "@bitauth/libauth" "^1.17.2"
     assert "^2.0.0"
@@ -1911,6 +1911,7 @@ mainnet-js@../../:
     pg-format "^1.0.4"
     pg-native "^3.0.0"
     qrcode-svg "^1.1.0"
+    winston "3.3.3"
     yarn "^1.22.10"
 
 md5.js@^1.3.4:
@@ -3243,7 +3244,7 @@ winston-transport@^4.4.0:
     readable-stream "^2.3.7"
     triple-beam "^1.2.0"
 
-winston@^3.2.1:
+winston@3.3.3, winston@^3.2.1:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/winston/-/winston-3.3.3.tgz#ae6172042cafb29786afa3d09c8ff833ab7c9170"
   integrity sha512-oEXTISQnC8VlSAKf1KYSSd7J6IWuRPQqDdo8eoRNaYKLvwSb5+79Z3Yi1lrl6KDpU6/VWaxpakDAtb1oQ4n9aw==
