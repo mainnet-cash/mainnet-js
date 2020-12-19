@@ -27,7 +27,7 @@ jobs:
           yarn build      
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
-          git add dist/mainnet-* 
+          git add -f dist/mainnet-* 
           git commit -m 'Add packaged modules'
       - name: Copy and commit certain files for Dokku
         run: |
