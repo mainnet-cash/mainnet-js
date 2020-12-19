@@ -122,10 +122,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
   }
 
-  getInfo(): string[] {
-    return [this.electrum.toString()];
-  }
-
   connect(): Promise<void[]> {
     return this.isElectrumClient()
       ? this.connectClient()

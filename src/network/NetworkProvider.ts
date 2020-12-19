@@ -60,10 +60,4 @@ export default interface NetworkProvider {
    */
   disconnect(): Promise<boolean[]>;
 
-  /**
-   * Returns information about the network provider
-   * @throws {Error} If there is no info
-   * @returns string[]
-   */
-  getInfo(): string[];
 }

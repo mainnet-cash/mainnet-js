@@ -263,6 +263,28 @@ paths:
       summary: Get receiving cash address as a qrcode
       tags:
         - wallet
+  /wallet/info:
+    post:
+      operationId: info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          The wallet to request information about, in serialized form.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletInfo"
+          description: |
+            Information about the wallet network, type, and keys
+      summary: Get information about a wallet
+      tags:
+        - wallet        
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -613,16 +635,9 @@ components:
             The address in cashaddr format.
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
-        network:
-          description: network type
-          enum:
-            - mainnet
-            - testnet
-            - regtest
-            - simtest
-          example: testnet
-          type: string
       type: object 
+      allOf:
+       - $ref: "#/components/schemas/NetworkEnum"
     MineRequest:     
       example: 
         cashaddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
@@ -678,17 +693,9 @@ components:
           description: User defined string for wallet
           example: username1
           type: string
-        network:
-            description: network type
-            enum:
-              - mainnet
-              - testnet
-              - regtest
-              - simtest
-            example: testnet
-            type: string
       type: object
       allOf:
+       - $ref: "#/components/schemas/NetworkEnum"
        - $ref: "#/components/schemas/WalletType"
     SendRequest:
       properties:
@@ -735,6 +742,18 @@ components:
         balance:
           $ref: "#/components/schemas/BalanceResponse"
       type: object
+    NetworkEnum:
+      properties:
+        network:
+            description: network type
+            enum:
+              - mainnet
+              - testnet
+              - regtest
+            example: testnet
+            type: string
+      discriminator:
+        propertyName: network            
     UnitType:
       properties:
         unit:
@@ -765,3 +784,37 @@ components:
               - seed
             example: seed
             type: string
+      discriminator:
+        propertyName: wallet_type
+    WalletInfo:
+      properties:
+        cashaddr: 
+          type: string
+        isTestnet: 
+          type: boolean
+        name: 
+          type: string
+        publicKey: 
+          type: string
+        publicKeyHash: 
+          type: string
+        privateKey: 
+          type: string
+        privateKeyWif: 
+          type: string
+        seed:
+          $ref: "#/components/schemas/WalletMnemonic"
+        walletId: 
+          type: string
+        walletDbEntry: 
+          type: string
+      allOf:
+       - $ref: "#/components/schemas/NetworkEnum"
+    WalletMnemonic:
+      properties:
+        seed: 
+          type: string
+        derivationPath: 
+          type: string
+      discriminator:
+        propertyName: seed       

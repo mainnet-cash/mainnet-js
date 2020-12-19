@@ -117,6 +117,8 @@ describe(`Mnemonic wallet creation`, () => {
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
     expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
+    const info = {"cashaddr": "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59", "isTestnet": false, "name": "", "network": "mainnet",  "privateKey": "e284129cc0922579a535bbf4d1a3b25773090d28c909bc0fed73b5e0222cc372", "privateKeyWif": "L4p2b9VAf8k5aUahF1JCJUzZkgNEAqLfq8DDdQiyAprQAKSbu8hf", "publicKey": "04aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e9370164133294e5fd1679672fe7866c307daf97281a28f66dca7cbb52919824f", "publicKeyHash": "03aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e", "seed": {"derivationPath": "m/44'/0'/0'/0/0", "seed": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"}, "walletDbEntry": "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", "walletId": "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"}
+    expect(w.getInfo()).toEqual(info);
   });
 
   test("Expect '11x abandon about' to have the correct key, seed and path", async () => {

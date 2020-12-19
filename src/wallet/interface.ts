@@ -20,8 +20,6 @@ export interface WalletInfoI {
   name?: string;
   network: NetworkEnum;
   seed?: MnemonicI;
-  networkProvider: string[];
-  storageProvider: string;
   publicKey?: string;
   publicKeyHash?: string;
   privateKey?: string;
