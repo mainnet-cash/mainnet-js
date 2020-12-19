@@ -75,11 +75,11 @@ jobs:
       with:
         node-version: "14.x"
     - uses: microsoft/playwright-github-action@v1
-    - run: npm install
-    - run: npm run build
-    - run: npm run test
-    - run: npm run test:api
-    - run: npm run test:browser
+    - run: yarn
+    - run: yarn build
+    - run: yarn test
+    - run: yarn test:api
+    - run: yarn test:browser
       env:
         BROWSER: ${{ matrix.browser }}
   coverage:
@@ -91,9 +91,9 @@ jobs:
     - uses: actions/setup-node@master
       with:
         node-version: '14'
-    - run: npm install
-    - run: npm run build
+    - run: yarn
+    - run: yarn build
     - uses: paambaati/codeclimate-action@v2.5.7
       with:
-        coverageCommand: npm run coverage
+        coverageCommand: yarn coverage
         debug: true

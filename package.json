@@ -30,7 +30,7 @@
     "cover:api": "nyc --silent --no-clean yarn run test:api",
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "test": "npx jest --runInBand --detectOpenHandles --forceExit",
-    "test:api": "yarn install --cwd generated/serve/ --prefix generated/serve/  && yarn  --cwd generated/serve/ --prefix generated/serve/ test",
+    "test:api": "yarn install --cwd generated/serve/ --prefix generated/serve/  && yarn test  ",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
     "test:wallet": "npx jest --detectOpenHandles",
     "format": "prettier --write .",
@@ -83,6 +83,7 @@
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
     "qrcode-svg": "^1.1.0",
+    "winston": "3.3.3",
     "yarn": "^1.22.10"
   },
   "keywords": [

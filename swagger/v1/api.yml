@@ -22,7 +22,7 @@ servers:
   - url: https://rest-unstable.mainnet.cash/
     description: unstable service (for development)
   - url: http://localhost:3000/
-    description: local development server via npm run api:serve
+    description: local development server via `yarn api:serve`
 tags:
   - name: contract
     description: Interact with contracts
