@@ -26,7 +26,7 @@ To keep the explanation short (a more detailed explanation will follow): Applica
 
 5. Once you've understood what is *going* to happen, launch the app and ensure everything is working as expected:
 ```
-yarn start
+npm start
 ```
 ### Tests
 Unfortunately, I have not written any unit-tests. Those will come in the future. However, the package does come with all that is needed to write and run tests - mocha and sinon and the related libraries are included in the package.js and will be installed upon npm install command
