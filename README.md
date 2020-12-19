@@ -50,7 +50,7 @@ in a folder called [swagger](swagger/v1/api.yml).
 
 Changes may be validated using openapi-generator locally using:
 
-    npm run api:validate
+    yarn api:validate
 
 ## Extending the core library
 
@@ -59,11 +59,11 @@ calls should be as close to the swagger specification as possible.
 
 Tests may be run with:
 
-    npm run test
+    yarn test
 
 Note this also tests the API server, which depends on the bundled output of src/
 
-    npm run build
+    yarn build
 
 ## Updating the API server
 
@@ -72,25 +72,25 @@ after validation and committed automatically in CI.
 
 The API server is build already, but to rebuild it manually use:
 
-    npm run api:build:server
+    yarn api:build:server
 
 The server uses a nodejs packaged version of the library
 
-    npm run build
+    yarn build
 
 To start the API server for development:
 
-    npm run api:serve
+    yarn api:serve
 
 To run multiple instances of the API server in "cluster" mode:
 
-    npm run api:serve:cluster
+    yarn api:serve:cluster
 
 ## Developing API clients
 
 To generate clients in a particular language, use:
 
-    npm run api:build:client <generator_name>
+    yarn api:build:client <generator_name>
 
 For a list of generators see:
 
