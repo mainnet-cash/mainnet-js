@@ -137,29 +137,29 @@ describe(`Mnemonic wallet creation`, () => {
           "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
       },
       walletDbEntry:
-        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/0'/0'/0/0",
       walletId:
-        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/0'/0'/0/0",
     };
     expect(w.getInfo()).toEqual(info);
   });
 
-  test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
-    let w = await TestNetWallet.fromId(
-      "seed:testnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+  test("Expect '11x abandon about' to have the correct key, seed and path when generated on 145' coin path", async () => {
+    let w = await Wallet.fromId(
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/145'/0'/0/0"
     );
     expect(w.cashaddr!).toBe(
-      "bchtest:qqaz6s295ncfs53m86qj0uw6sl8u2kuw0ymst35fx4"
+      "bitcoincash:qqyx49mu0kkn9ftfj6hje6g2wfer34yfnq5tahq3q6"
     );
     expect(w.privateKeyWif!).toBe(
-      "cV6NTLu255SZ5iCNkVHezNGDH5qv6CanJpgBPqYgJU13NNKJhRs1"
+      "KxbEv3FeYig2afQp7QEA9R3gwqdTBFwAJJ6Ma7j1SkmZoxC9bAXZ"
     );
     expect(w.getSeed().seed).toBe(
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
-    expect(w.getSeed().derivationPath).toBe("m/44'/1'/0'/0/0");
+    expect(w.getSeed().derivationPath).toBe("m/44'/145'/0'/0/0");
   });
-  test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
+  test("Expect '11x abandon about' to have the correct key, seed and path from regtest wallet", async () => {
     let w = await RegTestWallet.fromId(
       "seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );

@@ -475,7 +475,7 @@ export class Wallet extends BaseWallet {
     if (this.name) {
       return `named:${this.network}:${this.name}`;
     } else if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}`;
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     } else {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     }
@@ -483,7 +483,7 @@ export class Wallet extends BaseWallet {
 
   public toDbString() {
     if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}`;
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     } else {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     }
