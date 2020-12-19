@@ -15,7 +15,10 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
-import * as bip39 from "bip39";
+import {mnemonicToSeedSync, generateMnemonic} from "bip39";
+import { UnitEnum } from "../enum";
+
+import { TxI } from "../interface";
 
 import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
@@ -54,6 +57,8 @@ import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
+
+type WatchBalanceCancel = () => void;
 
 export class Wallet extends BaseWallet {
   cashaddr?: string;
@@ -102,7 +107,7 @@ export class Wallet extends BaseWallet {
     this.mnemonic = mnemonic;
 
     const crypto = await instantiateBIP32Crypto();
-    let seed = bip39.mnemonicToSeedSync(this.mnemonic);
+    let seed = mnemonicToSeedSync(this.mnemonic);
 
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
     if (!hdNode.valid) {
@@ -203,8 +208,8 @@ export class Wallet extends BaseWallet {
 
   private async _generateMnemonic() {
     const crypto = await instantiateBIP32Crypto();
-    this.mnemonic = bip39.generateMnemonic();
-    let seed = bip39.mnemonicToSeedSync(this.mnemonic!);
+    this.mnemonic = generateMnemonic();
+    let seed = mnemonicToSeedSync(this.mnemonic!);
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
@@ -271,6 +276,7 @@ export class Wallet extends BaseWallet {
         } else {
           return this._named(arg1);
         }
+
       case "seed":
         if (arg2) {
           return this.fromSeed(arg1, arg2);
@@ -348,12 +354,80 @@ export class Wallet extends BaseWallet {
     return await this.provider.getUtxos(address);
   }
 
-  public async getBalance(unit?: string): Promise<BalanceResponse | number> {
-    if (unit) {
+  // gets transaction history of this wallet
+  public async getHistory(): Promise<TxI[]> {
+    return await this.provider!.getHistory(this.cashaddr!);
+  }
+
+  // gets last transaction of this wallet
+  public async getLastTransaction(
+    confirmedOnly: boolean = false
+  ): Promise<any> {
+    let history: TxI[] = await this.getHistory();
+    if (confirmedOnly) {
+      history = history.filter((val) => val.height > 0);
+    }
+    const [lastTx] = history.slice(-1);
+    return this.provider!.getRawTransactionObject(lastTx.tx_hash);
+  }
+
+  // gets wallet balance in sats, bch and usd
+  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+    if (rawUnit) {
+      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
     }
+  }
+
+  // sets up a callback to be called upon wallet's balance change
+  // can be cancelled by calling the function returned from this one
+  public async watchBalance(
+    callback: (balance: BalanceResponse) => boolean | void
+  ): Promise<WatchBalanceCancel> {
+    let watchBalanceCallback: () => void;
+    let cancel: WatchBalanceCancel = async () => {
+      await this.provider!.unsubscribeFromAddress(
+        this.cashaddr!,
+        watchBalanceCallback
+      );
+    };
+
+    watchBalanceCallback = async () => {
+      const balance = (await this.getBalance(undefined)) as BalanceResponse;
+      await callback(balance);
+    };
+    await this.provider!.subscribeToAddress(
+      this.cashaddr!,
+      watchBalanceCallback
+    );
+
+    return cancel;
+  }
+
+  // waits for next transaction, program execution is halted
+  public async waitForTransaction(): Promise<any> {
+    return new Promise(async (resolve) => {
+      const waitForTransactionCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== this.cashaddr!) {
+            return;
+          }
+          let lastTx = await this.getLastTransaction();
+          await this.provider!.unsubscribeFromAddress(
+            this.cashaddr!,
+            waitForTransactionCallback
+          );
+          resolve(lastTx);
+        }
+      };
+      await this.provider!.subscribeToAddress(
+        this.cashaddr!,
+        waitForTransactionCallback
+      );
+    });
   }
 
   // Gets balance by summing value in all utxos in stats

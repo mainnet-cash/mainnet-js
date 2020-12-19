@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.4
+  version: 0.1.0
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -24,16 +24,16 @@ servers:
   - url: http://localhost:3000/
     description: local development server via npm run api:serve
 tags:
-  - name: contract 
+  - name: contract
     description: Interact with contracts
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
-  - name: mine 
+  - name: mine
     description: Mine regtest coins
     externalDocs:
       description: Find out more
-      url: https://rest-unstable.mainnet.cash/api-docs/#/mine/      
+      url: https://rest-unstable.mainnet.cash/api-docs/#/mine/
   - name: util
     description: Stateless convenience utilities
     externalDocs:
@@ -44,7 +44,39 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
+  - name: webhook
+    description: Create webhooks
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
 paths:
+  /webhook/watch_address:
+    post:
+      operationId: watchAddressTranasctions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WatchAddressRequest"
+        description: |
+          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url' -
+          'transaction:in' for incoming only, 'transaction:out' for outgoing only and 'transaction:in,out' both for incoming and outgoing transactions.
+          'balance' will post the object according to 'BalanceResponse' schema
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchAddressResponse"
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Create a webhook to watch address balance and transactions.
+      tags:
+        - webhook
   /contract/escrow/create:
     post:
       operationId: createEscrow
@@ -71,8 +103,8 @@ paths:
       summary: Create an escrow contract
       tags:
         - contract
-  /contract/escrow/utxos: 
-    post: 
+  /contract/escrow/utxos:
+    post:
       operationId: escrowUtxos
       requestBody:
         content:
@@ -92,12 +124,12 @@ paths:
           description: Invalid input
       summary: List specific utxos in a contract
       description: |
-        Returns all UTXOs that can be spent by the 
+        Returns all UTXOs that can be spent by the
         contract. Both confirmed and unconfirmed UTXOs are included.
       tags:
         - contract
-  /contract/escrow/call: 
-    post: 
+  /contract/escrow/call:
+    post:
       operationId: escrowFn
       requestBody:
         content:
@@ -148,10 +180,10 @@ paths:
           content: {}
           description: Invalid Request
       tags:
-        - mine 
+        - mine
   /util/convert:
     post:
-      operationId: convert 
+      operationId: convert
       requestBody:
         content:
           application/json:
@@ -170,7 +202,7 @@ paths:
           description: Invalid input
       summary: create a new wallet
       tags:
-        - util                
+        - util
   /wallet/create:
     post:
       operationId: createWallet
@@ -259,7 +291,7 @@ paths:
                 $ref: "#/components/schemas/ScalableVectorGraphic"
           description: |
             A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>                
+               - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
       tags:
         - wallet
@@ -284,7 +316,7 @@ paths:
             Information about the wallet network, type, and keys
       summary: Get information about a wallet
       tags:
-        - wallet        
+        - wallet
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -294,13 +326,13 @@ paths:
             schema:
               $ref: "#/components/schemas/MaxAmountToSendRequest"
         description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
-        required: true      
+        required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BalanceResponse"  
+                $ref: "#/components/schemas/BalanceResponse"
           description: transaction accepted
         "400":
           content: {}
@@ -380,7 +412,7 @@ paths:
           description: Invalid Request
       summary: Send all available funds to a given address
       tags:
-        - wallet                    
+        - wallet
 components:
   schemas:
     Utxo:
@@ -393,13 +425,13 @@ components:
           description: The hash of a transaction
         value:
           type: number
-          example: 100      
+          example: 100
         utxoId:
           type: string
           example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0"
-          description: serialized outpoint    
+          description: serialized outpoint
       allOf:
-        - $ref: "#/components/schemas/UnitType"   
+        - $ref: "#/components/schemas/UnitType"
       required:
         - amount
         - txId
@@ -412,9 +444,9 @@ components:
           description: |
             ID that is returned in `wallet` field of /wallet call
       allOf:
-        - $ref: "#/components/schemas/UnitType"   
+        - $ref: "#/components/schemas/UnitType"
       required:
-        - walletId       
+        - walletId
     BalanceResponse:
       properties:
         bch:
@@ -436,6 +468,55 @@ components:
           type: string
         stack:
           type: string
+    WatchAddressRequest:
+      properties:
+        address:
+          type: string
+          example: "bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2"
+          description: |
+            Cash address to watch
+        url:
+          description:
+            Url to be called when configured action is triggered
+          type: string
+          example: http://example.com/webhook
+        type:
+          description:
+            Type of watch operation
+          type: string
+          enum:
+            - transaction:in
+            - transaction:out
+            - transaction:in,out
+            - balance
+          example: transaction:in,out
+          default: transaction:in,out
+        recurrence:
+          description:
+            Action recurrence. Indicates if webhook should be triggered recurrently until expire or only once
+          type: string
+          enum:
+            - once
+            - recurrent
+          example: recurrent
+          default: once
+        duration_sec:
+          description:
+            Duration of the webhook lifetime in seconds before it will expire.
+          type: number
+          example: 86400
+          default: 86400
+      required:
+        - address
+        - url
+        - type
+    WatchAddressResponse:
+      properties:
+        id:
+          type: number
+          format: integer
+          example: 1
+          description: Webhook Id created in the system
     ZeroBalanceResponse:
       properties:
         bch:
@@ -450,12 +531,12 @@ components:
         usd:
           type: number
           example: 0
-          description: Amount in United States Dollars   
+          description: Amount in United States Dollars
     Contract:
       properties:
         contractId:
           type: string
-          description:  | 
+          description:  |
             serialized contract
       required:
         - contractId
@@ -465,19 +546,19 @@ components:
           example: "bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah"
           description: The cashaddress of the buyer
         arbiterAddr:
-          example: "bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt" 
-          description: The cashaddress of the arbiter      
+          example: "bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt"
+          description: The cashaddress of the arbiter
         sellerAddr:
           example: "bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2"
           description: The cashaddress of the seller
         amount:
           description: Numeric amount to be transferred by the contract in satoshi, amount must be less than 21 BCH.
           type: number
-          example: 10000    
+          example: 10000
         nonce:
           description: A unique value added to the contract, which allows the contract to be different from an otherwise identical contract, i.e. two monthly orders.
           type: number
-          example: 808 
+          example: 808
       required:
         - buyerAddr
         - arbiterAddr
@@ -487,7 +568,7 @@ components:
       properties:
         contractId:
             type: string
-            description:  | 
+            description:  |
               serialized contract
         cashaddr:
           example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
@@ -496,21 +577,21 @@ components:
       properties:
         contractId:
             type: string
-            description:  | 
+            description:  |
               serialized contract
         walletId:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
-        action: 
+        action:
           description: Action for finalization of contract.
           enum:
             - spend
             - refund
           example: spend
           type: string
-        to: 
+        to:
           description: output for the transaction
           type: string
           example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
@@ -527,16 +608,16 @@ components:
         nonce:
           description: A unique value added to the contract, which allows the contract to be different from an otherwise identical contract, i.e. two monthly orders.
           type: number
-          example: 808 
+          example: 808
       required:
         - contractId
         - walletId
-        - action   
+        - action
     ContractFnResponse:
       properties:
         contractId:
             type: string
-            description:  | 
+            description:  |
               serialized contract
         txId:
           type: string
@@ -550,19 +631,19 @@ components:
       properties:
         src:
           type: string
-          example: "data:image/svg+xml;base64,PD94bWwgdm... ==**"    
+          example: "data:image/svg+xml;base64,PD94bWwgdm... ==**"
           description: |
             A Qr code image data in svg format as utf-8 encoded string.
             Suitable for inclusion in html using:
-                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>      
-        title: 
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
+        title:
           example: "bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
           type: string
-          description: hover text for graphic 
+          description: hover text for graphic
         alt:
           example: "A Bitcoin Cash Qr Code"
           type: string
-          description: assistive text         
+          description: assistive text
     SendMaxRequest:
       properties:
         walletId:
@@ -602,7 +683,7 @@ components:
       required:
         - walletId
       discriminator:
-        propertyName: walletId        
+        propertyName: walletId
     DepositAddressResponse:
       properties:
         cashaddr:
@@ -635,11 +716,11 @@ components:
             The address in cashaddr format.
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
-      type: object 
+      type: object
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
-    MineRequest:     
-      example: 
+    MineRequest:
+      example:
         cashaddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
         blocks: 105
       properties:
@@ -654,7 +735,7 @@ components:
       properties:
         value:
           type: number
-          example: 100    
+          example: 100
         from:
           description:
             Provided value unit of account.
@@ -668,7 +749,7 @@ components:
             - satoshi
             - satoshis
           example: BCH
-          type: string   
+          type: string
         to:
           description:
             Unit of account to be returned
@@ -682,7 +763,7 @@ components:
             - satoshi
             - satoshis
           example: USD
-          type: string   
+          type: string
     WalletRequest:
       example:
         type: wif
@@ -716,14 +797,14 @@ components:
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
         value:
           type: number
-          example: 100    
+          example: 100
       allOf:
         - $ref: "#/components/schemas/UnitType"
       required:
         - cashaddr
         - value
         - unit
-      type: object      
+      type: object
     SendMaxResponse:
       properties:
         txId:
@@ -753,7 +834,7 @@ components:
             example: testnet
             type: string
       discriminator:
-        propertyName: network            
+        propertyName: network
     UnitType:
       properties:
         unit:
@@ -769,7 +850,7 @@ components:
             - satoshi
             - satoshis
           example: sat
-          type: string 
+          type: string
       discriminator:
         propertyName: unit_type
     WalletType:
@@ -788,33 +869,33 @@ components:
         propertyName: wallet_type
     WalletInfo:
       properties:
-        cashaddr: 
+        cashaddr:
           type: string
-        isTestnet: 
+        isTestnet:
           type: boolean
-        name: 
+        name:
           type: string
-        publicKey: 
+        publicKey:
           type: string
-        publicKeyHash: 
+        publicKeyHash:
           type: string
-        privateKey: 
+        privateKey:
           type: string
-        privateKeyWif: 
+        privateKeyWif:
           type: string
         seed:
           $ref: "#/components/schemas/WalletMnemonic"
-        walletId: 
+        walletId:
           type: string
-        walletDbEntry: 
+        walletDbEntry:
           type: string
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
     WalletMnemonic:
       properties:
-        seed: 
+        seed:
           type: string
-        derivationPath: 
+        derivationPath:
           type: string
       discriminator:
-        propertyName: seed       
+        propertyName: seed

@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.4
+  version: 0.1.0
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -44,7 +44,40 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
   name: wallet
+- description: Create webhooks
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
+  name: webhook
 paths:
+  /webhook/watch_address:
+    post:
+      operationId: watchAddressTranasctions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchAddressRequest'
+        description: |
+          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url' -
+          'transaction:in' for incoming only, 'transaction:out' for outgoing only and 'transaction:in,out' both for incoming and outgoing transactions.
+          'balance' will post the object according to 'BalanceResponse' schema
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchAddressResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Create a webhook to watch address balance and transactions.
+      tags:
+      - webhook
+      x-eov-operation-handler: controllers/WebhookController
   /contract/escrow/create:
     post:
       operationId: createEscrow
@@ -74,8 +107,9 @@ paths:
       x-eov-operation-handler: controllers/ContractController
   /contract/escrow/utxos:
     post:
-      description: "Returns all UTXOs that can be spent by the \ncontract. Both confirmed\
-        \ and unconfirmed UTXOs are included.\n"
+      description: |
+        Returns all UTXOs that can be spent by the
+        contract. Both confirmed and unconfirmed UTXOs are included.
       operationId: escrowUtxos
       requestBody:
         content:
@@ -264,9 +298,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: "A Qr code image data encoded string in the src field suitable\
-            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
-            \\>                \n"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
       tags:
       - wallet
@@ -461,6 +495,61 @@ components:
           type: string
         stack:
           type: string
+    WatchAddressRequest:
+      example:
+        recurrence: recurrent
+        address: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+        type: transaction:in,out
+        url: http://example.com/webhook
+        duration_sec: 86400
+      properties:
+        address:
+          description: |
+            Cash address to watch
+          example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+          type: string
+        url:
+          description: Url to be called when configured action is triggered
+          example: http://example.com/webhook
+          type: string
+        type:
+          default: transaction:in,out
+          description: Type of watch operation
+          enum:
+          - transaction:in
+          - transaction:out
+          - transaction:in,out
+          - balance
+          example: transaction:in,out
+          type: string
+        recurrence:
+          default: once
+          description: Action recurrence. Indicates if webhook should be triggered
+            recurrently until expire or only once
+          enum:
+          - once
+          - recurrent
+          example: recurrent
+          type: string
+        duration_sec:
+          default: 86400
+          description: Duration of the webhook lifetime in seconds before it will
+            expire.
+          example: 86400
+          type: number
+      required:
+      - address
+      - type
+      - url
+    WatchAddressResponse:
+      example:
+        id: 1
+      properties:
+        id:
+          description: Webhook Id created in the system
+          example: 1
+          format: integer
+          type: number
     ZeroBalanceResponse:
       example:
         bch: 0
@@ -613,9 +702,10 @@ components:
         title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       properties:
         src:
-          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
-            \ ==**\"\\>      \n"
+          description: |
+            A Qr code image data in svg format as utf-8 encoded string.
+            Suitable for inclusion in html using:
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
           example: data:image/svg+xml;base64,PD94bWwgdm... ==**
           type: string
         title:
@@ -854,18 +944,6 @@ components:
         balance:
           $ref: '#/components/schemas/BalanceResponse'
       type: object
-    NetworkEnum:
-      discriminator:
-        propertyName: network
-      properties:
-        network:
-          description: network type
-          enum:
-          - mainnet
-          - testnet
-          - regtest
-          example: testnet
-          type: string
     UnitType:
       discriminator:
         propertyName: unit_type
@@ -882,66 +960,4 @@ components:
           - satoshi
           - satoshis
           example: sat
-          type: string
-    WalletType:
-      discriminator:
-        propertyName: wallet_type
-      properties:
-        type:
-          description: Wallet type, either a mnemonic seed single address wallet,
-            a simple private key (wif) or a Hierarchical Deterministic wallet determined
-            from a seed.
-          enum:
-          - wif
-          - hd
-          - seed
-          example: seed
-          type: string
-    WalletInfo:
-      allOf:
-      - $ref: '#/components/schemas/NetworkEnum'
-      example:
-        cashaddr: cashaddr
-        privateKey: privateKey
-        walletId: walletId
-        walletDbEntry: walletDbEntry
-        seed:
-          seed: seed
-          derivationPath: derivationPath
-        name: name
-        isTestnet: true
-        publicKey: publicKey
-        privateKeyWif: privateKeyWif
-        publicKeyHash: publicKeyHash
-      properties:
-        cashaddr:
-          type: string
-        isTestnet:
-          type: boolean
-        name:
-          type: string
-        publicKey:
-          type: string
-        publicKeyHash:
-          type: string
-        privateKey:
-          type: string
-        privateKeyWif:
-          type: string
-        seed:
-          $ref: '#/components/schemas/WalletMnemonic'
-        walletId:
-          type: string
-        walletDbEntry:
-          type: string
-    WalletMnemonic:
-      discriminator:
-        propertyName: seed
-      example:
-        seed: seed
-        derivationPath: derivationPath
-      properties:
-        seed:
-          type: string
-        derivationPath:
           type: string

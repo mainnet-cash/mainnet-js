@@ -7,23 +7,24 @@ Features:
 - All wallets and contracts will use the global providers if available.
 - Express server now uses network providers from global scope declared once at service start.
 - Escrow contracts
-- Express server returns JSON instead of text errors.
-- Named wallets now return id in "named:wif:<THE_NAME>" format
+- Express server return JSON instead of text errors.
+- Named wallets now return id as "named:wif:<THE_NAME>" format
 - Initial utility endpoint for currency conversion.
 - Added convert utility function and supporting satoshiToAmount 
 - Unit conversions are now done as numbers.
 - Use stock latest openapitools/openapi-generator-cli instead of fork for local validation and building
 
-TODO:
-- Use randombytes library for cross environment random number generation
-- Use seed phrase by default
-
-
 ...
+
+0.1.0
+-----
+- New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress, subscribeToHeaders, unsubscribeFromHeaders, waitForBlock
+- New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
+- Add webhooks for watching balance and transactions - REST Endpoint /webhook/watch_address
+- Add websockets for watching balance and transactions - REST Endpoint /api/v1/wallet, methods watchBalance, waitForTransaction
 
 0.0.4
 -----
 
 - Bugfix: fix function that determines if a network provider is using a electrum cluster or single electrum client.
-
 ...

@@ -1,7 +1,9 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-
+import { getNetworkProvider } from "../network/default";
+import { Network } from "cashscript";
+import { disconnectProviders, initProviders } from "../network";
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -222,4 +224,44 @@ describe(`Watch only Wallets`, () => {
       expect(aliceBalance.sat).toBeGreaterThan(2000);
     }
   });
+
+  test("Should wait for transaction", async () => {
+    let provider = getNetworkProvider(Network.REGTEST, undefined, true);
+    provider.connect();
+
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    aliceWallet.provider = provider;
+    bobWallet.provider = provider;
+
+    setTimeout(
+      () =>
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      1
+    );
+
+    let tx = await bobWallet.waitForTransaction();
+    expect(tx.hash).not.toBe("");
+    await bobWallet.sendMax(aliceWallet.cashaddr!);
+    await provider.disconnect();
+  });
+});
+
+test("Should cancel watching balance", async () => {
+  initProviders([Network.REGTEST]);
+  const aliceWallet = await RegTestWallet.newRandom();
+
+  let cancel = await aliceWallet.watchBalance(() => {});
+
+  await cancel();
+
+  disconnectProviders([Network.REGTEST]);
 });

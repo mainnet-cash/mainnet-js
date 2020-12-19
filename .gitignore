@@ -12,4 +12,8 @@ node_modules
 src/**/*.d.ts
 src/**/*.js
 src/**/*.js.map
+coverage
+genserated/serve/coverage
+jest/playwright/*
+dist
 
