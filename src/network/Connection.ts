@@ -26,7 +26,7 @@ export async function initProviders(networks?: Network[]) {
   networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
   let initPromises = networks.map((n) => initProvider(n));
   await Promise.all(initPromises).catch((e) => {
-    console.warn(`Warning, couldn't establish a connection a network provider ${e}`);
+    console.warn(`Warning, couldn't establish a connection for ${e}`);
   });
 }
 
