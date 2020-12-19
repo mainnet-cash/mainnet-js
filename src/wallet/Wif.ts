@@ -122,7 +122,7 @@ export class Wallet extends BaseWallet {
       this.derivationPath
     ) as HdPrivateNodeValid;
     this.privateKey = zerothChild.privateKey;
-    
+
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
@@ -131,7 +131,7 @@ export class Wallet extends BaseWallet {
   private async deriveInfo() {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
-    this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!)
+    this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
     this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey!);
     this.privateKeyWif = encodePrivateKeyWif(
       sha256,

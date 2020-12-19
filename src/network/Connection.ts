@@ -8,11 +8,11 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 async function initProvider(network: Network) {
   const ticker = networkTickerMap[network];
   if (!(ticker in globalThis)) {
-    try{
+    try {
       let conn = new Connection(network);
-      return (globalThis[ticker] = (await conn.ready()).networkProvider);  
-    } catch(e){
-      throw `${network} ${e}`
+      return (globalThis[ticker] = (await conn.ready()).networkProvider);
+    } catch (e) {
+      throw `${network} ${e}`;
     }
   } else {
     console.warn(
