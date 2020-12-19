@@ -21,7 +21,7 @@ externalDocs:
 servers:
 - description: unstable service (for development)
   url: https://rest-unstable.mainnet.cash/
-- description: local development server via npm run api:serve
+- description: local development server via `yarn api:serve`
   url: http://localhost:3000/
 tags:
 - description: Interact with contracts
