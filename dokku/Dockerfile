@@ -24,18 +24,11 @@ RUN useradd --create-home --uid 32767 --gid 32767 --shell /bin/bash appuser
 RUN mkdir /app/
 RUN chown -R appuser:appuser /app/
 
-# Run yarn
+# Run npm
 USER appuser
 WORKDIR /app/
-COPY package.json /app/
-COPY yarn.lock /app/
-RUN yarn
-
-
-## Copy the rest of the application
-USER appuser
 COPY --chown=appuser:appuser . /app/
-RUN yarn build
-RUN yarn
+RUN npm install --only=production
+RUN npm run build --production
 
 CMD bash -lc "echo $WORKERS workers will be run; npm run api:serve:cluster"
