@@ -14,6 +14,6 @@ src/**/*.js
 src/**/*.js.map
 coverage
 genserated/serve/coverage
-jest/playwright/mainnet.js
+jest/playwright/*
 dist
 
