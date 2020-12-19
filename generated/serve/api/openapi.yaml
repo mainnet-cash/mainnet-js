@@ -944,6 +944,18 @@ components:
         balance:
           $ref: '#/components/schemas/BalanceResponse'
       type: object
+    NetworkEnum:
+      discriminator:
+        propertyName: network
+      properties:
+        network:
+          description: network type
+          enum:
+          - mainnet
+          - testnet
+          - regtest
+          example: testnet
+          type: string
     UnitType:
       discriminator:
         propertyName: unit_type
@@ -960,4 +972,66 @@ components:
           - satoshi
           - satoshis
           example: sat
+          type: string
+    WalletType:
+      discriminator:
+        propertyName: wallet_type
+      properties:
+        type:
+          description: Wallet type, either a mnemonic seed single address wallet,
+            a simple private key (wif) or a Hierarchical Deterministic wallet determined
+            from a seed.
+          enum:
+          - wif
+          - hd
+          - seed
+          example: seed
+          type: string
+    WalletInfo:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        cashaddr: cashaddr
+        privateKey: privateKey
+        walletId: walletId
+        walletDbEntry: walletDbEntry
+        seed:
+          seed: seed
+          derivationPath: derivationPath
+        name: name
+        isTestnet: true
+        publicKey: publicKey
+        privateKeyWif: privateKeyWif
+        publicKeyHash: publicKeyHash
+      properties:
+        cashaddr:
+          type: string
+        isTestnet:
+          type: boolean
+        name:
+          type: string
+        publicKey:
+          type: string
+        publicKeyHash:
+          type: string
+        privateKey:
+          type: string
+        privateKeyWif:
+          type: string
+        seed:
+          $ref: '#/components/schemas/WalletMnemonic'
+        walletId:
+          type: string
+        walletDbEntry:
+          type: string
+    WalletMnemonic:
+      discriminator:
+        propertyName: seed
+      example:
+        seed: seed
+        derivationPath: derivationPath
+      properties:
+        seed:
+          type: string
+        derivationPath:
           type: string

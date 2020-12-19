@@ -1,7 +1,21 @@
 Newest changes
 --------------
 
-Features:
+Newest changes
+--------------
+
+- added getInfo() wallet method and - REST Endpoint wallet/info 
+- Wallets default to use mnemonic phrase seed by default
+- added getSeed(), fromSeed() wallet methods
+
+...
+
+0.1.0
+-----
+- New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress, subscribeToHeaders, unsubscribeFromHeaders, waitForBlock
+- New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
+- Add webhooks for watching balance and transactions - REST Endpoint /webhook/watch_address
+- Add websockets for watching balance and transactions - REST Endpoint /api/v1/wallet, methods watchBalance, waitForTransaction
 - General Cashscript contract serialization/deserialization
 - Network providers are created in global scope (BCH, BCHt, BCHr) with the function initProviders()
 - All wallets and contracts will use the global providers if available.
@@ -13,15 +27,6 @@ Features:
 - Added convert utility function and supporting satoshiToAmount 
 - Unit conversions are now done as numbers.
 - Use stock latest openapitools/openapi-generator-cli instead of fork for local validation and building
-
-...
-
-0.1.0
------
-- New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress, subscribeToHeaders, unsubscribeFromHeaders, waitForBlock
-- New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
-- Add webhooks for watching balance and transactions - REST Endpoint /webhook/watch_address
-- Add websockets for watching balance and transactions - REST Endpoint /api/v1/wallet, methods watchBalance, waitForTransaction
 
 0.0.4
 -----
