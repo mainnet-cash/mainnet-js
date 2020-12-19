@@ -16,7 +16,7 @@ Features:
 
 ...
 
-0.0.5
+0.1.0
 -----
 - New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress, subscribeToHeaders, unsubscribeFromHeaders, waitForBlock
 - New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
