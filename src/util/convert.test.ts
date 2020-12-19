@@ -17,7 +17,7 @@ test("Get of bch in usd", async () => {
 
 test("Should usd value in fixed format", async () => {
   let usd = await convert(1, "bch", "usd");
-  usd = Math.round(usd)
+  usd = Math.round(usd);
   expect(usd.toString()).toMatch(/^\d$/);
 });
 
