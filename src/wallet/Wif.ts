@@ -15,7 +15,7 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
-import {mnemonicToSeedSync, generateMnemonic} from "bip39";
+import { mnemonicToSeedSync, generateMnemonic } from "bip39";
 import { UnitEnum } from "../enum";
 
 import { TxI } from "../interface";
