@@ -1,12 +1,12 @@
 {
   "name": "mainnet-cash",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development ",
   "main": "index.js",
   "scripts": {
     "prestart": "npm install",
     "start": "node cluster.js",
-    "test": "npx jest --detectOpenHandles"
+    "test": "TIMEOUT=10 npx jest --detectOpenHandles --runInBand --forceExit"
   },
   "keywords": [
     "openapi-generator",
@@ -37,7 +37,8 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.17.2",
     "loadtest": "^5.1.2",
-    "mocha": "^7.1.1"
+    "mocha": "^7.1.1",
+    "superwstest": "^1.3.0"
   },
   "eslintConfig": {
     "env": {

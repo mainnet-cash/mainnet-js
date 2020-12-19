@@ -1,4 +1,4 @@
-import { Utxo, Network } from "../interface";
+import { TxI, UtxoI, Network, HeaderI } from "../interface";
 
 export default interface NetworkProvider {
   /**
@@ -11,7 +11,7 @@ export default interface NetworkProvider {
    * @param address The CashAddress for which we wish to retrieve UTXOs.
    * @returns List of UTXOs spendable by the provided address.
    */
-  getUtxos(address: string): Promise<Utxo[]>;
+  getUtxos(address: string): Promise<UtxoI[]>;
 
   /**
    * Retrieve all balance of an address in satoshi
@@ -27,11 +27,20 @@ export default interface NetworkProvider {
 
   /**
    * Retrieve the Hex transaction details for a given transaction ID.
-   * @param txid Hex transaction ID.
+   * @param txHash Hex transaction ID.
+   * @param verbose Whether a verbose coin-specific response is required.
    * @throws {Error} If the transaction does not exist
    * @returns The full hex transaction for the provided transaction ID.
    */
-  getRawTransaction(txid: string): Promise<string>;
+  getRawTransaction(txHash: string): Promise<string>;
+
+  /**
+   * Retrieve a verbose coin-specific response transaction details for a given transaction ID.
+   * @param txHash Hex transaction ID.
+   * @throws {Error} If the transaction does not exist
+   * @returns The full hex transaction for the provided transaction ID.
+   */
+  getRawTransactionObject(txHash: string): Promise<any>;
 
   /**
    * Broadcast a raw hex transaction to the Bitcoin Cash network.
@@ -40,6 +49,43 @@ export default interface NetworkProvider {
    * @returns The transaction ID corresponding to the broadcast transaction.
    */
   sendRawTransaction(txHex: string): Promise<string>;
+
+  /**
+   * Return the confirmed and unconfirmed history of a Bitcoin Cash address.
+   * @param address The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the transaction was not accepted by the network.
+   * @returns Array of transactions.
+   */
+  getHistory(address: string): Promise<TxI[]>;
+
+  /**
+   * Wait for the next block or a block at given blockchain height.
+   * @param height If specified, waits for blockchain to reach this height.
+   * @returns Block header.
+   */
+  waitForBlock(height?: number): Promise<HeaderI>;
+
+  /**
+   * Subscribe to the address change events
+   * @param address The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the transaction was not accepted by the network.
+   * @returns nothing.
+   */
+  subscribeToAddress(
+    address: string,
+    callback: (data: any) => void
+  ): Promise<void>;
+
+  /**
+   * Unsubscribe from the address change events
+   * @param address The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the transaction was not accepted by the network.
+   * @returns nothing.
+   */
+  unsubscribeFromAddress(
+    address: string,
+    callback: (data: any) => void
+  ): Promise<void>;
 
   /**
    * Function to wait for connection to be ready
@@ -52,7 +98,7 @@ export default interface NetworkProvider {
    * Function to connect manually if using persistent connections
    * @returns array of connection boolean successes, or throws error
    */
-  connect(): Promise<boolean[]>;
+  connect(): Promise<void[]>;
 
   /**
    * Function to disconnect manually if using persistent connections

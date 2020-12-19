@@ -2,7 +2,7 @@
 require("dotenv").config({ path: ".env.regtest" });
 require("dotenv").config({ path: ".env.testnet" });
 
-const { spawn } = require("child_process");
+const { spawnSync } = require("child_process");
 const http = require("http");
 const { pingBchn, getRegtestUtxos } = require("./util/generateBlock");
 
@@ -16,8 +16,9 @@ module.exports = async function () {
   console.log("Starting regtest network...");
 
   if (global.fulcrumRegtest === undefined) {
-    global.fulcrumRegtest = spawn("./jest/docker/start.sh", null, {
+    global.fulcrumRegtest = spawnSync("./jest/docker/start.sh", null, {
       shell: false,
+      stdio: "inherit",
     });
     console.log("... OKAY");
   } else {

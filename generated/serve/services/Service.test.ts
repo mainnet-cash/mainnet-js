@@ -1,4 +1,4 @@
-import { getServer } from "../generated/serve/index";
+import { getServer , killElectrum} from "../index";
 var request = require("supertest");
 
 var app;
@@ -7,8 +7,9 @@ describe("Post Endpoints", () => {
   beforeAll(async function () {
     app = await getServer().launch();
   });
-  afterEach(function () {
+  afterAll(async function () {
     app.close();
+    await killElectrum()
   });
 
   /**
@@ -29,7 +30,7 @@ describe("Post Endpoints", () => {
   });
 
   /**
-   * redirect to docs
+   * Should timeout
    */
   it("Should timeout", async () => {
     const resp = await request(app).get("/timeout").send();

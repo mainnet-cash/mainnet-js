@@ -1,9 +1,9 @@
-import { Utxo } from "../interface";
+import { UtxoI } from "../interface";
 
-export async function sumUtxoValue(utxos: Utxo[]) {
-  if (utxos) {
+export async function sumUtxoValue(utxos: UtxoI[]) {
+  if (utxos.length > 0) {
     const balanceArray: number[] = await Promise.all(
-      utxos.map(async (o: Utxo) => {
+      utxos.map(async (o: UtxoI) => {
         return o.satoshis;
       })
     );

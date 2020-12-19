@@ -1,17 +1,47 @@
 import { default as NetworkProvider } from "./NetworkProvider";
 import { getNetworkProvider } from "./default";
 import { Network } from "../interface";
-import { Wallet } from "../wallet/Wif";
-import { walletClassMap } from "../wallet/createWallet";
+import { networkTickerMap } from "./constant";
 import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-export function connect(
-  servers: string[] | string,
-  network: Network = Network.MAINNET
-) {
-  globalThis["bch"] = new Connection(network, servers);
-  globalThis["bch"].ready();
+async function initProvider(network: Network) {
+  const ticker = networkTickerMap[network];
+  if (!(ticker in globalThis)) {
+    let conn = new Connection(network);
+    return (globalThis[ticker] = (await conn.ready()).networkProvider);
+  } else {
+    console.warn(
+      `Ignoring attempt to reinitialize non-existent ${network} provider`
+    );
+    return true;
+  }
+}
+
+export async function initProviders(networks?: Network[]) {
+  networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
+  let initPromises = networks.map((n) => initProvider(n));
+  await Promise.all(initPromises).catch((e) => {
+    console.warn(`Error establishing a persistent connection. ${e}`);
+  });
+}
+
+async function disconnectProvider(network: Network) {
+  const ticker = networkTickerMap[network];
+  if (ticker in globalThis) {
+    return globalThis[ticker].disconnect();
+  } else {
+    console.warn(
+      `Ignoring attempt to disconnect non-existent ${network} provider`
+    );
+    return true;
+  }
+}
+
+export async function disconnectProviders(networks?: Network[]) {
+  networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
+  let disconnectPromises = networks.map((n) => disconnectProvider(n));
+  await Promise.all(disconnectPromises);
 }
 
 export class Connection {
@@ -27,31 +57,17 @@ export class Connection {
   }
 
   public async ready() {
-    try {
-      await this.networkProvider.connect();
-      await this.networkProvider.ready();
-    } catch (e) {
-      throw Error(e);
-    }
+    await this.networkProvider.connect();
+    await this.networkProvider.ready();
+    return this;
   }
 
   public async disconnect() {
     try {
       await this.networkProvider.disconnect();
+      return this;
     } catch (e) {
       throw Error(e);
-    }
-  }
-
-  public async Wallet(name = ""): Promise<Wallet> {
-    let walletClass = walletClassMap["wif"][this.network]();
-    let wallet = new walletClass(name);
-    let walletResult = await wallet.generate();
-    if (walletResult instanceof Error) {
-      throw walletResult;
-    } else {
-      walletResult.provider = this.networkProvider;
-      return walletResult;
     }
   }
 }

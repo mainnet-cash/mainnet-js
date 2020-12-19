@@ -15,7 +15,7 @@ const createEscrow = ({ escrowRequest }) => new Promise(
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
+        e,
         e.status || 405,
       ));
     }
@@ -32,14 +32,16 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 const escrowFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.contractFromId(contractFnRequest.contractId);
+      let contract = await mainnet.EscrowContract.fromId(contractFnRequest.contractId);
       let wallet = await mainnet.walletFromId(contractFnRequest.walletId)
-      
-      let resp = await contract.run(
+      let utxos = contractFnRequest.utxoIds ? contractFnRequest.utxoIds.map(u => {return mainnet.deserializeUtxo(u)}) : undefined
+      let resp = await contract._sendMax(
         wallet.privateKeyWif,
         contractFnRequest.action, 
+        contractFnRequest.to,
         contractFnRequest.getHexOnly, 
-        contractFnRequest.utxos 
+        utxos,
+        contractFnRequest.nonce,
         );
 
       resolve(Service.successResponse({
@@ -49,11 +51,11 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
       }));
     } catch (e) {
       reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
+        e,
+        e.status || 500,
       ));
     }
-  },
+   },
 );
 /**
 * List specific utxos in a contract
@@ -69,9 +71,9 @@ const escrowUtxos = ({contract}) => new Promise(
       let resp = await c.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(e);
+
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },

@@ -1,0 +1,41 @@
+import { bchParam } from "../chain";
+import { UnitEnum } from "../enum";
+import { getUsdRate } from "./getUsdRate";
+
+/**
+ * converts given value and unit from satoshi
+ *
+ * @param {value} number           some value in satoshi
+ * @param {rawUnit} any            the target unit
+ *
+ * @returns a promise to the value in the unit of account given by rawUnit
+ */
+export async function satoshiToAmount(
+  value: number,
+  rawUnit: any
+): Promise<number> {
+  const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
+  switch (unit) {
+    case UnitEnum.BCH:
+      return value / bchParam.subUnits;
+    case UnitEnum.SATOSHI:
+      return value;
+    case UnitEnum.SAT:
+      return value;
+    case UnitEnum.SATS:
+      return value;
+    case UnitEnum.SATOSHIS:
+      return value;
+    case UnitEnum.USD:
+      let USD_over_BCH = await getUsdRate();
+      let SAT_over_BCH = bchParam.subUnits;
+      // truncate dollar amounts to fixed precision (2),
+      // then return the fixed value string as a float.
+      let dollarValue = Number(value * (USD_over_BCH / SAT_over_BCH)).toFixed(
+        2
+      );
+      return Number.parseFloat(dollarValue);
+    default:
+      throw Error("Unit of value not defined");
+  }
+}

@@ -14,32 +14,70 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.0.4
+  version: 0.1.0
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
 - description: unstable service (for development)
   url: https://rest-unstable.mainnet.cash/
-- description: local development server via npm run serve
+- description: local development server via npm run api:serve
   url: http://localhost:3000/
 tags:
-- description: Interact with wallets
-  externalDocs:
-    description: Find out more
-    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
-  name: wallet
-- description: Mine regtest coins
-  externalDocs:
-    description: Find out more
-    url: https://rest-unstable.mainnet.cash/api-docs/#/mine/
-  name: mine
 - description: Interact with contracts
   externalDocs:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
   name: contract
+- description: Mine regtest coins
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/mine/
+  name: mine
+- description: Stateless convenience utilities
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/util/
+  name: util
+- description: Interact with wallets
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
+  name: wallet
+- description: Create webhooks
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
+  name: webhook
 paths:
+  /webhook/watch_address:
+    post:
+      operationId: watchAddressTranasctions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchAddressRequest'
+        description: |
+          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url' -
+          'transaction:in' for incoming only, 'transaction:out' for outgoing only and 'transaction:in,out' both for incoming and outgoing transactions.
+          'balance' will post the object according to 'BalanceResponse' schema
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchAddressResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Create a webhook to watch address balance and transactions.
+      tags:
+      - webhook
+      x-eov-operation-handler: controllers/WebhookController
   /contract/escrow/create:
     post:
       operationId: createEscrow
@@ -57,17 +95,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContractResponse'
           description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
       summary: Create an escrow contract
       tags:
       - contract
       x-eov-operation-handler: controllers/ContractController
   /contract/escrow/utxos:
     post:
-      description: "Returns all UTXOs that can be spent by the \ncontract. Both confirmed\
-        \ and unconfirmed UTXOs are included.\n"
+      description: |
+        Returns all UTXOs that can be spent by the
+        contract. Both confirmed and unconfirmed UTXOs are included.
       operationId: escrowUtxos
       requestBody:
         content:
@@ -97,7 +139,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ContractFnRequest'
-        description: "null"
         required: true
       responses:
         "200":
@@ -110,9 +151,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContractFnResponse'
           description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
       summary: Finalize an escrow contract
       tags:
       - contract
@@ -142,6 +186,29 @@ paths:
       tags:
       - mine
       x-eov-operation-handler: controllers/MineController
+  /util/convert:
+    post:
+      operationId: convert
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertRequest'
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                description: If a unit of account is passed, a plain number is returned.
+                type: number
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new wallet
+      tags:
+      - util
+      x-eov-operation-handler: controllers/UtilController
   /wallet/create:
     post:
       operationId: createWallet
@@ -231,9 +298,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: "A Qr code image data encoded string in the src field suitable\
-            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
-            \\>                \n"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
       tags:
       - wallet
@@ -342,9 +409,10 @@ paths:
 components:
   schemas:
     Utxo:
+      allOf:
+      - $ref: '#/components/schemas/UnitType'
       example:
         utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-        unit: sat
         index: 0.8008281904610115
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
         value: 100
@@ -358,19 +426,6 @@ components:
         value:
           example: 100
           type: number
-        unit:
-          description: Unit of account.
-          enum:
-          - bch
-          - usd
-          - bit
-          - bits
-          - sat
-          - sats
-          - satoshi
-          - satoshis
-          example: sat
-          type: string
         utxoId:
           description: serialized outpoint
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
@@ -380,27 +435,15 @@ components:
       - txId
       - utxoId
     BalanceRequest:
+      allOf:
+      - $ref: '#/components/schemas/UnitType'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        unit: sat
       properties:
         walletId:
           description: |
             ID that is returned in `wallet` field of /wallet call
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        unit:
-          description: Unit of account.
-          enum:
-          - bch
-          - usd
-          - bit
-          - bits
-          - sat
-          - sats
-          - satoshi
-          - satoshis
-          example: sat
           type: string
       required:
       - walletId
@@ -422,6 +465,67 @@ components:
         usd:
           description: Amount in United States Dollars
           example: 438.02
+          type: number
+    Error:
+      properties:
+        message:
+          type: string
+        stack:
+          type: string
+    WatchAddressRequest:
+      example:
+        recurrence: recurrent
+        address: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+        type: transaction:in,out
+        url: http://example.com/webhook
+        duration_sec: 86400
+      properties:
+        address:
+          description: |
+            Cash address to watch
+          example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+          type: string
+        url:
+          description: Url to be called when configured action is triggered
+          example: http://example.com/webhook
+          type: string
+        type:
+          default: transaction:in,out
+          description: Type of watch operation
+          enum:
+          - transaction:in
+          - transaction:out
+          - transaction:in,out
+          - balance
+          example: transaction:in,out
+          type: string
+        recurrence:
+          default: once
+          description: Action recurrence. Indicates if webhook should be triggered
+            recurrently until expire or only once
+          enum:
+          - once
+          - recurrent
+          example: recurrent
+          type: string
+        duration_sec:
+          default: 86400
+          description: Duration of the webhook lifetime in seconds before it will
+            expire.
+          example: 86400
+          type: number
+      required:
+      - address
+      - type
+      - url
+    WatchAddressResponse:
+      example:
+        id: 1
+      properties:
+        id:
+          description: Webhook Id created in the system
+          example: 1
+          format: integer
           type: number
     ZeroBalanceResponse:
       example:
@@ -454,33 +558,47 @@ components:
       - contractId
     EscrowRequest:
       example:
-        arbiterAddr: bchtest:qpsm4nm7talhxhl05mlhms3ys43u76rn0ttdv3qg2u
-        buyerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        sellerAddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        arbiterAddr: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
+        amount: 10000
+        buyerAddr: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
+        sellerAddr: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
+        nonce: 808
       properties:
         buyerAddr:
           description: The cashaddress of the buyer
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          example: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
         arbiterAddr:
           description: The cashaddress of the arbiter
-          example: bchtest:qpsm4nm7talhxhl05mlhms3ys43u76rn0ttdv3qg2u
+          example: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
         sellerAddr:
           description: The cashaddress of the seller
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          example: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
+        amount:
+          description: Numeric amount to be transferred by the contract in satoshi,
+            amount must be less than 21 BCH.
+          example: 10000
+          type: number
+        nonce:
+          description: A unique value added to the contract, which allows the contract
+            to be different from an otherwise identical contract, i.e. two monthly
+            orders.
+          example: 808
+          type: number
       required:
+      - amount
       - arbiterAddr
       - buyerAddr
       - sellerAddr
     ContractResponse:
       example:
-        address: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         contractId: contractId
       properties:
         contractId:
           description: |
             serialized contract
           type: string
-        address:
+        cashaddr:
           description: The funding address for the contract
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
     ContractFnRequest:
@@ -488,9 +606,11 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         contractId: contractId
         action: spend
+        to: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         utxoIds:
-        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
+        nonce: 808
         getHexOnly: true
       properties:
         contractId:
@@ -509,16 +629,27 @@ components:
           - refund
           example: spend
           type: string
+        to:
+          description: output for the transaction
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
         getHexOnly:
           description: |
             getHexOnly (default:false), if true, will cause only the transaction hex to be returned; if false, the transaction will be sent to the network
           type: boolean
         utxoIds:
           items:
-            description: The hash of a transaction and index of the utxo
-            example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+            description: The hash of a transaction and index of the utxo and amount
+              in satoshi
+            example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
             type: string
           type: array
+        nonce:
+          description: A unique value added to the contract, which allows the contract
+            to be different from an otherwise identical contract, i.e. two monthly
+            orders.
+          example: 808
+          type: number
       required:
       - action
       - contractId
@@ -548,9 +679,10 @@ components:
         title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       properties:
         src:
-          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
-            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
-            \ ==**\"\\>      \n"
+          description: |
+            A Qr code image data in svg format as utf-8 encoded string.
+            Suitable for inclusion in html using:
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
           example: data:image/svg+xml;base64,PD94bWwgdm... ==**
           type: string
         title:
@@ -620,12 +752,10 @@ components:
       example:
         utxos:
         - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          unit: sat
           index: 0.8008281904610115
           txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           value: 100
         - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          unit: sat
           index: 0.8008281904610115
           txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           value: 100
@@ -683,6 +813,41 @@ components:
           description: the number of blocks to mine
           example: 105
           type: number
+    ConvertRequest:
+      example:
+        from: BCH
+        to: USD
+        value: 100
+      properties:
+        value:
+          example: 100
+          type: number
+        from:
+          description: Provided value unit of account.
+          enum:
+          - bch
+          - usd
+          - bit
+          - bits
+          - sat
+          - sats
+          - satoshi
+          - satoshis
+          example: BCH
+          type: string
+        to:
+          description: Unit of account to be returned
+          enum:
+          - bch
+          - usd
+          - bit
+          - bits
+          - sat
+          - sats
+          - satoshi
+          - satoshis
+          example: USD
+          type: string
     WalletRequest:
       example:
         type: wif
@@ -716,10 +881,8 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         to:
         - cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          unit: sat
           value: 100
         - cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          unit: sat
           value: 100
       properties:
         walletId:
@@ -732,26 +895,11 @@ components:
             $ref: '#/components/schemas/SendRequestItem'
           type: array
       type: object
-    SerializedSendRequest:
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        to:
-          items:
-            description: |
-              And array of send parameters, in the form:
-              [cashaddr, value, unit]
-            example: '[bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t, 100, ''sat'']'
-            items: {}
-            type: array
-          type: array
     SendRequestItem:
+      allOf:
+      - $ref: '#/components/schemas/UnitType'
       example:
         cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-        unit: sat
         value: 100
       properties:
         cashaddr:
@@ -760,19 +908,6 @@ components:
         value:
           example: 100
           type: number
-        unit:
-          description: Unit of account.
-          enum:
-          - bch
-          - usd
-          - bit
-          - bits
-          - sat
-          - sats
-          - satoshi
-          - satoshis
-          example: sat
-          type: string
       required:
       - cashaddr
       - unit
@@ -808,3 +943,20 @@ components:
         balance:
           $ref: '#/components/schemas/BalanceResponse'
       type: object
+    UnitType:
+      discriminator:
+        propertyName: unit_type
+      properties:
+        unit:
+          description: Unit of account.
+          enum:
+          - bch
+          - usd
+          - bit
+          - bits
+          - sat
+          - sats
+          - satoshi
+          - satoshis
+          example: sat
+          type: string

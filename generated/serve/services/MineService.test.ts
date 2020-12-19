@@ -9,8 +9,8 @@ describe("Test Mine Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();  
   });
-
-  afterEach(function () {
+  afterAll(async function () {
+    await server.killElectrum()
     app.close();
   });
 
@@ -36,6 +36,6 @@ describe("Test Mine Endpoints", () => {
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toEqual(15);
-    expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(50 * 15);
+    expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(25 * 15);
   });
 });

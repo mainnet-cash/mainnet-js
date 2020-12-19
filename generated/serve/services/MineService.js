@@ -13,9 +13,8 @@ const mine = ({ mineRequest }) => new Promise(
       let resp = await mainnet.mine(mineRequest);
       resolve(Service.successResponse(resp));
     } catch (e) {
-      console.log(e);
       reject(
-        Service.rejectResponse(e.message || "Invalid input", e.status || 500)
+        Service.rejectResponse(e, e.status || 500)
       );
     }
   },

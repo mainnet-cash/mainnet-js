@@ -10,15 +10,15 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { WalletTypeEnum } from "./enum";
 import { UnitEnum } from "../enum";
 
-import { BaseWallet } from "./Base";
-
-import { PrivateKey } from "../interface";
+import { TxI } from "../interface";
 
 import { networkPrefixMap } from "../enum";
+import { PrivateKeyI, UtxoI } from "../interface";
 
+import { BaseWallet } from "./Base";
+import { WalletTypeEnum } from "./enum";
 import {
   SendRequest,
   SendRequestArray,
@@ -27,29 +27,32 @@ import {
   UtxoResponse,
 } from "./model";
 
-import { Utxo } from "../interface";
-
 import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress, Image } from "../qr/Qr";
+import { qrAddress } from "../qr/Qr";
+import { ImageI } from "../qr/interface";
 import { asSendRequestObject } from "../util/asSendRequestObject";
-import { checkWifNetwork } from "../util/checkWifNetwork";
-import { deriveCashaddr } from "../util/deriveCashaddr";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi";
+import { checkWifNetwork } from "../util/checkWifNetwork";
+import { deriveCashaddr } from "../util/deriveCashaddr";
+
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { derivePrefix } from "../util/derivePublicKeyHash";
+import { resolve } from "path";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
+
+type WatchBalanceCancel = () => void;
 
 export class Wallet extends BaseWallet {
   publicKey?: Uint8Array;
@@ -77,7 +80,7 @@ export class Wallet extends BaseWallet {
       throw Error(result as string);
     }
     checkWifNetwork(secret, this.networkType);
-    let resultData: PrivateKey = result as PrivateKey;
+    let resultData: PrivateKeyI = result as PrivateKeyI;
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
@@ -162,13 +165,8 @@ export class Wallet extends BaseWallet {
   }
 
   public _fromId = async (walletId: string): Promise<this> => {
-    let [
-      walletType,
-      networkGiven,
-      privateImport,
-      address,
-    ]: string[] = walletId.split(":");
-    if (!["watch", "wif", "seed"].includes(walletType)) {
+    let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
+    if (!["named", "seed", "watch", "wif"].includes(walletType)) {
       throw Error(
         `Wallet type ${walletType} was passed to single address wallet`
       );
@@ -182,18 +180,26 @@ export class Wallet extends BaseWallet {
     }
     switch (walletType) {
       case "wif":
-        return this.fromWIF(privateImport);
+        return this.fromWIF(arg1);
       case "watch":
-        if (address) {
-          address = `${privateImport}:${address}`;
+        let sanitizedAddress;
+        if (arg2) {
+          sanitizedAddress = `${arg1}:${arg2}`;
         } else {
-          address = `${derivePrefix(privateImport)}:${privateImport}`;
+          sanitizedAddress = `${derivePrefix(arg1)}:${arg1}`;
         }
-        return this.watchOnly(address);
+        return this.watchOnly(sanitizedAddress);
+      case "named":
+        if (arg2) {
+          return this._named(arg1, arg2);
+        } else {
+          return this._named(arg1);
+        }
+
       case "seed":
         throw new Error("Not implemented");
       default:
-        return this.fromWIF(privateImport);
+        return this.fromWIF(arg1);
     }
   };
 
@@ -245,21 +251,35 @@ export class Wallet extends BaseWallet {
     return this.cashaddr;
   }
 
-  public getDepositQr(): Image {
+  public getDepositQr(): ImageI {
     return qrAddress(this.cashaddr as string);
   }
 
-  public async getAddressUtxos(address: string): Promise<Utxo[]> {
+  public async getAddressUtxos(address: string): Promise<UtxoI[]> {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
     }
-    const res = await this.provider.getUtxos(address);
-    if (!res) {
-      throw Error("No Utxo response from server");
-    }
-    return res;
+    return await this.provider.getUtxos(address);
   }
 
+  // gets transaction history of this wallet
+  public async getHistory(): Promise<TxI[]> {
+    return await this.provider!.getHistory(this.cashaddr!);
+  }
+
+  // gets last transaction of this wallet
+  public async getLastTransaction(
+    confirmedOnly: boolean = false
+  ): Promise<any> {
+    let history: TxI[] = await this.getHistory();
+    if (confirmedOnly) {
+      history = history.filter((val) => val.height > 0);
+    }
+    const [lastTx] = history.slice(-1);
+    return this.provider!.getRawTransactionObject(lastTx.tx_hash);
+  }
+
+  // gets wallet balance in sats, bch and usd
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
@@ -269,13 +289,74 @@ export class Wallet extends BaseWallet {
     }
   }
 
+  // sets up a callback to be called upon wallet's balance change
+  // can be cancelled by calling the function returned from this one
+  public async watchBalance(
+    callback: (balance: BalanceResponse) => boolean | void
+  ): Promise<WatchBalanceCancel> {
+    let watchBalanceCallback: () => void;
+    let cancel: WatchBalanceCancel = async () => {
+      await this.provider!.unsubscribeFromAddress(
+        this.cashaddr!,
+        watchBalanceCallback
+      );
+    };
+
+    watchBalanceCallback = async () => {
+      const balance = (await this.getBalance(undefined)) as BalanceResponse;
+      await callback(balance);
+    };
+    await this.provider!.subscribeToAddress(
+      this.cashaddr!,
+      watchBalanceCallback
+    );
+
+    return cancel;
+  }
+
+  // waits for next transaction, program execution is halted
+  public async waitForTransaction(): Promise<any> {
+    return new Promise(async (resolve) => {
+      const waitForTransactionCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== this.cashaddr!) {
+            return;
+          }
+          let lastTx = await this.getLastTransaction();
+          await this.provider!.unsubscribeFromAddress(
+            this.cashaddr!,
+            waitForTransactionCallback
+          );
+          resolve(lastTx);
+        }
+      };
+      await this.provider!.subscribeToAddress(
+        this.cashaddr!,
+        waitForTransactionCallback
+      );
+    });
+  }
+
   // Gets balance by summing value in all utxos in stats
   public async getBalanceFromUtxos(): Promise<number> {
     const utxos = await this.getAddressUtxos(this.cashaddr!);
     return await sumUtxoValue(utxos);
   }
 
+  // Returns the serialized wallet as a string
+  // If storing in a database, set asNamed to false to store secrets
+  // In all other cases, the a named wallet is deserialized from the database
+  //  by the name key
   public toString() {
+    if (this.name) {
+      return `named:${this.network}:${this.name}`;
+    } else {
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    }
+  }
+
+  public toDbString() {
     return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
   }
 
@@ -329,7 +410,7 @@ export class Wallet extends BaseWallet {
     let utxos = await this.getAddressUtxos(this.cashaddr);
     let resp = new UtxoResponse();
     resp.utxos = await Promise.all(
-      utxos.map(async (o: Utxo) => {
+      utxos.map(async (o: UtxoI) => {
         let utxo = new UtxoItem();
         utxo.unit = "sat";
         utxo.value = o.satoshis;

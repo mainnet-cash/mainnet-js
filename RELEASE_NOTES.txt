@@ -1,8 +1,30 @@
 Newest changes
 --------------
 
+Features:
+- General Cashscript contract serialization/deserialization
+- Network providers are created global in scope (BCH, BCHt, BCHr) with the function initProviders()
+- All wallets and contracts will use the global providers if available.
+- Express server now uses network providers from global scope declared once at service start.
+- Escrow contracts
+- Express server return JSON instead of text errors.
+- Named wallets now return id as "named:wif:<THE_NAME>" format
+- Initial utility endpoint for currency conversion.
+- Added convert utility function and supporting satoshiToAmount 
+- Unit conversions are now done as numbers.
+- Use stock latest openapitools/openapi-generator-cli instead of fork for local validation and building
+
 ...
+
+0.1.0
+-----
+- New network provider methods: getHistory, getRawTransactionObject, subscribeToAddress, unsubscribeFromAddress, subscribeToHeaders, unsubscribeFromHeaders, waitForBlock
+- New wallet methods: getLastTransaction, getHistory, watchBalance, waitForTransaction
+- Add webhooks for watching balance and transactions - REST Endpoint /webhook/watch_address
+- Add websockets for watching balance and transactions - REST Endpoint /api/v1/wallet, methods watchBalance, waitForTransaction
 
 0.0.4
 -----
-Added first implementation of the escrow contract
+
+- Bugfix: fix function that determines if a network provider is using a electrum cluster or single electrum client.
+...

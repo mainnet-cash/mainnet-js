@@ -9,34 +9,73 @@ import { Network } from "../interface";
 const APPLICATION_USER_AGENT = "mainnet-js";
 const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
 
+function getGlobalProvider(network: Network): NetworkProvider | void {
+  let accessor: string;
+  switch (network) {
+    case Network.MAINNET:
+      accessor = "BCH";
+      break;
+    case Network.TESTNET:
+      accessor = "BCHt";
+      break;
+    case Network.REGTEST:
+      accessor = "BCHr";
+      break;
+  }
+  if (globalThis[accessor]) {
+    return globalThis[accessor];
+  } else {
+    return;
+  }
+}
+
 export function getNetworkProvider(
   network: Network = Network.MAINNET,
   servers?: string[] | string,
-  manualConnectionManagement = false
+  manualConnectionManagement?: boolean,
+  options?: ElectrumClusterParams
 ): NetworkProvider {
   let useCluster;
+  manualConnectionManagement = manualConnectionManagement
+    ? manualConnectionManagement
+    : false;
   servers = servers ? servers : config.defaultServers[network];
-  // If the user has passed a single string, assume a single client connection
 
+  let globalProvider = getGlobalProvider(network);
+  if (globalProvider) {
+    return globalProvider;
+  }
+  // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {
     servers = [servers as string];
     useCluster = false;
   }
-  // Otherwise assume a list of servers has been passed
+
+  // Otherwise, assume a list of servers has been passed
   else {
     servers = servers;
     useCluster = servers.length > 1;
   }
+
+  // There were server(s)
   if (servers) {
-    let c;
+    let clusterOrClient;
+    // There were multiple servers
     if (useCluster) {
-      const clusterParams = config.clusterParams[network];
+      let clusterParams = config.clusterParams[network];
       clusterParams["confidence"] = getConfidence();
-      c = getCluster(servers, clusterParams);
-    } else {
-      c = getClient(servers);
+      clusterParams = Object.assign({}, clusterParams, options);
+      clusterOrClient = getCluster(servers, clusterParams);
     }
-    return new ElectrumNetworkProvider(c, network, manualConnectionManagement);
+    // The server is a single string in an array
+    else {
+      clusterOrClient = getClient(servers);
+    }
+    return new ElectrumNetworkProvider(
+      clusterOrClient,
+      network,
+      manualConnectionManagement
+    );
   } else {
     throw Error("No servers provided, defaults not available.");
   }
@@ -83,7 +122,7 @@ function getElectrumCluster(params: ElectrumClusterParams) {
   );
 }
 
-function getElectrumClient(params: ElectrumHostParams, timeout) {
+function getElectrumClient(params: ElectrumHostParams, timeout: number) {
   return new ElectrumClient(
     APPLICATION_USER_AGENT,
     ELECTRUM_CASH_PROTOCOL_VERSION,
