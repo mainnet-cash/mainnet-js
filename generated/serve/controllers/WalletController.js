@@ -24,6 +24,10 @@ const depositQr = async (request, response) => {
   await Controller.handleRequest(request, response, service.depositQr);
 };
 
+const info = async (request, response) => {
+  await Controller.handleRequest(request, response, service.info);
+};
+
 const maxAmountToSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.maxAmountToSend);
 };
@@ -46,6 +50,7 @@ module.exports = {
   createWallet,
   depositAddress,
   depositQr,
+  info,
   maxAmountToSend,
   send,
   sendMax,

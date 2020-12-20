@@ -7,9 +7,15 @@ import {
   CashAddressNetworkPrefix,
   decodePrivateKeyWif,
   encodePrivateKeyWif,
+  deriveHdPrivateNodeFromSeed,
+  deriveHdPrivateNodeChild,
+  deriveHdPath,
   generatePrivateKey,
+  HdPrivateNodeValid,
+  instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
+import { mnemonicToSeedSync, generateMnemonic } from "bip39";
 import { UnitEnum } from "../enum";
 
 import { TxI } from "../interface";
@@ -19,6 +25,8 @@ import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
+import { MnemonicI, WalletInfoI } from "./interface";
+
 import {
   SendRequest,
   SendRequestArray,
@@ -43,11 +51,9 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
-
+import { derivePrefix } from "../util/derivePublicKeyHash";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
-import { derivePrefix } from "../util/derivePublicKeyHash";
-import { resolve } from "path";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -55,43 +61,90 @@ const sha256Promise = instantiateSha256();
 type WatchBalanceCancel = () => void;
 
 export class Wallet extends BaseWallet {
+  cashaddr?: string;
+  derivationPath?: string;
+  mnemonic?: string;
+  privateKey?: Uint8Array;
+  privateKeyWif?: string;
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
-  privateKey?: Uint8Array;
-  uncompressedPrivateKey?: Uint8Array;
-  privateKeyWif?: string;
   walletType?: WalletTypeEnum;
-  cashaddr?: string;
 
-  constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
+  constructor(
+    name = "",
+    networkPrefix = CashAddressNetworkPrefix.mainnet,
+    walletType = WalletTypeEnum.Seed
+  ) {
     super(name, networkPrefix);
     this.name = name;
-    this.walletType = WalletTypeEnum.Wif;
+    this.walletType = walletType;
   }
 
   // Initialize wallet from Wallet Import Format
   public async fromWIF(secret: string): Promise<this> {
-    const sha256 = await sha256Promise;
-    const secp256k1 = await secp256k1Promise;
-    let result = decodePrivateKeyWif(sha256, secret);
-
-    const hasError = typeof result === "string";
-    if (hasError) {
-      throw Error(result as string);
-    }
     checkWifNetwork(secret, this.networkType);
-    let resultData: PrivateKeyI = result as PrivateKeyI;
+
+    const sha256 = await sha256Promise;
+    let wifResult = decodePrivateKeyWif(sha256, secret);
+
+    const hasError = typeof wifResult === "string";
+    if (hasError) {
+      throw Error(wifResult as string);
+    }
+    let resultData: PrivateKeyI = wifResult as PrivateKeyI;
     this.privateKey = resultData.privateKey;
     this.privateKeyWif = secret;
     this.walletType = WalletTypeEnum.Wif;
-    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey);
-    this.cashaddr = (await deriveCashaddr(
-      this.privateKey,
-      this.networkPrefix
-    )) as string;
+    await this.deriveInfo();
     return this;
   }
 
+  // Initialize wallet from a mnemonic phrase
+  public async fromSeed(
+    mnemonic: string,
+    derivationPath?: string
+  ): Promise<this> {
+    this.mnemonic = mnemonic;
+
+    const crypto = await instantiateBIP32Crypto();
+    let seed = mnemonicToSeedSync(this.mnemonic);
+
+    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    if (!hdNode.valid) {
+      throw Error("Invalid private key derived from mnemonic seed");
+    }
+    this.derivationPath = derivationPath
+      ? derivationPath
+      : `m/44'/${this.isTestnet ? 1 : 0}'/0'/0/0`;
+    let zerothChild = deriveHdPath(
+      crypto,
+      hdNode,
+      this.derivationPath
+    ) as HdPrivateNodeValid;
+    this.privateKey = zerothChild.privateKey;
+
+    this.walletType = WalletTypeEnum.Seed;
+    await this.deriveInfo();
+    return this;
+  }
+
+  private async deriveInfo() {
+    const sha256 = await sha256Promise;
+    const secp256k1 = await secp256k1Promise;
+    this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
+    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey!);
+    this.privateKeyWif = encodePrivateKeyWif(
+      sha256,
+      this.privateKey!,
+      this.networkType
+    );
+    checkWifNetwork(this.privateKeyWif, this.networkType);
+
+    this.cashaddr = (await deriveCashaddr(
+      this.privateKey!,
+      this.networkPrefix
+    )) as string;
+  }
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
     let addressComponents = address.split(":");
@@ -116,6 +169,14 @@ export class Wallet extends BaseWallet {
   }
 
   public async generate(): Promise<this> {
+    if (this.walletType === WalletTypeEnum.Wif) {
+      return await this._generateWif();
+    } else {
+      return await this._generateMnemonic();
+    }
+  }
+
+  private async _generateWif() {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
@@ -142,6 +203,26 @@ export class Wallet extends BaseWallet {
       this.privateKey,
       this.networkPrefix
     )) as string;
+    return this;
+  }
+
+  private async _generateMnemonic() {
+    const crypto = await instantiateBIP32Crypto();
+    this.mnemonic = generateMnemonic();
+    let seed = mnemonicToSeedSync(this.mnemonic!);
+    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    if (!hdNode.valid) {
+      throw Error("Invalid private key derived from mnemonic seed");
+    }
+    this.derivationPath = `m/44'/${this.isTestnet ? 1 : 0}'/0'/0/0`;
+    let zerothChild = deriveHdPath(
+      crypto,
+      hdNode,
+      this.derivationPath
+    ) as HdPrivateNodeValid;
+    this.privateKey = zerothChild.privateKey;
+    this.walletType = WalletTypeEnum.Seed;
+    await this.deriveInfo();
     return this;
   }
 
@@ -197,7 +278,11 @@ export class Wallet extends BaseWallet {
         }
 
       case "seed":
-        throw new Error("Not implemented");
+        if (arg2) {
+          return this.fromSeed(arg1, arg2);
+        } else {
+          return this.fromSeed(arg1);
+        }
       default:
         return this.fromWIF(arg1);
     }
@@ -209,6 +294,13 @@ export class Wallet extends BaseWallet {
     force?: boolean
   ): Promise<Wallet> {
     return new this()._named(name, dbName, force);
+  }
+
+  public static fromSeed(
+    seed: string,
+    derivationPath?: string
+  ): Promise<Wallet> {
+    return new this().fromSeed(seed, derivationPath);
   }
 
   public static newRandom(name = "", dbName?: string): Promise<Wallet> {
@@ -344,6 +436,37 @@ export class Wallet extends BaseWallet {
     return await sumUtxoValue(utxos);
   }
 
+  // Get mnemonic and derivation path for wallet
+  public getSeed(): MnemonicI {
+    if (!this.mnemonic) {
+      throw Error("Wallet mnemonic seed phrase not set");
+    }
+    if (!this.derivationPath) {
+      throw Error("Wallet derivation path not set");
+    }
+    return {
+      seed: this.mnemonic,
+      derivationPath: this.derivationPath,
+    };
+  }
+
+  // Return wallet info
+  public getInfo(): WalletInfoI {
+    return {
+      cashaddr: this.cashaddr,
+      isTestnet: this.isTestnet,
+      name: this.name,
+      network: this.network,
+      seed: this.getSeed(),
+      publicKey: binToHex(this.publicKey!),
+      publicKeyHash: binToHex(this.publicKeyHash!),
+      privateKey: binToHex(this.privateKey!),
+      privateKeyWif: this.privateKeyWif,
+      walletId: this.toString(),
+      walletDbEntry: this.toDbString(),
+    };
+  }
+
   // Returns the serialized wallet as a string
   // If storing in a database, set asNamed to false to store secrets
   // In all other cases, the a named wallet is deserialized from the database
@@ -351,13 +474,19 @@ export class Wallet extends BaseWallet {
   public toString() {
     if (this.name) {
       return `named:${this.network}:${this.name}`;
+    } else if (this.mnemonic) {
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     } else {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     }
   }
 
   public toDbString() {
-    return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    if (this.mnemonic) {
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else {
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    }
   }
 
   public async getMaxAmountToSend({
@@ -505,5 +634,29 @@ export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
+  }
+}
+
+export class WifWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.mainnet;
+  static walletType = WalletTypeEnum.Wif;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Wif);
+  }
+}
+
+export class TestNetWifWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.testnet;
+  static walletType = WalletTypeEnum.Wif;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Wif);
+  }
+}
+
+export class RegTestWifWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.regtest;
+  static walletType = WalletTypeEnum.Wif;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Wif);
   }
 }

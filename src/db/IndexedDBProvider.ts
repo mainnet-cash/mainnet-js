@@ -23,6 +23,10 @@ export default class IndexedDBProvider
     return this;
   }
 
+  public getInfo() {
+    return "indexedDB";
+  }
+
   public async addWallet(name: string, wallet: string): Promise<boolean> {
     // Make sure we have something in DB:
 

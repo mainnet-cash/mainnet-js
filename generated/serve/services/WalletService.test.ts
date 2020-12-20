@@ -96,7 +96,7 @@ describe("Test Wallet Endpoints", () => {
   it("Should create an unnamed Mainnet wallet with the API", async () => {
     
     let req = {
-    type : "wif",
+    type : "seed",
     network:"mainnet"
   }
 
@@ -106,7 +106,7 @@ describe("Test Wallet Endpoints", () => {
     expect(resp.statusCode).toBe(200);
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:mainnet:")).toBeTruthy();
+    expect(body!.walletId!.startsWith("seed:mainnet:")).toBeTruthy();
   });
 
   it("Should create a mainnet wallet on empty request", async () => {
@@ -117,7 +117,7 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.name).toBe("");
     expect(body!.network).toBe("mainnet");
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
-    expect(body!.walletId!.startsWith("wif:mainnet:")).toBeTruthy();
+    expect(body!.walletId!.startsWith("seed:mainnet:")).toBeTruthy();
   });
   /**
    * depositAddress
@@ -159,7 +159,6 @@ describe("Test Wallet Endpoints", () => {
     } else {
       const bobsWalletResp = await request(app).post("/wallet/create").send({
         name: "bobs wallet",
-        type: "wif",
         network: "regtest",
       });
 
@@ -233,8 +232,8 @@ describe("Test Wallet Endpoints", () => {
 
   it("Should send all available funds", async () => {
     let bobWalletReq = {
-      name:"A Bobs Regtest Wallet",
-  type:"wif", 
+      name:"Bob's Regtest Wallet",
+  type:"seed", 
   network:"regtest"
 };
 
@@ -242,6 +241,7 @@ describe("Test Wallet Endpoints", () => {
       .post("/wallet/create")
       .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
+    expect(bobsWallet.cashaddr).toMatch(/bchreg:[q|p]\w{41}/)
 
     let initialResp = await request(app).post("/wallet/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
