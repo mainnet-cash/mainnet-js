@@ -21,6 +21,7 @@
     "api:build:server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/generated/serve",
     "api:build:client": "node swagger/generate.js",
     "api:serve": "yarn install --only=production --cwd generated/serve/ --prefix generated/serve/ && node generated/serve/serve.js",
+    "api:serve:install": "yarn install  --only=production --cwd generated/serve/ --prefix generated/serve/",
     "api:serve:cluster": "yarn --cwd generated/serve/ --prefix generated/serve/ start",
     "cli": "npx ts-node src/cli.ts",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent yarn run cover",
