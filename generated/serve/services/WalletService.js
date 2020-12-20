@@ -90,6 +90,24 @@ const depositQr = ({ serializedWallet }) =>
     }
   });
 /**
+* Get wallet info
+*
+* serializedWallet SerializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 
+* returns WalletInfo
+* */
+const info = ({ serializedWallet }) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
+      let resp = await wallet.getInfo();
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  });  
+/**
 * Get maximum spendable amount
 *
 * maxAmountToSendRequest MaxAmountToSendRequest get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
@@ -180,6 +198,7 @@ module.exports = {
   createWallet,
   depositAddress,
   depositQr,
+  info,
   maxAmountToSend,
   send,
   sendMax,

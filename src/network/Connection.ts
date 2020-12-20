@@ -8,8 +8,12 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 async function initProvider(network: Network) {
   const ticker = networkTickerMap[network];
   if (!(ticker in globalThis)) {
-    let conn = new Connection(network);
-    return (globalThis[ticker] = (await conn.ready()).networkProvider);
+    try {
+      let conn = new Connection(network);
+      return (globalThis[ticker] = (await conn.ready()).networkProvider);
+    } catch (e) {
+      throw `${network} ${e}`;
+    }
   } else {
     console.warn(
       `Ignoring attempt to reinitialize non-existent ${network} provider`
@@ -22,7 +26,7 @@ export async function initProviders(networks?: Network[]) {
   networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
   let initPromises = networks.map((n) => initProvider(n));
   await Promise.all(initPromises).catch((e) => {
-    console.warn(`Error establishing a persistent connection. ${e}`);
+    console.warn(`Warning, couldn't establish a connection for ${e}`);
   });
 }
 

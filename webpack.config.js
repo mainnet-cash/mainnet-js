@@ -48,6 +48,7 @@ const browserConfig = {
   },
   resolve: {
     alias: {
+      bip39: require.resolve("./polyfill/bip39.browser.js"),
       buffer: false,
       bufferutil: false,
       child_process: false,
@@ -82,6 +83,7 @@ const webWorkerConfig = {
   },
   resolve: {
     alias: {
+      bip39: require.resolve("./polyfill/bip39.browser.js"),
       buffer: false,
       bufferutil: false,
       child_process: false,

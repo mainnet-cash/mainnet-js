@@ -12,9 +12,9 @@ RUN apt-get update \
   && cd opt \
   && git clone ${GIT_REPO} mainnet-js \
   && cd mainnet-js && git checkout $GIT_COMMIT \
-  && yarn && npm run build && rm -rf node_modules dist \
+  && yarn && yarn build && rm -rf node_modules dist \
   && cd generated/serve \
-  && npm install
+  && yarn install
 
 COPY ./entrypoint.sh ./http.conf ./https.conf ./https.le.conf.tpl ./supervisor.conf /opt/
 

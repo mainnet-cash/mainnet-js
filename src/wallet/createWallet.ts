@@ -1,9 +1,27 @@
 import { WalletTypeEnum } from "./enum";
-import { Wallet, TestNetWallet, RegTestWallet } from "./Wif";
+import {
+  Wallet,
+  TestNetWallet,
+  RegTestWallet,
+  WifWallet,
+  TestNetWifWallet,
+  RegTestWifWallet,
+} from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
 
 export const walletClassMap = {
   wif: {
+    mainnet: () => {
+      return WifWallet;
+    },
+    testnet: () => {
+      return TestNetWifWallet;
+    },
+    regtest: () => {
+      return RegTestWifWallet;
+    },
+  },
+  seed: {
     mainnet: () => {
       return Wallet;
     },
@@ -16,9 +34,9 @@ export const walletClassMap = {
   },
 };
 
-export async function createWallet(body: WalletRequestI): Promise<any> {
+export async function createWallet(body: WalletRequestI): Promise<Wallet> {
   let wallet;
-  let walletType = body.type ? body.type : "wif";
+  let walletType = body.type ? body.type : "seed";
   let networkType = body.network ? body.network : "mainnet";
 
   // Named wallets are saved in the database
@@ -40,6 +58,7 @@ export async function createWallet(body: WalletRequestI): Promise<any> {
   else {
     let walletClass = walletClassMap[walletType][networkType]();
     wallet = await new walletClass();
+    wallet.walletType = walletType;
     return wallet.generate();
   }
 }
