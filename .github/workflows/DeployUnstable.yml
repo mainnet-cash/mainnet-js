@@ -24,7 +24,7 @@ jobs:
       - name: build
         run: |
           yarn install --only=production
-          yarn build --production
+          yarn build
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
           git add -f dist/mainnet-* 
