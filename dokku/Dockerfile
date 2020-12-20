@@ -30,5 +30,6 @@ WORKDIR /app/
 COPY --chown=appuser:appuser . /app/
 RUN yarn install --only=production
 RUN yarn build 
+RUN yarn api:serve:install
 
 CMD bash -lc "echo $WORKERS workers will be run; yarn api:serve:cluster"
