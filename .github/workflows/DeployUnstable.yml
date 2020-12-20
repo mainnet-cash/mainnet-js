@@ -23,8 +23,8 @@ jobs:
           node-version: "14.x"
       - name: build
         run: |
-          npm install --only=production
-          npm run build --production
+          yarn install --only=production
+          yarn build --production
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
           git add -f dist/mainnet-* 
