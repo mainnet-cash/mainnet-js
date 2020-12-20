@@ -28,7 +28,7 @@ RUN chown -R appuser:appuser /app/
 USER appuser
 WORKDIR /app/
 COPY --chown=appuser:appuser . /app/
-RUN npm install --only=production
-RUN npm run build --production
+RUN yarn install --only=production
+RUN yarn build 
 
-CMD bash -lc "echo $WORKERS workers will be run; npm run api:serve:cluster"
+CMD bash -lc "echo $WORKERS workers will be run; yarn api:serve:cluster"
