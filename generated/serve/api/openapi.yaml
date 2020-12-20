@@ -14,14 +14,14 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.1.0
+  version: 0.1.1
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
 servers:
 - description: unstable service (for development)
   url: https://rest-unstable.mainnet.cash/
-- description: local development server via npm run api:serve
+- description: local development server via `yarn api:serve`
   url: http://localhost:3000/
 tags:
 - description: Interact with contracts
@@ -302,6 +302,29 @@ paths:
             A Qr code image data encoded string in the src field suitable for inclusion in html using:
                - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/info:
+    post:
+      operationId: info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          The wallet to request information about, in serialized form.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletInfo'
+          description: |
+            Information about the wallet network, type, and keys
+      summary: Get information about a wallet
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -765,12 +788,13 @@ components:
             $ref: '#/components/schemas/Utxo'
           type: array
     WalletResponse:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         wif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         name: username1
-        network: testnet
       properties:
         walletId:
           description: |
@@ -790,15 +814,6 @@ components:
           description: |
             The address in cashaddr format.
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-        network:
-          description: network type
-          enum:
-          - mainnet
-          - testnet
-          - regtest
-          - simtest
-          example: testnet
           type: string
       type: object
     MineRequest:
@@ -849,6 +864,9 @@ components:
           example: USD
           type: string
     WalletRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      - $ref: '#/components/schemas/WalletType'
       example:
         type: wif
         network: testnet
@@ -857,23 +875,6 @@ components:
         name:
           description: User defined string for wallet
           example: username1
-          type: string
-        network:
-          description: network type
-          enum:
-          - mainnet
-          - testnet
-          - regtest
-          - simtest
-          example: testnet
-          type: string
-        type:
-          description: Wallet type, either a single wallet with private key (wif)
-            or a Hierarchical Deterministic wallet determined from a seed.
-          enum:
-          - wif
-          - hd
-          example: wif
           type: string
       type: object
     SendRequest:
@@ -943,6 +944,18 @@ components:
         balance:
           $ref: '#/components/schemas/BalanceResponse'
       type: object
+    NetworkEnum:
+      discriminator:
+        propertyName: network
+      properties:
+        network:
+          description: network type
+          enum:
+          - mainnet
+          - testnet
+          - regtest
+          example: testnet
+          type: string
     UnitType:
       discriminator:
         propertyName: unit_type
@@ -959,4 +972,66 @@ components:
           - satoshi
           - satoshis
           example: sat
+          type: string
+    WalletType:
+      discriminator:
+        propertyName: wallet_type
+      properties:
+        type:
+          description: Wallet type, either a mnemonic seed single address wallet,
+            a simple private key (wif) or a Hierarchical Deterministic wallet determined
+            from a seed.
+          enum:
+          - wif
+          - hd
+          - seed
+          example: seed
+          type: string
+    WalletInfo:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        cashaddr: cashaddr
+        privateKey: privateKey
+        walletId: walletId
+        walletDbEntry: walletDbEntry
+        seed:
+          seed: seed
+          derivationPath: derivationPath
+        name: name
+        isTestnet: true
+        publicKey: publicKey
+        privateKeyWif: privateKeyWif
+        publicKeyHash: publicKeyHash
+      properties:
+        cashaddr:
+          type: string
+        isTestnet:
+          type: boolean
+        name:
+          type: string
+        publicKey:
+          type: string
+        publicKeyHash:
+          type: string
+        privateKey:
+          type: string
+        privateKeyWif:
+          type: string
+        seed:
+          $ref: '#/components/schemas/WalletMnemonic'
+        walletId:
+          type: string
+        walletDbEntry:
+          type: string
+    WalletMnemonic:
+      discriminator:
+        propertyName: seed
+      example:
+        seed: seed
+        derivationPath: derivationPath
+      properties:
+        seed:
+          type: string
+        derivationPath:
           type: string

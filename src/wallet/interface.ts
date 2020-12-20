@@ -14,6 +14,25 @@ export interface WalletResponseI {
   network?: NetworkEnum;
 }
 
+export interface WalletInfoI {
+  cashaddr?: string;
+  isTestnet?: boolean;
+  name?: string;
+  network: NetworkEnum;
+  seed?: MnemonicI;
+  publicKey?: string;
+  publicKeyHash?: string;
+  privateKey?: string;
+  privateKeyWif?: string;
+  walletId: string;
+  walletDbEntry: string;
+}
+
+export interface MnemonicI {
+  seed: string;
+  derivationPath: string;
+}
+
 export interface WalletI {
   /**
    * generate should randomly create a new wallet

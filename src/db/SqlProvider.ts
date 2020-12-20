@@ -7,6 +7,7 @@ var parseDbUrl = require("parse-database-url");
 
 export default class SqlProvider implements StorageProvider {
   private db;
+  private info;
   private walletTable: string;
   private webhookTable: string;
   private isInit = false;
@@ -14,6 +15,7 @@ export default class SqlProvider implements StorageProvider {
   public constructor(walletTable?: string) {
     this.walletTable = walletTable ? walletTable : "wallet";
     this.webhookTable = "webhook";
+    const info = process.env.DATABASE_URL;
     var dbConfig = parseDbUrl(process.env.DATABASE_URL);
     this.db = new Pool(dbConfig);
   }
@@ -54,6 +56,10 @@ export default class SqlProvider implements StorageProvider {
   public async close(): Promise<StorageProvider> {
     await this.db.end();
     return this;
+  }
+
+  public getInfo(): string {
+    return this.info;
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {

@@ -22,6 +22,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ) {
     if (electrum) {
       this.electrum = electrum;
+
       return;
     } else {
       throw new Error(`A electrum-cash cluster or client is required.`);
