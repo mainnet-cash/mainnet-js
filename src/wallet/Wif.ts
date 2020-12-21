@@ -408,7 +408,10 @@ export class Wallet extends BaseWallet {
 
   // waits for address balance to be greater than or equal to the target value
   // this call halts the execution
-  public async waitForBalance(value: number, rawUnit: UnitEnum = UnitEnum.BCH): Promise<number | BalanceResponse> {
+  public async waitForBalance(
+    value: number,
+    rawUnit: UnitEnum = UnitEnum.BCH
+  ): Promise<number | BalanceResponse> {
     return new Promise(async (resolve) => {
       const waitForBalanceCallback = async (data) => {
         if (data instanceof Array) {
@@ -417,7 +420,7 @@ export class Wallet extends BaseWallet {
             return;
           }
 
-          const balance = (await this.getBalance(rawUnit));
+          const balance = await this.getBalance(rawUnit);
           console.log(balance);
           if (balance >= value) {
             await this.provider!.unsubscribeFromAddress(

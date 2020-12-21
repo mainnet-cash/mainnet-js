@@ -277,7 +277,6 @@ describe(`Watch only Wallets`, () => {
   });
 });
 
-
 test("Should cancel watching balance", async () => {
   initProviders([Network.REGTEST]);
   const aliceWallet = await RegTestWallet.newRandom();
@@ -288,7 +287,6 @@ test("Should cancel watching balance", async () => {
 
   disconnectProviders([Network.REGTEST]);
 });
-
 
 test("Should wait for balance", async () => {
   let provider = getNetworkProvider(Network.REGTEST, undefined, true);
