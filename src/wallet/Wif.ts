@@ -406,6 +406,36 @@ export class Wallet extends BaseWallet {
     return cancel;
   }
 
+  // waits for address balance to be greater than or equal to the target value
+  // this call halts the execution
+  public async waitForBalance(value: number, rawUnit: UnitEnum = UnitEnum.BCH): Promise<number | BalanceResponse> {
+    return new Promise(async (resolve) => {
+      const waitForBalanceCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== this.cashaddr!) {
+            return;
+          }
+
+          const balance = (await this.getBalance(rawUnit));
+          console.log(balance);
+          if (balance >= value) {
+            await this.provider!.unsubscribeFromAddress(
+              this.cashaddr!,
+              waitForBalanceCallback
+            );
+            resolve(balance);
+          }
+        }
+      };
+
+      await this.provider!.subscribeToAddress(
+        this.cashaddr!,
+        waitForBalanceCallback
+      );
+    });
+  }
+
   // waits for next transaction, program execution is halted
   public async waitForTransaction(): Promise<any> {
     return new Promise(async (resolve) => {
