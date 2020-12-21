@@ -7,6 +7,9 @@ on:
   release:
     types: [created]
 
+env:
+  NODE_ENV: production
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +25,7 @@ jobs:
   # More info in generated/serve/docker/README.md
   publish-docker:
     continue-on-error: true
-    needs: build
+    needs: publish-npm
     runs-on: ubuntu-latest
     steps:
       # Build project
@@ -40,11 +43,16 @@ jobs:
 
       # Actual job
       - name: Build docker image
-        run: docker build ./generated/serve/docker --tag mainnet/mainnet-rest:${{ env.TAG_NAME }} --build-arg GIT_REPO=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} --build-arg GIT_COMMIT=${GITHUB_SHA}
+        run: docker build ./generated/serve/docker --tag mainnet/mainnet-rest:${{ env.TAG_NAME }} --build-arg GIT_REPO=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} --build-arg GIT_COMMIT=${GITHUB_SHA} --build-arg MAINNET_TAG=${{ env.TAG_NAME }}
 
       - name: Push image to docker hub
         run: docker push mainnet/mainnet-rest:${{ env.TAG_NAME }}
 
+      - name: Tag this image as latest
+        run: docker tag mainnet/mainnet-rest:${{ env.TAG_NAME }} mainnet/mainnet-rest:latest
+
+      - name: Push latest image to docker hub
+        run: docker push mainnet/mainnet-rest:latest
 
   # Deploy REST API to https://rest-unstable.mainnet.cash
   # Done by pushing to deploy branch on github, this will trigger the deploy action
