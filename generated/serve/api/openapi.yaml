@@ -793,18 +793,15 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        wif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         name: username1
+      oneOf:
+      - $ref: '#/components/schemas/Wif'
+      - $ref: '#/components/schemas/WalletMnemonic'
       properties:
         walletId:
           description: |
             ID that is returned in `wallet` field of /wallet call
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        wif:
-          description: |
-            The wallet in Wallet Import Format (WIF)
-          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         name:
           description: User defined string for wallet
@@ -830,8 +827,8 @@ components:
           type: number
     ConvertRequest:
       example:
-        from: BCH
-        to: USD
+        from: bch
+        to: usd
         value: 100
       properties:
         value:
@@ -841,34 +838,40 @@ components:
           description: Provided value unit of account.
           enum:
           - bch
+          - BCH
           - usd
+          - USD
           - bit
           - bits
           - sat
+          - SAT
           - sats
           - satoshi
           - satoshis
-          example: BCH
+          example: bch
           type: string
         to:
           description: Unit of account to be returned
           enum:
           - bch
+          - BCH
           - usd
+          - USD
           - bit
           - bits
           - sat
+          - SAT
           - sats
           - satoshi
           - satoshis
-          example: USD
+          example: usd
           type: string
     WalletRequest:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
       - $ref: '#/components/schemas/WalletType'
       example:
-        type: wif
+        type: seed
         network: testnet
         name: username1
       properties:
@@ -964,10 +967,13 @@ components:
           description: Unit of account.
           enum:
           - bch
+          - BCH
           - usd
+          - USD
           - bit
           - bits
           - sat
+          - SAT
           - sats
           - satoshi
           - satoshis
@@ -1034,4 +1040,11 @@ components:
         seed:
           type: string
         derivationPath:
+          type: string
+    Wif:
+      properties:
+        wif:
+          description: |
+            The wallet in Wallet Import Format (WIF)
+          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string

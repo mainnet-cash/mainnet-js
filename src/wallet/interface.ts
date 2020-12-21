@@ -12,6 +12,8 @@ export interface WalletResponseI {
   cashaddr: string;
   walletId: string;
   network?: NetworkEnum;
+  wif?: string;
+  seed?: MnemonicI;
 }
 
 export interface WalletInfoI {

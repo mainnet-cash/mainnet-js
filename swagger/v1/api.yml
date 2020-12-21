@@ -702,11 +702,6 @@ components:
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
-        wif:
-          description: |
-            The wallet in Wallet Import Format (WIF)
-          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
         name:
           description: User defined string for wallet
           example: username1
@@ -717,6 +712,9 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
       type: object
+      oneOf:
+       - $ref: "#/components/schemas/Wif"
+       - $ref: "#/components/schemas/WalletMnemonic"
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
     MineRequest:
@@ -741,32 +739,38 @@ components:
             Provided value unit of account.
           enum:
             - bch
+            - BCH
             - usd
+            - USD
             - bit
             - bits
             - sat
+            - SAT
             - sats
             - satoshi
             - satoshis
-          example: BCH
+          example: bch
           type: string
         to:
           description:
             Unit of account to be returned
           enum:
             - bch
+            - BCH
             - usd
+            - USD
             - bit
             - bits
             - sat
+            - SAT
             - sats
             - satoshi
             - satoshis
-          example: USD
+          example: usd
           type: string
     WalletRequest:
       example:
-        type: wif
+        type: seed
         network: testnet
         name: username1
       properties:
@@ -842,10 +846,13 @@ components:
             Unit of account.
           enum:
             - bch
+            - BCH
             - usd
+            - USD
             - bit
             - bits
             - sat
+            - SAT
             - sats
             - satoshi
             - satoshis
@@ -899,3 +906,10 @@ components:
           type: string
       discriminator:
         propertyName: seed
+    Wif:
+      properties:
+        wif:
+          description: |
+            The wallet in Wallet Import Format (WIF)
+          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
