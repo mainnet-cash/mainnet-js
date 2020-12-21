@@ -80,22 +80,22 @@ export async function createWalletResponse(
 }
 
 function asJsonResponse(wallet: Wallet): WalletResponseI {
-  if(wallet.mnemonic){
+  if (wallet.mnemonic) {
     return {
       name: wallet.name,
       cashaddr: wallet.cashaddr as string,
       walletId: wallet.toString(),
       seed: wallet.getSeed(),
       network: wallet.network,
-    };  
-  }else{
+    };
+  } else {
     return {
       name: wallet.name,
       cashaddr: wallet.cashaddr as string,
       walletId: wallet.toString(),
       wif: wallet.privateKeyWif,
       network: wallet.network,
-    };  
+    };
   }
 }
 

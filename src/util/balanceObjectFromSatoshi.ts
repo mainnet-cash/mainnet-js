@@ -56,8 +56,8 @@ export async function balanceFromSatoshi(
     case UnitEnum.SATOSHIS:
       return value;
     case UnitEnum.USD:
-      let usd = ((value / bchParam.subUnits) * (await getUsdRate()))
-      return Number(usd.toFixed(2))
+      let usd = (value / bchParam.subUnits) * (await getUsdRate());
+      return Number(usd.toFixed(2));
     default:
       throw Error(
         `Balance response type ${JSON.stringify(unit)} not understood`
