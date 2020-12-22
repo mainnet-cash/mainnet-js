@@ -4,7 +4,6 @@ require("dotenv").config({ path: ".env.testnet" });
 
 const { spawnSync } = require("child_process");
 const http = require("http");
-const { abort } = require("process");
 const { pingBchn, getRegtestUtxos } = require("./util/generateBlock");
 
 function delay(ms) {
