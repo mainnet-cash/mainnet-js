@@ -4,6 +4,7 @@ require("dotenv").config({ path: ".env.testnet" });
 
 const { spawnSync } = require("child_process");
 const http = require("http");
+const { abort } = require("process");
 const { pingBchn, getRegtestUtxos } = require("./util/generateBlock");
 
 function delay(ms) {
@@ -14,6 +15,16 @@ let miningStarted = false;
 
 module.exports = async function () {
   console.log("Starting regtest network...");
+
+  let output = spawnSync("docker", ["ps"], {
+    shell: false,
+    stdio: "ignore"
+  });
+
+  if (output.status != 0) {
+    console.error("Docker is not running in your system. Aborting.");
+    process.exit(0);
+  }
 
   if (global.fulcrumRegtest === undefined) {
     global.fulcrumRegtest = spawnSync("./jest/docker/start.sh", null, {

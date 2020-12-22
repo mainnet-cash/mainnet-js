@@ -271,6 +271,7 @@ describe(`Watch only Wallets`, () => {
     );
 
     let tx = await bobWallet.waitForTransaction();
+    console.log(tx);
     expect(tx.hash).not.toBe("");
     await bobWallet.sendMax(aliceWallet.cashaddr!);
     await provider.disconnect();
