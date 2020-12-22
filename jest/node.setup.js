@@ -18,7 +18,7 @@ module.exports = async function () {
 
   let output = spawnSync("docker", ["ps"], {
     shell: false,
-    stdio: "ignore"
+    stdio: "ignore",
   });
 
   if (output.status != 0) {
