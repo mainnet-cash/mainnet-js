@@ -14,7 +14,7 @@ import {
 } from "@bitauth/libauth";
 import { UtxoI } from "../interface";
 
-import { DUST_UTXO_THRESHOLD } from "../constant"
+import { DUST_UTXO_THRESHOLD } from "../constant";
 import { SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -57,11 +57,11 @@ export async function buildP2pkhNonHdTransaction(
     if (discardChange !== true) {
       const changeAmount =
         BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
-      if(changeAmount > DUST_UTXO_THRESHOLD){
+      if (changeAmount > DUST_UTXO_THRESHOLD) {
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
           satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
-        });  
+        });
       }
     }
 
@@ -196,7 +196,7 @@ export async function getFeeAmount({
       utxos,
       sendRequests,
       privateKey,
-      1000 
+      1000
     );
     return draftTransaction.length * 1 + 1;
   } else {

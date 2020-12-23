@@ -168,7 +168,6 @@ describe(`Test Wallet library`, () => {
     }
   });
 
-
   // If the change from a transaction is less than the DUST_UTXO_THRESHOLD
   // assume that the change cannot be spent and use it as fee instead
   test("Send assume change less than dust is fee", async () => {
@@ -195,7 +194,6 @@ describe(`Test Wallet library`, () => {
       expect(Math.round(charlieBalance.sat!)).toBe(734);
     }
   });
-
 
   test("Send a transaction (as array) on the regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
