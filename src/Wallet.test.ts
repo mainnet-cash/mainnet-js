@@ -241,7 +241,7 @@ describe(`Test Wallet library`, () => {
       throw Error("Alice or Bob's wallet are missing addresses");
     }
     if (!alice.privateKey || !bob.privateKey) {
-      throw Error("Alice or Bob's wallet are missing private ke");
+      throw Error("Alice or Bob's wallet are missing private keys");
     }
     await alice.send([
       {
