@@ -52,7 +52,7 @@ tags:
 paths:
   /webhook/watch_address:
     post:
-      operationId: watchAddressTranasctions
+      operationId: watchAddress
       requestBody:
         content:
           application/json:
