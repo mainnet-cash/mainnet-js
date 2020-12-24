@@ -85,7 +85,7 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
       name: wallet.name,
       cashaddr: wallet.cashaddr as string,
       walletId: wallet.toString(),
-      seed: wallet.getSeed(),
+      ... wallet.getSeed(),
       network: wallet.network,
     };  
   }else{

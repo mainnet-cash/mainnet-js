@@ -52,7 +52,7 @@ tags:
 paths:
   /webhook/watch_address:
     post:
-      operationId: watchAddressTranasctions
+      operationId: watchAddressTransactions
       requestBody:
         content:
           application/json:
@@ -768,6 +768,10 @@ components:
             - satoshis
           example: usd
           type: string
+      required:
+        - value
+        - from
+        - to                
     WalletRequest:
       example:
         type: seed

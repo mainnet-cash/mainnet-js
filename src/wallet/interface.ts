@@ -13,7 +13,8 @@ export interface WalletResponseI {
   walletId: string;
   network?: NetworkEnum;
   wif?: string;
-  seed?: MnemonicI;
+  seed?: string;
+  derivationPath?: string;
 }
 
 export interface WalletInfoI {
@@ -21,7 +22,8 @@ export interface WalletInfoI {
   isTestnet?: boolean;
   name?: string;
   network: NetworkEnum;
-  seed?: MnemonicI;
+  seed?: string;
+  derivationPath?: string;
   publicKey?: string;
   publicKeyHash?: string;
   privateKey?: string;
