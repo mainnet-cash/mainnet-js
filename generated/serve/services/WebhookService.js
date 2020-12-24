@@ -14,7 +14,6 @@ const watchAddressTranasctions = ({ watchAddressRequest }) => new Promise(
       let network = process.env.JEST_WORKER_ID === undefined ? mainnet.Network.MAINNET : mainnet.Network.REGTEST;
 
       const worker = new mainnet.WebhookWorker(network);
-      await worker.init();
       const id =  await worker.registerWebhook({ ...watchAddressRequest }, false);
       await worker.destroy();
       resolve(Service.successResponse({

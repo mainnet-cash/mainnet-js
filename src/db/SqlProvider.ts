@@ -33,7 +33,7 @@ export default class SqlProvider implements StorageProvider {
       let createWebhookTable = format(
         "CREATE TABLE IF NOT EXISTS %I (" +
           "id SERIAL PRIMARY KEY," +
-          "address TEXT," +
+          "cashaddr TEXT," +
           "type TEXT," +
           "recurrence TEXT," +
           "hook_url TEXT," +
@@ -93,12 +93,15 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async addWebhook(
-    address: string,
+    cashaddr: string,
     hook_url: string,
     type?: string,
     recurrence?: string,
     duration_sec?: number
   ): Promise<WebhookI> {
+    // init db if it was not, useful for external api calls
+    await this.init();
+
     type = type || "transaction:in,out";
     recurrence = recurrence || "once";
     const expireTimeout =
@@ -107,12 +110,12 @@ export default class SqlProvider implements StorageProvider {
     duration_sec = duration_sec > expireTimeout ? expireTimeout : duration_sec;
     const expires_at = new Date(new Date().getTime() + duration_sec * 1000);
     let text = format(
-      "INSERT into %I (address,type,recurrence,hook_url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
+      "INSERT into %I (cashaddr,type,recurrence,hook_url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
       this.webhookTable
     );
 
     const result = await this.db.query(text, [
-      address,
+      cashaddr,
       type,
       recurrence,
       hook_url,

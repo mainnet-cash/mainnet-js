@@ -104,7 +104,7 @@ describe("Webhook worker tests", () => {
   test("Test starting with expired hook", async () => {
     await worker.registerWebhook(
       {
-        address: alice,
+        cashaddr: alice,
         url: "http://example.com/pass",
         type: "transaction:in",
         recurrence: "once",
@@ -130,7 +130,7 @@ describe("Webhook worker tests", () => {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
-        address: bobWallet.cashaddr!,
+        cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/success",
         type: "transaction:in",
         recurrence: "once",
@@ -167,7 +167,7 @@ describe("Webhook worker tests", () => {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
-        address: bobWallet.cashaddr!,
+        cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/fail",
         type: "transaction:in",
         recurrence: "once",
@@ -203,7 +203,7 @@ describe("Webhook worker tests", () => {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
-        address: bobWallet.cashaddr!,
+        cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
         type: "transaction:in",
         recurrence: "recurrent",
@@ -240,7 +240,7 @@ describe("Webhook worker tests", () => {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
-        address: bobWallet.cashaddr!,
+        cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
         type: "transaction:out",
         recurrence: "recurrent",
@@ -279,7 +279,7 @@ describe("Webhook worker tests", () => {
       const bobWallet = await RegTestWallet.newRandom();
       const minerWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
-        address: bobWallet.cashaddr!,
+        cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
         type: "transaction:in",
         recurrence: "recurrent",
@@ -399,7 +399,7 @@ describe("Webhook worker tests", () => {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
       const hookId = await worker.registerWebhook({
-        address: bobWallet.cashaddr!,
+        cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/watchBalance",
         type: "balance",
         recurrence: "once",

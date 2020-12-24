@@ -19,6 +19,7 @@ import { SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
+import { ElectrumRawTransaction } from "../network/interface";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
@@ -144,11 +145,33 @@ export async function prepareOutputs(outputs: SendRequest[]) {
   return lockedOutputs;
 }
 
+function slpPredicate(utxo: UtxoI, rawTransactions: ElectrumRawTransaction[]) {
+  const tx = rawTransactions.find((rawTx) => rawTx.txid === utxo.txid)!;
+  if (tx === undefined) console.error("Undefined tx");
+  return tx.vout[utxo.vout].scriptPubKey.hex.indexOf("6a04534c5000") === 0;
+}
+
+export function getNonSlpUtxos(
+  utxos: UtxoI[],
+  rawTransactions: ElectrumRawTransaction[]
+) {
+  return utxos.filter((utxo) => !slpPredicate(utxo, rawTransactions));
+}
+
+export function getSlpUtxos(
+  utxos: UtxoI[],
+  rawTransactions: ElectrumRawTransaction[]
+) {
+  return utxos.filter((utxo) => slpPredicate(utxo, rawTransactions));
+}
+
 export async function getSuitableUtxos(
   unspentOutputs: UtxoI[],
   amountRequired: BigInt | undefined,
-  bestHeight: number
+  bestHeight: number,
+  rawTransactions: ElectrumRawTransaction[]
 ) {
+  unspentOutputs = getNonSlpUtxos(unspentOutputs, rawTransactions);
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = 0n;
   for (const u of unspentOutputs) {

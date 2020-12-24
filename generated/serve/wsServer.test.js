@@ -21,7 +21,7 @@ describe("Test websocket server methods", () => {
   test("Test watchBalance ws method", async () => {
     await request(app)
       .ws('/api/v1/wallet')
-      .sendJson({ method: "watchBalance", data: { address: alice}})
+      .sendJson({ method: "watchBalance", data: { cashaddr: alice }})
       .expectJson((actual) => (actual.bch > 0.1))
       .close()
       .expectClosed();
@@ -41,7 +41,7 @@ describe("Test websocket server methods", () => {
 
     await request(app)
       .ws('/api/v1/wallet')
-      .sendJson({ method: "waitForTransaction", data: { address: alice}})
+      .sendJson({ method: "waitForTransaction", data: { cashaddr: alice }})
       .expectJson((actual) => (actual !== undefined && actual.hash !== undefined))
       .close()
       .expectClosed();
