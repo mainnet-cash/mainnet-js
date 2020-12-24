@@ -1,5 +1,5 @@
 // Stable
-import { instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
+import {instantiateSecp256k1, instantiateSha256} from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -15,17 +15,17 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
-import { mnemonicToSeedSync, generateMnemonic } from "bip39";
-import { UnitEnum } from "../enum";
+import {mnemonicToSeedSync, generateMnemonic} from "bip39";
+import {UnitEnum} from "../enum";
 
-import { TxI } from "../interface";
+import {TxI} from "../interface";
 
-import { networkPrefixMap } from "../enum";
-import { PrivateKeyI, UtxoI } from "../interface";
+import {networkPrefixMap} from "../enum";
+import {PrivateKeyI, UtxoI} from "../interface";
 
-import { BaseWallet } from "./Base";
-import { WalletTypeEnum } from "./enum";
-import { MnemonicI, WalletInfoI } from "./interface";
+import {BaseWallet} from "./Base";
+import {WalletTypeEnum} from "./enum";
+import {MnemonicI, WalletInfoI} from "./interface";
 
 import {
   SendRequest,
@@ -41,19 +41,20 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress } from "../qr/Qr";
-import { ImageI } from "../qr/interface";
-import { asSendRequestObject } from "../util/asSendRequestObject";
+import {qrAddress} from "../qr/Qr";
+import {ImageI} from "../qr/interface";
+import {asSendRequestObject} from "../util/asSendRequestObject";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi";
-import { checkWifNetwork } from "../util/checkWifNetwork";
-import { deriveCashaddr } from "../util/deriveCashaddr";
-import { derivePrefix } from "../util/derivePublicKeyHash";
-import { sumUtxoValue } from "../util/sumUtxoValue";
-import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
+import {checkWifNetwork} from "../util/checkWifNetwork";
+import {deriveCashaddr} from "../util/deriveCashaddr";
+import {derivePrefix} from "../util/derivePublicKeyHash";
+import {sumUtxoValue} from "../util/sumUtxoValue";
+import {sumSendRequestAmounts} from "../util/sumSendRequestAmounts";
+import Signature from "../addresses/Signature";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -78,6 +79,23 @@ export class Wallet extends BaseWallet {
     super(name, networkPrefix);
     this.name = name;
     this.walletType = walletType;
+  }
+
+  // Sign message
+  public sign(message: string): Signature {
+    return Signature.sign(message, this)
+  }
+
+  // Send message
+  public sendMessage(
+    address: string,
+    message: string,
+    prefix: string
+  ): boolean {
+    if(!this.privateKey){
+      throw Error("Private key does not exist");
+    }
+    return Signature.sign(message, this).verify(address, prefix);
   }
 
   // Initialize wallet from Wallet Import Format
@@ -145,6 +163,7 @@ export class Wallet extends BaseWallet {
       this.networkPrefix
     )) as string;
   }
+
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
     let addressComponents = address.split(":");
@@ -306,6 +325,7 @@ export class Wallet extends BaseWallet {
   public static newRandom(name = "", dbName?: string): Promise<Wallet> {
     return new this()._newRandom(name, dbName);
   }
+
   public static fromWIF(wif): Promise<Wallet> {
     return new this().fromWIF(wif);
   }
@@ -523,8 +543,8 @@ export class Wallet extends BaseWallet {
   }
 
   public async getMaxAmountToSend({
-    outputCount = 1,
-  }: {
+                                    outputCount = 1,
+                                  }: {
     outputCount?: number;
   }): Promise<BalanceResponse> {
     if (!this.privateKey) {
@@ -562,6 +582,7 @@ export class Wallet extends BaseWallet {
 
     return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
+
   /**
    * utxos Get unspent outputs for the wallet
    */
@@ -658,6 +679,7 @@ export class Wallet extends BaseWallet {
 
 export class TestNetWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
+
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet);
   }
@@ -665,6 +687,7 @@ export class TestNetWallet extends Wallet {
 
 export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
+
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
   }
@@ -673,6 +696,7 @@ export class RegTestWallet extends Wallet {
 export class WifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
   static walletType = WalletTypeEnum.Wif;
+
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Wif);
   }
@@ -681,6 +705,7 @@ export class WifWallet extends Wallet {
 export class TestNetWifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static walletType = WalletTypeEnum.Wif;
+
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Wif);
   }
@@ -689,6 +714,7 @@ export class TestNetWifWallet extends Wallet {
 export class RegTestWifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   static walletType = WalletTypeEnum.Wif;
+
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Wif);
   }
