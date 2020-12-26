@@ -1,4 +1,5 @@
 import {Wallet} from "..";
+
 const bchMessage = require('bitcoinjs-message');
 const {randomBytes} = require('crypto');
 
@@ -13,21 +14,27 @@ export default class Signature {
     this.signature = signature;
   }
 
-  static sign(message: string, wallet: Wallet): Signature {
-    if(!wallet.privateKey){
+  static async sign(message: string, wallet: Wallet): Promise<Signature> {
+    if (!wallet.privateKey) {
       throw Error("Private key does not exist");
     }
-    let signature = bchMessage.sign(message,
-      wallet.privateKey,
-      true,
-      {
-        extraEntropy: randomBytes(32)
-      }
-    );
-    return new Signature(wallet, message, signature);
+
+    try {
+      const signature = await bchMessage.sign(message,
+        wallet.privateKey,
+        true,
+        {
+          extraEntropy: randomBytes(32)
+        }
+      );
+
+      return new Signature(wallet, message, signature);
+    } catch (e) {
+      throw Error(e)
+    }
   }
 
-  static magicHash(message, messagePrefix): Buffer {
+  static magicHash(message, messagePrefix?): Buffer {
     return bchMessage.magicHash(message, messagePrefix);
   }
 

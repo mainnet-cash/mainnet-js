@@ -1,10 +1,12 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
-import { bchParam } from "../chain";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-import { getNetworkProvider } from "../network/default";
-import { Network } from "cashscript";
-import { disconnectProviders, initProviders } from "../network";
-import { UnitEnum } from "../enum";
+import {RegTestWallet, TestNetWallet, Wallet} from "./Wif";
+import {bchParam} from "../chain";
+import {BalanceResponse} from "../util/balanceObjectFromSatoshi";
+import {getNetworkProvider} from "../network/default";
+import {Network} from "cashscript";
+import {disconnectProviders, initProviders} from "../network";
+import {UnitEnum} from "../enum";
+import Signature from "../addresses/Signature";
+
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -282,7 +284,8 @@ test("Should cancel watching balance", async () => {
   initProviders([Network.REGTEST]);
   const aliceWallet = await RegTestWallet.newRandom();
 
-  let cancel = await aliceWallet.watchBalance(() => {});
+  let cancel = await aliceWallet.watchBalance(() => {
+  });
 
   await cancel();
 
@@ -312,4 +315,118 @@ test("Should wait for balance", async () => {
   expect(balance).toBeGreaterThanOrEqual(2000);
   await bobWallet.sendMax(aliceWallet.cashaddr!);
   await provider.disconnect();
+});
+
+describe("Should sign and verify string in address", () => {
+  test("MAINNET", async () => {
+
+    const provider = getNetworkProvider(Network.MAINNET, undefined, true);
+    await provider.connect();
+    // wallet from wif
+    const aliceWallet = await Wallet.fromWIF('L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1');
+
+    const signature = await aliceWallet.sign('string');
+    expect(signature.message).toBe('string');
+    expect(signature.signature).toMatchObject({});
+
+    const verify = await signature.verify('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV');
+    expect(verify).toBeTruthy();
+
+    try {
+      // wallet watch only
+      const aliceWalletWatchOnly = await Wallet.watchOnly('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV');
+      await aliceWalletWatchOnly.sign('string');
+    } catch (e) {
+      expect(e.message).toBe('Private key does not exist');
+    }
+
+    await disconnectProviders([Network.MAINNET]);
+  });
+  test("REGTEST", async () => {
+    const providerRegTest = getNetworkProvider(Network.REGTEST, undefined, true);
+    await providerRegTest.connect();
+
+    const aliceRegTestWallet = await RegTestWallet.fromWIF('cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6');
+
+    const signatureRegTestWallet = await aliceRegTestWallet.sign('string');
+    expect(signatureRegTestWallet.message).toBe('string');
+    expect(signatureRegTestWallet.signature).toMatchObject({});
+
+    const verifyRegTestWallet = await signatureRegTestWallet.verify('18uVyRcvE7RdR9WFLyD1kMPjehKxyE91in');
+    expect(verifyRegTestWallet).toBeTruthy();
+
+    try {
+      // regtest wallet watch only
+      const aliceWalletWatchOnly = await aliceRegTestWallet.watchOnly('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV');
+      await aliceWalletWatchOnly.sign('string');
+    } catch (e) {
+      expect(e.message).toBe('Private key does not exist');
+    }
+
+    await disconnectProviders([Network.REGTEST]);
+  });
+});
+
+describe("Should sing, verify string in address and send message", () => {
+  test("MAINNET", async () => {
+    const provider = getNetworkProvider(Network.MAINNET, undefined, true);
+    await provider.connect();
+
+    const aliceWallet = await Wallet.fromWIF('L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1');
+    aliceWallet.provider = provider;
+
+    const sendMessage = await aliceWallet.sendMessage('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV', 'string');
+    expect(sendMessage).toBe(true);
+
+    try {
+      // wallet watch only
+      const aliceWalletWatchOnly = await Wallet.watchOnly('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV');
+      await aliceWalletWatchOnly.sendMessage('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV', 'string');
+    } catch (e) {
+      expect(e.message).toBe('Private key does not exist');
+    }
+
+    await disconnectProviders([Network.MAINNET]);
+  });
+  test("REGTEST", async () => {
+    const providerRegTest = getNetworkProvider(Network.REGTEST, undefined, true);
+    await providerRegTest.connect();
+
+    const aliceRegTestWallet = await RegTestWallet.fromWIF('cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6');
+    aliceRegTestWallet.provider = providerRegTest;
+
+    const sendMessage = await aliceRegTestWallet.sendMessage('18uVyRcvE7RdR9WFLyD1kMPjehKxyE91in', 'string');
+    expect(sendMessage).toBe(true);
+
+    try {
+      // regtest wallet watch only
+      const aliceWalletWatchOnly = await Wallet.watchOnly('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV');
+      await aliceWalletWatchOnly.sendMessage('1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV', 'string');
+    } catch (e) {
+      expect(e.message).toBe('Private key does not exist');
+    }
+  });
+});
+
+describe("Should convert string to buffer", () => {
+  test("MAINNET", async () => {
+    const aliceWallet = await Wallet.fromWIF('cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6');
+
+    const signature = await aliceWallet.sign('string');
+    const strToBuffer = signature.magicHash('string');
+    expect(strToBuffer).not.toMatchObject({
+      "data": [71, 19, 119, 129, 226, 110, 162, 185, 223, 99, 10, 85, 96, 0, 106, 42, 98, 157, 65, 214, 90, 226, 218, 126, 147, 194, 57, 255, 49, 5, 117, 100],
+      "type": "Buffer"
+    })
+  });
+  test("REGTEST", async () => {
+    const aliceRegTestWallet = await RegTestWallet.fromWIF('18uVyRcvE7RdR9WFLyD1kMPjehKxyE91in');
+
+    const signatureRegTest = await aliceRegTestWallet.sign('string');
+    const strToBuffer = signatureRegTest.magicHash('string');
+    expect(strToBuffer).not.toMatchObject({
+      "data": [71, 19, 119, 129, 226, 110, 162, 185, 223, 99, 10, 85, 96, 0, 106, 42, 98, 157, 65, 214, 90, 226, 218, 126, 147, 194, 57, 255, 49, 5, 117, 100],
+      "type": "Buffer"
+    })
+  });
 });
