@@ -14,14 +14,14 @@ makeWsServer = (server) => {
       try {
         data = JSON.parse(data);
         if (data.method === "watchBalance") {
-          const addr = data.data.address;
+          const addr = data.data.cashaddr;
           const w = await getWallet(addr);
           fn = await w.watchBalance((balance) => {
             socket.send(JSON.stringify(balance));
           });
           socket.unsubscribeFunctions.push(fn);
         } else if (data.method === "waitForTransaction") {
-          const addr = data.data.address;
+          const addr = data.data.cashaddr;
           const w = await getWallet(addr);
           const rawTx = await w.waitForTransaction();
           socket.send(JSON.stringify(rawTx));

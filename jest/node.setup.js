@@ -13,6 +13,10 @@ function delay(ms) {
 let miningStarted = false;
 
 module.exports = async function () {
+  if (process.env.SKIP_REGTEST_INIT) {
+    return;
+  }
+
   console.log("Starting regtest network...");
 
   let output = spawnSync("docker", ["ps"], {

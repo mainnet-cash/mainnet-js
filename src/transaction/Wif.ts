@@ -19,6 +19,7 @@ import { SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
+import { ElectrumRawTransaction } from "../network/interface";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(

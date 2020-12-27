@@ -24,7 +24,7 @@ describe("Test Webhook Endpoints", () => {
     const resp = await request(app)
       .post("/webhook/watch_address")
       .send({
-        address: bobWallet.cashaddr,
+        cashaddr: bobWallet.cashaddr,
         url: 'http://example.com/',
         type: 'balance'
       });
@@ -38,7 +38,7 @@ describe("Test Webhook Endpoints", () => {
     const resp = await request(app)
       .post("/webhook/watch_address")
       .send({
-        address: bobWallet.cashaddr,
+        cashaddr: bobWallet.cashaddr,
         url: 'http://example.com/',
         type: 'transaction:in'
       });
@@ -52,7 +52,7 @@ describe("Test Webhook Endpoints", () => {
     const resp = await request(app)
       .post("/webhook/watch_address")
       .send({
-        address: bobWallet.cashaddr,
+        cashaddr: bobWallet.cashaddr,
         url: 'http://example.com/',
         type: 'test'
       });

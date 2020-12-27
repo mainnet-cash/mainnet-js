@@ -74,7 +74,7 @@ paths:
           content: {}
           description: Invalid input
       summary: |
-        Create a webhook to watch address balance and transactions.
+        Create a webhook to watch cashaddress balance and transactions.
       tags:
         - webhook
   /contract/escrow/create:
@@ -470,7 +470,7 @@ components:
           type: string
     WatchAddressRequest:
       properties:
-        address:
+        cashaddr:
           type: string
           example: "bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2"
           description: |
@@ -507,7 +507,7 @@ components:
           example: 86400
           default: 86400
       required:
-        - address
+        - cashaddr
         - url
         - type
     WatchAddressResponse:

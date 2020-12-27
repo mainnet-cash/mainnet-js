@@ -9,6 +9,7 @@ import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
 import { add } from "winston";
+import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -29,10 +30,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  async getUtxos(address: string): Promise<UtxoI[]> {
+  async getUtxos(cashaddr: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
-      address
+      cashaddr
     )) as ElectrumUtxo[];
 
     const utxos = result.map((utxo) => ({
@@ -45,10 +46,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return utxos;
   }
 
-  async getBalance(address: string): Promise<number> {
+  async getBalance(cashaddr: string): Promise<number> {
     const result = (await this.performRequest(
       "blockchain.address.get_balance",
-      address
+      cashaddr
     )) as ElectrumBalanceI;
 
     return result.confirmed + result.unconfirmed;
@@ -63,23 +64,25 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getRawTransaction(
-    txHash: string,
+    txHex: string,
     verbose: boolean = false
   ): Promise<string> {
     return (await this.performRequest(
       "blockchain.transaction.get",
-      txHash,
+      txHex,
       verbose
     )) as string;
   }
 
   // gets the decoded transaction in human readable form
-  async getRawTransactionObject(txHash: string): Promise<any> {
+  async getRawTransactionObject(
+    txHex: string
+  ): Promise<ElectrumRawTransaction> {
     return (await this.performRequest(
       "blockchain.transaction.get",
-      txHash,
+      txHex,
       true
-    )) as Object;
+    )) as ElectrumRawTransaction;
   }
 
   async sendRawTransaction(txHex: string): Promise<string> {
@@ -93,11 +96,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  // Get transaction history of a given address
-  async getHistory(address: string): Promise<TxI[]> {
+  // Get transaction history of a given cashaddr
+  async getHistory(cashaddr: string): Promise<TxI[]> {
     const result = (await this.performRequest(
       "blockchain.address.get_history",
-      address
+      cashaddr
     )) as TxI[];
 
     return result;
@@ -137,24 +140,24 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async subscribeToAddress(
-    address: string,
+    cashaddr: string,
     callback: (data: any) => void
   ): Promise<void> {
     await this.subscribeRequest(
       "blockchain.address.subscribe",
       callback,
-      address
+      cashaddr
     );
   }
 
   async unsubscribeFromAddress(
-    address: string,
+    cashaddr: string,
     callback: (data: any) => void
   ): Promise<void> {
     await this.unsubscribeRequest(
       "blockchain.address.subscribe",
       callback,
-      address
+      cashaddr
     );
   }
 
@@ -356,16 +359,4 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async disconnectClient(): Promise<boolean[]> {
     return [await (this.electrum as ElectrumClient).disconnect(true)];
   }
-}
-
-interface ElectrumUtxo {
-  tx_pos: number;
-  value: number;
-  tx_hash: string;
-  height: number;
-}
-
-interface BlockHeader {
-  height: number;
-  hex: string;
 }
