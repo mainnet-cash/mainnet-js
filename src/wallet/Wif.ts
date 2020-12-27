@@ -112,9 +112,7 @@ export class Wallet extends BaseWallet {
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
-    this.derivationPath = derivationPath
-      ? derivationPath
-      : `m/44'/0'/0'/0/0`;
+    this.derivationPath = derivationPath ? derivationPath : `m/44'/0'/0'/0/0`;
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,

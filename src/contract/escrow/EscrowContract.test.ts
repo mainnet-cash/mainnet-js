@@ -145,7 +145,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 445000
+      amount: 445000,
     });
 
     // fund the escrow contract
@@ -188,7 +188,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 446000
+      amount: 446000,
     });
 
     // fund the escrow contract
@@ -231,7 +231,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 446000
+      amount: 446000,
     });
 
     // fund the escrow contract
@@ -254,7 +254,6 @@ describe(`Test Escrow Contracts`, () => {
     expect(await buyer2.getBalance("sat")).toBeGreaterThan(446000);
   });
 
-
   test("Should return hex when getHexOnly is true", async () => {
     let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
 
@@ -275,7 +274,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 446000
+      amount: 446000,
     });
 
     // fund the escrow contract
@@ -289,13 +288,17 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    let hexOnly = await escrow.run(arbiter.privateKeyWif!, "refund", undefined, true);
+    let hexOnly = await escrow.run(
+      arbiter.privateKeyWif!,
+      "refund",
+      undefined,
+      true
+    );
     // Assure the hex is long enough.
     expect(hexOnly.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
     // Assure the contract funds are still there
     expect(await escrow.getBalance()).toBe(450000);
   });
-
 
   test("Should fail on refund by buyer", async () => {
     expect.assertions(1);
@@ -317,7 +320,7 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
-        amount: 40000
+        amount: 40000,
       });
 
       // fund the escrow contract
@@ -358,7 +361,7 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
-        amount: 40000
+        amount: 40000,
       });
 
       // fund the escrow contract

@@ -131,11 +131,11 @@ describe(`Mnemonic wallet creation`, () => {
         "04aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e9370164133294e5fd1679672fe7866c307daf97281a28f66dca7cbb52919824f",
       publicKeyHash:
         "03aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e",
-      
-        derivationPath: "m/44'/0'/0'/0/0",
-        seed:
-          "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-      
+
+      derivationPath: "m/44'/0'/0'/0/0",
+      seed:
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+
       walletDbEntry:
         "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/0'/0'/0/0",
       walletId:
