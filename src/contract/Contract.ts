@@ -24,22 +24,27 @@ export class Contract implements ContractI {
   public network: Network;
   private nonce: number;
 
-  constructor(script: string, parameters: any, network: Network, nonce: number) {
+  constructor(
+    script: string,
+    parameters: any,
+    network: Network,
+    nonce: number
+  ) {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
     this.artifact = this.getArtifact();
     this.provider = getNetworkProvider(this.network);
     this.contract = this.getContactInstance();
-    this.nonce = nonce
+    this.nonce = nonce;
   }
 
   getContractText(): string | Error {
     return this.script;
   }
 
-  getNonce(){
-    return this.nonce
+  getNonce() {
+    return this.nonce;
   }
 
   getArtifact() {
@@ -67,7 +72,7 @@ export class Contract implements ContractI {
       this.network,
       this.getSerializedParameters(),
       this.getSerializedScript(),
-      this.nonce
+      this.nonce,
     ].join(DELIMITER);
   }
 
@@ -115,7 +120,12 @@ export class Contract implements ContractI {
     return this;
   }
 
-  public static fromCashScript(script: string, parameters, network: Network, nonce: number) {
+  public static fromCashScript(
+    script: string,
+    parameters,
+    network: Network,
+    nonce: number
+  ) {
     return new this(script, parameters, network, nonce).fromCashScript();
   }
 
@@ -137,13 +147,12 @@ export class Contract implements ContractI {
     return Math.round(estimatedTxHex.length * 2 * feePerByte);
   }
 
-  
   public async _sendMax(
     wif: string,
     funcName: string,
     outputAddress: string,
     getHexOnly = false,
-    utxos?: UtxoI[],
+    utxos?: UtxoI[]
   ) {
     const sig = new SignatureTemplate(wif);
     const secp256k1 = await instantiateSecp256k1();

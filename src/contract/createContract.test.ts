@@ -30,7 +30,6 @@ describe(`Create Contract Tests`, () => {
       amount: 5000,
     });
 
-   
     expect(response.contractId).toBe(
       (await contractFromId(response.contractId)).toString()
     );
@@ -42,7 +41,7 @@ describe(`Create Contract Tests`, () => {
       sellerAddr: "bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e",
       buyerAddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
       arbiterAddr: "bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8",
-      amount: 12000
+      amount: 12000,
     });
 
     let response = await contractFromId(createResponse.contractId);
