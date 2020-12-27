@@ -1,5 +1,4 @@
 import { ClusterOrder } from "electrum-cash";
-import { Network } from "../interface";
 
 export const networkTickerMap = {
   mainnet: "BCH",
@@ -7,17 +6,9 @@ export const networkTickerMap = {
   regtest: "BCHr",
 };
 
-export const mainnetServers = [
-  "https://fulcrum.fountainhead.cash:50002",
-  //"https://bch.imaginary.cash:50002",
-  //"wss://bch.imaginary.cash:50004",
-  //"wss://electroncash.de:60002",
-];
+export const mainnetServers = ["wss://bch.imaginary.cash:50004"];
 
-export const testnetServers = [
-  "wss://blackie.c3-soft.com:60004",
-  // "wss://electroncash.de:60004",
-];
+export const testnetServers = ["wss://blackie.c3-soft.com:60004"];
 
 export const regtestServers = "ws://127.0.0.1:60003";
 

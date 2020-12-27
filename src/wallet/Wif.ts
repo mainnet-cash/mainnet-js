@@ -54,6 +54,7 @@ import { derivePrefix } from "../util/derivePublicKeyHash";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { ElectrumRawTransaction } from "../network/interface";
+import { getRelayFeeCache } from "../network/getRelayFeeCache";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -552,10 +553,12 @@ export class Wallet extends BaseWallet {
       .map(() => sendRequest);
 
     const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
+    const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
+      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
     });
     const spendableAmount = await sumUtxoValue(fundingUtxos);
 
@@ -615,10 +618,12 @@ export class Wallet extends BaseWallet {
       throw Error("Couldn't get spend amount when building transaction");
     }
 
+    const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
     const feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
+      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
     });
 
     const fundingUtxos = await getSuitableUtxos(
@@ -635,6 +640,7 @@ export class Wallet extends BaseWallet {
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
+      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
     });
     const encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,

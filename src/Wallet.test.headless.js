@@ -98,6 +98,14 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.slice(0, 13)).toBe("bitcoincash:q");
   });
 
+  test(`Should get an empty balance from a mainnet wallet`, async () => {
+    const result = await page.evaluate(async (p) => {
+      let w = await Wallet.newRandom();
+      return w.getBalance();
+    });
+    expect(result.sat).toBe(0);
+  });
+
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
       const alice = await TestNetWallet.fromWIF(wif);
