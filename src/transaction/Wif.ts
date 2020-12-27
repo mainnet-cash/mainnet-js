@@ -135,15 +135,15 @@ export async function prepareOutputs(outputs: SendRequest[]) {
       prefix: string;
     };
 
-    let sendAmount = await amountInSatoshi(output.value, output.unit)
-    if(sendAmount % 1 !== 0){
-      throw Error(`Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`)
+    let sendAmount = await amountInSatoshi(output.value, output.unit);
+    if (sendAmount % 1 !== 0) {
+      throw Error(
+        `Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`
+      );
     }
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(
-        BigInt(sendAmount)
-      ),
+      satoshis: bigIntToBinUint64LE(BigInt(sendAmount)),
     };
     lockedOutputs.push(lockedOutput);
   }
