@@ -15,13 +15,14 @@ describe("Test websocket server methods", () => {
   });
   afterAll(async function () {
     app.close();
-    await server.killElectrum()
+    await server.killElectrum();
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   });
 
   test("Test watchBalance ws method", async () => {
     await request(app)
       .ws('/api/v1/wallet')
-      .sendJson({ method: "watchBalance", data: { address: alice}})
+      .sendJson({ method: "watchBalance", data: { cashaddr: alice }})
       .expectJson((actual) => (actual.bch > 0.1))
       .close()
       .expectClosed();
@@ -31,17 +32,18 @@ describe("Test websocket server methods", () => {
     let aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
     let bobWallet = await mainnet.RegTestWallet.newRandom();
 
-    aliceWallet.send([
+    setTimeout(async () => {
+      await aliceWallet.send([
       {
         cashaddr: bobWallet.cashaddr,
         value: 1000,
         unit: "satoshis",
       },
-    ]);
+    ])}, 1000);
 
     await request(app)
       .ws('/api/v1/wallet')
-      .sendJson({ method: "waitForTransaction", data: { address: alice}})
+      .sendJson({ method: "waitForTransaction", data: { cashaddr: alice }})
       .expectJson((actual) => (actual !== undefined && actual.hash !== undefined))
       .close()
       .expectClosed();
