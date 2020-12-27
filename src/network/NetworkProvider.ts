@@ -26,6 +26,11 @@ export default interface NetworkProvider {
   getBlockHeight(): Promise<number>;
 
   /**
+   * @returns The current minimum relay fee per kb
+   */
+  getRelayFee(): Promise<number>;
+
+  /**
    * Retrieve the Hex transaction details for a given transaction ID.
    * @param txHex Hex transaction ID.
    * @param verbose Whether a verbose coin-specific response is required.

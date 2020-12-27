@@ -4,11 +4,10 @@ import {
   RequestResponse,
   ConnectionStatus,
 } from "electrum-cash";
-import { NetworkProvider } from "cashscript";
+import { default as NetworkProvider } from "./NetworkProvider";
 import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface";
 import { Network } from "../interface";
 import { delay } from "../util/delay";
-import { add } from "winston";
 import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
@@ -102,6 +101,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       "blockchain.address.get_history",
       cashaddr
     )) as TxI[];
+
+    return result;
+  }
+
+  // Get the minimum fee a low-priority transaction must pay in order to be accepted to the daemon's memory pool.
+  async getRelayFee(): Promise<number> {
+    const result = (await this.performRequest(
+      "blockchain.relayfee"
+    )) as number;
 
     return result;
   }
