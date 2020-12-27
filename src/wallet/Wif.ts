@@ -552,11 +552,7 @@ export class Wallet extends BaseWallet {
       .fill(0)
       .map(() => sendRequest);
 
-    const fundingUtxos = await getSuitableUtxos(
-      utxos,
-      undefined,
-      bestHeight,
-    );
+    const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,

@@ -317,13 +317,15 @@ describe("Webhook worker tests", () => {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
           unit: "satoshis",
-        }]);
+        },
+      ]);
       await aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 2000,
           unit: "satoshis",
-        }]);
+        },
+      ]);
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
       await worker.provider.waitForBlock();

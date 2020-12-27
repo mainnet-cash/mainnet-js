@@ -70,7 +70,10 @@ export default class WebhookWorker {
     }
   }
 
-  async registerWebhook(params: RegisterWebhookParams, start: boolean = true): Promise<number> {
+  async registerWebhook(
+    params: RegisterWebhookParams,
+    start: boolean = true
+  ): Promise<number> {
     const webhook = await this.db.addWebhook(
       params.cashaddr,
       params.url,
@@ -185,7 +188,7 @@ export default class WebhookWorker {
           tx.tx_hash
         );
         const parentTxs: ElectrumRawTransaction[] = await Promise.all(
-          rawTx.vin.map(t => this.provider.getRawTransactionObject(t.txid))
+          rawTx.vin.map((t) => this.provider.getRawTransactionObject(t.txid))
         );
         // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
@@ -203,9 +206,9 @@ export default class WebhookWorker {
         const txDirection: string =
           haveAddressInParentOutputs && haveAddressInOutputs
             ? "transaction:in,out"
-            : (haveAddressInParentOutputs
+            : haveAddressInParentOutputs
             ? "transaction:out"
-            : "transaction:in");
+            : "transaction:in";
 
         if (wantsIn && haveAddressInOutputs) {
           result = await this.postWebHook(hook.hook_url, {
