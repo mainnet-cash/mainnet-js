@@ -2,7 +2,12 @@ import { WalletTypeEnum } from "./wallet/enum";
 import { UnitEnum } from "./enum";
 import { bchParam } from "./chain";
 import { DUST_UTXO_THRESHOLD } from "./constant";
-import { Wallet, RegTestWallet, TestNetWallet, RegTestWatchWallet } from "./wallet/Wif";
+import {
+  Wallet,
+  RegTestWallet,
+  TestNetWallet,
+  RegTestWatchWallet,
+} from "./wallet/Wif";
 import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
