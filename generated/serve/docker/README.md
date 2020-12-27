@@ -26,7 +26,7 @@ You can run the server locally without https.
 It will still be secure since requests coming not from you machine will be refused by the server.
 
 ```bash
-sudo docker run --rm -p 80:80 mainnet/mainnet-rest
+sudo docker run --rm -p 3000:80 mainnet/mainnet-rest
 ```
 
 Then you can target your browser or API consumers to http://localhost

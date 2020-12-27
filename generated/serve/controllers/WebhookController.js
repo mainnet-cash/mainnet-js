@@ -8,11 +8,11 @@
 
 const Controller = require('./Controller');
 const service = require('../services/WebhookService');
-const watchAddressTransactions = async (request, response) => {
-  await Controller.handleRequest(request, response, service.watchAddressTransactions);
+const watchAddress = async (request, response) => {
+  await Controller.handleRequest(request, response, service.watchAddress);
 };
 
 
 module.exports = {
-  watchAddressTransactions,
+  watchAddress,
 };

@@ -70,7 +70,7 @@ test("Watch wallet balance", async () => {
     // stop watching
     return true;
   });
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   expect(result).toBe(true);
 });
 
