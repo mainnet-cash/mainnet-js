@@ -1,6 +1,7 @@
 import { WalletTypeEnum } from "./wallet/enum";
 import { UnitEnum } from "./enum";
 import { bchParam } from "./chain";
+import { DUST_UTXO_THRESHOLD } from "./constant";
 import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
 import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
@@ -167,6 +168,33 @@ describe(`Test Wallet library`, () => {
     }
   });
 
+  // If the change from a transaction is less than the DUST_UTXO_THRESHOLD
+  // assume that the change cannot be spent and use it as fee instead
+  test("Send assume change less than dust is fee", async () => {
+    if (!process.env.PRIVATE_WIF) {
+      throw Error("Attempted to pass an empty WIF");
+    } else {
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
+      const bob = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+      const charlie = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+
+      await alice.send([[bob.cashaddr!, 1440, "sat"]]);
+      await bob.send([[charlie.cashaddr!, 734, "sat"]]);
+      // Build Bob's wallet from a public address, check his balance.
+      const bobBalance = (await bob.getBalance()) as BalanceResponse;
+      // Build Bob's wallet from a public address, check his balance.
+      const charlieBalance = (await charlie.getBalance()) as BalanceResponse;
+      expect(Math.round(bobBalance.sat!)).toBe(0);
+      expect(Math.round(charlieBalance.sat!)).toBe(734);
+    }
+  });
+
   test("Send a transaction (as array) on the regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {
@@ -211,12 +239,12 @@ describe(`Test Wallet library`, () => {
       throw Error("Alice or Bob's wallet are missing addresses");
     }
     if (!alice.privateKey || !bob.privateKey) {
-      throw Error("Alice or Bob's wallet are missing private ke");
+      throw Error("Alice or Bob's wallet are missing private keys");
     }
     await alice.send([
       {
         cashaddr: bob.cashaddr,
-        value: 1100,
+        value: 1200,
         unit: UnitEnum.SAT,
       },
     ]);

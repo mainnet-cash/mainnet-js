@@ -54,6 +54,7 @@ import { deriveCashaddr } from "../util/deriveCashaddr";
 import { derivePrefix } from "../util/derivePublicKeyHash";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
+import { ElectrumRawTransaction } from "../network/interface";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -362,7 +363,7 @@ export class Wallet extends BaseWallet {
   // gets last transaction of this wallet
   public async getLastTransaction(
     confirmedOnly: boolean = false
-  ): Promise<any> {
+  ): Promise<ElectrumRawTransaction> {
     let history: TxI[] = await this.getHistory();
     if (confirmedOnly) {
       history = history.filter((val) => val.height > 0);
@@ -406,8 +407,40 @@ export class Wallet extends BaseWallet {
     return cancel;
   }
 
+  // waits for address balance to be greater than or equal to the target value
+  // this call halts the execution
+  public async waitForBalance(
+    value: number,
+    rawUnit: UnitEnum = UnitEnum.BCH
+  ): Promise<number | BalanceResponse> {
+    return new Promise(async (resolve) => {
+      const waitForBalanceCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== this.cashaddr!) {
+            return;
+          }
+
+          const balance = await this.getBalance(rawUnit);
+          if (balance >= value) {
+            await this.provider!.unsubscribeFromAddress(
+              this.cashaddr!,
+              waitForBalanceCallback
+            );
+            resolve(balance);
+          }
+        }
+      };
+
+      await this.provider!.subscribeToAddress(
+        this.cashaddr!,
+        waitForBalanceCallback
+      );
+    });
+  }
+
   // waits for next transaction, program execution is halted
-  public async waitForTransaction(): Promise<any> {
+  public async waitForTransaction(): Promise<ElectrumRawTransaction> {
     return new Promise(async (resolve) => {
       const waitForTransactionCallback = async (data) => {
         if (data instanceof Array) {
@@ -501,10 +534,10 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
     // get inputs
-    let utxos = await this.getAddressUtxos(this.cashaddr);
+    const utxos = await this.getAddressUtxos(this.cashaddr);
 
     // Get current height to assure recently mined coins are not spent.
-    let bestHeight = await this.provider!.getBlockHeight();
+    const bestHeight = await this.provider!.getBlockHeight();
     if (!bestHeight) {
       throw Error("Couldn't get chain height");
     }
@@ -515,17 +548,17 @@ export class Wallet extends BaseWallet {
       value: 100,
       unit: "sat",
     });
-    let sendRequests = Array(outputCount)
+    const sendRequests = Array(outputCount)
       .fill(0)
       .map(() => sendRequest);
 
-    let fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
-    let fee = await getFeeAmount({
+    const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
+    const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
     });
-    let spendableAmount = await sumUtxoValue(fundingUtxos);
+    const spendableAmount = await sumUtxoValue(fundingUtxos);
 
     return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
@@ -571,10 +604,10 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
     // get input
-    let utxos = await this.provider!.getUtxos(this.cashaddr);
+    const utxos = await this.provider!.getUtxos(this.cashaddr);
 
-    let bestHeight = await this.provider!.getBlockHeight()!;
-    let spendAmount = await sumSendRequestAmounts(sendRequests);
+    const bestHeight = await this.provider!.getBlockHeight()!;
+    const spendAmount = await sumSendRequestAmounts(sendRequests);
 
     if (utxos.length === 0) {
       throw Error("There were no Unspent Outputs");
@@ -583,12 +616,13 @@ export class Wallet extends BaseWallet {
       throw Error("Couldn't get spend amount when building transaction");
     }
 
-    let feeEstimate = await getFeeAmount({
+    const feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
     });
-    let fundingUtxos = await getSuitableUtxos(
+
+    const fundingUtxos = await getSuitableUtxos(
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight
@@ -598,12 +632,12 @@ export class Wallet extends BaseWallet {
         "The available inputs couldn't satisfy the request with fees"
       );
     }
-    let fee = await getFeeAmount({
+    const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
     });
-    let encodedTransaction = await buildEncodedTransaction(
+    const encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,
       sendRequests,
       this.privateKey,

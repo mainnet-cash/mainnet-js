@@ -8,9 +8,9 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.1.1",
+  "version": "0.1.7",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.1.1.js",
+  "main": "dist/mainnet-node-0.1.7.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -31,7 +31,7 @@
     "cover:api": "nyc --silent --no-clean yarn run test:api",
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "test": "npx jest --runInBand --detectOpenHandles --forceExit",
-    "test:api": "yarn install --cwd generated/serve/ --prefix generated/serve/  && yarn test  ",
+    "test:api": "yarn install --cwd generated/serve/ --prefix generated/serve/  && yarn --cwd generated/serve/ --prefix generated/serve/ test",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
     "test:wallet": "npx jest --detectOpenHandles",
     "format": "prettier --write .",
@@ -84,6 +84,7 @@
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
     "qrcode-svg": "^1.1.0",
+    "slp-parser": "^0.0.4",
     "winston": "3.3.3",
     "yarn": "^1.22.10"
   },

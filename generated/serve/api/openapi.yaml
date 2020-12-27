@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.1.1
+  version: 0.1.7
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -52,7 +52,7 @@ tags:
 paths:
   /webhook/watch_address:
     post:
-      operationId: watchAddressTranasctions
+      operationId: watchAddress
       requestBody:
         content:
           application/json:
@@ -74,7 +74,7 @@ paths:
           content: {}
           description: Invalid input
       summary: |
-        Create a webhook to watch address balance and transactions.
+        Create a webhook to watch cashaddress balance and transactions.
       tags:
       - webhook
       x-eov-operation-handler: controllers/WebhookController
@@ -498,12 +498,12 @@ components:
     WatchAddressRequest:
       example:
         recurrence: recurrent
-        address: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+        cashaddr: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
         type: transaction:in,out
         url: http://example.com/webhook
         duration_sec: 86400
       properties:
-        address:
+        cashaddr:
           description: |
             Cash address to watch
           example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
@@ -538,7 +538,7 @@ components:
           example: 86400
           type: number
       required:
-      - address
+      - cashaddr
       - type
       - url
     WatchAddressResponse:

@@ -11,19 +11,25 @@ makeWsServer = (server) => {
     socket.on('pong', () => { socket.isAlive = true });
 
     socket.on('message', async data => {
-      data = JSON.parse(data);
-      if (data.method === "watchBalance") {
-        const addr = data.data.address;
-        const w = await getWallet(addr);
-        fn = await w.watchBalance((balance) => {
-          socket.send(JSON.stringify(balance));
-        });
-        socket.unsubscribeFunctions.push(fn);
-      } else if (data.method === "waitForTransaction") {
-        const addr = data.data.address;
-        const w = await getWallet(addr);
-        const rawTx = await w.waitForTransaction();
-        socket.send(JSON.stringify(rawTx));
+      try {
+        data = JSON.parse(data);
+        if (data.method === "watchBalance") {
+          const addr = data.data.cashaddr;
+          const w = await getWallet(addr);
+          fn = await w.watchBalance((balance) => {
+            socket.send(JSON.stringify(balance));
+          });
+          socket.unsubscribeFunctions.push(fn);
+        } else if (data.method === "waitForTransaction") {
+          const addr = data.data.cashaddr;
+          const w = await getWallet(addr);
+          const rawTx = await w.waitForTransaction();
+          socket.send(JSON.stringify(rawTx));
+        } else {
+          throw Error(`Mainnet websockets: unsupported method ${data.method}`);
+        }
+      } catch (e) {
+        socket.send(JSON.stringify({error: e.message}));
       }
     });
 

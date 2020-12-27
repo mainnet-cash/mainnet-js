@@ -13,7 +13,21 @@ function delay(ms) {
 let miningStarted = false;
 
 module.exports = async function () {
+  if (process.env.SKIP_REGTEST_INIT) {
+    return;
+  }
+
   console.log("Starting regtest network...");
+
+  let output = spawnSync("docker", ["ps"], {
+    shell: false,
+    stdio: "ignore",
+  });
+
+  if (output.status != 0) {
+    console.error("Docker is not running in your system. Aborting.");
+    process.exit(0);
+  }
 
   if (global.fulcrumRegtest === undefined) {
     global.fulcrumRegtest = spawnSync("./jest/docker/start.sh", null, {

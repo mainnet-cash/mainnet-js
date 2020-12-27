@@ -8,7 +8,7 @@ export interface WalletI {
 
 export interface WebhookI {
   id?: number;
-  address: string;
+  cashaddr: string;
   type: string;
   recurrence: string;
   hook_url: string;
@@ -16,4 +16,12 @@ export interface WebhookI {
   last_height: number;
   tx_seen: Array<TxI>;
   expires_at: Date;
+}
+
+export interface RegisterWebhookParams {
+  cashaddr: string;
+  url: string;
+  type: string;
+  recurrence: string;
+  duration_sec?: number;
 }

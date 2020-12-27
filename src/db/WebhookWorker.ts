@@ -1,10 +1,11 @@
 import { default as SqlProvider } from "../db/SqlProvider";
-import { WebhookI } from "../db/interface";
+import { RegisterWebhookParams, WebhookI } from "../db/interface";
 
 import { Network, TxI } from "../interface";
 import NetworkProvider from "../network/NetworkProvider";
 import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
 import { getNetworkProvider } from "../network";
+import { ElectrumRawTransaction } from "../network/interface";
 
 const axios = require("axios").default;
 
@@ -17,6 +18,7 @@ export default class WebhookWorker {
   provider: NetworkProvider;
   db: SqlProvider;
   interval: any = undefined;
+  seenStatuses: string[] = [];
 
   constructor(network: Network = Network.MAINNET) {
     this.provider = getNetworkProvider(network, undefined, true);
@@ -37,9 +39,12 @@ export default class WebhookWorker {
   }
 
   async destroy(): Promise<void> {
+    this.seenStatuses = [];
     await this.stop();
-    clearInterval(this.interval);
-    this.interval = undefined;
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = undefined;
+    }
   }
 
   async pickupHooks(start: boolean = false): Promise<void> {
@@ -65,9 +70,12 @@ export default class WebhookWorker {
     }
   }
 
-  async registerWebhook(params: any, start: boolean = true): Promise<number> {
+  async registerWebhook(
+    params: RegisterWebhookParams,
+    start: boolean = true
+  ): Promise<number> {
     const webhook = await this.db.addWebhook(
-      params.address,
+      params.cashaddr,
       params.url,
       params.type,
       params.recurrence,
@@ -114,26 +122,29 @@ export default class WebhookWorker {
         }
       } else if (data instanceof Array) {
         status = data[1];
-        if (data[0] !== hook.address) {
-          // console.warn("Address missmatch, skipping", data[0], hook.address);
+        if (data[0] !== hook.cashaddr) {
+          // console.warn("Address missmatch, skipping", data[0], hook.cashaddr);
           return;
         }
+      } else {
+        return;
       }
 
-      if (status != hook.status) {
+      if (status != hook.status && this.seenStatuses.indexOf(status) === -1) {
+        this.seenStatuses.push(status);
         await this.webhookHandler(hook, status);
       }
     };
 
     this.callbacks.set(hook.id!, webhookCallback);
-    await this.provider.subscribeToAddress(hook.address, webhookCallback);
+    await this.provider.subscribeToAddress(hook.cashaddr, webhookCallback);
   }
 
   async webhookHandler(hook: WebhookI, status: string): Promise<void> {
     // console.debug("Dispatching action for a webhook", JSON.stringify(hook));
 
     // get transactions
-    const history: TxI[] = await this.provider.getHistory(hook.address);
+    const history: TxI[] = await this.provider.getHistory(hook.cashaddr);
 
     // figure out which transactions to send to the hook
     let txs: TxI[] = [];
@@ -173,19 +184,19 @@ export default class WebhookWorker {
 
       if (hook.type.indexOf("transaction:") >= 0) {
         // console.debug("Getting raw tx", tx.tx_hash);
-        const rawTx: any = await this.provider.getRawTransactionObject(
+        const rawTx: ElectrumRawTransaction = await this.provider.getRawTransactionObject(
           tx.tx_hash
         );
-        const parentTxs: any[] = await Promise.all(
+        const parentTxs: ElectrumRawTransaction[] = await Promise.all(
           rawTx.vin.map((t) => this.provider.getRawTransactionObject(t.txid))
         );
         // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
-          val.scriptPubKey.addresses.includes(hook.address)
+          val.scriptPubKey.addresses.includes(hook.cashaddr)
         );
         const haveAddressInParentOutputs: boolean = parentTxs.some((parent) =>
           parent.vout.some((val) =>
-            val.scriptPubKey.addresses.includes(hook.address)
+            val.scriptPubKey.addresses.includes(hook.cashaddr)
           )
         );
 
@@ -215,7 +226,7 @@ export default class WebhookWorker {
         }
       } else if (hook.type.indexOf("balance") >= 0) {
         // watching address balance
-        const balanceSat = await this.provider!.getBalance(hook.address);
+        const balanceSat = await this.provider!.getBalance(hook.cashaddr);
         const balanceObject = await balanceResponseFromSatoshi(balanceSat);
         result = await this.postWebHook(hook.hook_url, balanceObject);
       }
@@ -269,7 +280,7 @@ export default class WebhookWorker {
   async stopHook(hook: WebhookI): Promise<void> {
     if (this.activeHooks.has(hook.id!)) {
       await this.provider.unsubscribeFromAddress(
-        hook.address,
+        hook.cashaddr,
         this.callbacks.get(hook.id!)!
       );
       this.activeHooks.delete(hook.id!);

@@ -8,17 +8,17 @@ export default interface NetworkProvider {
 
   /**
    * Retrieve all UTXOs (confirmed and unconfirmed) for a given address.
-   * @param address The CashAddress for which we wish to retrieve UTXOs.
+   * @param cashaddr The CashAddress for which we wish to retrieve UTXOs.
    * @returns List of UTXOs spendable by the provided address.
    */
-  getUtxos(address: string): Promise<UtxoI[]>;
+  getUtxos(cashaddr: string): Promise<UtxoI[]>;
 
   /**
    * Retrieve all balance of an address in satoshi
-   * @param address The CashAddress for which we wish to retrieve UTXOs.
+   * @param cashaddr The CashAddress for which we wish to retrieve UTXOs.
    * @returns the balance.
    */
-  getBalance(address: string): Promise<number>;
+  getBalance(cashaddr: string): Promise<number>;
 
   /**
    * @returns The current block height.
@@ -27,20 +27,20 @@ export default interface NetworkProvider {
 
   /**
    * Retrieve the Hex transaction details for a given transaction ID.
-   * @param txHash Hex transaction ID.
+   * @param txHex Hex transaction ID.
    * @param verbose Whether a verbose coin-specific response is required.
    * @throws {Error} If the transaction does not exist
    * @returns The full hex transaction for the provided transaction ID.
    */
-  getRawTransaction(txHash: string): Promise<string>;
+  getRawTransaction(txHex: string): Promise<string>;
 
   /**
    * Retrieve a verbose coin-specific response transaction details for a given transaction ID.
-   * @param txHash Hex transaction ID.
+   * @param txHex Hex transaction ID.
    * @throws {Error} If the transaction does not exist
    * @returns The full hex transaction for the provided transaction ID.
    */
-  getRawTransactionObject(txHash: string): Promise<any>;
+  getRawTransactionObject(txHex: string): Promise<any>;
 
   /**
    * Broadcast a raw hex transaction to the Bitcoin Cash network.
@@ -52,11 +52,11 @@ export default interface NetworkProvider {
 
   /**
    * Return the confirmed and unconfirmed history of a Bitcoin Cash address.
-   * @param address The CashAddress for which we wish to retrieve history.
-   * @throws {Error} If the transaction was not accepted by the network.
+   * @param cashaddr The CashAddress for which we wish to retrieve history.
+   * @throws {Error} When failing to get history.
    * @returns Array of transactions.
    */
-  getHistory(address: string): Promise<TxI[]>;
+  getHistory(cashaddr: string): Promise<TxI[]>;
 
   /**
    * Wait for the next block or a block at given blockchain height.
@@ -67,23 +67,23 @@ export default interface NetworkProvider {
 
   /**
    * Subscribe to the address change events
-   * @param address The CashAddress for which we wish to retrieve history.
-   * @throws {Error} If the transaction was not accepted by the network.
+   * @param cashaddr The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the subscription failed.
    * @returns nothing.
    */
   subscribeToAddress(
-    address: string,
+    cashaddr: string,
     callback: (data: any) => void
   ): Promise<void>;
 
   /**
    * Unsubscribe from the address change events
-   * @param address The CashAddress for which we wish to retrieve history.
-   * @throws {Error} If the transaction was not accepted by the network.
+   * @param cashaddr The CashAddress for which we wish to retrieve history.
+   * @throws {Error} If the unsubscription failed.
    * @returns nothing.
    */
   unsubscribeFromAddress(
-    address: string,
+    cashaddr: string,
     callback: (data: any) => void
   ): Promise<void>;
 
