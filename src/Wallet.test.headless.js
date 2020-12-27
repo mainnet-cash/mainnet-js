@@ -169,6 +169,13 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
+  test(`Should return testnet balance in usd`, async () => {
+      const result = await page.evaluate(async () => {
+        return await Mainnet.convert(1,"bch","sat");   
+      });
+      expect(result).toBe(100000000);
+  });
+
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
     if (process.env.ALICE_TESTNET_WALLET_ID) {
       const result = await page.evaluate(

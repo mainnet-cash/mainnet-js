@@ -1,5 +1,3 @@
-import { default as randomBytes } from "randombytes";
-
 export function generateRandomBytes(len = 32) {
   // nodejs
   if (typeof process !== "undefined") {

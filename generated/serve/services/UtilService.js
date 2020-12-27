@@ -11,7 +11,7 @@ const mainnet = require("mainnet-js");
 const convert = ({ convertRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.convertObject(convertRequest)
+      let resp = await mainnet.Mainnet.convertObject(convertRequest)
       resolve(Service.successResponse(resp.toString()));
     } catch (e) {
       reject(

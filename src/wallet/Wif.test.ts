@@ -131,11 +131,11 @@ describe(`Mnemonic wallet creation`, () => {
         "04aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e9370164133294e5fd1679672fe7866c307daf97281a28f66dca7cbb52919824f",
       publicKeyHash:
         "03aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e",
-      seed: {
+      
         derivationPath: "m/44'/0'/0'/0/0",
         seed:
           "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-      },
+      
       walletDbEntry:
         "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/0'/0'/0/0",
       walletId:
@@ -164,15 +164,15 @@ describe(`Mnemonic wallet creation`, () => {
       "seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
     expect(w.cashaddr!).toBe(
-      "bchreg:qqaz6s295ncfs53m86qj0uw6sl8u2kuw0ypvash69n"
+      "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
     );
     expect(w.privateKeyWif!).toBe(
-      "cV6NTLu255SZ5iCNkVHezNGDH5qv6CanJpgBPqYgJU13NNKJhRs1"
+      "cVB244V26CSLjv3xdR7KfoVdNufdqHSMuAMgjqBUfwWQR4WVFsky"
     );
     expect(w.getSeed().seed).toBe(
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
-    expect(w.getSeed().derivationPath).toBe("m/44'/1'/0'/0/0");
+    expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
   });
 });
 

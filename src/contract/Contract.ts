@@ -13,7 +13,7 @@ import { ContractI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { castParametersFromConstructor } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
-import { GROUP_DELIMITER, ROW_DELIMITER } from "../constant";
+import { DELIMITER } from "../constant";
 
 export class Contract implements ContractI {
   private script: string;
@@ -22,18 +22,24 @@ export class Contract implements ContractI {
   private contract: CashScriptContract;
   private provider: NetworkProvider;
   public network: Network;
+  private nonce: number;
 
-  constructor(script: string, parameters: any, network: Network) {
+  constructor(script: string, parameters: any, network: Network, nonce: number) {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
     this.artifact = this.getArtifact();
     this.provider = getNetworkProvider(this.network);
     this.contract = this.getContactInstance();
+    this.nonce = nonce
   }
 
   getContractText(): string | Error {
     return this.script;
+  }
+
+  getNonce(){
+    return this.nonce
   }
 
   getArtifact() {
@@ -48,7 +54,7 @@ export class Contract implements ContractI {
   }
 
   private getSerializedParameters() {
-    return this.parameters.map((a) => btoa(a.toString())).join(ROW_DELIMITER);
+    return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
   }
 
   private getSerializedScript() {
@@ -61,25 +67,26 @@ export class Contract implements ContractI {
       this.network,
       this.getSerializedParameters(),
       this.getSerializedScript(),
-    ].join(GROUP_DELIMITER);
+      this.nonce
+    ].join(DELIMITER);
   }
 
   // Deserialize from a string
   public static fromId(contractId: string) {
-    let [network, serializedParams, serializedScript] = contractId.split(
-      GROUP_DELIMITER
+    let [network, serializedParams, serializedScript, nonce] = contractId.split(
+      DELIMITER
     );
     let script = atob(serializedScript);
     let contractTemplate = CashCompiler.compileString(script);
-    let paramStrings = serializedParams
-      .split(ROW_DELIMITER)
+    let paramStrings = atob(serializedParams)
+      .split(DELIMITER)
       .map((s) => atob(s));
     let params = castParametersFromConstructor(
       paramStrings,
       contractTemplate.constructorInputs
     );
 
-    return new Contract(script, params, network as Network);
+    return new Contract(script, params, network as Network, parseInt(nonce));
   }
 
   public getDepositAddress() {
@@ -108,8 +115,8 @@ export class Contract implements ContractI {
     return this;
   }
 
-  public static fromCashScript(script: string, parameters, network: Network) {
-    return new this(script, parameters, network).fromCashScript();
+  public static fromCashScript(script: string, parameters, network: Network, nonce: number) {
+    return new this(script, parameters, network, nonce).fromCashScript();
   }
 
   public call(method: string, args) {
@@ -129,19 +136,18 @@ export class Contract implements ContractI {
     // Use the feePerByte to get the fee for the transaction length
     return Math.round(estimatedTxHex.length * 2 * feePerByte);
   }
-  // TODO refactor, split out fee estimator, amount estimator
+
+  
   public async _sendMax(
     wif: string,
     funcName: string,
     outputAddress: string,
     getHexOnly = false,
     utxos?: UtxoI[],
-    nonce?: number
   ) {
     const sig = new SignatureTemplate(wif);
     const secp256k1 = await instantiateSecp256k1();
     let publicKey = sig.getPublicKey(secp256k1);
-    nonce = nonce ? nonce : 0;
     let func;
     if (typeof this.contract.functions[funcName] === "function") {
       func = this.contract.functions[funcName];
@@ -173,14 +179,14 @@ export class Contract implements ContractI {
             "The contract transaction requires a greater fee then available with contract balance"
           );
         }
-        let transaction = func(publicKey, sig, amount, nonce)
+        let transaction = func(publicKey, sig, amount, this.nonce)
           .withHardcodedFee(fee)
           .from(utxos)
           .to(outputAddress, amount);
         let txResult = await transaction[method]();
 
         if (getHexOnly) {
-          return { tx: txResult.txid, fee: fee, utxo: utxos };
+          return { hex: txResult };
         } else {
           return txResult;
         }

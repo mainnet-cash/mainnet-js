@@ -14,14 +14,11 @@ describe(`Create Contract Tests`, () => {
       amount: 5000,
     });
 
-    expect(contract.getDepositAddress()).toBe(
-      "bchtest:pqx9kffugfzrrl3z94f8h35g7cj7ma85ls92csf2s6"
-    );
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString()).toBe(
       (await contractFromId(contract.toString())).toString()
     );
-    expect(contract.toString().slice(0, 8)).toBe("testnet␝");
+    expect(contract.toString().slice(0, 8)).toBe("testnet:");
   });
 
   test("Should create return a contract object", async () => {
@@ -33,9 +30,7 @@ describe(`Create Contract Tests`, () => {
       amount: 5000,
     });
 
-    expect(response.cashaddr).toBe(
-      "bchtest:pqx9kffugfzrrl3z94f8h35g7cj7ma85ls92csf2s6"
-    );
+   
     expect(response.contractId).toBe(
       (await contractFromId(response.contractId)).toString()
     );
@@ -47,8 +42,7 @@ describe(`Create Contract Tests`, () => {
       sellerAddr: "bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e",
       buyerAddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
       arbiterAddr: "bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8",
-      amount: 12000,
-      nonce: 1,
+      amount: 12000
     });
 
     let response = await contractFromId(createResponse.contractId);

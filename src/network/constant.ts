@@ -15,8 +15,8 @@ export const mainnetServers = [
 ];
 
 export const testnetServers = [
-  //"wss://blackie.c3-soft.com:60004",
-  "wss://electroncash.de:60004",
+  "wss://blackie.c3-soft.com:60004",
+  //"wss://electroncash.de:60004",
 ];
 
 export const regtestServers = "ws://127.0.0.1:60003";

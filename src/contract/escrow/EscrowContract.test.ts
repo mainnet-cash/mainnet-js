@@ -1,7 +1,5 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
-import { serializeUtxo } from "../../util/serializeUtxo";
-import { spliceOperations } from "@bitauth/libauth";
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
@@ -21,11 +19,9 @@ describe(`Test Escrow Contracts`, () => {
       sellerAddr: seller.getDepositAddress()!,
       amount: 19500,
     });
-    expect(escrow.toString().slice(0, -20)).toBe(
-      escrow2.toString().slice(0, -20)
+    expect(escrow.toString().slice(0, 20)).toBe(
+      escrow2.toString().slice(0, 20)
     );
-    expect(escrow.getDepositAddress()).toBe(escrow2.getDepositAddress());
-
     let escrow3 = EscrowContract.fromId(escrow.toString());
     expect(escrow.getDepositAddress()).toBe(escrow3.getDepositAddress());
   });
@@ -149,8 +145,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 445000,
-      nonce: 12,
+      amount: 445000
     });
 
     // fund the escrow contract
@@ -193,8 +188,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 446000,
-      nonce: 13,
+      amount: 446000
     });
 
     // fund the escrow contract
@@ -237,8 +231,7 @@ describe(`Test Escrow Contracts`, () => {
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
-      amount: 446000,
-      nonce: 22,
+      amount: 446000
     });
 
     // fund the escrow contract
@@ -261,6 +254,49 @@ describe(`Test Escrow Contracts`, () => {
     expect(await buyer2.getBalance("sat")).toBeGreaterThan(446000);
   });
 
+
+  test("Should return hex when getHexOnly is true", async () => {
+    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
+
+    let arbiter = await RegTestWallet.newRandom();
+    let buyer = await RegTestWallet.newRandom();
+    let buyer2 = await RegTestWallet.newRandom();
+    let seller = await RegTestWallet.newRandom();
+
+    await funder.send([
+      {
+        cashaddr: buyer.getDepositAddress()!,
+        value: 500000,
+        unit: "satoshis",
+      },
+    ]);
+    expect(await buyer.getBalance("sat")).toBe(500000);
+    let escrow = new EscrowContract({
+      arbiterAddr: arbiter.getDepositAddress()!,
+      buyerAddr: buyer.getDepositAddress()!,
+      sellerAddr: seller.getDepositAddress()!,
+      amount: 446000
+    });
+
+    // fund the escrow contract
+    await buyer.send([
+      {
+        cashaddr: escrow.getDepositAddress()!,
+        value: 450000,
+        unit: "satoshis",
+      },
+    ]);
+    expect(await escrow.getBalance()).toBe(450000);
+
+    // refund the escrow contract
+    let hexOnly = await escrow.run(arbiter.privateKeyWif!, "refund", undefined, true);
+    // Assure the hex is long enough.
+    expect(hexOnly.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
+    // Assure the contract funds are still there
+    expect(await escrow.getBalance()).toBe(450000);
+  });
+
+
   test("Should fail on refund by buyer", async () => {
     expect.assertions(1);
     try {
@@ -281,8 +317,7 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
-        amount: 40000,
-        nonce: 3,
+        amount: 40000
       });
 
       // fund the escrow contract
@@ -323,8 +358,7 @@ describe(`Test Escrow Contracts`, () => {
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
-        amount: 40000,
-        nonce: 3,
+        amount: 40000
       });
 
       // fund the escrow contract

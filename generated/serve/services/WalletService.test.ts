@@ -30,6 +30,20 @@ describe("Test Wallet Endpoints", () => {
   });
 
   /**
+   * watch balance
+   */
+  it("Should return the balance from a watch only regtest wallet", async () => {
+    const resp = await request(app)
+      .post("/wallet/balance")
+      .send({
+        walletId: `watch:regtest:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0`,
+      });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.sat).toBeGreaterThan(100);
+    expect(resp.body.bch).toBeGreaterThanOrEqual(5000);
+  });
+
+  /**
    * balance in satoshi
    */
   it("Should return the balance from a regtest wallet in satoshi", async () => {
@@ -61,6 +75,25 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.network).toBe(req.network);
     expect(body!.cashaddr!.startsWith("bchreg:")).toBeTruthy();
     expect(body!.walletId).toBe("named:regtest:A simple Testnet Wallet");
+  });
+
+  /**
+   * createWallet
+   */
+  it("Should create a watch only Regtest wallet form the API", async () => {
+    let req = {
+      name:"A simple watch only Wallet",
+      type : "watch",
+      network:"regtest"
+    }
+    let resp = await request(app).post("/wallet/create").send(req);
+    const body = resp.body;
+    console.log(JSON.stringify(resp.body))
+    expect(resp.statusCode).toBe(200);
+    expect(body!.name).toBe(req.name);
+    expect(body!.network).toBe(req.network);
+    expect(body!.cashaddr!.startsWith("bchreg:")).toBeTruthy();
+    expect(body!.walletId).toBe("named:regtest:A simple watch only Wallet");
   });
 
   it("Should create a Testnet wallet with the API", async () => {
@@ -117,6 +150,8 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.name).toBe("");
     expect(body!.network).toBe("mainnet");
     expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
+    expect(body!.seed!).toMatch(/(\w+\s){11}\w+/);
+    expect(body!.derivationPath!).toBe("m/44'/0'/0'/0/0");
     expect(body!.walletId!.startsWith("seed:mainnet:")).toBeTruthy();
   });
   /**

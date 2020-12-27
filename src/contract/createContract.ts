@@ -48,6 +48,6 @@ export async function createContractResponse(
 function asJsonResponse(contract: Contract): ContractResponseI {
   return {
     contractId: contract.toString(),
-    cashaddr: contract.getDepositAddress(),
+    cashaddr: contract.getDepositAddress()
   };
 }

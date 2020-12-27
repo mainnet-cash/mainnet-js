@@ -20,7 +20,7 @@ describe("Test Contract Services", () => {
   /**
    * integration test for create & spend
    */
-  it("Should should allow buyer to release funds", async () => {
+  it("Should allow buyer to release funds", async () => {
     let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
     let buyer =  await RegTestWallet.fromId(buyerId)
     let arbiter = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
@@ -30,14 +30,13 @@ describe("Test Contract Services", () => {
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
       sellerAddr: seller.getDepositAddress(),
-      amount: 16000,
-      nonce: 3
+      amount: 16000
     });
     
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.cashaddr).toEqual("bchreg:ppeuugad5yac7yv3zy2a4eautgt8tsmzg5spak929e");
+    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
     let contractId = contractResp.body.contractId
     let contractAddress = contractResp.body.cashaddr
@@ -60,9 +59,9 @@ describe("Test Contract Services", () => {
       contractId: contractId,
       walletId: buyerId,
       action: "spend",
-      to: seller.getDepositAddress(),
-      nonce: 3
+      to: seller.getDepositAddress()
     });
+
 
     expect(respSpend.statusCode).toEqual(200);
     expect(respSpend.body.txId.length).toEqual(64);
@@ -79,10 +78,11 @@ describe("Test Contract Services", () => {
 
   });
 
+
   /**
-   * integration test for create and utxos 
+   * Should return transaction when getHexOnly is passed
    */
-  it("Should should get utxos on a contract address", async () => {
+  it("Should allow getting hex only from spend request", async () => {
     let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
     let buyer =  await RegTestWallet.fromId(buyerId)
     let arbiter = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
@@ -92,13 +92,72 @@ describe("Test Contract Services", () => {
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
       sellerAddr: seller.getDepositAddress(),
-      amount: 16000,
-      nonce: 1
+      amount: 16000
+    });
+    
+    
+    expect(contractResp.statusCode).toEqual(200);
+    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
+    
+    let contractId = contractResp.body.contractId
+    let contractAddress = contractResp.body.cashaddr
+
+
+    const sendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: buyerId,
+          to: [
+            {
+              cashaddr: contractAddress,
+              unit: 'satoshis',
+              value: 21000,
+            },
+          ],
+        });
+
+    const respHex = await request(app).post("/contract/escrow/call").send({
+      contractId: contractId,
+      walletId: buyerId,
+      action: "spend",
+      getHexOnly: true, 
+      to: seller.getDepositAddress()
+    });
+
+    expect(respHex.statusCode).toEqual(200);
+    expect(respHex.body.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
+
+    const resp = await request(app)
+      .post("/wallet/balance")
+      .send({
+        walletId: `watch:regtest:${contractAddress}`,
+      });
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.sat).toBeGreaterThan(16700);
+
+  });
+
+  /**
+   * integration test for create and utxos 
+   */
+  it("Should get utxos on a contract address", async () => {
+    let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
+    let buyer =  await RegTestWallet.fromId(buyerId)
+    let arbiter = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
+    let seller = await RegTestWallet.watchOnly('bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e')
+    
+    const contractResp = await request(app).post("/contract/escrow/create").send({
+      buyerAddr: buyer.getDepositAddress(),
+      arbiterAddr: arbiter.getDepositAddress(),
+      sellerAddr: seller.getDepositAddress(),
+      amount: 16000
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.cashaddr).toEqual("bchreg:ppjc0aqrc2stmhran90twhevfnhul9wanvgnffd5lp");
+    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
     let contractId = contractResp.body.contractId
     let contractAddress = contractResp.body.cashaddr
@@ -131,7 +190,7 @@ describe("Test Contract Services", () => {
   /**
    * integration test for spending from specific utxo
    */
-  it("Should should allow buyer to release funds from specific utxos", async () => {
+  it("Should allow buyer to release funds from specific utxos", async () => {
     let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
     let buyer =  await RegTestWallet.fromId(buyerId)
     let arbiter = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
@@ -141,14 +200,13 @@ describe("Test Contract Services", () => {
       buyerAddr: buyer.getDepositAddress(),
       arbiterAddr: arbiter.getDepositAddress(),
       sellerAddr: seller.getDepositAddress(),
-      amount: 16000,
-      nonce: 6
+      amount: 16000
     });
     
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId.slice(0,198)).toEqual("regtest␝MjQxLDIyLDUzLDIzMiwyMjksMjUzLDE4NSwxNTEsNSwxMDMsMjMyLDExMywxNTUsNzgsMTk1LDEwLDE3NSwxODIsMTU4LDIzMg==␞ODYsMTgyLDE3OCwzMiw2NiwxODUsMTMsMjE0LDEyMywyNDIsMjUxLDI1MSwxNTQsMjU1LDEyNSw1NSwyNTEsMjM4L");
-    expect(contractResp.body.cashaddr).toEqual("bchreg:pr3rrjygr2nl259n8u8p7tkywpawm0zdyyw44kwcv6");
+    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
     let contractId = contractResp.body.contractId
     let contractAddress = contractResp.body.cashaddr
@@ -194,8 +252,7 @@ describe("Test Contract Services", () => {
       walletId: buyerId,
       action: "spend",
       to: seller.getDepositAddress(),
-      utxoIds: utxos,
-      nonce: 6
+      utxoIds: utxos
     });
 
     expect(respSpend.statusCode).toEqual(200);

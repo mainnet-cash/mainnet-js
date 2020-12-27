@@ -415,7 +415,7 @@ cashc@^0.5.7:
     commander "^6.0.0"
     semver "^6.3.0"
 
-cashscript@^0.5.5:
+cashscript@^0.5.7:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.5.7.tgz#155fe865a6b8656207c0e4f187567a41d36bfca4"
   integrity sha512-fEULeedpkyNgurTbFVBBooEZ2t5Zw0WN6evJYSvuY2QeVYm5ftuTL0rp8T0nT7ep3OHoeIWZLuJemWZnOExOAA==
@@ -1901,7 +1901,7 @@ mainnet-js@../../:
     assert "^2.0.0"
     axios "^0.20.0"
     bip39 "^3.0.3"
-    cashscript "^0.5.5"
+    cashscript "^0.5.7"
     deepmerge "^4.2.2"
     dexie "^3.0.2"
     dotenv "^8.2.0"

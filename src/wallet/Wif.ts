@@ -114,7 +114,7 @@ export class Wallet extends BaseWallet {
     }
     this.derivationPath = derivationPath
       ? derivationPath
-      : `m/44'/${this.isTestnet ? 1 : 0}'/0'/0/0`;
+      : `m/44'/0'/0'/0/0`;
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,
@@ -213,7 +213,7 @@ export class Wallet extends BaseWallet {
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
-    this.derivationPath = `m/44'/${this.isTestnet ? 1 : 0}'/0'/0/0`;
+    this.derivationPath = `m/44'/0'/0'/0/0`;
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,
@@ -658,5 +658,29 @@ export class RegTestWifWallet extends Wallet {
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Wif);
+  }
+}
+
+export class WatchWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.mainnet;
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Watch);
+  }
+}
+
+export class TestNetWatchWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.testnet;
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Watch);
+  }
+}
+
+export class RegTestWatchWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.regtest;
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Watch);
   }
 }

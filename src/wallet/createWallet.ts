@@ -6,6 +6,9 @@ import {
   WifWallet,
   TestNetWifWallet,
   RegTestWifWallet,
+  WatchWallet,
+  TestNetWatchWallet,
+  RegTestWatchWallet
 } from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
 
@@ -32,6 +35,17 @@ export const walletClassMap = {
       return RegTestWallet;
     },
   },
+  watch:{
+    mainnet: () => {
+      return WatchWallet;
+    },
+    testnet: () => {
+      return TestNetWatchWallet;
+    },
+    regtest: () => {
+      return RegTestWatchWallet;
+    },
+  }
 };
 
 export async function createWallet(body: WalletRequestI): Promise<Wallet> {
