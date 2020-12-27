@@ -134,10 +134,15 @@ export async function prepareOutputs(outputs: SendRequest[]) {
       bytecode: Uint8Array;
       prefix: string;
     };
+
+    let sendAmount = await amountInSatoshi(output.value, output.unit)
+    if(sendAmount % 1 !== 0){
+      throw Error(`Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`)
+    }
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
       satoshis: bigIntToBinUint64LE(
-        BigInt(await amountInSatoshi(output.value, output.unit))
+        BigInt(sendAmount)
       ),
     };
     lockedOutputs.push(lockedOutput);
@@ -174,7 +179,7 @@ export async function getSuitableUtxos(
     return suitableUtxos;
   } else if (amountAvailable < amountRequired) {
     throw Error(
-      `Amount required was not met, ${amountRequired} needed, ${amountAvailable} available`
+      `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
     );
   } else {
     return suitableUtxos;

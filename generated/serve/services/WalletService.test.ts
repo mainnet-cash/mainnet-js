@@ -77,24 +77,6 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.walletId).toBe("named:regtest:A simple Testnet Wallet");
   });
 
-  /**
-   * createWallet
-   */
-  it("Should create a watch only Regtest wallet form the API", async () => {
-    let req = {
-      name:"A simple watch only Wallet",
-      type : "watch",
-      network:"regtest"
-    }
-    let resp = await request(app).post("/wallet/create").send(req);
-    const body = resp.body;
-    console.log(JSON.stringify(resp.body))
-    expect(resp.statusCode).toBe(200);
-    expect(body!.name).toBe(req.name);
-    expect(body!.network).toBe(req.network);
-    expect(body!.cashaddr!.startsWith("bchreg:")).toBeTruthy();
-    expect(body!.walletId).toBe("named:regtest:A simple watch only Wallet");
-  });
 
   it("Should create a Testnet wallet with the API", async () => {
     let req = {

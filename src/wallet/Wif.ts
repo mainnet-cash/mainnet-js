@@ -178,6 +178,7 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
+    // TODO replace with util/randomBytes
     // nodejs
     if (typeof process !== "undefined") {
       let crypto = require("crypto");

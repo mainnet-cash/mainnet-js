@@ -38,18 +38,6 @@ describe(`Named Wallets`, () => {
     expect(w.name).toBe("Bob's Regtest Wallet");
   });
 
-  test("Get create a named regtest seed wallet", async () => {
-    const req = {
-      name: "Bob's Watch Wallet",
-      type: "watch",
-      network: "regtest",
-    } as WalletRequestI;
-    let w = await createWallet(req);
-    expect(w.cashaddr).toMatch(/bchreg:/);
-    expect(w.name).toBe("Bob's Regtest Wallet");
-  });
-
-
   test("Get create a unnamed mainnet wallet", async () => {
     const req = {
       type: "seed",

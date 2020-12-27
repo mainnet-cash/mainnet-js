@@ -2,7 +2,7 @@ import { WalletTypeEnum } from "./wallet/enum";
 import { UnitEnum } from "./enum";
 import { bchParam } from "./chain";
 import { DUST_UTXO_THRESHOLD } from "./constant";
-import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
+import { Wallet, RegTestWallet, TestNetWallet, RegTestWatchWallet } from "./wallet/Wif";
 import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
@@ -106,6 +106,28 @@ describe(`Test Wallet library`, () => {
     } catch (e) {
       expect(e.message.slice(0, 97)).toBe(
         "Network prefix regtest to a testnet wallet"
+      );
+    }
+  });
+
+  test("Should throw a nice error when attempting to send fractional satoshi", async () => {
+    expect.assertions(1);
+    try {
+      let alice = await RegTestWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`);
+      const bob = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+      await alice.send([
+        {
+          cashaddr: bob.cashaddr!,
+          value: 1100.33333,
+          unit: "satoshis",
+        },
+      ]);
+    } catch (e) {
+      expect(e.message).toBe(
+        "Cannot send 1100.33333 satoshis, (fractional sats do not exist, yet), please use an integer number."
       );
     }
   });
