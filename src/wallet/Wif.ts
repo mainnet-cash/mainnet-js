@@ -230,12 +230,18 @@ export class Wallet extends BaseWallet {
     requests: SendRequest[] | SendRequestArray[]
   ): Promise<SendResponse> {
     try {
-      let sendRequests = asSendRequestObject(requests);
-      let result = await this._processSendRequests(sendRequests);
-      let resp = new SendResponse({});
-      resp.txId = result;
-      resp.balance = (await this.getBalance()) as BalanceResponse;
-      return resp;
+      try {
+        let sendRequests = asSendRequestObject(requests);
+
+
+        let result = await this._processSendRequests(sendRequests);
+        let resp = new SendResponse({});
+        resp.txId = result;
+        resp.balance = (await this.getBalance()) as BalanceResponse;
+        return resp;
+      } catch (e) {
+        throw ("Cannot " + e)
+      }
     } catch (e) {
       throw e;
     }
@@ -254,8 +260,7 @@ export class Wallet extends BaseWallet {
     }
     if (networkPrefixMap[this.networkPrefix] != networkGiven) {
       throw Error(
-        `Network prefix ${networkGiven} to a ${
-          networkPrefixMap[this.networkPrefix]
+        `Network prefix ${networkGiven} to a ${networkPrefixMap[this.networkPrefix]
         } wallet`
       );
     }
