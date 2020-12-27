@@ -552,15 +552,10 @@ export class Wallet extends BaseWallet {
       .fill(0)
       .map(() => sendRequest);
 
-    const uniqueTxIds = [...new Set(utxos.map((val) => val.txid))];
-    const rawTransactions = await Promise.all(
-      uniqueTxIds.map((val) => this.provider!.getRawTransactionObject(val))
-    );
     const fundingUtxos = await getSuitableUtxos(
       utxos,
       undefined,
       bestHeight,
-      rawTransactions
     );
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
@@ -630,15 +625,11 @@ export class Wallet extends BaseWallet {
       sendRequests: sendRequests,
       privateKey: this.privateKey,
     });
-    const uniqueTxIds = [...new Set(utxos.map((val) => val.txid))];
-    const rawTransactions = await Promise.all(
-      uniqueTxIds.map((val) => this.provider!.getRawTransactionObject(val))
-    );
+
     const fundingUtxos = await getSuitableUtxos(
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
-      bestHeight,
-      rawTransactions
+      bestHeight
     );
     if (fundingUtxos.length === 0) {
       throw Error(

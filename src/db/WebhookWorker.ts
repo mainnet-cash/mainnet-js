@@ -18,6 +18,7 @@ export default class WebhookWorker {
   provider: NetworkProvider;
   db: SqlProvider;
   interval: any = undefined;
+  seenStatuses: string[] = [];
 
   constructor(network: Network = Network.MAINNET) {
     this.provider = getNetworkProvider(network, undefined, true);
@@ -38,6 +39,7 @@ export default class WebhookWorker {
   }
 
   async destroy(): Promise<void> {
+    this.seenStatuses = [];
     await this.stop();
     if (this.interval) {
       clearInterval(this.interval);
@@ -68,10 +70,7 @@ export default class WebhookWorker {
     }
   }
 
-  async registerWebhook(
-    params: RegisterWebhookParams,
-    start: boolean = true
-  ): Promise<number> {
+  async registerWebhook(params: RegisterWebhookParams, start: boolean = true): Promise<number> {
     const webhook = await this.db.addWebhook(
       params.cashaddr,
       params.url,
@@ -124,9 +123,12 @@ export default class WebhookWorker {
           // console.warn("Address missmatch, skipping", data[0], hook.cashaddr);
           return;
         }
+      } else {
+        return;
       }
 
-      if (status != hook.status) {
+      if (status != hook.status && this.seenStatuses.indexOf(status) === -1) {
+        this.seenStatuses.push(status);
         await this.webhookHandler(hook, status);
       }
     };
@@ -183,7 +185,7 @@ export default class WebhookWorker {
           tx.tx_hash
         );
         const parentTxs: ElectrumRawTransaction[] = await Promise.all(
-          rawTx.vin.map((t) => this.provider.getRawTransactionObject(t.txid))
+          rawTx.vin.map(t => this.provider.getRawTransactionObject(t.txid))
         );
         // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
@@ -201,9 +203,9 @@ export default class WebhookWorker {
         const txDirection: string =
           haveAddressInParentOutputs && haveAddressInOutputs
             ? "transaction:in,out"
-            : haveAddressInParentOutputs
+            : (haveAddressInParentOutputs
             ? "transaction:out"
-            : "transaction:in";
+            : "transaction:in");
 
         if (wantsIn && haveAddressInOutputs) {
           result = await this.postWebHook(hook.hook_url, {
