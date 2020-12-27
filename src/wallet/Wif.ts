@@ -554,12 +554,12 @@ export class Wallet extends BaseWallet {
       .map(() => sendRequest);
 
     const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
-    const feePerByte = await getRelayFeeCache(this.provider!)
+    const feePerByte = await getRelayFeeCache(this.provider!);
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
-      relayFeePerByteInSatoshi: feePerByte
+      relayFeePerByteInSatoshi: feePerByte,
     });
     const spendableAmount = await sumUtxoValue(fundingUtxos);
 
@@ -619,12 +619,12 @@ export class Wallet extends BaseWallet {
       throw Error("Couldn't get spend amount when building transaction");
     }
 
-    const feePerKb = await getRelayFeeCache(this.provider!)
+    const feePerKb = await getRelayFeeCache(this.provider!);
     const feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
-      relayFeePerByteInSatoshi: feePerKb
+      relayFeePerByteInSatoshi: feePerKb,
     });
 
     const fundingUtxos = await getSuitableUtxos(
@@ -641,7 +641,7 @@ export class Wallet extends BaseWallet {
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey,
-      relayFeePerByteInSatoshi: feePerKb
+      relayFeePerByteInSatoshi: feePerKb,
     });
     const encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,

@@ -185,7 +185,7 @@ export async function getFeeAmount({
   utxos,
   sendRequests,
   privateKey,
-  relayFeePerByteInSatoshi
+  relayFeePerByteInSatoshi,
 }: {
   utxos: UtxoI[];
   sendRequests: SendRequest[];
@@ -201,7 +201,7 @@ export async function getFeeAmount({
       privateKey,
       1000
     );
-    
+
     return draftTransaction.length * relayFeePerByteInSatoshi + 1;
   } else {
     throw Error(

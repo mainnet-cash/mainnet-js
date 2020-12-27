@@ -107,9 +107,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   // Get the minimum fee a low-priority transaction must pay in order to be accepted to the daemon's memory pool.
   async getRelayFee(): Promise<number> {
-    const result = (await this.performRequest(
-      "blockchain.relayfee"
-    )) as number;
+    const result = (await this.performRequest("blockchain.relayfee")) as number;
 
     return result;
   }
