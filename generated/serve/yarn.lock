@@ -283,6 +283,11 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
 
+bignumber.js@^9.0.0:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.1.tgz#8d7ba124c882bfd8e43260c67475518d0689e4e5"
+  integrity sha512-IdZR9mh6ahOBv/hYGiXyVuyCetmGJhtYkqLBpTStdhEGjegpPlUawydyaF3pbIOFynJTpllEs+NP+CS9jKFLjA==
+
 binary-extensions@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.1.0.tgz#30fa40c9e7fe07dbc895678cd287024dea241dd9"
@@ -1895,7 +1900,7 @@ lru-cache@^6.0.0:
     yallist "^4.0.0"
 
 mainnet-js@../../:
-  version "0.1.1"
+  version "0.1.5"
   dependencies:
     "@bitauth/libauth" "^1.17.2"
     assert "^2.0.0"
@@ -1911,6 +1916,7 @@ mainnet-js@../../:
     pg-format "^1.0.4"
     pg-native "^3.0.0"
     qrcode-svg "^1.1.0"
+    slp-parser "^0.0.4"
     winston "3.3.3"
     yarn "^1.22.10"
 
@@ -2822,6 +2828,13 @@ slice-ansi@^2.1.0:
     ansi-styles "^3.2.0"
     astral-regex "^1.0.0"
     is-fullwidth-code-point "^2.0.0"
+
+slp-parser@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/slp-parser/-/slp-parser-0.0.4.tgz#e16bf0ff08837f3bb0c157035c9b0ffe947c2f8d"
+  integrity sha512-AvbslJumkzGfMGWNvuE2pWx2nyHEk/VgQ7l119kDKIFRTuRUWOkyOULLauw5laGRQsBRThg6NCx/TsR3grX6GA==
+  dependencies:
+    bignumber.js "^9.0.0"
 
 spdx-correct@^3.0.0:
   version "3.1.1"

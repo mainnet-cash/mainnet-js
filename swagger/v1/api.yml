@@ -507,7 +507,7 @@ components:
           example: 86400
           default: 86400
       required:
-        - cashaddress
+        - cashaddr
         - url
         - type
     WatchAddressResponse:
