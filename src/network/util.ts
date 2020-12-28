@@ -3,9 +3,10 @@ import { ElectrumHostParams } from "./interface";
 
 export function parseElectrumUrl(givenUrl: string): ElectrumHostParams {
   let url = new URL(givenUrl);
+  let port = parseInt(url.port || "443");
   let scheme = getElectrumScheme(url.protocol);
 
-  return { host: url.hostname, port: parseInt(url.port), scheme: scheme };
+  return { host: url.hostname, port: port, scheme: scheme };
 }
 
 function getElectrumScheme(protocol: string) {
