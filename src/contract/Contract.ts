@@ -11,6 +11,7 @@ import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
 import { ContractI } from "./interface";
 import { atob, btoa } from "../util/base64";
+import { getRandomInt } from "../util/randomInt";
 import { castParametersFromConstructor } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
@@ -28,7 +29,7 @@ export class Contract implements ContractI {
     script: string,
     parameters: any,
     network: Network,
-    nonce: number
+    nonce?: number
   ) {
     this.script = script;
     this.parameters = parameters;
@@ -36,7 +37,7 @@ export class Contract implements ContractI {
     this.artifact = this.getArtifact();
     this.provider = getNetworkProvider(this.network);
     this.contract = this.getContactInstance();
-    this.nonce = nonce;
+    this.nonce = nonce ? nonce : getRandomInt(2147483647);
   }
 
   getContractText(): string | Error {

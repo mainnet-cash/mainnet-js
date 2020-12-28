@@ -58,3 +58,25 @@ export function castParametersFromConstructor(
   });
   return result;
 }
+
+export function castArgumentsFromFunction(
+  args: string[],
+  inputs: AbiInput[]
+) {
+  let result: any[] = [];
+  args.forEach(function (value, i) {
+    if (inputs[i].type.startsWith("bytes")) {
+      let uint = Uint8Array.from(
+        value.split(",").map((vStr) => parseInt(vStr))
+      );
+      result.push(uint);
+    } else if (inputs[i].type === "int") {
+      result.push(parseInt(value));
+    } else if (inputs[i].type === "boolean") {
+      result.push(Boolean(value));
+    } else {
+      result.push(value);
+    }
+  });
+  return result;
+}
