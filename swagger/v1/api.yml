@@ -605,10 +605,7 @@ components:
               type: string
               example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000"
               description: The hash of a transaction and index of the utxo and amount in satoshi
-        nonce:
-          description: A unique value added to the contract, which allows the contract to be different from an otherwise identical contract, i.e. two monthly orders.
-          type: number
-          example: 808
+        
       required:
         - contractId
         - walletId
@@ -626,7 +623,7 @@ components:
         hex:
           type: string
           example: "0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251"
-          description: The transaction as bitcoin encoded hex
+          description: The transaction as bitcoin encoded hex, if getHexOnly is true
     ScalableVectorGraphic:
       properties:
         src:
@@ -702,11 +699,6 @@ components:
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
-        wif:
-          description: |
-            The wallet in Wallet Import Format (WIF)
-          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
         name:
           description: User defined string for wallet
           example: username1
@@ -717,6 +709,9 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
       type: object
+      oneOf:
+       - $ref: "#/components/schemas/Wif"
+       - $ref: "#/components/schemas/WalletMnemonic"
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
     MineRequest:
@@ -741,32 +736,42 @@ components:
             Provided value unit of account.
           enum:
             - bch
+            - BCH
             - usd
+            - USD
             - bit
             - bits
             - sat
+            - SAT
             - sats
             - satoshi
             - satoshis
-          example: BCH
+          example: bch
           type: string
         to:
           description:
             Unit of account to be returned
           enum:
             - bch
+            - BCH
             - usd
+            - USD
             - bit
             - bits
             - sat
+            - SAT
             - sats
             - satoshi
             - satoshis
-          example: USD
+          example: usd
           type: string
+      required:
+        - value
+        - from
+        - to                
     WalletRequest:
       example:
-        type: wif
+        type: seed
         network: testnet
         name: username1
       properties:
@@ -842,10 +847,13 @@ components:
             Unit of account.
           enum:
             - bch
+            - BCH
             - usd
+            - USD
             - bit
             - bits
             - sat
+            - SAT
             - sats
             - satoshi
             - satoshis
@@ -863,6 +871,7 @@ components:
               - wif
               - hd
               - seed
+              - watch
             example: seed
             type: string
       discriminator:
@@ -884,7 +893,9 @@ components:
         privateKeyWif:
           type: string
         seed:
-          $ref: "#/components/schemas/WalletMnemonic"
+          type: string
+        derivationPath:
+          type: string
         walletId:
           type: string
         walletDbEntry:
@@ -899,3 +910,10 @@ components:
           type: string
       discriminator:
         propertyName: seed
+    Wif:
+      properties:
+        wif:
+          description: |
+            The wallet in Wallet Import Format (WIF)
+          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string

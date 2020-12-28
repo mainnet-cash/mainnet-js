@@ -4,13 +4,13 @@ import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
 import { UtxoI } from "../../interface";
 import { EscrowArguments } from "./interface";
+import { getRandomInt } from "../../util/randomInt";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
   private arbiterAddr: string;
   private buyerAddr: string;
   private amount: number;
-  private nonce: number;
 
   constructor({
     sellerAddr,
@@ -24,21 +24,19 @@ export class EscrowContract extends Contract {
 
     // Derive the network from addresses given or throw error if not on same network
     const network = derivedNetwork(Object.values(addressArgs));
-    const tmpNonce = nonce ? nonce : 0;
+    const tmpNonce = nonce ? nonce : getRandomInt(2147483647);
     // Transform the arguments given to Public Key Hashes
     let rawContractArgs = addressArgs.map((x) => {
       return derivePublicKeyHash(x);
     }) as any[];
     rawContractArgs.push(amount);
     rawContractArgs.push(tmpNonce);
-    super(EscrowContract.getContractText(), rawContractArgs, network);
+    super(EscrowContract.getContractText(), rawContractArgs, network, tmpNonce);
 
     // Assure all addresses are prefixed and lowercase
     [this.sellerAddr, this.buyerAddr, this.arbiterAddr] = addressArgs.map((x) =>
       sanitizeAddress(x)
     );
-
-    this.nonce = tmpNonce;
     this.amount = amount;
   }
 
@@ -69,14 +67,7 @@ export class EscrowContract extends Contract {
         throw Error("Could not determine output address");
       }
     }
-    return await this._sendMax(
-      wif,
-      funcName,
-      outputAddress,
-      getHexOnly,
-      utxos,
-      this.nonce
-    );
+    return await this._sendMax(wif, funcName, outputAddress, getHexOnly, utxos);
   }
 
   static getContractText() {

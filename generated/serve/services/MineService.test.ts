@@ -36,6 +36,6 @@ describe("Test Mine Endpoints", () => {
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toEqual(15);
-    expect(bobBalanceResp.body.bch).toBeGreaterThanOrEqual(25 * 15);
+    
   });
 });

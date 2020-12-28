@@ -8,7 +8,6 @@ import {
   decodePrivateKeyWif,
   encodePrivateKeyWif,
   deriveHdPrivateNodeFromSeed,
-  deriveHdPrivateNodeChild,
   deriveHdPath,
   generatePrivateKey,
   HdPrivateNodeValid,
@@ -115,9 +114,7 @@ export class Wallet extends BaseWallet {
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
-    this.derivationPath = derivationPath
-      ? derivationPath
-      : `m/44'/${this.isTestnet ? 1 : 0}'/0'/0/0`;
+    this.derivationPath = derivationPath ? derivationPath : `m/44'/0'/0'/0/0`;
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,
@@ -182,6 +179,7 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
+    // TODO replace with util/randomBytes
     // nodejs
     if (typeof process !== "undefined") {
       let crypto = require("crypto");
@@ -216,7 +214,7 @@ export class Wallet extends BaseWallet {
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
-    this.derivationPath = `m/44'/${this.isTestnet ? 1 : 0}'/0'/0/0`;
+    this.derivationPath = `m/44'/0'/0'/0/0`;
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,
@@ -232,12 +230,17 @@ export class Wallet extends BaseWallet {
     requests: SendRequest[] | SendRequestArray[]
   ): Promise<SendResponse> {
     try {
-      let sendRequests = asSendRequestObject(requests);
-      let result = await this._processSendRequests(sendRequests);
-      let resp = new SendResponse({});
-      resp.txId = result;
-      resp.balance = (await this.getBalance()) as BalanceResponse;
-      return resp;
+      try {
+        let sendRequests = asSendRequestObject(requests);
+
+        let result = await this._processSendRequests(sendRequests);
+        let resp = new SendResponse({});
+        resp.txId = result;
+        resp.balance = (await this.getBalance()) as BalanceResponse;
+        return resp;
+      } catch (e) {
+        throw "Cannot " + e;
+      }
     } catch (e) {
       throw e;
     }
@@ -491,7 +494,8 @@ export class Wallet extends BaseWallet {
       isTestnet: this.isTestnet,
       name: this.name,
       network: this.network,
-      seed: this.getSeed(),
+      seed: this.getSeed().seed,
+      derivationPath: this.getSeed().derivationPath,
       publicKey: binToHex(this.publicKey!),
       publicKeyHash: binToHex(this.publicKeyHash!),
       privateKey: binToHex(this.privateKey!),
@@ -698,5 +702,29 @@ export class RegTestWifWallet extends Wallet {
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Wif);
+  }
+}
+
+export class WatchWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.mainnet;
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Watch);
+  }
+}
+
+export class TestNetWatchWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.testnet;
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Watch);
+  }
+}
+
+export class RegTestWatchWallet extends Wallet {
+  static networkPrefix = CashAddressNetworkPrefix.regtest;
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Watch);
   }
 }

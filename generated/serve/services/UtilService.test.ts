@@ -18,7 +18,7 @@ describe("Test Util Endpoints", () => {
    * test mining blocks
    */
   it("Should convert an amount from usd to bch", async () => {
-    const rate = await mainnet.getUsdRate()
+    const rate = await mainnet.Mainnet.getUsdRate()
     const convertResp = await request(app).post("/util/convert").send({
       value: 1,
       from: "bch",

@@ -6,7 +6,7 @@ export function asSendRequestObject(
   let resp: SendRequest[] = [];
   requests.forEach(async (r: SendRequest | SendRequestArray) => {
     if (r.hasOwnProperty("cashaddr")) {
-      resp.push(new SendRequest(r as SendRequest));
+      resp.push(r as SendRequest);
     } else {
       resp.push(
         new SendRequest({
