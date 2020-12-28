@@ -59,10 +59,7 @@ export function castParametersFromConstructor(
   return result;
 }
 
-export function castArgumentsFromFunction(
-  args: string[],
-  inputs: AbiInput[]
-) {
+export function castArgumentsFromFunction(args: string[], inputs: AbiInput[]) {
   let result: any[] = [];
   args.forEach(function (value, i) {
     if (inputs[i].type.startsWith("bytes")) {
