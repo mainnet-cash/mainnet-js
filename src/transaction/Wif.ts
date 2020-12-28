@@ -19,7 +19,7 @@ import { SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
-import { ElectrumRawTransaction } from "../network/interface";
+import { getRelayFeeCache } from "../network/getRelayFeeCache";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
@@ -185,10 +185,12 @@ export async function getFeeAmount({
   utxos,
   sendRequests,
   privateKey,
+  relayFeePerByteInSatoshi,
 }: {
   utxos: UtxoI[];
   sendRequests: SendRequest[];
   privateKey: Uint8Array;
+  relayFeePerByteInSatoshi: number;
 }) {
   // build transaction
   if (utxos) {
@@ -199,7 +201,8 @@ export async function getFeeAmount({
       privateKey,
       1000
     );
-    return draftTransaction.length * 1 + 1;
+
+    return draftTransaction.length * relayFeePerByteInSatoshi + 1;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"

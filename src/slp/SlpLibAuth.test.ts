@@ -52,5 +52,5 @@ test("Test SLP genesis txo template", async () => {
   );
 
   const obj = parseSLP(Buffer.from(hex, "hex"));
-  console.log(obj);
+  //console.log(obj);
 });
