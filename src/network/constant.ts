@@ -6,10 +6,7 @@ export const networkTickerMap = {
   regtest: "BCHr",
 };
 
-export const mainnetServers = [
-  "wss://fulcrum.fountainhead.cash",
-  //"wss://bch.imaginary.cash:50004"
-];
+export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];
 
 export const testnetServers = ["wss://blackie.c3-soft.com:60004"];
 
