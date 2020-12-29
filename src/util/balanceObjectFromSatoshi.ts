@@ -30,7 +30,7 @@ export async function balanceResponseFromSatoshi(
         break;
       case UnitEnum.USD:
         let usd = (value / bchParam.subUnits) * (await getUsdRate());
-        response.usd = Number(usd.toFixed(2))
+        response.usd = Number(usd.toFixed(2));
         break;
       default:
         throw Error(
