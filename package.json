@@ -75,6 +75,8 @@
     "axios": "^0.20.0",
     "crypto": "^1.0.1",
     "bitcoinjs-message": "^2.1.4",
+    "cashaddrjs": "^0.4.4",
+    "base58check": "^2.0.0",
     "bip39": "^3.0.3",
     "cashscript": "^0.5.5",
     "deepmerge": "^4.2.2",

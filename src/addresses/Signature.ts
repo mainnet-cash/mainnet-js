@@ -1,5 +1,7 @@
 import {Wallet} from "..";
 
+const base58check = require('base58check');
+const cashAddrJs = require('cashaddrjs');
 const bchMessage = require('bitcoinjs-message');
 const {randomBytes} = require('crypto');
 
@@ -14,35 +16,47 @@ export default class Signature {
     this.signature = signature;
   }
 
-  static async sign(message: string, wallet: Wallet): Promise<Signature> {
+  static sign(message: string, wallet: Wallet): Signature {
     if (!wallet.privateKey) {
       throw Error("Private key does not exist");
     }
 
-    try {
-      const signature = await bchMessage.sign(message,
-        wallet.privateKey,
-        true,
-        {
-          extraEntropy: randomBytes(32)
-        }
-      );
+    const signature = bchMessage.sign(message,
+      wallet.privateKey,
+      true,
+      {
+        extraEntropy: randomBytes(32)
+      }
+    );
 
-      return new Signature(wallet, message, signature);
-    } catch (e) {
-      throw Error(e)
-    }
+    return new Signature(wallet, message, signature);
   }
 
-  static magicHash(message, messagePrefix?): Buffer {
+  static magicHash(message: string, messagePrefix?: string): Buffer {
     return bchMessage.magicHash(message, messagePrefix);
   }
 
-  magicHash(messagePrefix): Buffer {
+  magicHash(messagePrefix: string): Buffer {
     return bchMessage.magicHash(this.message, messagePrefix);
   }
 
-  verify(address, messagePrefix?: string): boolean {
-    return bchMessage.verify(this.message, address, this.signature, messagePrefix);
+  cashAddressToLegacy(address: string): string {
+    const decoded = cashAddrJs.decode(address);
+    let rawHex = '';
+    let prefix = '00';
+
+    for (let x = 0; x < decoded.hash.length; ++x) {
+      if (decoded.hash[x] < 16) rawHex += '0';
+      rawHex += decoded.hash[x].toString(16);
+    }
+
+    if (decoded.type == 'P2SH') prefix = '05';
+
+    return base58check.encode(rawHex, prefix);
+  }
+
+  verify(address: string, messagePrefix?: string): boolean {
+    const legacyAddress = this.cashAddressToLegacy(address);
+    return bchMessage.verify(this.message, legacyAddress, this.signature, messagePrefix);
   }
 }
