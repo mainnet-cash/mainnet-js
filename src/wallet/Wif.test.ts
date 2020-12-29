@@ -5,6 +5,7 @@ import { getNetworkProvider } from "../network/default";
 import { Network } from "cashscript";
 import { disconnectProviders, initProviders } from "../network";
 import { UnitEnum } from "../enum";
+
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -311,4 +312,30 @@ test("Should wait for balance", async () => {
   expect(balance).toBeGreaterThanOrEqual(2000);
   await bobWallet.sendMax(aliceWallet.cashaddr!);
   await provider.disconnect();
+});
+
+test("Should watch multiple wallets", async () => {
+  let provider = getNetworkProvider(Network.REGTEST, undefined, true);
+  provider.connect();
+  const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+  const alice = await RegTestWallet.fromId(aliceId);
+  const bob = await RegTestWallet.newRandom();
+  const charlie = await RegTestWallet.newRandom();
+
+  let bobBalance = await bob.waitForBalance(100, "sat");
+  let bobTx = await bob.waitForTransaction();
+  setTimeout(
+    () =>
+      alice.send([
+        {
+          cashaddr: bob.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ]),
+    500
+  );
+
+  expect(bobTx.version).toBe(2);
+  expect(bobBalance).toBe(1000);
 });

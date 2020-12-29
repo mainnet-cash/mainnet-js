@@ -186,6 +186,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
     if (process.env.ALICE_TESTNET_WALLET_ID) {
+      await initProviders();
       const result = await page.evaluate(
         async (args) => {
           const alice = await walletFromId(args[0]);
