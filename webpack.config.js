@@ -101,6 +101,7 @@ const webWorkerConfig = {
       "parse-database-url": false,
       path: false,
       pg: false,
+      "pg-format": false,
       "pg-native": false,
       process: false,
       stream: false,

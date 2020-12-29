@@ -51,6 +51,7 @@ import {
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import { derivePrefix } from "../util/derivePublicKeyHash";
+import { sanitizeUnit } from "../util/sanitizeUnit";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { ElectrumRawTransaction } from "../network/interface";
@@ -379,7 +380,7 @@ export class Wallet extends BaseWallet {
   // gets wallet balance in sats, bch and usd
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
     if (rawUnit) {
-      const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
+      const unit = sanitizeUnit(rawUnit);
       return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
     } else {
       return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());

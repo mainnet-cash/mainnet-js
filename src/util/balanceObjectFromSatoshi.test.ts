@@ -9,9 +9,10 @@ test("Get balanceResponse from 1 bch in satoshi", async () => {
 });
 
 test("Get balanceResponse from 1 satoshi", async () => {
-  let bal = await balanceResponseFromSatoshi(1);
-  expect(bal.bch).toBe(0.00000001);
-  expect(bal.sat).toBe(1);
+  let bal = await balanceResponseFromSatoshi(110000000);
+  expect(bal.bch).toBe(1.1);
+  expect(bal.sat).toBe(110000000);
+  expect(bal.usd!.toString()).toMatch(/\d+\.?\d{1,2}/)
 });
 
 test("Get balanceResponse from 1 sat", async () => {
