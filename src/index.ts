@@ -10,9 +10,3 @@ export * from "./wallet/createWallet";
 export * as Mainnet from "./util/index";
 export { Network } from "./interface";
 
-import { initProviders } from "./network/Connection";
-
-async function init() {
-  await initProviders();
-}
-init();
