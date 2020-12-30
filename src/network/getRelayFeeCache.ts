@@ -1,4 +1,5 @@
 import { bchParam } from "../chain";
+import { Network } from "../interface";
 import { networkTickerMap } from "./constant";
 import { default as NetworkProvider } from "./NetworkProvider";
 
@@ -11,6 +12,9 @@ export async function getRelayFeeCache(provider: NetworkProvider) {
   }
   if (typeof relayFeePerKbInCoins !== "number") {
     relayFeePerKbInCoins = await provider.getRelayFee();
+    if(provider.network==Network.TESTNET){
+      relayFeePerKbInCoins += 0.00001
+    }
     globalThis[
       networkTickerMap[provider.network] + "_RELAY_FEE"
     ] = relayFeePerKbInCoins;

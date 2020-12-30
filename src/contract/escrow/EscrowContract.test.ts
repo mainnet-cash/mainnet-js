@@ -72,7 +72,7 @@ describe(`Test Escrow Contracts`, () => {
 
     // spend the sellers funds to another wallet
     await seller.sendMax(seller2.getDepositAddress()!);
-    expect(await seller2.getBalance("sat")).toBeGreaterThan(9500);
+    expect(await seller2.getBalance("sat")).toBeGreaterThan(9200);
   });
 
   test("Should allow buyer to spend specific utxos to seller", async () => {
