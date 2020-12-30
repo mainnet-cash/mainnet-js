@@ -96,7 +96,7 @@ export class Wallet extends BaseWallet {
       throw Error("Private key does not exist");
     }
     const sign = await Signature.sign(message, this);
-    return sign.verify(address, prefix);
+    return await sign.verify(address, prefix);
   }
 
   // Initialize wallet from Wallet Import Format
