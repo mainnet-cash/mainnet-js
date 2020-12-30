@@ -339,29 +339,3 @@ describe(`Wallet subscriptions`, () => {
   //   await provider.disconnect();
   // });
 });
-
-test("Should watch multiple wallets", async () => {
-  let provider = getNetworkProvider(Network.REGTEST, undefined, true);
-  provider.connect();
-  const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-  const alice = await RegTestWallet.fromId(aliceId);
-  const bob = await RegTestWallet.newRandom();
-  const charlie = await RegTestWallet.newRandom();
-
-  let bobBalance = await bob.waitForBalance(100, "sat");
-  let bobTx = await bob.waitForTransaction();
-  setTimeout(
-    () =>
-      alice.send([
-        {
-          cashaddr: bob.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-    500
-  );
-
-  expect(bobTx.version).toBe(2);
-  expect(bobBalance).toBe(1000);
-});
