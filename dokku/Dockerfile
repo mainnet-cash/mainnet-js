@@ -28,7 +28,7 @@ RUN chown -R appuser:appuser /app/
 USER appuser
 WORKDIR /app/
 COPY --chown=appuser:appuser . /app/
-RUN yarn install --only=production
+RUN yarn install --production=true
 RUN yarn build 
 RUN yarn api:serve:install
 
