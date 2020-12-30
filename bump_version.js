@@ -30,7 +30,7 @@ files.forEach((file) => {
 
   console.log(`Updating ${file} to version: ${newVersion}`);
   package.main = package.main.replace(version, newVersion);
-  if(typeof package.browser !== "undefined"){
+  if (typeof package.browser !== "undefined") {
     package.browser = package.browser.replace(version, newVersion);
   }
   package.version = newVersion;
