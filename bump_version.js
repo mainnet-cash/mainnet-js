@@ -30,6 +30,7 @@ files.forEach((file) => {
 
   console.log(`Updating ${file} to version: ${newVersion}`);
   package.main = package.main.replace(version, newVersion);
+  package.browser = package.browser.replace(version, newVersion);
   package.version = newVersion;
 
   fs.writeFileSync(file, JSON.stringify(package, null, 2) + "\n");
