@@ -323,7 +323,7 @@ describe("Should sign and verify string in address", () => {
     // wallet from wif
     const aliceWallet = await Wallet.fromWIF('L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1');
 
-    const signature = aliceWallet.sign('string');
+    const signature = await aliceWallet.sign('string');
     expect(signature.message).toBe('string');
     expect(signature.signature).toMatchObject({});
 
@@ -333,7 +333,7 @@ describe("Should sign and verify string in address", () => {
     try {
       // wallet watch only
       const aliceWalletWatchOnly = await Wallet.watchOnly('bitcoincash:qzdpc799qa5f7m65hpr66880res5ac3lrcjr7ekgm0');
-      aliceWalletWatchOnly.sign('string');
+      await aliceWalletWatchOnly.sign('string');
     } catch (e) {
       expect(e.message).toBe('Private key does not exist');
     }
@@ -346,7 +346,7 @@ describe("Should sign and verify string in address", () => {
 
     const aliceRegTestWallet = await RegTestWallet.fromWIF('cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6');
 
-    const signatureRegTestWallet = aliceRegTestWallet.sign('string');
+    const signatureRegTestWallet = await aliceRegTestWallet.sign('string');
     expect(signatureRegTestWallet.message).toBe('string');
     expect(signatureRegTestWallet.signature).toMatchObject({});
 
@@ -356,7 +356,7 @@ describe("Should sign and verify string in address", () => {
     try {
       // regtest wallet watch only
       const aliceWalletWatchOnly = await aliceRegTestWallet.watchOnly('bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0');
-      aliceWalletWatchOnly.sign('string');
+      await aliceWalletWatchOnly.sign('string');
     } catch (e) {
       expect(e.message).toBe('Private key does not exist');
     }
@@ -369,7 +369,7 @@ describe("Should sign and verify string in address", () => {
 
     const aliceTestNetWallet = await TestNetWallet.newRandom();
 
-    const signatureTestNetWallet = aliceTestNetWallet.sign('string');
+    const signatureTestNetWallet = await aliceTestNetWallet.sign('string');
     expect(signatureTestNetWallet.message).toBe('string');
     expect(signatureTestNetWallet.signature).toMatchObject({});
 
@@ -379,7 +379,7 @@ describe("Should sign and verify string in address", () => {
     try {
       // testnet wallet watch only
       const aliceWalletWatchOnly = await aliceTestNetWallet.watchOnly(aliceTestNetWallet.cashaddr!);
-      aliceWalletWatchOnly.sign('string');
+      await aliceWalletWatchOnly.sign('string');
     } catch (e) {
       expect(e.message).toBe('Private key does not exist');
     }
@@ -396,13 +396,13 @@ describe("Should sing, verify string in address and send message", () => {
     const aliceWallet = await Wallet.fromWIF('L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1');
     aliceWallet.provider = provider;
 
-    const sendMessage = aliceWallet.sendMessage('bitcoincash:qzdpc799qa5f7m65hpr66880res5ac3lrcjr7ekgm0', 'string');
+    const sendMessage = await aliceWallet.sendMessage('bitcoincash:qzdpc799qa5f7m65hpr66880res5ac3lrcjr7ekgm0', 'string');
     expect(sendMessage).toBe(true);
 
     try {
       // wallet watch only
       const aliceWalletWatchOnly = await Wallet.watchOnly('bitcoincash:qzdpc799qa5f7m65hpr66880res5ac3lrcjr7ekgm0');
-      aliceWalletWatchOnly.sendMessage('bitcoincash:qzdpc799qa5f7m65hpr66880res5ac3lrcjr7ekgm0', 'string');
+      await aliceWalletWatchOnly.sendMessage('bitcoincash:qzdpc799qa5f7m65hpr66880res5ac3lrcjr7ekgm0', 'string');
     } catch (e) {
       expect(e.message).toBe('Private key does not exist');
     }
@@ -416,13 +416,13 @@ describe("Should sing, verify string in address and send message", () => {
     const aliceRegTestWallet = await RegTestWallet.fromWIF('cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6');
     aliceRegTestWallet.provider = providerRegTest;
 
-    const sendMessage = aliceRegTestWallet.sendMessage('bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0', 'string');
+    const sendMessage = await aliceRegTestWallet.sendMessage('bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0', 'string');
     expect(sendMessage).toBe(true);
 
     try {
       // regtest wallet watch only
       const aliceWalletWatchOnly = await Wallet.watchOnly('bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0');
-      aliceWalletWatchOnly.sendMessage('bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0', 'string');
+      await aliceWalletWatchOnly.sendMessage('bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0', 'string');
     } catch (e) {
       expect(e.message).toBe('Private key does not exist');
     }
@@ -435,13 +435,13 @@ describe("Should sing, verify string in address and send message", () => {
     const aliceTestNetWallet = await TestNetWallet.newRandom();
     aliceTestNetWallet.provider = providerTestNet;
 
-    const sendMessage = aliceTestNetWallet.sendMessage(aliceTestNetWallet.cashaddr!, 'string');
+    const sendMessage = await aliceTestNetWallet.sendMessage(aliceTestNetWallet.cashaddr!, 'string');
     expect(sendMessage).toBe(true);
 
     try {
       // testnet wallet watch only
       const aliceWalletWatchOnly = await Wallet.watchOnly(aliceTestNetWallet.cashaddr!);
-      aliceWalletWatchOnly.sendMessage(aliceTestNetWallet.cashaddr!, 'string');
+      await aliceWalletWatchOnly.sendMessage(aliceTestNetWallet.cashaddr!, 'string');
     } catch (e) {
       expect(e.message).toBe('Private key does not exist');
     }
@@ -453,22 +453,22 @@ describe("Should convert string to buffer", () => {
   test("MAINNET", async () => {
     const aliceWallet = await Wallet.fromWIF('L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1');
 
-    const signature = aliceWallet.sign('string');
+    const signature = await aliceWallet.sign('string');
     const strToBuffer = signature.magicHash('string');
-    expect(strToBuffer).toMatchObject({});
+    expect(strToBuffer).toBe('U6uK9OwtJVlLnfOTjPaTW1s1GdZZhyFeHsJ/w8fD0Ag=');
   });
   test("REGTEST", async () => {
     const aliceRegTestWallet = await RegTestWallet.fromWIF('cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6');
 
-    const signatureRegTest = aliceRegTestWallet.sign('string');
+    const signatureRegTest = await aliceRegTestWallet.sign('string');
     const strToBuffer = signatureRegTest.magicHash('string');
-    expect(strToBuffer).toMatchObject({});
+    expect(strToBuffer).toBe('U6uK9OwtJVlLnfOTjPaTW1s1GdZZhyFeHsJ/w8fD0Ag=');
   });
   test("TESTNET", async () => {
     const aliceTestNetWallet = await TestNetWallet.newRandom();
 
-    const signatureTestNet = aliceTestNetWallet.sign('string');
+    const signatureTestNet = await aliceTestNetWallet.sign('string');
     const strToBuffer = signatureTestNet.magicHash('string');
-    expect(strToBuffer).toMatchObject({});
+    expect(strToBuffer).toBe('U6uK9OwtJVlLnfOTjPaTW1s1GdZZhyFeHsJ/w8fD0Ag=');
   });
 });

@@ -82,20 +82,20 @@ export class Wallet extends BaseWallet {
   }
 
   // Sign message
-  public sign(message: string): Signature {
-    return Signature.sign(message, this)
+  public async sign(message: string): Promise<Signature> {
+    return await Signature.sign(message, this)
   }
 
   // Send message
-  public sendMessage(
+  public async sendMessage(
     address: string,
     message: string,
     prefix?: string
-  ): boolean {
+  ): Promise<boolean> {
     if(!this.privateKey){
       throw Error("Private key does not exist");
     }
-    const sign = Signature.sign(message, this);
+    const sign = await Signature.sign(message, this);
     return sign.verify(address, prefix);
   }
 

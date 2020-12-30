@@ -2,42 +2,43 @@ import {Wallet} from "..";
 
 const base58check = require('base58check');
 const cashAddrJs = require('cashaddrjs');
-const bchMessage = require('bitcoinjs-message');
-const {randomBytes} = require('crypto');
+const crypto = require('crypto');
+import { instantiateSecp256k1 } from '@bitauth/libauth';
 
 export default class Signature {
   message: string;
   wallet: Wallet;
-  signature: Buffer;
+  signature: Uint8Array;
+  publicKey?: Uint8Array;
 
-  constructor(wallet: Wallet, message: string, signature: Buffer) {
+  constructor(wallet: Wallet, message: string, signature: Uint8Array) {
     this.wallet = wallet;
     this.message = message;
     this.signature = signature;
   }
 
-  static sign(message: string, wallet: Wallet): Signature {
+  static async sign(message: string, wallet: Wallet): Promise<Signature> {
     if (!wallet.privateKey) {
       throw Error("Private key does not exist");
     }
 
-    const signature = bchMessage.sign(message,
-      wallet.privateKey,
-      true,
-      {
-        extraEntropy: randomBytes(32)
-      }
-    );
+    const secp256k1 = await instantiateSecp256k1();
+
+    const signature = secp256k1.signMessageHashDER(wallet.privateKey, this.magicHash(message))
 
     return new Signature(wallet, message, signature);
   }
 
   static magicHash(message: string, messagePrefix?: string): Buffer {
-    return bchMessage.magicHash(message, messagePrefix);
+    return crypto.createHash('sha256')
+      .update(messagePrefix + message)
+      .digest('base64');
   }
 
   magicHash(messagePrefix: string): Buffer {
-    return bchMessage.magicHash(this.message, messagePrefix);
+    return crypto.createHash('sha256')
+      .update(messagePrefix + this.message)
+      .digest('base64');
   }
 
   cashAddressToLegacy(address: string): string {
@@ -55,8 +56,11 @@ export default class Signature {
     return base58check.encode(rawHex, prefix);
   }
 
-  verify(address: string, messagePrefix?: string): boolean {
-    const legacyAddress = this.cashAddressToLegacy(address);
-    return bchMessage.verify(this.message, legacyAddress, this.signature, messagePrefix);
+  async verify(address: string, messagePrefix?: string): Promise<boolean> {
+    const secp256k1 = await instantiateSecp256k1();
+    const hash = this.magicHash(messagePrefix + this.message);
+
+    const wallet = await this.wallet.watchOnly(address);
+    return secp256k1.verifySignatureDERLowS(this.signature, wallet.publicKey!, new Uint8Array(hash))
   }
 }
