@@ -12,7 +12,7 @@ const { OpenApiValidator } = require('express-openapi-validator');
 const logger = require('./logger');
 const timeout = require('connect-timeout');
 const config = require('./config');
-const mainnet = require("mainnet-js");
+const mainnet = require('mainnet-js');
 
 const makeWsServer = require('./wsServer');
 

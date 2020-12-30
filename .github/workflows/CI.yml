@@ -78,6 +78,7 @@ jobs:
     - run: yarn
     - run: yarn build
     - run: yarn test
+    - run: yarn api:serve:install
     - run: yarn test:api
     - run: yarn test:browser
       env:
