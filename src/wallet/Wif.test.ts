@@ -516,7 +516,7 @@ describe("Should convert string to buffer", () => {
 
     const signature = await aliceWallet.sign("string");
     const strToBuffer = signature.magicHash("string");
-    expect(strToBuffer).toBe({
+    expect(strToBuffer).toStrictEqual({
       sigBytes: 32,
       words: [
         1403751156,
@@ -537,7 +537,7 @@ describe("Should convert string to buffer", () => {
 
     const signatureRegTest = await aliceRegTestWallet.sign("string");
     const strToBuffer = signatureRegTest.magicHash("string");
-    expect(strToBuffer).toBe({
+    expect(strToBuffer).toStrictEqual({
       sigBytes: 32,
       words: [
         1403751156,
@@ -556,7 +556,7 @@ describe("Should convert string to buffer", () => {
 
     const signatureTestNet = await aliceTestNetWallet.sign("string");
     const strToBuffer = signatureTestNet.magicHash("string");
-    expect(strToBuffer).toBe({
+    expect(strToBuffer).toStrictEqual({
       sigBytes: 32,
       words: [
         1403751156,

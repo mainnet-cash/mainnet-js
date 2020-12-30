@@ -87,7 +87,6 @@
     "pg": "^8.4.1",
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
-    "postgresql": "0.0.1",
     "qrcode-svg": "^1.1.0",
     "winston": "3.3.3",
     "yarn": "^1.22.10"
