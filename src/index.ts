@@ -9,4 +9,3 @@ export * from "./wallet/Wif";
 export * from "./wallet/createWallet";
 export * as Mainnet from "./util/index";
 export { Network } from "./interface";
-
