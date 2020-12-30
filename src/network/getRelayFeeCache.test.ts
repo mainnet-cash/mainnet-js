@@ -13,4 +13,3 @@ test("Should return  ", async () => {
   let fee2 = await getRelayFeeCache(provider);
   expect(fee2).toBe(1);
 });
-git;
