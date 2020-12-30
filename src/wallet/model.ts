@@ -1,4 +1,5 @@
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
+import { sanitizeUnit } from "../util/sanitizeUnit";
 import { UnitEnum } from "../enum";
 
 // These are the minimal models used to provide types for the express server
@@ -22,7 +23,7 @@ export class SendRequest {
   }) {
     this.cashaddr = cashaddr;
     this.value = value;
-    this.unit = unit.toLocaleLowerCase() as UnitEnum;
+    this.unit = sanitizeUnit(unit);
   }
 }
 

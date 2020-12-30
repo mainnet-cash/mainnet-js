@@ -1,6 +1,7 @@
 import { bchParam } from "../chain";
 import { UnitEnum } from "../enum";
 import { getUsdRate } from "./getUsdRate";
+import { sanitizeUnit } from "../util/sanitizeUnit";
 
 /**
  * converts given value and unit from satoshi
@@ -14,7 +15,7 @@ export async function satoshiToAmount(
   value: number,
   rawUnit: any
 ): Promise<number> {
-  const unit = rawUnit.toLocaleLowerCase() as UnitEnum;
+  const unit = sanitizeUnit(rawUnit);
   switch (unit) {
     case UnitEnum.BCH:
       return value / bchParam.subUnits;

@@ -8,9 +8,10 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.1.9.js",
+  "main": "dist/mainnet-node-0.2.0.js",
+  "browser":"dist/mainnet-0.2.0.js",
   "types": "index.d.ts",
   "files": [
     "dist/*.js",
@@ -33,7 +34,7 @@
     "test": "npx jest --runInBand --detectOpenHandles --forceExit",
     "test:api": "yarn install --cwd generated/serve/ --prefix generated/serve/  && yarn --cwd generated/serve/ --prefix generated/serve/ test",
     "test:browser": "npx jest --config jest/browser.config.js --detectOpenHandles",
-    "test:wallet": "npx jest --detectOpenHandles",
+    "test:new": "npx jest src/contract/Contract.test.ts",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "build": "npx webpack",
@@ -70,14 +71,12 @@
     "unzipper": "^0.10.11",
     "util": "^0.12.3",
     "webpack": "^v5.1.0",
-    "webpack-cli": "^4.2.0"
-  },
-  "dependencies": {
+    "webpack-cli": "^4.2.0",
     "@bitauth/libauth": "^1.17.2",
     "assert": "^2.0.0",
     "axios": "^0.20.0",
     "bip39": "^3.0.3",
-    "cashscript": "^0.5.5",
+    "cashscript": "^0.5.7",
     "deepmerge": "^4.2.2",
     "dexie": "^3.0.2",
     "dotenv": "^8.2.0",
@@ -88,10 +87,10 @@
     "winston": "3.3.3",
     "yarn": "^1.22.10"
   },
+  "sideEffects": false,
   "keywords": [
     "bch",
     "bitcoin cash"
   ],
-  "sideEffects": false,
   "author": "readcash"
 }

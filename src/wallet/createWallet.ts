@@ -6,6 +6,9 @@ import {
   WifWallet,
   TestNetWifWallet,
   RegTestWifWallet,
+  WatchWallet,
+  TestNetWatchWallet,
+  RegTestWatchWallet,
 } from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
 
@@ -30,6 +33,17 @@ export const walletClassMap = {
     },
     regtest: () => {
       return RegTestWallet;
+    },
+  },
+  watch: {
+    mainnet: () => {
+      return WatchWallet;
+    },
+    testnet: () => {
+      return TestNetWatchWallet;
+    },
+    regtest: () => {
+      return RegTestWatchWallet;
     },
   },
 };
@@ -80,12 +94,23 @@ export async function createWalletResponse(
 }
 
 function asJsonResponse(wallet: Wallet): WalletResponseI {
-  return {
-    name: wallet.name,
-    cashaddr: wallet.cashaddr as string,
-    walletId: wallet.toString(),
-    network: wallet.network,
-  };
+  if (wallet.mnemonic) {
+    return {
+      name: wallet.name,
+      cashaddr: wallet.cashaddr as string,
+      walletId: wallet.toString(),
+      ...wallet.getSeed(),
+      network: wallet.network,
+    };
+  } else {
+    return {
+      name: wallet.name,
+      cashaddr: wallet.cashaddr as string,
+      walletId: wallet.toString(),
+      wif: wallet.privateKeyWif,
+      network: wallet.network,
+    };
+  }
 }
 
 export async function walletFromId(walletId: string): Promise<any> {

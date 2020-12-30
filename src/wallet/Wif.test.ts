@@ -5,6 +5,7 @@ import { getNetworkProvider } from "../network/default";
 import { Network } from "cashscript";
 import { disconnectProviders, initProviders } from "../network";
 import { UnitEnum } from "../enum";
+
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -132,11 +133,11 @@ describe(`Mnemonic wallet creation`, () => {
         "04aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e9370164133294e5fd1679672fe7866c307daf97281a28f66dca7cbb52919824f",
       publicKeyHash:
         "03aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e",
-      seed: {
-        derivationPath: "m/44'/0'/0'/0/0",
-        seed:
-          "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-      },
+
+      derivationPath: "m/44'/0'/0'/0/0",
+      seed:
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+
       walletDbEntry:
         "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/0'/0'/0/0",
       walletId:
@@ -165,15 +166,15 @@ describe(`Mnemonic wallet creation`, () => {
       "seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
     expect(w.cashaddr!).toBe(
-      "bchreg:qqaz6s295ncfs53m86qj0uw6sl8u2kuw0ypvash69n"
+      "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
     );
     expect(w.privateKeyWif!).toBe(
-      "cV6NTLu255SZ5iCNkVHezNGDH5qv6CanJpgBPqYgJU13NNKJhRs1"
+      "cVB244V26CSLjv3xdR7KfoVdNufdqHSMuAMgjqBUfwWQR4WVFsky"
     );
     expect(w.getSeed().seed).toBe(
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
-    expect(w.getSeed().derivationPath).toBe("m/44'/1'/0'/0/0");
+    expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
   });
 });
 
@@ -246,7 +247,8 @@ describe(`Watch only Wallets`, () => {
       expect(aliceBalance.sat).toBeGreaterThan(2000);
     }
   });
-
+});
+describe(`Wallet subscriptions`, () => {
   test("Should wait for transaction", async () => {
     let provider = getNetworkProvider(Network.REGTEST, undefined, true);
     provider.connect();
@@ -275,40 +277,65 @@ describe(`Watch only Wallets`, () => {
     await bobWallet.sendMax(aliceWallet.cashaddr!);
     await provider.disconnect();
   });
-});
 
-test("Should cancel watching balance", async () => {
-  initProviders([Network.REGTEST]);
-  const aliceWallet = await RegTestWallet.newRandom();
+  test("Should cancel watching balance", async () => {
+    initProviders([Network.REGTEST]);
+    const aliceWallet = await RegTestWallet.newRandom();
 
-  let cancel = await aliceWallet.watchBalance(() => {});
+    let cancel = await aliceWallet.watchBalance(() => {});
 
-  await cancel();
+    await cancel();
 
-  disconnectProviders([Network.REGTEST]);
-});
+    disconnectProviders([Network.REGTEST]);
+  });
 
-test("Should wait for balance", async () => {
-  let provider = getNetworkProvider(Network.REGTEST, undefined, true);
-  provider.connect();
+  test("Should wait for balance", async () => {
+    let provider = getNetworkProvider(Network.REGTEST, undefined, true);
+    provider.connect();
 
-  const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-  const aliceWallet = await RegTestWallet.fromId(aliceWif);
-  const bobWallet = await RegTestWallet.newRandom();
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
 
-  aliceWallet.provider = provider;
-  bobWallet.provider = provider;
+    aliceWallet.provider = provider;
+    bobWallet.provider = provider;
 
-  aliceWallet.send([
-    {
-      cashaddr: bobWallet.cashaddr!,
-      value: 2000,
-      unit: "satoshis",
-    },
-  ]);
+    aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 2000,
+        unit: "satoshis",
+      },
+    ]);
 
-  let balance = await bobWallet.waitForBalance(2000, UnitEnum.SATOSHIS);
-  expect(balance).toBeGreaterThanOrEqual(2000);
-  await bobWallet.sendMax(aliceWallet.cashaddr!);
-  await provider.disconnect();
+    let balance = await bobWallet.waitForBalance(2000, UnitEnum.SATOSHIS);
+    expect(balance).toBeGreaterThanOrEqual(2000);
+    await bobWallet.sendMax(aliceWallet.cashaddr!);
+    await provider.disconnect();
+  });
+
+  // test("Should watch multiple wallets", async () => {
+  //   let provider = getNetworkProvider(Network.REGTEST, undefined, true);
+  //   provider.connect();
+  //   const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+  //   const alice = await RegTestWallet.fromId(aliceId);
+  //   const bob = await RegTestWallet.newRandom();
+
+  //   setTimeout(
+  //     () =>
+  //       alice.send([
+  //         {
+  //           cashaddr: bob.cashaddr!,
+  //           value: 1000,
+  //           unit: "satoshis",
+  //         },
+  //       ]),
+  //     500
+  //   );
+  //   let bobBalance = await bob.waitForBalance(1000, "sat");
+  //   let bobTx = await bob.waitForTransaction();
+  //   expect(bobTx.version).toBe(2);
+  //   expect(bobBalance).toBe(1000);
+  //   await provider.disconnect();
+  // });
 });
