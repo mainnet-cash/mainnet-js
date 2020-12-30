@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.1.10
+  version: 0.2.2
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -558,7 +558,6 @@ components:
         nonce:
           description: A unique value added to the contract, which allows the contract to be different from an otherwise identical contract, i.e. two monthly orders.
           type: number
-          example: 808
       required:
         - buyerAddr
         - arbiterAddr

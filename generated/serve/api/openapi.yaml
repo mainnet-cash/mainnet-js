@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.1.10
+  version: 0.2.2
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -585,7 +585,7 @@ components:
         amount: 10000
         buyerAddr: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
         sellerAddr: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
-        nonce: 808
+        nonce: 0.8008281904610115
       properties:
         buyerAddr:
           description: The cashaddress of the buyer
@@ -605,7 +605,6 @@ components:
           description: A unique value added to the contract, which allows the contract
             to be different from an otherwise identical contract, i.e. two monthly
             orders.
-          example: 808
           type: number
       required:
       - amount
