@@ -247,6 +247,8 @@ describe(`Watch only Wallets`, () => {
       expect(aliceBalance.sat).toBeGreaterThan(2000);
     }
   });
+});
+  describe(`Wallet subscriptions`, () => {
 
   test("Should wait for transaction", async () => {
     let provider = getNetworkProvider(Network.REGTEST, undefined, true);
@@ -276,7 +278,8 @@ describe(`Watch only Wallets`, () => {
     await bobWallet.sendMax(aliceWallet.cashaddr!);
     await provider.disconnect();
   });
-});
+
+
 
 test("Should cancel watching balance", async () => {
   initProviders([Network.REGTEST]);
@@ -314,28 +317,30 @@ test("Should wait for balance", async () => {
   await provider.disconnect();
 });
 
-test("Should watch multiple wallets", async () => {
-  let provider = getNetworkProvider(Network.REGTEST, undefined, true);
-  provider.connect();
-  const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-  const alice = await RegTestWallet.fromId(aliceId);
-  const bob = await RegTestWallet.newRandom();
-  const charlie = await RegTestWallet.newRandom();
+// test("Should watch multiple wallets", async () => {
+//   let provider = getNetworkProvider(Network.REGTEST, undefined, true);
+//   provider.connect();
+//   const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+//   const alice = await RegTestWallet.fromId(aliceId);
+//   const bob = await RegTestWallet.newRandom();
 
-  let bobBalance = await bob.waitForBalance(100, "sat");
-  let bobTx = await bob.waitForTransaction();
-  setTimeout(
-    () =>
-      alice.send([
-        {
-          cashaddr: bob.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-    500
-  );
 
-  expect(bobTx.version).toBe(2);
-  expect(bobBalance).toBe(1000);
+//   setTimeout(
+//     () =>
+//       alice.send([
+//         {
+//           cashaddr: bob.cashaddr!,
+//           value: 1000,
+//           unit: "satoshis",
+//         },
+//       ]),
+//     500
+//   );
+//   let bobBalance = await bob.waitForBalance(1000, "sat");
+//   let bobTx = await bob.waitForTransaction();
+//   expect(bobTx.version).toBe(2);
+//   expect(bobBalance).toBe(1000);
+//   await provider.disconnect();
+// });
+
 });
