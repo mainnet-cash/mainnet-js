@@ -1,5 +1,5 @@
 // Stable
-import {instantiateSecp256k1, instantiateSha256} from "@bitauth/libauth";
+import { instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -15,17 +15,17 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
-import {mnemonicToSeedSync, generateMnemonic} from "bip39";
-import {UnitEnum} from "../enum";
+import { mnemonicToSeedSync, generateMnemonic } from "bip39";
+import { UnitEnum } from "../enum";
 
-import {TxI} from "../interface";
+import { TxI } from "../interface";
 
-import {networkPrefixMap} from "../enum";
-import {PrivateKeyI, UtxoI} from "../interface";
+import { networkPrefixMap } from "../enum";
+import { PrivateKeyI, UtxoI } from "../interface";
 
-import {BaseWallet} from "./Base";
-import {WalletTypeEnum} from "./enum";
-import {MnemonicI, WalletInfoI} from "./interface";
+import { BaseWallet } from "./Base";
+import { WalletTypeEnum } from "./enum";
+import { MnemonicI, WalletInfoI } from "./interface";
 
 import {
   SendRequest,
@@ -41,19 +41,19 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import {qrAddress} from "../qr/Qr";
-import {ImageI} from "../qr/interface";
-import {asSendRequestObject} from "../util/asSendRequestObject";
+import { qrAddress } from "../qr/Qr";
+import { ImageI } from "../qr/interface";
+import { asSendRequestObject } from "../util/asSendRequestObject";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi";
-import {checkWifNetwork} from "../util/checkWifNetwork";
-import {deriveCashaddr} from "../util/deriveCashaddr";
-import {derivePrefix} from "../util/derivePublicKeyHash";
-import {sumUtxoValue} from "../util/sumUtxoValue";
-import {sumSendRequestAmounts} from "../util/sumSendRequestAmounts";
+import { checkWifNetwork } from "../util/checkWifNetwork";
+import { deriveCashaddr } from "../util/deriveCashaddr";
+import { derivePrefix } from "../util/derivePublicKeyHash";
+import { sumUtxoValue } from "../util/sumUtxoValue";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import Signature from "../addresses/Signature";
 
 const secp256k1Promise = instantiateSecp256k1();
@@ -83,7 +83,7 @@ export class Wallet extends BaseWallet {
 
   // Sign message
   public async sign(message: string): Promise<Signature> {
-    return await Signature.sign(message, this)
+    return await Signature.sign(message, this);
   }
 
   // Send message
@@ -92,7 +92,7 @@ export class Wallet extends BaseWallet {
     message: string,
     prefix?: string
   ): Promise<boolean> {
-    if(!this.privateKey){
+    if (!this.privateKey) {
       throw Error("Private key does not exist");
     }
     const sign = await Signature.sign(message, this);
@@ -544,8 +544,8 @@ export class Wallet extends BaseWallet {
   }
 
   public async getMaxAmountToSend({
-                                    outputCount = 1,
-                                  }: {
+    outputCount = 1,
+  }: {
     outputCount?: number;
   }): Promise<BalanceResponse> {
     if (!this.privateKey) {

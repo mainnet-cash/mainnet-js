@@ -1,9 +1,9 @@
-import {Wallet} from "..";
+import { Wallet } from "..";
 
-const base58check = require('base58check');
-const cashAddrJs = require('cashaddrjs');
-const crypto = require('crypto');
-import { instantiateSecp256k1 } from '@bitauth/libauth';
+const base58check = require("base58check");
+const cashAddrJs = require("cashaddrjs");
+import sha256 from "crypto-js/sha256";
+import { instantiateSecp256k1 } from "@bitauth/libauth";
 
 export default class Signature {
   message: string;
@@ -24,34 +24,33 @@ export default class Signature {
 
     const secp256k1 = await instantiateSecp256k1();
 
-    const signature = secp256k1.signMessageHashDER(wallet.privateKey, this.magicHash(message))
+    const signature = secp256k1.signMessageHashDER(
+      wallet.privateKey,
+      this.magicHash(message)
+    );
 
     return new Signature(wallet, message, signature);
   }
 
   static magicHash(message: string, messagePrefix?: string): Buffer {
-    return crypto.createHash('sha256')
-      .update(messagePrefix + message)
-      .digest('base64');
+    return sha256(messagePrefix + message);
   }
 
-  magicHash(messagePrefix: string): Buffer {
-    return crypto.createHash('sha256')
-      .update(messagePrefix + this.message)
-      .digest('base64');
+  magicHash(messagePrefix?: string): Buffer {
+    return sha256(messagePrefix + this.message);
   }
 
   cashAddressToLegacy(address: string): string {
     const decoded = cashAddrJs.decode(address);
-    let rawHex = '';
-    let prefix = '00';
+    let rawHex = "";
+    let prefix = "00";
 
     for (let x = 0; x < decoded.hash.length; ++x) {
-      if (decoded.hash[x] < 16) rawHex += '0';
+      if (decoded.hash[x] < 16) rawHex += "0";
       rawHex += decoded.hash[x].toString(16);
     }
 
-    if (decoded.type == 'P2SH') prefix = '05';
+    if (decoded.type == "P2SH") prefix = "05";
 
     return base58check.encode(rawHex, prefix);
   }
@@ -61,6 +60,10 @@ export default class Signature {
     const hash = this.magicHash(messagePrefix + this.message);
 
     const wallet = await this.wallet.watchOnly(address);
-    return secp256k1.verifySignatureDERLowS(this.signature, wallet.publicKey!, new Uint8Array(hash))
+    return secp256k1.verifySignatureDERLowS(
+      this.signature,
+      wallet.publicKey!,
+      new Uint8Array(hash)
+    );
   }
 }

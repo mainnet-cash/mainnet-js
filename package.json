@@ -73,7 +73,7 @@
     "@bitauth/libauth": "^1.17.2",
     "assert": "^2.0.0",
     "axios": "^0.20.0",
-    "crypto": "^1.0.1",
+    "crypto-js": "^4.0.0",
     "bitcoinjs-message": "^2.1.4",
     "cashaddrjs": "^0.4.4",
     "base58check": "^2.0.0",
