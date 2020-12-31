@@ -178,9 +178,15 @@ export async function getSuitableUtxos(
   if (typeof amountRequired === "undefined") {
     return suitableUtxos;
   } else if (amountAvailable < amountRequired) {
-    throw Error(
+
+    let e = Error(
       `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
     );
+    e['data'] = {
+      "required":amountRequired,
+       "available":amountAvailable 
+      }
+    throw e
   } else {
     return suitableUtxos;
   }
