@@ -240,7 +240,7 @@ export class Wallet extends BaseWallet {
         resp.balance = (await this.getBalance()) as BalanceResponse;
         return resp;
       } catch (e) {
-        throw "Cannot " + e;
+        throw "Cannot process request, " + e;
       }
     } catch (e) {
       throw e;
