@@ -2,7 +2,7 @@ import { getPlatform } from "./getPlatform";
 
 export function generateRandomBytes(len = 32) {
   // nodejs
-  if (getPlatform()==='node') {
+  if (getPlatform() === "node") {
     let crypto = require("crypto");
     return crypto.randomBytes(len);
   }

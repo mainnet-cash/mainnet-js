@@ -1,7 +1,7 @@
 import { getPlatform } from "./getPlatform";
 
 export function btoa(data: string) {
-  if (getPlatform() !=='node') {
+  if (getPlatform() !== "node") {
     return globalThis.btoa(data);
   } else {
     const btoa = (str: string) => {
@@ -12,7 +12,7 @@ export function btoa(data: string) {
 }
 
 export function atob(data: string) {
-  if (getPlatform() !=='node') {
+  if (getPlatform() !== "node") {
     return globalThis.atob(data);
   } else {
     const atob = (str: string) => {
