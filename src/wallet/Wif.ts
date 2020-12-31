@@ -51,6 +51,7 @@ import {
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import { derivePrefix } from "../util/derivePublicKeyHash";
+import { getPlatform } from "../util/getPlatform";
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -182,7 +183,7 @@ export class Wallet extends BaseWallet {
 
     // TODO replace with util/randomBytes
     // nodejs
-    if (typeof process !== "undefined") {
+    if (getPlatform() === "node") {
       let crypto = require("crypto");
       this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
     }

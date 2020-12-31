@@ -39,6 +39,14 @@ describe(`Wallet should function in the browser`, () => {
     expect(result).toEqual("function");
   });
 
+  test(`Should not have a "process"`, async () => {
+    expect(page).not.toBeNull();
+    const result = await page.evaluate(async () => {
+      return typeof process;
+    });
+    expect(result).toEqual("undefined");
+  });
+
   test(`Should create regtest wallet`, async () => {
     let params = { name: "Alice's Regtest", type: "wif", network: "regtest" };
     const result = await page.evaluate(async (p) => {
@@ -160,6 +168,15 @@ describe(`Wallet should function in the browser`, () => {
         "SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env"
       );
     }
+  });
+
+  test(`Should return reterive a named wallet`, async () => {
+    const result = await page.evaluate(async () => {
+      const alice = await TestNetWallet.named("alice");
+      const alice2 = await TestNetWallet.named("alice");
+      return [alice.cashaddr, alice2.cashaddr];
+    }, undefined);
+    expect(result[0]).toBe(result[1]);
   });
 
   test(`Should return testnet balance in usd`, async () => {
