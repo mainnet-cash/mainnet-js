@@ -97,7 +97,9 @@ export class BaseWallet implements WalletI {
         return wallet;
       }
     } else {
-      throw Error("No database was available or configured to store the named wallet.")
+      throw Error(
+        "No database was available or configured to store the named wallet."
+      );
     }
   };
 
@@ -139,7 +141,7 @@ export class BaseWallet implements WalletI {
  * @param {BaseWallet} wallet        a wallet
  */
 const _checkContextSafety = function (wallet: BaseWallet) {
-  if (getPlatform()==='node') {
+  if (getPlatform() === "node") {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.networkType === NetworkType.Mainnet) {
         throw Error(

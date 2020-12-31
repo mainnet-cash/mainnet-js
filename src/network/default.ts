@@ -85,7 +85,7 @@ export function getNetworkProvider(
 function getConfidence() {
   // Allow users to configure the cluster confidence
   let confidence;
-  if (getPlatform()==='node') {
+  if (getPlatform() === "node") {
     confidence = process.env.CLUSTER_CONFIDENCE
       ? process.env.CLUSTER_CONFIDENCE
       : 1;

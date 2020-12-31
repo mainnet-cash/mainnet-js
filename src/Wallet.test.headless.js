@@ -42,7 +42,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should not have a "process"`, async () => {
     expect(page).not.toBeNull();
     const result = await page.evaluate(async () => {
-      return (typeof process);
+      return typeof process;
     });
     expect(result).toEqual("undefined");
   });
@@ -171,13 +171,12 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should return reterive a named wallet`, async () => {
-    
-      const result = await page.evaluate(async () => {
-        const alice = await TestNetWallet.named("alice");
-        const alice2 = await TestNetWallet.named("alice");
-        return [alice.cashaddr,alice2.cashaddr];
-      }, undefined);
-      expect(result[0]).toBe(result[1]);
+    const result = await page.evaluate(async () => {
+      const alice = await TestNetWallet.named("alice");
+      const alice2 = await TestNetWallet.named("alice");
+      return [alice.cashaddr, alice2.cashaddr];
+    }, undefined);
+    expect(result[0]).toBe(result[1]);
   });
 
   test(`Should return testnet balance in usd`, async () => {

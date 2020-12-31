@@ -183,7 +183,7 @@ export class Wallet extends BaseWallet {
 
     // TODO replace with util/randomBytes
     // nodejs
-    if (getPlatform()==='node') {
+    if (getPlatform() === "node") {
       let crypto = require("crypto");
       this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
     }
