@@ -5,6 +5,7 @@ import * as config from "./constant";
 import { parseElectrumUrl } from "./util";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
 import { Network } from "../interface";
+import { getPlatform } from "../util";
 
 const APPLICATION_USER_AGENT = "mainnet-js";
 const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
@@ -84,7 +85,7 @@ export function getNetworkProvider(
 function getConfidence() {
   // Allow users to configure the cluster confidence
   let confidence;
-  if (typeof process !== "undefined") {
+  if (getPlatform()==='node') {
     confidence = process.env.CLUSTER_CONFIDENCE
       ? process.env.CLUSTER_CONFIDENCE
       : 1;

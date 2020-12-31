@@ -5,6 +5,7 @@ import { getStorageProvider } from "../db/util";
 import { WalletI } from "./interface";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
+import { getPlatform } from "../util";
 
 /**
  * A class to hold features used by all wallets
@@ -96,7 +97,7 @@ export class BaseWallet implements WalletI {
         return wallet;
       }
     } else {
-      return await this.generate();
+      throw Error("No database was available or configured to store the named wallet.")
     }
   };
 
@@ -138,7 +139,7 @@ export class BaseWallet implements WalletI {
  * @param {BaseWallet} wallet        a wallet
  */
 const _checkContextSafety = function (wallet: BaseWallet) {
-  if (typeof process !== "undefined") {
+  if (getPlatform()==='node') {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.networkType === NetworkType.Mainnet) {
         throw Error(

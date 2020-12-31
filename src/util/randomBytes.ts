@@ -1,6 +1,8 @@
+import { getPlatform } from "./getPlatform";
+
 export function generateRandomBytes(len = 32) {
   // nodejs
-  if (typeof process !== "undefined") {
+  if (getPlatform()==='node') {
     let crypto = require("crypto");
     return crypto.randomBytes(len);
   }
