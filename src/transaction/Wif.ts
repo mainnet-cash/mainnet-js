@@ -156,7 +156,7 @@ export async function getSuitableUtxos(
   bestHeight: number
 ) {
   let suitableUtxos: UtxoI[] = [];
-  let amountAvailable = 0n;
+  let amountAvailable = BigInt(0);
   for (const u of unspentOutputs) {
     if (u.coinbase && u.height && bestHeight) {
       let age = bestHeight - u.height;

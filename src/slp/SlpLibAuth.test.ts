@@ -38,7 +38,7 @@ test("Test SLP genesis txo template", async () => {
       decimals: Uint8Array.from([8]),
       mint_baton_vout: Uint8Array.from([2]),
       initial_token_mint_quantity: bigIntToBinUint64BE(
-        BigInt(10000000000000000n)
+        BigInt(BigInt(10000000000000000))
       ),
     },
   });
