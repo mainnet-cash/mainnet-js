@@ -9,11 +9,10 @@ module.exports = {
   ],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
-    ".*/src/.*\\.test\\.{ts,js}",
-    ".*/src/.*\\.test\\.headless\\.js",
+    ".*/src/.*\\.test\\.{ts,js}"
   ],
   roots: ["<rootDir>/src"],
-  testMatch: ["**/?(*.)+(test.headless).[t|j]s"],
+  testMatch: ["**/**.test.headless.js"],
   testPathIgnorePatterns: ["/node_modules/"], //
   testEnvironment: "node",
   transform: {
