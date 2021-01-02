@@ -9,7 +9,7 @@ module.exports = {
   ],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
-    ".*/src/.*\\.test\\.{ts,js}"
+    ".*/src/.*\\.test\\.{ts,js}",
   ],
   roots: ["<rootDir>/src"],
   testMatch: ["**/**.test.headless.js"],
