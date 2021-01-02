@@ -114,7 +114,9 @@ describe(`Test Wallet library`, () => {
   test("Should throw a nice error when attempting to send fractional satoshi", async () => {
     expect.assertions(1);
     try {
-      let alice = await RegTestWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`);
+      let alice = await RegTestWallet.fromId(
+        `wif:regtest:${process.env.PRIVATE_WIF}`
+      );
       const bob = await createWallet({
         type: WalletTypeEnum.Wif,
         network: "regtest",
