@@ -1,9 +1,9 @@
 module.exports = {
   verbose: true,
-  rootDir: "../",
+  rootDir: "./",
   preset: "jest-playwright-preset",
   collectCoverageFrom: [
-    "**/*.{js,jsx,ts}",
+    "**/*.{js}",
     "!**/node_modules/**",
     "!**/generated/**",
   ],
@@ -11,8 +11,8 @@ module.exports = {
     ".*/src/.*\\.d\\.ts",
     ".*/src/.*\\.test\\.{ts,js}",
   ],
-  roots: ["<rootDir>/src"],
-  testMatch: ["<rootDir>/**/*.test.headless.js"],
+  roots: ["<rootDir>/src"], 
+  testMatch: ["<rootDir>/src/**/?(*.)test.headless.js"],
   testPathIgnorePatterns: ["/node_modules/"], //
   testEnvironment: "node",
   testEnvironmentOptions: {
