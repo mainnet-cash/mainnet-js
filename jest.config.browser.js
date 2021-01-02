@@ -2,11 +2,7 @@ module.exports = {
   verbose: true,
   rootDir: "./",
   preset: "jest-playwright-preset",
-  collectCoverageFrom: [
-    "**/*.{js}",
-    "!**/node_modules/**",
-    "!**/generated/**",
-  ],
+  collectCoverageFrom: ["**/*.{js}", "!**/node_modules/**", "!**/generated/**"],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
     ".*/src/.*\\.test\\.{ts,js}",
