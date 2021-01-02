@@ -31,12 +31,10 @@ describe(`Wallet should function in the browser`, () => {
     expect(await page.title()).toEqual("Load module for playwright");
   });
 
-
   test(`Should recognize browser as platform`, async () => {
     const result = await page.evaluate(async () => {
       return Mainnet.getPlatform();
-    }, );
+    });
     expect(result).toBe("browser");
   });
-
 });
