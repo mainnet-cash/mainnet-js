@@ -12,7 +12,7 @@ module.exports = {
     ".*/src/.*\\.test\\.{ts,js}",
   ],
   roots: ["<rootDir>/src"],
-  testMatch: ["**/*.test.headless.js"],
+  testMatch: ["<rootDir>/**/*.test.headless.js"],
   testPathIgnorePatterns: ["/node_modules/"], //
   testEnvironment: "node",
   testEnvironmentOptions: {
