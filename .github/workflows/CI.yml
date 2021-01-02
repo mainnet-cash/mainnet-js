@@ -60,14 +60,8 @@ jobs:
         with:
           commit_message: Apply formatting changes
   test_browsers:
-    name: ${{ matrix.os }} (${{ matrix.browser }})
+    name: ${{ matrix.os }}
     needs: [ format ]
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        browser: [chromium, firefox, webkit]
-        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -77,9 +71,7 @@ jobs:
     - uses: microsoft/playwright-github-action@v1
     - run: yarn
     - run: yarn build
-    - run: yarn test:browser
-      env:
-        BROWSER: ${{ matrix.browser }}          
+    - run: yarn test:browser       
   test_linux:
     name: ${{ matrix.os }} (${{ matrix.browser }})
     needs: [ test_browsers ]
