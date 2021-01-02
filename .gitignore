@@ -10,7 +10,6 @@ generated/client/*
 node_modules
 *.log
 src/**/*.d.ts
-src/**/*.js
 src/**/*.js.map
 coverage
 genserated/serve/coverage
