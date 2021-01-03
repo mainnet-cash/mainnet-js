@@ -70,7 +70,6 @@ jobs:
     - uses: microsoft/playwright-github-action@v1
     - run: yarn
     - run: yarn build
-    - run: pwd
     - run: yarn test:browser       
   test_linux:
     name: ${{ matrix.os }} (${{ matrix.browser }})

@@ -2,7 +2,7 @@
 import {
   authenticationTemplateP2pkhNonHd,
   authenticationTemplateToCompilerBCH,
-  bigIntToBinUint64LE,
+  bigIntToBinUint64LEClamped,
   cashAddressToLockingBytecode,
   Compiler,
   encodeTransaction,
@@ -61,7 +61,7 @@ export async function buildP2pkhNonHdTransaction(
       if (changeAmount > DUST_UTXO_THRESHOLD) {
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
-          satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
+          satoshis: git(BigInt(changeAmount)),
         });
       }
     }
@@ -110,7 +110,7 @@ export function prepareInputs(
         data: {
           keys: { privateKeys: { key: signingKey } },
         },
-        satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
+        satoshis: bigIntToBinUint64LEClamped(BigInt(utxoTxnValue)),
         script: "unlock",
       },
     };
@@ -143,7 +143,7 @@ export async function prepareOutputs(outputs: SendRequest[]) {
     }
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(BigInt(sendAmount)),
+      satoshis: bigIntToBinUint64LEClamped(BigInt(sendAmount)),
     };
     lockedOutputs.push(lockedOutput);
   }
