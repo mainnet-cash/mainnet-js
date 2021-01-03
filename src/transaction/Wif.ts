@@ -61,7 +61,7 @@ export async function buildP2pkhNonHdTransaction(
       if (changeAmount > DUST_UTXO_THRESHOLD) {
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
-          satoshis: git(BigInt(changeAmount)),
+          satoshis: bigIntToBinUint64LEClamped(BigInt(changeAmount)),
         });
       }
     }
