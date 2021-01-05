@@ -1,17 +1,26 @@
 import { WalletTypeEnum } from "./wallet/enum";
 import { UnitEnum } from "./enum";
 import { bchParam } from "./chain";
-import { DUST_UTXO_THRESHOLD } from "./constant";
 import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
 import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { getUsdRate } from "./util/getUsdRate";
+import { initProviders, disconnectProviders } from "./network/Connection";
+
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
 
 describe(`Test Wallet library`, () => {
-  /**
-   * Create the browser and page context
-   */
-  beforeEach(async () => {});
+  beforeEach(async () => {
+    // With persistent global network connections, tests run faster than
+    // fulcrum polls the full node for new transactions
+    // Waiting for a single poll should prevent double spending utxos
+    //delay(550);
+  });
 
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
@@ -245,18 +254,13 @@ describe(`Test Wallet library`, () => {
     expect(await alice.getBalance("sat")).toBe(0);
   });
 
-  test("Send a transaction on testnet, send it  back", async () => {
+  test("Send a transaction on regtest, send it back", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
-    if (!process.env.ALICE_TESTNET_WALLET_ID) {
-      throw Error("Missing testnet env keys");
-    }
-    const alice = await TestNetWallet.fromId(
-      process.env.ALICE_TESTNET_WALLET_ID
-    );
+    const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
     const bob = await createWallet({
       type: WalletTypeEnum.Seed,
-      network: "testnet",
+      network: "regtest",
       name: "Bob's random wallet",
     });
 
@@ -266,19 +270,21 @@ describe(`Test Wallet library`, () => {
     if (!alice.privateKey || !bob.privateKey) {
       throw Error("Alice or Bob's wallet are missing private keys");
     }
+
+    // Assume fulcrum node polling is 1s
     await alice.send([
       {
         cashaddr: bob.cashaddr,
-        value: 1200,
+        value: 3400,
         unit: UnitEnum.SAT,
       },
     ]);
 
     // Build Bob's wallet from a public address, check his balance.
-
     const sendMaxResponse = await bob.sendMax(alice.cashaddr);
     expect(sendMaxResponse.txId!.length).toBe(64);
 
+    // Assume fulcrum node polling is 1s
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
   });

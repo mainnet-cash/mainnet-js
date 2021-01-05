@@ -231,21 +231,13 @@ export class Wallet extends BaseWallet {
   public async send(
     requests: SendRequest[] | SendRequestArray[]
   ): Promise<SendResponse> {
-    try {
-      try {
-        let sendRequests = asSendRequestObject(requests);
+    let sendRequests = asSendRequestObject(requests);
 
-        let result = await this._processSendRequests(sendRequests);
-        let resp = new SendResponse({});
-        resp.txId = result;
-        resp.balance = (await this.getBalance()) as BalanceResponse;
-        return resp;
-      } catch (e) {
-        throw "Cannot process request, " + e;
-      }
-    } catch (e) {
-      throw e;
-    }
+    let result = await this._processSendRequests(sendRequests);
+    let resp = new SendResponse({});
+    resp.txId = result;
+    resp.balance = (await this.getBalance()) as BalanceResponse;
+    return resp;
   }
 
   public static async fromId(walletId: string) {
@@ -322,15 +314,11 @@ export class Wallet extends BaseWallet {
   }
 
   public async sendMax(cashaddr: string): Promise<SendResponse> {
-    try {
-      let result = await this.sendMaxRaw(cashaddr);
-      let resp = new SendResponse({});
-      resp.txId = result;
-      resp.balance = (await this.getBalance()) as BalanceResponse;
-      return resp;
-    } catch (e) {
-      throw Error(e);
-    }
+    let result = await this.sendMaxRaw(cashaddr);
+    let resp = new SendResponse({});
+    resp.txId = result;
+    resp.balance = (await this.getBalance()) as BalanceResponse;
+    return resp;
   }
 
   public async sendMaxRaw(cashaddr: string) {

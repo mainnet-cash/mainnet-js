@@ -2309,7 +2309,7 @@ lru-cache@^6.0.0:
     yallist "^4.0.0"
 
 mainnet-js@../../:
-  version "0.2.3"
+  version "0.2.4"
   optionalDependencies:
     "@bitauth/libauth" "^1.17.2"
     assert "^2.0.0"

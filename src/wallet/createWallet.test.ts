@@ -1,5 +1,13 @@
 import { createWallet } from "./createWallet";
 import { WalletRequestI } from "./interface";
+import { initProviders, disconnectProviders } from "../network/Connection";
+
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
 
 describe(`Named Wallets`, () => {
   test("Get create a regtest wallet", async () => {
