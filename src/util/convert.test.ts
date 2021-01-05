@@ -1,26 +1,26 @@
 import { convert } from "./convert";
 import { getUsdRate } from "./getUsdRate";
 
-test("Get price sat in usd", async () => {
+test("Should get price sat in usd", async () => {
   let rate = await getUsdRate();
   let usd = await convert(100000000, "sat", "usd");
   expect(Math.round(rate)).toBeLessThan(usd + 1);
   expect(Math.round(rate)).toBeGreaterThan(usd - 1);
 });
 
-test("Get of bch in usd", async () => {
+test("Should get of bch in usd", async () => {
   let rate = await getUsdRate();
   let usd = await convert(1, "bch", "usd");
   expect(Math.round(rate)).toBeLessThan(usd + 1);
   expect(Math.round(rate)).toBeGreaterThan(usd - 1);
 });
 
-test("Should usd value in fixed format", async () => {
+test("Should get usd value in fixed format", async () => {
   let usd = await convert(1, "bch", "usd");
-  expect(usd.toString()).toMatch(/^\d+\.\d+?$/);
+  expect(usd.toFixed(2)).toMatch(/^\d+\.\d+?$/);
 });
 
-test("Get price in usd in bch", async () => {
+test("Should get price in usd in bch", async () => {
   let rate = await getUsdRate();
   let unity = await convert(rate, "usd", "bch");
   expect(unity).toBeLessThan(1.01);

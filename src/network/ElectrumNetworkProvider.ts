@@ -177,7 +177,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       this.concurrentRequests += 1;
     }
 
-    await this.ready();
+    await this.ready().catch((e) => {
+      throw e;
+    });
 
     let result;
     try {
@@ -266,6 +268,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   private shouldConnect(): boolean {
     if (this.manualConnectionManagement) return false;
     if (this.concurrentRequests !== 0) return false;
+    if (this.subscriptions !== 0) return false;
     return true;
   }
 
@@ -312,50 +315,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       }
       return true;
     };
-
-    // @ts-ignore
-    let timeoutPromise = new Promise((resolve, reject) => {
-      let id = setTimeout(() => {
-        clearTimeout(id);
-        reject(`Client Connection Request timeout after ${timeout}ms`);
-      }, timeout);
-    });
-
-    return Promise.race([connectPromise(), timeoutPromise]);
+    return connectPromise;
   }
 
-  async readyCluster(timeout?: number): Promise<boolean | unknown> {
-    timeout = typeof timeout !== "undefined" ? timeout : 3000;
-
-    // @ts-ignore
-    let timeoutPromise = new Promise((none, reject) => {
-      let id = setTimeout(() => {
-        clearTimeout(id);
-        reject(`Cluster connection request timeout after ${timeout}`);
-      }, timeout);
-    });
-
-    // Race the call to connect with an error
-    return Promise.race([
-      (this.electrum as ElectrumCluster).ready(),
-      timeoutPromise,
-    ]);
+  async readyCluster(timeout?: number): Promise<boolean> {
+    timeout;
+    return (this.electrum as ElectrumCluster).ready();
   }
 
   async connectCluster(): Promise<void[]> {
-    try {
-      return (this.electrum as ElectrumCluster).startup();
-    } catch (e) {
-      throw Error(e);
-    }
+    return (this.electrum as ElectrumCluster).startup();
   }
 
   async connectClient(): Promise<void[]> {
-    try {
-      return [await (this.electrum as ElectrumClient).connect()];
-    } catch (e) {
-      throw Error(e);
-    }
+    return [await (this.electrum as ElectrumClient).connect()];
   }
 
   async disconnectCluster(): Promise<boolean[]> {

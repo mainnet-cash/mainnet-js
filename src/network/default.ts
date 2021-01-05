@@ -7,22 +7,24 @@ import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
 import { Network } from "../interface";
 import { getPlatform } from "../util";
 
-const APPLICATION_USER_AGENT = "mainnet-js";
+const APPLICATION_USER_AGENT = "mainnet-js-" + getPlatform();
 const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
 
-function getGlobalProvider(network: Network): NetworkProvider | void {
-  let accessor: string;
-  switch (network) {
-    case Network.MAINNET:
-      accessor = "BCH";
-      break;
-    case Network.TESTNET:
-      accessor = "BCHt";
-      break;
-    case Network.REGTEST:
-      accessor = "BCHr";
-      break;
+function setGlobalProvider(
+  network: Network,
+  provider: NetworkProvider
+): NetworkProvider {
+  let accessor = config.networkTickerMap[network];
+  if (globalThis[accessor]) {
+    return globalThis[accessor];
+  } else {
+    globalThis[accessor] = provider;
+    return globalThis[accessor];
   }
+}
+
+function getGlobalProvider(network: Network): NetworkProvider | void {
+  let accessor = config.networkTickerMap[network];
   if (globalThis[accessor]) {
     return globalThis[accessor];
   } else {
@@ -72,11 +74,12 @@ export function getNetworkProvider(
     else {
       clusterOrClient = getClient(servers);
     }
-    return new ElectrumNetworkProvider(
+    let provider = new ElectrumNetworkProvider(
       clusterOrClient,
       network,
       manualConnectionManagement
     );
+    return setGlobalProvider(network, provider);
   } else {
     throw Error("No servers provided, defaults not available.");
   }

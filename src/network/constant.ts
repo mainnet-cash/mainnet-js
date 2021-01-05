@@ -32,6 +32,6 @@ export const clusterParams = {
   regtest: {
     distribution: 1,
     order: ClusterOrder.PRIORITY,
-    timeout: 1000,
+    timeout: 5000,
   },
 };
