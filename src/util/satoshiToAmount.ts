@@ -28,7 +28,7 @@ export async function satoshiToAmount(
     case UnitEnum.SATOSHIS:
       return value;
     case UnitEnum.USD:
-      let USD_over_BCH = await ExchangeRate.get('usd');
+      let USD_over_BCH = await ExchangeRate.get("usd");
       let SAT_over_BCH = bchParam.subUnits;
       // truncate dollar amounts to fixed precision (2),
       // then return the fixed value string as a float.
