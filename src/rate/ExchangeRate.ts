@@ -1,6 +1,6 @@
-import { EXCHANGE_RATE_TTL } from "../constant"
+import { EXCHANGE_RATE_TTL } from "../constant";
 import { Platform, getPlatform } from "../util/getPlatform";
-import ExchangeRateProvider from "../db/ExchangeRateProvider"
+import ExchangeRateProvider from "../db/ExchangeRateProvider";
 
 import get from "axios";
 
@@ -35,57 +35,53 @@ export class ExchangeRate {
     }
   }
 
-  static async getRateFromIndexedDb(symbol) : Promise<number> {
-      let cache = new ExchangeRateProvider()
-      let cacheRate = await cache.getRate(symbol)
-      if(cacheRate){
-          // if the cache is still good, return it
-        if(cacheRate.ttl > Date.now()){
-            return cacheRate.rate
-        }
-        // else fall through 
+  static async getRateFromIndexedDb(symbol): Promise<number> {
+    let cache = new ExchangeRateProvider();
+    let cacheRate = await cache.getRate(symbol);
+    if (cacheRate) {
+      // if the cache is still good, return it
+      if (cacheRate.ttl > Date.now()) {
+        return cacheRate.rate;
       }
-      let freshRate = await getRateFromExchange(symbol)
-      cache.setRate(symbol, freshRate, getTtl())
-      return freshRate
+      // else fall through
+    }
+    let freshRate = await getRateFromExchange(symbol);
+    cache.setRate(symbol, freshRate, getTtl());
+    return freshRate;
   }
 
   static async getRateFromGlobalScope(symbol) {
     if (globalThis.RATE) {
       let rateObject = globalThis.RATE;
-      if(symbol in rateObject){
-          let cachedRate = rateObject[symbol] as ExchangeRate
-          // If the cache is still good return ie
-          if(cachedRate.ttl> Date.now()){
-              return cachedRate.rate
-          } 
+      if (symbol in rateObject) {
+        let cachedRate = rateObject[symbol] as ExchangeRate;
+        // If the cache is still good return ie
+        if (cachedRate.ttl > Date.now()) {
+          return cachedRate.rate;
+        }
       }
     }
-      let freshRate = getRateFromExchange(symbol);
-      this.cacheRateInGlobalScope(symbol, freshRate)
-      return freshRate
+    let freshRate = getRateFromExchange(symbol);
+    this.cacheRateInGlobalScope(symbol, freshRate);
+    return freshRate;
   }
 
-  static cacheRateInGlobalScope(symbol, rate){
+  static cacheRateInGlobalScope(symbol, rate) {
     if (!globalThis.RATE) {
-        globalThis.RATE = {}
-    }else{
-        globalThis.RATE[symbol] = {
-            symbol: symbol,
-            rate: rate,
-            ttl: getTtl()
-        }
+      globalThis.RATE = {};
+    } else {
+      globalThis.RATE[symbol] = {
+        symbol: symbol,
+        rate: rate,
+        ttl: getTtl(),
+      };
     }
-
   }
 }
 
-
-
-export function getTtl(){
-    return Math.trunc(Date.now()+EXCHANGE_RATE_TTL)
+export function getTtl() {
+  return Math.trunc(Date.now() + EXCHANGE_RATE_TTL);
 }
-
 
 // Attempt to get the usd rate from some web app
 export async function getRateFromExchange(symbol: string): Promise<number> {
@@ -109,7 +105,9 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
           return e2;
         }
       }
-      default:
-          throw Error("Support for giving an amount in '${symbol}' is not supported.")
+    default:
+      throw Error(
+        "Support for giving an amount in '${symbol}' is not supported."
+      );
   }
 }

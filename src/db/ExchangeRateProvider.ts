@@ -1,8 +1,7 @@
 import Dexie from "dexie";
 import { ExchangeRateI } from "./interface";
 
-export default class ExchangeRateProvider
-  extends Dexie {
+export default class ExchangeRateProvider extends Dexie {
   private fx: Dexie.Table<ExchangeRateI, number>;
 
   public constructor() {
@@ -38,7 +37,11 @@ export default class ExchangeRateProvider
     }
   }
 
-  public async setRate(symbol: string, rate: number, ttl: number): Promise<boolean> {
+  public async setRate(
+    symbol: string,
+    rate: number,
+    ttl: number
+  ): Promise<boolean> {
     return this.transaction("rw", this.fx, async () => {
       // Add or replace the existing entry
       await this.fx.put({ symbol: symbol, rate: rate, ttl: ttl }).catch((e) => {
@@ -47,5 +50,4 @@ export default class ExchangeRateProvider
       return true;
     });
   }
-
 }

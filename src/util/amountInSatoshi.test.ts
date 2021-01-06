@@ -25,7 +25,7 @@ test("Get price of sat(s)", async () => {
 });
 
 test("Get price of USD, Usd, usd", async () => {
-  let usdRate = await ExchangeRate.get('usd');
+  let usdRate = await ExchangeRate.get("usd");
   let rate = await amountInSatoshi(usdRate - 10, "USD");
   expect(rate).toBeLessThan(bchParam.subUnits);
   rate = await amountInSatoshi(usdRate - 10, "Usd");

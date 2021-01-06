@@ -193,7 +193,7 @@ describe(`Test Wallet library`, () => {
         type: WalletTypeEnum.Wif,
         network: "regtest",
       });
-      let usdRate = await ExchangeRate.get('usd');
+      let usdRate = await ExchangeRate.get("usd");
       await alice.send([[bob.cashaddr!, usdRate, "Usd"]]);
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
