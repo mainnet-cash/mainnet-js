@@ -1,5 +1,5 @@
-import { ExchangeRate } from "../rate/ExchangeRate"
+import { ExchangeRate } from "../rate/ExchangeRate";
 
-export function getUsdRate(){
-    return ExchangeRate.get('usd')
+export function getUsdRate() {
+  return ExchangeRate.get("usd");
 }
