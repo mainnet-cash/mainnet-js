@@ -1,6 +1,6 @@
 import { amountInSatoshi } from "./amountInSatoshi";
 import { bchParam } from "../chain";
-import { getUsdRate } from "./getUsdRate";
+import { ExchangeRate } from "../rate/ExchangeRate";
 
 test("Get price of Bch, BCH, bch in sat", async () => {
   let rate = await amountInSatoshi(1, "Bch");
@@ -25,7 +25,7 @@ test("Get price of sat(s)", async () => {
 });
 
 test("Get price of USD, Usd, usd", async () => {
-  let usdRate = await getUsdRate();
+  let usdRate = await ExchangeRate.get('usd');
   let rate = await amountInSatoshi(usdRate - 10, "USD");
   expect(rate).toBeLessThan(bchParam.subUnits);
   rate = await amountInSatoshi(usdRate - 10, "Usd");

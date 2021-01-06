@@ -11,8 +11,6 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
-
-
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -278,8 +276,6 @@ describe(`Wallet subscriptions`, () => {
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
 
-  
-
   test("Should watch then wait", async () => {
     const aliceWallet = await RegTestWallet.newRandom();
 
@@ -308,9 +304,9 @@ describe(`Wallet subscriptions`, () => {
 
   test("Should watch balance, then waitForBalance, then cancel watch", async () => {
     const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-      const alice = await RegTestWallet.fromId(aliceId);
+    const alice = await RegTestWallet.fromId(aliceId);
     const bob = await RegTestWallet.newRandom();
-    let balanceSat = 0
+    let balanceSat = 0;
     alice.send([
       {
         cashaddr: bob.cashaddr!,
@@ -318,93 +314,90 @@ describe(`Wallet subscriptions`, () => {
         unit: "satoshis",
       },
     ]);
-    let bobAny:any = {}
-    let cancel = await bob.watchBalance(balance  => {
-      bobAny = balance ;
+    let bobAny: any = {};
+    let cancel = await bob.watchBalance((balance) => {
+      bobAny = balance;
     });
-    let balance = await bob.waitForBalance(2000, 'sat')
+    let balance = await bob.waitForBalance(2000, "sat");
     expect(balance).toBe(2000);
-    await cancel()
+    await cancel();
     //expect(bobAny.sat).toBe(2000);
   });
 
   test("Should watch multiple wallets", async () => {
-    
-      const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-      const alice = await RegTestWallet.fromId(aliceId);
-      const bob = await RegTestWallet.newRandom();
-      const charlie = await RegTestWallet.newRandom();
+    const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const alice = await RegTestWallet.fromId(aliceId);
+    const bob = await RegTestWallet.newRandom();
+    const charlie = await RegTestWallet.newRandom();
 
-      setTimeout(
-        () =>
-          alice.send([
-            {
-              cashaddr: bob.cashaddr!,
-              value: 1000,
-              unit: "satoshis",
-            },
-          ]),
-        600
-      );
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: bob.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
 
-      let bobBalance = await bob.waitForBalance(1000, "sat").catch((e) => {
-        throw e;
-      });
-      setTimeout(
-        () =>
-          alice.send([
-            {
-              cashaddr: charlie.cashaddr!,
-              value: 1000,
-              unit: "satoshis",
-            },
-          ]),
-        600
-      );
-      let charlieBalance = await charlie
-        .waitForBalance(1000, "sat");
-      expect(bobBalance).toBe(1000);
-      expect(charlieBalance).toBe(1000);
-      setTimeout(
-        () =>
-          alice.send([
-            {
-              cashaddr: bob.cashaddr!,
-              value: 1000,
-              unit: "satoshis",
-            },
-          ]),
-        600
-      );
-      let bobTx = await bob.waitForTransaction();
-      expect(bobTx.version).toBe(2);
-      setTimeout(
-        () =>
-          alice.send([
-            {
-              cashaddr: bob.cashaddr!,
-              value: 1000,
-              unit: "satoshis",
-            },
-          ]),
-        600
-      );
-      bobTx = await bob.waitForTransaction();
-      expect(bobTx.version).toBe(2);
-      setTimeout(
-        () =>
-          alice.send([
-            {
-              cashaddr: bob.cashaddr!,
-              value: 1000,
-              unit: "satoshis",
-            },
-          ]),
-        600
-      );
-      bobTx = await bob.waitForTransaction();
-      expect(bobTx.version).toBe(2);
-      expect(await bob.getBalance("sat")).toBe(4000);
-    
+    let bobBalance = await bob.waitForBalance(1000, "sat").catch((e) => {
+      throw e;
+    });
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: charlie.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    let charlieBalance = await charlie.waitForBalance(1000, "sat");
+    expect(bobBalance).toBe(1000);
+    expect(charlieBalance).toBe(1000);
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: bob.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    let bobTx = await bob.waitForTransaction();
+    expect(bobTx.version).toBe(2);
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: bob.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    bobTx = await bob.waitForTransaction();
+    expect(bobTx.version).toBe(2);
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: bob.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    bobTx = await bob.waitForTransaction();
+    expect(bobTx.version).toBe(2);
+    expect(await bob.getBalance("sat")).toBe(4000);
   });
 });

@@ -4,7 +4,7 @@ import { bchParam } from "./chain";
 import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
 import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
-import { getUsdRate } from "./util/getUsdRate";
+import { ExchangeRate } from "./rate/ExchangeRate";
 import { initProviders, disconnectProviders } from "./network/Connection";
 
 beforeAll(async () => {
@@ -193,7 +193,7 @@ describe(`Test Wallet library`, () => {
         type: WalletTypeEnum.Wif,
         network: "regtest",
       });
-      let usdRate = await getUsdRate();
+      let usdRate = await ExchangeRate.get('usd');
       await alice.send([[bob.cashaddr!, usdRate, "Usd"]]);
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
