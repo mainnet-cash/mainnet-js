@@ -27,7 +27,8 @@ export async function buildP2pkhNonHdTransaction(
   outputs: SendRequest[],
   signingKey: Uint8Array,
   fee: number = 0,
-  discardChange = false
+  discardChange = false,
+  slpOutputs: any[] = []
 ) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -70,7 +71,7 @@ export async function buildP2pkhNonHdTransaction(
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
-      outputs: [...lockedOutputs],
+      outputs: [...slpOutputs, ...lockedOutputs],
       version: 2,
     });
     return result;
@@ -196,11 +197,13 @@ export async function getFeeAmount({
   sendRequests,
   privateKey,
   relayFeePerByteInSatoshi,
+  slpOutputs,
 }: {
   utxos: UtxoI[];
   sendRequests: SendRequest[];
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
+  slpOutputs: any[];
 }) {
   // build transaction
   if (utxos) {
@@ -209,7 +212,9 @@ export async function getFeeAmount({
       utxos,
       sendRequests,
       privateKey,
-      1000
+      1000,
+      false,
+      slpOutputs
     );
 
     return draftTransaction.length * relayFeePerByteInSatoshi + 1;
@@ -226,14 +231,16 @@ export async function buildEncodedTransaction(
   sendRequests: SendRequest[],
   privateKey: Uint8Array,
   fee: number = 0,
-  discardChange = false
+  discardChange = false,
+  slpOutputs: any[] = []
 ) {
   let txn = await buildP2pkhNonHdTransaction(
     fundingUtxos,
     sendRequests,
     privateKey,
     fee,
-    discardChange
+    discardChange,
+    slpOutputs
   );
   // submit transaction
   if (txn.success) {

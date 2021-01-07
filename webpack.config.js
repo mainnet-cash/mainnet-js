@@ -49,12 +49,12 @@ const browserConfig = {
   resolve: {
     alias: {
       bip39: require.resolve("./polyfill/bip39.browser.js"),
-      buffer: false,
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -85,12 +85,12 @@ const webWorkerConfig = {
   resolve: {
     alias: {
       bip39: require.resolve("./polyfill/bip39.browser.js"),
-      buffer: false,
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
