@@ -174,7 +174,6 @@
   var console = new Console();
   document.addEventListener("DOMContentLoaded", function () {
     return __awaiter(this, void 0, void 0, function () {
-      var wallet;
       return __generator(this, function (_a) {
         //
         // Bootstrapping

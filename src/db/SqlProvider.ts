@@ -15,7 +15,6 @@ export default class SqlProvider implements StorageProvider {
   public constructor(walletTable?: string) {
     this.walletTable = walletTable ? walletTable : "wallet";
     this.webhookTable = "webhook";
-    const info = process.env.DATABASE_URL;
     var dbConfig = parseDbUrl(process.env.DATABASE_URL);
     this.db = new Pool(dbConfig);
   }
@@ -171,11 +170,11 @@ export default class SqlProvider implements StorageProvider {
 
   public async deleteWebhook(id: number): Promise<void> {
     let text = format("DELETE FROM %I WHERE id = $1;", this.webhookTable);
-    let result = await this.db.query(text, [id]);
+    await this.db.query(text, [id]);
   }
 
   public async clearWebhooks(): Promise<void> {
     let text = format("DELETE FROM %I;", this.webhookTable);
-    let result = await this.db.query(text);
+    await this.db.query(text);
   }
 }
