@@ -196,7 +196,6 @@ describe(`Wallet should function in the browser`, () => {
     if (process.env.PRIVATE_WIF) {
       const result = await page.evaluate(
         async (args) => {
-          
           const alice = await RegTestWallet.fromWIF(args[0]);
           const bob = await createWallet({
             type: "wif",
