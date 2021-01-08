@@ -1,6 +1,6 @@
 import { bchParam } from "../chain";
-import { getUsdRate } from "./getUsdRate";
 import { UnitEnum } from "../enum";
+import { ExchangeRate } from "../rate/ExchangeRate";
 import { sanitizeUnit } from "./sanitizeUnit";
 
 export class BalanceResponse {
@@ -29,7 +29,7 @@ export async function balanceResponseFromSatoshi(
         response.sat = value;
         break;
       case UnitEnum.USD:
-        let usd = (value / bchParam.subUnits) * (await getUsdRate());
+        let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd"));
         response.usd = Number(usd.toFixed(2));
         break;
       default:
@@ -58,7 +58,7 @@ export async function balanceFromSatoshi(
     case UnitEnum.SATOSHIS:
       return value;
     case UnitEnum.USD:
-      let usd = (value / bchParam.subUnits) * (await getUsdRate());
+      let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd"));
       return Number(usd.toFixed(2));
     default:
       throw Error(

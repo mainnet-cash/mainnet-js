@@ -1,6 +1,6 @@
 import { bchParam } from "../chain";
 import { UnitEnum } from "../enum";
-import { getUsdRate } from "./getUsdRate";
+import { ExchangeRate } from "../rate/ExchangeRate";
 import { sanitizeUnit } from "../util/sanitizeUnit";
 
 /**
@@ -29,7 +29,7 @@ export async function amountInSatoshi(
     case UnitEnum.SATOSHIS:
       return value;
     case UnitEnum.USD:
-      let USD_over_BCH = await getUsdRate();
+      let USD_over_BCH = await ExchangeRate.get("usd");
       let SAT_over_BCH = bchParam.subUnits;
       return Math.round(Number(value * (SAT_over_BCH / USD_over_BCH)));
     default:

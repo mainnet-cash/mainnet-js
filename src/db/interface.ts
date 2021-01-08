@@ -6,6 +6,12 @@ export interface WalletI {
   wallet: string;
 }
 
+export interface ExchangeRateI {
+  symbol: string;
+  rate: number;
+  ttl: number;
+}
+
 export interface WebhookI {
   id?: number;
   cashaddr: string;
