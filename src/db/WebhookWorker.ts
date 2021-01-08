@@ -272,7 +272,7 @@ export default class WebhookWorker {
   }
 
   async stop(): Promise<void> {
-    for (const [key, hook] of this.activeHooks) {
+    for (const [, hook] of this.activeHooks) {
       await this.stopHook(hook);
     }
   }

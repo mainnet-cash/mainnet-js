@@ -42,7 +42,7 @@ describe("Test Contract Services", () => {
     let contractAddress = contractResp.body.cashaddr
 
 
-    const sendResp = await request(app)
+    await request(app)
         .post("/wallet/send")
         .send({
           walletId: buyerId,
@@ -104,7 +104,7 @@ describe("Test Contract Services", () => {
     let contractAddress = contractResp.body.cashaddr
 
 
-    const sendResp = await request(app)
+    await request(app)
         .post("/wallet/send")
         .send({
           walletId: buyerId,
@@ -163,7 +163,7 @@ describe("Test Contract Services", () => {
     let contractAddress = contractResp.body.cashaddr
 
 
-    const sendResp = await request(app)
+    await request(app)
         .post("/wallet/send")
         .send({
           walletId: buyerId,
@@ -212,7 +212,7 @@ describe("Test Contract Services", () => {
     let contractAddress = contractResp.body.cashaddr
 
 
-    const sendResp = await request(app)
+    await request(app)
         .post("/wallet/send")
         .send({
           walletId: buyerId,
@@ -225,7 +225,7 @@ describe("Test Contract Services", () => {
           ],
         });
 
-    const sendResp2 = await request(app)
+    await request(app)
         .post("/wallet/send")
         .send({
           walletId: buyerId,
