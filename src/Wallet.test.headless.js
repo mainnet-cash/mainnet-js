@@ -202,13 +202,13 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
-    if (process.env.ALICE_TESTNET_WALLET_ID) {
+    if (process.env.PRIVATE_WIF) {
       const result = await page.evaluate(
         async (args) => {
-          const alice = await walletFromId(args[0]);
+          const alice = await RegTestWallet.fromWIF(args[0]);
           const bob = await createWallet({
             type: "wif",
-            network: "testnet",
+            network: "regtest",
             name: "Bob's random wallet",
           });
           await alice.send([
@@ -220,13 +220,13 @@ describe(`Wallet should function in the browser`, () => {
           ]);
           return bob.sendMax(alice.cashaddr);
         },
-        [process.env.ALICE_TESTNET_WALLET_ID]
+        [process.env.PRIVATE_WIF]
       );
       expect(result.balance.sat).toBe(0);
     } else {
       expect.assertions(1);
       console.warn(
-        "SKIPPING testnet maxAmountToSend test, set ALICE_TESTNET_ADDRESS env"
+        "SKIPPING regtest maxAmountToSend test, set PRIVATE_WIF env"
       );
     }
   });
