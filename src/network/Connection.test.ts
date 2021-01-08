@@ -1,4 +1,4 @@
-import { initProviders, disconnectProviders } from "./Connection";
+import { initProviders, disconnectProviders, Connection } from "./Connection";
 import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 
 beforeAll(async () => {
@@ -36,4 +36,11 @@ test("Should lower overhead in creating wallets", async () => {
     expect(wallet.provider == globalThis.BCHr).toBeTruthy();
     expect(await wallet.getBalance("sat")).toBe(0);
   }
+});
+
+test("Should create a new Connection", async () => {
+  let conn = new Connection("mainnet", "wss://bch.imaginary.cash:50004");
+  let blockheight = await conn.networkProvider.getBlockHeight();
+  expect(blockheight).toBeGreaterThan(10000);
+  expect(10001).toBeGreaterThan(10000);
 });
