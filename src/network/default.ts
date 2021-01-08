@@ -1,11 +1,7 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
 import { ElectrumCluster, ElectrumClient } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider";
-import {
-  defaultServers,
-  getConfidence,
-  getUserAgent,
-} from "./configuration";
+import { defaultServers, getConfidence, getUserAgent } from "./configuration";
 import { parseElectrumUrl } from "./util";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
 import { Network } from "../interface";

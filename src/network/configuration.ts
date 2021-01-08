@@ -28,17 +28,18 @@ export function getDefaultServers() {
   };
 }
 
-  export function getUserAgent() {
-    // Allow users to configure the cluster confidence
-    let ua;
-    if (getPlatform() === "node") {
-      ua = process.env.ELECTRUM_USER_AGENT ? process.env.ELECTRUM_USER_AGENT
-      : "mainnet-js-" + getPlatform();;
-    } else {
-      ua=  "mainnet-js-" + getPlatform();
-    }
-    return ua;
+export function getUserAgent() {
+  // Allow users to configure the cluster confidence
+  let ua;
+  if (getPlatform() === "node") {
+    ua = process.env.ELECTRUM_USER_AGENT
+      ? process.env.ELECTRUM_USER_AGENT
+      : "mainnet-js-" + getPlatform();
+  } else {
+    ua = "mainnet-js-" + getPlatform();
   }
+  return ua;
+}
 
 export function getConfidence() {
   // Allow users to configure the cluster confidence
