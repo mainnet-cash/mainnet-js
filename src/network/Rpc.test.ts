@@ -1,5 +1,5 @@
-import { Connection, disconnectProviders, initProviders } from "./Connection";
-import { Wallet, TestNetWallet, RegTestWallet } from "../wallet/Wif";
+import { disconnectProviders, initProviders } from "./Connection";
+import { RegTestWallet } from "../wallet/Wif";
 import { getNetworkProvider } from "../network/default";
 import { Network } from "cashscript";
 import { mine } from "../mine";
@@ -34,14 +34,13 @@ test("subcribe to muliple addresses bug", async () => {
   const provider = getNetworkProvider(Network.REGTEST);
 
   try {
-    let response1 = undefined;
-    let response2 = undefined;
+
     await provider.subscribeToAddress(
       "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
       async (data) => {
         // console.log("First", data);
         expect(data).not.toBe("");
-        response1 = data;
+        data;
       }
     );
 
@@ -50,7 +49,7 @@ test("subcribe to muliple addresses bug", async () => {
       async (data) => {
         // console.log("Second", data);
         expect(data).not.toBe("");
-        response2 = data;
+        data;
       }
     );
 

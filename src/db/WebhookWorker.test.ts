@@ -127,7 +127,7 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = await worker.registerWebhook({
+      await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/success",
         type: "transaction:in",
@@ -164,7 +164,7 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = await worker.registerWebhook({
+      await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/fail",
         type: "transaction:in",
@@ -200,7 +200,7 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = await worker.registerWebhook({
+      await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
         type: "transaction:in",
@@ -237,7 +237,7 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = await worker.registerWebhook({
+      await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
         type: "transaction:out",
@@ -351,7 +351,7 @@ describe("Webhook worker tests", () => {
     try {
       const aliceWallet = await RegTestWallet.fromId(aliceWif);
       const bobWallet = await RegTestWallet.newRandom();
-      const hookId = await worker.registerWebhook({
+      await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/watchBalance",
         type: "balance",
