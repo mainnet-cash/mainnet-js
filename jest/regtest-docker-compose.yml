@@ -3,7 +3,7 @@ version: "3.7"
 services:
   bitcoind:
     image: zquestz/bitcoin-cash-node
-    command: bitcoind -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
+    command: bitcoind -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
       interval: 1m30s
@@ -13,7 +13,8 @@ services:
     container_name: bitcoind
     ports:
       - "18443:18443"
-    expose: [18443]
+      - "28332:28332"
+    expose: [18443, 28332]
     volumes:
       - bitcoin-data:/data
     networks:
@@ -48,6 +49,47 @@ services:
       - "sql-data:/var/lib/postgresql/data"
     ports:
       - 15432:5432
+
+  mongodb:
+    image: mongo:4.4.2-bionic
+    #image: mongo:4.2-bionic
+    #image: mongo:4.0
+    container_name: mongo-slpdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    command: mongod --logpath=/dev/null # -- quiet
+    restart: always
+    networks:
+      - bitcoin
+
+  slpdb:
+    image: mainnet/slpdb:latest
+    container_name: slpdb
+    volumes:
+      - ./docker/run-script.sh:/home/safeuser/config/run-script.sh
+    restart: always
+    networks:
+      - bitcoin
+
+  slpserve:
+    image: mainnet/slpserve:latest
+    container_name: slpserve
+    ports:
+      - "12300:4000"
+    restart: always
+    networks:
+      - bitcoin
+
+  slpsockserve:
+    image: mainnet/slpsockserve:latest
+    container_name: slpsockserve
+    ports:
+      - "12301:4001"
+    restart: always
+    networks:
+      - bitcoin
 networks:
   bitcoin:
 
@@ -55,3 +97,4 @@ volumes:
   bitcoin-data:
   sql-data:
   fulcrum-data:
+  mongo-data:

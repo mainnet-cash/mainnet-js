@@ -1,7 +1,7 @@
 export enum Platform {
   node = "node",
-  webworker = "webworker",
   browser = "browser",
+  webworker = "webworker",
 }
 
 export function getPlatform(): Platform {

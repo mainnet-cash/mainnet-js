@@ -1,10 +1,9 @@
 import WebhookWorker from "./WebhookWorker";
-import { default as SqlProvider } from "../db/SqlProvider";
 import { default as axios } from "axios";
 import { Network } from "../interface";
 import { initProviders, disconnectProviders } from "../network/Connection";
 
-import { Wallet, RegTestWallet } from "../wallet/Wif";
+import { RegTestWallet } from "../wallet/Wif";
 import { mine } from "../mine";
 
 let worker: WebhookWorker;
@@ -53,7 +52,6 @@ describe("Webhook worker tests", () => {
           return Promise.resolve({ status: 200 });
         }
       );
-
       await initProviders([Network.REGTEST]);
       worker = new WebhookWorker(Network.REGTEST);
       await worker.init();
@@ -72,8 +70,8 @@ describe("Webhook worker tests", () => {
 
   afterAll(async () => {
     await worker.destroy();
-    await disconnectProviders([Network.REGTEST]);
     await worker.db.close();
+    await disconnectProviders([Network.REGTEST]);
   });
 
   test("Test posting hook", async () => {

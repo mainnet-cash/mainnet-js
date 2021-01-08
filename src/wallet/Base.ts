@@ -24,25 +24,25 @@ export class BaseWallet implements WalletI {
     this.name = name;
 
     this.networkPrefix = networkPrefix;
-    this.networkType =
-      this.networkPrefix === CashAddressNetworkPrefix.mainnet
-        ? NetworkType.Mainnet
-        : NetworkType.Testnet;
 
-    this.isTestnet = this.networkType === "testnet" ? true : false;
     switch (this.networkPrefix) {
       case CashAddressNetworkPrefix.regtest:
         this.network = NetworkEnum.Regtest;
+        this.networkType = NetworkType.Regtest;
         this.provider = getNetworkProvider("regtest");
         break;
       case CashAddressNetworkPrefix.testnet:
         this.network = NetworkEnum.Testnet;
+        this.networkType = NetworkType.Testnet;
         this.provider = getNetworkProvider("testnet");
         break;
       default:
         this.network = NetworkEnum.Mainnet;
+        this.networkType = NetworkType.Mainnet;
         this.provider = getNetworkProvider();
     }
+
+    this.isTestnet = this.networkType === "testnet" ? true : false;
   }
 
   /**

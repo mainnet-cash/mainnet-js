@@ -136,11 +136,11 @@ export class Contract implements ContractI {
   private async estimateFee(func, publicKey, sig, outputAddress, utxos) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance
-    const estimatorTransaction = func(publicKey, sig, 10, 0)
-      .to([{ to: outputAddress, amount: 10 }])
+    const estimatorTransaction = func(publicKey, sig, 10, 2147483640)
+      .to([{ to: outputAddress, amount: 1000 }])
       .from(utxos);
     const estimatedTxHex = (await estimatorTransaction
-      .withHardcodedFee(10)
+      .withHardcodedFee(1000)
       ["build"]()) as string;
 
     // Use the feePerByte to get the fee for the transaction length

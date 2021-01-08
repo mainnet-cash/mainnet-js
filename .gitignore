@@ -3,6 +3,7 @@
 .vscode
 .env.testnet
 .env.mainnet
+scratch.ts
 generated/serve/*.log
 generated/serve/coverage
 generated/serve/node_modules
