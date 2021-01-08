@@ -34,7 +34,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should load module`, async () => {
     expect(page).not.toBeNull();
     const result = await page.evaluate(async () => {
-      return await typeof RegTestWallet;
+      return await typeof TestNetWallet;
     });
     expect(result).toEqual("function");
   });
@@ -55,15 +55,15 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.cashaddr.slice(0, 8)).toBe("bchreg:q");
   });
 
-  test(`Should create regtest wallet`, async () => {
-    let params = { name: "Alice's regtest", type: "wif", network: "regtest" };
+  test(`Should create testnet wallet`, async () => {
+    let params = { name: "Alice's TestNet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
       return await createWalletResponse(p);
     }, params);
-    expect(result.cashaddr.slice(0, 8)).toBe("bchreg:q");
+    expect(result.cashaddr.slice(0, 9)).toBe("bchtest:q");
   });
 
-  test(`Should throw Error on regtest wif to testnet wallet`, async () => {
+  test(`Should throw Error on regtest wif to Testnet`, async () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
@@ -80,7 +80,7 @@ describe(`Wallet should function in the browser`, () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
-        return await RegTestWallet.fromId(`hd:regtest:${wif}`);
+        return await TestNetWallet.fromId(`hd:testnet:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
@@ -89,13 +89,13 @@ describe(`Wallet should function in the browser`, () => {
     }
   });
 
-  test(`Should create a random regtest wallet`, async () => {
+  test(`Should create a random testnet wallet`, async () => {
     let params = {};
     const result = await page.evaluate(async (p) => {
-      let w = await RegTestWallet.newRandom();
+      let w = await TestNetWallet.newRandom();
       return w.getDepositAddress();
     }, params);
-    expect(result.slice(0, 8)).toBe("bchreg:q");
+    expect(result.slice(0, 9)).toBe("bchtest:q");
   });
 
   test(`Should create mainnet wallet`, async () => {
@@ -114,17 +114,17 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.sat).toBe(0);
   });
 
-  test(`Should return deposit address from regtest wallet`, async () => {
+  test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await RegTestWallet.fromWIF(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.slice(0, 9)).toBe("bchreg:qp");
+    expect(result.slice(0, 10)).toBe("bchtest:qp");
   });
 
-  test(`Should return deposit qr from regtest wallet`, async () => {
+  test(`Should return deposit qr from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await RegTestWallet.fromWIF(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositQr();
     }, process.env.PRIVATE_WIF);
     expect(
@@ -132,12 +132,12 @@ describe(`Wallet should function in the browser`, () => {
     ).toBeTruthy();
   });
 
-  test(`Should return deposit address from regtest wallet`, async () => {
+  test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
-      const alice = await RegTestWallet.fromWIF(wif);
+      const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
-    expect(result.slice(0, 8)).toBe("bchreg:q");
+    expect(result.slice(0, 9)).toBe("bchtest:q");
   });
 
   test(`Should return watch testnet balance`, async () => {
@@ -150,75 +150,84 @@ describe(`Wallet should function in the browser`, () => {
     } else {
       expect.assertions(1);
       console.warn(
-        "SKIPPING regtest balance test, set ALICE_TESTNET_ADDRESS env"
+        "SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env"
       );
     }
   });
 
   test(`Should return watch named balance`, async () => {
-    const result = await page.evaluate(async () => {
-      const alice = await RegTestWallet.named("alice");
-      return alice.getBalance("sat");
-    });
-    expect(result).toBe(0);
+    if (process.env.ALICE_TESTNET_ADDRESS) {
+      const result = await page.evaluate(async (addr) => {
+        const alice = await TestNetWallet.named("alice");
+        return alice.getBalance("sat");
+      }, process.env.ALICE_TESTNET_ADDRESS);
+      expect(result).toBe(0);
+    } else {
+      expect.assertions(1);
+      console.warn(
+        "SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env"
+      );
+    }
   });
 
   test(`Should return reterive a named wallet`, async () => {
     const result = await page.evaluate(async () => {
-      const alice = await RegTestWallet.named("alice");
-      const alice2 = await RegTestWallet.named("alice");
+      const alice = await TestNetWallet.named("alice");
+      const alice2 = await TestNetWallet.named("alice");
       return [alice.cashaddr, alice2.cashaddr];
     }, undefined);
     expect(result[0]).toBe(result[1]);
   });
 
-  test(`Should return regtest balance in usd`, async () => {
-    if (process.env.ADDRESS) {
+  test(`Should return testnet balance in usd`, async () => {
+    if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
-        const alice = await RegTestWallet.watchOnly(addr);
+        const alice = await TestNetWallet.watchOnly(addr);
         return alice.getBalance("usd");
-      }, process.env.ADDRESS);
+      }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result).toBeGreaterThan(0);
     } else {
       expect.assertions(1);
-      console.warn("SKIPPING regtest balance test, set ADDRESS");
+      console.warn(
+        "SKIPPING testnet balance test, set ALICE_TESTNET_ADDRESS env"
+      );
     }
   });
 
-  test(`Should return regtest balance in usd`, async () => {
+  test(`Should return testnet balance in usd`, async () => {
     const result = await page.evaluate(async () => {
       return await Mainnet.convert(1, "bch", "sat");
     });
     expect(result).toBe(100000000);
   });
 
-  test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
-    if (process.env.PRIVATE_WIF) {
-      const result = await page.evaluate(
-        async (args) => {
-          const alice = await RegTestWallet.fromWIF(args[0]);
-          const bob = await createWallet({
-            type: "wif",
-            network: "regtest",
-            name: "Bob's random wallet",
-          });
-          await alice.send([
-            {
-              cashaddr: bob.cashaddr,
-              value: 3000,
-              unit: "sat",
-            },
-          ]);
-          return bob.sendMax(alice.cashaddr);
-        },
-        [process.env.PRIVATE_WIF]
-      );
-      expect(result.balance.sat).toBe(0);
-    } else {
-      expect.assertions(1);
-      console.warn(
-        "SKIPPING regtest maxAmountToSend test, set PRIVATE_WIF env"
-      );
-    }
-  });
+  // test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
+  //   if (process.env.ALICE_TESTNET_WALLET_ID) {
+  //     const result = await page.evaluate(
+  //       async (args) => {
+  //         const alice = await walletFromId(args[0]);
+  //         const bob = await createWallet({
+  //           type: "wif",
+  //           network: "testnet",
+  //           name: "Bob's random wallet",
+  //         });
+  //         await alice.send([
+  //           {
+  //             cashaddr: bob.cashaddr,
+  //             value: 3000,
+  //             unit: "sat",
+  //           },
+  //         ]);
+  //         return bob.sendMax(alice.cashaddr);
+  //       },
+  //       [process.env.ALICE_TESTNET_WALLET_ID]
+  //     );
+  //     expect(result.balance.sat).toBe(0);
+  //   } else {
+  //     expect.assertions(1);
+  //     console.warn(
+  //       "SKIPPING testnet maxAmountToSend test, set ALICE_TESTNET_ADDRESS env"
+  //     );
+  //   }
+  // });
 });
