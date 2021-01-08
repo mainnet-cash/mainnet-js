@@ -288,9 +288,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "WB";
-    await aliceWallet.slp.genesis(
-      genesisOptions
-    );
+    await aliceWallet.slp.genesis(genesisOptions);
     bobWallet.slp.watchBalance((balance) => {
       expect(balance.length).toBeGreaterThan(0);
     });
@@ -313,9 +311,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "_WFB";
-    await aliceWallet.slp.genesis(
-      genesisOptions
-    );
+    await aliceWallet.slp.genesis(genesisOptions);
     setTimeout(async () => {
       await aliceWallet.slp.send([
         {
@@ -332,6 +328,7 @@ describe("Slp wallet tests", () => {
     expect(balance.amount.isEqualTo(20));
   });
 
+<<<<<<< HEAD
   // test("Test waiting for slp transaction", async () => {
   //   const aliceWif = `${process.env.PRIVATE_WIF!}`;
   //   const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
@@ -355,6 +352,29 @@ describe("Slp wallet tests", () => {
   //   );
   //   expect(transaction.tx.h.length).toBe(64);
   // });
+=======
+  test("Test waiting for slp transaction", async () => {
+    const aliceWif = `${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    genesisOptions.ticker = ticker + "_WT";
+    await aliceWallet.slp.genesis(genesisOptions);
+    setTimeout(async () => {
+      await aliceWallet.slp.send([
+        {
+          cashaddr: bobWallet.slp.cashaddr,
+          ticker: genesisOptions.ticker,
+          value: 20,
+        },
+      ]);
+    }, 5000);
+    const transaction = await bobWallet.slp.waitForTransaction(
+      genesisOptions.ticker
+    );
+    expect(transaction.tx.h.length).toBe(64);
+  });
+>>>>>>> 290e6f798260807f4c3750882400261516929f3d
 
   test("Test getting history", async () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;

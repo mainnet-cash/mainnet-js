@@ -34,7 +34,6 @@ test("subcribe to muliple addresses bug", async () => {
   const provider = getNetworkProvider(Network.REGTEST);
 
   try {
-
     await provider.subscribeToAddress(
       "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
       async (data) => {
