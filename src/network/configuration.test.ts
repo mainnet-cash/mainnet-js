@@ -23,13 +23,12 @@ test("Should get electrum settings from env", async () => {
 });
 
 test("Should get electrum cluster confidence from defaults", async () => {
-    let c = config.getConfidence()
-    expect(c).toStrictEqual(1);
-  });
-  
-  test("Should get electrum cluster confidence from env", async () => {
-    process.env.ELECTRUM_CONFIDENCE = "2";
-    let c = config.getConfidence()
-    expect(c).toStrictEqual(2);
-  });
-  
+  let c = config.getConfidence();
+  expect(c).toStrictEqual(1);
+});
+
+test("Should get electrum cluster confidence from env", async () => {
+  process.env.ELECTRUM_CONFIDENCE = "2";
+  let c = config.getConfidence();
+  expect(c).toStrictEqual(2);
+});

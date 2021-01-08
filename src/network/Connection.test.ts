@@ -38,10 +38,9 @@ test("Should lower overhead in creating wallets", async () => {
   }
 });
 
-
 test("Should create a new Connection", async () => {
-  let conn = new Connection("mainnet","wss://bch.imaginary.cash:50004" )
-  let blockheight = await conn.networkProvider.getBlockHeight()
-  expect(blockheight).toBeGreaterThan(10000)
-  expect(10001).toBeGreaterThan(10000)
+  let conn = new Connection("mainnet", "wss://bch.imaginary.cash:50004");
+  let blockheight = await conn.networkProvider.getBlockHeight();
+  expect(blockheight).toBeGreaterThan(10000);
+  expect(10001).toBeGreaterThan(10000);
 });
