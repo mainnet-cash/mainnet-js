@@ -4,7 +4,7 @@ import { default as NetworkProvider } from "./NetworkProvider";
 import {
   defaultServers,
   getConfidence,
-  ELECTRUM_USER_AGENT,
+  getUserAgent,
 } from "./configuration";
 import { parseElectrumUrl } from "./util";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
@@ -106,7 +106,7 @@ function getClient(servers: string[]) {
 
 function getElectrumCluster(params: ElectrumClusterParams) {
   return new ElectrumCluster(
-    ELECTRUM_USER_AGENT,
+    getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
     params.confidence,
     params.distribution,
@@ -117,7 +117,7 @@ function getElectrumCluster(params: ElectrumClusterParams) {
 
 function getElectrumClient(params: ElectrumHostParams, timeout: number) {
   return new ElectrumClient(
-    ELECTRUM_USER_AGENT,
+    getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
     params.host,
     params.port,
