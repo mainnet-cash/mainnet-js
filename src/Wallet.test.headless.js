@@ -156,11 +156,11 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should return watch named balance`, async () => {
-      const result = await page.evaluate(async () => {
-        const alice = await RegTestWallet.named("alice");
-        return alice.getBalance("sat");
-      }, );
-      expect(result).toBe(0);
+    const result = await page.evaluate(async () => {
+      const alice = await RegTestWallet.named("alice");
+      return alice.getBalance("sat");
+    });
+    expect(result).toBe(0);
   });
 
   test(`Should return reterive a named wallet`, async () => {
@@ -181,9 +181,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(result).toBeGreaterThan(0);
     } else {
       expect.assertions(1);
-      console.warn(
-        "SKIPPING regtest balance test, set ADDRESS"
-      );
+      console.warn("SKIPPING regtest balance test, set ADDRESS");
     }
   });
 
@@ -198,7 +196,7 @@ describe(`Wallet should function in the browser`, () => {
     if (process.env.PRIVATE_WIF) {
       const result = await page.evaluate(
         async (args) => {
-          initProviders()
+          initProviders();
           const alice = await RegTestWallet.fromWIF(args[0]);
           const bob = await createWallet({
             type: "wif",
