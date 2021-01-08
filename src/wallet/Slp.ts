@@ -123,13 +123,14 @@ export class Slp {
     );
   }
 
+  // TODO fix test
   // waits for next transaction, program execution is halted
-  public async waitForTransaction(
-    ticker?: string,
-    tokenId?: string
-  ): Promise<any> {
-    return this.provider.SlpWaitForTransaction(this.cashaddr, ticker, tokenId);
-  }
+  // public async waitForTransaction(
+  //   ticker?: string,
+  //   tokenId?: string
+  // ): Promise<any> {
+  //   return this.provider.SlpWaitForTransaction(this.cashaddr, ticker, tokenId);
+  // }
 
   public async genesis(options: SlpGenesisOptions): Promise<SlpGenesisResult> {
     let result = await this._processGenesis(options);
