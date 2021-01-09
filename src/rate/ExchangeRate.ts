@@ -1,5 +1,8 @@
 import { EXCHANGE_RATE_TTL } from "../constant";
-import { RuntimePlatform, getRuntimePlatform } from "../util/getRuntimePlatform";
+import {
+  RuntimePlatform,
+  getRuntimePlatform,
+} from "../util/getRuntimePlatform";
 import ExchangeRateProvider from "../db/ExchangeRateProvider";
 
 import get from "axios";
