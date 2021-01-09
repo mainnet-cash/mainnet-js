@@ -298,7 +298,7 @@ describe("Webhook worker tests", () => {
       let hook = await worker.getWebhook(hookId);
       expect(hook!.status).not.toBe("");
       expect(hook!.tx_seen).not.toBe([]);
-      const tx = hook!.tx_seen[0];
+      hook!.tx_seen[0];
       expect(responses["http://example.com/bob"].length).toBe(1);
 
       // shutdown

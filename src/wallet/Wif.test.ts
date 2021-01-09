@@ -313,10 +313,8 @@ describe(`Wallet subscriptions`, () => {
         unit: "satoshis",
       },
     ]);
-    let bobAny: any = {};
-    let cancel = bob.watchBalance((balance) => {
-      bobAny = balance;
-    });
+    
+    let cancel = bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
     expect(balance).toBe(2000);
     cancel();
@@ -328,6 +326,7 @@ describe(`Wallet subscriptions`, () => {
     const alice = await RegTestWallet.fromId(aliceId);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
+    const dave = await RegTestWallet.newRandom();
 
     setTimeout(
       () =>
@@ -356,8 +355,21 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     let charlieBalance = await charlie.waitForBalance(1000, "sat");
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: dave.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    let daveBalance = await dave.waitForBalance(1000, "sat");
     expect(bobBalance).toBe(1000);
     expect(charlieBalance).toBe(1000);
+    expect(daveBalance).toBe(1000);
     setTimeout(
       () =>
         alice.send([
