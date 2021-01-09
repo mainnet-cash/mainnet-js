@@ -7,6 +7,8 @@ import { mine } from "../mine";
 
 import { SlpGenesisOptions, SlpGenesisResult } from "../slp/interface";
 import { DUST_UTXO_THRESHOLD } from "../constant";
+import { ElectrumRawTransaction } from "../network/interface";
+import { raw } from "core-js/core/string";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -162,6 +164,137 @@ describe("Slp wallet tests", () => {
     expect(charlieBalances[0].name).toBe("Mainnet coin");
     expect(charlieBalances[0].ticker).toBe(ticker);
     expect(charlieBalances[0].tokenId).toBe(tokenId);
+  });
+
+  test("Send-return test", async () => {
+    let aliceWif = `${process.env.PRIVATE_WIF!}`;
+    let aliceWallet = await RegTestWallet.fromWIF(aliceWif);
+    let bobWallet = await RegTestWallet.newRandom();
+
+    genesisOptions.ticker = ticker + "_SR";
+    let genesis: SlpGenesisResult = await aliceWallet.slp.genesis(
+      genesisOptions
+    );
+
+    // send bob some bch gas to enable him to send slp
+    let aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat"}]);
+
+    let aliceSlpBalance = (await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId))[0].amount;
+    let result = await aliceWallet.slp.send([
+      {
+        cashaddr: bobWallet.slp.cashaddr,
+        value: 5,
+        ticker: genesisOptions.ticker,
+        tokenId: genesis.tokenId,
+      },
+    ]);
+    let rawTransaction = await aliceWallet.provider!.getRawTransactionObject(result.txId) as ElectrumRawTransaction;
+    expect(rawTransaction.vout.length).toBe(4);
+
+    // slp op_return
+    expect(rawTransaction.vout[0].value).toBe(0);
+
+    // slp target
+    expect(rawTransaction.vout[1].value).toBe(DUST_UTXO_THRESHOLD / 1.e8);
+    expect(rawTransaction.vout[1].scriptPubKey.addresses[0]).toBe(bobWallet.cashaddr);
+
+    // slp change
+    expect(rawTransaction.vout[2].value).toBe(DUST_UTXO_THRESHOLD / 1.e8);
+    expect(rawTransaction.vout[2].scriptPubKey.addresses[0]).toBe(aliceWallet.cashaddr);
+
+    // bch change
+    expect(rawTransaction.vout[3].scriptPubKey.addresses[0]).toBe(aliceWallet.cashaddr);
+
+    expect(result.balances.length).toBe(1);
+    expect(result.balances[0].amount.isEqualTo(aliceSlpBalance.minus(5)));
+
+    result = await bobWallet.slp.send([{cashaddr: aliceWallet.slp.cashaddr, value: 5, ticker: genesisOptions.ticker, tokenId: genesis.tokenId}]);
+    expect(result.balances.length).toBe(0);
+
+    rawTransaction = await aliceWallet.provider!.getRawTransactionObject(result.txId) as ElectrumRawTransaction;
+    expect(rawTransaction.vout.length).toBe(3);
+
+    // slp op_return
+    expect(rawTransaction.vout[0].value).toBe(0);
+
+    // slp target
+    expect(rawTransaction.vout[1].value).toBe(DUST_UTXO_THRESHOLD / 1.e8);
+    expect(rawTransaction.vout[1].scriptPubKey.addresses[0]).toBe(aliceWallet.cashaddr);
+
+    // no slp change!
+
+    // bch change
+    expect(rawTransaction.vout[2].scriptPubKey.addresses[0]).toBe(bobWallet.cashaddr);
+
+    let aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId))[0].amount;
+    expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
+
+    // await bobWallet.sendMax(aliceWallet.cashaddr!);
+
+    // check non-slp send did not burn tokens
+    aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId))[0].amount;
+    expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
+
+
+
+
+
+    // send bob some bch gas to enable him to send slp
+    // aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat"}]);
+
+    aliceSlpBalance = (await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId))[0].amount;
+    result = await aliceWallet.slp.send([
+      {
+        cashaddr: bobWallet.slp.cashaddr,
+        value: 5,
+        ticker: genesisOptions.ticker,
+        tokenId: genesis.tokenId,
+      },
+    ]);
+    rawTransaction = await aliceWallet.provider!.getRawTransactionObject(result.txId) as ElectrumRawTransaction;
+    expect(rawTransaction.vout.length).toBe(3);
+
+    // slp op_return
+    expect(rawTransaction.vout[0].value).toBe(0);
+
+    // slp target
+    expect(rawTransaction.vout[1].value).toBe(DUST_UTXO_THRESHOLD / 1.e8);
+    expect(rawTransaction.vout[1].scriptPubKey.addresses[0]).toBe(bobWallet.cashaddr);
+
+    // no slp change! since we have sent the utxo we received from bob
+
+    // bch change
+    expect(rawTransaction.vout[2].scriptPubKey.addresses[0]).toBe(aliceWallet.cashaddr);
+
+    expect(result.balances.length).toBe(1);
+    expect(result.balances[0].amount.isEqualTo(aliceSlpBalance.minus(5)));
+
+    result = await bobWallet.slp.send([{cashaddr: aliceWallet.slp.cashaddr, value: 5, ticker: genesisOptions.ticker, tokenId: genesis.tokenId}]);
+    expect(result.balances.length).toBe(0);
+
+    rawTransaction = await aliceWallet.provider!.getRawTransactionObject(result.txId) as ElectrumRawTransaction;
+    expect(rawTransaction.vout.length).toBe(3);
+
+    // slp op_return
+    expect(rawTransaction.vout[0].value).toBe(0);
+
+    // slp target
+    expect(rawTransaction.vout[1].value).toBe(DUST_UTXO_THRESHOLD / 1.e8);
+    expect(rawTransaction.vout[1].scriptPubKey.addresses[0]).toBe(aliceWallet.cashaddr);
+
+    // no slp change!
+
+    // bch change
+    expect(rawTransaction.vout[2].scriptPubKey.addresses[0]).toBe(bobWallet.cashaddr);
+
+    aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId))[0].amount;
+    expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
+
+    await bobWallet.sendMax(aliceWallet.cashaddr!);
+
+    // check non-slp send did not burn tokens
+    aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId))[0].amount;
+    expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
   });
 
   test("Mint test", async () => {

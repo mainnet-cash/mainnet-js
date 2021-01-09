@@ -26,9 +26,13 @@ class Controller {
       response.json({
         "code":error.code,
         "message":error.error.message
-      })
+      });
     } else {
-      response.end(error.error || error.message);
+      // response.end(error.error || error.message);
+      response.json({
+        "code":error.code || 500,
+        "message":error.error || error.message
+      });
     }
   }
 

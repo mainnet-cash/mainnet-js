@@ -13,6 +13,7 @@ const logger = require('./logger');
 const timeout = require('connect-timeout');
 const config = require('./config');
 const mainnet = require('mainnet-js');
+const setupRateLimits = require('./rateLimits');
 
 const makeWsServer = require('./wsServer');
 
@@ -34,6 +35,8 @@ class ExpressServer {
   setupMiddleware() {
     // this.setupAllowedMedia();
     this.app.use(cors());
+    this.app.use('/scripts', express.static(__dirname + '/node_modules/mainnet-js/dist/'));
+    this.app.use(express.static('static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
     this.app.use(timeout(`${config.TIMEOUT}s`));
@@ -61,6 +64,8 @@ class ExpressServer {
       res.status(200);
       res.json(req.query);
     });
+
+    setupRateLimits(this.app);
   }
 
   async launch() {
@@ -91,6 +96,7 @@ class ExpressServer {
           wsServer.close();
         });
 
+        server.app = this.app;
         return server;
       });
   }

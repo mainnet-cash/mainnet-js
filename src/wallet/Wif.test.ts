@@ -400,4 +400,40 @@ describe(`Wallet subscriptions`, () => {
     expect(bobTx.version).toBe(2);
     expect(await bob.getBalance("sat")).toBe(4000);
   });
+
+  test("Should get testnet satoshis and send them back", async () => {
+    TestNetWallet.faucetServer = "http://localhost:3000";
+
+    const wallet = await TestNetWallet.newRandom() as TestNetWallet;
+    const txid = await wallet.getTestnetSatoshis();
+    expect(txid.length).toBe(64);
+    let balance = await wallet.getBalance("sat");
+    expect(balance).toBe(10000);
+
+    const response = await wallet.returnTestnetSatoshis();
+    expect(response.balance!.sat!).toBe(0);
+  });
+
+  test("Should get testnet slp tokens and send them back", async () => {
+    let aliceWif = `${process.env.ALICE_TESTNET_WALLET_ID!}`;
+    let aliceWallet = await TestNetWallet.fromId(aliceWif);
+
+    TestNetWallet.faucetServer = "http://localhost:3000";
+
+    const wallet = await TestNetWallet.newRandom() as TestNetWallet;
+
+    // send bob some bch gas to enable him to send slp
+    await aliceWallet.slpAware().send([{cashaddr: wallet.cashaddr!, value: 5000, unit: "sat"}]);
+
+    const txid = await wallet.getTestnetSlp("MNC");
+    expect(txid.length).toBe(64);
+    let balance = await wallet.slp.getBalance("MNC");
+    expect(balance[0].amount.toNumber()).toBe(10);
+
+    const tokenId = balance[0].tokenId;
+    const response = await wallet.returnTestnetSlp("MNC", tokenId);
+    expect(response.balances.length).toBe(0);
+
+    await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
+  });
 });
