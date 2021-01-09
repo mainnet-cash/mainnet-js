@@ -211,7 +211,12 @@ export const SlpGetSendOutputs = async (
   let amounts = sendRequests.map((val) => new BigNumber(val.value));
   if (change.isGreaterThan(new BigNumber(0))) {
     amounts.push(change);
-    sendRequests.push({cashaddr: changeCashaddr, ticker: ticker, tokenId: tokenId, value: 0});
+    sendRequests.push({
+      cashaddr: changeCashaddr,
+      ticker: ticker,
+      tokenId: tokenId,
+      value: 0,
+    });
   }
 
   const bchSendRequests = sendRequests.map(

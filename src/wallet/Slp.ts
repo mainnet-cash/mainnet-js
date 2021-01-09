@@ -194,7 +194,11 @@ export class Slp {
       ticker,
       tokenId
     );
-    let slpOutputsResult = await SlpGetSendOutputs(this.cashaddr, slpUtxos, sendRequests);
+    let slpOutputsResult = await SlpGetSendOutputs(
+      this.cashaddr,
+      slpUtxos,
+      sendRequests
+    );
 
     let fundingBchUtxos = await this.wallet
       .slpAware(true)

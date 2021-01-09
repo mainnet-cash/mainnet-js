@@ -404,7 +404,7 @@ describe(`Wallet subscriptions`, () => {
   test("Should get testnet satoshis and send them back", async () => {
     TestNetWallet.faucetServer = "http://localhost:3000";
 
-    const wallet = await TestNetWallet.newRandom() as TestNetWallet;
+    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
     const txid = await wallet.getTestnetSatoshis();
     expect(txid.length).toBe(64);
     let balance = await wallet.getBalance("sat");
@@ -420,10 +420,12 @@ describe(`Wallet subscriptions`, () => {
 
     TestNetWallet.faucetServer = "http://localhost:3000";
 
-    const wallet = await TestNetWallet.newRandom() as TestNetWallet;
+    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
 
     // send bob some bch gas to enable him to send slp
-    await aliceWallet.slpAware().send([{cashaddr: wallet.cashaddr!, value: 5000, unit: "sat"}]);
+    await aliceWallet
+      .slpAware()
+      .send([{ cashaddr: wallet.cashaddr!, value: 5000, unit: "sat" }]);
 
     const txid = await wallet.getTestnetSlp("MNC");
     expect(txid.length).toBe(64);

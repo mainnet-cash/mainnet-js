@@ -19,7 +19,7 @@ import {
   _convertUtxoBigNumbers,
 } from "./SlpProvider";
 import axios from "axios";
-import { btoa } from "../util/base64"
+import { btoa } from "../util/base64";
 
 const servers = {
   mainnet: {
