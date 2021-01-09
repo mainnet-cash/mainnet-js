@@ -33,7 +33,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should recognize browser as platform`, async () => {
     const result = await page.evaluate(async () => {
-      return Mainnet.getPlatform();
+      return Mainnet.getRuntimePlatform();
     });
     expect(result).toBe("browser");
   });
