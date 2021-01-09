@@ -5,6 +5,7 @@ import { getStorageProvider } from "../db/util";
 import { WalletI } from "./interface";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
+import { getPlatform } from "../util";
 
 /**
  * A class to hold features used by all wallets
@@ -23,25 +24,25 @@ export class BaseWallet implements WalletI {
     this.name = name;
 
     this.networkPrefix = networkPrefix;
-    this.networkType =
-      this.networkPrefix === CashAddressNetworkPrefix.mainnet
-        ? NetworkType.Mainnet
-        : NetworkType.Testnet;
 
-    this.isTestnet = this.networkType === "testnet" ? true : false;
     switch (this.networkPrefix) {
       case CashAddressNetworkPrefix.regtest:
         this.network = NetworkEnum.Regtest;
+        this.networkType = NetworkType.Regtest;
         this.provider = getNetworkProvider("regtest");
         break;
       case CashAddressNetworkPrefix.testnet:
         this.network = NetworkEnum.Testnet;
+        this.networkType = NetworkType.Testnet;
         this.provider = getNetworkProvider("testnet");
         break;
       default:
         this.network = NetworkEnum.Mainnet;
+        this.networkType = NetworkType.Mainnet;
         this.provider = getNetworkProvider();
     }
+
+    this.isTestnet = this.networkType === "testnet" ? true : false;
   }
 
   /**
@@ -96,7 +97,9 @@ export class BaseWallet implements WalletI {
         return wallet;
       }
     } else {
-      return await this.generate();
+      throw Error(
+        "No database was available or configured to store the named wallet."
+      );
     }
   };
 
@@ -138,7 +141,7 @@ export class BaseWallet implements WalletI {
  * @param {BaseWallet} wallet        a wallet
  */
 const _checkContextSafety = function (wallet: BaseWallet) {
-  if (typeof process !== "undefined") {
+  if (getPlatform() === "node") {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.networkType === NetworkType.Mainnet) {
         throw Error(

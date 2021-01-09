@@ -1,21 +1,21 @@
 module.exports = {
   verbose: true,
-  rootDir: "../",
+  rootDir: "./",
   preset: "jest-playwright-preset",
-  collectCoverageFrom: [
-    "**/*.{js,jsx,ts}",
-    "!**/node_modules/**",
-    "!**/generated/**",
-  ],
+  collectCoverageFrom: ["**/*.{js}", "!**/node_modules/**", "!**/generated/**"],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
     ".*/src/.*\\.test\\.{ts,js}",
-    ".*/src/.*\\.test\\.headless\\.js",
   ],
   roots: ["<rootDir>/src"],
-  testMatch: ["**/?(*.)+(test.headless).[t|j]s"],
+  testMatch: ["**/**.test.headless.js"],
   testPathIgnorePatterns: ["/node_modules/"], //
   testEnvironment: "node",
+  testEnvironmentOptions: {
+    "jest-playwright": {
+      browsers: ["chromium", "firefox", "webkit"],
+    },
+  },
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },

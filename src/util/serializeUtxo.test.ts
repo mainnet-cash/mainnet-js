@@ -1,5 +1,4 @@
 import { serializeUtxo, deserializeUtxo } from "./serializeUtxo";
-import { UtxoI } from "../interface";
 
 test("Should serialize utxo", () => {
   let utxoId = serializeUtxo({

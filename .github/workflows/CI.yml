@@ -59,16 +59,9 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
         with:
           commit_message: Apply formatting changes
-  test_linux:
-    name: ${{ matrix.os }} (${{ matrix.browser }})
+  test_browsers:
     needs: [ format ]
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        browser: [chromium] # firefox, webkit
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
@@ -77,11 +70,25 @@ jobs:
     - uses: microsoft/playwright-github-action@v1
     - run: yarn
     - run: yarn build
+    - run: yarn test:browser       
+  test_linux:
+    name: ${{ matrix.os }} (${{ matrix.browser }})
+    needs: [ test_browsers ]
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: "14.x"
+    - run: yarn
+    - run: yarn build
     - run: yarn test
     - run: yarn test:api
-    - run: yarn test:browser
-      env:
-        BROWSER: ${{ matrix.browser }}
   coverage:
     needs: [ test_linux ]
     name: coverage

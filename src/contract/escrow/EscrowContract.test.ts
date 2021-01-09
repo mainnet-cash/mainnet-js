@@ -1,22 +1,27 @@
 import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
 
+import { initProviders, disconnectProviders } from "../../network/Connection";
+
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
+
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
-
     let escrow = new EscrowContract({
-      arbiterAddr: arbiter.getDepositAddress()!,
-      buyerAddr: buyer.getDepositAddress()!,
-      sellerAddr: seller.getDepositAddress()!,
+      sellerAddr: "bchtest:qrmxnsr0g6kl7s3zkweedf5cvlqscatajgt62kpjtj",
+      buyerAddr: "bchtest:qz74q2z3v6qakjwj9htgn62d6vn0uvag2u2qgz6fm6",
+      arbiterAddr: "bchtest:qrzqzlnclmmrt4vujzz6nu9je99rv85kw5aa9hklev",
       amount: 19500,
     });
     let escrow2 = new EscrowContract({
-      arbiterAddr: arbiter.getDepositAddress()!,
-      buyerAddr: buyer.getDepositAddress()!,
-      sellerAddr: seller.getDepositAddress()!,
+      sellerAddr: "bchtest:qrmxnsr0g6kl7s3zkweedf5cvlqscatajgt62kpjtj",
+      buyerAddr: "bchtest:qz74q2z3v6qakjwj9htgn62d6vn0uvag2u2qgz6fm6",
+      arbiterAddr: "bchtest:qrzqzlnclmmrt4vujzz6nu9je99rv85kw5aa9hklev",
       amount: 19500,
     });
     expect(escrow.toString().slice(0, 20)).toBe(

@@ -49,12 +49,12 @@ const browserConfig = {
   resolve: {
     alias: {
       bip39: require.resolve("./polyfill/bip39.browser.js"),
-      buffer: false,
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -66,7 +66,6 @@ const browserConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      process: false,
       stream: false,
       tls: false,
       util: require.resolve("./polyfill/util.js"),
@@ -86,12 +85,12 @@ const webWorkerConfig = {
   resolve: {
     alias: {
       bip39: require.resolve("./polyfill/bip39.browser.js"),
-      buffer: false,
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -103,7 +102,6 @@ const webWorkerConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      process: false,
       stream: false,
       tls: false,
       util: require.resolve("./polyfill/util.js"),

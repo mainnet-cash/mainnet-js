@@ -33,7 +33,8 @@ export async function initProviders(networks?: Network[]) {
 async function disconnectProvider(network: Network) {
   const ticker = networkTickerMap[network];
   if (ticker in globalThis) {
-    return globalThis[ticker].disconnect();
+    await globalThis[ticker].disconnect();
+    return delete globalThis[ticker];
   } else {
     console.warn(
       `Ignoring attempt to disconnect non-existent ${network} provider`

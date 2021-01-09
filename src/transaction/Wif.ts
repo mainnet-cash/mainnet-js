@@ -2,7 +2,7 @@
 import {
   authenticationTemplateP2pkhNonHd,
   authenticationTemplateToCompilerBCH,
-  bigIntToBinUint64LE,
+  bigIntToBinUint64LEClamped,
   cashAddressToLockingBytecode,
   Compiler,
   encodeTransaction,
@@ -27,7 +27,8 @@ export async function buildP2pkhNonHdTransaction(
   outputs: SendRequest[],
   signingKey: Uint8Array,
   fee: number = 0,
-  discardChange = false
+  discardChange = false,
+  slpOutputs: any[] = []
 ) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -61,7 +62,7 @@ export async function buildP2pkhNonHdTransaction(
       if (changeAmount > DUST_UTXO_THRESHOLD) {
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
-          satoshis: bigIntToBinUint64LE(BigInt(changeAmount)),
+          satoshis: bigIntToBinUint64LEClamped(BigInt(changeAmount)),
         });
       }
     }
@@ -70,7 +71,7 @@ export async function buildP2pkhNonHdTransaction(
     const result = generateTransaction({
       inputs: signedInputs,
       locktime: 0,
-      outputs: [...lockedOutputs],
+      outputs: [...slpOutputs, ...lockedOutputs],
       version: 2,
     });
     return result;
@@ -110,7 +111,7 @@ export function prepareInputs(
         data: {
           keys: { privateKeys: { key: signingKey } },
         },
-        satoshis: bigIntToBinUint64LE(BigInt(utxoTxnValue)),
+        satoshis: bigIntToBinUint64LEClamped(BigInt(utxoTxnValue)),
         script: "unlock",
       },
     };
@@ -143,7 +144,7 @@ export async function prepareOutputs(outputs: SendRequest[]) {
     }
     let lockedOutput = {
       lockingBytecode: outputLockingBytecode.bytecode,
-      satoshis: bigIntToBinUint64LE(BigInt(sendAmount)),
+      satoshis: bigIntToBinUint64LEClamped(BigInt(sendAmount)),
     };
     lockedOutputs.push(lockedOutput);
   }
@@ -156,7 +157,7 @@ export async function getSuitableUtxos(
   bestHeight: number
 ) {
   let suitableUtxos: UtxoI[] = [];
-  let amountAvailable = 0n;
+  let amountAvailable = BigInt(0);
   for (const u of unspentOutputs) {
     if (u.coinbase && u.height && bestHeight) {
       let age = bestHeight - u.height;
@@ -178,9 +179,14 @@ export async function getSuitableUtxos(
   if (typeof amountRequired === "undefined") {
     return suitableUtxos;
   } else if (amountAvailable < amountRequired) {
-    throw Error(
+    let e = Error(
       `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
     );
+    e["data"] = {
+      required: amountRequired,
+      available: amountAvailable,
+    };
+    throw e;
   } else {
     return suitableUtxos;
   }
@@ -191,11 +197,13 @@ export async function getFeeAmount({
   sendRequests,
   privateKey,
   relayFeePerByteInSatoshi,
+  slpOutputs,
 }: {
   utxos: UtxoI[];
   sendRequests: SendRequest[];
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
+  slpOutputs: any[];
 }) {
   // build transaction
   if (utxos) {
@@ -204,7 +212,9 @@ export async function getFeeAmount({
       utxos,
       sendRequests,
       privateKey,
-      1000
+      1000,
+      false,
+      slpOutputs
     );
 
     return draftTransaction.length * relayFeePerByteInSatoshi + 1;
@@ -221,14 +231,16 @@ export async function buildEncodedTransaction(
   sendRequests: SendRequest[],
   privateKey: Uint8Array,
   fee: number = 0,
-  discardChange = false
+  discardChange = false,
+  slpOutputs: any[] = []
 ) {
   let txn = await buildP2pkhNonHdTransaction(
     fundingUtxos,
     sendRequests,
     privateKey,
     fee,
-    discardChange
+    discardChange,
+    slpOutputs
   );
   // submit transaction
   if (txn.success) {
