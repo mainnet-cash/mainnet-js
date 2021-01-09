@@ -37,7 +37,7 @@ test("Test SLP genesis txo bytecode per SLP Spec", async () => {
     "6a04534c500001010747454e45534953045553445423546574686572204c74642e20555320646f6c6c6172206261636b656420746f6b656e734168747470733a2f2f7465746865722e746f2f77702d636f6e74656e742f75706c6f6164732f323031362f30362f546574686572576869746550617065722e70646620db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec77793139160108010208002386f26fc10000"
   );
 
-  const obj = parseSLP(Buffer.from(hex, "hex"));
+  parseSLP(Buffer.from(hex, "hex"));
 });
 
 test("Test SLP send txo bytecode per SLP Spec", async () => {
@@ -66,7 +66,7 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
     "6a04534c500001010453454e4420550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b350800005af3107a40000800232bff5f46c000"
   );
 
-  const obj = parseSLP(Buffer.from(hex, "hex"));
+  parseSLP(Buffer.from(hex, "hex"));
 });
 
 test("Test SLP mint txo bytecode per SLP Spec", async () => {
@@ -96,5 +96,5 @@ test("Test SLP mint txo bytecode per SLP Spec", async () => {
     "6a04534c50000101044d494e5420550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35010208002386f26fc10000"
   );
 
-  const obj = parseSLP(Buffer.from(hex, "hex"));
+  parseSLP(Buffer.from(hex, "hex"));
 });
