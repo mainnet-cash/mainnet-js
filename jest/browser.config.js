@@ -16,6 +16,13 @@ module.exports = {
   testMatch: ["**/?(*.)+(test.headless).[t|j]s"],
   testPathIgnorePatterns: ["/node_modules/"], //
   testEnvironment: "node",
+  testEnvironmentOptions: {
+    "jest-playwright": {
+      browsers: ["chromium", "firefox"
+      //, "webkit"
+    ],
+    },
+  },
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },
