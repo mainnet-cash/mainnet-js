@@ -5,7 +5,7 @@ import { getStorageProvider } from "../db/util";
 import { WalletI } from "./interface";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
-import { getPlatform } from "../util";
+import { getRuntimePlatform } from "../util/getRuntimePlatform";
 
 /**
  * A class to hold features used by all wallets
@@ -141,7 +141,7 @@ export class BaseWallet implements WalletI {
  * @param {BaseWallet} wallet        a wallet
  */
 const _checkContextSafety = function (wallet: BaseWallet) {
-  if (getPlatform() === "node") {
+  if (getRuntimePlatform() === "node") {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.networkType === NetworkType.Mainnet) {
         throw Error(

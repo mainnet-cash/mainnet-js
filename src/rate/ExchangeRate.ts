@@ -1,5 +1,5 @@
 import { EXCHANGE_RATE_TTL } from "../constant";
-import { Platform, getPlatform } from "../util/getPlatform";
+import { RuntimePlatform, getRuntimePlatform } from "../util/getRuntimePlatform";
 import ExchangeRateProvider from "../db/ExchangeRateProvider";
 
 import get from "axios";
@@ -27,7 +27,7 @@ export class ExchangeRate {
   }
 
   static async get(symbol: string) {
-    const platform = getPlatform();
+    const platform = getRuntimePlatform();
     if (platform !== Platform.node) {
       return await this.getRateFromIndexedDb(symbol);
     } else {
