@@ -10,7 +10,7 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let miningStarted = false;
+process.on("unhandledRejection", console.error);
 
 module.exports = async function () {
   if (process.env.SKIP_REGTEST_INIT) {

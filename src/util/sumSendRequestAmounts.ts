@@ -9,10 +9,10 @@ export async function sumSendRequestAmounts(requests: SendRequest[]) {
         return BigInt(await amountInSatoshi(r.value, r.unit));
       })
     );
-    const balance = balanceArray.reduce(sumBalance, 0n);
+    const balance = balanceArray.reduce(sumBalance, BigInt(0));
     return balance;
   } else {
-    return 0n;
+    return BigInt(0);
   }
 }
 

@@ -9,8 +9,8 @@ export default class IndexedDBProvider
 
   public constructor(dbName: string) {
     super(dbName);
-    this.version(2).stores({
-      wallet: "++id,name,wallet",
+    this.version(3).stores({
+      wallet: "name",
     });
     this.db = this.table("wallet");
   }
@@ -28,10 +28,7 @@ export default class IndexedDBProvider
   }
 
   public async addWallet(name: string, wallet: string): Promise<boolean> {
-    // Make sure we have something in DB:
-
     return this.transaction("rw", this.db, async () => {
-      // Make sure we have something in DB:
       if ((await this.db.where({ name: name }).count()) === 0) {
         await this.db.add({ name: name, wallet: wallet }).catch((e) => {
           throw Error(e);

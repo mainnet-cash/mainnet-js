@@ -1,19 +1,18 @@
 import { ClusterOrder } from "electrum-cash";
 
+export const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
+
 export const networkTickerMap = {
   mainnet: "BCH",
   testnet: "BCHt",
   regtest: "BCHr",
 };
 
-export const mainnetServers = [
-  "wss://fulcrum.fountainhead.cash",
-  //"wss://bch.imaginary.cash:50004"
-];
+export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];
 
 export const testnetServers = ["wss://blackie.c3-soft.com:60004"];
 
-export const regtestServers = "ws://127.0.0.1:60003";
+export const regtestServers = ["ws://127.0.0.1:60003"];
 
 export const defaultServers = {
   mainnet: mainnetServers,
@@ -35,6 +34,6 @@ export const clusterParams = {
   regtest: {
     distribution: 1,
     order: ClusterOrder.PRIORITY,
-    timeout: 1000,
+    timeout: 5000,
   },
 };

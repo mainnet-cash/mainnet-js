@@ -1,6 +1,9 @@
+import { UnitEnum } from "./enum";
+
 export * from "./contract";
 export * from "./db/index";
 export * from "./mine";
+export { UnitEnum } from "./enum";
 export * from "./network";
 export * from "./wallet/Wif";
 export * from "./wallet/createWallet";

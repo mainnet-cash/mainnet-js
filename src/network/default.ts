@@ -1,27 +1,28 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
 import { ElectrumCluster, ElectrumClient } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider";
-import * as config from "./constant";
+import { defaultServers, getConfidence, getUserAgent } from "./configuration";
 import { parseElectrumUrl } from "./util";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
 import { Network } from "../interface";
+import { networkTickerMap, clusterParams } from "./constant";
+import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant";
 
-const APPLICATION_USER_AGENT = "mainnet-js";
-const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
+function setGlobalProvider(
+  network: Network,
+  provider: NetworkProvider
+): NetworkProvider {
+  let accessor = networkTickerMap[network];
+  if (globalThis[accessor]) {
+    return globalThis[accessor];
+  } else {
+    globalThis[accessor] = provider;
+    return globalThis[accessor];
+  }
+}
 
 function getGlobalProvider(network: Network): NetworkProvider | void {
-  let accessor: string;
-  switch (network) {
-    case Network.MAINNET:
-      accessor = "BCH";
-      break;
-    case Network.TESTNET:
-      accessor = "BCHt";
-      break;
-    case Network.REGTEST:
-      accessor = "BCHr";
-      break;
-  }
+  let accessor = networkTickerMap[network];
   if (globalThis[accessor]) {
     return globalThis[accessor];
   } else {
@@ -39,7 +40,7 @@ export function getNetworkProvider(
   manualConnectionManagement = manualConnectionManagement
     ? manualConnectionManagement
     : false;
-  servers = servers ? servers : config.defaultServers[network];
+  servers = servers ? servers : defaultServers[network];
 
   let globalProvider = getGlobalProvider(network);
   if (globalProvider) {
@@ -62,36 +63,24 @@ export function getNetworkProvider(
     let clusterOrClient;
     // There were multiple servers
     if (useCluster) {
-      let clusterParams = config.clusterParams[network];
-      clusterParams["confidence"] = getConfidence();
-      clusterParams = Object.assign({}, clusterParams, options);
-      clusterOrClient = getCluster(servers, clusterParams);
+      let clusterParam = clusterParams[network];
+      clusterParam["confidence"] = getConfidence();
+      clusterParam = Object.assign({}, clusterParam, options);
+      clusterOrClient = getCluster(servers, clusterParam);
     }
     // The server is a single string in an array
     else {
       clusterOrClient = getClient(servers);
     }
-    return new ElectrumNetworkProvider(
+    let provider = new ElectrumNetworkProvider(
       clusterOrClient,
       network,
       manualConnectionManagement
     );
+    return setGlobalProvider(network, provider);
   } else {
     throw Error("No servers provided, defaults not available.");
   }
-}
-
-function getConfidence() {
-  // Allow users to configure the cluster confidence
-  let confidence;
-  if (typeof process !== "undefined") {
-    confidence = process.env.CLUSTER_CONFIDENCE
-      ? process.env.CLUSTER_CONFIDENCE
-      : 1;
-  } else {
-    confidence = 1;
-  }
-  return confidence;
 }
 
 // Create a cluster give a list of servers and parameters
@@ -113,7 +102,7 @@ function getClient(servers: string[]) {
 
 function getElectrumCluster(params: ElectrumClusterParams) {
   return new ElectrumCluster(
-    APPLICATION_USER_AGENT,
+    getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
     params.confidence,
     params.distribution,
@@ -124,7 +113,7 @@ function getElectrumCluster(params: ElectrumClusterParams) {
 
 function getElectrumClient(params: ElectrumHostParams, timeout: number) {
   return new ElectrumClient(
-    APPLICATION_USER_AGENT,
+    getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
     params.host,
     params.port,

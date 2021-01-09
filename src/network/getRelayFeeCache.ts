@@ -1,4 +1,5 @@
 import { bchParam } from "../chain";
+import { Network } from "../interface";
 import { networkTickerMap } from "./constant";
 import { default as NetworkProvider } from "./NetworkProvider";
 
