@@ -28,7 +28,7 @@ export class ExchangeRate {
 
   static async get(symbol: string) {
     const platform = getRuntimePlatform();
-    if (platform !== Platform.node) {
+    if (platform !== RuntimePlatform.node) {
       return await this.getRateFromIndexedDb(symbol);
     } else {
       return await this.getRateFromGlobalScope(symbol);
