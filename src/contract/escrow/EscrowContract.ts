@@ -9,7 +9,7 @@ import { getRandomInt } from "../../util/randomInt";
 export class EscrowContract extends Contract {
   private sellerAddr: string;
   private buyerAddr: string;
-  
+
   // @ts-ignore
   private arbiterAddr: string;
   // @ts-ignore
