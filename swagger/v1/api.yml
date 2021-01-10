@@ -29,6 +29,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
+  - name: faucet
+    description: Testnet faucet
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/faucet/
   - name: mine
     description: Mine regtest coins
     externalDocs:
@@ -50,6 +55,73 @@ tags:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
 paths:
+  /faucet/get_testnet_bch:
+    post:
+      operationId: getTestnetBch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetTestnetBchRequest"
+        description: |
+          Request to bch faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTestnetBchResponse"
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get testnet bch
+      tags:
+        - faucet
+  /faucet/get_testnet_slp:
+    post:
+      operationId: getTestnetSlp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetTestnetSlpRequest"
+        description: |
+          Request to slp faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTestnetSlpResponse"
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get testnet slp tokens
+      tags:
+        - faucet
+  /faucet/get_addresses:
+    post:
+      operationId: getAddresses
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAddressesResponse"
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get addresses to return back or donate the testnet bch and tokens
+      tags:
+        - faucet
   /webhook/watch_address:
     post:
       operationId: watchAddress
@@ -415,6 +487,56 @@ paths:
         - wallet
 components:
   schemas:
+    GetTestnetBchRequest:
+      properties:
+        cashaddr:
+          type: string
+          description: Receiver's cashaddr
+      example:
+        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
+    GetTestnetBchResponse:
+      properties:
+        txId:
+          type: string
+          description: Transaction id
+      example:
+        txId: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+    GetTestnetSlpRequest:
+      properties:
+        cashaddr:
+          type: string
+          description: Receiver's cashaddr
+        ticker:
+          type: string
+          description: Token ticker
+        tokenId:
+          type: string
+          description: TokenId in hex
+      required:
+        - cashaddr
+        - ticker
+      example:
+        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
+        ticker: "MNC"
+        tokenId: "5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27"
+    GetTestnetSlpResponse:
+      properties:
+        txId:
+          type: string
+          description: Transaction id
+      example:
+        txId: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+    GetAddressesResponse:
+      properties:
+        bchtest:
+          type: string
+          description: Cashaddr to return testnet BCH
+        slptest:
+          type: string
+          description: Cashaddr to return testnet SLP tokens
+      example:
+        bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
+        slptest: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"
     Utxo:
       properties:
         index:

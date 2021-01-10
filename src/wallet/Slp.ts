@@ -25,6 +25,7 @@ import {
   SlpGetGenesisOutputs,
   SlpGetMintOutputs,
   SlpGetSendOutputs,
+  SlpTxoTemplate,
 } from "../slp/SlpLibAuth";
 import { binToHex } from "@bitauth/libauth";
 import { SendRequest } from "./model";
@@ -194,7 +195,11 @@ export class Slp {
       ticker,
       tokenId
     );
-    let slpOutputsResult = await SlpGetSendOutputs(slpUtxos, sendRequests);
+    let slpOutputsResult = await SlpGetSendOutputs(
+      this.cashaddr,
+      slpUtxos,
+      sendRequests
+    );
 
     let fundingBchUtxos = await this.wallet
       .slpAware(true)
