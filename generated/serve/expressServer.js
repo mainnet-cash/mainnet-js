@@ -35,7 +35,8 @@ class ExpressServer {
   setupMiddleware() {
     // this.setupAllowedMedia();
     this.app.use(cors());
-    this.app.use('/scripts', express.static(__dirname + '/node_modules/mainnet-js/dist/'));
+    const latest = fs.readdirSync(__dirname + '/node_modules/mainnet-js/dist/').filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
+    this.app.use('/scripts/mainnet.js', express.static(__dirname + `/node_modules/mainnet-js/dist/${latest}`));
     this.app.use(express.static('static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
