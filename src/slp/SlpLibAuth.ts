@@ -26,6 +26,15 @@ export const bigIntToBinUint64BE = (value) => {
   return bin;
 };
 
+const stringToBin = (value, hex = false) => {
+  if (!value) return Uint8Array.from([0x4c, 0x00]);
+
+  if (hex) return Uint8Array.from([...[value.length / 2], ...hexToBin(value)]);
+
+  const length = new TextEncoder().encode(value).length;
+  return Uint8Array.from([...[length], ...utf8ToBin(value)]);
+};
+
 export const SlpGetGenesisOutputs = async (
   options: SlpGenesisOptions,
   genesis_token_receiver_cashaddr: string,
@@ -66,15 +75,10 @@ export const SlpGetGenesisOutputs = async (
 
   let genesisTxoBytecode = compiler.generateBytecode("genesis_lock", {
     bytecode: {
-      g_token_ticker: utf8ToBin(options.ticker),
-      g_token_name: utf8ToBin(options.name),
-      g_token_document_url: utf8ToBin(
-        options.documentUrl || "https://mainnet.cash"
-      ),
-      g_token_document_hash: hexToBin(
-        options.documentHash ||
-          "0000000000000000000000000000000000000000000000000000000000000000"
-      ),
+      g_token_ticker: stringToBin(options.ticker),
+      g_token_name: stringToBin(options.name),
+      g_token_document_url: stringToBin(options.documentUrl),
+      g_token_document_hash: stringToBin(options.documentHash, true),
       g_decimals: Uint8Array.from([options.decimalPlaces]),
       g_mint_baton_vout: Uint8Array.from([batonVout]),
       g_initial_token_mint_quantity: bigIntToBinUint64BE(rawTokenAmount),
@@ -436,7 +440,7 @@ export const SlpTxoTemplate = {
     "genesis_lock": {
       "lockingType": "standard",
       "name": "Genesis",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'GENESIS'> <g_token_ticker> <g_token_name> <g_token_document_url> <g_token_document_hash> $(<0x01 g_decimals>) $(<0x01 g_mint_baton_vout>) $(<0x08 g_initial_token_mint_quantity>)"
+      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'GENESIS'> $(<g_token_ticker>) $(<g_token_name>) $(<g_token_document_url>) $(<g_token_document_hash>) $(<0x01 g_decimals>) $(<0x01 g_mint_baton_vout>) $(<0x08 g_initial_token_mint_quantity>)"
     },
     "send_lock": {
       "lockingType": "standard",
