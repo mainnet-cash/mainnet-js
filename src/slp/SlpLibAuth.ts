@@ -1,11 +1,13 @@
 import {
   authenticationTemplateToCompilerBCH,
   bigIntToBinUint64LE,
+  binToHex,
   hexToBin,
   utf8ToBin,
   validateAuthenticationTemplate,
 } from "@bitauth/libauth";
 import bchaddr from "bchaddrjs-slp";
+import { parseSLP } from "slp-parser";
 
 import { SendRequest } from "../wallet/model";
 import { SlpGenesisOptions, SlpSendRequest, SlpUtxoI } from "../slp/interface";
@@ -22,6 +24,15 @@ export const bigIntToBinUint64BE = (value) => {
   // eslint-disable-next-line functional/no-expression-statement
   view.setBigUint64(0, value, writeAsLittleEndian);
   return bin;
+};
+
+const stringToBin = (value, hex = false) => {
+  if (!value) return Uint8Array.from([0x4c, 0x00]);
+
+  if (hex) return Uint8Array.from([...[value.length / 2], ...hexToBin(value)]);
+
+  const length = new TextEncoder().encode(value).length;
+  return Uint8Array.from([...[length], ...utf8ToBin(value)]);
 };
 
 export const SlpGetGenesisOutputs = async (
@@ -64,15 +75,10 @@ export const SlpGetGenesisOutputs = async (
 
   let genesisTxoBytecode = compiler.generateBytecode("genesis_lock", {
     bytecode: {
-      g_token_ticker: utf8ToBin(options.ticker),
-      g_token_name: utf8ToBin(options.name),
-      g_token_document_url: utf8ToBin(
-        options.documentUrl || "https://mainnet.cash"
-      ),
-      g_token_document_hash: hexToBin(
-        options.documentHash ||
-          "0000000000000000000000000000000000000000000000000000000000000000"
-      ),
+      g_token_ticker: stringToBin(options.ticker),
+      g_token_name: stringToBin(options.name),
+      g_token_document_url: stringToBin(options.documentUrl),
+      g_token_document_hash: stringToBin(options.documentHash, true),
       g_decimals: Uint8Array.from([options.decimalPlaces]),
       g_mint_baton_vout: Uint8Array.from([batonVout]),
       g_initial_token_mint_quantity: bigIntToBinUint64BE(rawTokenAmount),
@@ -148,6 +154,7 @@ export const SlpGetMintOutputs = async (
 };
 
 export const SlpGetSendOutputs = async (
+  changeCashaddr: string,
   slpUtxos: SlpUtxoI[],
   sendRequests: SlpSendRequest[]
 ) => {
@@ -162,6 +169,14 @@ export const SlpGetSendOutputs = async (
       "You have two different token types with the same ticker. Pass tokenId parameter"
     );
   }
+
+  const decimals = slpUtxos[0].decimals;
+  const tokenId = slpUtxos[0].tokenId;
+  const ticker = slpUtxos[0].ticker;
+
+  // sort inputs in ascending order to eliminate the unnecessary splitting
+  // and to prefer the consolidation of small inputs
+  slpUtxos = slpUtxos.sort((a, b) => a.amount.comparedTo(b.amount));
 
   const slpAvailableAmount: BigNumber = slpUtxos
     .map((val) => new BigNumber(val.amount))
@@ -179,15 +194,33 @@ export const SlpGetSendOutputs = async (
   }
 
   let fundingSlpUtxos: SlpUtxoI[] = [];
-  let inputTokensRaw = new BigNumber(0);
+  let totalInputTokens = new BigNumber(0);
   for (let slputxo of slpUtxos) {
-    const amountTooLow = inputTokensRaw.isLessThan(slpSpendAmount);
+    const amountTooLow = totalInputTokens.isLessThan(slpSpendAmount);
     if (amountTooLow) {
-      inputTokensRaw = inputTokensRaw.plus(slputxo.amount);
+      totalInputTokens = totalInputTokens.plus(slputxo.amount);
       fundingSlpUtxos.push(slputxo);
     } else {
       break;
     }
+  }
+
+  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  if (typeof template === "string") {
+    throw new Error("Transaction template error");
+  }
+  const compiler = await authenticationTemplateToCompilerBCH(template);
+
+  const change = totalInputTokens.minus(slpSpendAmount);
+  let amounts = sendRequests.map((val) => new BigNumber(val.value));
+  if (change.isGreaterThan(new BigNumber(0))) {
+    amounts.push(change);
+    sendRequests.push({
+      cashaddr: changeCashaddr,
+      ticker: ticker,
+      tokenId: tokenId,
+      value: 0,
+    });
   }
 
   const bchSendRequests = sendRequests.map(
@@ -199,19 +232,6 @@ export const SlpGetSendOutputs = async (
       })
   );
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
-  if (typeof template === "string") {
-    throw new Error("Transaction template error");
-  }
-  const compiler = await authenticationTemplateToCompilerBCH(template);
-
-  const change = slpAvailableAmount.minus(slpSpendAmount);
-  let amounts = sendRequests.map((val) => new BigNumber(val.value));
-  if (change.isGreaterThan(new BigNumber(0))) {
-    amounts.push(change);
-  }
-
-  const decimals = slpUtxos[0].decimals;
   amounts = amounts.map((val) => val.shiftedBy(decimals));
 
   let result: Uint8Array = new Uint8Array();
@@ -223,8 +243,6 @@ export const SlpGetSendOutputs = async (
     ]);
   }
 
-  const tokenId = slpUtxos[0].tokenId;
-
   let sendTxoBytecode = compiler.generateBytecode("send_lock", {
     bytecode: {
       s_token_id: hexToBin(tokenId!),
@@ -234,6 +252,9 @@ export const SlpGetSendOutputs = async (
   if (!sendTxoBytecode.success) {
     throw new Error(sendTxoBytecode.toString());
   }
+
+  // enforce checking
+  parseSLP(Buffer.from(binToHex(sendTxoBytecode.bytecode), "hex"));
 
   return {
     SlpOutputs: [
@@ -419,7 +440,7 @@ export const SlpTxoTemplate = {
     "genesis_lock": {
       "lockingType": "standard",
       "name": "Genesis",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'GENESIS'> <g_token_ticker> <g_token_name> <g_token_document_url> <g_token_document_hash> $(<0x01 g_decimals>) $(<0x01 g_mint_baton_vout>) $(<0x08 g_initial_token_mint_quantity>)"
+      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'GENESIS'> $(<g_token_ticker>) $(<g_token_name>) $(<g_token_document_url>) $(<g_token_document_hash>) $(<0x01 g_decimals>) $(<0x01 g_mint_baton_vout>) $(<0x08 g_initial_token_mint_quantity>)"
     },
     "send_lock": {
       "lockingType": "standard",
