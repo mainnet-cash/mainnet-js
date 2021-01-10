@@ -58,7 +58,11 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
   };
 
-  const result = await SlpGetSendOutputs([fundingSlpUtxo], [sendRequest]);
+  const result = await SlpGetSendOutputs(
+    wallet.cashaddr!,
+    [fundingSlpUtxo],
+    [sendRequest]
+  );
   const sendTxoBytecode = result.SlpOutputs[0].lockingBytecode;
 
   const hex = binToHex(sendTxoBytecode);

@@ -604,7 +604,24 @@ export class Wallet extends BaseWallet {
    * utxos Get unspent outputs for the wallet
    */
   public async getUtxos() {
-    return this.getAddressUtxos(this.cashaddr!);
+    if (!this.cashaddr) {
+      throw Error("Attempted to get utxos without an address");
+    }
+    let utxos = await this.getAddressUtxos(this.cashaddr);
+    let resp = new UtxoResponse();
+    resp.utxos = await Promise.all(
+      utxos.map(async (o: UtxoI) => {
+        let utxo = new UtxoItem();
+        utxo.unit = "sat";
+        utxo.value = o.satoshis;
+
+        utxo.txId = o.txid;
+        utxo.index = o.vout;
+        utxo.utxoId = utxo.txId + ":" + utxo.index;
+        return utxo;
+      })
+    );
+    return resp;
   }
 
   /**
@@ -700,7 +717,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return data.txId;
     } catch (e) {
-      console.log(e.response.data);
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
       throw e;
     }
   }
@@ -714,7 +732,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return await this.sendMax(data.bchtest);
     } catch (e) {
-      console.log(e.response.data);
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
       throw e;
     }
   }
@@ -729,7 +748,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return data.txId;
     } catch (e) {
-      console.log(e.response.data);
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
       throw e;
     }
   }

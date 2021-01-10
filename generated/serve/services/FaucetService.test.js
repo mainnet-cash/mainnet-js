@@ -90,7 +90,7 @@ describe("Test faucet endpoints", () => {
     // return tokens to faucet
     await bobwallet.slp.send([{cashaddr: wallet.slp.cashaddr, value: 10, ticker: ticker, tokenId: tokenId}]);
     // return 'gas'
-    await bobwallet.slpAware().sendMax(wallet.cashaddr);
+    await bobwallet.slpAware(false).sendMax(wallet.cashaddr);
   });
 
   it("Should get faucet addresses", async () => {
