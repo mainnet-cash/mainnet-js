@@ -54,6 +54,25 @@ export class Slp {
     return this.provider.SlpUtxos(bchaddr.toSlpAddress(cashaddr));
   }
 
+  public async getFormattedSlpUtxos(cashaddr: string): Promise<any[]> {
+    const utxos = await this.getSlpUtxos(bchaddr.toSlpAddress(cashaddr));
+    const result: any = {};
+    result.utxos =
+      utxos.map((val) => {
+        let utxo:any = {};
+        utxo.ticker = val.ticker;
+        utxo.tokenId = val.tokenId;
+        utxo.amount = val.amount;
+        utxo.satoshis = val.satoshis;
+        utxo.decimals = val.decimals;
+        utxo.txId = val.txid;
+        utxo.index = val.vout;
+        utxo.utxoId = utxo.txId + ":" + utxo.index;
+        return utxo;
+      })
+    return result;
+  }
+
   public async getBatonUtxos(
     ticker?: string,
     tokenId?: string

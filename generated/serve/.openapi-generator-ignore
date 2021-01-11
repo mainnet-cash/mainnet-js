@@ -24,7 +24,7 @@
 
 services/*.js
 services/*.test.ts
-#!services/FaucetService.js
+!services/WalletSlpService.js
 controllers/Controller.js
 package.json
 index.js
