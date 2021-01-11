@@ -46,7 +46,7 @@ describe("Test faucet endpoints", () => {
     expect(resp.statusCode).toEqual(405);
     expect(resp.body.message).toBe("You have 10000 sats or more. Refusing to refill.");
 
-    await bobwallet.sendMax(wallet.cashaddr);
+    await bobwallet.slpAware().sendMax(wallet.cashaddr);
   });
 
   it("Should send testnet slp tokens to recepient", async () => {
@@ -88,9 +88,9 @@ describe("Test faucet endpoints", () => {
     expect(resp.body.message).toBe("You have 10 tokens or more of this type. Refusing to refill.");
 
     // return tokens to faucet
-    await bobwallet.slp.send([{cashaddr: wallet.slp.cashaddr, value: 10, ticker: ticker, tokenId: tokenId}]);
+    await bobwallet.slp.sendMax(wallet.slp.cashaddr, ticker, tokenId);
     // return 'gas'
-    await bobwallet.slpAware(false).sendMax(wallet.cashaddr);
+    await bobwallet.slpAware().sendMax(wallet.cashaddr);
   });
 
   it("Should get faucet addresses", async () => {

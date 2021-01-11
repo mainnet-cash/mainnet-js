@@ -78,11 +78,11 @@
         }).catch(error => alert(error));
       },
       getBch() {
-        this.fetch("/faucet/get_testnet_bch", {cashaddr: this.cashaddr});
+        this.fetch("/faucet/get_testnet_bch", {cashaddr: bchaddr.toCashAddress(this.cashaddr)});
         this.update();
       },
       getTokens(ticker, tokenId) {
-        this.fetch("/faucet/get_testnet_slp", {cashaddr: this.cashaddr, ticker: ticker, tokenId: tokenId});
+        this.fetch("/faucet/get_testnet_slp", {cashaddr: bchaddr.toSlpAddress(this.cashaddr), ticker: ticker, tokenId: tokenId});
         this.update();
       },
 
@@ -96,26 +96,26 @@
           this.faucetCashaddr = json.bchtest;
 
           const wallet = await TestNetWallet.watchOnly(this.faucetCashAddr);
-            wallet.slpAware();
-            wallet.getBalance("bch").then((resp) => this.balance = resp);
+          wallet.slpAware();
+          wallet.getBalance("bch").then((resp) => this.balance = resp);
 
-            const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
-            const slpWallet = await TestNetWallet.watchOnly(caddr);
-            slpWallet.slp.getBalance().then((resp) => this.slpbalance = resp);
+          const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
+          const slpWallet = await TestNetWallet.watchOnly(caddr);
+          slpWallet.slp.getBalance().then((resp) => this.slpbalance = resp);
 
-            // const slpWallet = await TestNetWallet.fromWIF("cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG");
-            // const genesisOptions = {
-            //   name: "Mainnet coin",
-            //   ticker: "MNC",
-            //   decimalPlaces: 2,
-            //   initialAmount: 10000,
-            //   documentUrl: "https://mainnet.cash",
-            //   documentHash:
-            //     "0000000000000000000000000000000000000000000000000000000000000000",
-            // };
+          // const slpWallet = await TestNetWallet.fromWIF("cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG");
+          // const genesisOptions = {
+          //   name: "Mainnet coin",
+          //   ticker: "MNC",
+          //   decimalPlaces: 2,
+          //   initialAmount: 10000,
+          //   documentUrl: "https://mainnet.cash",
+          //   documentHash:
+          //     "0000000000000000000000000000000000000000000000000000000000000000",
+          // };
 
-            // const result = await slpWallet.slp.genesis(genesisOptions);
-            // console.log(result);
+          // const result = await slpWallet.slp.genesis(genesisOptions);
+          // console.log(result);
         })
       }
     },
