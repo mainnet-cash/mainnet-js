@@ -730,7 +730,7 @@ export class TestNetWallet extends Wallet {
         `${TestNetWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.sendMax(data.bchtest);
+      return await this.slpAware().sendMax(data.bchtest);
     } catch (e) {
       console.log(e);
       console.log(e.response ? e.response.data : "");
@@ -764,9 +764,7 @@ export class TestNetWallet extends Wallet {
         `${TestNetWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.slp.send([
-        { cashaddr: data.slptest, value: 10, ticker: ticker, tokenId: tokenId },
-      ]);
+      return await this.slp.sendMax(data.slptest, ticker, tokenId);
     } catch (e) {
       console.log(e);
       console.log(e.response ? e.response.data : "");

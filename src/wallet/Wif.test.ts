@@ -4,6 +4,8 @@ import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { UnitEnum } from "../enum";
 import { initProviders, disconnectProviders } from "../network/Connection";
 
+import { delay } from "../util/delay";
+
 beforeAll(async () => {
   await initProviders();
 });
@@ -401,41 +403,38 @@ describe(`Wallet subscriptions`, () => {
     expect(await bob.getBalance("sat")).toBe(4000);
   });
 
-  // test("Should get testnet satoshis and send them back", async () => {
-  //   TestNetWallet.faucetServer = "http://localhost:3000";
+  test("Should get testnet satoshis and send them back", async () => {
+    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
+    const txid = await wallet.getTestnetSatoshis();
+    expect(txid.length).toBe(64);
+    let balance = await wallet.getBalance("sat");
+    expect(balance).toBe(10000);
 
-  //   const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
-  //   const txid = await wallet.getTestnetSatoshis();
-  //   expect(txid.length).toBe(64);
-  //   let balance = await wallet.getBalance("sat");
-  //   expect(balance).toBe(10000);
+    const response = await wallet.returnTestnetSatoshis();
+    delay(3000);
+    expect(response.balance!.sat!).toBe(0);
+  });
 
-  //   const response = await wallet.returnTestnetSatoshis();
-  //   expect(response.balance!.sat!).toBe(0);
-  // });
+  test("Should get testnet slp tokens and send them back", async () => {
+    let aliceWif = `${process.env.ALICE_TESTNET_WALLET_ID!}`;
+    let aliceWallet = await TestNetWallet.fromId(aliceWif);
 
-  // test("Should get testnet slp tokens and send them back", async () => {
-  //   let aliceWif = `${process.env.ALICE_TESTNET_WALLET_ID!}`;
-  //   let aliceWallet = await TestNetWallet.fromId(aliceWif);
+    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
 
-  //   TestNetWallet.faucetServer = "http://localhost:3000";
+    // send bob some bch gas to enable him to send slp
+    await aliceWallet
+      .slpAware()
+      .send([{ cashaddr: wallet.cashaddr!, value: 5000, unit: "sat" }]);
 
-  //   const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
+    const txid = await wallet.getTestnetSlp("MNC");
+    expect(txid.length).toBe(64);
+    let balance = await wallet.slp.getBalance("MNC");
+    expect(balance[0].amount.toNumber()).toBe(10);
 
-  //   // send bob some bch gas to enable him to send slp
-  //   await aliceWallet
-  //     .slpAware()
-  //     .send([{ cashaddr: wallet.cashaddr!, value: 5000, unit: "sat" }]);
+    const tokenId = balance[0].tokenId;
+    const response = await wallet.returnTestnetSlp("MNC", tokenId);
+    expect(response.balances.length).toBe(0);
 
-  //   const txid = await wallet.getTestnetSlp("MNC");
-  //   expect(txid.length).toBe(64);
-  //   let balance = await wallet.slp.getBalance("MNC");
-  //   expect(balance[0].amount.toNumber()).toBe(10);
-
-  //   const tokenId = balance[0].tokenId;
-  //   const response = await wallet.returnTestnetSlp("MNC", tokenId);
-  //   expect(response.balances.length).toBe(0);
-
-  //   await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
-  // });
+    await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
+  });
 });
