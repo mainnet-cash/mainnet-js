@@ -298,6 +298,28 @@ paths:
       summary: create a new wallet
       tags:
         - wallet
+  /wallet/info:
+    post:
+      operationId: info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          The wallet to request information about, in serialized form.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletInfo"
+          description: |
+            Information about the wallet network, type, and keys
+      summary: Get information about a wallet
+      tags:
+        - wallet
   /wallet/balance:
     post:
       operationId: balance
@@ -321,6 +343,32 @@ paths:
                 description: If a unit of account is passed, a plain number is returned.
           description: successful operation
       summary: Get total balance for wallet
+      tags:
+        - wallet
+  /wallet/max_amount_to_send:
+    post:
+      operationId: maxAmountToSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaxAmountToSendRequest"
+        description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Get maximum spendable amount
       tags:
         - wallet
   /wallet/deposit_address:
@@ -365,75 +413,6 @@ paths:
             A Qr code image data encoded string in the src field suitable for inclusion in html using:
                - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
-      tags:
-        - wallet
-  /wallet/info:
-    post:
-      operationId: info
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SerializedWallet"
-        description: |
-          The wallet to request information about, in serialized form.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WalletInfo"
-          description: |
-            Information about the wallet network, type, and keys
-      summary: Get information about a wallet
-      tags:
-        - wallet
-  /wallet/max_amount_to_send:
-    post:
-      operationId: maxAmountToSend
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/MaxAmountToSendRequest"
-        description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BalanceResponse"
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-        "418":
-          content: {}
-          description: Invalid network for given address
-      summary: Get maximum spendable amount
-      tags:
-        - wallet
-  /wallet/utxo:
-    post:
-      operationId: utxos
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SerializedWallet"
-        description: |
-          Request detailed list of unspent transaction outputs
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UtxoResponse"
-          description: successful operation
-      summary: Get detailed information about unspent outputs (utxos)
       tags:
         - wallet
   /wallet/send:
@@ -485,6 +464,209 @@ paths:
       summary: Send all available funds to a given address
       tags:
         - wallet
+  /wallet/utxo:
+    post:
+      operationId: utxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request detailed list of unspent transaction outputs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UtxoResponse"
+          description: successful operation
+      summary: Get detailed information about unspent outputs (utxos)
+      tags:
+        - wallet
+
+  /wallet/slp/genesis:
+    post:
+      operationId: slpGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpGenesisRequest"
+        description: |
+          Request to create a new SLP token (genesis)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new slp balances of the wallet
+      tags:
+        - wallet
+
+  /wallet/slp/mint:
+    post:
+      operationId: slpMint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpMintRequest"
+        description: |
+          Request to mint more of SLP tokens
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpMintResponse'
+          description: successful operation
+      summary: Get created tokenId back and new slp balances of the wallet
+      tags:
+        - wallet
+
+
+  /wallet/slp/balance:
+    post:
+      operationId: slpBalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpBalanceRequest"
+        description: |
+          Request for a wallet slp balances
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpBalanceResponse'
+          description: successful operation
+      summary: Get total slp balances of the wallet
+      tags:
+        - wallet
+  /wallet/slp/deposit_address:
+    post:
+      operationId: slpDepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for an SLP deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositAddressResponse"
+          description: successful operation
+      summary: Get an SLP deposit address in cash address format
+      tags:
+        - wallet
+  /wallet/slp/deposit_qr:
+    post:
+      operationId: slpDepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for an SLP deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScalableVectorGraphic"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get an SLP receiving cash address as a qrcode
+      tags:
+        - wallet
+  /wallet/slp/send:
+    post:
+      operationId: slpSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpSendRequest"
+        description: place an SLP send request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SlpSendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Send some SLP token amount to a given cash address
+      tags:
+        - wallet
+  /wallet/slp/send_max:
+    post:
+      operationId: slpSendMax
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpSendMaxRequest"
+        description: Request to send all available SLP funds to a given address
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SlpSendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Send all available SLP funds to a given address
+      tags:
+        - wallet
+  /wallet/slp/utxo:
+    post:
+      operationId: slpUtxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request detailed list of unspent SLP transaction outputs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SlpUtxoResponse"
+          description: successful operation
+      summary: Get detailed information about unspent SLP outputs (utxos)
+      tags:
+        - wallet
+
 components:
   schemas:
     GetTestnetBchRequest:
@@ -500,7 +682,7 @@ components:
           type: string
           description: Transaction id
       example:
-        txId: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
     GetTestnetSlpRequest:
       properties:
         cashaddr:
@@ -525,7 +707,7 @@ components:
           type: string
           description: Transaction id
       example:
-        txId: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
     GetAddressesResponse:
       properties:
         bchtest:
@@ -1038,3 +1220,228 @@ components:
             The wallet in Wallet Import Format (WIF)
           example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
+
+    SlpGenesisRequest:
+      properties:
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+        name:
+          type: string
+          example: Mainnet coin
+        ticker:
+          type: string
+          example: MNC
+        initialAmount:
+          type: string
+          example: "10000"
+          description: Value is represented as a string to avoid precision loss
+        decimalPlaces:
+          type: number
+          description: Indicates that 1 token is divisible into 10^decimalPlaces base units
+        documentUrl:
+          type: string
+          example: https://mainnet.cash
+        documentHash:
+          type: string
+          example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
+          description: Document hash of the token. Empty or 64 character long hex string.
+        endBaton:
+          type: boolean
+          example: false
+          description: Indicates if token should not be 'mintable', e.g. total circluation amount increased
+      required:
+        - name
+        - ticker
+        - initialAmount
+        - decimalPlaces
+
+    SlpGenesisResponse:
+      properties:
+        tokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: |
+            Full token identifier freshly created
+        balances:
+          $ref: "#/components/schemas/SlpBalanceResponse"
+
+    SlpMintRequest:
+      properties:
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+        amount:
+          type: string
+          example: "10000"
+          description: Value is represented as a string to avoid precision loss
+        ticker:
+          type: string
+          example: MNC
+        tokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        endBaton:
+          type: boolean
+          example: false
+          description: Indicates if token should not be 'mintable' anymore, e.g. total circluation amount increased
+      required:
+        - amount
+        - ticker
+
+    SlpMintResponse:
+      properties:
+        txId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: |
+            Transaction id
+        balances:
+          $ref: "#/components/schemas/SlpBalanceResponse"
+
+    SlpBalanceRequest:
+      properties:
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+        ticker:
+          type: string
+          example: "MNC"
+          description: |
+            Optional token ticker to reduce the balances lookup
+        tokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: |
+            Full token identifier to avoid confusion if you have several tokens with same ticker
+      required:
+        - walletId
+
+    SlpBalanceResponse:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/SlpBalanceResponseItem"
+
+    SlpBalanceResponseItem:
+      properties:
+        amount:
+          type: string
+          format: float
+          example: "0.00000001"
+          description: A big number represented as a string to avoid precision loss
+        ticker:
+          type: string
+          example: "MNC"
+          description: Token ticker
+        name:
+          type: string
+          example: Mainnet coin
+          description: Full name of the SLP token
+        tokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: Token unique hexadecimal identifier, also the id of the token creation transaction
+
+    SlpSendRequest:
+      properties:
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+        to:
+          type: array
+          items:
+            $ref: "#/components/schemas/SlpSendRequestItem"
+      type: object
+
+    SlpSendRequestItem:
+      properties:
+        cashaddr:
+           type: string
+           example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+        value:
+          type: number
+          example: 100
+        ticker:
+           type: string
+           example: MNC
+        tokenId:
+           type: string
+           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+      required:
+        - cashaddr
+        - value
+        - ticker
+      type: object
+
+    SlpSendResponse:
+      properties:
+        txId:
+          type: string
+          example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
+          description: The hash of a transaction
+        balances:
+          $ref: "#/components/schemas/SlpBalanceResponse"
+      type: object
+
+    SlpSendMaxRequest:
+      properties:
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+        cashaddr:
+           type: string
+           example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+        ticker:
+           type: string
+           example: MNC
+        tokenId:
+           type: string
+           example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+      required:
+        - walletId
+        - cashaddr
+        - ticker
+
+    SlpUtxoResponse:
+      properties:
+        utxos:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SlpUtxo"
+    SlpUtxo:
+      properties:
+        index:
+          type: number
+        txId:
+          type: string
+          example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
+          description: The hash of a transaction
+        value:
+          type: number
+          example: 100
+          description: Locked satoshi
+        utxoId:
+          type: string
+          example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0"
+          description: serialized outpoint
+        amount:
+          type: string
+          description: Token amount represented as a string to avoid precision loss
+        decimals:
+          type: number
+        ticker:
+          type: string
+          example: "MNC"
+        tokenId:
+          type: string
+          example: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
