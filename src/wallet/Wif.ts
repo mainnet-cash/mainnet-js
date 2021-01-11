@@ -14,6 +14,8 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
+import { SignatureTemplate } from "cashscript";
+
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
 import { NetworkType, UnitEnum } from "../enum";
 
@@ -50,7 +52,7 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
-import { derivePrefix } from "../util/derivePublicKeyHash";
+import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { sumUtxoValue } from "../util/sumUtxoValue";
@@ -359,8 +361,12 @@ export class Wallet extends BaseWallet {
     return await this._processSendRequests([sendRequest], true);
   }
 
-  public getDepositAddress() {
-    return this.cashaddr;
+  public getDepositAddress(): string {
+    if(this.cashaddr){
+      return this.cashaddr;
+    }else{
+      throw Error("cashaddr was not set on wallet")
+    }
   }
 
   public getDepositQr(): ImageI {
@@ -621,6 +627,15 @@ export class Wallet extends BaseWallet {
     return resp;
   }
 
+  // returns the public key hash for an address
+  public getPublicKeyHash(){
+    return this.publicKeyHash!
+  }
+
+  // get a cashscript signature
+  public getSignatureTemplate(){
+    return new SignatureTemplate(this.privateKeyWif as string)
+  }
   /**
    * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
    * @param  {SendRequest[]} sendRequests

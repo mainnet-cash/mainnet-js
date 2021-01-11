@@ -58,11 +58,11 @@ describe("Test Contract Services", () => {
     const respSpend = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
-      action: "spend",
+      method: "spend",
       to: seller.getDepositAddress()
     });
 
-
+    console.log(JSON.stringify(respSpend))
     expect(respSpend.statusCode).toEqual(200);
     expect(respSpend.body.txId.length).toEqual(64);
     expect(respSpend.body.hex.length).toBeGreaterThan(1000);
@@ -95,7 +95,8 @@ describe("Test Contract Services", () => {
       amount: 16000
     });
     
-    
+    console.log(JSON.stringify(contractResp))
+
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
@@ -120,11 +121,10 @@ describe("Test Contract Services", () => {
     const respHex = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
-      action: "spend",
-      getHexOnly: true, 
+      method: "spend",
       to: seller.getDepositAddress()
     });
-
+    console.log(JSON.stringify(respHex))
     expect(respHex.statusCode).toEqual(200);
     expect(respHex.body.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
 
@@ -133,7 +133,7 @@ describe("Test Contract Services", () => {
       .send({
         walletId: `watch:regtest:${contractAddress}`,
       });
-
+      console.log(JSON.stringify(resp))
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.sat).toBeGreaterThan(16700);
 
@@ -154,7 +154,7 @@ describe("Test Contract Services", () => {
       sellerAddr: seller.getDepositAddress(),
       amount: 16000
     });
-    
+    console.log(JSON.stringify(contractResp))
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
@@ -179,7 +179,7 @@ describe("Test Contract Services", () => {
     const utxoResp = await request(app).post("/contract/escrow/utxos").send({
       contractId: contractId,
     });
-    
+    console.log(JSON.stringify(utxoResp))
     expect(utxoResp.statusCode).toEqual(200);
     expect(utxoResp.body["0"].txid.length).toEqual(64);
 
@@ -203,7 +203,7 @@ describe("Test Contract Services", () => {
       amount: 16000
     });
     
-    
+    console.log(JSON.stringify(contractResp))
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
@@ -242,6 +242,7 @@ describe("Test Contract Services", () => {
       contractId: contractId,
     });
     
+    console.log(JSON.stringify(utxoResp))
     expect(utxoResp.statusCode).toEqual(200);
     expect(utxoResp.body["1"].satoshis).toEqual(21000);
     
@@ -250,7 +251,7 @@ describe("Test Contract Services", () => {
     const respSpend = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
-      action: "spend",
+      method: "spend",
       to: seller.getDepositAddress(),
       utxoIds: utxos
     });

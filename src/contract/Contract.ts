@@ -130,8 +130,8 @@ export class Contract implements ContractI {
     return new this(script, parameters, network, nonce).fromCashScript();
   }
 
-  public call(method: string, args) {
-    this.contract.functions[method](args);
+  public getContractFunction(method: string) {
+    return this.contract.functions[method];
   }
 
   private async estimateFee(func, publicKey, sig, outputAddress, utxos) {

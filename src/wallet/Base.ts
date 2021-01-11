@@ -68,7 +68,7 @@ export class BaseWallet implements WalletI {
   _named = async (
     name: string,
     dbName?: string,
-    forceNew = false
+    forceNew: boolean = false
   ): Promise<this> => {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
@@ -99,7 +99,7 @@ export class BaseWallet implements WalletI {
     } else {
       throw Error(
         "No database was available or configured to store the named wallet."
-      );
+        );  
     }
   };
 

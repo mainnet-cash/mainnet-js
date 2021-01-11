@@ -37,7 +37,7 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
       let utxos = contractFnRequest.utxoIds ? contractFnRequest.utxoIds.map(u => {return mainnet.Mainnet.deserializeUtxo(u)}) : undefined
       let resp = await contract._sendMax(
         wallet.privateKeyWif,
-        contractFnRequest.action, 
+        contractFnRequest.method, 
         contractFnRequest.to,
         contractFnRequest.getHexOnly, 
         utxos
