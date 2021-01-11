@@ -155,9 +155,18 @@ export class Slp {
     return await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult);
   }
 
-  public async sendMax(cashaddr: string, ticker: string, tokenId?: string): Promise<SlpSendResult> {
+  public async sendMax(
+    cashaddr: string,
+    ticker: string,
+    tokenId?: string
+  ): Promise<SlpSendResult> {
     const balances = await this.getBalance(ticker, tokenId);
-    const requests: SlpSendRequest[] = balances.map(val => ({ cashaddr: cashaddr, value: val.amount, ticker: val.ticker, tokenId: val.tokenId }));
+    const requests: SlpSendRequest[] = balances.map((val) => ({
+      cashaddr: cashaddr,
+      value: val.amount,
+      ticker: val.ticker,
+      tokenId: val.tokenId,
+    }));
     return await this.send(requests);
   }
 
