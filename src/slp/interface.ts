@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
 import { UtxoI } from "../interface";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 
 export type SlpDbResponse = {
   t: any[];

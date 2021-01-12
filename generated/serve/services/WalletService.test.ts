@@ -103,7 +103,6 @@ describe("Test Wallet Endpoints", () => {
   }
 
     let resp = await request(app).post("/wallet/create").send(req);
-    const body = resp.body;
     expect(resp.statusCode).toBe(500);
     expect(resp.body.message).toBe("Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS=\"false\", if this service is secure and private");
   });
@@ -182,7 +181,7 @@ describe("Test Wallet Endpoints", () => {
       expect(bobsWalletResp.body.walletId).toBe("named:regtest:bobs wallet");
       const bobsCashaddr = bobsWalletResp.body.cashaddr;
 
-      const sendResp = await request(app)
+      await request(app)
         .post("/wallet/send")
         .send({
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,

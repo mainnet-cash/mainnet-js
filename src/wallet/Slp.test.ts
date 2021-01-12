@@ -1,4 +1,4 @@
-import { RegTestWallet, Wallet } from "../wallet/Wif";
+import { RegTestWallet } from "../wallet/Wif";
 
 import { Network } from "..";
 import { disconnectProviders, initProviders } from "../network";
@@ -8,7 +8,6 @@ import { mine } from "../mine";
 import { SlpGenesisOptions, SlpGenesisResult } from "../slp/interface";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
-import { raw } from "core-js/core/string";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -177,7 +176,7 @@ describe("Slp wallet tests", () => {
     );
 
     // send bob some bch gas to enable him to send slp
-    let aliceBalance = await aliceWallet
+    await aliceWallet
       .slpAware()
       .send([{ cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat" }]);
 
@@ -471,9 +470,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "WB";
-    const genesis: SlpGenesisResult = await aliceWallet.slp.genesis(
-      genesisOptions
-    );
+    await aliceWallet.slp.genesis(genesisOptions);
     bobWallet.slp.watchBalance((balance) => {
       expect(balance.length).toBeGreaterThan(0);
     });
@@ -496,9 +493,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "_WFB";
-    const genesis: SlpGenesisResult = await aliceWallet.slp.genesis(
-      genesisOptions
-    );
+    await aliceWallet.slp.genesis(genesisOptions);
     setTimeout(async () => {
       await aliceWallet.slp.send([
         {
@@ -586,7 +581,6 @@ describe("Slp wallet tests", () => {
   test("Test genesis ends baton", async () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
-    const bobWallet = await RegTestWallet.newRandom();
 
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
