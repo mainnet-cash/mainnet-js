@@ -259,7 +259,7 @@ export const SlpTokenInfoTemplate = (ticker: string, tokenId?: string) => {
     q["q"]["find"]["tokenDetails.tokenIdHex"] = tokenId;
   }
 
-  console.log(q);
+  // console.log(q);
 
   return q;
 }

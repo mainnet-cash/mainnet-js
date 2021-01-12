@@ -36,6 +36,10 @@ const slpSendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpSendMax);
 };
 
+const slpTokenInfo = async (request, response) => {
+  await Controller.handleRequest(request, response, service.slpTokenInfo);
+};
+
 const slpUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpUtxos);
 };
@@ -49,5 +53,6 @@ module.exports = {
   slpMint,
   slpSend,
   slpSendMax,
+  slpTokenInfo,
   slpUtxos,
 };

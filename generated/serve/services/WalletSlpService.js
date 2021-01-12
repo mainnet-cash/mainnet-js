@@ -20,9 +20,11 @@ const slpBalance = ({ slpBalanceRequest }) => new Promise(
       let resp = await wallet.slp.getBalance(slpBalanceRequest.ticker, slpBalanceRequest.tokenId);
       resolve(Service.successResponse(resp));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
 
   },
@@ -43,9 +45,11 @@ const slpDepositAddress = ({ serializedWallet }) => new Promise(
       resp = {cashaddr:resp}
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -64,9 +68,11 @@ const slpDepositQr = ({ serializedWallet }) => new Promise(
       let resp = await wallet.slp.getDepositQr(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -79,15 +85,17 @@ const slpDepositQr = ({ serializedWallet }) => new Promise(
 const slpGenesis = ({ slpGenesisRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
-      let args = serializedWallet;
+      let wallet = await mainnet.walletFromId(slpGenesisRequest.walletId);
+      let args = slpGenesisRequest;
       delete args.walletId;
-      let resp = await wallet.slp.slpGenesis(args);
+      let resp = await wallet.slp.genesis(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e)
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -100,15 +108,15 @@ const slpGenesis = ({ slpGenesisRequest }) => new Promise(
 const slpMint = ({ slpMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
-      let args = serializedWallet;
-      delete args.walletId;
-      let resp = await wallet.slp.mint(arg.amount, args.ticker, args.tokenId, args.endBaton);
+      let wallet = await mainnet.walletFromId(slpMintRequest.walletId);
+      let resp = await wallet.slp.mint(slpMintRequest.amount, slpMintRequest.ticker, slpMintRequest.tokenId, slpMintRequest.endBaton);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -121,16 +129,18 @@ const slpMint = ({ slpMintRequest }) => new Promise(
 const slpSend = ({ slpSendRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromId(sendRequest.walletId);
+      let wallet = await mainnet.walletFromId(slpSendRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
-      let resp = await wallet.send(sendRequest.to);
+      let resp = await wallet.slp.send(slpSendRequest.to);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -143,16 +153,39 @@ const slpSend = ({ slpSendRequest }) => new Promise(
 const slpSendMax = ({ slpSendMaxRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromId(sendMaxRequest.walletId);
+      let wallet = await mainnet.walletFromId(slpSendMaxRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
-      let resp = await wallet.sendMax(sendMaxRequest.cashaddr, sendMaxRequest.ticker, sendMaxRequest.tokenId);
+      let resp = await wallet.slp.sendMax(slpSendMaxRequest.cashaddr, slpSendMaxRequest.ticker, slpSendMaxRequest.tokenId);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get information about the token
+*
+* slpTokenInfoRequest SlpTokenInfoRequest Request to get information about the token 
+* returns List
+* */
+const slpTokenInfo = ({ slpTokenInfoRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.Wallet.newRandom();
+      const infos = await wallet.slp.getTokenInfo(slpTokenInfoRequest.ticker, slpTokenInfoRequest.tokenId);
+      resolve(Service.successResponse(infos));
+    } catch (e) {
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -171,9 +204,11 @@ const slpUtxos = ({ serializedWallet }) => new Promise(
       let resp = await wallet.getUtxos(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
     }
   },
 );
@@ -186,5 +221,6 @@ module.exports = {
   slpMint,
   slpSend,
   slpSendMax,
+  slpTokenInfo,
   slpUtxos,
 };

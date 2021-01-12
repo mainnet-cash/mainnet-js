@@ -553,6 +553,28 @@ paths:
       tags:
       - wallet/slp
       x-eov-operation-handler: controllers/WalletSlpController
+  /wallet/slp/token_info:
+    post:
+      operationId: slpTokenInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlpTokenInfoRequest'
+        description: |
+          Request to get information about the token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpTokenInfoResponse'
+          description: successful operation
+      summary: Get information about the token
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
   /wallet/slp/balance:
     post:
       operationId: slpBalance
@@ -1428,6 +1450,61 @@ components:
           items:
             $ref: '#/components/schemas/SlpBalanceResponseItem'
           type: array
+    SlpTokenInfoRequest:
+      example:
+        ticker: MNC
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+      properties:
+        ticker:
+          description: Token ticker
+          example: MNC
+          type: string
+        tokenId:
+          description: Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
+      required:
+      - ticker
+    SlpTokenInfoResponse:
+      items:
+        $ref: '#/components/schemas/SlpTokenInfoResponseItem'
+      type: array
+    SlpTokenInfoResponseItem:
+      example:
+        ticker: MNC
+        documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
+        decimalPlaces: 0.8008281904610115
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        initialAmount: "10000"
+        documentUrl: https://mainnet.cash
+        name: Mainnet coin
+      properties:
+        name:
+          example: Mainnet coin
+          type: string
+        ticker:
+          example: MNC
+          type: string
+        tokenId:
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
+        initialAmount:
+          description: Value is represented as a string to avoid precision loss
+          example: "10000"
+          type: string
+        decimalPlaces:
+          description: Indicates that 1 token is divisible into 10^decimalPlaces base
+            units
+          type: number
+        documentUrl:
+          example: https://mainnet.cash
+          type: string
+        documentHash:
+          description: Document hash of the token. Empty or 64 character long hex
+            string.
+          example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
+          type: string
     SlpMintRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6

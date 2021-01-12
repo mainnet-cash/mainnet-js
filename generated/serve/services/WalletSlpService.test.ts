@@ -16,16 +16,18 @@ describe("Test Wallet Slp Endpoints", () => {
     app.close();
   });
 
+  let ticker: string = Math.random().toString(36).substring(8).toUpperCase();
+
   /**
    * genesis
    */
-  it("Should create a new token", async () => {
+  it("Should create a new token (genesis)", async () => {
     const resp = await request(app)
       .post("/wallet/slp/genesis")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         name: "Mainnet coin",
-        ticker: "MNC",
+        ticker: ticker, //"MNC",
         initialAmount: "10000",
         decimalPlaces: 2,
         documentUrl: "https://mainnet.cash",
@@ -35,9 +37,46 @@ describe("Test Wallet Slp Endpoints", () => {
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
     expect(resp.body.balances.length).toBe(1);
-    expect(resp.body.balances[0].amount.toNumber()).toBe(10000);
+    expect(Number(resp.body.balances[0].amount)).toBe(10000);
   });
 
+  it("Should get token infos", async () => {
+    let resp = await request(app)
+      .post("/wallet/slp/token_info")
+      .send({
+        ticker: "HONK",
+      });
+
+    let body = resp.body;
+    expect(resp.statusCode).toBe(200);
+    expect(body.length).toBeGreaterThan(1);
+
+    resp = await request(app)
+      .post("/wallet/slp/token_info")
+      .send({
+        ticker: "HONK",
+        tokenId: "7f8889682d57369ed0e32336f8b7e0ffec625a35cca183f4e81fde4e71a538a1"
+      });
+
+    body = resp.body;
+    expect(resp.statusCode).toBe(200);
+    expect(body.length).toBe(1);
+  });
+
+  it("Should mint new tokens", async () => {
+    const resp = await request(app)
+      .post("/wallet/slp/mint")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        amount: "10000",
+        ticker: ticker, //"MNC",
+        endBaton: false
+      });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.txId.length).toBe(64);
+    expect(resp.body.balances.length).toBe(1);
+    expect(Number(resp.body.balances[0].amount)).toBe(20000);
+  });
 
   /**
    * balance
@@ -47,10 +86,11 @@ describe("Test Wallet Slp Endpoints", () => {
       .post("/wallet/slp/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        ticker: ticker
       });
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toBe(1);
-    expect(resp.body[0].amount.toNumber()).toBe(10000);
+    expect(Number(resp.body[0].amount)).toBe(20000);
   });
 
   /**
@@ -61,7 +101,7 @@ describe("Test Wallet Slp Endpoints", () => {
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
     expect(resp.statusCode).toBe(200);
-    expect(resp.body.cashaddr).toBe(process.env.ADDRESS);
+    expect(resp.body.cashaddr).toBe(bchaddr.toSlpAddress(process.env.ADDRESS));
   });
 
   /**
@@ -87,7 +127,7 @@ describe("Test Wallet Slp Endpoints", () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app).post("/wallet/slp/create").send({
+      const bobsWalletResp = await request(app).post("/wallet/create").send({
         type: "wif",
         network: "regtest",
       });
@@ -99,8 +139,8 @@ describe("Test Wallet Slp Endpoints", () => {
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
           to: [{
             cashaddr: bobsCashaddr,
-            tocker: "MNC",
-            amount: 10
+            ticker: ticker, //"MNC",
+            value: 10
           }]
         });
 
@@ -114,7 +154,8 @@ describe("Test Wallet Slp Endpoints", () => {
       expect(sendResp.statusCode).toBe(200);
       expect((sendResp.body.txId as string).length).toBe(64);
       expect(resp.statusCode).toBe(200);
-      expect(body[0].toNumber()).toBe(10);
+      console.log(body);
+      expect(Number(body[0].amount)).toBe(10);
     }
   });
 
@@ -152,7 +193,7 @@ describe("Test Wallet Slp Endpoints", () => {
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       to: [{
         cashaddr: bchaddr.toSlpAddress(bobsWallet.cashaddr),
-        ticker: "MNC",
+        ticker: ticker, //"MNC",
         value: 10
       }]
     });
@@ -165,11 +206,13 @@ describe("Test Wallet Slp Endpoints", () => {
       .send({
         walletId: bobsWallet.walletId,
         cashaddr: bchaddr.toSlpAddress(process.env.ADDRESS as string),
+        ticker: ticker
       });
     const slpBody = slpResp.body;
     if (slpResp.statusCode !== 200) {
       console.log(slpResp.error.text);
     }
+
     expect(slpResp.statusCode).toBe(200);
     expect((slpBody.txId as string).length).toBe(64);
     expect(slpBody.balances.length).toBe(0);

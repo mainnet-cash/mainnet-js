@@ -535,6 +535,27 @@ paths:
       tags:
         - wallet/slp
 
+  /wallet/slp/token_info:
+    post:
+      operationId: slpTokenInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpTokenInfoRequest"
+        description: |
+          Request to get information about the token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpTokenInfoResponse'
+          description: successful operation
+      summary: Get information about the token
+      tags:
+        - wallet/slp
 
   /wallet/slp/balance:
     post:
@@ -1261,6 +1282,7 @@ components:
           example: false
           description: Indicates if token should not be 'mintable', e.g. total circluation amount increased
       required:
+        - walletId
         - name
         - ticker
         - initialAmount
@@ -1275,6 +1297,50 @@ components:
             Full token identifier freshly created
         balances:
           $ref: "#/components/schemas/SlpBalanceResponse"
+
+    SlpTokenInfoRequest:
+      properties:
+        ticker:
+          type: string
+          example: "MNC"
+          description: Token ticker
+        tokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: Token unique hexadecimal identifier, also the id of the token creation transaction
+      required:
+        - ticker
+
+    SlpTokenInfoResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/SlpTokenInfoResponseItem"
+
+    SlpTokenInfoResponseItem:
+      properties:
+        name:
+          type: string
+          example: Mainnet coin
+        ticker:
+          type: string
+          example: MNC
+        tokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        initialAmount:
+          type: string
+          example: "10000"
+          description: Value is represented as a string to avoid precision loss
+        decimalPlaces:
+          type: number
+          description: Indicates that 1 token is divisible into 10^decimalPlaces base units
+        documentUrl:
+          type: string
+          example: https://mainnet.cash
+        documentHash:
+          type: string
+          example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
+          description: Document hash of the token. Empty or 64 character long hex string.
 
     SlpMintRequest:
       properties:
@@ -1298,6 +1364,7 @@ components:
           example: false
           description: Indicates if token should not be 'mintable' anymore, e.g. total circluation amount increased
       required:
+        - walletId
         - amount
         - ticker
 
@@ -1368,6 +1435,9 @@ components:
           items:
             $ref: "#/components/schemas/SlpSendRequestItem"
       type: object
+      required:
+        - walletId
+        - to
 
     SlpSendRequestItem:
       properties:
