@@ -18,6 +18,6 @@ export function getStorageProvider(
   }
 }
 
-export function indexedDbIsAvailable(){
-  return 'indexedDB' in globalThis
+export function indexedDbIsAvailable() {
+  return "indexedDB" in globalThis;
 }
