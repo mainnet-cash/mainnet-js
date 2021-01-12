@@ -33,10 +33,10 @@ export class ExchangeRate {
   static async get(symbol: string) {
     const platform = getRuntimePlatform();
     if (platform !== RuntimePlatform.node && indexedDbIsAvailable()) {
-      try{
+      try {
         return await this.getRateFromIndexedDb(symbol);
-      }catch{
-        return await this.getRateFromGlobalScope(symbol);  
+      } catch {
+        return await this.getRateFromGlobalScope(symbol);
       }
     } else {
       return await this.getRateFromGlobalScope(symbol);
