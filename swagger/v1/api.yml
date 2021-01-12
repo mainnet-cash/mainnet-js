@@ -766,7 +766,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/UnitType"
       required:
-        - amount
+        - value
         - txId
         - utxoId
     BalanceRequest:
@@ -1349,7 +1349,7 @@ components:
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
-        amount:
+        value:
           type: string
           example: "10000"
           description: Value is represented as a string to avoid precision loss
@@ -1365,7 +1365,7 @@ components:
           description: Indicates if token should not be 'mintable' anymore, e.g. total circluation amount increased
       required:
         - walletId
-        - amount
+        - value
         - ticker
 
     SlpMintResponse:
@@ -1405,7 +1405,7 @@ components:
 
     SlpBalanceResponseItem:
       properties:
-        amount:
+        value:
           type: string
           format: float
           example: "0.00000001"
@@ -1444,7 +1444,7 @@ components:
         cashaddr:
            type: string
            example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-        amount:
+        value:
           type: number
           example: 100
         ticker:
@@ -1455,7 +1455,7 @@ components:
            example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       required:
         - cashaddr
-        - amount
+        - value
         - ticker
       type: object
 
@@ -1512,7 +1512,7 @@ components:
           type: string
           example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0"
           description: serialized outpoint
-        amount:
+        value:
           type: string
           description: Token amount represented as a string to avoid precision loss
         decimals:

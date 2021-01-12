@@ -57,7 +57,7 @@ export interface SlpProvider {
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   SlpWaitForBalance(
-    amount: BigNumber.Value,
+    value: BigNumber.Value,
     cashaddr: string,
     ticker: string,
     tokenId?: string
@@ -83,12 +83,12 @@ export interface SlpProvider {
 export function _convertBalanceBigNumbers(
   balances: SlpTokenBalance[]
 ): SlpTokenBalance[] {
-  balances.forEach((val) => (val.amount = new BigNumber(val.amount)));
+  balances.forEach((val) => (val.value = new BigNumber(val.value)));
   return balances;
 }
 
 export function _convertUtxoBigNumbers(utxos: SlpUtxoI[]): SlpUtxoI[] {
-  utxos.forEach((val) => (val.amount = new BigNumber(val.amount)));
+  utxos.forEach((val) => (val.value = new BigNumber(val.value)));
   return utxos;
 }
 

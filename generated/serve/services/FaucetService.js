@@ -18,6 +18,7 @@ const getAddresses = () => new Promise(
         slptest: config.FAUCET_SLP_CASHADDR
       }));
     } catch (e) {
+      // console.log(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -49,6 +50,7 @@ const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
       const sendResponse = await wallet.send([{cashaddr: getTestnetBchRequest.cashaddr, value: diff, unit: "sat"}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
+      // console.log(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -71,15 +73,16 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
 
       const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetSlpRequest.cashaddr);
       const receiverBalance = await receiverWallet.slp.getBalance(getTestnetSlpRequest.ticker, getTestnetSlpRequest.tokenId);
-      const diff = 10 - (receiverBalance.length ? receiverBalance[0].amount : 0);
+      const diff = 10 - (receiverBalance.length ? receiverBalance[0].value : 0);
       if (diff <= 0)
         throw new Error("You have 10 tokens or more of this type. Refusing to refill.");
 
       const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_SLP_WIF);
       wallet.slpAware();
-      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, amount: diff, ticker: getTestnetSlpRequest.ticker, tokenId: getTestnetSlpRequest.tokenId}]);
+      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, value: diff, ticker: getTestnetSlpRequest.ticker, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
+      // console.log(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,

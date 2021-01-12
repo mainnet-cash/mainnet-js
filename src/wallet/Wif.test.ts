@@ -429,7 +429,7 @@ describe(`Wallet subscriptions`, () => {
     const txid = await wallet.getTestnetSlp("MNC");
     expect(txid.length).toBe(64);
     let balance = await wallet.slp.getBalance("MNC");
-    expect(balance[0].amount.toNumber()).toBe(10);
+    expect(balance[0].value.toNumber()).toBe(10);
 
     const tokenId = balance[0].tokenId;
     const response = await wallet.returnTestnetSlp("MNC", tokenId);

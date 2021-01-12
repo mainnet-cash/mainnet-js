@@ -13,14 +13,14 @@ export interface SlpDbResponse {
 };
 
 export interface SlpTokenBalance {
-  amount: BigNumber;
+  value: BigNumber;
   ticker: string;
   name: string;
   tokenId: string;
 };
 
 export interface SlpUtxoI extends UtxoI {
-  amount: BigNumber;
+  value: BigNumber;
   decimals: number;
   ticker: string;
   tokenId: string;
@@ -28,7 +28,7 @@ export interface SlpUtxoI extends UtxoI {
 
 export interface SlpSendRequest {
   cashaddr: string;
-  amount: BigNumber.Value;
+  value: BigNumber.Value;
   ticker: string;
   tokenId?: string;
 };
@@ -58,7 +58,7 @@ export interface SlpGenesisResult {
   balances: SlpTokenBalance[];
 }
 
-export interface SlpSendResult {
+export interface SlpSendResponse {
   txId: string;
   balances: SlpTokenBalance[];
 }

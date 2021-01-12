@@ -37,7 +37,7 @@ export const SlpAllUtxosTemplate = (cashaddr: string) => ({
         ]
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, amount: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
     }
 });
 
@@ -79,7 +79,7 @@ export const SlpSpendableUtxosTemplate = (cashaddr: string, ticker?: string, tok
         ]
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, amount: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
     }
   };
 
@@ -152,7 +152,7 @@ export const SlpAddressTokenBalancesTemplate = (cashaddr: string, ticker?: strin
        }
     },
     "r": {
-      "f": "[ .[] | { amount: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, } ]"
+      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, } ]"
     }
   }
 
@@ -302,7 +302,7 @@ export const SlpBatonUtxosTemplate = (cashaddr: string, ticker?: string, tokenId
         ]
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, amount: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
     }
   }
 

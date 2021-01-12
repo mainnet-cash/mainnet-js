@@ -42,7 +42,7 @@ describe("Slp wallet tests", () => {
 
     tokenId = result.tokenId;
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(10000));
+    expect(result.balances[0].value.isEqualTo(10000));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -67,14 +67,14 @@ describe("Slp wallet tests", () => {
     let result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
-        amount: 5,
+        value: 5,
         ticker: ticker,
         tokenId: tokenId,
       },
     ]);
 
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(9995));
+    expect(result.balances[0].value.isEqualTo(9995));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -85,18 +85,18 @@ describe("Slp wallet tests", () => {
     expect(await bobWallet.slpAware().getBalance("satoshi")).toBe(0);
     let bobBalances = await bobWallet.slp.getBalance();
     expect(bobBalances.length).toBe(1);
-    expect(bobBalances[0].amount.isEqualTo(5));
+    expect(bobBalances[0].value.isEqualTo(5));
     expect(bobBalances[0].name).toBe("Mainnet coin");
     expect(bobBalances[0].ticker).toBe(ticker);
     expect(bobBalances[0].tokenId).toBe(tokenId);
 
     // send without token id
     result = await aliceWallet.slp.send([
-      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
     ]);
 
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(9990));
+    expect(result.balances[0].value.isEqualTo(9990));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -107,19 +107,19 @@ describe("Slp wallet tests", () => {
     expect(await bobWallet.slpAware().getBalance("satoshi")).toBe(0);
     bobBalances = await bobWallet.slp.getBalance();
     expect(bobBalances.length).toBe(1);
-    expect(bobBalances[0].amount.isEqualTo(10));
+    expect(bobBalances[0].value.isEqualTo(10));
     expect(bobBalances[0].name).toBe("Mainnet coin");
     expect(bobBalances[0].ticker).toBe(ticker);
     expect(bobBalances[0].tokenId).toBe(tokenId);
 
     // send twice to bob
     result = await aliceWallet.slp.send([
-      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
-      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
     ]);
 
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(9980));
+    expect(result.balances[0].value.isEqualTo(9980));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -130,7 +130,7 @@ describe("Slp wallet tests", () => {
     expect(await bobWallet.slpAware().getBalance("satoshi")).toBe(0);
     bobBalances = await bobWallet.slp.getBalance();
     expect(bobBalances.length).toBe(1);
-    expect(bobBalances[0].amount.isEqualTo(20));
+    expect(bobBalances[0].value.isEqualTo(20));
     expect(bobBalances[0].name).toBe("Mainnet coin");
     expect(bobBalances[0].ticker).toBe(ticker);
     expect(bobBalances[0].tokenId).toBe(tokenId);
@@ -138,12 +138,12 @@ describe("Slp wallet tests", () => {
     // send to bob and charlie
     const charlieWallet = await RegTestWallet.newRandom();
     result = await aliceWallet.slp.send([
-      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
-      { cashaddr: charlieWallet.slp.cashaddr, amount: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
+      { cashaddr: charlieWallet.slp.cashaddr, value: 5, ticker: ticker },
     ]);
 
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(9970));
+    expect(result.balances[0].value.isEqualTo(9970));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -154,7 +154,7 @@ describe("Slp wallet tests", () => {
     expect(await bobWallet.slpAware().getBalance("satoshi")).toBe(0);
     bobBalances = await bobWallet.slp.getBalance();
     expect(bobBalances.length).toBe(1);
-    expect(bobBalances[0].amount.isEqualTo(25));
+    expect(bobBalances[0].value.isEqualTo(25));
     expect(bobBalances[0].name).toBe("Mainnet coin");
     expect(bobBalances[0].ticker).toBe(ticker);
     expect(bobBalances[0].tokenId).toBe(tokenId);
@@ -165,7 +165,7 @@ describe("Slp wallet tests", () => {
     expect(await charlieWallet.slpAware().getBalance("satoshi")).toBe(0);
     const charlieBalances = await charlieWallet.slp.getBalance();
     expect(charlieBalances.length).toBe(1);
-    expect(charlieBalances[0].amount.isEqualTo(25));
+    expect(charlieBalances[0].value.isEqualTo(25));
     expect(charlieBalances[0].name).toBe("Mainnet coin");
     expect(charlieBalances[0].ticker).toBe(ticker);
     expect(charlieBalances[0].tokenId).toBe(tokenId);
@@ -188,11 +188,11 @@ describe("Slp wallet tests", () => {
 
     let aliceSlpBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
-    )[0].amount;
+    )[0].value;
     let result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
-        amount: 5,
+        value: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -223,12 +223,12 @@ describe("Slp wallet tests", () => {
     );
 
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(aliceSlpBalance.minus(5)));
+    expect(result.balances[0].value.isEqualTo(aliceSlpBalance.minus(5)));
 
     result = await bobWallet.slp.send([
       {
         cashaddr: aliceWallet.slp.cashaddr,
-        amount: 5,
+        value: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -258,7 +258,7 @@ describe("Slp wallet tests", () => {
 
     let aliceSlpNewBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
-    )[0].amount;
+    )[0].value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     // await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -266,19 +266,19 @@ describe("Slp wallet tests", () => {
     // check non-slp send did not burn tokens
     aliceSlpNewBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
-    )[0].amount;
+    )[0].value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     // send bob some bch gas to enable him to send slp
-    // aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, amount: 3000, unit: "sat"}]);
+    // aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat"}]);
 
     aliceSlpBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
-    )[0].amount;
+    )[0].value;
     result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
-        amount: 5,
+        value: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -305,12 +305,12 @@ describe("Slp wallet tests", () => {
     );
 
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(aliceSlpBalance.minus(5)));
+    expect(result.balances[0].value.isEqualTo(aliceSlpBalance.minus(5)));
 
     result = await bobWallet.slp.send([
       {
         cashaddr: aliceWallet.slp.cashaddr,
-        amount: 5,
+        value: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -340,7 +340,7 @@ describe("Slp wallet tests", () => {
 
     aliceSlpNewBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
-    )[0].amount;
+    )[0].value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -348,7 +348,7 @@ describe("Slp wallet tests", () => {
     // check non-slp send did not burn tokens
     aliceSlpNewBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
-    )[0].amount;
+    )[0].value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
   });
 
@@ -361,7 +361,7 @@ describe("Slp wallet tests", () => {
 
     let result = await aliceWallet.slp.mint(50, ticker);
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(10040));
+    expect(result.balances[0].value.isEqualTo(10040));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -369,7 +369,7 @@ describe("Slp wallet tests", () => {
     // the baton must survive the first mint, and we end it now
     result = await aliceWallet.slp.mint(50, ticker, undefined, true);
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(10090));
+    expect(result.balances[0].value.isEqualTo(10090));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
@@ -398,7 +398,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 0,
+          value: 0,
         },
       ])
     ).rejects.toThrow();
@@ -407,7 +407,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 10,
+          value: 10,
         },
       ])
     ).rejects.toThrow();
@@ -416,7 +416,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 10,
+          value: 10,
         },
       ])
     ).rejects.toThrow();
@@ -425,7 +425,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 10,
+          value: 10,
         },
       ])
     ).rejects.toThrow();
@@ -434,13 +434,13 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 10,
+          value: 10,
           tokenId: genesis1.tokenId,
         },
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 10,
+          value: 10,
           tokenId: genesis2.tokenId,
         },
       ])
@@ -448,8 +448,8 @@ describe("Slp wallet tests", () => {
 
     await expect(
       aliceWallet.slp.send([
-        { cashaddr: aliceWallet.slp.cashaddr, ticker: "ABC", amount: 10 },
-        { cashaddr: aliceWallet.slp.cashaddr, ticker: "DEF", amount: 10 },
+        { cashaddr: aliceWallet.slp.cashaddr, ticker: "ABC", value: 10 },
+        { cashaddr: aliceWallet.slp.cashaddr, ticker: "DEF", value: 10 },
       ])
     ).rejects.toThrow();
 
@@ -462,7 +462,7 @@ describe("Slp wallet tests", () => {
       genesis1.tokenId
     );
     expect(result.balances.length).toBe(1);
-    expect(result.balances[0].amount.isEqualTo(10050));
+    expect(result.balances[0].value.isEqualTo(10050));
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(genesisOptions.ticker);
     expect(result.balances[0].tokenId).toBe(genesis1.tokenId);
@@ -486,7 +486,7 @@ describe("Slp wallet tests", () => {
       {
         cashaddr: bobWallet.slp.cashaddr,
         ticker: genesisOptions.ticker,
-        amount: 10,
+        value: 10,
       },
     ]);
 
@@ -509,7 +509,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: bobWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          amount: 20,
+          value: 20,
         },
       ]);
     }, 5000);
@@ -517,7 +517,7 @@ describe("Slp wallet tests", () => {
       10,
       genesisOptions.ticker
     );
-    expect(balance.amount.isEqualTo(20));
+    expect(balance.value.isEqualTo(20));
   });
 
   // TODO fix?
@@ -535,7 +535,7 @@ describe("Slp wallet tests", () => {
   //       {
   //         cashaddr: bobWallet.slp.cashaddr,
   //         ticker: genesisOptions.ticker,
-  //         amount: 20,
+  //         value: 20,
   //       },
   //     ]);
   //   }, 5000);

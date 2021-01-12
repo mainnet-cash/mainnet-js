@@ -791,9 +791,9 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
           type: string
       required:
-      - amount
       - txId
       - utxoId
+      - value
     BalanceRequest:
       allOf:
       - $ref: '#/components/schemas/UnitType'
@@ -1431,14 +1431,14 @@ components:
     SlpGenesisResponse:
       example:
         balances:
-        - amount: "0.00000001"
-          ticker: MNC
+        - ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
-        - amount: "0.00000001"
-          ticker: MNC
+          value: "0.00000001"
+        - ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          value: "0.00000001"
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
         tokenId:
@@ -1508,16 +1508,16 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         endBaton: false
-        amount: "10000"
         ticker: MNC
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        value: "10000"
       properties:
         walletId:
           description: |
             ID that is returned in `wallet` field of /wallet call
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
-        amount:
+        value:
           description: Value is represented as a string to avoid precision loss
           example: "10000"
           type: string
@@ -1533,20 +1533,20 @@ components:
           example: false
           type: boolean
       required:
-      - amount
       - ticker
+      - value
       - walletId
     SlpMintResponse:
       example:
         balances:
-        - amount: "0.00000001"
-          ticker: MNC
+        - ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
-        - amount: "0.00000001"
-          ticker: MNC
+          value: "0.00000001"
+        - ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          value: "0.00000001"
         txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
         txId:
@@ -1587,12 +1587,12 @@ components:
       type: array
     SlpBalanceResponseItem:
       example:
-        amount: "0.00000001"
         ticker: MNC
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         name: Mainnet coin
+        value: "0.00000001"
       properties:
-        amount:
+        value:
           description: A big number represented as a string to avoid precision loss
           example: "0.00000001"
           format: float
@@ -1615,13 +1615,13 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         to:
         - cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-          amount: 100
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          value: 100
         - cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-          amount: 100
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          value: 100
       properties:
         walletId:
           description: |
@@ -1639,14 +1639,14 @@ components:
     SlpSendRequestItem:
       example:
         cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-        amount: 100
         ticker: MNC
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        value: 100
       properties:
         cashaddr:
           example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
           type: string
-        amount:
+        value:
           example: 100
           type: number
         ticker:
@@ -1656,21 +1656,21 @@ components:
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
       required:
-      - amount
       - cashaddr
       - ticker
+      - value
       type: object
     SlpSendResponse:
       example:
         balances:
-        - amount: "0.00000001"
-          ticker: MNC
+        - ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
-        - amount: "0.00000001"
-          ticker: MNC
+          value: "0.00000001"
+        - ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          value: "0.00000001"
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
       properties:
         txId:
@@ -1711,20 +1711,20 @@ components:
       example:
         utxos:
         - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          amount: amount
           ticker: MNC
           tokenId: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
           decimals: 6.027456183070403
           index: 0.8008281904610115
           txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          value: value
           satoshis: 100
         - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          amount: amount
           ticker: MNC
           tokenId: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
           decimals: 6.027456183070403
           index: 0.8008281904610115
           txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          value: value
           satoshis: 100
       properties:
         utxos:
@@ -1734,12 +1734,12 @@ components:
     SlpUtxo:
       example:
         utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-        amount: amount
         ticker: MNC
         tokenId: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
         decimals: 6.027456183070403
         index: 0.8008281904610115
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+        value: value
         satoshis: 100
       properties:
         index:
@@ -1756,7 +1756,7 @@ components:
           description: serialized outpoint
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
           type: string
-        amount:
+        value:
           description: Token amount represented as a string to avoid precision loss
           type: string
         decimals:

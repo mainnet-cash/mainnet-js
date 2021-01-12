@@ -64,7 +64,7 @@ describe("Test faucet endpoints", () => {
     const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_SLP_WIF);
     const bobwallet = await mainnet.TestNetWallet.newRandom();
     resp = await request(app).post("/faucet/get_testnet_slp/").send({
-      cashaddr: bobwallet.cashaddr,
+      cashaddr: bobwallet.slp.cashaddr,
       ticker: ticker,
       tokenId: tokenId
     });
@@ -74,12 +74,12 @@ describe("Test faucet endpoints", () => {
 
     const balance = await bobwallet.slp.getBalance(ticker, tokenId);
     expect(balance.length).toBe(1);
-    expect(balance[0].amount.toNumber()).toBe(10);
+    expect(balance[0].value.toNumber()).toBe(10);
 
     // give bob some 'gas' bch to send his slp transaction
     await wallet.slpAware().send([{cashaddr: bobwallet.cashaddr, value: 3000, unit: "sat"}]);
     resp = await request(app).post("/faucet/get_testnet_slp/").send({
-      cashaddr: bobwallet.cashaddr,
+      cashaddr: bobwallet.slp.cashaddr,
       ticker: ticker,
       tokenId: tokenId
     });
@@ -94,8 +94,7 @@ describe("Test faucet endpoints", () => {
   });
 
   it("Should get faucet addresses", async () => {
-    let resp = await request(app).post("/faucet/get_addresses/").send({
-    });
+    let resp = await request(app).post("/faucet/get_addresses/").send({});
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.bchtest).toBe(config.FAUCET_CASHADDR);

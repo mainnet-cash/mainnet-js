@@ -59,7 +59,7 @@ import { ElectrumRawTransaction } from "../network/interface";
 import { getRelayFeeCache } from "../network/getRelayFeeCache";
 import { Slp } from "./Slp";
 import axios from "axios";
-import { SlpSendRequest, SlpSendResult } from "../slp/interface";
+import { SlpSendResponse } from "../slp/interface";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -758,7 +758,7 @@ export class TestNetWallet extends Wallet {
   async returnTestnetSlp(
     ticker: string,
     tokenId?: string
-  ): Promise<SlpSendResult> {
+  ): Promise<SlpSendResponse> {
     try {
       const response = await axios.post(
         `${TestNetWallet.faucetServer}/faucet/get_addresses`

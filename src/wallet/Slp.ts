@@ -5,7 +5,7 @@ import {
   SlpGenesisResult,
   SlpMintResult,
   SlpSendRequest,
-  SlpSendResult,
+  SlpSendResponse,
   SlpTokenBalance,
   SlpUtxoI,
 } from "../slp/interface";
@@ -68,7 +68,7 @@ export class Slp {
       let utxo: any = {};
       utxo.ticker = val.ticker;
       utxo.tokenId = val.tokenId;
-      utxo.amount = val.amount;
+      utxo.value = val.value;
       utxo.satoshis = val.satoshis;
       utxo.decimals = val.decimals;
       utxo.txId = val.txid;
@@ -184,18 +184,18 @@ export class Slp {
     cashaddr: string,
     ticker: string,
     tokenId?: string
-  ): Promise<SlpSendResult> {
+  ): Promise<SlpSendResponse> {
     const balances = await this.getBalance(ticker, tokenId);
     const requests: SlpSendRequest[] = balances.map((val) => ({
       cashaddr: cashaddr,
-      amount: val.amount,
+      value: val.value,
       ticker: val.ticker,
       tokenId: val.tokenId,
     }));
     return await this.send(requests);
   }
 
-  public async send(requests: SlpSendRequest[]): Promise<SlpSendResult> {
+  public async send(requests: SlpSendRequest[]): Promise<SlpSendResponse> {
     let [actualTokenId, result] = await this._processSendRequests(requests);
     return {
       txId: result!,

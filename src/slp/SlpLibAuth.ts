@@ -176,13 +176,13 @@ export const SlpGetSendOutputs = async (
 
   // sort inputs in ascending order to eliminate the unnecessary splitting
   // and to prefer the consolidation of small inputs
-  slpUtxos = slpUtxos.sort((a, b) => a.amount.comparedTo(b.amount));
+  slpUtxos = slpUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
   const slpAvailableAmount: BigNumber = slpUtxos
-    .map((val) => new BigNumber(val.amount))
+    .map((val) => new BigNumber(val.value))
     .reduce((a, b) => BigNumber.sum(a, b), new BigNumber(0));
   const slpSpendAmount: BigNumber = sendRequests
-    .map((val) => new BigNumber(val.amount))
+    .map((val) => new BigNumber(val.value))
     .reduce((a, b) => BigNumber.sum(a, b), new BigNumber(0));
 
   if (slpSpendAmount.isLessThanOrEqualTo(0)) {
@@ -198,7 +198,7 @@ export const SlpGetSendOutputs = async (
   for (let slputxo of slpUtxos) {
     const amountTooLow = totalInputTokens.isLessThan(slpSpendAmount);
     if (amountTooLow) {
-      totalInputTokens = totalInputTokens.plus(slputxo.amount);
+      totalInputTokens = totalInputTokens.plus(slputxo.value);
       fundingSlpUtxos.push(slputxo);
     } else {
       break;
@@ -212,14 +212,14 @@ export const SlpGetSendOutputs = async (
   const compiler = await authenticationTemplateToCompilerBCH(template);
 
   const change = totalInputTokens.minus(slpSpendAmount);
-  let amounts = sendRequests.map((val) => new BigNumber(val.amount));
+  let values = sendRequests.map((val) => new BigNumber(val.value));
   if (change.isGreaterThan(new BigNumber(0))) {
-    amounts.push(change);
+    values.push(change);
     sendRequests.push({
       cashaddr: changeCashaddr,
       ticker: ticker,
       tokenId: tokenId,
-      amount: new BigNumber(0),
+      value: new BigNumber(0),
     });
   }
 
@@ -232,14 +232,14 @@ export const SlpGetSendOutputs = async (
       })
   );
 
-  amounts = amounts.map((val) => val.shiftedBy(decimals));
+  values = values.map((val) => val.shiftedBy(decimals));
 
   let result: Uint8Array = new Uint8Array();
-  for (const amnt of amounts) {
+  for (const val of values) {
     result = new Uint8Array([
       ...result,
       ...Uint8Array.from([8]),
-      ...bigIntToBinUint64BE(BigInt(amnt)),
+      ...bigIntToBinUint64BE(BigInt(val)),
     ]);
   }
 

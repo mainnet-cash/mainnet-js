@@ -1,7 +1,6 @@
 import { Network, TxI } from "../interface";
 import {
   SlpDbResponse,
-  SlpGenesisOptions,
   SlpTokenBalance,
   SlpTokenInfo,
   SlpUtxoI,
@@ -140,7 +139,7 @@ export class SlpDbProvider implements SlpProvider {
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   async SlpWaitForBalance(
-    amount: BigNumber.Value,
+    value: BigNumber.Value,
     cashaddr: string,
     ticker: string,
     tokenId?: string
@@ -149,7 +148,7 @@ export class SlpDbProvider implements SlpProvider {
       this.SlpWatchBalance(
         (balance: SlpTokenBalance[]) => {
           let bal = balance[0];
-          if (bal.amount.isGreaterThanOrEqualTo(new BigNumber(amount))) {
+          if (bal.value.isGreaterThanOrEqualTo(new BigNumber(value))) {
             resolve(bal);
             return true;
           }

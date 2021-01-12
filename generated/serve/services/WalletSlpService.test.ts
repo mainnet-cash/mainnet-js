@@ -37,7 +37,7 @@ describe("Test Wallet Slp Endpoints", () => {
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
     expect(resp.body.balances.length).toBe(1);
-    expect(Number(resp.body.balances[0].amount)).toBe(10000);
+    expect(Number(resp.body.balances[0].value)).toBe(10000);
   });
 
   it("Should get token infos", async () => {
@@ -68,14 +68,14 @@ describe("Test Wallet Slp Endpoints", () => {
       .post("/wallet/slp/mint")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-        amount: "10000",
+        value: "10000",
         ticker: ticker, //"MNC",
         endBaton: false
       });
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.txId.length).toBe(64);
     expect(resp.body.balances.length).toBe(1);
-    expect(Number(resp.body.balances[0].amount)).toBe(20000);
+    expect(Number(resp.body.balances[0].value)).toBe(20000);
   });
 
   /**
@@ -90,7 +90,7 @@ describe("Test Wallet Slp Endpoints", () => {
       });
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.length).toBe(1);
-    expect(Number(resp.body[0].amount)).toBe(20000);
+    expect(Number(resp.body[0].value)).toBe(20000);
   });
 
   /**
@@ -140,7 +140,7 @@ describe("Test Wallet Slp Endpoints", () => {
           to: [{
             cashaddr: bobsCashaddr,
             ticker: ticker, //"MNC",
-            amount: 10
+            value: 10
           }]
         });
 
@@ -154,7 +154,7 @@ describe("Test Wallet Slp Endpoints", () => {
       expect(sendResp.statusCode).toBe(200);
       expect((sendResp.body.txId as string).length).toBe(64);
       expect(resp.statusCode).toBe(200);
-      expect(Number(body[0].amount)).toBe(10);
+      expect(Number(body[0].value)).toBe(10);
     }
   });
 
@@ -193,7 +193,7 @@ describe("Test Wallet Slp Endpoints", () => {
       to: [{
         cashaddr: bchaddr.toSlpAddress(bobsWallet.cashaddr),
         ticker: ticker, //"MNC",
-        amount: 10
+        value: 10
       }]
     });
     if (initialSlpResp.statusCode !== 200) {

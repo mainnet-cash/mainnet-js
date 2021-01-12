@@ -109,7 +109,7 @@ const slpMint = ({ slpMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       let wallet = await mainnet.walletFromId(slpMintRequest.walletId);
-      let resp = await wallet.slp.mint(slpMintRequest.amount, slpMintRequest.ticker, slpMintRequest.tokenId, slpMintRequest.endBaton);
+      let resp = await wallet.slp.mint(slpMintRequest.value, slpMintRequest.ticker, slpMintRequest.tokenId, slpMintRequest.endBaton);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
