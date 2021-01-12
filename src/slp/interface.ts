@@ -10,14 +10,14 @@ export interface SlpDbResponse {
   a: any[];
   x: any[];
   s: any[];
-};
+}
 
 export interface SlpTokenBalance {
   value: BigNumber;
   ticker: string;
   name: string;
   tokenId: string;
-};
+}
 
 export interface SlpUtxoI extends UtxoI {
   value: BigNumber;
@@ -31,7 +31,7 @@ export interface SlpSendRequest {
   value: BigNumber.Value;
   ticker: string;
   tokenId?: string;
-};
+}
 
 export interface SlpTokenInfo {
   name: string;
