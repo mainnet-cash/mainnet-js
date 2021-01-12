@@ -46,7 +46,7 @@ export const SlpGetGenesisOutputs = async (
     throw Error("Initial genesis token amount should be greater than zero");
   }
 
-  if (options.decimalPlaces < 0 || options.decimalPlaces > 9) {
+  if (options.decimals < 0 || options.decimals > 9) {
     throw new Error("Genesis allows decimal places between 0");
   }
   const cashAddrs = options.endBaton
@@ -68,7 +68,7 @@ export const SlpGetGenesisOutputs = async (
   const compiler = await authenticationTemplateToCompilerBCH(template);
 
   const rawTokenAmount = BigInt(
-    options.initialAmount.shiftedBy(options.decimalPlaces)
+    options.initialAmount.shiftedBy(options.decimals)
   );
 
   const batonVout = options.endBaton ? 0x00 : 0x02;
@@ -79,7 +79,7 @@ export const SlpGetGenesisOutputs = async (
       g_token_name: stringToBin(options.name),
       g_token_document_url: stringToBin(options.documentUrl),
       g_token_document_hash: stringToBin(options.documentHash, true),
-      g_decimals: Uint8Array.from([options.decimalPlaces]),
+      g_decimals: Uint8Array.from([options.decimals]),
       g_mint_baton_vout: Uint8Array.from([batonVout]),
       g_initial_token_mint_quantity: bigIntToBinUint64BE(rawTokenAmount),
     },
@@ -182,7 +182,7 @@ export const SlpGetSendOutputs = async (
     .map((val) => new BigNumber(val.amount))
     .reduce((a, b) => BigNumber.sum(a, b), new BigNumber(0));
   const slpSpendAmount: BigNumber = sendRequests
-    .map((val) => new BigNumber(val.value))
+    .map((val) => new BigNumber(val.amount))
     .reduce((a, b) => BigNumber.sum(a, b), new BigNumber(0));
 
   if (slpSpendAmount.isLessThanOrEqualTo(0)) {
@@ -212,14 +212,14 @@ export const SlpGetSendOutputs = async (
   const compiler = await authenticationTemplateToCompilerBCH(template);
 
   const change = totalInputTokens.minus(slpSpendAmount);
-  let amounts = sendRequests.map((val) => new BigNumber(val.value));
+  let amounts = sendRequests.map((val) => new BigNumber(val.amount));
   if (change.isGreaterThan(new BigNumber(0))) {
     amounts.push(change);
     sendRequests.push({
       cashaddr: changeCashaddr,
       ticker: ticker,
       tokenId: tokenId,
-      value: 0,
+      amount: new BigNumber(0),
     });
   }
 

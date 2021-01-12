@@ -25,7 +25,7 @@ describe("Slp wallet tests", () => {
   const genesisOptions: SlpGenesisOptions = {
     name: "Mainnet coin",
     ticker: ticker,
-    decimalPlaces: 2,
+    decimals: 2,
     initialAmount: 10000,
     documentUrl: "https://mainnet.cash",
     documentHash:
@@ -67,7 +67,7 @@ describe("Slp wallet tests", () => {
     let result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
-        value: 5,
+        amount: 5,
         ticker: ticker,
         tokenId: tokenId,
       },
@@ -92,7 +92,7 @@ describe("Slp wallet tests", () => {
 
     // send without token id
     result = await aliceWallet.slp.send([
-      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
     ]);
 
     expect(result.balances.length).toBe(1);
@@ -114,8 +114,8 @@ describe("Slp wallet tests", () => {
 
     // send twice to bob
     result = await aliceWallet.slp.send([
-      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
-      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
     ]);
 
     expect(result.balances.length).toBe(1);
@@ -138,8 +138,8 @@ describe("Slp wallet tests", () => {
     // send to bob and charlie
     const charlieWallet = await RegTestWallet.newRandom();
     result = await aliceWallet.slp.send([
-      { cashaddr: bobWallet.slp.cashaddr, value: 5, ticker: ticker },
-      { cashaddr: charlieWallet.slp.cashaddr, value: 5, ticker: ticker },
+      { cashaddr: bobWallet.slp.cashaddr, amount: 5, ticker: ticker },
+      { cashaddr: charlieWallet.slp.cashaddr, amount: 5, ticker: ticker },
     ]);
 
     expect(result.balances.length).toBe(1);
@@ -192,7 +192,7 @@ describe("Slp wallet tests", () => {
     let result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
-        value: 5,
+        amount: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -228,7 +228,7 @@ describe("Slp wallet tests", () => {
     result = await bobWallet.slp.send([
       {
         cashaddr: aliceWallet.slp.cashaddr,
-        value: 5,
+        amount: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -270,7 +270,7 @@ describe("Slp wallet tests", () => {
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     // send bob some bch gas to enable him to send slp
-    // aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat"}]);
+    // aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, amount: 3000, unit: "sat"}]);
 
     aliceSlpBalance = (
       await aliceWallet.slp.getBalance(genesisOptions.ticker, genesis.tokenId)
@@ -278,7 +278,7 @@ describe("Slp wallet tests", () => {
     result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
-        value: 5,
+        amount: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -310,7 +310,7 @@ describe("Slp wallet tests", () => {
     result = await bobWallet.slp.send([
       {
         cashaddr: aliceWallet.slp.cashaddr,
-        value: 5,
+        amount: 5,
         ticker: genesisOptions.ticker,
         tokenId: genesis.tokenId,
       },
@@ -398,7 +398,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 0,
+          amount: 0,
         },
       ])
     ).rejects.toThrow();
@@ -407,7 +407,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 10,
+          amount: 10,
         },
       ])
     ).rejects.toThrow();
@@ -416,7 +416,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 10,
+          amount: 10,
         },
       ])
     ).rejects.toThrow();
@@ -425,7 +425,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 10,
+          amount: 10,
         },
       ])
     ).rejects.toThrow();
@@ -434,13 +434,13 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 10,
+          amount: 10,
           tokenId: genesis1.tokenId,
         },
         {
           cashaddr: aliceWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 10,
+          amount: 10,
           tokenId: genesis2.tokenId,
         },
       ])
@@ -448,8 +448,8 @@ describe("Slp wallet tests", () => {
 
     await expect(
       aliceWallet.slp.send([
-        { cashaddr: aliceWallet.slp.cashaddr, ticker: "ABC", value: 10 },
-        { cashaddr: aliceWallet.slp.cashaddr, ticker: "DEF", value: 10 },
+        { cashaddr: aliceWallet.slp.cashaddr, ticker: "ABC", amount: 10 },
+        { cashaddr: aliceWallet.slp.cashaddr, ticker: "DEF", amount: 10 },
       ])
     ).rejects.toThrow();
 
@@ -486,7 +486,7 @@ describe("Slp wallet tests", () => {
       {
         cashaddr: bobWallet.slp.cashaddr,
         ticker: genesisOptions.ticker,
-        value: 10,
+        amount: 10,
       },
     ]);
 
@@ -509,7 +509,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: bobWallet.slp.cashaddr,
           ticker: genesisOptions.ticker,
-          value: 20,
+          amount: 20,
         },
       ]);
     }, 5000);
@@ -535,7 +535,7 @@ describe("Slp wallet tests", () => {
   //       {
   //         cashaddr: bobWallet.slp.cashaddr,
   //         ticker: genesisOptions.ticker,
-  //         value: 20,
+  //         amount: 20,
   //       },
   //     ]);
   //   }, 5000);

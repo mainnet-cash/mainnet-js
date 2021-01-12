@@ -57,7 +57,7 @@ export interface SlpProvider {
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   SlpWaitForBalance(
-    value: BigNumber.Value,
+    amount: BigNumber.Value,
     cashaddr: string,
     ticker: string,
     tokenId?: string

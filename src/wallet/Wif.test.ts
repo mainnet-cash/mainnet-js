@@ -403,7 +403,7 @@ describe(`Wallet subscriptions`, () => {
     expect(await bob.getBalance("sat")).toBe(4000);
   });
 
-  test("Should get testnet satoshis and send them back", async () => {
+  test.skip("Should get testnet satoshis and send them back", async () => {
     const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
     const txid = await wallet.getTestnetSatoshis();
     expect(txid.length).toBe(64);
@@ -415,7 +415,7 @@ describe(`Wallet subscriptions`, () => {
     expect(response.balance!.sat!).toBe(0);
   });
 
-  test("Should get testnet slp tokens and send them back", async () => {
+  test.skip("Should get testnet slp tokens and send them back", async () => {
     let aliceWif = `${process.env.ALICE_TESTNET_WALLET_ID!}`;
     let aliceWallet = await TestNetWallet.fromId(aliceWif);
 

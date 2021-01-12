@@ -1386,8 +1386,8 @@ components:
         endBaton: false
         ticker: MNC
         documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
-        decimalPlaces: 0.8008281904610115
         initialAmount: "10000"
+        decimals: 0.8008281904610115
         documentUrl: https://mainnet.cash
         name: Mainnet coin
       properties:
@@ -1406,9 +1406,8 @@ components:
           description: Value is represented as a string to avoid precision loss
           example: "10000"
           type: string
-        decimalPlaces:
-          description: Indicates that 1 token is divisible into 10^decimalPlaces base
-            units
+        decimals:
+          description: Indicates that 1 token is divisible into 10^decimals base units
           type: number
         documentUrl:
           example: https://mainnet.cash
@@ -1424,7 +1423,7 @@ components:
           example: false
           type: boolean
       required:
-      - decimalPlaces
+      - decimals
       - initialAmount
       - name
       - ticker
@@ -1475,9 +1474,9 @@ components:
       example:
         ticker: MNC
         documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
-        decimalPlaces: 0.8008281904610115
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         initialAmount: "10000"
+        decimals: 0.8008281904610115
         documentUrl: https://mainnet.cash
         name: Mainnet coin
       properties:
@@ -1494,9 +1493,8 @@ components:
           description: Value is represented as a string to avoid precision loss
           example: "10000"
           type: string
-        decimalPlaces:
-          description: Indicates that 1 token is divisible into 10^decimalPlaces base
-            units
+        decimals:
+          description: Indicates that 1 token is divisible into 10^decimals base units
           type: number
         documentUrl:
           example: https://mainnet.cash
@@ -1617,13 +1615,13 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         to:
         - cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+          amount: 100
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          value: 100
         - cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+          amount: 100
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          value: 100
       properties:
         walletId:
           description: |
@@ -1641,14 +1639,14 @@ components:
     SlpSendRequestItem:
       example:
         cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+        amount: 100
         ticker: MNC
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        value: 100
       properties:
         cashaddr:
           example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
           type: string
-        value:
+        amount:
           example: 100
           type: number
         ticker:
@@ -1658,9 +1656,9 @@ components:
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
       required:
+      - amount
       - cashaddr
       - ticker
-      - value
       type: object
     SlpSendResponse:
       example:

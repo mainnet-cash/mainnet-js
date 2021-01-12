@@ -1267,9 +1267,9 @@ components:
           type: string
           example: "10000"
           description: Value is represented as a string to avoid precision loss
-        decimalPlaces:
+        decimals:
           type: number
-          description: Indicates that 1 token is divisible into 10^decimalPlaces base units
+          description: Indicates that 1 token is divisible into 10^decimals base units
         documentUrl:
           type: string
           example: https://mainnet.cash
@@ -1286,7 +1286,7 @@ components:
         - name
         - ticker
         - initialAmount
-        - decimalPlaces
+        - decimals
 
     SlpGenesisResponse:
       properties:
@@ -1331,9 +1331,9 @@ components:
           type: string
           example: "10000"
           description: Value is represented as a string to avoid precision loss
-        decimalPlaces:
+        decimals:
           type: number
-          description: Indicates that 1 token is divisible into 10^decimalPlaces base units
+          description: Indicates that 1 token is divisible into 10^decimals base units
         documentUrl:
           type: string
           example: https://mainnet.cash
@@ -1444,7 +1444,7 @@ components:
         cashaddr:
            type: string
            example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-        value:
+        amount:
           type: number
           example: 100
         ticker:
@@ -1455,7 +1455,7 @@ components:
            example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       required:
         - cashaddr
-        - value
+        - amount
         - ticker
       type: object
 

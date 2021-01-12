@@ -77,7 +77,7 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
 
       const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_SLP_WIF);
       wallet.slpAware();
-      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, value: diff, ticker: getTestnetSlpRequest.ticker, tokenId: getTestnetSlpRequest.tokenId}]);
+      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, amount: diff, ticker: getTestnetSlpRequest.ticker, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
       reject(Service.rejectResponse(

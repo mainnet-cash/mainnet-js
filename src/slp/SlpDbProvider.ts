@@ -140,7 +140,7 @@ export class SlpDbProvider implements SlpProvider {
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   async SlpWaitForBalance(
-    value: BigNumber.Value,
+    amount: BigNumber.Value,
     cashaddr: string,
     ticker: string,
     tokenId?: string
@@ -149,7 +149,7 @@ export class SlpDbProvider implements SlpProvider {
       this.SlpWatchBalance(
         (balance: SlpTokenBalance[]) => {
           let bal = balance[0];
-          if (bal.amount.isGreaterThanOrEqualTo(new BigNumber(value))) {
+          if (bal.amount.isGreaterThanOrEqualTo(new BigNumber(amount))) {
             resolve(bal);
             return true;
           }

@@ -29,7 +29,7 @@ describe("Test Wallet Slp Endpoints", () => {
         name: "Mainnet coin",
         ticker: ticker, //"MNC",
         initialAmount: "10000",
-        decimalPlaces: 2,
+        decimals: 2,
         documentUrl: "https://mainnet.cash",
         documentHash: "db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916",
         endBaton: false
@@ -140,7 +140,7 @@ describe("Test Wallet Slp Endpoints", () => {
           to: [{
             cashaddr: bobsCashaddr,
             ticker: ticker, //"MNC",
-            value: 10
+            amount: 10
           }]
         });
 
@@ -154,7 +154,6 @@ describe("Test Wallet Slp Endpoints", () => {
       expect(sendResp.statusCode).toBe(200);
       expect((sendResp.body.txId as string).length).toBe(64);
       expect(resp.statusCode).toBe(200);
-      console.log(body);
       expect(Number(body[0].amount)).toBe(10);
     }
   });
@@ -194,7 +193,7 @@ describe("Test Wallet Slp Endpoints", () => {
       to: [{
         cashaddr: bchaddr.toSlpAddress(bobsWallet.cashaddr),
         ticker: ticker, //"MNC",
-        value: 10
+        amount: 10
       }]
     });
     if (initialSlpResp.statusCode !== 200) {
@@ -235,7 +234,7 @@ describe("Test Wallet Slp Endpoints", () => {
   /**
    * utxos
    */
-  it("Should return the unspent transaction outputs for a regtest wallet", async () => {
+  it("Should return the unspent slp transaction outputs for a regtest wallet", async () => {
     const resp = await request(app)
       .post("/wallet/slp/utxo")
       .send({
@@ -243,18 +242,7 @@ describe("Test Wallet Slp Endpoints", () => {
       });
 
     const body = resp.body;
-    if (body.utxos) {
-      const valueArray = await Promise.all(
-        body.utxos.map(async (b) => {
-          return b!.value || 0;
-        })
-      );
-      const value = valueArray.reduce((a:any, b:any) => a + b, 0);
-      expect(resp.statusCode).toBe(200);
-      expect(value).toBeGreaterThan(0);
-      expect(body!.utxos!.length).toBeGreaterThan(0);
-    } else {
-      throw Error("no utxos returned");
-    }
+    expect(resp.statusCode).toBe(200);
+    expect(body!.utxos!.length).toBeGreaterThan(0);
   });
 });

@@ -137,12 +137,12 @@ export class Slp {
   // waits for address balance to be greater than or equal to the target value
   // this call halts the execution
   public async waitForBalance(
-    value: BigNumber.Value,
+    amount: BigNumber.Value,
     ticker: string,
     tokenId?: string
   ): Promise<SlpTokenBalance> {
     return this.provider.SlpWaitForBalance(
-      value,
+      amount,
       this.cashaddr,
       ticker,
       tokenId
@@ -188,7 +188,7 @@ export class Slp {
     const balances = await this.getBalance(ticker, tokenId);
     const requests: SlpSendRequest[] = balances.map((val) => ({
       cashaddr: cashaddr,
-      value: val.amount,
+      amount: val.amount,
       ticker: val.ticker,
       tokenId: val.tokenId,
     }));
