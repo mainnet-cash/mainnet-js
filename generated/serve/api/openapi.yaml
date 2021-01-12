@@ -1428,6 +1428,7 @@ components:
       - initialAmount
       - name
       - ticker
+      - walletId
     SlpGenesisResponse:
       example:
         balances:
@@ -1536,6 +1537,7 @@ components:
       required:
       - amount
       - ticker
+      - walletId
     SlpMintResponse:
       example:
         balances:
@@ -1632,6 +1634,9 @@ components:
           items:
             $ref: '#/components/schemas/SlpSendRequestItem'
           type: array
+      required:
+      - to
+      - walletId
       type: object
     SlpSendRequestItem:
       example:
