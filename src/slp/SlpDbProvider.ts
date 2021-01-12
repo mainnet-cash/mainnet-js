@@ -1,5 +1,11 @@
 import { Network, TxI } from "../interface";
-import { SlpDbResponse, SlpTokenBalance, SlpUtxoI } from "./interface";
+import {
+  SlpDbResponse,
+  SlpGenesisOptions,
+  SlpTokenBalance,
+  SlpTokenInfo,
+  SlpUtxoI,
+} from "./interface";
 import {
   SlpAllUtxosTemplate,
   SlpAddressTokenBalancesTemplate,
@@ -7,6 +13,7 @@ import {
   SlpWaitForTransactionTemplate,
   SlpBatonUtxosTemplate,
   SlpSpendableUtxosTemplate,
+  SlpTokenInfoTemplate,
 } from "./SlpDbTemplates";
 import EventSource from "eventsource";
 import BigNumber from "bignumber.js";
@@ -16,6 +23,7 @@ import {
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
   _convertBalanceBigNumbers,
+  _convertSlpTokenInfo,
   _convertUtxoBigNumbers,
 } from "./SlpProvider";
 import axios from "axios";
@@ -43,6 +51,17 @@ export class SlpDbProvider implements SlpProvider {
   async SlpUtxos(cashaddr: string): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
       (await this.SlpDbQuery(SlpAllUtxosTemplate(cashaddr))).g as SlpUtxoI[]
+    );
+  }
+
+  // look up the token information
+  async SlpTokenInfo(
+    ticker: string,
+    tokenId?: string
+  ): Promise<SlpTokenInfo[]> {
+    return _convertSlpTokenInfo(
+      (await this.SlpDbQuery(SlpTokenInfoTemplate(ticker, tokenId)))
+        .t as SlpTokenInfo[]
     );
   }
 

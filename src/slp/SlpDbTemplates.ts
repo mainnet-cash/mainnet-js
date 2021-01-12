@@ -234,21 +234,35 @@ export const SlpWaitForTransactionTemplate = (cashaddr: string, ticker?: string,
   return q;
 };
 
+// Lookup SLP token information
 // prettier-ignore
-export const SlpAllTokensTemplate = () => ({
-  "v": 3,
-  "q": {
-    "db": ["t"],
-    "find": {},
-    "sort": {
-      "tokenStats.approx_txns_since_genesis": -1
+export const SlpTokenInfoTemplate = (ticker: string, tokenId?: string) => {
+  let q = {
+    "v": 3,
+    "q": {
+      "db": ["t"],
+      "find": {},
+      "sort": {
+        "tokenStats.approx_txns_since_genesis": -1
+      }
     },
-    "limit": 1000000
-  },
-  "r": {
-    "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex} ]"
+    "r": {
+      "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex, decimalPlaces: .tokenDetails.decimals, documentUrl: .tokenDetails.documentUri, documentHash: .tokenDetails.documentSha256Hex, initialAmount: .tokenDetails.genesisOrMintQuantity } ]"
+    }
   }
-})
+
+  if (ticker) {
+    q["q"]["find"]["tokenDetails.symbol"] = ticker;
+  }
+
+  if (tokenId) {
+    q["q"]["find"]["tokenDetails.tokenIdHex"] = tokenId;
+  }
+
+  console.log(q);
+
+  return q;
+}
 
 // Slp Utxos for bch operation, to prevent accident burning of tokens and baton
 // prettier-ignore

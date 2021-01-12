@@ -46,6 +46,11 @@ describe("Slp wallet tests", () => {
     expect(result.balances[0].name).toBe("Mainnet coin");
     expect(result.balances[0].ticker).toBe(ticker);
     expect(result.balances[0].tokenId).toBe(tokenId);
+
+    const infos = await aliceWallet.slp.getTokenInfo(ticker, tokenId);
+    const info = infos[0];
+    delete (info as any).tokenId;
+    expect(infos[0]).toEqual(genesisOptions);
   });
 
   test("Genesis test, utxos are not suitable", async () => {

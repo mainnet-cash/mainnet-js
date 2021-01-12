@@ -1,5 +1,10 @@
 import { TxI } from "../interface";
-import { SlpTokenBalance, SlpUtxoI } from "./interface";
+import {
+  SlpGenesisOptions,
+  SlpTokenBalance,
+  SlpTokenInfo,
+  SlpUtxoI,
+} from "./interface";
 import BigNumber from "bignumber.js";
 
 export type SlpWatchTransactionCallback = (tx: any) => boolean | void;
@@ -11,6 +16,9 @@ export type SlpWatchBalanceCallback = (
 export interface SlpProvider {
   // all utxos, including mint batons
   SlpUtxos(cashaddr: string): Promise<SlpUtxoI[]>;
+
+  // look up the token information
+  SlpTokenInfo(ticker: string, tokenId?: string): Promise<SlpGenesisOptions[]>;
 
   // safe-spendable token utxos, without baton
   SlpSpendableUtxos(
@@ -82,4 +90,19 @@ export function _convertBalanceBigNumbers(
 export function _convertUtxoBigNumbers(utxos: SlpUtxoI[]): SlpUtxoI[] {
   utxos.forEach((val) => (val.amount = new BigNumber(val.amount)));
   return utxos;
+}
+
+export function _convertSlpTokenInfo(
+  tokenInfos: SlpTokenInfo[]
+): SlpTokenInfo[] {
+  tokenInfos.forEach((val) => {
+    for (const key in val) {
+      if (val[key] === null) {
+        val[key] = "";
+      }
+    }
+    val.initialAmount = new BigNumber(val.initialAmount);
+  });
+
+  return tokenInfos;
 }

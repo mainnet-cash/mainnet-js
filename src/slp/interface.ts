@@ -34,6 +34,16 @@ export type SlpSendRequest = {
   // burnAmount: number | undefined;
 };
 
+export interface SlpTokenInfo {
+  name: string;
+  ticker: string;
+  tokeinId: string;
+  initialAmount: BigNumber.Value;
+  decimalPlaces: number;
+  documentUrl?: string;
+  documentHash?: string;
+}
+
 export interface SlpGenesisOptions {
   name: string;
   ticker: string;
