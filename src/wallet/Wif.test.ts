@@ -315,7 +315,7 @@ describe(`Wallet subscriptions`, () => {
         unit: "satoshis",
       },
     ]);
-    
+
     let cancel = bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
     expect(balance).toBe(2000);
