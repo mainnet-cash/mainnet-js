@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.6
+  version: 0.2.8
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -29,6 +29,11 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
   name: contract
+- description: Testnet faucet
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/faucet/
+  name: faucet
 - description: Mine regtest coins
   externalDocs:
     description: Find out more
@@ -50,6 +55,76 @@ tags:
     url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
   name: webhook
 paths:
+  /faucet/get_testnet_bch:
+    post:
+      operationId: getTestnetBch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetTestnetBchRequest'
+        description: |
+          Request to bch faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTestnetBchResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get testnet bch
+      tags:
+      - faucet
+      x-eov-operation-handler: controllers/FaucetController
+  /faucet/get_testnet_slp:
+    post:
+      operationId: getTestnetSlp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetTestnetSlpRequest'
+        description: |
+          Request to slp faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTestnetSlpResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get testnet slp tokens
+      tags:
+      - faucet
+      x-eov-operation-handler: controllers/FaucetController
+  /faucet/get_addresses:
+    post:
+      operationId: getAddresses
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAddressesResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get addresses to return back or donate the testnet bch and tokens
+      tags:
+      - faucet
+      x-eov-operation-handler: controllers/FaucetController
   /webhook/watch_address:
     post:
       operationId: watchAddress
@@ -431,6 +506,56 @@ paths:
       x-eov-operation-handler: controllers/WalletController
 components:
   schemas:
+    GetTestnetBchRequest:
+      example:
+        cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
+      properties:
+        cashaddr:
+          description: Receiver's cashaddr
+          type: string
+    GetTestnetBchResponse:
+      example:
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+      properties:
+        txId:
+          description: Transaction id
+          type: string
+    GetTestnetSlpRequest:
+      example:
+        cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
+        ticker: MNC
+        tokenId: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
+      properties:
+        cashaddr:
+          description: Receiver's cashaddr
+          type: string
+        ticker:
+          description: Token ticker
+          type: string
+        tokenId:
+          description: TokenId in hex
+          type: string
+      required:
+      - cashaddr
+      - ticker
+    GetTestnetSlpResponse:
+      example:
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+      properties:
+        txId:
+          description: Transaction id
+          type: string
+    GetAddressesResponse:
+      example:
+        bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
+        slptest: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+      properties:
+        bchtest:
+          description: Cashaddr to return testnet BCH
+          type: string
+        slptest:
+          description: Cashaddr to return testnet SLP tokens
+          type: string
     Utxo:
       allOf:
       - $ref: '#/components/schemas/UnitType'

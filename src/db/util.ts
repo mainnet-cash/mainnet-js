@@ -1,12 +1,12 @@
 import { StorageProvider } from ".";
-import { getPlatform } from "../util";
+import { getRuntimePlatform } from "../util";
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
 import { default as SqlProvider } from "./SqlProvider";
 
 export function getStorageProvider(
   dbName: string
 ): StorageProvider | undefined {
-  if (getPlatform() !== "node") {
+  if (getRuntimePlatform() !== "node") {
     return new IndexedDBProvider(dbName);
   } else {
     if ("DATABASE_URL" in process.env) {

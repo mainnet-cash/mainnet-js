@@ -1,0 +1,127 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="/scripts/mainnet.js"></script>
+    <script src="https://unpkg.com/bchaddrjs-slp@0.2.9/dist/bchaddrjs-slp-0.2.9.min.js"></script> 
+    <script src="https://unpkg.com/buefy/dist/components/input"></script>
+    <script src="https://unpkg.com/buefy/dist/components/button"></script>
+    <script src="https://unpkg.com/buefy/dist/components/field"></script>
+    <script src="https://unpkg.com/buefy/dist/components/tooltip"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+
+  </head>
+  <body>
+    <div id="app">
+    </div>
+  </body>
+
+  <script>
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      balance: 0,
+      slpbalance: "",
+      cashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv",
+
+      faucetCashAddr: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga",
+      faucetSlpCashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"
+    },
+
+    template: `
+    <div>
+      <section style="margin:20px">
+        <b-field style="width:50%;"" label="Your cashaddress">
+          <b-input v-model="cashaddr"></b-input>
+        </b-field>
+        <p>Faucet balances available</p>
+        <li> <button @click="getBch">Get tBCH</button> {{ balance }} tBCH </li>
+        <div v-for="token in slpbalance" :key="token.tokenId">
+          <li>
+            <button @click="getTokens(token.ticker, token.tokenId)">
+              Get {{ token.ticker }}
+            </button>
+            {{ parseInt(token.amount) }}
+            <b-tooltip :label="token.tokenId" position="is-right" :triggers="['click']" :auto-close="['outside', 'escape']">
+              <a>[{{ token.ticker }}]</a>
+            </b-tooltip>
+            {{ token.name }}
+          </li>
+        </div>
+        <b-field style="width:50%; margin-top:50px;" label="Instructions">
+        </b-field>
+        <p>You will get 10000 testnet satoshi or 10 tokens per request</p>
+        <p>Requests are limited to one in 15 minutes from the same IP</p>
+        <p>There is as well a global rate limit to prevent abuse</p>
+        <p>&nbsp;</p>
+        <p>Remember to return the tBCH back to the faucet or donate your own tBCH to the <strong>{{ faucetCashAddr }}</strong> </p>
+        <p>Donate your SLP tokens to <strong>{{ faucetSlpCashaddr }}</strong> </p>
+
+      </section>
+    </div>`,
+
+    methods: {
+      fetch(url, body) {
+        fetch(url, {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: {
+              "Content-type": "application/json; charset=UTF-8"
+          }
+        }).then(response => response.json())
+        .then((json) => {
+          if (json.code >= 400) {
+            throw new Error(json.message);
+          }
+          alert("Successfully got coins, txid "+(json.txId))
+        }).catch(error => alert(error));
+      },
+      getBch() {
+        this.fetch("/faucet/get_testnet_bch", {cashaddr: bchaddr.toCashAddress(this.cashaddr)});
+        this.update();
+      },
+      getTokens(ticker, tokenId) {
+        this.fetch("/faucet/get_testnet_slp", {cashaddr: bchaddr.toSlpAddress(this.cashaddr), ticker: ticker, tokenId: tokenId});
+        this.update();
+      },
+
+      async update() {
+        const fetchopt = {
+          method: "POST",
+          headers: { "Content-type": "application/json; charset=UTF-8" }
+        };
+        fetch("/faucet/get_addresses", fetchopt).then((r) => r.json()).then(async (json) => {
+          this.faucetSlpCashaddr = json.slptest;
+          this.faucetCashaddr = json.bchtest;
+
+          const wallet = await TestNetWallet.watchOnly(this.faucetCashAddr);
+          wallet.slpAware();
+          wallet.getBalance("bch").then((resp) => this.balance = resp);
+
+          const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
+          const slpWallet = await TestNetWallet.watchOnly(caddr);
+          slpWallet.slp.getBalance().then((resp) => this.slpbalance = resp);
+
+          // const slpWallet = await TestNetWallet.fromWIF("cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG");
+          // const genesisOptions = {
+          //   name: "Mainnet coin",
+          //   ticker: "MNC",
+          //   decimalPlaces: 2,
+          //   initialAmount: 10000,
+          //   documentUrl: "https://mainnet.cash",
+          //   documentHash:
+          //     "0000000000000000000000000000000000000000000000000000000000000000",
+          // };
+
+          // const result = await slpWallet.slp.genesis(genesisOptions);
+          // console.log(result);
+        })
+      }
+    },
+
+    mounted: async function () {
+      this.update();
+    }});
+  </script>
+</html>

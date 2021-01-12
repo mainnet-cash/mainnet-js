@@ -25,6 +25,7 @@ import {
   SlpGetGenesisOutputs,
   SlpGetMintOutputs,
   SlpGetSendOutputs,
+  SlpTxoTemplate,
 } from "../slp/SlpLibAuth";
 import { binToHex } from "@bitauth/libauth";
 import { SendRequest } from "./model";
@@ -123,13 +124,14 @@ export class Slp {
     );
   }
 
+  // TODO fix test
   // waits for next transaction, program execution is halted
-  public async waitForTransaction(
-    ticker?: string,
-    tokenId?: string
-  ): Promise<any> {
-    return this.provider.SlpWaitForTransaction(this.cashaddr, ticker, tokenId);
-  }
+  // public async waitForTransaction(
+  //   ticker?: string,
+  //   tokenId?: string
+  // ): Promise<any> {
+  //   return this.provider.SlpWaitForTransaction(this.cashaddr, ticker, tokenId);
+  // }
 
   public async genesis(options: SlpGenesisOptions): Promise<SlpGenesisResult> {
     let result = await this._processGenesis(options);
@@ -151,6 +153,21 @@ export class Slp {
       .getAddressUtxos(this.wallet.cashaddr!);
 
     return await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult);
+  }
+
+  public async sendMax(
+    cashaddr: string,
+    ticker: string,
+    tokenId?: string
+  ): Promise<SlpSendResult> {
+    const balances = await this.getBalance(ticker, tokenId);
+    const requests: SlpSendRequest[] = balances.map((val) => ({
+      cashaddr: cashaddr,
+      value: val.amount,
+      ticker: val.ticker,
+      tokenId: val.tokenId,
+    }));
+    return await this.send(requests);
   }
 
   public async send(requests: SlpSendRequest[]): Promise<SlpSendResult> {
@@ -193,7 +210,11 @@ export class Slp {
       ticker,
       tokenId
     );
-    let slpOutputsResult = await SlpGetSendOutputs(slpUtxos, sendRequests);
+    let slpOutputsResult = await SlpGetSendOutputs(
+      this.cashaddr,
+      slpUtxos,
+      sendRequests
+    );
 
     let fundingBchUtxos = await this.wallet
       .slpAware(true)

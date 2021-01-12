@@ -1,4 +1,4 @@
-import { getPlatform } from "../util";
+import { getRuntimePlatform } from "../util";
 import * as primary from "./constant";
 
 let mainnetServers: string[],
@@ -6,7 +6,7 @@ let mainnetServers: string[],
   regtestServers: string[];
 
 export function getDefaultServers() {
-  if (getPlatform() == "node") {
+  if (getRuntimePlatform() == "node") {
     mainnetServers = process.env.ELECTRUM
       ? process.env.ELECTRUM.split(",")
       : primary.mainnetServers;
@@ -31,12 +31,12 @@ export function getDefaultServers() {
 export function getUserAgent() {
   // Allow users to configure the cluster confidence
   let ua;
-  if (getPlatform() === "node") {
+  if (getRuntimePlatform() === "node") {
     ua = process.env.ELECTRUM_USER_AGENT
       ? process.env.ELECTRUM_USER_AGENT
-      : "mainnet-js-" + getPlatform();
+      : "mainnet-js-" + getRuntimePlatform();
   } else {
-    ua = "mainnet-js-" + getPlatform();
+    ua = "mainnet-js-" + getRuntimePlatform();
   }
   return ua;
 }
@@ -44,7 +44,7 @@ export function getUserAgent() {
 export function getConfidence() {
   // Allow users to configure the cluster confidence
   let confidence;
-  if (getPlatform() === "node") {
+  if (getRuntimePlatform() === "node") {
     confidence = process.env.ELECTRUM_CONFIDENCE
       ? parseInt(process.env.ELECTRUM_CONFIDENCE)
       : 1;

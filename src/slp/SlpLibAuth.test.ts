@@ -40,6 +40,60 @@ test("Test SLP genesis txo bytecode per SLP Spec", async () => {
   parseSLP(Buffer.from(hex, "hex"));
 });
 
+test("Test SLP genesis txo bytecode with empty strings", async () => {
+  const wallet = await RegTestWallet.newRandom();
+
+  const genesisOptions: SlpGenesisOptions = {
+    name: "",
+    ticker: "",
+    decimalPlaces: 5,
+    initialAmount: 1000,
+    documentUrl: "",
+    documentHash: "",
+  };
+
+  const result = await SlpGetGenesisOutputs(
+    genesisOptions,
+    wallet.cashaddr!,
+    wallet.cashaddr!
+  );
+  const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
+
+  const hex = binToHex(genesisTxoBytecode);
+  expect(hex).toBe(
+    "6a04534c500001010747454e455349534c004c004c004c0001050102080000000005f5e100"
+  );
+
+  const obj = parseSLP(Buffer.from(hex, "hex"));
+});
+
+test("Test SLP genesis txo bytecode with utf strings", async () => {
+  const wallet = await RegTestWallet.newRandom();
+
+  const genesisOptions: SlpGenesisOptions = {
+    name: "Music 🎵",
+    ticker: "🎵",
+    decimalPlaces: 0,
+    initialAmount: 100000,
+    documentUrl: "http://tiny.cc/gcmzcz",
+    documentHash: "",
+  };
+
+  const result = await SlpGetGenesisOutputs(
+    genesisOptions,
+    wallet.cashaddr!,
+    wallet.cashaddr!
+  );
+  const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
+
+  const hex = binToHex(genesisTxoBytecode);
+  expect(hex).toBe(
+    "6a04534c500001010747454e4553495304f09f8eb50a4d7573696320f09f8eb515687474703a2f2f74696e792e63632f67636d7a637a4c00010001020800000000000186a0"
+  );
+
+  const obj = parseSLP(Buffer.from(hex, "hex"));
+});
+
 test("Test SLP send txo bytecode per SLP Spec", async () => {
   const wallet = await RegTestWallet.newRandom();
   const fundingSlpUtxo: SlpUtxoI = {
@@ -58,7 +112,11 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
   };
 
-  const result = await SlpGetSendOutputs([fundingSlpUtxo], [sendRequest]);
+  const result = await SlpGetSendOutputs(
+    wallet.cashaddr!,
+    [fundingSlpUtxo],
+    [sendRequest]
+  );
   const sendTxoBytecode = result.SlpOutputs[0].lockingBytecode;
 
   const hex = binToHex(sendTxoBytecode);

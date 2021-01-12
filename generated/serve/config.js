@@ -10,6 +10,10 @@ const config = {
   BASE_VERSION: '',
   CONTROLLER_DIRECTORY: path.join(__dirname, 'controllers'),
   PROJECT_DIR: __dirname,
+  FAUCET_CASHADDR: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga",
+  FAUCET_WIF: "cQp32f2zYoKFG65Hq6WhYeYqJAFhoumDK7Vy792f1qJ55u71ZGUJ",
+  FAUCET_SLP_CASHADDR: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv",
+  FAUCET_SLP_WIF: "cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG"
 };
 config.OPENAPI_YAML = path.join(config.ROOT_DIR, 'api', 'openapi.yaml');
 config.DOC_YAML = path.join(config.ROOT_DIR, "../../swagger/v1/", "api.yml");

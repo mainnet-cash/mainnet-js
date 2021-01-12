@@ -9,7 +9,7 @@ const launchServer = async () => {
     logger.info('Express server running');
     return this.expressServer;
   } catch (error) {
-    logger.error('Express Server failure', error.message);
+    logger.error('Express Server failure', error.message, error.stack, error);
     await this.close();
   }
 };
