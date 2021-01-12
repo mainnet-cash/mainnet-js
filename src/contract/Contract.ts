@@ -135,37 +135,39 @@ export class Contract implements ContractI {
     return this.contract.functions[method];
   }
 
-  public async runFunction(req : CashscriptTransactionI){
-    let fn = this.getContractFunction(req.function)
-    let func = fn(...req.arguments).to(req.to.cashaddr,req.to.value)
-    if(req.utxoIds){
-      let utxos = req.utxoIds.map(u => {return deserializeUtxo(u)})
-      func = func.from(utxos)
+  public async runFunction(req: CashscriptTransactionI) {
+    let fn = this.getContractFunction(req.function);
+    let func = fn(...req.arguments).to(req.to.cashaddr, req.to.value);
+    if (req.utxoIds) {
+      let utxos = req.utxoIds.map((u) => {
+        return deserializeUtxo(u);
+      });
+      func = func.from(utxos);
     }
-    if(req.opReturn){
-      func = func.withOpReturn(req.opReturn)
+    if (req.opReturn) {
+      func = func.withOpReturn(req.opReturn);
     }
-    if(req.feePerByte){
-      func = func.withFeePerByte(req.feePerByte)
+    if (req.feePerByte) {
+      func = func.withFeePerByte(req.feePerByte);
     }
-    if(req.hardcodedFee){
-      func = func.withHardcodedFee(req.hardcodedFee)
+    if (req.hardcodedFee) {
+      func = func.withHardcodedFee(req.hardcodedFee);
     }
-    if(req.minChange){
-      func = func.withMinChange(req.minChange)
+    if (req.minChange) {
+      func = func.withMinChange(req.minChange);
     }
-    if(req.withoutChange){
-      func = func.withoutChange()
+    if (req.withoutChange) {
+      func = func.withoutChange();
     }
-    if(req.age){
-      func = func.withAge(req.age)
+    if (req.age) {
+      func = func.withAge(req.age);
     }
-    if(req.time){
-      func = func.withTime(req.time)
+    if (req.time) {
+      func = func.withTime(req.time);
     }
-    return await func[req.action]()
+    return await func[req.action]();
   }
-  
+
   private async estimateFee(func, publicKey, sig, outputAddress, utxos) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance

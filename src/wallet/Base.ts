@@ -99,7 +99,7 @@ export class BaseWallet implements WalletI {
     } else {
       throw Error(
         "No database was available or configured to store the named wallet."
-        );  
+      );
     }
   };
 

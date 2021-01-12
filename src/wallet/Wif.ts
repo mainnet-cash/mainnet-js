@@ -365,10 +365,10 @@ export class Wallet extends BaseWallet {
   }
 
   public getDepositAddress(): string {
-    if(this.cashaddr){
+    if (this.cashaddr) {
       return this.cashaddr;
-    }else{
-      throw Error("cashaddr was not set on wallet")
+    } else {
+      throw Error("cashaddr was not set on wallet");
     }
   }
 
@@ -631,13 +631,13 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
-  public getPublicKeyHash(){
-    return this.publicKeyHash!
+  public getPublicKeyHash() {
+    return this.publicKeyHash!;
   }
 
   // get a cashscript signature
-  public getSignatureTemplate(){
-    return new SignatureTemplate(this.privateKeyWif as string)
+  public getSignatureTemplate() {
+    return new SignatureTemplate(this.privateKeyWif as string);
   }
   /**
    * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
