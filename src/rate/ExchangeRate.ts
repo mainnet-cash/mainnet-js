@@ -4,6 +4,7 @@ import {
   getRuntimePlatform,
 } from "../util/getRuntimePlatform";
 import ExchangeRateProvider from "../db/ExchangeRateProvider";
+import { indexedDbIsAvailable } from "../db/util";
 
 import get from "axios";
 
@@ -31,7 +32,7 @@ export class ExchangeRate {
 
   static async get(symbol: string) {
     const platform = getRuntimePlatform();
-    if (platform !== RuntimePlatform.node) {
+    if (platform !== RuntimePlatform.node && indexedDbIsAvailable()) {
       return await this.getRateFromIndexedDb(symbol);
     } else {
       return await this.getRateFromGlobalScope(symbol);

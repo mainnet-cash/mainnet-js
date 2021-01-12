@@ -59,7 +59,7 @@ import { ElectrumRawTransaction } from "../network/interface";
 import { getRelayFeeCache } from "../network/getRelayFeeCache";
 import { Slp } from "./Slp";
 import axios from "axios";
-import { SlpSendRequest, SlpSendResult } from "../slp/interface";
+import { SlpSendResult } from "../slp/interface";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();

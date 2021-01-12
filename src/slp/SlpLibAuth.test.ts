@@ -64,7 +64,7 @@ test("Test SLP genesis txo bytecode with empty strings", async () => {
     "6a04534c500001010747454e455349534c004c004c004c0001050102080000000005f5e100"
   );
 
-  const obj = parseSLP(Buffer.from(hex, "hex"));
+  parseSLP(Buffer.from(hex, "hex"));
 });
 
 test("Test SLP genesis txo bytecode with utf strings", async () => {
@@ -91,7 +91,7 @@ test("Test SLP genesis txo bytecode with utf strings", async () => {
     "6a04534c500001010747454e4553495304f09f8eb50a4d7573696320f09f8eb515687474703a2f2f74696e792e63632f67636d7a637a4c00010001020800000000000186a0"
   );
 
-  const obj = parseSLP(Buffer.from(hex, "hex"));
+  parseSLP(Buffer.from(hex, "hex"));
 });
 
 test("Test SLP send txo bytecode per SLP Spec", async () => {

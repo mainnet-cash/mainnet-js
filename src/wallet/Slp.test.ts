@@ -8,7 +8,6 @@ import { mine } from "../mine";
 import { SlpGenesisOptions, SlpGenesisResult } from "../slp/interface";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
-import { raw } from "core-js/core/string";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -177,7 +176,7 @@ describe("Slp wallet tests", () => {
     );
 
     // send bob some bch gas to enable him to send slp
-    let aliceBalance = await aliceWallet
+    await aliceWallet
       .slpAware()
       .send([{ cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat" }]);
 
