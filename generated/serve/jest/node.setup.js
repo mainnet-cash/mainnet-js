@@ -11,6 +11,10 @@ function delay(ms) {
 }
 
 module.exports = async function () {
+  if (process.env.SKIP_REGTEST_INIT) {
+    return;
+  }
+
   console.log("Starting regtest network...");
 
   if (global.fulcrumRegtest === undefined) {

@@ -1,3 +1,6 @@
+import { SendRequest } from "../wallet/model";
+import { UtxoI } from "../interface";
+
 export interface ContractI {
   /**
    * toString should return a serialized representation of the contract
@@ -16,4 +19,19 @@ export interface ContractI {
 export interface ContractResponseI {
   contractId: string;
   cashaddr: string;
+}
+
+export interface CashscriptTransactionI {
+  arguments: string[];
+  function: string;
+  action: string;
+  to: SendRequest;
+  utxoIds: string[];
+  opReturn: string[];
+  feePerByte: number;
+  hardcodedFee: number;
+  minChange: number;
+  withoutChange: boolean;
+  age: number;
+  time: number;
 }

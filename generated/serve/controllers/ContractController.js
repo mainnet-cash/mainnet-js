@@ -12,6 +12,10 @@ const contractFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractFn);
 };
 
+const contractUtxos = async (request, response) => {
+  await Controller.handleRequest(request, response, service.contractUtxos);
+};
+
 const createContract = async (request, response) => {
   await Controller.handleRequest(request, response, service.createContract);
 };
@@ -24,15 +28,11 @@ const escrowFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowFn);
 };
 
-const escrowUtxos = async (request, response) => {
-  await Controller.handleRequest(request, response, service.escrowUtxos);
-};
-
 
 module.exports = {
   contractFn,
+  contractUtxos,
   createContract,
   createEscrow,
   escrowFn,
-  escrowUtxos,
 };

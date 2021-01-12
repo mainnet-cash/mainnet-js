@@ -25,6 +25,7 @@ import {
   SlpGetGenesisOutputs,
   SlpGetMintOutputs,
   SlpGetSendOutputs,
+  SlpTxoTemplate,
 } from "../slp/SlpLibAuth";
 import { binToHex } from "@bitauth/libauth";
 import { SendRequest } from "./model";
@@ -154,6 +155,21 @@ export class Slp {
     return await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult);
   }
 
+  public async sendMax(
+    cashaddr: string,
+    ticker: string,
+    tokenId?: string
+  ): Promise<SlpSendResult> {
+    const balances = await this.getBalance(ticker, tokenId);
+    const requests: SlpSendRequest[] = balances.map((val) => ({
+      cashaddr: cashaddr,
+      value: val.amount,
+      ticker: val.ticker,
+      tokenId: val.tokenId,
+    }));
+    return await this.send(requests);
+  }
+
   public async send(requests: SlpSendRequest[]): Promise<SlpSendResult> {
     let [actualTokenId, result] = await this._processSendRequests(requests);
     return {
@@ -194,7 +210,11 @@ export class Slp {
       ticker,
       tokenId
     );
-    let slpOutputsResult = await SlpGetSendOutputs(slpUtxos, sendRequests);
+    let slpOutputsResult = await SlpGetSendOutputs(
+      this.cashaddr,
+      slpUtxos,
+      sendRequests
+    );
 
     let fundingBchUtxos = await this.wallet
       .slpAware(true)

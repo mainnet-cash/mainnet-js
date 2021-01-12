@@ -9,9 +9,10 @@ import {
 } from "cashscript";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
-import { ContractI } from "./interface";
+import { ContractI, CashscriptTransactionI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
+import { deserializeUtxo } from "../util/serializeUtxo";
 import { castParametersFromConstructor } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
@@ -134,6 +135,37 @@ export class Contract implements ContractI {
     return this.contract.functions[method];
   }
 
+  public async runFunction(req : CashscriptTransactionI){
+    let fn = this.getContractFunction(req.function)
+    let func = fn(...req.arguments).to(req.to.cashaddr,req.to.value)
+    if(req.utxoIds){
+      let utxos = req.utxoIds.map(u => {return deserializeUtxo(u)})
+      func = func.from(utxos)
+    }
+    if(req.opReturn){
+      func = func.withOpReturn(req.opReturn)
+    }
+    if(req.feePerByte){
+      func = func.withFeePerByte(req.feePerByte)
+    }
+    if(req.hardcodedFee){
+      func = func.withHardcodedFee(req.hardcodedFee)
+    }
+    if(req.minChange){
+      func = func.withMinChange(req.minChange)
+    }
+    if(req.withoutChange){
+      func = func.withoutChange()
+    }
+    if(req.age){
+      func = func.withAge(req.age)
+    }
+    if(req.time){
+      func = func.withTime(req.time)
+    }
+    return await func[req.action]()
+  }
+  
   private async estimateFee(func, publicKey, sig, outputAddress, utxos) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance

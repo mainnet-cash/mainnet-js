@@ -19,6 +19,7 @@ import {
   _convertUtxoBigNumbers,
 } from "./SlpProvider";
 import axios from "axios";
+import { btoa } from "../util/base64";
 
 const servers = {
   mainnet: {
@@ -227,11 +228,9 @@ const fetch_retry = (url, options = {}, n = 5) =>
     });
   });
 
-const btoa_ext = (buf) => Buffer.from(buf).toString("base64");
-
 const B64QueryString = function (queryObject): string {
   if (!queryObject || !Object.keys(queryObject).length) {
     throw new Error("Empty SLPDB query");
   }
-  return btoa_ext(JSON.stringify(queryObject));
+  return btoa(JSON.stringify(queryObject));
 };

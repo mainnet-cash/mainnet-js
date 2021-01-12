@@ -60,6 +60,8 @@ import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { ElectrumRawTransaction } from "../network/interface";
 import { getRelayFeeCache } from "../network/getRelayFeeCache";
 import { Slp } from "./Slp";
+import axios from "axios";
+import { SlpSendRequest, SlpSendResult } from "../slp/interface";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -92,6 +94,7 @@ export class Wallet extends BaseWallet {
   get slp() {
     if (!this._slp) {
       this._slp = new Slp(this);
+      this._slpAware = true;
     }
 
     return this._slp;
@@ -654,7 +657,7 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
     // get input
-    const utxos = await this.provider!.getUtxos(this.cashaddr);
+    const utxos = await this.getAddressUtxos(this.cashaddr);
 
     const bestHeight = await this.provider!.getBlockHeight()!;
     const spendAmount = await sumSendRequestAmounts(sendRequests);
@@ -714,8 +717,74 @@ export class Wallet extends BaseWallet {
 
 export class TestNetWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
+  static faucetServer = "https://rest-unstable.mainnet.cash";
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet);
+  }
+
+  // will receive 10000 testnet satoshi, rate limits apply
+  async getTestnetSatoshis(): Promise<string> {
+    try {
+      const response = await axios.post(
+        `${TestNetWallet.faucetServer}/faucet/get_testnet_bch`,
+        { cashaddr: this.cashaddr! }
+      );
+      const data = response.data;
+      return data.txId;
+    } catch (e) {
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
+      throw e;
+    }
+  }
+
+  // be nice and return them back
+  async returnTestnetSatoshis(): Promise<SendResponse> {
+    try {
+      const response = await axios.post(
+        `${TestNetWallet.faucetServer}/faucet/get_addresses`
+      );
+      const data = response.data;
+      return await this.slpAware().sendMax(data.bchtest);
+    } catch (e) {
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
+      throw e;
+    }
+  }
+
+  // will receive 10000 testnet satoshi, rate limits apply
+  async getTestnetSlp(ticker: string, tokenId?: string): Promise<string> {
+    try {
+      const response = await axios.post(
+        `${TestNetWallet.faucetServer}/faucet/get_testnet_slp`,
+        { cashaddr: this.cashaddr!, ticker: ticker, tokenId: tokenId }
+      );
+      const data = response.data;
+      return data.txId;
+    } catch (e) {
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
+      throw e;
+    }
+  }
+
+  // be nice and return them back
+  async returnTestnetSlp(
+    ticker: string,
+    tokenId?: string
+  ): Promise<SlpSendResult> {
+    try {
+      const response = await axios.post(
+        `${TestNetWallet.faucetServer}/faucet/get_addresses`
+      );
+      const data = response.data;
+      return await this.slp.sendMax(data.slptest, ticker, tokenId);
+    } catch (e) {
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
+      throw e;
+    }
   }
 }
 

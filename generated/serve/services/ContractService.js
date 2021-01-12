@@ -1,6 +1,27 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
+
+/**
+* Create a cashscript contract
+*
+* contractRequest ContractRequest Request a new cashscript contract
+* returns ContractResponse
+* */
+const createContract = ({ contractRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.createContractResponse(contractRequest);
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e,
+        e.status || 405,
+      ));
+    }
+  },
+);
+
 /**
 * Create an escrow contract
 *
@@ -22,6 +43,30 @@ const createEscrow = ({ escrowRequest }) => new Promise(
   },
 );
 
+/**
+* Call a method on a contract
+*
+* contractFnRequest ContractFnRequest null
+* returns ContractFnResponse
+* */
+const contractFn = ({ req }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let contract = await mainnet.Contract.fromId(req.contractId);
+      resp = await contract.runFunction(req)
+      resolve(Service.successResponse({
+        contractId: contractFnRequest.contractId, 
+        txId: resp.txid,
+        hex: resp.hex
+      }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e,
+        e.status || 500,
+      ));
+    }
+   },
+);
 
 /**
 * Finalize an escrow contract
@@ -63,14 +108,13 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
 * contract Contract 
 * returns UtxoResponse
 * */
-const escrowUtxos = ({contract}) => new Promise(
+const contractUtxos = ({contract}) => new Promise(
   async (resolve, reject) => {
     try {
       let c = await mainnet.contractFromId(contract.contractId);
       let resp = await c.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -79,7 +123,9 @@ const escrowUtxos = ({contract}) => new Promise(
 );
 
 module.exports = {
+  createContract,
   createEscrow,
-  escrowFn,
-  escrowUtxos,
+  contractFn,
+  contractUtxos,
+  escrowFn
 };
