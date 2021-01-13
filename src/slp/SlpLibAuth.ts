@@ -162,17 +162,8 @@ export const SlpGetSendOutputs = async (
     throw new Error("No available tokens to spend");
   }
 
-  // check this once again with fetched tokenId data
-  const uniqueTockenIds = new Set(slpUtxos.map((val) => val.tokenId));
-  if (uniqueTockenIds.size > 1) {
-    throw Error(
-      "You have two different token types with the same ticker. Pass tokenId parameter"
-    );
-  }
-
   const decimals = slpUtxos[0].decimals;
   const tokenId = slpUtxos[0].tokenId;
-  const ticker = slpUtxos[0].ticker;
 
   // sort inputs in ascending order to eliminate the unnecessary splitting
   // and to prefer the consolidation of small inputs
@@ -217,7 +208,6 @@ export const SlpGetSendOutputs = async (
     values.push(change);
     sendRequests.push({
       cashaddr: changeCashaddr,
-      ticker: ticker,
       tokenId: tokenId,
       value: new BigNumber(0),
     });

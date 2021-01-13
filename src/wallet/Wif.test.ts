@@ -432,8 +432,8 @@ describe(`Wallet subscriptions`, () => {
     expect(balance[0].value.toNumber()).toBe(10);
 
     const tokenId = balance[0].tokenId;
-    const response = await wallet.returnTestnetSlp("MNC", tokenId);
-    expect(response.balances.length).toBe(0);
+    const response = await wallet.returnTestnetSlp(tokenId);
+    expect(response.balance).toBe(0);
 
     await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
   });

@@ -72,14 +72,14 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
         throw new Error("Incorrect cashaddr");
 
       const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetSlpRequest.cashaddr);
-      const receiverBalance = await receiverWallet.slp.getBalance(getTestnetSlpRequest.ticker, getTestnetSlpRequest.tokenId);
-      const diff = 10 - (receiverBalance.length ? receiverBalance[0].value : 0);
+      const receiverBalance = await receiverWallet.slp.getBalance(getTestnetSlpRequest.tokenId);
+      const diff = 10 - (receiverBalance.value.toNumber());
       if (diff <= 0)
         throw new Error("You have 10 tokens or more of this type. Refusing to refill.");
 
       const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_SLP_WIF);
       wallet.slpAware();
-      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, value: diff, ticker: getTestnetSlpRequest.ticker, tokenId: getTestnetSlpRequest.tokenId}]);
+      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, value: diff, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
       // console.log(e);

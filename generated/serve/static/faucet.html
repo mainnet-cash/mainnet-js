@@ -22,7 +22,7 @@
     el: '#app',
     data: {
       balance: 0,
-      slpbalance: "",
+      slpbalances: [],
       cashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv",
 
       faucetCashAddr: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga",
@@ -37,12 +37,12 @@
         </b-field>
         <p>Faucet balances available</p>
         <li> <button @click="getBch">Get tBCH</button> {{ balance }} tBCH </li>
-        <div v-for="token in slpbalance" :key="token.tokenId">
+        <div v-for="token in slpbalances" :key="token.tokenId">
           <li>
             <button @click="getTokens(token.ticker, token.tokenId)">
               Get {{ token.ticker }}
             </button>
-            {{ parseInt(token.amount) }}
+            {{ parseInt(token.value) }}
             <b-tooltip :label="token.tokenId" position="is-right" :triggers="['click']" :auto-close="['outside', 'escape']">
               <a>[{{ token.ticker }}]</a>
             </b-tooltip>
@@ -101,7 +101,7 @@
 
           const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
           const slpWallet = await TestNetWallet.watchOnly(caddr);
-          slpWallet.slp.getBalance().then((resp) => this.slpbalance = resp);
+          slpWallet.slp.getAllBalances().then((resp) => this.slpbalances = resp);
 
           // const slpWallet = await TestNetWallet.fromWIF("cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG");
           // const genesisOptions = {

@@ -26,17 +26,27 @@ export interface SlpUtxoI extends UtxoI {
   tokenId: string;
 }
 
+export interface SlpFormattedUtxo {
+  ticker: string,
+  tokenId: string,
+  value: string,
+  satoshis: number,
+  decimals: number
+  txId: string,
+  index: number,
+  utxoId: string
+}
+
 export interface SlpSendRequest {
   cashaddr: string;
   value: BigNumber.Value;
-  ticker: string;
-  tokenId?: string;
+  tokenId: string;
 }
 
 export interface SlpTokenInfo {
   name: string;
   ticker: string;
-  tokeinId: string;
+  tokenId: string;
   initialAmount: BigNumber.Value;
   decimals: number;
   documentUrl?: string;
@@ -55,15 +65,15 @@ export interface SlpGenesisOptions {
 
 export interface SlpGenesisResult {
   tokenId: string;
-  balances: SlpTokenBalance[];
+  balance: SlpTokenBalance;
 }
 
 export interface SlpSendResponse {
   txId: string;
-  balances: SlpTokenBalance[];
+  balance: SlpTokenBalance;
 }
 
 export interface SlpMintResult {
   txId: string;
-  balances: SlpTokenBalance[];
+  balance: SlpTokenBalance;
 }

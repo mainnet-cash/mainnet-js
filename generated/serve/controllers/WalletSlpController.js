@@ -8,6 +8,10 @@
 
 const Controller = require('./Controller');
 const service = require('../services/WalletSlpService');
+const slpAllBalances = async (request, response) => {
+  await Controller.handleRequest(request, response, service.slpAllBalances);
+};
+
 const slpBalance = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpBalance);
 };
@@ -46,6 +50,7 @@ const slpUtxos = async (request, response) => {
 
 
 module.exports = {
+  slpAllBalances,
   slpBalance,
   slpDepositAddress,
   slpDepositQr,

@@ -1,6 +1,4 @@
 
-import { bchParam } from "../../../src/chain";
-
 var server = require("../")
 var request = require("supertest");
 var bchaddr = require('bchaddrjs-slp');
@@ -17,6 +15,7 @@ describe("Test Wallet Slp Endpoints", () => {
   });
 
   let ticker: string = Math.random().toString(36).substring(8).toUpperCase();
+  let tokenId: string;
 
   /**
    * genesis
@@ -27,40 +26,33 @@ describe("Test Wallet Slp Endpoints", () => {
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         name: "Mainnet coin",
-        ticker: ticker, //"MNC",
+        ticker: ticker,
         initialAmount: "10000",
         decimals: 2,
         documentUrl: "https://mainnet.cash",
         documentHash: "db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916",
         endBaton: false
       });
+
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
-    expect(resp.body.balances.length).toBe(1);
-    expect(Number(resp.body.balances[0].value)).toBe(10000);
+    expect(Number(resp.body.balance.value)).toBe(10000);
+    tokenId = resp.body.tokenId;
   });
 
   it("Should get token infos", async () => {
     let resp = await request(app)
       .post("/wallet/slp/token_info")
       .send({
-        ticker: "HONK",
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        tokenId: tokenId,
       });
 
     let body = resp.body;
-    expect(resp.statusCode).toBe(200);
-    expect(body.length).toBeGreaterThan(1);
 
-    resp = await request(app)
-      .post("/wallet/slp/token_info")
-      .send({
-        ticker: "HONK",
-        tokenId: "7f8889682d57369ed0e32336f8b7e0ffec625a35cca183f4e81fde4e71a538a1"
-      });
-
-    body = resp.body;
     expect(resp.statusCode).toBe(200);
-    expect(body.length).toBe(1);
+    expect(body).toBeDefined();
+    expect(body.tokenId).toBe(tokenId);
   });
 
   it("Should mint new tokens", async () => {
@@ -69,28 +61,40 @@ describe("Test Wallet Slp Endpoints", () => {
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         value: "10000",
-        ticker: ticker, //"MNC",
+        tokenId: tokenId,
         endBaton: false
       });
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.txId.length).toBe(64);
-    expect(resp.body.balances.length).toBe(1);
-    expect(Number(resp.body.balances[0].value)).toBe(20000);
+    expect(Number(resp.body.balance.value)).toBe(20000);
   });
 
   /**
    * balance
    */
-  it("Should return the balance from a regtest wallet", async () => {
+  it("Should return the slp balance from a regtest wallet", async () => {
     const resp = await request(app)
       .post("/wallet/slp/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-        ticker: ticker
+        tokenId: tokenId
       });
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.length).toBe(1);
-    expect(Number(resp.body[0].value)).toBe(20000);
+    expect(Number(resp.body.value)).toBe(20000);
+  });
+
+  /**
+   * all balances
+   */
+  it("Should return alp slp balances from a regtest wallet", async () => {
+    const resp = await request(app)
+      .post("/wallet/slp/all_balances")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.length).toBeGreaterThanOrEqual(1);
+    expect(resp.body.map(val => Number(val.value))).toContain(20000);
   });
 
   /**
@@ -139,7 +143,7 @@ describe("Test Wallet Slp Endpoints", () => {
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
           to: [{
             cashaddr: bobsCashaddr,
-            ticker: ticker, //"MNC",
+            tokenId: tokenId,
             value: 10
           }]
         });
@@ -154,7 +158,7 @@ describe("Test Wallet Slp Endpoints", () => {
       expect(sendResp.statusCode).toBe(200);
       expect((sendResp.body.txId as string).length).toBe(64);
       expect(resp.statusCode).toBe(200);
-      expect(Number(body[0].value)).toBe(10);
+      expect(Number(body.value)).toBe(10);
     }
   });
 
@@ -192,7 +196,7 @@ describe("Test Wallet Slp Endpoints", () => {
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       to: [{
         cashaddr: bchaddr.toSlpAddress(bobsWallet.cashaddr),
-        ticker: ticker, //"MNC",
+        tokenId: tokenId,
         value: 10
       }]
     });
@@ -205,7 +209,7 @@ describe("Test Wallet Slp Endpoints", () => {
       .send({
         walletId: bobsWallet.walletId,
         cashaddr: bchaddr.toSlpAddress(process.env.ADDRESS as string),
-        ticker: ticker
+        tokenId: tokenId
       });
     const slpBody = slpResp.body;
     if (slpResp.statusCode !== 200) {
@@ -214,7 +218,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
     expect(slpResp.statusCode).toBe(200);
     expect((slpBody.txId as string).length).toBe(64);
-    expect(slpBody.balances.length).toBe(0);
+    expect(Number(slpBody.balance.value)).toBe(0);
 
     let resp = await request(app)
       .post("/wallet/send_max")

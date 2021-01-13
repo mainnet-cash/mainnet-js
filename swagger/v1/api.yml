@@ -557,6 +557,28 @@ paths:
       tags:
         - wallet/slp
 
+  /wallet/slp/all_balances:
+    post:
+      operationId: slpAllBalances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a wallet slp balances
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpBalanceArrayResponse'
+          description: successful operation
+      summary: Get all slp balances of the wallet
+      tags:
+        - wallet/slp
+
   /wallet/slp/balance:
     post:
       operationId: slpBalance
@@ -575,9 +597,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/SlpBalanceResponse'
           description: successful operation
-      summary: Get total slp balances of the wallet
+      summary: Get total slp token balance of the wallet
       tags:
         - wallet/slp
+
   /wallet/slp/deposit_address:
     post:
       operationId: slpDepositAddress
@@ -698,56 +721,6 @@ paths:
 
 components:
   schemas:
-    GetTestnetBchRequest:
-      properties:
-        cashaddr:
-          type: string
-          description: Receiver's cashaddr
-      example:
-        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
-    GetTestnetBchResponse:
-      properties:
-        txId:
-          type: string
-          description: Transaction id
-      example:
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-    GetTestnetSlpRequest:
-      properties:
-        cashaddr:
-          type: string
-          description: Receiver's cashaddr
-        ticker:
-          type: string
-          description: Token ticker
-        tokenId:
-          type: string
-          description: TokenId in hex
-      required:
-        - cashaddr
-        - ticker
-      example:
-        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
-        ticker: "MNC"
-        tokenId: "5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27"
-    GetTestnetSlpResponse:
-      properties:
-        txId:
-          type: string
-          description: Transaction id
-      example:
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-    GetAddressesResponse:
-      properties:
-        bchtest:
-          type: string
-          description: Cashaddr to return testnet BCH
-        slptest:
-          type: string
-          description: Cashaddr to return testnet SLP tokens
-      example:
-        bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
-        slptest: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"
     Utxo:
       properties:
         index:
@@ -1300,21 +1273,23 @@ components:
 
     SlpTokenInfoRequest:
       properties:
-        ticker:
+        walletId:
           type: string
-          example: "MNC"
-          description: Token ticker
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           description: Token unique hexadecimal identifier, also the id of the token creation transaction
       required:
-        - ticker
+        - walletId
+        - tokenId
 
     SlpTokenInfoResponse:
-      type: array
-      items:
-        $ref: "#/components/schemas/SlpTokenInfoResponseItem"
+      type: object
+      nullable: true
+      $ref: "#/components/schemas/SlpTokenInfoResponseItem"
 
     SlpTokenInfoResponseItem:
       properties:
@@ -1353,9 +1328,6 @@ components:
           type: string
           example: "10000"
           description: Value is represented as a string to avoid precision loss
-        ticker:
-          type: string
-          example: MNC
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
@@ -1366,7 +1338,7 @@ components:
       required:
         - walletId
         - value
-        - ticker
+        - tokenId
 
     SlpMintResponse:
       properties:
@@ -1385,25 +1357,20 @@ components:
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
-        ticker:
-          type: string
-          example: "MNC"
-          description: |
-            Optional token ticker to reduce the balances lookup
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           description: |
-            Full token identifier to avoid confusion if you have several tokens with same ticker
+            Full token identifier aka its genesis transaction id
       required:
         - walletId
 
-    SlpBalanceResponse:
+    SlpBalanceArrayResponse:
       type: "array"
       items:
-        $ref: "#/components/schemas/SlpBalanceResponseItem"
+        $ref: "#/components/schemas/SlpBalanceResponse"
 
-    SlpBalanceResponseItem:
+    SlpBalanceResponse:
       properties:
         value:
           type: string
@@ -1447,16 +1414,13 @@ components:
         value:
           type: number
           example: 100
-        ticker:
-           type: string
-           example: MNC
         tokenId:
            type: string
            example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       required:
         - cashaddr
         - value
-        - ticker
+        - tokenId
       type: object
 
     SlpSendResponse:
@@ -1479,23 +1443,18 @@ components:
         cashaddr:
            type: string
            example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-        ticker:
-           type: string
-           example: MNC
         tokenId:
            type: string
            example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
       required:
         - walletId
         - cashaddr
-        - ticker
+        - tokenId
 
     SlpUtxoResponse:
-      properties:
-        utxos:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/SlpUtxo"
+      type: "array"
+      items:
+        $ref: "#/components/schemas/SlpUtxo"
     SlpUtxo:
       properties:
         index:
@@ -1523,3 +1482,50 @@ components:
         tokenId:
           type: string
           example: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
+
+    GetTestnetBchRequest:
+      properties:
+        cashaddr:
+          type: string
+          description: Receiver's cashaddr
+      example:
+        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
+    GetTestnetBchResponse:
+      properties:
+        txId:
+          type: string
+          description: Transaction id
+      example:
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+    GetTestnetSlpRequest:
+      properties:
+        cashaddr:
+          type: string
+          description: Receiver's cashaddr
+        tokenId:
+          type: string
+          description: TokenId in hex
+      required:
+        - cashaddr
+        - tokenId
+      example:
+        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
+        tokenId: "5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27"
+    GetTestnetSlpResponse:
+      properties:
+        txId:
+          type: string
+          description: Transaction id
+      example:
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+    GetAddressesResponse:
+      properties:
+        bchtest:
+          type: string
+          description: Cashaddr to return testnet BCH
+        slptest:
+          type: string
+          description: Cashaddr to return testnet SLP tokens
+      example:
+        bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
+        slptest: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"

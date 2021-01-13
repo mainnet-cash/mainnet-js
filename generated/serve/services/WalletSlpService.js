@@ -3,6 +3,33 @@ const Service = require('./Service');
 const mainnet = require("mainnet-js");
 
 /**
+* Get all slp balances of the wallet
+*
+* slpBalanceRequest SlpBalanceRequest Request for a wallet slp balances 
+* returns List
+* */
+const slpAllBalances = ({ serializedWallet }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
+      if (!wallet) {
+        throw Error("Could not derive wallet");
+      }
+
+      let resp = await wallet.slp.getAllBalances(serializedWallet.tokenId);
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+
+  },
+);
+
+/**
 * Get total slp balances of the wallet
 *
 * slpBalanceRequest SlpBalanceRequest Request for a wallet slp balances 
@@ -17,7 +44,7 @@ const slpBalance = ({ slpBalanceRequest }) => new Promise(
       }
 
       // the balance unit may also be empty
-      let resp = await wallet.slp.getBalance(slpBalanceRequest.ticker, slpBalanceRequest.tokenId);
+      let resp = await wallet.slp.getBalance(slpBalanceRequest.tokenId);
       resolve(Service.successResponse(resp));
     } catch (e) {
       console.log(e);
@@ -109,7 +136,7 @@ const slpMint = ({ slpMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       let wallet = await mainnet.walletFromId(slpMintRequest.walletId);
-      let resp = await wallet.slp.mint(slpMintRequest.value, slpMintRequest.ticker, slpMintRequest.tokenId, slpMintRequest.endBaton);
+      let resp = await wallet.slp.mint(slpMintRequest.value, slpMintRequest.tokenId, slpMintRequest.endBaton);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
@@ -157,7 +184,7 @@ const slpSendMax = ({ slpSendMaxRequest }) => new Promise(
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
-      let resp = await wallet.slp.sendMax(slpSendMaxRequest.cashaddr, slpSendMaxRequest.ticker, slpSendMaxRequest.tokenId);
+      let resp = await wallet.slp.sendMax(slpSendMaxRequest.cashaddr, slpSendMaxRequest.tokenId);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
@@ -177,9 +204,9 @@ const slpSendMax = ({ slpSendMaxRequest }) => new Promise(
 const slpTokenInfo = ({ slpTokenInfoRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const wallet = await mainnet.Wallet.newRandom();
-      const infos = await wallet.slp.getTokenInfo(slpTokenInfoRequest.ticker, slpTokenInfoRequest.tokenId);
-      resolve(Service.successResponse(infos));
+      let wallet = await mainnet.walletFromId(slpTokenInfoRequest.walletId);
+      const info = await wallet.slp.getTokenInfo(slpTokenInfoRequest.tokenId);
+      resolve(Service.successResponse(info));
     } catch (e) {
       console.log(e);
       reject(Service.rejectResponse(
@@ -214,6 +241,7 @@ const slpUtxos = ({ serializedWallet }) => new Promise(
 );
 
 module.exports = {
+  slpAllBalances,
   slpBalance,
   slpDepositAddress,
   slpDepositQr,

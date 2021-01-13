@@ -10,7 +10,7 @@ import BigNumber from "bignumber.js";
 export type SlpWatchTransactionCallback = (tx: any) => boolean | void;
 export type SlpCancelWatchFn = () => void;
 export type SlpWatchBalanceCallback = (
-  balance: SlpTokenBalance[]
+  balance: SlpTokenBalance
 ) => boolean | void;
 
 export interface SlpProvider {
@@ -18,40 +18,40 @@ export interface SlpProvider {
   SlpUtxos(cashaddr: string): Promise<SlpUtxoI[]>;
 
   // look up the token information
-  SlpTokenInfo(ticker: string, tokenId?: string): Promise<SlpGenesisOptions[]>;
+  SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined>;
 
   // safe-spendable token utxos, without baton
   SlpSpendableUtxos(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<SlpUtxoI[]>;
 
   // token mint baton utxos
   SlpBatonUtxos(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<SlpUtxoI[]>;
 
   // get all token balances
-  SlpAddressTokenBalances(
+  SlpAllTokenBalances(
     cashaddr: string,
-    ticker?: string,
-    tokenId?: string
   ): Promise<SlpTokenBalance[]>;
+
+    // get specific token balance
+  SlpTokenBalance(
+    cashaddr: string,
+    tokenId: string
+  ): Promise<SlpTokenBalance>
 
   // get all slp transactions of this address
   SlpAddressTransactionHistory(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<TxI[]>;
 
   // waits for next slp transaction to appear in mempool, code execution is halted
   SlpWaitForTransaction(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<any>;
 
@@ -59,15 +59,13 @@ export interface SlpProvider {
   SlpWaitForBalance(
     value: BigNumber.Value,
     cashaddr: string,
-    ticker: string,
-    tokenId?: string
+    tokenId: string
   ): Promise<SlpTokenBalance>;
 
   // set's up a callback to be executed each time the token balance of the wallet is changed
   SlpWatchBalance(
     callback: SlpWatchBalanceCallback,
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): SlpCancelWatchFn;
 
@@ -75,7 +73,6 @@ export interface SlpProvider {
   SlpWatchTransactions(
     callback: SlpWatchTransactionCallback,
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): SlpCancelWatchFn;
 }
@@ -93,16 +90,23 @@ export function _convertUtxoBigNumbers(utxos: SlpUtxoI[]): SlpUtxoI[] {
 }
 
 export function _convertSlpTokenInfo(
-  tokenInfos: SlpTokenInfo[]
-): SlpTokenInfo[] {
-  tokenInfos.forEach((val) => {
-    for (const key in val) {
-      if (val[key] === null) {
-        val[key] = "";
-      }
-    }
-    val.initialAmount = new BigNumber(val.initialAmount);
-  });
+  tokenInfo: SlpTokenInfo | undefined
+): SlpTokenInfo | undefined {
+  if (!tokenInfo)
+    return tokenInfo;
 
-  return tokenInfos;
+  for (const key in tokenInfo) {
+    if (tokenInfo[key] === null) {
+      tokenInfo[key] = "";
+    }
+  }
+  tokenInfo.initialAmount = new BigNumber(tokenInfo.initialAmount);
+
+  return tokenInfo;
+}
+
+export function _emptyTokenBalance(
+  tokenId: string
+): SlpTokenBalance {
+  return { value: new BigNumber(0), ticker: "", name: "", tokenId: tokenId } as SlpTokenBalance;
 }

@@ -65,22 +65,19 @@ describe("Test faucet endpoints", () => {
     const bobwallet = await mainnet.TestNetWallet.newRandom();
     resp = await request(app).post("/faucet/get_testnet_slp/").send({
       cashaddr: bobwallet.slp.cashaddr,
-      ticker: ticker,
       tokenId: tokenId
     });
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.txId.length).toBe(64);
 
-    const balance = await bobwallet.slp.getBalance(ticker, tokenId);
-    expect(balance.length).toBe(1);
-    expect(balance[0].value.toNumber()).toBe(10);
+    const balance = await bobwallet.slp.getBalance(tokenId);
+    expect(balance.value.toNumber()).toBe(10);
 
     // give bob some 'gas' bch to send his slp transaction
     await wallet.slpAware().send([{cashaddr: bobwallet.cashaddr, value: 3000, unit: "sat"}]);
     resp = await request(app).post("/faucet/get_testnet_slp/").send({
       cashaddr: bobwallet.slp.cashaddr,
-      ticker: ticker,
       tokenId: tokenId
     });
 
@@ -88,7 +85,7 @@ describe("Test faucet endpoints", () => {
     expect(resp.body.message).toBe("You have 10 tokens or more of this type. Refusing to refill.");
 
     // return tokens to faucet
-    await bobwallet.slp.sendMax(wallet.slp.cashaddr, ticker, tokenId);
+    await bobwallet.slp.sendMax(wallet.slp.cashaddr, tokenId);
     // return 'gas'
     await bobwallet.slpAware().sendMax(wallet.cashaddr);
   });

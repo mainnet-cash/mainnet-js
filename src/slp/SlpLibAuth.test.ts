@@ -108,7 +108,6 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
   const sendRequest: SlpSendRequest = {
     cashaddr: wallet.cashaddr!,
     value: 1000000,
-    ticker: "USDT",
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
   };
 
