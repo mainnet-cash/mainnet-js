@@ -755,9 +755,7 @@ export class TestNetWallet extends Wallet {
   }
 
   // be nice and return them back
-  async returnTestnetSlp(
-    tokenId: string
-  ): Promise<SlpSendResponse> {
+  async returnTestnetSlp(tokenId: string): Promise<SlpSendResponse> {
     try {
       const response = await axios.post(
         `${TestNetWallet.faucetServer}/faucet/get_addresses`

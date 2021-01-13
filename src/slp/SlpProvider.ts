@@ -21,27 +21,16 @@ export interface SlpProvider {
   SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined>;
 
   // safe-spendable token utxos, without baton
-  SlpSpendableUtxos(
-    cashaddr: string,
-    tokenId?: string
-  ): Promise<SlpUtxoI[]>;
+  SlpSpendableUtxos(cashaddr: string, tokenId?: string): Promise<SlpUtxoI[]>;
 
   // token mint baton utxos
-  SlpBatonUtxos(
-    cashaddr: string,
-    tokenId?: string
-  ): Promise<SlpUtxoI[]>;
+  SlpBatonUtxos(cashaddr: string, tokenId?: string): Promise<SlpUtxoI[]>;
 
   // get all token balances
-  SlpAllTokenBalances(
-    cashaddr: string,
-  ): Promise<SlpTokenBalance[]>;
+  SlpAllTokenBalances(cashaddr: string): Promise<SlpTokenBalance[]>;
 
-    // get specific token balance
-  SlpTokenBalance(
-    cashaddr: string,
-    tokenId: string
-  ): Promise<SlpTokenBalance>
+  // get specific token balance
+  SlpTokenBalance(cashaddr: string, tokenId: string): Promise<SlpTokenBalance>;
 
   // get all slp transactions of this address
   SlpAddressTransactionHistory(
@@ -50,10 +39,7 @@ export interface SlpProvider {
   ): Promise<TxI[]>;
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  SlpWaitForTransaction(
-    cashaddr: string,
-    tokenId?: string
-  ): Promise<any>;
+  SlpWaitForTransaction(cashaddr: string, tokenId?: string): Promise<any>;
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   SlpWaitForBalance(
@@ -92,8 +78,7 @@ export function _convertUtxoBigNumbers(utxos: SlpUtxoI[]): SlpUtxoI[] {
 export function _convertSlpTokenInfo(
   tokenInfo: SlpTokenInfo | undefined
 ): SlpTokenInfo | undefined {
-  if (!tokenInfo)
-    return tokenInfo;
+  if (!tokenInfo) return tokenInfo;
 
   for (const key in tokenInfo) {
     if (tokenInfo[key] === null) {
@@ -105,8 +90,11 @@ export function _convertSlpTokenInfo(
   return tokenInfo;
 }
 
-export function _emptyTokenBalance(
-  tokenId: string
-): SlpTokenBalance {
-  return { value: new BigNumber(0), ticker: "", name: "", tokenId: tokenId } as SlpTokenBalance;
+export function _emptyTokenBalance(tokenId: string): SlpTokenBalance {
+  return {
+    value: new BigNumber(0),
+    ticker: "",
+    name: "",
+    tokenId: tokenId,
+  } as SlpTokenBalance;
 }

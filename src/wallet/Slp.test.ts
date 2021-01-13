@@ -174,9 +174,8 @@ describe("Slp wallet tests", () => {
       .slpAware()
       .send([{ cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat" }]);
 
-    let aliceSlpBalance = (
-      await aliceWallet.slp.getBalance(genesis.tokenId)
-    ).value;
+    let aliceSlpBalance = (await aliceWallet.slp.getBalance(genesis.tokenId))
+      .value;
     let result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
@@ -214,7 +213,10 @@ describe("Slp wallet tests", () => {
     let bobSlpBalance = await bobWallet.slp.getBalance(genesis.tokenId);
     expect(bobSlpBalance.value.toNumber()).toBe(5);
 
-    result = await bobWallet.slp.sendMax(aliceWallet.slp.cashaddr, genesis.tokenId);
+    result = await bobWallet.slp.sendMax(
+      aliceWallet.slp.cashaddr,
+      genesis.tokenId
+    );
     expect(result.balance.value.toNumber()).toBe(0);
 
     rawTransaction = (await aliceWallet.provider!.getRawTransactionObject(
@@ -238,25 +240,21 @@ describe("Slp wallet tests", () => {
       bobWallet.cashaddr
     );
 
-    let aliceSlpNewBalance = (
-      await aliceWallet.slp.getBalance(genesis.tokenId)
-    ).value;
+    let aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesis.tokenId))
+      .value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     // await bobWallet.sendMax(aliceWallet.cashaddr!);
 
     // check non-slp send did not burn tokens
-    aliceSlpNewBalance = (
-      await aliceWallet.slp.getBalance(genesis.tokenId)
-    ).value;
+    aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesis.tokenId))
+      .value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     // send bob some bch gas to enable him to send slp
     // aliceBalance = await aliceWallet.slpAware().send([{cashaddr: bobWallet.cashaddr!, value: 3000, unit: "sat"}]);
 
-    aliceSlpBalance = (
-      await aliceWallet.slp.getBalance(genesis.tokenId)
-    ).value;
+    aliceSlpBalance = (await aliceWallet.slp.getBalance(genesis.tokenId)).value;
     result = await aliceWallet.slp.send([
       {
         cashaddr: bobWallet.slp.cashaddr,
@@ -287,7 +285,10 @@ describe("Slp wallet tests", () => {
 
     expect(result.balance.value.isEqualTo(aliceSlpBalance.minus(5)));
 
-    result = await bobWallet.slp.sendMax(aliceWallet.slp.cashaddr, genesis.tokenId);
+    result = await bobWallet.slp.sendMax(
+      aliceWallet.slp.cashaddr,
+      genesis.tokenId
+    );
     expect(result.balance.value.toNumber()).toBe(0);
 
     rawTransaction = (await aliceWallet.provider!.getRawTransactionObject(
@@ -311,17 +312,15 @@ describe("Slp wallet tests", () => {
       bobWallet.cashaddr
     );
 
-    aliceSlpNewBalance = (
-      await aliceWallet.slp.getBalance(genesis.tokenId)
-    ).value;
+    aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesis.tokenId))
+      .value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
 
     await bobWallet.sendMax(aliceWallet.cashaddr!);
 
     // check non-slp send did not burn tokens
-    aliceSlpNewBalance = (
-      await aliceWallet.slp.getBalance(genesis.tokenId)
-    ).value;
+    aliceSlpNewBalance = (await aliceWallet.slp.getBalance(genesis.tokenId))
+      .value;
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
   });
 
@@ -372,7 +371,7 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: aliceWallet.slp.cashaddr,
           value: 0,
-          tokenId: genesis1.tokenId
+          tokenId: genesis1.tokenId,
         },
       ])
     ).rejects.toThrow();
@@ -393,10 +392,7 @@ describe("Slp wallet tests", () => {
       ])
     ).rejects.toThrow();
 
-    const result = await aliceWallet.slp.mint(
-      50,
-      genesis1.tokenId
-    );
+    const result = await aliceWallet.slp.mint(50, genesis1.tokenId);
     expect(result.balance.value.isEqualTo(10050));
     expect(result.balance.name).toBe("Mainnet coin");
     expect(result.balance.ticker).toBe(genesisOptions.ticker);
@@ -421,7 +417,7 @@ describe("Slp wallet tests", () => {
       {
         cashaddr: bobWallet.slp.cashaddr,
         value: 10,
-        tokenId: genesis.tokenId
+        tokenId: genesis.tokenId,
       },
     ]);
 
@@ -444,14 +440,11 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: bobWallet.slp.cashaddr,
           value: 20,
-          tokenId: genesis.tokenId
+          tokenId: genesis.tokenId,
         },
       ]);
     }, 5000);
-    const balance = await bobWallet.slp.waitForBalance(
-      10,
-      genesis.tokenId
-    );
+    const balance = await bobWallet.slp.waitForBalance(10, genesis.tokenId);
     expect(balance.value.isEqualTo(20));
   });
 
@@ -472,13 +465,11 @@ describe("Slp wallet tests", () => {
         {
           cashaddr: bobWallet.slp.cashaddr,
           value: 20,
-          tokenId: genesis.tokenId
+          tokenId: genesis.tokenId,
         },
       ]);
     }, 5000);
-    const transaction = await bobWallet.slp.waitForTransaction(
-      genesis.tokenId
-    );
+    const transaction = await bobWallet.slp.waitForTransaction(genesis.tokenId);
     expect(transaction.tx.h.length).toBe(64);
   });
 
@@ -542,17 +533,17 @@ describe("Slp wallet tests", () => {
 
     tokenId = result.tokenId;
 
-    await expect(
-      aliceWallet.slp.mint(100, tokenId, false)
-    ).rejects.toThrow();
+    await expect(aliceWallet.slp.mint(100, tokenId, false)).rejects.toThrow();
   });
 
   test("Test should get formatted slp utxos", async () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
 
-    const utxos: any = await aliceWallet.slp.getFormattedSlpUtxos(aliceWallet.cashaddr!);
+    const utxos: any = await aliceWallet.slp.getFormattedSlpUtxos(
+      aliceWallet.cashaddr!
+    );
     expect(utxos.length).toBeGreaterThan(0);
-    expect(utxos[0].utxoId).toContain(':');
+    expect(utxos[0].utxoId).toContain(":");
   });
 });

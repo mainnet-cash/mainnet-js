@@ -56,10 +56,9 @@ export class SlpDbProvider implements SlpProvider {
   }
 
   // look up the token information
-  async SlpTokenInfo(
-    tokenId: string
-  ): Promise<SlpTokenInfo | undefined> {
-    const infos = (await this.SlpDbQuery(SlpTokenInfoTemplate(tokenId))).t as SlpTokenInfo[];
+  async SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
+    const infos = (await this.SlpDbQuery(SlpTokenInfoTemplate(tokenId)))
+      .t as SlpTokenInfo[];
     return _convertSlpTokenInfo(infos[0]);
   }
 
@@ -69,19 +68,13 @@ export class SlpDbProvider implements SlpProvider {
     tokenId?: string
   ): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpSpendableUtxosTemplate(cashaddr, tokenId)
-        )
-      ).g as SlpUtxoI[]
+      (await this.SlpDbQuery(SlpSpendableUtxosTemplate(cashaddr, tokenId)))
+        .g as SlpUtxoI[]
     );
   }
 
   // token mint baton utxos
-  async SlpBatonUtxos(
-    cashaddr: string,
-    tokenId?: string
-  ): Promise<SlpUtxoI[]> {
+  async SlpBatonUtxos(cashaddr: string, tokenId?: string): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
       (await this.SlpDbQuery(SlpBatonUtxosTemplate(cashaddr, tokenId)))
         .g as SlpUtxoI[]
@@ -89,15 +82,10 @@ export class SlpDbProvider implements SlpProvider {
   }
 
   // get all token balances
-  async SlpAllTokenBalances(
-    cashaddr: string,
-  ): Promise<SlpTokenBalance[]> {
+  async SlpAllTokenBalances(cashaddr: string): Promise<SlpTokenBalance[]> {
     return _convertBalanceBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpAllTokenBalancesTemplate(cashaddr)
-        )
-      ).g as SlpTokenBalance[]
+      (await this.SlpDbQuery(SlpAllTokenBalancesTemplate(cashaddr)))
+        .g as SlpTokenBalance[]
     );
   }
 
@@ -107,11 +95,8 @@ export class SlpDbProvider implements SlpProvider {
     tokenId: string
   ): Promise<SlpTokenBalance> {
     const balances = _convertBalanceBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpTokenBalanceTemplate(cashaddr, tokenId)
-        )
-      ).g as SlpTokenBalance[]
+      (await this.SlpDbQuery(SlpTokenBalanceTemplate(cashaddr, tokenId)))
+        .g as SlpTokenBalance[]
     );
 
     return balances[0] || _emptyTokenBalance(tokenId);
@@ -175,11 +160,9 @@ export class SlpDbProvider implements SlpProvider {
   ): SlpCancelWatchFn {
     const cancelFn = this.SlpWatchTransactions(
       () => {
-        this.SlpTokenBalance(cashaddr, tokenId).then(
-          (balance) => {
-            if (!!callback(balance)) cancelFn();
-          }
-        );
+        this.SlpTokenBalance(cashaddr, tokenId).then((balance) => {
+          if (!!callback(balance)) cancelFn();
+        });
       },
       cashaddr,
       tokenId

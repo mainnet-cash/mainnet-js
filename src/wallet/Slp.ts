@@ -51,9 +51,7 @@ export class Slp {
     return qrAddress(this.cashaddr as string);
   }
 
-  public getTokenInfo(
-    tokenId: string
-  ): Promise<SlpTokenInfo | undefined> {
+  public getTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
     return this.provider.SlpTokenInfo(tokenId);
   }
 
@@ -61,7 +59,9 @@ export class Slp {
     return this.provider.SlpUtxos(bchaddr.toSlpAddress(cashaddr));
   }
 
-  public async getFormattedSlpUtxos(cashaddr: string): Promise<SlpFormattedUtxo[]> {
+  public async getFormattedSlpUtxos(
+    cashaddr: string
+  ): Promise<SlpFormattedUtxo[]> {
     const utxos = await this.getSlpUtxos(bchaddr.toSlpAddress(cashaddr));
     return utxos.map((val) => {
       let utxo: any = {};
@@ -77,18 +77,13 @@ export class Slp {
     });
   }
 
-  public async getBatonUtxos(
-    tokenId?: string
-  ): Promise<SlpUtxoI[]> {
+  public async getBatonUtxos(tokenId?: string): Promise<SlpUtxoI[]> {
     return this.provider.SlpBatonUtxos(this.cashaddr, tokenId);
   }
 
   // gets transaction history of this wallet
   public async getHistory(tokenId?: string): Promise<TxI[]> {
-    return this.provider.SlpAddressTransactionHistory(
-      this.cashaddr,
-      tokenId
-    );
+    return this.provider.SlpAddressTransactionHistory(this.cashaddr, tokenId);
   }
 
   // gets last transaction of this wallet
@@ -104,20 +99,13 @@ export class Slp {
   }
 
   // get wallet token balance
-  public async getBalance(
-    tokenId: string
-  ): Promise<SlpTokenBalance> {
-    return this.provider.SlpTokenBalance(
-      this.cashaddr,
-      tokenId
-    );
+  public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
+    return this.provider.SlpTokenBalance(this.cashaddr, tokenId);
   }
 
   // get all token balances of this wallet
   public async getAllBalances(): Promise<SlpTokenBalance[]> {
-    return this.provider.SlpAllTokenBalances(
-      this.cashaddr
-    );
+    return this.provider.SlpAllTokenBalances(this.cashaddr);
   }
 
   // sets up a callback to be called upon wallet's balance change
@@ -126,11 +114,7 @@ export class Slp {
     callback: SlpWatchBalanceCallback,
     tokenId?: string
   ): () => void {
-    return this.provider.SlpWatchBalance(
-      callback,
-      this.cashaddr,
-      tokenId
-    );
+    return this.provider.SlpWatchBalance(callback, this.cashaddr, tokenId);
   }
 
   // waits for address balance to be greater than or equal to the target value
@@ -139,17 +123,11 @@ export class Slp {
     value: BigNumber.Value,
     tokenId: string
   ): Promise<SlpTokenBalance> {
-    return this.provider.SlpWaitForBalance(
-      value,
-      this.cashaddr,
-      tokenId
-    );
+    return this.provider.SlpWaitForBalance(value, this.cashaddr, tokenId);
   }
 
   // waits for next transaction, program execution is halted
-  public async waitForTransaction(
-    tokenId?: string
-  ): Promise<any> {
+  public async waitForTransaction(tokenId?: string): Promise<any> {
     return this.provider.SlpWaitForTransaction(this.cashaddr, tokenId);
   }
 
@@ -193,9 +171,7 @@ export class Slp {
     let [actualTokenId, result] = await this._processSendRequests(requests);
     return {
       txId: result,
-      balance: await this.getBalance(
-        actualTokenId
-      )
+      balance: await this.getBalance(actualTokenId),
     };
   }
 
@@ -253,9 +229,7 @@ export class Slp {
     );
     return {
       txId: result,
-      balance: await this.getBalance(
-        actualTokenId
-      )
+      balance: await this.getBalance(actualTokenId),
     };
   }
 

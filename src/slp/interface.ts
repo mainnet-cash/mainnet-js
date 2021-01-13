@@ -27,14 +27,14 @@ export interface SlpUtxoI extends UtxoI {
 }
 
 export interface SlpFormattedUtxo {
-  ticker: string,
-  tokenId: string,
-  value: string,
-  satoshis: number,
-  decimals: number
-  txId: string,
-  index: number,
-  utxoId: string
+  ticker: string;
+  tokenId: string;
+  value: string;
+  satoshis: number;
+  decimals: number;
+  txId: string;
+  index: number;
+  utxoId: string;
 }
 
 export interface SlpSendRequest {
