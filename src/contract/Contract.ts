@@ -1,4 +1,4 @@
-import { instantiateSecp256k1, binToHex, assembleBitcoinABCScript } from "@bitauth/libauth";
+import { instantiateSecp256k1 } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,

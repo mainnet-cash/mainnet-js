@@ -281,9 +281,9 @@ describe(`Wallet subscriptions`, () => {
   test("Should watch then wait", async () => {
     const aliceWallet = await RegTestWallet.newRandom();
 
-    let cancel = await aliceWallet.watchBalance(() => {});
+    let cancel = aliceWallet.watchBalance(() => {});
 
-    await cancel();
+    cancel();
   });
 
   test("Should wait for balance", async () => {
@@ -308,7 +308,6 @@ describe(`Wallet subscriptions`, () => {
     const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const alice = await RegTestWallet.fromId(aliceId);
     const bob = await RegTestWallet.newRandom();
-    let balanceSat = 0;
     alice.send([
       {
         cashaddr: bob.cashaddr!,
@@ -316,13 +315,11 @@ describe(`Wallet subscriptions`, () => {
         unit: "satoshis",
       },
     ]);
-    let bobAny: any = {};
-    let cancel = await bob.watchBalance((balance) => {
-      bobAny = balance;
-    });
+
+    let cancel = bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
     expect(balance).toBe(2000);
-    await cancel();
+    cancel();
     //expect(bobAny.sat).toBe(2000);
   });
 
@@ -331,6 +328,7 @@ describe(`Wallet subscriptions`, () => {
     const alice = await RegTestWallet.fromId(aliceId);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
+    const dave = await RegTestWallet.newRandom();
 
     setTimeout(
       () =>
@@ -359,8 +357,21 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     let charlieBalance = await charlie.waitForBalance(1000, "sat");
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: dave.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    let daveBalance = await dave.waitForBalance(1000, "sat");
     expect(bobBalance).toBe(1000);
     expect(charlieBalance).toBe(1000);
+    expect(daveBalance).toBe(1000);
     setTimeout(
       () =>
         alice.send([

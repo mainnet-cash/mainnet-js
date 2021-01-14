@@ -8,8 +8,11 @@ import { getRandomInt } from "../../util/randomInt";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
-  private arbiterAddr: string;
   private buyerAddr: string;
+
+  // @ts-ignore
+  private arbiterAddr: string;
+  // @ts-ignore
   private amount: number;
 
   constructor({
