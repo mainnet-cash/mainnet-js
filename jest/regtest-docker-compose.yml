@@ -22,12 +22,12 @@ services:
   bitcoin-mine:
     image: zquestz/bitcoin-cash-node
     entrypoint: ["/entrypoint.sh"]
-    command: /bin/sh -c "/bin/sleep 5 && bitcoin-cli -regtest -rpcconnect=bitcoind  -rpcuser=alice -rpcpassword=password -rpcport=18443 generatetoaddress 215 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 1> /dev/null"
+    command: /bin/sh -c "/bin/sleep 10 && bitcoin-cli -regtest -rpcconnect=bitcoind  -rpcuser=alice -rpcpassword=password -rpcport=18443 generatetoaddress 215 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 1> /dev/null"
     networks:
       - bitcoin
   fulcrum:
     image: cculianu/fulcrum
-    command: /bin/sh -c "/bin/sleep 5 && Fulcrum /tmp/fulcrum.conf"
+    command: /bin/sh -c "/bin/sleep 10 && Fulcrum /tmp/fulcrum.conf"
     ports:
       - "60001:60001"
       - "60003:60003"

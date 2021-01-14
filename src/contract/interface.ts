@@ -1,5 +1,6 @@
 import { SendRequest } from "../wallet/model";
 import { UtxoI } from "../interface";
+import { Argument } from "cashscript";
 
 export interface ContractI {
   /**
@@ -22,16 +23,16 @@ export interface ContractResponseI {
 }
 
 export interface CashscriptTransactionI {
-  arguments: string[];
+  arguments: Argument[];
   function: string;
   action: string;
   to: SendRequest;
-  utxoIds: string[];
-  opReturn: string[];
-  feePerByte: number;
-  hardcodedFee: number;
-  minChange: number;
-  withoutChange: boolean;
-  age: number;
-  time: number;
+  utxoIds?: string[];
+  opReturn?: string[];
+  feePerByte?: number;
+  hardcodedFee?: number;
+  minChange?: number;
+  withoutChange?: boolean;
+  age?: number;
+  time?: number;
 }

@@ -1,4 +1,4 @@
-import { instantiateSecp256k1, binToHex } from "@bitauth/libauth";
+import { instantiateSecp256k1, binToHex, assembleBitcoinABCScript } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,
@@ -13,7 +13,7 @@ import { ContractI, CashscriptTransactionI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
 import { deserializeUtxo } from "../util/serializeUtxo";
-import { castParametersFromConstructor } from "./util";
+import { castArgumentsFromFunction, castParametersFromConstructor } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
 
@@ -131,13 +131,19 @@ export class Contract implements ContractI {
     return new this(script, parameters, network, nonce).fromCashScript();
   }
 
-  public getContractFunction(method: string) {
-    return this.contract.functions[method];
+  public getContractFunction(funcName: string) {
+    return this.contract.functions[funcName];
   }
 
   public async runFunction(req: CashscriptTransactionI) {
     let fn = this.getContractFunction(req.function);
-    let func = fn(...req.arguments).to(req.to.cashaddr, req.to.value);
+    let abi = this.artifact.abi.filter(abi => abi.name===req.function)[0]
+    let arg = await castArgumentsFromFunction(
+      req.arguments,
+      abi.inputs
+    );
+    let func = fn(...arg)
+    func = func.to(req.to.cashaddr, req.to.value);
     if (req.utxoIds) {
       let utxos = req.utxoIds.map((u) => {
         return deserializeUtxo(u);
@@ -165,7 +171,7 @@ export class Contract implements ContractI {
     if (req.time) {
       func = func.withTime(req.time);
     }
-    return await func[req.action]();
+    return  await func[req.action]();
   }
 
   private async estimateFee(func, publicKey, sig, outputAddress, utxos) {

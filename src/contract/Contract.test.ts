@@ -1,7 +1,10 @@
 import { Network } from "../interface";
 import { RegTestWallet } from "../wallet/Wif";
+import {CashscriptTransactionI } from "./interface"
 import { Contract } from "./Contract";
 import { binToHex } from "@bitauth/libauth";
+import { delay } from "../util/delay";
+import { castArgumentsFromFunction } from "./util";
 
 describe(`Create Contract Tests`, () => {
   test("Should send a transfer with timeout script", async () => {
@@ -51,5 +54,62 @@ describe(`Create Contract Tests`, () => {
     let txn = await fn(sig).to(bob.getDepositAddress(), 7000).send();
     expect(txn.txid.length).toBe(64);
     expect(await bob.getBalance("sat")).toBe(7000);
+  });
+
+  test("Should send a transfer with timeout script, using runFunction", async () => {
+    let script = `contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
+            function transfer(sig recipientSig) {
+                require(checkSig(recipientSig, recipient));
+            }
+        
+            function timeout(sig senderSig) {
+                require(checkSig(senderSig, sender));
+                require(tx.time >= timeout);
+            }
+        }`;
+
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const charlie = await RegTestWallet.newRandom();
+
+    const alicePkh = binToHex(alice.getPublicKeyHash());
+    const charliePkh = binToHex(charlie.getPublicKeyHash());
+
+    const now = 215;
+
+    let contract = new Contract(
+      script,
+      [alicePkh, charliePkh, now],
+      Network.REGTEST,
+      1
+    );
+
+    // fund the escrow contract
+    await alice.send([
+      {
+        cashaddr: contract.getDepositAddress()!,
+        value: 100000,
+        unit: "satoshis",
+      },
+    ]);
+
+    expect(contract.toString().length).toBeGreaterThan(30);
+    expect(contract.toString().slice(0, 8)).toBe("regtest:");
+    let txn = await contract.runFunction(
+      {
+        action:"build",
+        function:"transfer",
+        arguments:[charlie.toString()],
+        to: {
+              cashaddr: charlie.getDepositAddress(),
+              value: 7000
+            },
+
+      } as CashscriptTransactionI
+    )
+    expect(txn.length).toBeGreaterThan(500);
+
+
+    await charlie.provider!.sendRawTransaction(txn)
+    expect(await charlie.getBalance("sat")).toBe(7000);
   });
 });
