@@ -89,26 +89,12 @@
       },
 
       async update() {
-        const fetchopt = {
-          method: "POST",
-          headers: { "Content-type": "application/json; charset=UTF-8" }
-        };
-        // fetch("/faucet/get_addresses", fetchopt).then((r) => r.json()).then(async (json) => {
-        //   this.faucetCashaddr = json.bchtest;
-        //   this.faucetSlpCashaddr = json.slptest;
-
-        //   const wallet = await TestNetWallet.watchOnly(this.faucetCashAddr);
-        //   wallet.slpAware();
-        //   wallet.getBalance("bch").then((resp) => this.balance = resp);
-
-        //   const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
-        //   const slpWallet = await TestNetWallet.watchOnly(caddr);
-        //   slpWallet.slp.getAllBalances().then((resp) => this.slpbalances = resp);
-        // }).catch(error => {
-        //   console.log(error);
-        //   alert(message);
-        // });
         try {
+          const fetchopt = {
+            method: "POST",
+            headers: { "Content-type": "application/json; charset=UTF-8" }
+          };
+
           const result = await fetch("/faucet/get_addresses", fetchopt);
           const json = await result.json();
           if (json.code >= 400) {
@@ -118,7 +104,6 @@
           this.faucetCashaddr = json.bchtest;
           this.faucetSlpCashaddr = json.slptest;
 
-          console.log(json.bchtest);
           const wallet = await TestNetWallet.watchOnly(json.bchtest);
           this.balance = await wallet.slpAware().getBalance("bch");
 
