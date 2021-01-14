@@ -46,7 +46,7 @@ export const SlpGetGenesisOutputs = async (
     throw Error("Initial genesis token amount should be greater than zero");
   }
 
-  if (options.decimalPlaces < 0 || options.decimalPlaces > 9) {
+  if (options.decimals < 0 || options.decimals > 9) {
     throw new Error("Genesis allows decimal places between 0");
   }
   const cashAddrs = options.endBaton
@@ -68,7 +68,7 @@ export const SlpGetGenesisOutputs = async (
   const compiler = await authenticationTemplateToCompilerBCH(template);
 
   const rawTokenAmount = BigInt(
-    options.initialAmount.shiftedBy(options.decimalPlaces)
+    options.initialAmount.shiftedBy(options.decimals)
   );
 
   const batonVout = options.endBaton ? 0x00 : 0x02;
@@ -79,7 +79,7 @@ export const SlpGetGenesisOutputs = async (
       g_token_name: stringToBin(options.name),
       g_token_document_url: stringToBin(options.documentUrl),
       g_token_document_hash: stringToBin(options.documentHash, true),
-      g_decimals: Uint8Array.from([options.decimalPlaces]),
+      g_decimals: Uint8Array.from([options.decimals]),
       g_mint_baton_vout: Uint8Array.from([batonVout]),
       g_initial_token_mint_quantity: bigIntToBinUint64BE(rawTokenAmount),
     },
@@ -162,24 +162,15 @@ export const SlpGetSendOutputs = async (
     throw new Error("No available tokens to spend");
   }
 
-  // check this once again with fetched tokenId data
-  const uniqueTockenIds = new Set(slpUtxos.map((val) => val.tokenId));
-  if (uniqueTockenIds.size > 1) {
-    throw Error(
-      "You have two different token types with the same ticker. Pass tokenId parameter"
-    );
-  }
-
   const decimals = slpUtxos[0].decimals;
   const tokenId = slpUtxos[0].tokenId;
-  const ticker = slpUtxos[0].ticker;
 
   // sort inputs in ascending order to eliminate the unnecessary splitting
   // and to prefer the consolidation of small inputs
-  slpUtxos = slpUtxos.sort((a, b) => a.amount.comparedTo(b.amount));
+  slpUtxos = slpUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
   const slpAvailableAmount: BigNumber = slpUtxos
-    .map((val) => new BigNumber(val.amount))
+    .map((val) => new BigNumber(val.value))
     .reduce((a, b) => BigNumber.sum(a, b), new BigNumber(0));
   const slpSpendAmount: BigNumber = sendRequests
     .map((val) => new BigNumber(val.value))
@@ -198,7 +189,7 @@ export const SlpGetSendOutputs = async (
   for (let slputxo of slpUtxos) {
     const amountTooLow = totalInputTokens.isLessThan(slpSpendAmount);
     if (amountTooLow) {
-      totalInputTokens = totalInputTokens.plus(slputxo.amount);
+      totalInputTokens = totalInputTokens.plus(slputxo.value);
       fundingSlpUtxos.push(slputxo);
     } else {
       break;
@@ -212,14 +203,13 @@ export const SlpGetSendOutputs = async (
   const compiler = await authenticationTemplateToCompilerBCH(template);
 
   const change = totalInputTokens.minus(slpSpendAmount);
-  let amounts = sendRequests.map((val) => new BigNumber(val.value));
+  let values = sendRequests.map((val) => new BigNumber(val.value));
   if (change.isGreaterThan(new BigNumber(0))) {
-    amounts.push(change);
+    values.push(change);
     sendRequests.push({
       cashaddr: changeCashaddr,
-      ticker: ticker,
       tokenId: tokenId,
-      value: 0,
+      value: new BigNumber(0),
     });
   }
 
@@ -232,14 +222,14 @@ export const SlpGetSendOutputs = async (
       })
   );
 
-  amounts = amounts.map((val) => val.shiftedBy(decimals));
+  values = values.map((val) => val.shiftedBy(decimals));
 
   let result: Uint8Array = new Uint8Array();
-  for (const amnt of amounts) {
+  for (const val of values) {
     result = new Uint8Array([
       ...result,
       ...Uint8Array.from([8]),
-      ...bigIntToBinUint64BE(BigInt(amnt)),
+      ...bigIntToBinUint64BE(BigInt(val)),
     ]);
   }
 

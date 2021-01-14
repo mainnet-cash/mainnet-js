@@ -6,6 +6,7 @@ controllers/FaucetController.js
 controllers/MineController.js
 controllers/UtilController.js
 controllers/WalletController.js
+controllers/WalletSlpController.js
 controllers/WebhookController.js
 controllers/index.js
 logger.js

@@ -17,7 +17,7 @@ test("Test SLP genesis txo bytecode per SLP Spec", async () => {
   const genesisOptions: SlpGenesisOptions = {
     name: "Tether Ltd. US dollar backed tokens",
     ticker: "USDT",
-    decimalPlaces: 8,
+    decimals: 8,
     initialAmount: 100000000,
     documentUrl:
       "https://tether.to/wp-content/uploads/2016/06/TetherWhitePaper.pdf",
@@ -46,7 +46,7 @@ test("Test SLP genesis txo bytecode with empty strings", async () => {
   const genesisOptions: SlpGenesisOptions = {
     name: "",
     ticker: "",
-    decimalPlaces: 5,
+    decimals: 5,
     initialAmount: 1000,
     documentUrl: "",
     documentHash: "",
@@ -73,7 +73,7 @@ test("Test SLP genesis txo bytecode with utf strings", async () => {
   const genesisOptions: SlpGenesisOptions = {
     name: "Music 🎵",
     ticker: "🎵",
-    decimalPlaces: 0,
+    decimals: 0,
     initialAmount: 100000,
     documentUrl: "http://tiny.cc/gcmzcz",
     documentHash: "",
@@ -97,7 +97,7 @@ test("Test SLP genesis txo bytecode with utf strings", async () => {
 test("Test SLP send txo bytecode per SLP Spec", async () => {
   const wallet = await RegTestWallet.newRandom();
   const fundingSlpUtxo: SlpUtxoI = {
-    amount: new BigNumber(100000000),
+    value: new BigNumber(100000000),
     decimals: 8,
     txid: "",
     vout: 1,
@@ -108,7 +108,6 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
   const sendRequest: SlpSendRequest = {
     cashaddr: wallet.cashaddr!,
     value: 1000000,
-    ticker: "USDT",
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
   };
 
@@ -130,7 +129,7 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
 test("Test SLP mint txo bytecode per SLP Spec", async () => {
   const wallet = await RegTestWallet.newRandom();
   const batonSlpUtxo: SlpUtxoI = {
-    amount: new BigNumber(100000000),
+    value: new BigNumber(100000000),
     decimals: 8,
     txid: "",
     vout: 1,

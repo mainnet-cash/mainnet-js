@@ -22,11 +22,11 @@
     el: '#app',
     data: {
       balance: 0,
-      slpbalance: "",
-      cashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv",
+      slpbalances: [],
+      cashaddr: "",
 
-      faucetCashAddr: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga",
-      faucetSlpCashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"
+      faucetCashAddr: "",
+      faucetSlpCashaddr: ""
     },
 
     template: `
@@ -37,12 +37,12 @@
         </b-field>
         <p>Faucet balances available</p>
         <li> <button @click="getBch">Get tBCH</button> {{ balance }} tBCH </li>
-        <div v-for="token in slpbalance" :key="token.tokenId">
+        <div v-for="token in slpbalances" :key="token.tokenId">
           <li>
             <button @click="getTokens(token.ticker, token.tokenId)">
               Get {{ token.ticker }}
             </button>
-            {{ parseInt(token.amount) }}
+            {{ parseInt(token.value) }}
             <b-tooltip :label="token.tokenId" position="is-right" :triggers="['click']" :auto-close="['outside', 'escape']">
               <a>[{{ token.ticker }}]</a>
             </b-tooltip>
@@ -51,11 +51,11 @@
         </div>
         <b-field style="width:50%; margin-top:50px;" label="Instructions">
         </b-field>
-        <p>You will get 10000 testnet satoshi or 10 tokens per request</p>
+        <p>Your wallet will get refilled to 10000 testnet satoshi or 10 tokens per request, if you have more than that - bad luck</p>
         <p>Requests are limited to one in 15 minutes from the same IP</p>
         <p>There is as well a global rate limit to prevent abuse</p>
         <p>&nbsp;</p>
-        <p>Remember to return the tBCH back to the faucet or donate your own tBCH to the <strong>{{ faucetCashAddr }}</strong> </p>
+        <p>Remember to return the tBCH back to the faucet or donate your own tBCH to <strong>{{ faucetCashAddr }}</strong> </p>
         <p>Donate your SLP tokens to <strong>{{ faucetSlpCashaddr }}</strong> </p>
 
       </section>
@@ -101,21 +101,7 @@
 
           const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
           const slpWallet = await TestNetWallet.watchOnly(caddr);
-          slpWallet.slp.getBalance().then((resp) => this.slpbalance = resp);
-
-          // const slpWallet = await TestNetWallet.fromWIF("cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG");
-          // const genesisOptions = {
-          //   name: "Mainnet coin",
-          //   ticker: "MNC",
-          //   decimalPlaces: 2,
-          //   initialAmount: 10000,
-          //   documentUrl: "https://mainnet.cash",
-          //   documentHash:
-          //     "0000000000000000000000000000000000000000000000000000000000000000",
-          // };
-
-          // const result = await slpWallet.slp.genesis(genesisOptions);
-          // console.log(result);
+          slpWallet.slp.getAllBalances().then((resp) => this.slpbalances = resp);
         })
       }
     },

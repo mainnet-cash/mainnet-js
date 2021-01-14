@@ -2,7 +2,7 @@ import BigNumber from "bignumber.js";
 import { UtxoI } from "../interface";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 
-export type SlpDbResponse = {
+export interface SlpDbResponse {
   t: any[];
   u: any[];
   c: any[];
@@ -10,35 +10,54 @@ export type SlpDbResponse = {
   a: any[];
   x: any[];
   s: any[];
-};
+}
 
-export type SlpTokenBalance = {
-  amount: BigNumber;
+export interface SlpTokenBalance {
+  value: BigNumber;
   ticker: string;
   name: string;
   tokenId: string;
-};
+}
 
 export interface SlpUtxoI extends UtxoI {
-  amount: BigNumber;
+  value: BigNumber;
   decimals: number;
   ticker: string;
   tokenId: string;
 }
 
-export type SlpSendRequest = {
+export interface SlpFormattedUtxo {
+  ticker: string;
+  tokenId: string;
+  value: string;
+  satoshis: number;
+  decimals: number;
+  txId: string;
+  index: number;
+  utxoId: string;
+}
+
+export interface SlpSendRequest {
   cashaddr: string;
   value: BigNumber.Value;
+  tokenId: string;
+}
+
+export interface SlpTokenInfo {
+  name: string;
   ticker: string;
-  tokenId?: string;
-  // burnAmount: number | undefined;
-};
+  tokenId: string;
+  initialAmount: BigNumber.Value;
+  decimals: number;
+  documentUrl?: string;
+  documentHash?: string;
+}
 
 export interface SlpGenesisOptions {
   name: string;
   ticker: string;
   initialAmount: BigNumber.Value;
-  decimalPlaces: number;
+  decimals: number;
   documentUrl?: string;
   documentHash?: string;
   endBaton?: boolean;
@@ -46,15 +65,15 @@ export interface SlpGenesisOptions {
 
 export interface SlpGenesisResult {
   tokenId: string;
-  balances: SlpTokenBalance[];
+  balance: SlpTokenBalance;
 }
 
-export interface SlpSendResult {
+export interface SlpSendResponse {
   txId: string;
-  balances: SlpTokenBalance[];
+  balance: SlpTokenBalance;
 }
 
 export interface SlpMintResult {
   txId: string;
-  balances: SlpTokenBalance[];
+  balance: SlpTokenBalance;
 }
