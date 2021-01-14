@@ -50,12 +50,11 @@ describe("Test faucet endpoints", () => {
   });
 
   it("Should send testnet slp tokens to recepient", async () => {
-    const ticker = "MNC";
     const tokenId = "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15";
 
     let resp = await request(app).post("/faucet/get_testnet_slp/").send({
       cashaddr: "",
-      ticker: ""
+      tokenId: ""
     });
 
     expect(resp.statusCode).toEqual(405);

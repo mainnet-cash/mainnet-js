@@ -4,6 +4,12 @@ var mainnet = require("mainnet-js");
 var bchaddr = require('bchaddrjs-slp');
 var config  = require('../config');
 
+const assertFaucetAvailable = () => {
+  if ([config.FAUCET_CASHADDR, config.FAUCET_WIF, config.FAUCET_SLP_CASHADDR, config.FAUCET_SLP_WIF].some(val => !val)) {
+    throw new Error('Faucet service was not configured for this server');
+  }
+}
+
 /**
 * Get addresses to return back or donate the testnet bch and tokens 
 *
@@ -13,6 +19,7 @@ var config  = require('../config');
 const getAddresses = () => new Promise(
   async (resolve, reject) => {
     try {
+      assertFaucetAvailable();
       resolve(Service.successResponse({
         bchtest: config.FAUCET_CASHADDR,
         slptest: config.FAUCET_SLP_CASHADDR
@@ -36,6 +43,7 @@ const getAddresses = () => new Promise(
 const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
   async (resolve, reject) => {
     try {
+      assertFaucetAvailable();
       if (!bchaddr.isValidAddress(getTestnetBchRequest.cashaddr))
         throw new Error("Incorrect cashaddr");
 
@@ -68,6 +76,7 @@ const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
 const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
   async (resolve, reject) => {
     try {
+      assertFaucetAvailable();
       if (!bchaddr.isValidAddress(getTestnetSlpRequest.cashaddr))
         throw new Error("Incorrect cashaddr");
 

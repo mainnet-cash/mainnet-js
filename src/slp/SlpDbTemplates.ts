@@ -164,6 +164,11 @@ export const SlpTokenBalanceTemplate = (cashaddr: string, tokenId: string) => {
       "aggregate": [
         {
           "$match": {
+            "tokenDetails.tokenIdHex": tokenId
+          }
+        },
+        {
+          "$match": {
             "graphTxn.outputs.status": "UNSPENT",
             "graphTxn.outputs.address": cashaddr
           }
@@ -196,11 +201,6 @@ export const SlpTokenBalanceTemplate = (cashaddr: string, tokenId: string) => {
             "localField": "_id",
             "foreignField": "tokenDetails.tokenIdHex",
             "as": "token"
-          }
-        },
-        {
-          "$match": {
-            "token.tokenDetails.tokenIdHex": tokenId
           }
         }
       ],

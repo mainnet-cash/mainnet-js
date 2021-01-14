@@ -23,10 +23,10 @@
     data: {
       balance: 0,
       slpbalances: [],
-      cashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv",
+      cashaddr: "",
 
-      faucetCashAddr: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga",
-      faucetSlpCashaddr: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"
+      faucetCashAddr: "",
+      faucetSlpCashaddr: ""
     },
 
     template: `
@@ -102,20 +102,6 @@
           const caddr = bchaddr.toCashAddress(this.faucetSlpCashaddr);
           const slpWallet = await TestNetWallet.watchOnly(caddr);
           slpWallet.slp.getAllBalances().then((resp) => this.slpbalances = resp);
-
-          // const slpWallet = await TestNetWallet.fromWIF("cPxmU6njbsiWd8uz6S8JjfcfhndyZbaeL6yYhXCRiHmXY3wLVJgG");
-          // const genesisOptions = {
-          //   name: "Mainnet coin",
-          //   ticker: "MNC",
-          //   decimals: 2,
-          //   initialAmount: 10000,
-          //   documentUrl: "https://mainnet.cash",
-          //   documentHash:
-          //     "0000000000000000000000000000000000000000000000000000000000000000",
-          // };
-
-          // const result = await slpWallet.slp.genesis(genesisOptions);
-          // console.log(result);
         })
       }
     },
