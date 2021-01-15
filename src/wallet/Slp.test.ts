@@ -406,7 +406,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "WB";
-    await aliceWallet.slp.genesis(genesisOptions);
+    const genesis = await aliceWallet.slp.genesis(genesisOptions);
     bobWallet.slp.watchBalance((balance) => {
       expect(balance.value.toNumber()).toBeGreaterThan(0);
     });
@@ -429,7 +429,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "_WFB";
-    await aliceWallet.slp.genesis(genesisOptions);
+    const genesis =  await aliceWallet.slp.genesis(genesisOptions);
     setTimeout(async () => {
       await aliceWallet.slp.send([
         {
