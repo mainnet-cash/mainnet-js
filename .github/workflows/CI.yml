@@ -15,6 +15,11 @@ env:
   BOB_TESTNET_ADDRESS: ${{ secrets.BOB_TESTNET_ADDRESS }}
   BOB_TESTNET_WALLET_ID: ${{ secrets.BOB_TESTNET_WALLET_ID }}
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  FAUCET_CASHADDR: ${{ secrets.FAUCET_CASHADDR }}
+  FAUCET_WIF: ${{ secrets.FAUCET_WIF }}
+  FAUCET_SLP_CASHADDR: ${{ secrets.FAUCET_SLP_CASHADDR }}
+  FAUCET_SLP_WIF: ${{ secrets.FAUCET_SLP_WIF }}
+
 jobs:
   generate:
     runs-on: ubuntu-latest
