@@ -1,5 +1,3 @@
-import { UnitEnum } from "./enum";
-
 export * from "./contract";
 export * from "./db/index";
 export * from "./mine";

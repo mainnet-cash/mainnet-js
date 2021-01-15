@@ -9,7 +9,7 @@ test("Should return  ", async () => {
 
 test("Should return  ", async () => {
   let provider = getNetworkProvider();
-  let fee = await getRelayFeeCache(provider);
+  globalThis.BCH_RELAY_FEE = 0.00005;
   let fee2 = await getRelayFeeCache(provider);
-  expect(fee2).toBe(1);
+  expect(fee2).toBe(5);
 });

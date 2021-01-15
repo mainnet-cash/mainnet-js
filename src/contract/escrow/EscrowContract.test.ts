@@ -264,7 +264,6 @@ describe(`Test Escrow Contracts`, () => {
 
     let arbiter = await RegTestWallet.newRandom();
     let buyer = await RegTestWallet.newRandom();
-    let buyer2 = await RegTestWallet.newRandom();
     let seller = await RegTestWallet.newRandom();
 
     await funder.send([

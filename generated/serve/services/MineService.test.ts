@@ -30,7 +30,7 @@ describe("Test Mine Endpoints", () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    const bobBalanceResp = await request(app).post("/wallet/balance").send({
+    await request(app).post("/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
 
