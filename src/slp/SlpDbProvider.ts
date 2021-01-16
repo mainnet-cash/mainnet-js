@@ -1,12 +1,19 @@
 import { Network, TxI } from "../interface";
-import { SlpDbResponse, SlpTokenBalance, SlpUtxoI } from "./interface";
+import {
+  SlpDbResponse,
+  SlpTokenBalance,
+  SlpTokenInfo,
+  SlpUtxoI,
+} from "./interface";
 import {
   SlpAllUtxosTemplate,
-  SlpAddressTokenBalancesTemplate,
   SlpAddressTransactionHistoryTemplate,
   SlpWaitForTransactionTemplate,
   SlpBatonUtxosTemplate,
   SlpSpendableUtxosTemplate,
+  SlpTokenInfoTemplate,
+  SlpAllTokenBalancesTemplate,
+  SlpTokenBalanceTemplate,
 } from "./SlpDbTemplates";
 import EventSource from "eventsource";
 import BigNumber from "bignumber.js";
@@ -16,9 +23,12 @@ import {
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
   _convertBalanceBigNumbers,
+  _convertSlpTokenInfo,
   _convertUtxoBigNumbers,
+  _emptyTokenBalance,
 } from "./SlpProvider";
 import axios from "axios";
+import { btoa } from "../util/base64";
 
 const servers = {
   mainnet: {
@@ -45,56 +55,60 @@ export class SlpDbProvider implements SlpProvider {
     );
   }
 
+  // look up the token information
+  async SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
+    const infos = (await this.SlpDbQuery(SlpTokenInfoTemplate(tokenId)))
+      .t as SlpTokenInfo[];
+    return _convertSlpTokenInfo(infos[0]);
+  }
+
   // safe-spendable token utxos, without baton
   async SlpSpendableUtxos(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpSpendableUtxosTemplate(cashaddr, ticker, tokenId)
-        )
-      ).g as SlpUtxoI[]
+      (await this.SlpDbQuery(SlpSpendableUtxosTemplate(cashaddr, tokenId)))
+        .g as SlpUtxoI[]
     );
   }
 
   // token mint baton utxos
-  async SlpBatonUtxos(
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
-  ): Promise<SlpUtxoI[]> {
+  async SlpBatonUtxos(cashaddr: string, tokenId?: string): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
-      (await this.SlpDbQuery(SlpBatonUtxosTemplate(cashaddr, ticker, tokenId)))
+      (await this.SlpDbQuery(SlpBatonUtxosTemplate(cashaddr, tokenId)))
         .g as SlpUtxoI[]
     );
   }
 
   // get all token balances
-  async SlpAddressTokenBalances(
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
-  ): Promise<SlpTokenBalance[]> {
+  async SlpAllTokenBalances(cashaddr: string): Promise<SlpTokenBalance[]> {
     return _convertBalanceBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpAddressTokenBalancesTemplate(cashaddr, ticker, tokenId)
-        )
-      ).g as SlpTokenBalance[]
+      (await this.SlpDbQuery(SlpAllTokenBalancesTemplate(cashaddr)))
+        .g as SlpTokenBalance[]
     );
+  }
+
+  // get specific token balance
+  async SlpTokenBalance(
+    cashaddr: string,
+    tokenId: string
+  ): Promise<SlpTokenBalance> {
+    const balances = _convertBalanceBigNumbers(
+      (await this.SlpDbQuery(SlpTokenBalanceTemplate(cashaddr, tokenId)))
+        .g as SlpTokenBalance[]
+    );
+
+    return balances[0] || _emptyTokenBalance(tokenId);
   }
 
   // get all slp transactions of this address
   async SlpAddressTransactionHistory(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<TxI[]> {
     const response = await this.SlpDbQuery(
-      SlpAddressTransactionHistoryTemplate(cashaddr, ticker, tokenId)
+      SlpAddressTransactionHistoryTemplate(cashaddr, tokenId)
     );
     return response.c.concat(response.u) as TxI[];
   }
@@ -102,7 +116,6 @@ export class SlpDbProvider implements SlpProvider {
   // waits for next slp transaction to appear in mempool, code execution is halted
   async SlpWaitForTransaction(
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): Promise<any> {
     return new Promise(async (resolve) => {
@@ -112,7 +125,6 @@ export class SlpDbProvider implements SlpProvider {
           return true;
         },
         cashaddr,
-        ticker,
         tokenId
       );
     });
@@ -122,22 +134,19 @@ export class SlpDbProvider implements SlpProvider {
   async SlpWaitForBalance(
     value: BigNumber.Value,
     cashaddr: string,
-    ticker: string,
-    tokenId?: string
+    tokenId: string
   ): Promise<SlpTokenBalance> {
     return new Promise((resolve) =>
       this.SlpWatchBalance(
-        (balance: SlpTokenBalance[]) => {
-          let bal = balance[0];
-          if (bal.amount.isGreaterThanOrEqualTo(new BigNumber(value))) {
-            resolve(bal);
+        (balance: SlpTokenBalance) => {
+          if (balance.value.isGreaterThanOrEqualTo(new BigNumber(value))) {
+            resolve(balance);
             return true;
           }
 
           return false;
         },
         cashaddr,
-        ticker,
         tokenId
       )
     );
@@ -147,19 +156,15 @@ export class SlpDbProvider implements SlpProvider {
   SlpWatchBalance(
     callback: SlpWatchBalanceCallback,
     cashaddr: string,
-    ticker?: string,
-    tokenId?: string
+    tokenId: string
   ): SlpCancelWatchFn {
     const cancelFn = this.SlpWatchTransactions(
       () => {
-        this.SlpAddressTokenBalances(cashaddr, ticker, tokenId).then(
-          (balance) => {
-            if (!!callback(balance)) cancelFn();
-          }
-        );
+        this.SlpTokenBalance(cashaddr, tokenId).then((balance) => {
+          if (!!callback(balance)) cancelFn();
+        });
       },
       cashaddr,
-      ticker,
       tokenId
     );
     return cancelFn;
@@ -169,11 +174,10 @@ export class SlpDbProvider implements SlpProvider {
   SlpWatchTransactions(
     callback: SlpWatchTransactionCallback,
     cashaddr: string,
-    ticker?: string,
     tokenId?: string
   ): SlpCancelWatchFn {
     const eventSource: EventSource = this.SlpSocketEventSource(
-      SlpWaitForTransactionTemplate(cashaddr, ticker, tokenId)
+      SlpWaitForTransactionTemplate(cashaddr, tokenId)
     );
     const cancelFn: SlpCancelWatchFn = () => {
       eventSource.close();
@@ -227,11 +231,9 @@ const fetch_retry = (url, options = {}, n = 5) =>
     });
   });
 
-const btoa_ext = (buf) => Buffer.from(buf).toString("base64");
-
 const B64QueryString = function (queryObject): string {
   if (!queryObject || !Object.keys(queryObject).length) {
     throw new Error("Empty SLPDB query");
   }
-  return btoa_ext(JSON.stringify(queryObject));
+  return btoa(JSON.stringify(queryObject));
 };

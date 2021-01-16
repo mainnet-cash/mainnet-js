@@ -4,6 +4,8 @@ import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { UnitEnum } from "../enum";
 import { initProviders, disconnectProviders } from "../network/Connection";
 
+import { delay } from "../util/delay";
+
 beforeAll(async () => {
   await initProviders();
 });
@@ -279,9 +281,9 @@ describe(`Wallet subscriptions`, () => {
   test("Should watch then wait", async () => {
     const aliceWallet = await RegTestWallet.newRandom();
 
-    let cancel = await aliceWallet.watchBalance(() => {});
+    let cancel = aliceWallet.watchBalance(() => {});
 
-    await cancel();
+    cancel();
   });
 
   test("Should wait for balance", async () => {
@@ -306,7 +308,6 @@ describe(`Wallet subscriptions`, () => {
     const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const alice = await RegTestWallet.fromId(aliceId);
     const bob = await RegTestWallet.newRandom();
-    let balanceSat = 0;
     alice.send([
       {
         cashaddr: bob.cashaddr!,
@@ -314,13 +315,11 @@ describe(`Wallet subscriptions`, () => {
         unit: "satoshis",
       },
     ]);
-    let bobAny: any = {};
-    let cancel = await bob.watchBalance((balance) => {
-      bobAny = balance;
-    });
+
+    let cancel = bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
     expect(balance).toBe(2000);
-    await cancel();
+    cancel();
     //expect(bobAny.sat).toBe(2000);
   });
 
@@ -329,6 +328,7 @@ describe(`Wallet subscriptions`, () => {
     const alice = await RegTestWallet.fromId(aliceId);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
+    const dave = await RegTestWallet.newRandom();
 
     setTimeout(
       () =>
@@ -357,8 +357,21 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     let charlieBalance = await charlie.waitForBalance(1000, "sat");
+    setTimeout(
+      () =>
+        alice.send([
+          {
+            cashaddr: dave.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+      600
+    );
+    let daveBalance = await dave.waitForBalance(1000, "sat");
     expect(bobBalance).toBe(1000);
     expect(charlieBalance).toBe(1000);
+    expect(daveBalance).toBe(1000);
     setTimeout(
       () =>
         alice.send([
@@ -399,5 +412,40 @@ describe(`Wallet subscriptions`, () => {
     bobTx = await bob.waitForTransaction();
     expect(bobTx.version).toBe(2);
     expect(await bob.getBalance("sat")).toBe(4000);
+  });
+
+  test.skip("Should get testnet satoshis and send them back", async () => {
+    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
+    const txid = await wallet.getTestnetSatoshis();
+    expect(txid.length).toBe(64);
+    let balance = await wallet.getBalance("sat");
+    expect(balance).toBe(10000);
+
+    const response = await wallet.returnTestnetSatoshis();
+    delay(3000);
+    expect(response.balance!.sat!).toBe(0);
+  });
+
+  test.skip("Should get testnet slp tokens and send them back", async () => {
+    let aliceWif = `${process.env.ALICE_TESTNET_WALLET_ID!}`;
+    let aliceWallet = await TestNetWallet.fromId(aliceWif);
+
+    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
+
+    // send bob some bch gas to enable him to send slp
+    await aliceWallet
+      .slpAware()
+      .send([{ cashaddr: wallet.cashaddr!, value: 5000, unit: "sat" }]);
+
+    const txid = await wallet.getTestnetSlp("MNC");
+    expect(txid.length).toBe(64);
+    let balance = await wallet.slp.getBalance("MNC");
+    expect(balance[0].value.toNumber()).toBe(10);
+
+    const tokenId = balance[0].tokenId;
+    const response = await wallet.returnTestnetSlp(tokenId);
+    expect(response.balance).toBe(0);
+
+    await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
   });
 });

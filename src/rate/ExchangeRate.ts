@@ -1,6 +1,10 @@
 import { EXCHANGE_RATE_TTL } from "../constant";
-import { RuntimePlatform, getRuntimePlatform } from "../util/getRuntimePlatform";
+import {
+  RuntimePlatform,
+  getRuntimePlatform,
+} from "../util/getRuntimePlatform";
 import ExchangeRateProvider from "../db/ExchangeRateProvider";
+import { indexedDbIsAvailable } from "../db/util";
 
 import get from "axios";
 
@@ -28,8 +32,12 @@ export class ExchangeRate {
 
   static async get(symbol: string) {
     const platform = getRuntimePlatform();
-    if (platform !== RuntimePlatform.node) {
-      return await this.getRateFromIndexedDb(symbol);
+    if (platform !== RuntimePlatform.node && indexedDbIsAvailable()) {
+      try {
+        return await this.getRateFromIndexedDb(symbol);
+      } catch {
+        return await this.getRateFromGlobalScope(symbol);
+      }
     } else {
       return await this.getRateFromGlobalScope(symbol);
     }
@@ -61,7 +69,7 @@ export class ExchangeRate {
         }
       }
     }
-    let freshRate = getRateFromExchange(symbol);
+    let freshRate = await getRateFromExchange(symbol);
     this.cacheRateInGlobalScope(symbol, freshRate);
     return freshRate;
   }

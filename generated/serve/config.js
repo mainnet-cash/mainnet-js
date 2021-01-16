@@ -10,6 +10,10 @@ const config = {
   BASE_VERSION: '',
   CONTROLLER_DIRECTORY: path.join(__dirname, 'controllers'),
   PROJECT_DIR: __dirname,
+  FAUCET_CASHADDR: process.env.FAUCET_CASHADDR,
+  FAUCET_WIF: process.env.FAUCET_WIF,
+  FAUCET_SLP_CASHADDR: process.env.FAUCET_SLP_CASHADDR,
+  FAUCET_SLP_WIF: process.env.FAUCET_SLP_WIF,
 };
 config.OPENAPI_YAML = path.join(config.ROOT_DIR, 'api', 'openapi.yaml');
 config.DOC_YAML = path.join(config.ROOT_DIR, "../../swagger/v1/", "api.yml");
