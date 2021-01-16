@@ -3,21 +3,21 @@ import { RegTestWallet } from "../wallet/Wif";
 import {CashscriptTransactionI } from "./interface"
 import { Contract } from "./Contract";
 import { binToHex } from "@bitauth/libauth";
-import { delay } from "../util/delay";
-import { castArgumentsFromFunction } from "./util";
 
 describe(`Create Contract Tests`, () => {
   test("Should send a transfer with timeout script", async () => {
-    let script = `contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
-            function transfer(sig recipientSig) {
-                require(checkSig(recipientSig, recipient));
-            }
-        
-            function timeout(sig senderSig) {
-                require(checkSig(senderSig, sender));
-                require(tx.time >= timeout);
-            }
-        }`;
+    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+      function transfer(pubkey signingPk, sig s) {
+        require(hash160(signingPk) == recipientPkh);
+        require(checkSig(s, signingPk));
+      }
+  
+      function timeout(pubkey signingPk, sig s) {
+          require(hash160(signingPk) == senderPkh);
+          require(checkSig(s, signingPk));
+          require(tx.time >= timeout);
+      }
+  }`;
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.fromId(process.env.BOB_ID!);
@@ -45,28 +45,30 @@ describe(`Create Contract Tests`, () => {
 
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString()).toBe(
-      "regtest:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgICAgICAgICBmdW5jdGlvbiB0cmFuc2ZlcihzaWcgcmVjaXBpZW50U2lnKSB7CiAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHJlY2lwaWVudFNpZywgcmVjaXBpZW50KSk7CiAgICAgICAgICAgIH0KICAgICAgICAKICAgICAgICAgICAgZnVuY3Rpb24gdGltZW91dChzaWcgc2VuZGVyU2lnKSB7CiAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgICAgICAgICByZXF1aXJlKHR4LnRpbWUgPj0gdGltZW91dCk7CiAgICAgICAgICAgIH0KICAgICAgICB9:1"
+      "regtest:TlRaaU5tSXlNakEwTW1JNU1HUmtOamRpWmpKbVltWmlPV0ZtWmpka016ZG1ZbVZsTVRFeU5BPT06WlRVeVpUSmxPRFZrTldGa1lqTXhNV1V5TnpjeE56SmlaamRoWlRjNU5EaGlZell4TWpJeU13PT06TWpFMQ==:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CiAgCiAgICAgIGZ1bmN0aW9uIHRpbWVvdXQocHVia2V5IHNpZ25pbmdQaywgc2lnIHMpIHsKICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IHNlbmRlclBraCk7CiAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgICB9CiAgfQ==:1"
     );
     expect(contract.toString().slice(0, 8)).toBe("regtest:");
 
-    const sig = bob.getSignatureTemplate();
-    let fn = contract.getContractFunction("transfer");
-    let txn = await fn(sig).to(bob.getDepositAddress(), 7000).send();
+    const sig = alice.getSignatureTemplate();
+    let fn = contract.getContractFunction("timeout");
+    let txn = await fn(alice.publicKey!, sig).to(alice.getDepositAddress(), 7000).send();
     expect(txn.txid.length).toBe(64);
-    expect(await bob.getBalance("sat")).toBe(7000);
+    expect(await alice.getBalance("sat")).toBe(7000);
   });
 
   test("Should send a transfer with timeout script, using runFunction", async () => {
-    let script = `contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
-            function transfer(sig recipientSig) {
-                require(checkSig(recipientSig, recipient));
-            }
-        
-            function timeout(sig senderSig) {
-                require(checkSig(senderSig, sender));
-                require(tx.time >= timeout);
-            }
-        }`;
+    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+      function transfer(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == recipientPkh);
+      }
+  
+      function timeout(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == senderPkh);
+        require(tx.time >= timeout);
+      }
+    }`;
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const charlie = await RegTestWallet.newRandom();
@@ -94,22 +96,21 @@ describe(`Create Contract Tests`, () => {
 
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString().slice(0, 8)).toBe("regtest:");
-    let txn = await contract.runFunction(
+    let txn = await contract.runFunctionFromStrings(
       {
         action:"build",
-        function:"transfer",
-        arguments:[charlie.toString()],
+        function:"timeout",
+        arguments:[alice.publicKey!, alice.toString()],
         to: {
-              cashaddr: charlie.getDepositAddress(),
+              cashaddr: alice.getDepositAddress(),
               value: 7000
             },
-
+        time:215
       } as CashscriptTransactionI
     )
     expect(txn.length).toBeGreaterThan(500);
 
-
-    await charlie.provider!.sendRawTransaction(txn)
-    expect(await charlie.getBalance("sat")).toBe(7000);
+    await alice.provider!.sendRawTransaction(txn)
+    expect(await alice.getBalance("sat")).toBe(7000);
   });
 });

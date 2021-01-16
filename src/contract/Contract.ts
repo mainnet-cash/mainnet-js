@@ -13,7 +13,7 @@ import { ContractI, CashscriptTransactionI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
 import { deserializeUtxo } from "../util/serializeUtxo";
-import { castArgumentsFromFunction, castParametersFromConstructor } from "./util";
+import { castConstructorParametersFromArtifact, castStringArgumentsFromArtifact } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
 
@@ -84,13 +84,13 @@ export class Contract implements ContractI {
       DELIMITER
     );
     let script = atob(serializedScript);
-    let contractTemplate = CashCompiler.compileString(script);
+    let artifact = CashCompiler.compileString(script);
     let paramStrings = atob(serializedParams)
       .split(DELIMITER)
       .map((s) => atob(s));
-    let params = castParametersFromConstructor(
+    let params = castConstructorParametersFromArtifact(
       paramStrings,
-      contractTemplate.constructorInputs
+      artifact
     );
 
     return new Contract(script, params, network as Network, parseInt(nonce));
@@ -100,10 +100,18 @@ export class Contract implements ContractI {
     return this.contract.address;
   }
 
+  /**
+ * Get the unspent transaction outputs of the contract
+ * @returns A promise to the utxos of the contract
+ */
   public getUtxos() {
     return this.contract.getUtxos();
   }
 
+   /**
+ * Get the current balance of the contract
+ * @returns The balance in satoshi
+ */
   public getBalance() {
     return this.contract.getBalance();
   }
@@ -116,31 +124,55 @@ export class Contract implements ContractI {
     );
   }
 
+  /**
+ * Get a contract object the wrapper object
+ * @returns A cashscript Contract
+ */
   public fromCashScript() {
     this.artifact = CashCompiler.compileFile(this.script);
     this.contract = new CashScriptContract(this.artifact, [], this.provider);
     return this;
   }
 
+/**
+ * Get a contract object from a script, arguments, network and nonce
+ * @param script The contract cashscript test
+ * @param parameters Contract constructor arguments
+ * @param network Network for the contract
+ * @param nonce A unique number to differentiate the contract
+ * @returns A cashscript Contract
+ */
   public static fromCashScript(
     script: string,
-    parameters,
+    parameters: Argument[],
     network: Network,
     nonce: number
   ) {
     return new this(script, parameters, network, nonce).fromCashScript();
   }
 
+  /**
+ * Get a function object from a contract
+ * @param funcName The string identifying the function in the cashscript contract
+ * @returns A cashscript Transaction
+ */
   public getContractFunction(funcName: string) {
     return this.contract.functions[funcName];
   }
 
-  public async runFunction(req: CashscriptTransactionI) {
+/**
+ * Call a cashscript contract function using an interface object of strings.
+ * This function is a helper for the rest or serialized interfaces and not intended
+ * for native use within the library, although it may be useful for running stored transactions.
+ * @param req Parameters for the transaction call, serialized as strings.
+ * @returns A cashscript Transaction result
+ */
+  public async runFunctionFromStrings(req: CashscriptTransactionI) {
     let fn = this.getContractFunction(req.function);
-    let abi = this.artifact.abi.filter(abi => abi.name===req.function)[0]
-    let arg = await castArgumentsFromFunction(
+    let arg = await castStringArgumentsFromArtifact(
       req.arguments,
-      abi.inputs
+      this.artifact,
+      req.function
     );
     let func = fn(...arg)
     func = func.to(req.to.cashaddr, req.to.value);

@@ -155,7 +155,6 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
-    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey!);
     const networkType =
       this.networkType === NetworkType.Regtest
         ? NetworkType.Testnet
@@ -171,6 +170,8 @@ export class Wallet extends BaseWallet {
       this.privateKey!,
       this.networkPrefix
     )) as string;
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
+    return this
   }
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
@@ -179,6 +180,7 @@ export class Wallet extends BaseWallet {
     if (addressComponents.length === 1) {
       addressBase = addressComponents.shift() as string;
       this.cashaddr = addressBase;
+      this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     } else {
       addressPrefix = addressComponents.shift() as string;
       addressBase = addressComponents.shift() as string;
@@ -190,8 +192,9 @@ export class Wallet extends BaseWallet {
         }
       }
       this.cashaddr = `${addressPrefix}:${addressBase}`;
+      this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     }
-
+    
     return this;
   }
 
@@ -207,17 +210,18 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
-    // TODO replace with util/randomBytes
-    // nodejs
-    if (getRuntimePlatform() === "node") {
-      let crypto = require("crypto");
-      this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
-    }
-    // window, webworkers, service workers
-    else {
-      this.privateKey = generatePrivateKey(() =>
-        window.crypto.getRandomValues(new Uint8Array(32))
-      );
+    //
+    if(!this.privateKey){
+      if (getRuntimePlatform() === "node") {
+        let crypto = require("crypto");
+        this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
+      }
+      // window, webworkers, service workers
+      else {
+        this.privateKey = generatePrivateKey(() =>
+          window.crypto.getRandomValues(new Uint8Array(32))
+        );
+      }
     }
     this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
     const networkType =
@@ -235,6 +239,7 @@ export class Wallet extends BaseWallet {
       this.privateKey,
       this.networkPrefix
     )) as string;
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     return this;
   }
 
@@ -253,9 +258,10 @@ export class Wallet extends BaseWallet {
       this.derivationPath
     ) as HdPrivateNodeValid;
     this.privateKey = zerothChild.privateKey;
+  
     this.walletType = WalletTypeEnum.Seed;
-    await this.deriveInfo();
-    return this;
+    return await this.deriveInfo();
+    
   }
 
   public async send(
@@ -631,6 +637,11 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
+  public getPublicKey() {
+    return this.publicKey!;
+  }
+
+  // returns the public key hash for an address
   public getPublicKeyHash() {
     return this.publicKeyHash!;
   }
@@ -732,8 +743,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return data.txId;
     } catch (e) {
-      console.log(e);
-      console.log(e.response ? e.response.data : "");
+      // console.log(e);
+      // console.log(e.response ? e.response.data : "");
       throw e;
     }
   }
@@ -763,8 +774,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return data.txId;
     } catch (e) {
-      console.log(e);
-      console.log(e.response ? e.response.data : "");
+      //console.log(e);
+      //console.log(e.response ? e.response.data : "");
       throw e;
     }
   }

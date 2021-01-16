@@ -5,7 +5,7 @@ import {
   parseBytecode,
 } from "@bitauth/libauth";
 
-import { AbiInput, Argument } from "cashscript";
+import { AbiInput, Argument, Artifact } from "cashscript";
 
 import { walletFromId } from "../wallet/createWallet"
 
@@ -40,11 +40,18 @@ export function bytecodeToAsm(bytecode: Uint8Array): string {
   return asm;
 }
 
-export function castParametersFromConstructor(
+/**
+ * Cast string arguments to form suitable for the appropriate cashscript contract constructor input
+ * @param parameters String arguments to construct inputs from
+ * @param inputs The name and type of required arguments for the transaction constructor
+ * @returns A list of constructor parameters
+ */
+export function castConstructorParametersFromArtifact(
   parameters: string[],
-  inputs: AbiInput[]
+  artifact: Artifact
 ) {
   let result: any[] = [];
+  let inputs = artifact.constructorInputs
   parameters.forEach(function (value, i) {
     if (inputs[i].type.startsWith("bytes")) {
       let uint = Uint8Array.from(
@@ -62,17 +69,25 @@ export function castParametersFromConstructor(
   return result;
 }
 
-export async function castArgumentsFromFunction(args: Argument[], inputs: AbiInput[]) {
+/**
+ * Cast string arguments to form suitable for the appropriate cashscript contract function input
+ * @param args String arguments to construct inputs from
+ * @param artifact The contract artifact
+ * @param function The function name
+ * @returns A list of arguments
+ */
+export async function castStringArgumentsFromArtifact(args: Argument[], artifact:Artifact, funcName:string) {
+  let abi = artifact.abi.filter(abi => abi.name===funcName)[0]
   let result: any[] = [];
   for( let i=0; i< args.length; i++) {
-    if (inputs[i].type.startsWith("bytes")) {
+    if (abi.inputs[i].type.startsWith("bytes")) {
       let uint = hexToBin(args[i] as string);
       result.push(uint);
-    } else if (inputs[i].type === "int") {
+    } else if (abi.inputs[i].type === "int") {
       result.push(args[i] as number);
-    } else if (inputs[i].type === "boolean") {
+    } else if (abi.inputs[i].type === "boolean") {
       result.push(Boolean(args[i]));
-    } else if (inputs[i].type === "sig") {
+    } else if (abi.inputs[i].type === "sig") {
       let w = await walletFromId(args[i] as string)
       let sig = w.getSignatureTemplate()
       result.push(sig);

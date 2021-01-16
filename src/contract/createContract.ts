@@ -16,6 +16,7 @@ export async function createContract(body: any): Promise<Contract> {
     let contract = await contractClass.create(body);
     return contract;
   } else {
+    console.warn("creating contract from contractId")
     return contractFromId(body.contractId);
   }
 }
