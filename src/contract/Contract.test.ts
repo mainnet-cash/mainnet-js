@@ -1,6 +1,6 @@
 import { Network } from "../interface";
 import { RegTestWallet } from "../wallet/Wif";
-import {CashscriptTransactionI } from "./interface"
+import { CashscriptTransactionI } from "./interface";
 import { Contract } from "./Contract";
 import { binToHex } from "@bitauth/libauth";
 
@@ -51,7 +51,9 @@ describe(`Create Contract Tests`, () => {
 
     const sig = alice.getSignatureTemplate();
     let fn = contract.getContractFunction("timeout");
-    let txn = await fn(alice.publicKey!, sig).to(alice.getDepositAddress(), 7000).send();
+    let txn = await fn(alice.publicKey!, sig)
+      .to(alice.getDepositAddress(), 7000)
+      .send();
     expect(txn.txid.length).toBe(64);
     expect(await alice.getBalance("sat")).toBe(7000);
   });
@@ -96,21 +98,19 @@ describe(`Create Contract Tests`, () => {
 
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString().slice(0, 8)).toBe("regtest:");
-    let txn = await contract.runFunctionFromStrings(
-      {
-        action:"build",
-        function:"timeout",
-        arguments:[alice.publicKey!, alice.toString()],
-        to: {
-              cashaddr: alice.getDepositAddress(),
-              value: 7000
-            },
-        time:215
-      } as CashscriptTransactionI
-    )
+    let txn = await contract.runFunctionFromStrings({
+      action: "build",
+      function: "timeout",
+      arguments: [alice.publicKey!, alice.toString()],
+      to: {
+        cashaddr: alice.getDepositAddress(),
+        value: 7000,
+      },
+      time: 215,
+    } as CashscriptTransactionI);
     expect(txn.length).toBeGreaterThan(500);
 
-    await alice.provider!.sendRawTransaction(txn)
+    await alice.provider!.sendRawTransaction(txn);
     expect(await alice.getBalance("sat")).toBe(7000);
   });
 });

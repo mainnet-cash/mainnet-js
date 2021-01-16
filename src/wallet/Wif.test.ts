@@ -22,7 +22,7 @@ describe(`Test creation of wallet from walletId`, () => {
     expect(w.publicKey!.length).toBe(65);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
-    expect(w.privateKeyWif!=="undefined").toBeTruthy();
+    expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
   test("Should get a new random wallet", async () => {
@@ -31,7 +31,7 @@ describe(`Test creation of wallet from walletId`, () => {
     expect(w.publicKey!.length).toBe(65);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
-    expect(w.privateKeyWif!=="undefined").toBeTruthy();
+    expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
   test("Should get a regtest wallet from wif id string", async () => {
@@ -40,7 +40,7 @@ describe(`Test creation of wallet from walletId`, () => {
     expect(w.publicKey!.length).toBe(65);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
-    expect(w.privateKeyWif!=="undefined").toBeTruthy();
+    expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
   test("Should get a regtest wallet from seed id string", async () => {
@@ -49,7 +49,7 @@ describe(`Test creation of wallet from walletId`, () => {
     expect(w.publicKey!.length).toBe(65);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
-    expect(w.privateKeyWif!=="undefined").toBeTruthy();
+    expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
   test("Get a testnet wallet from string id", async () => {
@@ -175,8 +175,7 @@ describe(`Mnemonic wallet creation`, () => {
       privateKeyWif: "L4p2b9VAf8k5aUahF1JCJUzZkgNEAqLfq8DDdQiyAprQAKSbu8hf",
       publicKey:
         "04aaeb52dd7494c361049de67cc680e83ebcbbbdbeb13637d92cd845f70308af5e9370164133294e5fd1679672fe7866c307daf97281a28f66dca7cbb52919824f",
-      publicKeyHash:
-        "d986ed01b7a22225a70edbf2ba7cfb63a15cb3aa",
+      publicKeyHash: "d986ed01b7a22225a70edbf2ba7cfb63a15cb3aa",
 
       derivationPath: "m/44'/0'/0'/0/0",
       seed:
@@ -270,7 +269,7 @@ describe(`Watch only Wallets`, () => {
     } else {
       let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
-      expect(alice.getPublicKeyHash().length).toBe(20)
+      expect(alice.getPublicKeyHash().length).toBe(20);
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
       expect(await alice.getBalance("sat")).toBeGreaterThan(

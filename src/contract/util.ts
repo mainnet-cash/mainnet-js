@@ -7,7 +7,7 @@ import {
 
 import { AbiInput, Argument, Artifact } from "cashscript";
 
-import { walletFromId } from "../wallet/createWallet"
+import { walletFromId } from "../wallet/createWallet";
 
 export type Op = number;
 export type OpOrData = Op | Uint8Array;
@@ -51,7 +51,7 @@ export function castConstructorParametersFromArtifact(
   artifact: Artifact
 ) {
   let result: any[] = [];
-  let inputs = artifact.constructorInputs
+  let inputs = artifact.constructorInputs;
   parameters.forEach(function (value, i) {
     if (inputs[i].type.startsWith("bytes")) {
       let uint = Uint8Array.from(
@@ -76,10 +76,14 @@ export function castConstructorParametersFromArtifact(
  * @param function The function name
  * @returns A list of arguments
  */
-export async function castStringArgumentsFromArtifact(args: Argument[], artifact:Artifact, funcName:string) {
-  let abi = artifact.abi.filter(abi => abi.name===funcName)[0]
+export async function castStringArgumentsFromArtifact(
+  args: Argument[],
+  artifact: Artifact,
+  funcName: string
+) {
+  let abi = artifact.abi.filter((abi) => abi.name === funcName)[0];
   let result: any[] = [];
-  for( let i=0; i< args.length; i++) {
+  for (let i = 0; i < args.length; i++) {
     if (abi.inputs[i].type.startsWith("bytes")) {
       let uint = hexToBin(args[i] as string);
       result.push(uint);
@@ -88,12 +92,12 @@ export async function castStringArgumentsFromArtifact(args: Argument[], artifact
     } else if (abi.inputs[i].type === "boolean") {
       result.push(Boolean(args[i]));
     } else if (abi.inputs[i].type === "sig") {
-      let w = await walletFromId(args[i] as string)
-      let sig = w.getSignatureTemplate()
+      let w = await walletFromId(args[i] as string);
+      let sig = w.getSignatureTemplate();
       result.push(sig);
     } else {
       result.push(args[i]);
     }
-  };
+  }
   return result;
 }

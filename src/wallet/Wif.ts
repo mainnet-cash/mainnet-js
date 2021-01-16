@@ -171,7 +171,7 @@ export class Wallet extends BaseWallet {
       this.networkPrefix
     )) as string;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
-    return this
+    return this;
   }
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
@@ -194,7 +194,7 @@ export class Wallet extends BaseWallet {
       this.cashaddr = `${addressPrefix}:${addressBase}`;
       this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     }
-    
+
     return this;
   }
 
@@ -211,7 +211,7 @@ export class Wallet extends BaseWallet {
     const secp256k1 = await secp256k1Promise;
 
     //
-    if(!this.privateKey){
+    if (!this.privateKey) {
       if (getRuntimePlatform() === "node") {
         let crypto = require("crypto");
         this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
@@ -258,10 +258,9 @@ export class Wallet extends BaseWallet {
       this.derivationPath
     ) as HdPrivateNodeValid;
     this.privateKey = zerothChild.privateKey;
-  
+
     this.walletType = WalletTypeEnum.Seed;
     return await this.deriveInfo();
-    
   }
 
   public async send(

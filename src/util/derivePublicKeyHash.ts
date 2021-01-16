@@ -1,6 +1,6 @@
 import {
   decodeCashAddressFormat,
-  decodeCashAddressFormatWithoutPrefix
+  decodeCashAddressFormatWithoutPrefix,
 } from "@bitauth/libauth";
 
 /**
@@ -23,8 +23,8 @@ export function derivePublicKeyHash(address: string): Uint8Array {
   }
 
   if (typeof result === "string") throw new Error(result);
-  
-  // return the public key hash 
+
+  // return the public key hash
   return result.hash;
 }
 
