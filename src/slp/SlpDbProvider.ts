@@ -106,7 +106,8 @@ export class SlpDbProvider implements SlpProvider {
   async SlpAddressTransactionHistory(
     cashaddr: string,
     tokenId?: string,
-    limit: number = 100, skip: number = 0
+    limit: number = 100,
+    skip: number = 0
   ): Promise<TxI[]> {
     const response = await this.SlpDbQuery(
       SlpAddressTransactionHistoryTemplate(cashaddr, tokenId, limit, skip)
