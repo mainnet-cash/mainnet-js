@@ -105,7 +105,7 @@ describe("Test Wallet Slp Endpoints", () => {
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
     expect(resp.statusCode).toBe(200);
-    expect(resp.body.cashaddr).toBe(bchaddr.toSlpAddress(process.env.ADDRESS));
+    expect(resp.body.slpaddr).toBe(bchaddr.toSlpAddress(process.env.ADDRESS));
   });
 
   /**
@@ -142,7 +142,7 @@ describe("Test Wallet Slp Endpoints", () => {
         .send({
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
           to: [{
-            cashaddr: bobsCashaddr,
+            slpaddr: bobsCashaddr,
             tokenId: tokenId,
             value: 10
           }]
@@ -177,7 +177,6 @@ describe("Test Wallet Slp Endpoints", () => {
       .post("/wallet/create")
       .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
-    expect(bobsWallet.cashaddr).toMatch(/bchreg:[q|p]\w{41}/)
 
     // give bob some bch gas
     let initialResp = await request(app).post("/wallet/send").send({
@@ -195,7 +194,7 @@ describe("Test Wallet Slp Endpoints", () => {
     let initialSlpResp = await request(app).post("/wallet/slp/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       to: [{
-        cashaddr: bchaddr.toSlpAddress(bobsWallet.cashaddr),
+        slpaddr: bobsWallet.cashaddr,
         tokenId: tokenId,
         value: 10
       }]
@@ -208,7 +207,7 @@ describe("Test Wallet Slp Endpoints", () => {
       .post("/wallet/slp/send_max")
       .send({
         walletId: bobsWallet.walletId,
-        cashaddr: bchaddr.toSlpAddress(process.env.ADDRESS as string),
+        slpaddr: process.env.ADDRESS,
         tokenId: tokenId
       });
     const slpBody = slpResp.body;
@@ -224,7 +223,7 @@ describe("Test Wallet Slp Endpoints", () => {
       .post("/wallet/send_max")
       .send({
         walletId: bobsWallet.walletId,
-        cashaddr: process.env.ADDRESS as string,
+        cashaddr: process.env.ADDRESS,
       });
     const body = resp.body;
     if (resp.statusCode !== 200) {

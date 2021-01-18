@@ -77,10 +77,10 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!bchaddr.isValidAddress(getTestnetSlpRequest.cashaddr))
-        throw new Error("Incorrect cashaddr");
+      if (!bchaddr.isValidAddress(getTestnetSlpRequest.slpaddr))
+        throw new Error("Incorrect slpaddr");
 
-      const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetSlpRequest.cashaddr);
+      const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetSlpRequest.slpaddr);
       const receiverBalance = await receiverWallet.slp.getBalance(getTestnetSlpRequest.tokenId);
       const diff = 10 - (receiverBalance.value.toNumber());
       if (diff <= 0)
@@ -88,10 +88,10 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
 
       const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_SLP_WIF);
       wallet.slpAware();
-      const sendResponse = await wallet.slp.send([{cashaddr: getTestnetSlpRequest.cashaddr, value: diff, tokenId: getTestnetSlpRequest.tokenId}]);
+      const sendResponse = await wallet.slp.send([{slpaddr: getTestnetSlpRequest.slpaddr, value: diff, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
-      // console.log(e);
+      // console.log(e, getTestnetSlpRequest);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,

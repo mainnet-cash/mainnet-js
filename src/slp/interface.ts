@@ -37,7 +37,7 @@ export interface SlpFormattedUtxo {
 }
 
 export interface SlpSendRequest {
-  cashaddr: string;
+  slpaddr: string;
   value: BigNumber.Value;
   tokenId: string;
 }

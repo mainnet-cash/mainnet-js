@@ -33,36 +33,36 @@ import { SendRequest } from "./model";
 import { SlpProvider, SlpWatchBalanceCallback } from "../slp/SlpProvider";
 
 export class Slp {
-  cashaddr: string;
+  slpaddr: string;
   readonly wallet: Wallet;
   public provider: SlpProvider;
 
   constructor(wallet: Wallet) {
-    this.cashaddr = bchaddr.toSlpAddress(wallet.cashaddr!);
+    this.slpaddr = bchaddr.toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
     this.provider = new SlpDbProvider(this.wallet.networkType);
   }
 
   public getDepositAddress() {
-    return this.cashaddr;
+    return this.slpaddr;
   }
 
   public getDepositQr(): ImageI {
-    return qrAddress(this.cashaddr as string);
+    return qrAddress(this.slpaddr);
   }
 
   public getTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
     return this.provider.SlpTokenInfo(tokenId);
   }
 
-  public async getSlpUtxos(cashaddr: string): Promise<SlpUtxoI[]> {
-    return this.provider.SlpUtxos(bchaddr.toSlpAddress(cashaddr));
+  public async getSlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
+    return this.provider.SlpUtxos(bchaddr.toSlpAddress(slpaddr));
   }
 
   public async getFormattedSlpUtxos(
-    cashaddr: string
+    slpaddr: string
   ): Promise<SlpFormattedUtxo[]> {
-    const utxos = await this.getSlpUtxos(bchaddr.toSlpAddress(cashaddr));
+    const utxos = await this.getSlpUtxos(bchaddr.toSlpAddress(slpaddr));
     return utxos.map((val) => {
       let utxo: any = {};
       utxo.ticker = val.ticker;
@@ -78,12 +78,12 @@ export class Slp {
   }
 
   public async getBatonUtxos(tokenId?: string): Promise<SlpUtxoI[]> {
-    return this.provider.SlpBatonUtxos(this.cashaddr, tokenId);
+    return this.provider.SlpBatonUtxos(this.slpaddr, tokenId);
   }
 
   // gets transaction history of this wallet
   public async getHistory(tokenId?: string): Promise<TxI[]> {
-    return this.provider.SlpAddressTransactionHistory(this.cashaddr, tokenId);
+    return this.provider.SlpAddressTransactionHistory(this.slpaddr, tokenId);
   }
 
   // gets last transaction of this wallet
@@ -100,12 +100,12 @@ export class Slp {
 
   // get wallet token balance
   public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
-    return this.provider.SlpTokenBalance(this.cashaddr, tokenId);
+    return this.provider.SlpTokenBalance(this.slpaddr, tokenId);
   }
 
   // get all token balances of this wallet
   public async getAllBalances(): Promise<SlpTokenBalance[]> {
-    return this.provider.SlpAllTokenBalances(this.cashaddr);
+    return this.provider.SlpAllTokenBalances(this.slpaddr);
   }
 
   // sets up a callback to be called upon wallet's balance change
@@ -114,7 +114,7 @@ export class Slp {
     callback: SlpWatchBalanceCallback,
     tokenId?: string
   ): () => void {
-    return this.provider.SlpWatchBalance(callback, this.cashaddr, tokenId);
+    return this.provider.SlpWatchBalance(callback, this.slpaddr, tokenId);
   }
 
   // waits for address balance to be greater than or equal to the target value
@@ -123,12 +123,12 @@ export class Slp {
     value: BigNumber.Value,
     tokenId: string
   ): Promise<SlpTokenBalance> {
-    return this.provider.SlpWaitForBalance(value, this.cashaddr, tokenId);
+    return this.provider.SlpWaitForBalance(value, this.slpaddr, tokenId);
   }
 
   // waits for next transaction, program execution is halted
   public async waitForTransaction(tokenId?: string): Promise<any> {
-    return this.provider.SlpWaitForTransaction(this.cashaddr, tokenId);
+    return this.provider.SlpWaitForTransaction(this.slpaddr, tokenId);
   }
 
   public async genesis(options: SlpGenesisOptions): Promise<SlpGenesisResult> {
@@ -142,8 +142,8 @@ export class Slp {
   private async _processGenesis(options: SlpGenesisOptions) {
     let slpOutputsResult = await SlpGetGenesisOutputs(
       options,
-      this.cashaddr,
-      this.cashaddr
+      this.slpaddr,
+      this.slpaddr
     );
 
     const fundingBchUtxos = await this.wallet
@@ -154,12 +154,12 @@ export class Slp {
   }
 
   public async sendMax(
-    cashaddr: string,
+    slpaddr: string,
     tokenId: string
   ): Promise<SlpSendResponse> {
     const balance = await this.getBalance(tokenId);
     const requests: SlpSendRequest[] = [balance].map((val) => ({
-      cashaddr: cashaddr,
+      slpaddr: slpaddr,
       value: val.value,
       ticker: val.ticker,
       tokenId: val.tokenId,
@@ -193,11 +193,11 @@ export class Slp {
     const tokenId = sendRequests[0].tokenId;
 
     const slpUtxos = await this.provider.SlpSpendableUtxos(
-      this.cashaddr,
+      this.slpaddr,
       tokenId
     );
     let slpOutputsResult = await SlpGetSendOutputs(
-      this.cashaddr,
+      this.slpaddr,
       slpUtxos,
       sendRequests
     );
@@ -252,8 +252,8 @@ export class Slp {
       slpBatonUtxos,
       tokenId,
       value,
-      this.cashaddr,
-      this.cashaddr,
+      this.slpaddr,
+      this.slpaddr,
       endBaton
     );
 

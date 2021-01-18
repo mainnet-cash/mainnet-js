@@ -1,13 +1,13 @@
 // Slp Utxos for bch operation, to prevent accident burning of tokens and baton
 // prettier-ignore
-export const SlpAllUtxosTemplate = (cashaddr: string) => ({
+export const SlpAllUtxosTemplate = (slpaddr: string) => ({
     "v": 3,
     "q": {
         "db": ["g"],
         "aggregate": [
             {
                 "$match": {
-                    "graphTxn.outputs.address": cashaddr,
+                    "graphTxn.outputs.address": slpaddr,
                     "graphTxn.outputs.status": {
                     "$in": [
                         "UNSPENT",
@@ -21,7 +21,7 @@ export const SlpAllUtxosTemplate = (cashaddr: string) => ({
             },
             {
                 "$match": {
-                    "graphTxn.outputs.address": cashaddr,
+                    "graphTxn.outputs.address": slpaddr,
                     "graphTxn.outputs.status": {
                         "$in": [
                             "UNSPENT",
@@ -44,7 +44,7 @@ export const SlpAllUtxosTemplate = (cashaddr: string) => ({
 
 // Slp Utxos for spending
 // prettier-ignore
-export const SlpSpendableUtxosTemplate = (cashaddr: string, tokenId?: string) => {
+export const SlpSpendableUtxosTemplate = (slpaddr: string, tokenId?: string) => {
   let q = {
     "v": 3,
     "q": {
@@ -52,7 +52,7 @@ export const SlpSpendableUtxosTemplate = (cashaddr: string, tokenId?: string) =>
         "aggregate": [
             {
                 "$match": {
-                    "graphTxn.outputs.address": cashaddr,
+                    "graphTxn.outputs.address": slpaddr,
                     "graphTxn.outputs.status": "UNSPENT"
                 }
             },
@@ -61,7 +61,7 @@ export const SlpSpendableUtxosTemplate = (cashaddr: string, tokenId?: string) =>
             },
             {
                 "$match": {
-                    "graphTxn.outputs.address": cashaddr,
+                    "graphTxn.outputs.address": slpaddr,
                     "graphTxn.outputs.status": "UNSPENT"
                 }
             },
@@ -95,7 +95,7 @@ export const SlpSpendableUtxosTemplate = (cashaddr: string, tokenId?: string) =>
 }
 
 // prettier-ignore
-export const SlpAllTokenBalancesTemplate = (cashaddr: string) => {
+export const SlpAllTokenBalancesTemplate = (slpaddr: string) => {
   let q = {
     "v": 3,
     "q": {
@@ -104,7 +104,7 @@ export const SlpAllTokenBalancesTemplate = (cashaddr: string) => {
         {
           "$match": {
             "graphTxn.outputs.status": "UNSPENT",
-            "graphTxn.outputs.address": cashaddr
+            "graphTxn.outputs.address": slpaddr
           }
         },
         {
@@ -113,7 +113,7 @@ export const SlpAllTokenBalancesTemplate = (cashaddr: string) => {
         {
           "$match": {
             "graphTxn.outputs.status": "UNSPENT",
-            "graphTxn.outputs.address": cashaddr
+            "graphTxn.outputs.address": slpaddr
           }
         },
         {
@@ -158,7 +158,7 @@ export const SlpAllTokenBalancesTemplate = (cashaddr: string) => {
 }
 
 // prettier-ignore
-export const SlpTokenBalanceTemplate = (cashaddr: string, tokenId: string) => {
+export const SlpTokenBalanceTemplate = (slpaddr: string, tokenId: string) => {
   let q = {
     "v": 3,
     "q": {
@@ -172,7 +172,7 @@ export const SlpTokenBalanceTemplate = (cashaddr: string, tokenId: string) => {
         {
           "$match": {
             "graphTxn.outputs.status": "UNSPENT",
-            "graphTxn.outputs.address": cashaddr
+            "graphTxn.outputs.address": slpaddr
           }
         },
         {
@@ -181,7 +181,7 @@ export const SlpTokenBalanceTemplate = (cashaddr: string, tokenId: string) => {
         {
           "$match": {
             "graphTxn.outputs.status": "UNSPENT",
-            "graphTxn.outputs.address": cashaddr
+            "graphTxn.outputs.address": slpaddr
           }
         },
         {
@@ -256,7 +256,7 @@ export const SlpAddressTransactionHistoryTemplate = (address: string, tokenId?: 
 };
 
 // prettier-ignore
-export const SlpWaitForTransactionTemplate = (cashaddr: string, tokenId?: string) => {
+export const SlpWaitForTransactionTemplate = (slpaddr: string, tokenId?: string) => {
   let q = {
     "v": 3,
     "q": {
@@ -264,10 +264,10 @@ export const SlpWaitForTransactionTemplate = (cashaddr: string, tokenId?: string
       "find": {
         "$or": [
           {
-            "in.e.a": cashaddr
+            "in.e.a": slpaddr
           },
           {
-            "out.e.a": cashaddr
+            "out.e.a": slpaddr
           }
         ]
       }
@@ -311,7 +311,7 @@ export const SlpTokenInfoTemplate = (tokenId?: string, limit: number = 100, skip
 
 // Slp Utxos for bch operation, to prevent accident burning of tokens and baton
 // prettier-ignore
-export const SlpBatonUtxosTemplate = (cashaddr: string, tokenId?: string) => {
+export const SlpBatonUtxosTemplate = (slpaddr: string, tokenId?: string) => {
   let q = {
     "v": 3,
     "q": {
@@ -319,7 +319,7 @@ export const SlpBatonUtxosTemplate = (cashaddr: string, tokenId?: string) => {
         "aggregate": [
             {
                 "$match": {
-                    "graphTxn.outputs.address": cashaddr,
+                    "graphTxn.outputs.address": slpaddr,
                     "graphTxn.outputs.status": "BATON_UNSPENT"
                 }
             },
@@ -328,7 +328,7 @@ export const SlpBatonUtxosTemplate = (cashaddr: string, tokenId?: string) => {
             },
             {
                 "$match": {
-                    "graphTxn.outputs.address": cashaddr,
+                    "graphTxn.outputs.address": slpaddr,
                     "graphTxn.outputs.status": "BATON_UNSPENT"
                 }
             },
