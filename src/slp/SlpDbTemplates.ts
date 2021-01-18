@@ -3,6 +3,7 @@
 export const SlpAllUtxosTemplate = (cashaddr: string) => ({
     "v": 3,
     "q": {
+        "db": ["g"],
         "aggregate": [
             {
                 "$match": {
@@ -47,6 +48,7 @@ export const SlpSpendableUtxosTemplate = (cashaddr: string, tokenId?: string) =>
   let q = {
     "v": 3,
     "q": {
+        "db": ["g"],
         "aggregate": [
             {
                 "$match": {
@@ -219,7 +221,7 @@ export const SlpTokenBalanceTemplate = (cashaddr: string, tokenId: string) => {
 }
 
 // prettier-ignore
-export const SlpAddressTransactionHistoryTemplate = (address: string, tokenId?: string) => {
+export const SlpAddressTransactionHistoryTemplate = (address: string, tokenId?: string, limit: number = 100, skip: number = 0) => {
   const q = {
     "v": 3,
     "q": {
@@ -235,7 +237,9 @@ export const SlpAddressTransactionHistoryTemplate = (address: string, tokenId?: 
             ]
         },
       },
-      "sort": {"blk.i": 1}
+      "sort": {"blk.i": 1},
+      "limit": limit,
+      "skip": skip,
     },
     "r": {
       "f": "[ .[] | { tx_hash: .tx.h, height: .blk.i} ]"
@@ -256,7 +260,7 @@ export const SlpWaitForTransactionTemplate = (cashaddr: string, tokenId?: string
   let q = {
     "v": 3,
     "q": {
-      "db": ["u"],
+      "db": ["c", "u"],
       "find": {
         "$or": [
           {
@@ -279,7 +283,7 @@ export const SlpWaitForTransactionTemplate = (cashaddr: string, tokenId?: string
 
 // Lookup SLP token information
 // prettier-ignore
-export const SlpTokenInfoTemplate = (tokenId?: string) => {
+export const SlpTokenInfoTemplate = (tokenId?: string, limit: number = 100, skip: number = 0) => {
   let q = {
     "v": 3,
     "q": {
@@ -287,7 +291,9 @@ export const SlpTokenInfoTemplate = (tokenId?: string) => {
       "find": {},
       "sort": {
         "tokenStats.approx_txns_since_genesis": -1
-      }
+      },
+      "limit": limit,
+      "skip": skip,
     },
     "r": {
       "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex, decimals: .tokenDetails.decimals, documentUrl: .tokenDetails.documentUri, documentHash: .tokenDetails.documentSha256Hex, initialAmount: .tokenDetails.genesisOrMintQuantity } ]"
@@ -309,6 +315,7 @@ export const SlpBatonUtxosTemplate = (cashaddr: string, tokenId?: string) => {
   let q = {
     "v": 3,
     "q": {
+        "db": ["g"],
         "aggregate": [
             {
                 "$match": {
