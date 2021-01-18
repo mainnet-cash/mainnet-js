@@ -8,6 +8,7 @@ import { mine } from "../mine";
 import { SlpGenesisOptions, SlpGenesisResult } from "../slp/interface";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
+import { delay } from "../util/delay";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -407,7 +408,7 @@ describe("Slp wallet tests", () => {
 
     genesisOptions.ticker = ticker + "WB";
     const genesis = await aliceWallet.slp.genesis(genesisOptions);
-    bobWallet.slp.watchBalance((balance) => {
+    const cancelFn = bobWallet.slp.watchBalance((balance) => {
       expect(balance.value.toNumber()).toBeGreaterThan(0);
     });
     await aliceWallet.slp.send([
@@ -418,7 +419,8 @@ describe("Slp wallet tests", () => {
       },
     ]);
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    delay(5000);
+    cancelFn();
   });
 
   test("Test waiting for slp certain balance", async () => {

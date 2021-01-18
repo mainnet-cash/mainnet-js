@@ -430,17 +430,17 @@ export const SlpTxoTemplate = {
     "genesis_lock": {
       "lockingType": "standard",
       "name": "Genesis",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'GENESIS'> $(<g_token_ticker>) $(<g_token_name>) $(<g_token_document_url>) $(<g_token_document_hash>) $(<0x01 g_decimals>) $(<0x01 g_mint_baton_vout>) $(<0x08 g_initial_token_mint_quantity>)"
+      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'GENESIS'> g_token_ticker g_token_name g_token_document_url g_token_document_hash 0x01 g_decimals 0x01 g_mint_baton_vout 0x08 g_initial_token_mint_quantity"
     },
     "send_lock": {
       "lockingType": "standard",
       "name": "Send",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'SEND'> <s_token_id> $(<s_token_output_quantities>)"
+      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'SEND'> <s_token_id> s_token_output_quantities"
     },
     "mint_lock": {
       "lockingType": "standard",
       "name": "Mint",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'MINT'> <m_token_id> $(<0x01 m_mint_baton_vout>) $(<0x08 m_additional_token_quantity>)"
+      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'MINT'> <m_token_id> 0x01 m_mint_baton_vout 0x08 m_additional_token_quantity"
     }
   },
   "supported": [
