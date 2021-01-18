@@ -156,7 +156,9 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
-    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(this.privateKey!);
+    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
+      this.privateKey!
+    );
     const networkType =
       this.networkType === NetworkType.Regtest
         ? NetworkType.Testnet
@@ -225,7 +227,7 @@ export class Wallet extends BaseWallet {
         );
       }
     }
-    return this.deriveInfo()
+    return this.deriveInfo();
   }
 
   private async _generateMnemonic() {
@@ -621,18 +623,18 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
-  public getPublicKey(hex=false) {
-    return hex ? binToHex(this.publicKey!) : this.publicKey
+  public getPublicKey(hex = false) {
+    return hex ? binToHex(this.publicKey!) : this.publicKey;
   }
 
   // returns the public key hash for an address
-  public getPublicKeyCompressed(hex=false) {
-    return hex ? binToHex(this.publicKeyCompressed!) : this.publicKeyCompressed
+  public getPublicKeyCompressed(hex = false) {
+    return hex ? binToHex(this.publicKeyCompressed!) : this.publicKeyCompressed;
   }
 
   // returns the public key hash for an address
-  public getPublicKeyHash(hex=false) {
-    return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash
+  public getPublicKeyHash(hex = false) {
+    return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
   }
 
   // get a cashscript signature

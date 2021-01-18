@@ -27,7 +27,7 @@ describe(`Create Contract Tests`, () => {
     const alicePkh = alice.getPublicKeyHash();
     const bobPkh = bob.getPublicKeyHash();
 
-    const now = 100
+    const now = 100;
 
     let contract = new Contract(
       script,
@@ -51,14 +51,11 @@ describe(`Create Contract Tests`, () => {
     // );
     expect(contract.toString().slice(0, 8)).toBe("regtest:");
 
-
     const sig = bob.getSignatureTemplate();
     const secp256k1 = await instantiateSecp256k1();
     let publicKey = sig.getPublicKey(secp256k1);
     let fn = contract.getContractFunction("transfer");
-    let txn = await fn(publicKey, sig)
-      .to(bob.getDepositAddress(), 7000)
-      .send();
+    let txn = await fn(publicKey, sig).to(bob.getDepositAddress(), 7000).send();
     expect(txn.txid.length).toBe(64);
     expect(await bob.getBalance("sat")).toBe(7000);
   });
