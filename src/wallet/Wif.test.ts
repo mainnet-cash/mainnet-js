@@ -20,6 +20,7 @@ describe(`Test creation of wallet from walletId`, () => {
     );
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
     expect(w.publicKey!.length).toBe(65);
+    expect(w.publicKeyCompressed!.length).toBe(33);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
     expect(w.privateKeyWif !== "undefined").toBeTruthy();
@@ -29,24 +30,27 @@ describe(`Test creation of wallet from walletId`, () => {
     let w = await RegTestWallet.newRandom();
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
     expect(w.publicKey!.length).toBe(65);
+    expect(w.publicKeyCompressed!.length).toBe(33);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
     expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
   test("Should get a regtest wallet from wif id string", async () => {
-    let w = await RegTestWallet.fromId(process.env.ALICE_ID);
+    let w = await RegTestWallet.fromId(process.env.ALICE_ID!);
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
     expect(w.publicKey!.length).toBe(65);
+    expect(w.publicKeyCompressed!.length).toBe(33);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
     expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
   test("Should get a regtest wallet from seed id string", async () => {
-    let w = await RegTestWallet.fromId(process.env.BOB_ID);
+    let w = await RegTestWallet.fromId(process.env.BOB_ID!);
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
     expect(w.publicKey!.length).toBe(65);
+    expect(w.publicKeyCompressed!.length).toBe(33);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
     expect(w.privateKeyWif !== "undefined").toBeTruthy();
@@ -57,6 +61,7 @@ describe(`Test creation of wallet from walletId`, () => {
       "wif:testnet:cPS12C2bpGHtKjS5NXNyWyTGGRMPk7D7pjp5JfgxRKWyFnWoDyZg"
     );
     expect(w.publicKey!.length).toBe(65);
+    expect(w.publicKeyCompressed!.length).toBe(33);
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
     expect(w.cashaddr!.startsWith("bchtest:")).toBeTruthy();
@@ -269,7 +274,7 @@ describe(`Watch only Wallets`, () => {
     } else {
       let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
-      expect(alice.getPublicKeyHash().length).toBe(20);
+      expect(alice.getPublicKeyHash()!.length).toBe(20);
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
       expect(await alice.getBalance("sat")).toBeGreaterThan(

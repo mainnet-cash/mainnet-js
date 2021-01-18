@@ -120,8 +120,10 @@ describe("Test Contract Services", () => {
       contractId: contractId,
       walletId: buyerId,
       method: "spend",
+      getHexOnly: true,
       to: seller.getDepositAddress()
     });
+    
     expect(respHex.statusCode).toEqual(200);
     expect(respHex.body.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
 
@@ -240,7 +242,7 @@ describe("Test Contract Services", () => {
     
     let utxos = [serializeUtxo(utxoResp.body["1"] as UtxoI)]
 
-    const respSpend = await request(app).post("/contract/call").send({
+    const respSpend = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
       method: "spend",
@@ -269,5 +271,94 @@ describe("Test Contract Services", () => {
 
   });
 
+  /**
+   * integration test for spending with timeout 
+   */
+  it("Should allow spender to reclaim funds after timeout", async () => {
+    
+    let sender =  await RegTestWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`)
+    let receiver = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
+    
+    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+      function transfer(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == recipientPkh);
+      }
   
+      function timeout(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == senderPkh);
+        require(tx.time >= timeout);
+      }
+    }`;
+
+    const contractResp = await request(app).post("/contract/create").send({
+      script: script,
+      parameters: [sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), 215],
+      network: 'regtest'
+    });
+    console.log(JSON.stringify(contractResp.body))
+    expect(contractResp.statusCode).toEqual(200);
+    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
+    
+    let contractId = contractResp.body.contractId
+    let contractAddress = contractResp.body.cashaddr
+
+
+    await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: sender.toString(),
+          to: [
+            {
+              cashaddr: contractAddress,
+              unit: 'satoshis',
+              value: 21000,
+            },
+          ],
+        });
+
+
+    const utxoResp = await request(app).post("/contract/utxos").send({
+      contractId: contractId,
+    });
+
+    expect(utxoResp.statusCode).toEqual(200);
+    expect(utxoResp.body["0"].satoshis).toEqual(21000);
+    
+    let utxos = [serializeUtxo(utxoResp.body["0"] as UtxoI)]
+
+    const respSpend = await request(app).post("/contract/call").send({
+      contractId: contractId,
+      action: "send",
+      method: "timeout",
+      arguments: [sender.publicKeyCompressed!, sender.toString()],
+      to: {
+        cashaddr: sender.getDepositAddress(),
+        value: 17000,
+      },
+    }
+    );
+
+    expect(respSpend.statusCode).toEqual(200);
+    expect(respSpend.body.txId.length).toEqual(64);
+    expect(respSpend.body.hex.length).toBeGreaterThan(1000);
+
+    const resp = await request(app)
+      .post("/wallet/balance")
+      .send({
+        walletId: `watch:regtest:${sender.getDepositAddress()}`,
+      });
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.sat).toBeGreaterThan(16700);
+    const utxo2Resp = await request(app).post("/contract/utxos").send({
+      contractId: contractId,
+    });
+    
+    expect(utxo2Resp.statusCode).toEqual(200);
+    expect(utxo2Resp.body["0"].satoshis).toEqual(21000);
+
+  });
 });

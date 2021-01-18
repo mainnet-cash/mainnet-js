@@ -73,6 +73,7 @@ export class Wallet extends BaseWallet {
   derivationPath?: string;
   mnemonic?: string;
   privateKey?: Uint8Array;
+  publicKeyCompressed?: Uint8Array;
   privateKeyWif?: string;
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
@@ -155,6 +156,7 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
+    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(this.privateKey!);
     const networkType =
       this.networkType === NetworkType.Regtest
         ? NetworkType.Testnet
@@ -223,24 +225,7 @@ export class Wallet extends BaseWallet {
         );
       }
     }
-    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-    const networkType =
-      this.networkType === NetworkType.Regtest
-        ? NetworkType.Testnet
-        : this.networkType;
-    this.privateKeyWif = encodePrivateKeyWif(
-      sha256,
-      this.privateKey,
-      networkType
-    );
-    checkWifNetwork(this.privateKeyWif, this.networkType);
-    this.walletType = WalletTypeEnum.Wif;
-    this.cashaddr = (await deriveCashaddr(
-      this.privateKey,
-      this.networkPrefix
-    )) as string;
-    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
-    return this;
+    return this.deriveInfo()
   }
 
   private async _generateMnemonic() {
@@ -636,13 +621,18 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
-  public getPublicKey() {
-    return this.publicKey!;
+  public getPublicKey(hex=false) {
+    return hex ? binToHex(this.publicKey!) : this.publicKey
   }
 
   // returns the public key hash for an address
-  public getPublicKeyHash() {
-    return this.publicKeyHash!;
+  public getPublicKeyCompressed(hex=false) {
+    return hex ? binToHex(this.publicKeyCompressed!) : this.publicKeyCompressed
+  }
+
+  // returns the public key hash for an address
+  public getPublicKeyHash(hex=false) {
+    return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash
   }
 
   // get a cashscript signature

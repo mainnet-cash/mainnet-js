@@ -19,6 +19,7 @@ import {
 } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
+import { string } from "pg-format";
 
 export class Contract implements ContractI {
   private script: string;
@@ -95,6 +96,20 @@ export class Contract implements ContractI {
 
     return new Contract(script, params, network as Network, parseInt(nonce));
   }
+
+  // Static convenience constructor
+  static _create(
+    script:string,
+    parameters:string[],
+    network:Network,
+    nonce?
+  ) {
+    let artifact = CashCompiler.compileString(script);
+    let params = castConstructorParametersFromArtifact(parameters, artifact);
+    return new this( script, params, network, nonce );
+  }
+
+  
 
   public getDepositAddress() {
     return this.contract.address;

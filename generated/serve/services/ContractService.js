@@ -53,7 +53,7 @@ const contractFn = ({ req }) => new Promise(
   async (resolve, reject) => {
     try {
       let contract = await mainnet.Contract.fromId(req.contractId);
-      resp = await contract.runFunction(req)
+      resp = await contract.runFunctionFromStrings(req)
       resolve(Service.successResponse({
         contractId: contractFnRequest.contractId, 
         txId: resp.txid,
@@ -71,25 +71,25 @@ const contractFn = ({ req }) => new Promise(
 /**
 * Finalize an escrow contract
 *
-* contractFnRequest ContractFnRequest null
+* escrowFnRequest EscrowFnRequest null
 * returns ContractFnResponse
 * */
-const escrowFn = ({ contractFnRequest }) => new Promise(
+const escrowFn = ( {escrowFnRequest} ) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.EscrowContract.fromId(contractFnRequest.contractId);
-      let wallet = await mainnet.walletFromId(contractFnRequest.walletId)
-      let utxos = contractFnRequest.utxoIds ? contractFnRequest.utxoIds.map(u => {return mainnet.Mainnet.deserializeUtxo(u)}) : undefined
+      let contract = await mainnet.EscrowContract.fromId(escrowFnRequest.contractId);
+      let wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
+      let utxos = escrowFnRequest.utxoIds ? escrowFnRequest.utxoIds.map(u => {return mainnet.Mainnet.deserializeUtxo(u)}) : undefined
       let resp = await contract._sendMax(
         wallet.privateKeyWif,
-        contractFnRequest.method, 
-        contractFnRequest.to,
-        contractFnRequest.getHexOnly, 
+        escrowFnRequest.method, 
+        escrowFnRequest.to,
+        escrowFnRequest.getHexOnly, 
         utxos
         );
 
       resolve(Service.successResponse({
-        contractId: contractFnRequest.contractId, 
+        contractId: escrowFnRequest.contractId, 
         txId: resp.txid,
         hex: resp.hex
       }));
