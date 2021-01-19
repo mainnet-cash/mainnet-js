@@ -98,17 +98,15 @@ export class Contract implements ContractI {
 
   // Static convenience constructor
   static _create(
-    script:string,
-    parameters:string[],
-    network:Network,
+    script: string,
+    parameters: string[],
+    network: Network,
     nonce?
   ) {
     let artifact = CashCompiler.compileString(script);
     let params = castConstructorParametersFromArtifact(parameters, artifact);
-    return new this( script, params, network, nonce );
+    return new this(script, params, network, nonce);
   }
-
-  
 
   public getDepositAddress() {
     return this.contract.address;
