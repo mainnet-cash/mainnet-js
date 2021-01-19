@@ -16,9 +16,11 @@ import { deserializeUtxo } from "../util/serializeUtxo";
 import {
   castConstructorParametersFromArtifact,
   castStringArgumentsFromArtifact,
+  transformContractToRequests,
 } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
+import { ContractFunction } from "cashscript/dist/module/Contract";
 
 export class Contract implements ContractI {
   private script: string;
@@ -176,49 +178,49 @@ export class Contract implements ContractI {
    * Call a cashscript contract function using an interface object of strings.
    * This function is a helper for the rest or serialized interfaces and not intended
    * for native use within the library, although it may be useful for running stored transactions.
-   * @param req Parameters for the transaction call, serialized as strings.
+   * @param request Parameters for the transaction call, serialized as strings.
    * @returns A cashscript Transaction result
    */
-  public async runFunctionFromStrings(req: CashscriptTransactionI) {
-    let fn = this.getContractFunction(req.function);
+  public async runFunctionFromStrings(request: CashscriptTransactionI) {
+    let fn = this.getContractFunction(request.function);
     let arg = await castStringArgumentsFromArtifact(
-      req.arguments,
+      request.arguments,
       this.artifact,
-      req.function
+      request.function
     );
     let func = fn(...arg);
-    func = func.to(req.to.cashaddr, req.to.value);
-    if (req.utxoIds) {
-      let utxos = req.utxoIds.map((u) => {
+    func = func.to(await transformContractToRequests(request.to));
+    if (request.utxoIds) {
+      let utxos = request.utxoIds.map((u) => {
         return deserializeUtxo(u);
       });
       func = func.from(utxos);
     }
-    if (req.opReturn) {
-      func = func.withOpReturn(req.opReturn);
+    if (request.opReturn) {
+      func = func.withOpReturn(request.opReturn);
     }
-    if (req.feePerByte) {
-      func = func.withFeePerByte(req.feePerByte);
+    if (request.feePerByte) {
+      func = func.withFeePerByte(request.feePerByte);
     }
-    if (req.hardcodedFee) {
-      func = func.withHardcodedFee(req.hardcodedFee);
+    if (request.hardcodedFee) {
+      func = func.withHardcodedFee(request.hardcodedFee);
     }
-    if (req.minChange) {
-      func = func.withMinChange(req.minChange);
+    if (request.minChange) {
+      func = func.withMinChange(request.minChange);
     }
-    if (req.withoutChange) {
+    if (request.withoutChange) {
       func = func.withoutChange();
     }
-    if (req.age) {
-      func = func.withAge(req.age);
+    if (request.age) {
+      func = func.withAge(request.age);
     }
-    if (req.time) {
-      func = func.withTime(req.time);
+    if (request.time) {
+      func = func.withTime(request.time);
     }
-    return await func[req.action]();
+    return await func[request.action]();
   }
 
-  private async estimateFee(func, publicKey, sig, outputAddress, utxos) {
+  private async estimateFee(func: ContractFunction, publicKey: Uint8Array, sig:SignatureTemplate, outputAddress:string, utxos:UtxoI[]) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance
     const estimatorTransaction = func(publicKey, sig, 10, 2147483640)

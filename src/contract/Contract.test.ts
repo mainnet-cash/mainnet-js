@@ -2,9 +2,7 @@ import { Network } from "../interface";
 import { RegTestWallet } from "../wallet/Wif";
 import { CashscriptTransactionI } from "./interface";
 import { Contract } from "./Contract";
-import { binToHex, instantiateSecp256k1 } from "@bitauth/libauth";
-import { SignatureTemplate } from "cashscript";
-import { ok } from "assert";
+import { instantiateSecp256k1 } from "@bitauth/libauth";
 
 describe(`Create Contract Tests`, () => {
   test("Should send a transfer with timeout script", async () => {
@@ -106,6 +104,7 @@ describe(`Create Contract Tests`, () => {
       to: {
         cashaddr: alice.getDepositAddress(),
         value: 7000,
+        unit: "sat",
       },
       time: 215,
     } as CashscriptTransactionI);
@@ -113,5 +112,61 @@ describe(`Create Contract Tests`, () => {
 
     await alice.provider!.sendRawTransaction(txn);
     expect(await contract.getBalance()).toBeLessThan(3000);
+  });
+
+  test("Should send a transfer with timeout script, using runFunction", async () => {
+    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+      function transfer(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == recipientPkh);
+      }
+  
+      function timeout(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == senderPkh);
+        require(tx.time >= timeout);
+      }
+    }`;
+
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const charlie = await RegTestWallet.newRandom();
+
+    const alicePkh = alice.getPublicKeyHash();
+    const charliePkh = charlie.getPublicKeyHash();
+
+    const now = 215;
+
+    let contract = new Contract(
+      script,
+      [alicePkh, charliePkh, now],
+      Network.REGTEST,
+      1
+    );
+
+    // fund the escrow contract
+    await alice.send([
+      {
+        cashaddr: contract.getDepositAddress()!,
+        value: 10000,
+        unit: "satoshis",
+      },
+    ]);
+    expect(contract.toString().length).toBeGreaterThan(30);
+    expect(contract.toString().slice(0, 8)).toBe("regtest:");
+    let txn = await contract.runFunctionFromStrings({
+      action: "build",
+      function: "transfer",
+      arguments: [charlie.getPublicKeyCompressed(), charlie.toString()],
+      to: {
+        to: charlie.getDepositAddress(),
+        amount: 7000,
+      },
+      time: 215,
+    } as CashscriptTransactionI);
+    expect(txn.length).toBeGreaterThan(500);
+
+    await charlie.provider!.sendRawTransaction(txn);
+    expect(await contract.getBalance()).toBeLessThan(3000);
+    expect(await charlie.getBalance('sat')).toBe(7000);
   });
 });

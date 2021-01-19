@@ -335,8 +335,8 @@ describe("Test Contract Services", () => {
       function: "timeout",
       arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
       to: {
-        cashaddr: sender.getDepositAddress(),
-        value: 17000,
+        to: sender.getDepositAddress(),
+        amount: 17000,
       },
     }
     );

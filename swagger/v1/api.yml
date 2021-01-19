@@ -784,7 +784,7 @@ components:
         action:
           description: In addition to `send`ing the built transaction, the built transaction 
             hex may be returned (without broadcasting) with `build` action, 
-              or the [`meep 🔗`](https://github.com/gcash/meep) debugger command
+              or the [`meep 🔗`](https://github.com/gcash/meep) debugger command.
           enum:
             - build
             - send
@@ -797,13 +797,19 @@ components:
           type: string          
         arguments:
           type: array
+          description: |
+            Arguments for the contract function call as strings.  Binary data should be passed as hexidecimal. 
+            Signatures may be passed as wallet import format (WIF) or wallet strings (walletId). Cashscript expects `pubkey`s to be compressed 35 byte values.
           items:
               type: string
-        to:
-          description: Output destination, as a SendRequest, cashscript style output(s), or just a cashaddr for a max_send
+        output:
+          description: The output destination, as a SendRequest, cashscript style output(s), array of either, or just a cashaddr for a max_send
           oneOf:
+          - $ref: "#/components/schemas/Cashaddr"
           - $ref: "#/components/schemas/SendRequestItem"
-          - $ref: "#/components/schemas/CashscriptSendItem"
+          - $ref: "#/components/schemas/SendRequestArray"
+          - $ref: "#/components/schemas/CashscriptReceipt"
+          - $ref: "#/components/schemas/CashscriptReceiptArray"
         utxoIds:
           description: Serialized utxoId(s) to spend from
           type: array
@@ -1102,7 +1108,15 @@ components:
         balance:
           $ref: "#/components/schemas/BalanceResponse"
       type: object
-    CashscriptSendItem:
+    SendRequestArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/SendRequestItem"
+    CashscriptReceiptArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/CashscriptReceipt"
+    CashscriptReceipt:
       properties:
         to:
            type: string
@@ -1110,6 +1124,10 @@ components:
         amount:
           type: number
           example: 100
+    Cashaddr:
+      type: string
+      example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+      description: A bitcoin cash address
     NetworkEnum:
       properties:
         network:
