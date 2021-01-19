@@ -34,8 +34,6 @@
     "test": "npx jest --runInBand --detectOpenHandles --forceExit",
     "test:api": "yarn install --ignore-optional --cwd generated/serve/ --prefix generated/serve/  && yarn --cwd generated/serve/ --prefix generated/serve/ test",
     "test:browser": "npx jest --config jest.config.browser.js --detectOpenHandles",
-    "test:new":"npx jest src/contract/Contract.test.ts --detectOpenHandles",
-    "test:new":"npx jest src/contract/Contract.test.ts --detectOpenHandles",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "build": "npx webpack",

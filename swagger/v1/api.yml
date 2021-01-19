@@ -781,11 +781,6 @@ components:
             type: string
             description:  |
               serialized contract
-        walletId:
-          type: string
-          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-          description: |
-            ID that is returned in `wallet` field of /wallet call
         action:
           description: In addition to `send`ing the built transaction, the built transaction 
             hex may be returned (without broadcasting) with `build` action, 
@@ -806,8 +801,9 @@ components:
               type: string
         to:
           description: Output destination, as a SendRequest, cashscript style output(s), or just a cashaddr for a max_send
-          type: string
-          example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+          oneOf:
+          - $ref: "#/components/schemas/SendRequestItem"
+          - $ref: "#/components/schemas/CashscriptSendItem"
         utxoIds:
           description: Serialized utxoId(s) to spend from
           type: array
@@ -846,7 +842,6 @@ components:
           type: number
       required:
         - contractId
-        - walletId
         - function
         - to
     EscrowFnRequest:
@@ -1107,6 +1102,14 @@ components:
         balance:
           $ref: "#/components/schemas/BalanceResponse"
       type: object
+    CashscriptSendItem:
+      properties:
+        to:
+           type: string
+           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        amount:
+          type: number
+          example: 100
     NetworkEnum:
       properties:
         network:

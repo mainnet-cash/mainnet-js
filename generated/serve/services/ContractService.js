@@ -49,11 +49,11 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 * contractFnRequest ContractFnRequest null
 * returns ContractFnResponse
 * */
-const contractFn = ({ req }) => new Promise(
+const contractFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.Contract.fromId(req.contractId);
-      resp = await contract.runFunctionFromStrings(req)
+      let contract = await mainnet.Contract.fromId(contractFnRequest.contractId);
+      resp = await contract.runFunctionFromStrings(contractFnRequest)
       resolve(Service.successResponse({
         contractId: contractFnRequest.contractId, 
         txId: resp.txid,

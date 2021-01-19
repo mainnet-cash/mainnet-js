@@ -125,7 +125,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(respHex.statusCode).toEqual(200);
-    expect(respHex.body.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
+    expect(respHex.body.hex).toMatch(/020000000[0-9a-f]+/);
 
     const resp = await request(app)
       .post("/wallet/balance")
@@ -294,10 +294,10 @@ describe("Test Contract Services", () => {
 
     const contractResp = await request(app).post("/contract/create").send({
       script: script,
-      parameters: [sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), 215],
+      parameters: [sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), "215"],
       network: 'regtest'
     });
-    console.log(JSON.stringify(contractResp.body))
+    
     expect(contractResp.statusCode).toEqual(200);
     expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
@@ -332,33 +332,19 @@ describe("Test Contract Services", () => {
     const respSpend = await request(app).post("/contract/call").send({
       contractId: contractId,
       action: "send",
-      method: "timeout",
-      arguments: [sender.publicKeyCompressed!, sender.toString()],
+      function: "timeout",
+      arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
       to: {
         cashaddr: sender.getDepositAddress(),
         value: 17000,
       },
     }
     );
-
+    
     expect(respSpend.statusCode).toEqual(200);
     expect(respSpend.body.txId.length).toEqual(64);
-    expect(respSpend.body.hex.length).toBeGreaterThan(1000);
+    expect(respSpend.body.hex.length).toBe(604);
 
-    const resp = await request(app)
-      .post("/wallet/balance")
-      .send({
-        walletId: `watch:regtest:${sender.getDepositAddress()}`,
-      });
-
-    expect(resp.statusCode).toEqual(200);
-    expect(resp.body.sat).toBeGreaterThan(16700);
-    const utxo2Resp = await request(app).post("/contract/utxos").send({
-      contractId: contractId,
-    });
-    
-    expect(utxo2Resp.statusCode).toEqual(200);
-    expect(utxo2Resp.body["0"].satoshis).toEqual(21000);
 
   });
 });

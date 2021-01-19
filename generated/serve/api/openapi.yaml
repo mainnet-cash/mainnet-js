@@ -845,7 +845,6 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
     ContractFnRequest:
       example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         minChange: 0.8008281904610115
         feePerByte: ""
         function: function
@@ -856,7 +855,7 @@ components:
         arguments:
         - arguments
         - arguments
-        to: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        to: ""
         utxoIds:
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
@@ -869,11 +868,6 @@ components:
         contractId:
           description: |
             serialized contract
-          type: string
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         action:
           default: send
@@ -896,8 +890,9 @@ components:
         to:
           description: Output destination, as a SendRequest, cashscript style output(s),
             or just a cashaddr for a max_send
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
+          oneOf:
+          - $ref: '#/components/schemas/SendRequestItem'
+          - $ref: '#/components/schemas/CashscriptSendItem'
         utxoIds:
           description: Serialized utxoId(s) to spend from
           items:
@@ -939,7 +934,6 @@ components:
       - contractId
       - function
       - to
-      - walletId
     EscrowFnRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -1265,6 +1259,14 @@ components:
         balance:
           $ref: '#/components/schemas/BalanceResponse'
       type: object
+    CashscriptSendItem:
+      properties:
+        to:
+          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+          type: string
+        amount:
+          example: 100
+          type: number
     NetworkEnum:
       discriminator:
         propertyName: network

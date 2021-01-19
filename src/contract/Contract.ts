@@ -19,7 +19,6 @@ import {
 } from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
-import { string } from "pg-format";
 
 export class Contract implements ContractI {
   private script: string;
@@ -41,7 +40,7 @@ export class Contract implements ContractI {
     this.network = network ? network : "mainnet";
     this.artifact = this.getArtifact();
     this.provider = getNetworkProvider(this.network);
-    this.contract = this.getContactInstance();
+    this.contract = this.getContractInstance();
     this.nonce = nonce ? nonce : getRandomInt(2147483647);
   }
 
@@ -131,7 +130,7 @@ export class Contract implements ContractI {
     return this.contract.getBalance();
   }
 
-  private getContactInstance() {
+  private getContractInstance() {
     return new CashScriptContract(
       this.artifact,
       this.parameters,

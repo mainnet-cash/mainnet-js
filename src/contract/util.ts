@@ -54,10 +54,19 @@ export function castConstructorParametersFromArtifact(
   let inputs = artifact.constructorInputs;
   parameters.forEach(function (value, i) {
     if (inputs[i].type.startsWith("bytes")) {
-      let uint = Uint8Array.from(
-        value.split(",").map((vStr) => parseInt(vStr))
-      );
-      result.push(uint);
+      if(typeof value === "string"){
+        let uint
+        if(value.includes(",")){
+          uint = Uint8Array.from(
+            value.split(",").map((vStr) => parseInt(vStr))
+          );
+        }else{
+          uint = hexToBin(value)
+        }
+        result.push(uint);
+      }else{
+        throw Error(`Couldn't parse ${value} from string to bytes`)
+      }      
     } else if (inputs[i].type === "int") {
       result.push(parseInt(value));
     } else if (inputs[i].type === "boolean") {
