@@ -30,7 +30,12 @@ import {
 } from "../slp/SlpLibAuth";
 import { binToHex } from "@bitauth/libauth";
 import { SendRequest } from "./model";
-import { SlpProvider, SlpWatchBalanceCallback } from "../slp/SlpProvider";
+import {
+  SlpCancelWatchFn,
+  SlpProvider,
+  SlpWatchBalanceCallback,
+  SlpWatchTransactionCallback,
+} from "../slp/SlpProvider";
 
 export class Slp {
   slpaddr: string;
@@ -48,7 +53,9 @@ export class Slp {
   }
 
   public getDepositQr(): ImageI {
-    return qrAddress(this.slpaddr);
+    const result = qrAddress(this.slpaddr);
+    result.alt = "A Bitcoin Cash Simple Ledger Protocol Qr Code";
+    return result;
   }
 
   public getTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
@@ -60,8 +67,11 @@ export class Slp {
   }
 
   public async getFormattedSlpUtxos(
-    slpaddr: string
+    slpaddr?: string
   ): Promise<SlpFormattedUtxo[]> {
+    if (!slpaddr) {
+      slpaddr = this.slpaddr;
+    }
     const utxos = await this.getSlpUtxos(bchaddr.toSlpAddress(slpaddr));
     return utxos.map((val) => {
       let utxo: any = {};
@@ -108,12 +118,12 @@ export class Slp {
     return this.provider.SlpAllTokenBalances(this.slpaddr);
   }
 
-  // sets up a callback to be called upon wallet's balance change
+  // sets up a callback to be called upon wallet's slp balance change
   // can be cancelled by calling the function returned from this one
   public watchBalance(
     callback: SlpWatchBalanceCallback,
     tokenId?: string
-  ): () => void {
+  ): SlpCancelWatchFn {
     return this.provider.SlpWatchBalance(callback, this.slpaddr, tokenId);
   }
 
@@ -124,6 +134,15 @@ export class Slp {
     tokenId: string
   ): Promise<SlpTokenBalance> {
     return this.provider.SlpWaitForBalance(value, this.slpaddr, tokenId);
+  }
+
+  // sets up a callback to be called upon wallet's slp transactions occuring
+  // can be cancelled by calling the function returned from this one
+  public watchTransactions(
+    callback: SlpWatchTransactionCallback,
+    tokenId?: string
+  ): SlpCancelWatchFn {
+    return this.provider.SlpWatchTransactions(callback, this.slpaddr, tokenId);
   }
 
   // waits for next transaction, program execution is halted
