@@ -30,7 +30,12 @@ import {
 } from "../slp/SlpLibAuth";
 import { binToHex } from "@bitauth/libauth";
 import { SendRequest } from "./model";
-import { SlpCancelWatchFn, SlpProvider, SlpWatchBalanceCallback, SlpWatchTransactionCallback } from "../slp/SlpProvider";
+import {
+  SlpCancelWatchFn,
+  SlpProvider,
+  SlpWatchBalanceCallback,
+  SlpWatchTransactionCallback,
+} from "../slp/SlpProvider";
 
 export class Slp {
   slpaddr: string;
