@@ -7,7 +7,6 @@ import {
   validateAuthenticationTemplate,
 } from "@bitauth/libauth";
 import bchaddr from "bchaddrjs-slp";
-import { parseSLP } from "slp-parser";
 
 import { SendRequest } from "../wallet/model";
 import { SlpGenesisOptions, SlpSendRequest, SlpUtxoI } from "../slp/interface";
@@ -242,9 +241,6 @@ export const SlpGetSendOutputs = async (
   if (!sendTxoBytecode.success) {
     throw new Error(sendTxoBytecode.toString());
   }
-
-  // enforce checking
-  parseSLP(Buffer.from(binToHex(sendTxoBytecode.bytecode), "hex"));
 
   return {
     SlpOutputs: [
