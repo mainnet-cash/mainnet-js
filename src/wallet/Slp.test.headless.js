@@ -45,7 +45,7 @@ describe(`Wallet should function in the browser`, () => {
           "0000000000000000000000000000000000000000000000000000000000000000",
       };
 
-      const {tokenId} = await wallet.slp.genesis(genesisOptions);
+      const { tokenId } = await wallet.slp.genesis(genesisOptions);
       return tokenId;
     }, process.env.PRIVATE_WIF);
     expect(result.length).toBe(64);
@@ -53,23 +53,31 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should mint extra slp tokens`, async () => {
-    const result = await page.evaluate(async ([wif, tokenId]) => {
-      const wallet = await RegTestWallet.fromId(`wif:regtest:${wif}`);
+    const result = await page.evaluate(
+      async ([wif, tokenId]) => {
+        const wallet = await RegTestWallet.fromId(`wif:regtest:${wif}`);
 
-      const {balance} = await wallet.slp.mint(10, tokenId);
-      return balance;
-    }, [process.env.PRIVATE_WIF, jestTokenId]);
+        const { balance } = await wallet.slp.mint(10, tokenId);
+        return balance;
+      },
+      [process.env.PRIVATE_WIF, jestTokenId]
+    );
     expect(result.value.c[0]).toBe(10010);
   });
 
   test(`Should mint extra slp tokens`, async () => {
-    const result = await page.evaluate(async ([wif, tokenId]) => {
-      const wallet = await RegTestWallet.fromId(`wif:regtest:${wif}`);
-      const bobWallet = await RegTestWallet.newRandom();
+    const result = await page.evaluate(
+      async ([wif, tokenId]) => {
+        const wallet = await RegTestWallet.fromId(`wif:regtest:${wif}`);
+        const bobWallet = await RegTestWallet.newRandom();
 
-      const {balance} = await wallet.slp.send([{slpaddr: bobWallet.slp.slpaddr, value: 10, tokenId: tokenId}]);
-      return balance;
-    }, [process.env.PRIVATE_WIF, jestTokenId]);
+        const { balance } = await wallet.slp.send([
+          { slpaddr: bobWallet.slp.slpaddr, value: 10, tokenId: tokenId },
+        ]);
+        return balance;
+      },
+      [process.env.PRIVATE_WIF, jestTokenId]
+    );
     expect(result.value.c[0]).toBe(10000);
   });
 });
