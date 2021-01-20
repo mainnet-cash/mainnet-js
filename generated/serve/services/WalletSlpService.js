@@ -69,7 +69,7 @@ const slpDepositAddress = ({ serializedWallet }) => new Promise(
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.slp.getDepositAddress(args);
-      resp = {cashaddr:resp}
+      resp = {slpaddr: resp}
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
@@ -184,7 +184,7 @@ const slpSendMax = ({ slpSendMaxRequest }) => new Promise(
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
-      let resp = await wallet.slp.sendMax(slpSendMaxRequest.cashaddr, slpSendMaxRequest.tokenId);
+      let resp = await wallet.slp.sendMax(slpSendMaxRequest.slpaddr, slpSendMaxRequest.tokenId);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);

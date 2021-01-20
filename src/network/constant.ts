@@ -4,8 +4,8 @@ export const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
 
 export const networkTickerMap = {
   mainnet: "BCH",
-  testnet: "BCHt",
-  regtest: "BCHr",
+  testnet: "tBCH",
+  regtest: "rBCH",
 };
 
 export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];

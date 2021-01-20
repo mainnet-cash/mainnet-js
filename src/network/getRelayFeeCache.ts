@@ -5,7 +5,7 @@ import { default as NetworkProvider } from "./NetworkProvider";
 export async function getRelayFeeCache(provider: NetworkProvider) {
   let relayFeePerKbInCoins;
   if (networkTickerMap[provider.network] + "_RELAY_FEE" in globalThis) {
-    // Stores the fee in BCH_RELAY_FEE, BCHt_RELAY_FEE, etc
+    // Stores the fee in BCH_RELAY_FEE, tBCH_RELAY_FEE, etc
     relayFeePerKbInCoins =
       globalThis[networkTickerMap[provider.network] + "_RELAY_FEE"];
   }

@@ -37,8 +37,8 @@ const stringToBin = (value, hex = false) => {
 
 export const SlpGetGenesisOutputs = async (
   options: SlpGenesisOptions,
-  genesis_token_receiver_cashaddr: string,
-  mint_baton_receiver_cashaddr
+  genesis_token_receiver_slpaddr: string,
+  mint_baton_receiver_slpaddr: string
 ) => {
   // explicitly convert initial amount to bignumber
   options.initialAmount = new BigNumber(options.initialAmount);
@@ -49,10 +49,10 @@ export const SlpGetGenesisOutputs = async (
   if (options.decimals < 0 || options.decimals > 9) {
     throw new Error("Genesis allows decimal places between 0");
   }
-  const cashAddrs = options.endBaton
-    ? [genesis_token_receiver_cashaddr]
-    : [genesis_token_receiver_cashaddr, mint_baton_receiver_cashaddr];
-  const bchSendRequests = cashAddrs.map(
+  const addrs = options.endBaton
+    ? [genesis_token_receiver_slpaddr]
+    : [genesis_token_receiver_slpaddr, mint_baton_receiver_slpaddr];
+  const bchSendRequests = addrs.map(
     (val) =>
       new SendRequest({
         cashaddr: bchaddr.toCashAddress(val),
@@ -104,14 +104,14 @@ export const SlpGetMintOutputs = async (
   slpBatonUtxos: SlpUtxoI[],
   tokenId: string,
   amount: BigNumber.Value,
-  mint_tokens_receiver_cashaddr: string,
-  mint_baton_receiver_cashaddr: string,
+  mint_tokens_receiver_slpaddr: string,
+  mint_baton_receiver_slpaddr: string,
   endBaton: boolean = false
 ) => {
-  const cashAddrs = endBaton
-    ? [mint_tokens_receiver_cashaddr]
-    : [mint_tokens_receiver_cashaddr, mint_baton_receiver_cashaddr];
-  const bchSendRequests = cashAddrs.map(
+  const addrs = endBaton
+    ? [mint_tokens_receiver_slpaddr]
+    : [mint_tokens_receiver_slpaddr, mint_baton_receiver_slpaddr];
+  const bchSendRequests = addrs.map(
     (val) =>
       new SendRequest({
         cashaddr: bchaddr.toCashAddress(val),
@@ -154,7 +154,7 @@ export const SlpGetMintOutputs = async (
 };
 
 export const SlpGetSendOutputs = async (
-  changeCashaddr: string,
+  changeSlpaddr: string,
   slpUtxos: SlpUtxoI[],
   sendRequests: SlpSendRequest[]
 ) => {
@@ -207,7 +207,7 @@ export const SlpGetSendOutputs = async (
   if (change.isGreaterThan(new BigNumber(0))) {
     values.push(change);
     sendRequests.push({
-      cashaddr: changeCashaddr,
+      slpaddr: changeSlpaddr,
       tokenId: tokenId,
       value: new BigNumber(0),
     });
@@ -216,7 +216,7 @@ export const SlpGetSendOutputs = async (
   const bchSendRequests = sendRequests.map(
     (val) =>
       new SendRequest({
-        cashaddr: bchaddr.toCashAddress(val.cashaddr),
+        cashaddr: bchaddr.toCashAddress(val.slpaddr),
         value: DUST_UTXO_THRESHOLD,
         unit: UnitEnum.SAT,
       })
@@ -430,17 +430,17 @@ export const SlpTxoTemplate = {
     "genesis_lock": {
       "lockingType": "standard",
       "name": "Genesis",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'GENESIS'> $(<g_token_ticker>) $(<g_token_name>) $(<g_token_document_url>) $(<g_token_document_hash>) $(<0x01 g_decimals>) $(<0x01 g_mint_baton_vout>) $(<0x08 g_initial_token_mint_quantity>)"
+      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'GENESIS'> g_token_ticker g_token_name g_token_document_url g_token_document_hash 0x01 g_decimals 0x01 g_mint_baton_vout 0x08 g_initial_token_mint_quantity"
     },
     "send_lock": {
       "lockingType": "standard",
       "name": "Send",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'SEND'> <s_token_id> $(<s_token_output_quantities>)"
+      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'SEND'> <s_token_id> s_token_output_quantities"
     },
     "mint_lock": {
       "lockingType": "standard",
       "name": "Mint",
-      "script": "OP_RETURN <'SLP'0x00> $(<0x0101>) <'MINT'> <m_token_id> $(<0x01 m_mint_baton_vout>) $(<0x08 m_additional_token_quantity>)"
+      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'MINT'> <m_token_id> 0x01 m_mint_baton_vout 0x08 m_additional_token_quantity"
     }
   },
   "supported": [

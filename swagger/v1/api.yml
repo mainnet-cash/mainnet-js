@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.9
+  version: 0.2.10
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -617,7 +617,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DepositAddressResponse"
+                $ref: "#/components/schemas/SlpDepositAddressResponse"
           description: successful operation
       summary: Get an SLP deposit address in cash address format
       tags:
@@ -1271,6 +1271,12 @@ components:
         balances:
           $ref: "#/components/schemas/SlpBalanceResponse"
 
+    SlpDepositAddressResponse:
+      properties:
+        slpaddr:
+           type: string
+           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+
     SlpTokenInfoRequest:
       properties:
         walletId:
@@ -1408,9 +1414,9 @@ components:
 
     SlpSendRequestItem:
       properties:
-        cashaddr:
+        slpaddr:
            type: string
-           example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         value:
           type: number
           example: 100
@@ -1418,7 +1424,7 @@ components:
            type: string
            example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       required:
-        - cashaddr
+        - slpaddr
         - value
         - tokenId
       type: object
@@ -1440,15 +1446,15 @@ components:
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             ID that is returned in `wallet` field of /wallet call
-        cashaddr:
+        slpaddr:
            type: string
-           example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         tokenId:
            type: string
            example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
       required:
         - walletId
-        - cashaddr
+        - slpaddr
         - tokenId
 
     SlpUtxoResponse:
@@ -1481,7 +1487,7 @@ components:
           example: "MNC"
         tokenId:
           type: string
-          example: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
 
     GetTestnetBchRequest:
       properties:
@@ -1499,25 +1505,25 @@ components:
         txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
     GetTestnetSlpRequest:
       properties:
-        cashaddr:
+        slpaddr:
           type: string
-          description: Receiver's cashaddr
+          description: Receiver's slpaddr
         tokenId:
           type: string
           description: TokenId in hex
       required:
-        - cashaddr
+        - slpaddr
         - tokenId
       example:
-        cashaddr: "bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8"
-        tokenId: "5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27"
+        slpaddr: "slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866"
+        tokenId: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
     GetTestnetSlpResponse:
       properties:
         txId:
           type: string
           description: Transaction id
       example:
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        txId: dc38ee5d4233163e69144e4ec6e49257d41f5605e297d05c0af8f1d81ae1a387
     GetAddressesResponse:
       properties:
         bchtest:
@@ -1525,7 +1531,7 @@ components:
           description: Cashaddr to return testnet BCH
         slptest:
           type: string
-          description: Cashaddr to return testnet SLP tokens
+          description: Slpaddr to return testnet SLP tokens
       example:
         bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
-        slptest: "slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv"
+        slptest: "slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866"

@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.9
+  version: 0.2.10
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -635,7 +635,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DepositAddressResponse'
+                $ref: '#/components/schemas/SlpDepositAddressResponse'
           description: successful operation
       summary: Get an SLP deposit address in cash address format
       tags:
@@ -1416,6 +1416,13 @@ components:
           type: string
         balances:
           $ref: '#/components/schemas/SlpBalanceResponse'
+    SlpDepositAddressResponse:
+      example:
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+      properties:
+        slpaddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
     SlpTokenInfoRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -1564,11 +1571,11 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         to:
-        - cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        - tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
           value: 100
-        - cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        - tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
           value: 100
       properties:
         walletId:
@@ -1586,12 +1593,12 @@ components:
       type: object
     SlpSendRequestItem:
       example:
-        cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         value: 100
       properties:
-        cashaddr:
-          example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+        slpaddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
           type: string
         value:
           example: 100
@@ -1600,7 +1607,7 @@ components:
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
       required:
-      - cashaddr
+      - slpaddr
       - tokenId
       - value
       type: object
@@ -1623,22 +1630,22 @@ components:
     SlpSendMaxRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        cashaddr: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
       properties:
         walletId:
           description: |
             ID that is returned in `wallet` field of /wallet call
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
-        cashaddr:
-          example: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+        slpaddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
           type: string
         tokenId:
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
       required:
-      - cashaddr
+      - slpaddr
       - tokenId
       - walletId
     SlpUtxoResponse:
@@ -1649,7 +1656,7 @@ components:
       example:
         utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
         ticker: MNC
-        tokenId: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         decimals: 6.027456183070403
         index: 0.8008281904610115
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
@@ -1679,7 +1686,7 @@ components:
           example: MNC
           type: string
         tokenId:
-          example: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
     GetTestnetBchRequest:
       example:
@@ -1697,21 +1704,21 @@ components:
           type: string
     GetTestnetSlpRequest:
       example:
-        cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
-        tokenId: 5d4df57571ea4930305d3bd174a152db59807cf5a516b7f0fd419d0c86537c27
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
-        cashaddr:
-          description: Receiver's cashaddr
+        slpaddr:
+          description: Receiver's slpaddr
           type: string
         tokenId:
           description: TokenId in hex
           type: string
       required:
-      - cashaddr
+      - slpaddr
       - tokenId
     GetTestnetSlpResponse:
       example:
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        txId: dc38ee5d4233163e69144e4ec6e49257d41f5605e297d05c0af8f1d81ae1a387
       properties:
         txId:
           description: Transaction id
@@ -1719,11 +1726,11 @@ components:
     GetAddressesResponse:
       example:
         bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
-        slptest: slptest:qr2n0w9q752l25zhpgchn096xt8d23kz9gw3j5a7vv
+        slptest: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
       properties:
         bchtest:
           description: Cashaddr to return testnet BCH
           type: string
         slptest:
-          description: Cashaddr to return testnet SLP tokens
+          description: Slpaddr to return testnet SLP tokens
           type: string

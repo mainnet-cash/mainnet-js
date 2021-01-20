@@ -41,7 +41,7 @@
         <li> <button @click="getBch">Get tBCH</button> {{ balance }} tBCH </li>
         <div v-for="token in slpbalances" :key="token.tokenId">
           <li>
-            <button @click="getTokens(token.ticker, token.tokenId)">
+            <button @click="getTokens(token.tokenId)">
               Get {{ token.ticker }}
             </button>
             {{ parseInt(token.value) }}
@@ -83,8 +83,8 @@
         await this.fetch("/faucet/get_testnet_bch", {cashaddr: bchaddr.toCashAddress(this.cashaddr)});
         await this.update();
       },
-      async getTokens(ticker, tokenId) {
-        await this.fetch("/faucet/get_testnet_slp", {cashaddr: bchaddr.toSlpAddress(this.cashaddr), ticker: ticker, tokenId: tokenId});
+      async getTokens(tokenId) {
+        await this.fetch("/faucet/get_testnet_slp", {slpaddr: bchaddr.toSlpAddress(this.cashaddr), tokenId: tokenId});
         await this.update();
       },
 
