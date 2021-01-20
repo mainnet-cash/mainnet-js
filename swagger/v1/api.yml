@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.10
+  version: 0.2.11
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -509,7 +509,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SlpGenesisResponse'
           description: successful operation
-      summary: Get created tokenId back and new slp balances of the wallet
+      summary: Get created tokenId back and new slp token balance of the wallet
       tags:
         - wallet/slp
 
@@ -531,7 +531,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SlpMintResponse'
           description: successful operation
-      summary: Get created tokenId back and new slp balances of the wallet
+      summary: Get created tokenId back and new slp token balance of the wallet
       tags:
         - wallet/slp
 
@@ -588,7 +588,7 @@ paths:
             schema:
               $ref: "#/components/schemas/SlpBalanceRequest"
         description: |
-          Request for a wallet slp balances
+          Request for a wallet slp token balance
         required: true
       responses:
         "200":
@@ -1236,6 +1236,7 @@ components:
         ticker:
           type: string
           example: MNC
+          description: Token ticker
         initialAmount:
           type: string
           example: "10000"
@@ -1266,9 +1267,8 @@ components:
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          description: |
-            Full token identifier freshly created
-        balances:
+          description: Full token identifier freshly created
+        balance:
           $ref: "#/components/schemas/SlpBalanceResponse"
 
     SlpDepositAddressResponse:
@@ -1305,6 +1305,7 @@ components:
         ticker:
           type: string
           example: MNC
+          description: Token ticker
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
@@ -1315,6 +1316,7 @@ components:
         decimals:
           type: number
           description: Indicates that 1 token is divisible into 10^decimals base units
+          example: 2
         documentUrl:
           type: string
           example: https://mainnet.cash
@@ -1353,7 +1355,7 @@ components:
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           description: |
             Transaction id
-        balances:
+        balance:
           $ref: "#/components/schemas/SlpBalanceResponse"
 
     SlpBalanceRequest:
@@ -1366,8 +1368,7 @@ components:
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          description: |
-            Full token identifier aka its genesis transaction id
+          description: Full token identifier aka its genesis transaction id
       required:
         - walletId
 
@@ -1381,7 +1382,7 @@ components:
         value:
           type: string
           format: float
-          example: "0.00000001"
+          example: "10000"
           description: A big number represented as a string to avoid precision loss
         ticker:
           type: string
@@ -1421,8 +1422,9 @@ components:
           type: number
           example: 100
         tokenId:
-           type: string
-           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: Token unique hexadecimal identifier, also the id of the token creation transaction
       required:
         - slpaddr
         - value
@@ -1435,7 +1437,7 @@ components:
           type: string
           example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
           description: The hash of a transaction
-        balances:
+        balance:
           $ref: "#/components/schemas/SlpBalanceResponse"
       type: object
 
@@ -1447,11 +1449,12 @@ components:
           description: |
             ID that is returned in `wallet` field of /wallet call
         slpaddr:
-           type: string
-           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         tokenId:
-           type: string
-           example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+          type: string
+          example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
+          description: Token unique hexadecimal identifier, also the id of the token creation transaction
       required:
         - walletId
         - slpaddr
@@ -1471,7 +1474,7 @@ components:
           description: The hash of a transaction
         satoshis:
           type: number
-          example: 100
+          example: 546
           description: Locked satoshi
         utxoId:
           type: string
@@ -1480,14 +1483,19 @@ components:
         value:
           type: string
           description: Token amount represented as a string to avoid precision loss
+          example: "10000"
         decimals:
           type: number
+          example: 2
+          description: Indicates that 1 token is divisible into 10^decimals base units
         ticker:
           type: string
           example: "MNC"
+          description: Token ticker
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: Token unique hexadecimal identifier, also the id of the token creation transaction
 
     GetTestnetBchRequest:
       properties:
@@ -1510,7 +1518,7 @@ components:
           description: Receiver's slpaddr
         tokenId:
           type: string
-          description: TokenId in hex
+          description: Token unique hexadecimal identifier, also the id of the token creation transaction
       required:
         - slpaddr
         - tokenId

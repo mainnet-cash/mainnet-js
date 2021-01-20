@@ -738,12 +738,12 @@ export class TestNetWallet extends Wallet {
     }
   }
 
-  // will receive 10000 testnet satoshi, rate limits apply
+  // will receive 10 testnet tokens, rate limits apply
   async getTestnetSlp(tokenId: string): Promise<string> {
     try {
       const response = await axios.post(
         `${TestNetWallet.faucetServer}/faucet/get_testnet_slp`,
-        { cashaddr: this.cashaddr!, tokenId: tokenId }
+        { slpaddr: this.slp.slpaddr, tokenId: tokenId }
       );
       const data = response.data;
       return data.txId;
