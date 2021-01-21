@@ -1285,7 +1285,7 @@ components:
     Cashaddr:
       description: A bitcoin cash address
       example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-      type: object
+      type: string
     NetworkEnum:
       discriminator:
         propertyName: network
