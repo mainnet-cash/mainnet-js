@@ -61,7 +61,7 @@ import { ElectrumRawTransaction } from "../network/interface";
 import { getRelayFeeCache } from "../network/getRelayFeeCache";
 import { Slp } from "./Slp";
 import axios from "axios";
-import { SlpSendResult } from "../slp/interface";
+import { SlpSendResponse } from "../slp/interface";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -775,12 +775,12 @@ export class TestNetWallet extends Wallet {
     }
   }
 
-  // will receive 10000 testnet satoshi, rate limits apply
-  async getTestnetSlp(ticker: string, tokenId?: string): Promise<string> {
+  // will receive 10 testnet tokens, rate limits apply
+  async getTestnetSlp(tokenId: string): Promise<string> {
     try {
       const response = await axios.post(
         `${TestNetWallet.faucetServer}/faucet/get_testnet_slp`,
-        { cashaddr: this.cashaddr!, ticker: ticker, tokenId: tokenId }
+        { slpaddr: this.slp.slpaddr, tokenId: tokenId }
       );
       const data = response.data;
       return data.txId;
@@ -792,16 +792,13 @@ export class TestNetWallet extends Wallet {
   }
 
   // be nice and return them back
-  async returnTestnetSlp(
-    ticker: string,
-    tokenId?: string
-  ): Promise<SlpSendResult> {
+  async returnTestnetSlp(tokenId: string): Promise<SlpSendResponse> {
     try {
       const response = await axios.post(
         `${TestNetWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.slp.sendMax(data.slptest, ticker, tokenId);
+      return await this.slp.sendMax(data.slptest, tokenId);
     } catch (e) {
       console.log(e);
       console.log(e.response ? e.response.data : "");

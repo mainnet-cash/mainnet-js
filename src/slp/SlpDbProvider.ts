@@ -1,12 +1,19 @@
 import { Network, TxI } from "../interface";
-import { SlpDbResponse, SlpTokenBalance, SlpUtxoI } from "./interface";
+import {
+  SlpDbResponse,
+  SlpTokenBalance,
+  SlpTokenInfo,
+  SlpUtxoI,
+} from "./interface";
 import {
   SlpAllUtxosTemplate,
-  SlpAddressTokenBalancesTemplate,
   SlpAddressTransactionHistoryTemplate,
   SlpWaitForTransactionTemplate,
   SlpBatonUtxosTemplate,
   SlpSpendableUtxosTemplate,
+  SlpTokenInfoTemplate,
+  SlpAllTokenBalancesTemplate,
+  SlpTokenBalanceTemplate,
 } from "./SlpDbTemplates";
 import EventSource from "eventsource";
 import BigNumber from "bignumber.js";
@@ -16,7 +23,9 @@ import {
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
   _convertBalanceBigNumbers,
+  _convertSlpTokenInfo,
   _convertUtxoBigNumbers,
+  _emptyTokenBalance,
 } from "./SlpProvider";
 import axios from "axios";
 import { btoa } from "../util/base64";
@@ -40,80 +49,81 @@ export class SlpDbProvider implements SlpProvider {
   constructor(public network: Network = Network.MAINNET) {}
 
   // all utxos, including mint batons
-  async SlpUtxos(cashaddr: string): Promise<SlpUtxoI[]> {
+  async SlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
-      (await this.SlpDbQuery(SlpAllUtxosTemplate(cashaddr))).g as SlpUtxoI[]
+      (await this.SlpDbQuery(SlpAllUtxosTemplate(slpaddr))).g as SlpUtxoI[]
     );
+  }
+
+  // look up the token information
+  async SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
+    const infos = (await this.SlpDbQuery(SlpTokenInfoTemplate(tokenId)))
+      .t as SlpTokenInfo[];
+    return _convertSlpTokenInfo(infos[0]);
   }
 
   // safe-spendable token utxos, without baton
   async SlpSpendableUtxos(
-    cashaddr: string,
-    ticker?: string,
+    slpaddr: string,
     tokenId?: string
   ): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpSpendableUtxosTemplate(cashaddr, ticker, tokenId)
-        )
-      ).g as SlpUtxoI[]
+      (await this.SlpDbQuery(SlpSpendableUtxosTemplate(slpaddr, tokenId)))
+        .g as SlpUtxoI[]
     );
   }
 
   // token mint baton utxos
-  async SlpBatonUtxos(
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
-  ): Promise<SlpUtxoI[]> {
+  async SlpBatonUtxos(slpaddr: string, tokenId?: string): Promise<SlpUtxoI[]> {
     return _convertUtxoBigNumbers(
-      (await this.SlpDbQuery(SlpBatonUtxosTemplate(cashaddr, ticker, tokenId)))
+      (await this.SlpDbQuery(SlpBatonUtxosTemplate(slpaddr, tokenId)))
         .g as SlpUtxoI[]
     );
   }
 
   // get all token balances
-  async SlpAddressTokenBalances(
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
-  ): Promise<SlpTokenBalance[]> {
+  async SlpAllTokenBalances(slpaddr: string): Promise<SlpTokenBalance[]> {
     return _convertBalanceBigNumbers(
-      (
-        await this.SlpDbQuery(
-          SlpAddressTokenBalancesTemplate(cashaddr, ticker, tokenId)
-        )
-      ).g as SlpTokenBalance[]
+      (await this.SlpDbQuery(SlpAllTokenBalancesTemplate(slpaddr)))
+        .g as SlpTokenBalance[]
     );
+  }
+
+  // get specific token balance
+  async SlpTokenBalance(
+    slpaddr: string,
+    tokenId: string
+  ): Promise<SlpTokenBalance> {
+    const balances = _convertBalanceBigNumbers(
+      (await this.SlpDbQuery(SlpTokenBalanceTemplate(slpaddr, tokenId)))
+        .g as SlpTokenBalance[]
+    );
+
+    return balances[0] || _emptyTokenBalance(tokenId);
   }
 
   // get all slp transactions of this address
   async SlpAddressTransactionHistory(
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
+    slpaddr: string,
+    tokenId?: string,
+    limit: number = 100,
+    skip: number = 0
   ): Promise<TxI[]> {
     const response = await this.SlpDbQuery(
-      SlpAddressTransactionHistoryTemplate(cashaddr, ticker, tokenId)
+      SlpAddressTransactionHistoryTemplate(slpaddr, tokenId, limit, skip)
     );
     return response.c.concat(response.u) as TxI[];
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  async SlpWaitForTransaction(
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
-  ): Promise<any> {
+  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any> {
     return new Promise(async (resolve) => {
       this.SlpWatchTransactions(
         (data) => {
           resolve(data);
           return true;
         },
-        cashaddr,
-        ticker,
+        slpaddr,
         tokenId
       );
     });
@@ -122,23 +132,20 @@ export class SlpDbProvider implements SlpProvider {
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   async SlpWaitForBalance(
     value: BigNumber.Value,
-    cashaddr: string,
-    ticker: string,
-    tokenId?: string
+    slpaddr: string,
+    tokenId: string
   ): Promise<SlpTokenBalance> {
     return new Promise((resolve) =>
       this.SlpWatchBalance(
-        (balance: SlpTokenBalance[]) => {
-          let bal = balance[0];
-          if (bal.amount.isGreaterThanOrEqualTo(new BigNumber(value))) {
-            resolve(bal);
+        (balance: SlpTokenBalance) => {
+          if (balance.value.isGreaterThanOrEqualTo(new BigNumber(value))) {
+            resolve(balance);
             return true;
           }
 
           return false;
         },
-        cashaddr,
-        ticker,
+        slpaddr,
         tokenId
       )
     );
@@ -147,20 +154,16 @@ export class SlpDbProvider implements SlpProvider {
   // set's up a callback to be executed each time the token balance of the wallet is changed
   SlpWatchBalance(
     callback: SlpWatchBalanceCallback,
-    cashaddr: string,
-    ticker?: string,
-    tokenId?: string
+    slpaddr: string,
+    tokenId: string
   ): SlpCancelWatchFn {
     const cancelFn = this.SlpWatchTransactions(
       () => {
-        this.SlpAddressTokenBalances(cashaddr, ticker, tokenId).then(
-          (balance) => {
-            if (!!callback(balance)) cancelFn();
-          }
-        );
+        this.SlpTokenBalance(slpaddr, tokenId).then((balance) => {
+          if (!!callback(balance)) cancelFn();
+        });
       },
-      cashaddr,
-      ticker,
+      slpaddr,
       tokenId
     );
     return cancelFn;
@@ -169,12 +172,11 @@ export class SlpDbProvider implements SlpProvider {
   // sets up a callback to be executed each time a new transaction associated with this wallet's address is entering the mempool
   SlpWatchTransactions(
     callback: SlpWatchTransactionCallback,
-    cashaddr: string,
-    ticker?: string,
+    slpaddr: string,
     tokenId?: string
   ): SlpCancelWatchFn {
     const eventSource: EventSource = this.SlpSocketEventSource(
-      SlpWaitForTransactionTemplate(cashaddr, ticker, tokenId)
+      SlpWaitForTransactionTemplate(slpaddr, tokenId)
     );
     const cancelFn: SlpCancelWatchFn = () => {
       eventSource.close();
