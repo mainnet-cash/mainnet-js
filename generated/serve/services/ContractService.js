@@ -54,11 +54,18 @@ const contractFn = ({ contractFnRequest }) => new Promise(
     try {
       let contract = await mainnet.Contract.fromId(contractFnRequest.contractId);
       resp = await contract.runFunctionFromStrings(contractFnRequest)
-      resolve(Service.successResponse({
-        contractId: contractFnRequest.contractId, 
-        txId: resp.txid,
-        hex: resp.hex
-      }));
+      let marshaledResponse = {contractId: contractFnRequest.contractId}
+      if(typeof resp === 'string' || resp instanceof String){
+        if(contractFnRequest.action === "meep"){
+          marshaledResponse.debug = resp
+        }else{
+          marshaledResponse.hex = resp
+        }
+      }else{
+        marshaledResponse.txId = resp.txid
+        marshaledResponse.hex = resp.hex
+      }      
+      resolve(Service.successResponse({... marshaledResponse}));
     } catch (e) {
       reject(Service.rejectResponse(
         e,

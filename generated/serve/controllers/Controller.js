@@ -113,7 +113,6 @@ class Controller {
       const serviceResponse = await serviceOperation(this.collectRequestParams(request));
       Controller.sendResponse(response, serviceResponse);
     } catch (error) {
-      console.log(error)
       Controller.sendError(response, error);
     }
   }
