@@ -42,7 +42,7 @@ export class BaseWallet implements WalletI {
         this.provider = getNetworkProvider();
     }
 
-    this.isTestnet = this.networkType === "testnet" ? true : false;
+    this.isTestnet = this.networkType === "mainnet" ? false : true;
   }
 
   /**

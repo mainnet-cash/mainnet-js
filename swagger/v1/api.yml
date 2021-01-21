@@ -25,10 +25,15 @@ servers:
     description: local development server via `yarn api:serve`
 tags:
   - name: contract
-    description: Interact with contracts
+    description: Use Cashscript contracts
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
+  - name: contract/escrow
+    description: Use a stock escrow contract, with some helpers.
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/      
   - name: faucet
     description: Testnet faucet
     externalDocs:
@@ -83,7 +88,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
           description: Error
-      summary: Create an cashscript contract
+      summary: Call a method on a contract
       tags:
         - contract
   /contract/create:
@@ -109,7 +114,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
           description: Error
-      summary: Create an cashscript contract
+      summary: Create a cashscript contract
       tags:
         - contract
   /contract/escrow/create:
@@ -137,7 +142,7 @@ paths:
           description: Error
       summary: Create an escrow contract
       tags:
-        - contract
+        - contract/escrow
   /contract/escrow/call:
     post:
       operationId: escrowFn
@@ -162,7 +167,7 @@ paths:
           description: Error
       summary: Finalize an escrow contract
       tags:
-        - contract
+        - contract/escrow
   /contract/utxos:
     post:
       operationId: contractUtxos
@@ -182,10 +187,10 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: List specific utxos in a contract
+      summary: List specific utxos on any contract
       description: |
         Returns all UTXOs that can be spent by the
-        contract. Both confirmed and unconfirmed UTXOs are included.
+        contract. Both confirmed and unconfirmed UTXOs are included. The endpoint works with contracts generated from templates (i.e. escrow).
       tags:
         - contract        
   /faucet/get_testnet_bch:
@@ -298,7 +303,7 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: create a new wallet
+      summary: convert between units
       tags:
         - util
 
@@ -310,7 +315,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/WalletRequest"
-        description: Request a new new random wallet
+        description: Request a new random wallet
         required: true
       responses:
         "200":
@@ -796,7 +801,7 @@ components:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            ID that is returned in `wallet` field of /wallet call
+            The walletId to get a balance for.
       allOf:
         - $ref: "#/components/schemas/UnitType"
       required:
@@ -985,10 +990,9 @@ components:
             Signatures may be passed as wallet import format (WIF) or wallet strings (walletId). Cashscript expects `pubkey`s to be compressed 35 byte values.
           items:
               type: string
-        output:
-          description: The output destination, as a SendRequest, cashscript style output(s), array of either, or just a cashaddr for a max_send
+        to:
+          description: The output destination, as a SendRequest, cashscript style output(s), array of either.
           oneOf:
-          - $ref: "#/components/schemas/Cashaddr"
           - $ref: "#/components/schemas/SendRequestItem"
           - $ref: "#/components/schemas/SendRequestArray"
           - $ref: "#/components/schemas/CashscriptReceipt"
@@ -1007,9 +1011,11 @@ components:
           items:
               type: string
         feePerByte:
+          type: number
           description: | 
             The withFeePerByte() function allows you to specify the fee per per bytes for the transaction. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withfeeperbyte)
         hardcodedFee:
+          type: number
           description: | 
             Specify a hardcoded fee to the transaction. By default the transaction fee is automatically calculated by the CashScript SDK. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withhardcodedfee)
         minChange:
@@ -1043,7 +1049,7 @@ components:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            ID that is returned in `wallet` field of /wallet call
+            The walletId of the transaction signer.
         function:
           description: Function to call on the escrow contract.
           enum:
@@ -1086,7 +1092,7 @@ components:
         hex:
           type: string
           example: "0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251"
-          description: The transaction as bitcoin encoded hex, if getHexOnly is true
+          description: The transaction as bitcoin encoded hex.
         debug:
           description: if a debugger action is passed in the request, the result will return here.
           example: |
@@ -1115,7 +1121,7 @@ components:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            ID that is returned in `wallet` field of /wallet call
+            The walletId of the sender
         cashaddr:
            type: string
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
@@ -1166,7 +1172,7 @@ components:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            ID that is returned in `wallet` field of /wallet call
+            All the information necessary to reconstruct a wallet, including private information, type and network.
         name:
           description: User defined string for wallet
           example: username1
@@ -1257,7 +1263,7 @@ components:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            ID that is returned in `wallet` field of /wallet call
+            The walletId of the source of funds to spend from.
         to:
           type: array
           items:
@@ -1354,7 +1360,7 @@ components:
         type:
             description:
               Wallet type, either a mnemonic seed single address wallet, a simple private key (wif)
-              or a Hierarchical Deterministic wallet determined from a seed.
+              or a *Hierarchical Deterministic wallet determined from a seed (not yet implemented)* .
             enum:
               - wif
               - hd
@@ -1369,6 +1375,7 @@ components:
         cashaddr:
           type: string
         isTestnet:
+          description: Whether the agreed value of the network is zero. True for all non-mainnet networks.
           type: boolean
         name:
           type: string
@@ -1387,6 +1394,7 @@ components:
         walletId:
           type: string
         walletDbEntry:
+          description: The serialized form with private information
           type: string
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
@@ -1630,7 +1638,7 @@ components:
           type: string
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
-            ID that is returned in `wallet` field of /wallet call
+            The walletId of the sending wallet
         slpaddr:
           type: string
           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
