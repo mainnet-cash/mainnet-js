@@ -624,28 +624,36 @@ export class Wallet extends BaseWallet {
 
   // returns the public key hash for an address
   public getPublicKey(hex = false) {
-    if(this.publicKey){
+    if (this.publicKey) {
       return hex ? binToHex(this.publicKey!) : this.publicKey;
-    }else{
-      throw Error("The public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress.")
+    } else {
+      throw Error(
+        "The public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
+      );
     }
   }
 
   // returns the public key hash for an address
   public getPublicKeyCompressed(hex = false) {
-    if(this.publicKeyCompressed){
-      return hex ? binToHex(this.publicKeyCompressed!) : this.publicKeyCompressed;
-    }else{
-      throw Error("The compressed public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress.")
+    if (this.publicKeyCompressed) {
+      return hex
+        ? binToHex(this.publicKeyCompressed!)
+        : this.publicKeyCompressed;
+    } else {
+      throw Error(
+        "The compressed public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
+      );
     }
   }
 
   // returns the public key hash for an address
   public getPublicKeyHash(hex = false) {
-    if(this.publicKeyHash){
+    if (this.publicKeyHash) {
       return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
-    }else{
-      throw Error("The public key hash for this wallet is not known. If this wallet was created from the constructor directly, calling the deriveInfo() function may help. ")
+    } else {
+      throw Error(
+        "The public key hash for this wallet is not known. If this wallet was created from the constructor directly, calling the deriveInfo() function may help. "
+      );
     }
   }
 

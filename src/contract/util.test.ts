@@ -44,7 +44,7 @@ describe(`Create Contract Tests`, () => {
     let sr = await transformContractToRequests([
       {
         amount: 100000000,
-        
+
         to: "cashaddr:this",
       },
       {

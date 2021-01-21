@@ -1,6 +1,5 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-
 export enum NetworkType {
   Mainnet = "mainnet",
   Testnet = "testnet",

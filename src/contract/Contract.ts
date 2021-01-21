@@ -220,7 +220,13 @@ export class Contract implements ContractI {
     return await func[request.action]();
   }
 
-  private async estimateFee(func: ContractFunction, publicKey: Uint8Array, sig:SignatureTemplate, outputAddress:string, utxos:UtxoI[]) {
+  private async estimateFee(
+    func: ContractFunction,
+    publicKey: Uint8Array,
+    sig: SignatureTemplate,
+    outputAddress: string,
+    utxos: UtxoI[]
+  ) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance
     const estimatorTransaction = func(publicKey, sig, 10, 2147483640)

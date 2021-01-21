@@ -167,6 +167,6 @@ describe(`Create Contract Tests`, () => {
 
     await charlie.provider!.sendRawTransaction(txn);
     expect(await contract.getBalance()).toBeLessThan(3000);
-    expect(await charlie.getBalance('sat')).toBe(7000);
+    expect(await charlie.getBalance("sat")).toBe(7000);
   });
 });
