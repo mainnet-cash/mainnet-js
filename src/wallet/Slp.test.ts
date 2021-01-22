@@ -377,13 +377,11 @@ describe("Slp wallet tests", () => {
       ])
     ).rejects.toThrow();
 
-    const sendRequests = [...Array(20).keys()].map(_ => (
-      {
-        slpaddr: aliceWallet.slp.slpaddr,
-        value: 1000,
-        tokenId: genesis1.tokenId,
-      }
-    ));
+    const sendRequests = [...Array(20).keys()].map((_) => ({
+      slpaddr: aliceWallet.slp.slpaddr,
+      value: 1000,
+      tokenId: genesis1.tokenId,
+    }));
 
     // test throw more than 19 send requests are not allowed
     await expect(aliceWallet.slp.send(sendRequests)).rejects.toThrow();

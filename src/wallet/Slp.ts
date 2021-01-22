@@ -214,7 +214,9 @@ export class Slp {
 
     const tokenId = sendRequests[0].tokenId;
     if (!tokenId.match(/^[0-9a-fA-F]{64}$/)) {
-      throw new Error('Invalid tokenId, must be 64 characte long hexadecimal string');
+      throw new Error(
+        "Invalid tokenId, must be 64 characte long hexadecimal string"
+      );
     }
 
     const slpUtxos = await this.provider.SlpSpendableUtxos(
