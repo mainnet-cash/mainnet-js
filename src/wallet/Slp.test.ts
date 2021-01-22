@@ -9,6 +9,7 @@ import { SlpGenesisOptions, SlpGenesisResult } from "../slp/interface";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
 import { delay } from "../util/delay";
+import { SendRequest } from "./model";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -372,6 +373,28 @@ describe("Slp wallet tests", () => {
           slpaddr: aliceWallet.slp.slpaddr,
           value: 0,
           tokenId: genesis1.tokenId,
+        },
+      ])
+    ).rejects.toThrow();
+
+    const sendRequests = [...Array(20).keys()].map(_ => (
+      {
+        slpaddr: aliceWallet.slp.slpaddr,
+        value: 1000,
+        tokenId: genesis1.tokenId,
+      }
+    ));
+
+    // test throw more than 19 send requests are not allowed
+    await expect(aliceWallet.slp.send(sendRequests)).rejects.toThrow();
+
+    // test tokenId is invalid
+    await expect(
+      aliceWallet.slp.send([
+        {
+          slpaddr: aliceWallet.slp.slpaddr,
+          value: 1000,
+          tokenId: "my cool token",
         },
       ])
     ).rejects.toThrow();
