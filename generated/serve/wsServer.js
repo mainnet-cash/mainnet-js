@@ -20,11 +20,27 @@ makeWsServer = (server) => {
             socket.send(JSON.stringify(balance));
           });
           socket.unsubscribeFunctions.push(fn);
+
+        } else if (data.method === "waitForBalance") {
+          const addr = data.data.cashaddr;
+          const value = data.data.value;
+          const unit = data.data.unit;
+          const w = await getWallet(addr);
+          const balance = await w.waitForBalance(value, unit);
+          socket.send(JSON.stringify({ balance: balance }));
+
         } else if (data.method === "waitForTransaction") {
           const addr = data.data.cashaddr;
           const w = await getWallet(addr);
           const rawTx = await w.waitForTransaction();
           socket.send(JSON.stringify(rawTx));
+
+        } else if (data.method === "waitForBlock") {
+          const height = data.data.height;
+          const provider = await getProvider();
+          const blockHeader = await provider.waitForBlock(height);
+          socket.send(JSON.stringify(blockHeader));
+          console.log(JSON.stringify(blockHeader));
         } else {
           throw Error(`Mainnet websockets: unsupported method ${data.method}`);
         }
@@ -65,6 +81,13 @@ getWallet = async (addr) => {
     new mainnet.Wallet() :
     new mainnet.RegTestWallet();
   return w.watchOnly(addr);
+};
+
+getProvider = async () => {
+  let w = process.env.JEST_WORKER_ID === undefined ?
+    new mainnet.Wallet() :
+    new mainnet.RegTestWallet();
+  return w.provider;
 };
 
 module.exports = makeWsServer;
