@@ -1,5 +1,6 @@
-const merge = require("deepmerge");
+const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
+const DtsBundleWebpack = require("dts-bundle-webpack");
 
 const baseConfig = {
   entry: "./src/index.ts",
@@ -9,6 +10,7 @@ const baseConfig = {
       {
         test: /\.tsx?$/,
         use: "ts-loader",
+        exclude: /node_modules/,
       },
     ],
   },
@@ -37,6 +39,13 @@ const nodeConfig = {
     libraryTarget: "umd",
     library: "mainnet",
   },
+  plugins: [
+    new DtsBundleWebpack({
+      name: "mainnet-js",
+      main: "src/index.d.ts",
+      out: "../dist/index.d.ts",
+    }),
+  ],
 };
 
 const browserConfig = {
