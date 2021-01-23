@@ -54,7 +54,7 @@ export class Slp {
 
   public getDepositQr(): ImageI {
     const result = qrAddress(this.slpaddr);
-    result.alt = "A Bitcoin Cash Simple Ledger Protocol Qr Code";
+    result.alt = "A Bitcoin Cash Simple Ledger Protocol QR Code";
     return result;
   }
 
@@ -202,6 +202,9 @@ export class Slp {
     if (!sendRequests.length) {
       throw Error("Empty send requests");
     }
+    if (sendRequests.length > 19) {
+      throw Error("Too many send requests in one transaction");
+    }
     const uniqueTockenIds = new Set(sendRequests.map((val) => val.tokenId));
     if (uniqueTockenIds.size > 1) {
       throw Error(
@@ -210,6 +213,11 @@ export class Slp {
     }
 
     const tokenId = sendRequests[0].tokenId;
+    if (!tokenId.match(/^[0-9a-fA-F]{64}$/)) {
+      throw new Error(
+        "Invalid tokenId, must be 64 characte long hexadecimal string"
+      );
+    }
 
     const slpUtxos = await this.provider.SlpSpendableUtxos(
       this.slpaddr,

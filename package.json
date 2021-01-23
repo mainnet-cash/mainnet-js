@@ -8,14 +8,15 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.2.12",
+  "version": "0.2.14",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.2.12.js",
-  "browser": "dist/mainnet-0.2.12.js",
-  "types": "index.d.ts",
+  "main": "dist/mainnet-node-0.2.14.js",
+  "browser": "dist/mainnet-0.2.14.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/*.js",
-    "dist/*.js.map"
+    "dist/*.js.map",
+    "dist/*.d.ts"
   ],
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
@@ -47,6 +48,7 @@
     "@types/node": "^14.11.8",
     "@types/pg": "^7.14.5",
     "@types/pg-format": "^1.0.1",
+    "dts-bundle-webpack": "^1.0.2",
     "events": "^3.2.0",
     "fake-indexeddb": "^3.1.2",
     "jest": "^26.5.3",
@@ -65,6 +67,7 @@
     "typescript": "^3.9.7",
     "unzipper": "^0.10.11",
     "util": "^0.12.3",
+    "webpack-merge": "^5.7.3",
     "winston": "3.3.3"
   },
   "optionalDependencies": {
