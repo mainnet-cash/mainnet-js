@@ -28,6 +28,27 @@ describe("Test websocket server methods", () => {
       .expectClosed();
   });
 
+  test("Test waitForBalance ws method", async () => {
+    let aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
+    let bobWallet = await mainnet.RegTestWallet.newRandom();
+
+    setTimeout(async () => {
+      await aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr,
+        value: 1000,
+        unit: "satoshis",
+      },
+    ])}, 2000);
+
+    await request(app)
+      .ws('/api/v1/wallet')
+      .sendJson({ method: "waitForBalance", data: { cashaddr: bobWallet.cashaddr, value: 500, unit: "satoshi" }})
+      .expectJson((actual) => (actual.balance >= 500))
+      .close()
+      .expectClosed();
+  });
+
   test("Test waitForTransaction ws method", async () => {
     let aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
     let bobWallet = await mainnet.RegTestWallet.newRandom();
@@ -45,6 +66,35 @@ describe("Test websocket server methods", () => {
       .ws('/api/v1/wallet')
       .sendJson({ method: "waitForTransaction", data: { cashaddr: alice }})
       .expectJson((actual) => (actual !== undefined && actual.hash !== undefined))
+      .close()
+      .expectClosed();
+  });
+
+  test("Test waitForBlock ws method", async () => {
+    let aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
+
+    const height = await aliceWallet.provider.getBlockHeight();
+
+    setTimeout(
+      async () => await mainnet.mine({ cashaddr: aliceWallet.cashaddr, blocks: 1 }),
+      2000
+    );
+    await request(app)
+      .ws('/api/v1/wallet')
+      .sendJson({ method: "waitForBlock", data: { height: undefined }})
+      .expectJson((actual) => (actual.height === (height + 1)))
+      .close()
+      .expectClosed();
+
+    setTimeout(
+      async () => await mainnet.mine({ cashaddr: aliceWallet.cashaddr, blocks: 1 }),
+      2000
+    );
+
+    await request(app)
+      .ws('/api/v1/wallet')
+      .sendJson({ method: "waitForBlock", data: { height: height + 2 }})
+      .expectJson((actual) => (actual.height === (height + 2)))
       .close()
       .expectClosed();
   });
