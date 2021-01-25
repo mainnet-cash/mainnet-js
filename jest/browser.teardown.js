@@ -1,5 +1,7 @@
 const child_process = require("child_process");
 
+const commonTeardown = require("./common.teardown")
+
 module.exports = async function globalTeardown() {
   // Your global teardown
 
@@ -12,4 +14,6 @@ module.exports = async function globalTeardown() {
     global.moduleServer.kill();
   }
   console.log("stopped express");
+
+  await commonTeardown();
 };

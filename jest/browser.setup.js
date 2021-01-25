@@ -8,6 +8,7 @@ try {
 
 const { spawn } = require("child_process");
 const http = require("http");
+const commonSetup = require("./common.setup");
 
 function serverReady() {
   return new Promise((resolve) => {
@@ -34,6 +35,7 @@ module.exports = async function globalSetup(globalConfig) {
   // do stuff which needs to be done before all tests are executed
 
   if (global.moduleServer === undefined) {
+    console.log('Starting html server');
     let npx = process.platform === "win32" ? "npx.cmd" : "npx";
     global.moduleServer = spawn(npx, ["reload", "--dir=jest/playwright/"], {
       shell: false,
@@ -48,4 +50,6 @@ module.exports = async function globalSetup(globalConfig) {
   }
 
   console.log("proceeding...");
+
+  await commonSetup();
 };
