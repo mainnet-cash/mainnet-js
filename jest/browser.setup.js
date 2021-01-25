@@ -35,7 +35,7 @@ module.exports = async function globalSetup(globalConfig) {
   // do stuff which needs to be done before all tests are executed
 
   if (global.moduleServer === undefined) {
-    console.log('Starting html server');
+    console.log("Starting html server");
     let npx = process.platform === "win32" ? "npx.cmd" : "npx";
     global.moduleServer = spawn(npx, ["reload", "--dir=jest/playwright/"], {
       shell: false,
