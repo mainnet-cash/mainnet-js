@@ -202,25 +202,22 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
-    const result = await page.evaluate(
-      async (wif) => {
-        const alice = await walletFromId(`wif:regtest:${wif}`);
-        const bob = await createWallet({
-          type: "wif",
-          network: "regtest",
-          name: "Bob's random wallet",
-        });
-        await alice.send([
-          {
-            cashaddr: bob.cashaddr,
-            value: 3000,
-            unit: "sat",
-          },
-        ]);
-        return bob.sendMax(alice.cashaddr);
-      },
-      process.env.PRIVATE_WIF
-    );
+    const result = await page.evaluate(async (wif) => {
+      const alice = await walletFromId(`wif:regtest:${wif}`);
+      const bob = await createWallet({
+        type: "wif",
+        network: "regtest",
+        name: "Bob's random wallet",
+      });
+      await alice.send([
+        {
+          cashaddr: bob.cashaddr,
+          value: 3000,
+          unit: "sat",
+        },
+      ]);
+      return bob.sendMax(alice.cashaddr);
+    }, process.env.PRIVATE_WIF);
     expect(result.balance.sat).toBe(0);
   });
 });
