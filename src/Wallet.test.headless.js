@@ -201,33 +201,26 @@ describe(`Wallet should function in the browser`, () => {
     expect(result).toBe(100000000);
   });
 
-  // test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
-  //   if (process.env.ALICE_TESTNET_WALLET_ID) {
-  //     const result = await page.evaluate(
-  //       async (args) => {
-  //         const alice = await walletFromId(args[0]);
-  //         const bob = await createWallet({
-  //           type: "wif",
-  //           network: "testnet",
-  //           name: "Bob's random wallet",
-  //         });
-  //         await alice.send([
-  //           {
-  //             cashaddr: bob.cashaddr,
-  //             value: 3000,
-  //             unit: "sat",
-  //           },
-  //         ]);
-  //         return bob.sendMax(alice.cashaddr);
-  //       },
-  //       [process.env.ALICE_TESTNET_WALLET_ID]
-  //     );
-  //     expect(result.balance.sat).toBe(0);
-  //   } else {
-  //     expect.assertions(1);
-  //     console.warn(
-  //       "SKIPPING testnet maxAmountToSend test, set ALICE_TESTNET_ADDRESS env"
-  //     );
-  //   }
-  // });
+  test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
+    const result = await page.evaluate(
+      async (wif) => {
+        const alice = await walletFromId(`wif:regtest:${wif}`);
+        const bob = await createWallet({
+          type: "wif",
+          network: "regtest",
+          name: "Bob's random wallet",
+        });
+        await alice.send([
+          {
+            cashaddr: bob.cashaddr,
+            value: 3000,
+            unit: "sat",
+          },
+        ]);
+        return bob.sendMax(alice.cashaddr);
+      },
+      process.env.PRIVATE_WIF
+    );
+    expect(result.balance.sat).toBe(0);
+  });
 });
