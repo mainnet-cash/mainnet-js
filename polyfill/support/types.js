@@ -3,6 +3,18 @@
 
 "use strict";
 
+const nativeBigInt = (typeof global !== 'undefined') && global.BigInt || (typeof window !== 'undefined') && window.BigInt;
+const supportsNativeBigInt = typeof nativeBigInt === 'function';
+
+if (!supportsNativeBigInt) {
+  var _BigInt = require("bigint-polyfill");
+  globalThis.BigInt = function(...args) { return new _BigInt(...args) };
+}
+
+if ((typeof global !== 'undefined') || (typeof window !== 'undefined')) {
+  globalThis.Buffer = require('buffer/').Buffer;
+}
+
 var isArgumentsObject = require("is-arguments");
 var isGeneratorFunction = require("is-generator-function");
 var whichTypedArray = require("which-typed-array");

@@ -100,5 +100,8 @@
     "bch",
     "bitcoin cash"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "dependencies": {
+    "bigint-polyfill": "^0.1.0"
+  }
 }
