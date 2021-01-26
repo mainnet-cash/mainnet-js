@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Setup environment
+      - name: Set REPO_USER env
+        run: echo "REPO_USER=$(echo $GITHUB_REPOSITORY | cut -d / -f1)" >> $GITHUB_ENV
       - name: Set TAG_NAME env
         run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 

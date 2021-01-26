@@ -353,8 +353,6 @@ describe("Slp wallet tests", () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
 
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
-
     genesisOptions.ticker = ticker + "_AMBIGUOS";
     const genesis1: SlpGenesisResult = await aliceWallet.slp.genesis(
       genesisOptions
@@ -425,8 +423,6 @@ describe("Slp wallet tests", () => {
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
 
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
-
     genesisOptions.ticker = ticker + "WB";
     const genesis = await aliceWallet.slp.genesis(genesisOptions);
     const cancelFn = bobWallet.slp.watchBalance((balance) => {
@@ -449,8 +445,6 @@ describe("Slp wallet tests", () => {
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
 
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
-
     genesisOptions.ticker = ticker + "_WFB";
     const genesis = await aliceWallet.slp.genesis(genesisOptions);
     setTimeout(async () => {
@@ -466,7 +460,7 @@ describe("Slp wallet tests", () => {
     expect(balance.value.isEqualTo(20));
   });
 
-  test("Test waiting for slp transaction", async () => {
+  test.skip("Test waiting for slp transaction", async () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
@@ -475,8 +469,6 @@ describe("Slp wallet tests", () => {
     const genesis: SlpGenesisResult = await aliceWallet.slp.genesis(
       genesisOptions
     );
-
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     setTimeout(async () => {
       await aliceWallet.slp.send([
@@ -494,8 +486,6 @@ describe("Slp wallet tests", () => {
   test("Test getting history", async () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
-
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     const history = await aliceWallet.slp.getHistory();
     expect(history.length).toBeGreaterThan(0);
@@ -537,8 +527,6 @@ describe("Slp wallet tests", () => {
   test("Test genesis ends baton", async () => {
     const aliceWif = `${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
-
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
     genesisOptions.ticker = ticker + "baton_end";
     genesisOptions.documentUrl = undefined;
