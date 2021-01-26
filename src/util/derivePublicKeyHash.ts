@@ -4,7 +4,7 @@ import {
 } from "@bitauth/libauth";
 
 /**
- * Helper function to convert an address to a hash
+ * Helper function to convert an address to a public key hash
  *
  * @param address   Address to convert to a hash
  *
@@ -24,7 +24,7 @@ export function derivePublicKeyHash(address: string): Uint8Array {
 
   if (typeof result === "string") throw new Error(result);
 
-  // TODO pass the network in and check it or raise Error
+  // return the public key hash
   return result.hash;
 }
 

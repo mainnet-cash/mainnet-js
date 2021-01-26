@@ -8,21 +8,21 @@
 
 const Controller = require('./Controller');
 const service = require('../services/ContractService');
-const createEscrow = async (request, response) => {
-  await Controller.handleRequest(request, response, service.createEscrow);
+const contractFn = async (request, response) => {
+  await Controller.handleRequest(request, response, service.contractFn);
 };
 
-const escrowFn = async (request, response) => {
-  await Controller.handleRequest(request, response, service.escrowFn);
+const contractUtxos = async (request, response) => {
+  await Controller.handleRequest(request, response, service.contractUtxos);
 };
 
-const escrowUtxos = async (request, response) => {
-  await Controller.handleRequest(request, response, service.escrowUtxos);
+const createContract = async (request, response) => {
+  await Controller.handleRequest(request, response, service.createContract);
 };
 
 
 module.exports = {
-  createEscrow,
-  escrowFn,
-  escrowUtxos,
+  contractFn,
+  contractUtxos,
+  createContract,
 };
