@@ -18,7 +18,7 @@ jobs:
       - run: yarn
       - run: yarn build
 
-  # Update mainnet-docs repository with the latest release version and deploy
+  # Update mainnet-docs repository with the latest release version and integrity hash
   publish-docs:
     continue-on-error: true
     needs: build
