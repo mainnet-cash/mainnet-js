@@ -3,13 +3,12 @@ import { RegTestWallet } from "../wallet/Wif";
 import { Network } from "..";
 import { disconnectProviders, initProviders } from "../network";
 
-import { mine } from "../mine";
+import { mine } from "../mine/mine";
 
 import { SlpGenesisOptions, SlpGenesisResult } from "../slp/interface";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
 import { delay } from "../util/delay";
-import { SendRequest } from "./model";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
