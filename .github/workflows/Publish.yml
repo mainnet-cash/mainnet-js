@@ -34,7 +34,6 @@ jobs:
           git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
           cd mainnet-docs
           sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/README.md
-          sudo apt-get update && sudo apt-get install -y curl openssl
           HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
           sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/README.md
 
@@ -42,7 +41,7 @@ jobs:
       - name: Commit to mainnet-docs repository
         uses: drud/action-cross-commit@master
         with:
-          source-folder: .
+          source-folder: mainnet-docs
           destination-repository: https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs
           destination-folder: .
           destination-branch: master
