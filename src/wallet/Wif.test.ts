@@ -460,7 +460,7 @@ describe(`Wallet subscriptions`, () => {
     const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
     const txid = await wallet.getTestnetSatoshis();
     expect(txid.length).toBe(64);
-    let balance = await wallet.getBalance("sat");
+    const balance = await wallet.getBalance("sat");
     expect(balance).toBe(10000);
 
     const response = await wallet.returnTestnetSatoshis();
