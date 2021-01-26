@@ -74,7 +74,6 @@ jobs:
         node-version: "14.x"
     - uses: microsoft/playwright-github-action@v1
     - run: yarn
-    - run: yarn build
     - run: yarn test:browser       
   test_linux:
     name: ${{ matrix.os }} (${{ matrix.browser }})
@@ -91,7 +90,6 @@ jobs:
       with:
         node-version: "14.x"
     - run: yarn
-    - run: yarn build
     - run: yarn test
     - run: yarn test:api
   coverage:
