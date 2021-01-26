@@ -31,7 +31,7 @@ jobs:
       # Actual job
       - name: Clone repo, update release version and integrity hash and deploy docs
         run: |
-          git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-docs mainnet-docs
+          git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
           cd mainnet-docs
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
@@ -182,6 +182,7 @@ jobs:
   # After being built, the clients are commited to their repositories, new tag and github release are created for them
   # Requires COMMIT_USER_TOKEN github secret to be set which allows you to commit to another repository
   buid-client:
+    needs: build
     continue-on-error: true
     strategy:
       fail-fast: false
