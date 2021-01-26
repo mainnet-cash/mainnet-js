@@ -35,40 +35,37 @@ describe(`Should handle contracts in the browser`, () => {
   });
 
   test(`Basic escrow integration test`, async () => {
-    const result = await page.evaluate(
-      async (args) => {
-        let funder = await walletFromId(args.testnetId);
+    const result = await page.evaluate(async (wif) => {
+      let funder = await RegTestWallet.fromId(`wif:regtest:${wif}`);
 
-        let arbiter = await TestNetWallet.newRandom();
-        let buyer = await TestNetWallet.newRandom();
-        let seller = await TestNetWallet.newRandom();
-        let seller2 = await TestNetWallet.newRandom();
-        await funder.send([
-          {
-            cashaddr: buyer.getDepositAddress(),
-            value: 9600,
-            unit: "satoshis",
-          },
-        ]);
-        let escrow = new EscrowContract({
-          arbiterAddr: arbiter.getDepositAddress(),
-          buyerAddr: buyer.getDepositAddress(),
-          sellerAddr: seller.getDepositAddress(),
-          amount: 5380,
-        });
+      let arbiter = await RegTestWallet.newRandom();
+      let buyer = await RegTestWallet.newRandom();
+      let seller = await RegTestWallet.newRandom();
+      let seller2 = await RegTestWallet.newRandom();
+      await funder.send([
+        {
+          cashaddr: buyer.getDepositAddress(),
+          value: 9600,
+          unit: "satoshis",
+        },
+      ]);
+      let escrow = new EscrowContract({
+        arbiterAddr: arbiter.getDepositAddress(),
+        buyerAddr: buyer.getDepositAddress(),
+        sellerAddr: seller.getDepositAddress(),
+        amount: 5380,
+      });
 
-        // fund the escrow contract
-        await buyer.sendMax(escrow.getDepositAddress());
+      // fund the escrow contract
+      await buyer.sendMax(escrow.getDepositAddress());
 
-        // spend the escrow contract
-        await escrow.run(buyer.privateKeyWif, "spend");
+      // spend the escrow contract
+      await escrow.run(buyer.privateKeyWif, "spend");
 
-        // spend the sellers funds to another wallet
-        await seller.sendMax(seller2.getDepositAddress());
-        return await seller2.getBalance("sat");
-      },
-      { testnetId: process.env.ALICE_TESTNET_WALLET_ID }
-    );
+      // spend the sellers funds to another wallet
+      await seller.sendMax(seller2.getDepositAddress());
+      return await seller2.getBalance("sat");
+    }, process.env.PRIVATE_WIF);
     expect(result).toBeGreaterThan(1);
   });
 });

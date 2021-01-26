@@ -40,7 +40,6 @@ makeWsServer = (server) => {
           const provider = await getProvider();
           const blockHeader = await provider.waitForBlock(height);
           socket.send(JSON.stringify(blockHeader));
-          console.log(JSON.stringify(blockHeader));
         } else {
           throw Error(`Mainnet websockets: unsupported method ${data.method}`);
         }
