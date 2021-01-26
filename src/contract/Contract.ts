@@ -9,11 +9,18 @@ import {
 } from "cashscript";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
-import { ContractI } from "./interface";
+import { ContractI, CashscriptTransactionI } from "./interface";
 import { atob, btoa } from "../util/base64";
-import { castParametersFromConstructor } from "./util";
+import { getRandomInt } from "../util/randomInt";
+import { deserializeUtxo } from "../util/serializeUtxo";
+import {
+  castConstructorParametersFromArtifact,
+  castStringArgumentsFromArtifact,
+  transformContractToRequests,
+} from "./util";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
+import { ContractFunction } from "cashscript/dist/module/Contract";
 
 export class Contract implements ContractI {
   private script: string;
@@ -28,15 +35,15 @@ export class Contract implements ContractI {
     script: string,
     parameters: any,
     network: Network,
-    nonce: number
+    nonce?: number
   ) {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
     this.artifact = this.getArtifact();
     this.provider = getNetworkProvider(this.network);
-    this.contract = this.getContactInstance();
-    this.nonce = nonce;
+    this.contract = this.getContractInstance();
+    this.nonce = nonce ? nonce : getRandomInt(2147483647);
   }
 
   getContractText(): string | Error {
@@ -82,31 +89,48 @@ export class Contract implements ContractI {
       DELIMITER
     );
     let script = atob(serializedScript);
-    let contractTemplate = CashCompiler.compileString(script);
+    let artifact = CashCompiler.compileString(script);
     let paramStrings = atob(serializedParams)
       .split(DELIMITER)
       .map((s) => atob(s));
-    let params = castParametersFromConstructor(
-      paramStrings,
-      contractTemplate.constructorInputs
-    );
+    let params = castConstructorParametersFromArtifact(paramStrings, artifact);
 
     return new Contract(script, params, network as Network, parseInt(nonce));
+  }
+
+  // Static convenience constructor
+  static _create(
+    script: string,
+    parameters: string[],
+    network: Network,
+    nonce?
+  ) {
+    let artifact = CashCompiler.compileString(script);
+    let params = castConstructorParametersFromArtifact(parameters, artifact);
+    return new this(script, params, network, nonce);
   }
 
   public getDepositAddress() {
     return this.contract.address;
   }
 
+  /**
+   * Get the unspent transaction outputs of the contract
+   * @returns A promise to the utxos of the contract
+   */
   public getUtxos() {
     return this.contract.getUtxos();
   }
 
+  /**
+   * Get the current balance of the contract
+   * @returns The balance in satoshi
+   */
   public getBalance() {
     return this.contract.getBalance();
   }
 
-  private getContactInstance() {
+  private getContractInstance() {
     return new CashScriptContract(
       this.artifact,
       this.parameters,
@@ -114,26 +138,95 @@ export class Contract implements ContractI {
     );
   }
 
+  /**
+   * Get a contract object the wrapper object
+   * @returns A cashscript Contract
+   */
   public fromCashScript() {
     this.artifact = CashCompiler.compileFile(this.script);
     this.contract = new CashScriptContract(this.artifact, [], this.provider);
     return this;
   }
 
+  /**
+   * Get a contract object from a script, arguments, network and nonce
+   * @param script The contract cashscript test
+   * @param parameters Contract constructor arguments
+   * @param network Network for the contract
+   * @param nonce A unique number to differentiate the contract
+   * @returns A cashscript Contract
+   */
   public static fromCashScript(
     script: string,
-    parameters,
+    parameters: Argument[],
     network: Network,
     nonce: number
   ) {
     return new this(script, parameters, network, nonce).fromCashScript();
   }
 
-  public call(method: string, args) {
-    this.contract.functions[method](args);
+  /**
+   * Get a function object from a contract
+   * @param funcName The string identifying the function in the cashscript contract
+   * @returns A cashscript Transaction
+   */
+  public getContractFunction(funcName: string) {
+    return this.contract.functions[funcName];
   }
 
-  private async estimateFee(func, publicKey, sig, outputAddress, utxos) {
+  /**
+   * Call a cashscript contract function using an interface object of strings.
+   * This function is a helper for the rest or serialized interfaces and not intended
+   * for native use within the library, although it may be useful for running stored transactions.
+   * @param request Parameters for the transaction call, serialized as strings.
+   * @returns A cashscript Transaction result
+   */
+  public async runFunctionFromStrings(request: CashscriptTransactionI) {
+    let fn = this.getContractFunction(request.function);
+    let arg = await castStringArgumentsFromArtifact(
+      request.arguments,
+      this.artifact,
+      request.function
+    );
+    let func = fn(...arg);
+    func = func.to(await transformContractToRequests(request.to));
+    if (request.utxoIds) {
+      let utxos = request.utxoIds.map((u) => {
+        return deserializeUtxo(u);
+      });
+      func = func.from(utxos);
+    }
+    if (request.opReturn) {
+      func = func.withOpReturn(request.opReturn);
+    }
+    if (request.feePerByte) {
+      func = func.withFeePerByte(request.feePerByte);
+    }
+    if (request.hardcodedFee) {
+      func = func.withHardcodedFee(request.hardcodedFee);
+    }
+    if (request.minChange) {
+      func = func.withMinChange(request.minChange);
+    }
+    if (request.withoutChange) {
+      func = func.withoutChange();
+    }
+    if (request.age) {
+      func = func.withAge(request.age);
+    }
+    if (request.time) {
+      func = func.withTime(request.time);
+    }
+    return await func[request.action]();
+  }
+
+  private async estimateFee(
+    func: ContractFunction,
+    publicKey: Uint8Array,
+    sig: SignatureTemplate,
+    outputAddress: string,
+    utxos: UtxoI[]
+  ) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance
     const estimatorTransaction = func(publicKey, sig, 10, 2147483640)

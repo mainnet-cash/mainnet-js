@@ -42,7 +42,7 @@ export class BaseWallet implements WalletI {
         this.provider = getNetworkProvider();
     }
 
-    this.isTestnet = this.networkType === "testnet" ? true : false;
+    this.isTestnet = this.networkType === "mainnet" ? false : true;
   }
 
   /**
@@ -68,7 +68,7 @@ export class BaseWallet implements WalletI {
   _named = async (
     name: string,
     dbName?: string,
-    forceNew = false
+    forceNew: boolean = false
   ): Promise<this> => {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");

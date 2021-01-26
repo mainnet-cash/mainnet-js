@@ -62,9 +62,9 @@ export class EscrowContract extends Contract {
     utxos?: UtxoI[]
   ) {
     if (!outputAddress) {
-      if (funcName.startsWith("spend")) {
+      if (funcName === "spend") {
         outputAddress = this.sellerAddr;
-      } else if (funcName.startsWith("refund")) {
+      } else if (funcName === "refund") {
         outputAddress = this.buyerAddr;
       } else {
         throw Error("Could not determine output address");

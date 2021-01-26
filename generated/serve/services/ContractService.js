@@ -1,17 +1,17 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
+
 /**
-* Create an escrow contract
+* Create a cashscript contract
 *
-* escrowRequest EscrowRequest Request a new escrow contract
-* returns EscrowResponse
+* contractRequest ContractRequest Request a new cashscript contract
+* returns ContractResponse
 * */
-const createEscrow = ({ escrowRequest }) => new Promise(
+const createContract = ({ contractRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      escrowRequest.type = 'escrow'
-      let resp = await mainnet.createContractResponse(escrowRequest);
+      let resp = await mainnet.createContractResponse(contractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -23,31 +23,30 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 );
 
 
+
 /**
-* Finalize an escrow contract
+* Call a method on a contract
 *
 * contractFnRequest ContractFnRequest null
 * returns ContractFnResponse
 * */
-const escrowFn = ({ contractFnRequest }) => new Promise(
+const contractFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.EscrowContract.fromId(contractFnRequest.contractId);
-      let wallet = await mainnet.walletFromId(contractFnRequest.walletId)
-      let utxos = contractFnRequest.utxoIds ? contractFnRequest.utxoIds.map(u => {return mainnet.Mainnet.deserializeUtxo(u)}) : undefined
-      let resp = await contract._sendMax(
-        wallet.privateKeyWif,
-        contractFnRequest.action, 
-        contractFnRequest.to,
-        contractFnRequest.getHexOnly, 
-        utxos
-        );
-
-      resolve(Service.successResponse({
-        contractId: contractFnRequest.contractId, 
-        txId: resp.txid,
-        hex: resp.hex
-      }));
+      let contract = await mainnet.Contract.fromId(contractFnRequest.contractId);
+      resp = await contract.runFunctionFromStrings(contractFnRequest)
+      let marshaledResponse = {contractId: contractFnRequest.contractId}
+      if(typeof resp === 'string' || resp instanceof String){
+        if(contractFnRequest.action === "meep"){
+          marshaledResponse.debug = resp
+        }else{
+          marshaledResponse.hex = resp
+        }
+      }else{
+        marshaledResponse.txId = resp.txid
+        marshaledResponse.hex = resp.hex
+      }      
+      resolve(Service.successResponse({... marshaledResponse}));
     } catch (e) {
       reject(Service.rejectResponse(
         e,
@@ -56,6 +55,8 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
     }
    },
 );
+
+
 /**
 * List specific utxos in a contract
 * Returns all UTXOs that can be spent by the  contract. Both confirmed and unconfirmed UTXOs are included. 
@@ -63,14 +64,13 @@ const escrowFn = ({ contractFnRequest }) => new Promise(
 * contract Contract 
 * returns UtxoResponse
 * */
-const escrowUtxos = ({contract}) => new Promise(
+const contractUtxos = ({contract}) => new Promise(
   async (resolve, reject) => {
     try {
       let c = await mainnet.contractFromId(contract.contractId);
       let resp = await c.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -79,7 +79,7 @@ const escrowUtxos = ({contract}) => new Promise(
 );
 
 module.exports = {
-  createEscrow,
-  escrowFn,
-  escrowUtxos,
+  createContract,
+  contractFn,
+  contractUtxos,
 };

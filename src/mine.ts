@@ -1,5 +1,5 @@
 const { spawnSync } = require("child_process");
-
+import { browserNotSupported } from "./util/browserNotSupported";
 /**
  * Mine blocks to a regtest address
  *
@@ -17,6 +17,9 @@ export async function mine({
   cashaddr: string;
   blocks: number;
 }) {
+  // node only
+  browserNotSupported();
+
   const generateArgs = [
     `exec`,
     `bitcoind`,
