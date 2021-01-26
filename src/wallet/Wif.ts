@@ -623,7 +623,7 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
-  public getPublicKey(hex = false) {
+  public getPublicKey(hex = false): string | Uint8Array {
     if (this.publicKey) {
       return hex ? binToHex(this.publicKey!) : this.publicKey;
     } else {
@@ -634,7 +634,7 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
-  public getPublicKeyCompressed(hex = false) {
+  public getPublicKeyCompressed(hex = false): string | Uint8Array {
     if (this.publicKeyCompressed) {
       return hex
         ? binToHex(this.publicKeyCompressed!)
@@ -647,7 +647,7 @@ export class Wallet extends BaseWallet {
   }
 
   // returns the public key hash for an address
-  public getPublicKeyHash(hex = false) {
+  public getPublicKeyHash(hex = false): string | Uint8Array {
     if (this.publicKeyHash) {
       return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
     } else {
