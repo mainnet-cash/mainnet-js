@@ -12,15 +12,11 @@ export function serializeUtxo(utxo: UtxoI) {
 }
 
 // deserialize the unspent transaction.
-export function deserializeUtxo(utxoId: string): UtxoI | undefined {
-  if (utxoId.length > 0) {
-    let [txid, voutStr, satoshiStr] = utxoId.split(DELIMITER);
-    return {
-      txid: txid,
-      vout: parseInt(voutStr),
-      satoshis: parseInt(satoshiStr),
-    };
-  } else {
-    return undefined;
-  }
+export function deserializeUtxo(utxoId: string): UtxoI {
+  let [txid, voutStr, satoshiStr] = utxoId.split(DELIMITER);
+  return {
+    txid: txid,
+    vout: parseInt(voutStr),
+    satoshis: parseInt(satoshiStr),
+  };
 }

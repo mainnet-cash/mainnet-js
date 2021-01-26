@@ -28,20 +28,27 @@ jobs:
       - name: Set TAG_NAME env
         run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-      # Actual job
-      - name: Clone repo, update release version and integrity hash and deploy docs
+      # Update sources
+      - name: Clone repo, update release version and integrity hash
         run: |
           git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
           cd mainnet-docs
-          git config --global user.email "ci@github.com"
-          git config --global user.name "Github CI"
           sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/README.md
           sudo apt-get update && sudo apt-get install -y curl openssl
           HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
           sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/README.md
-          git add .
-          git commit -m "Auto: update mainnet release to ${{ env.TAG_NAME }}"
-          git push origin master
+
+      # Commit
+      - name: Commit to mainnet-docs repository
+        uses: drud/action-cross-commit@master
+        with:
+          source-folder: .
+          destination-repository: https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs
+          destination-folder: .
+          destination-branch: master
+          git-user: "Auto-Generated"
+          git-user-email: hello@mainnet.cash
+          git-commit-message: "Auto: update mainnet release to ${{ env.TAG_NAME }}"
 
   # Build docker image with mainnet REST API server for self hosting
   # More info in generated/serve/docker/README.md

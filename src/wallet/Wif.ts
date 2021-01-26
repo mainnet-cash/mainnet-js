@@ -14,6 +14,8 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
+import { SignatureTemplate } from "cashscript";
+
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
 import { NetworkType, UnitEnum } from "../enum";
 
@@ -50,7 +52,7 @@ import {
 } from "../util/balanceObjectFromSatoshi";
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
-import { derivePrefix } from "../util/derivePublicKeyHash";
+import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { sumUtxoValue } from "../util/sumUtxoValue";
@@ -71,6 +73,7 @@ export class Wallet extends BaseWallet {
   derivationPath?: string;
   mnemonic?: string;
   privateKey?: Uint8Array;
+  publicKeyCompressed?: Uint8Array;
   privateKeyWif?: string;
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
@@ -153,7 +156,9 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
     this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
-    this.publicKeyHash = secp256k1.derivePublicKeyCompressed(this.privateKey!);
+    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
+      this.privateKey!
+    );
     const networkType =
       this.networkType === NetworkType.Regtest
         ? NetworkType.Testnet
@@ -169,6 +174,8 @@ export class Wallet extends BaseWallet {
       this.privateKey!,
       this.networkPrefix
     )) as string;
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
+    return this;
   }
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
@@ -177,6 +184,7 @@ export class Wallet extends BaseWallet {
     if (addressComponents.length === 1) {
       addressBase = addressComponents.shift() as string;
       this.cashaddr = addressBase;
+      this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     } else {
       addressPrefix = addressComponents.shift() as string;
       addressBase = addressComponents.shift() as string;
@@ -188,6 +196,7 @@ export class Wallet extends BaseWallet {
         }
       }
       this.cashaddr = `${addressPrefix}:${addressBase}`;
+      this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     }
 
     return this;
@@ -205,35 +214,20 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
 
-    // TODO replace with util/randomBytes
-    // nodejs
-    if (getRuntimePlatform() === "node") {
-      let crypto = require("crypto");
-      this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
+    //
+    if (!this.privateKey) {
+      if (getRuntimePlatform() === "node") {
+        let crypto = require("crypto");
+        this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
+      }
+      // window, webworkers, service workers
+      else {
+        this.privateKey = generatePrivateKey(() =>
+          window.crypto.getRandomValues(new Uint8Array(32))
+        );
+      }
     }
-    // window, webworkers, service workers
-    else {
-      this.privateKey = generatePrivateKey(() =>
-        window.crypto.getRandomValues(new Uint8Array(32))
-      );
-    }
-    this.publicKey = secp256k1.derivePublicKeyCompressed(this.privateKey);
-    const networkType =
-      this.networkType === NetworkType.Regtest
-        ? NetworkType.Testnet
-        : this.networkType;
-    this.privateKeyWif = encodePrivateKeyWif(
-      sha256,
-      this.privateKey,
-      networkType
-    );
-    checkWifNetwork(this.privateKeyWif, this.networkType);
-    this.walletType = WalletTypeEnum.Wif;
-    this.cashaddr = (await deriveCashaddr(
-      this.privateKey,
-      this.networkPrefix
-    )) as string;
-    return this;
+    return this.deriveInfo();
   }
 
   private async _generateMnemonic() {
@@ -251,9 +245,9 @@ export class Wallet extends BaseWallet {
       this.derivationPath
     ) as HdPrivateNodeValid;
     this.privateKey = zerothChild.privateKey;
+
     this.walletType = WalletTypeEnum.Seed;
-    await this.deriveInfo();
-    return this;
+    return await this.deriveInfo();
   }
 
   public async send(
@@ -362,8 +356,12 @@ export class Wallet extends BaseWallet {
     return await this._processSendRequests([sendRequest], true);
   }
 
-  public getDepositAddress() {
-    return this.cashaddr;
+  public getDepositAddress(): string {
+    if (this.cashaddr) {
+      return this.cashaddr;
+    } else {
+      throw Error("cashaddr was not set on wallet");
+    }
   }
 
   public getDepositQr(): ImageI {
@@ -624,6 +622,45 @@ export class Wallet extends BaseWallet {
     return resp;
   }
 
+  // returns the public key hash for an address
+  public getPublicKey(hex = false): string | Uint8Array {
+    if (this.publicKey) {
+      return hex ? binToHex(this.publicKey!) : this.publicKey;
+    } else {
+      throw Error(
+        "The public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
+      );
+    }
+  }
+
+  // returns the public key hash for an address
+  public getPublicKeyCompressed(hex = false): string | Uint8Array {
+    if (this.publicKeyCompressed) {
+      return hex
+        ? binToHex(this.publicKeyCompressed!)
+        : this.publicKeyCompressed;
+    } else {
+      throw Error(
+        "The compressed public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
+      );
+    }
+  }
+
+  // returns the public key hash for an address
+  public getPublicKeyHash(hex = false): string | Uint8Array {
+    if (this.publicKeyHash) {
+      return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
+    } else {
+      throw Error(
+        "The public key hash for this wallet is not known. If this wallet was created from the constructor directly, calling the deriveInfo() function may help. "
+      );
+    }
+  }
+
+  // get a cashscript signature
+  public getSignatureTemplate() {
+    return new SignatureTemplate(this.privateKeyWif as string);
+  }
   /**
    * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
    * @param  {SendRequest[]} sendRequests
@@ -717,8 +754,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return data.txId;
     } catch (e) {
-      console.log(e);
-      console.log(e.response ? e.response.data : "");
+      // console.log(e);
+      // console.log(e.response ? e.response.data : "");
       throw e;
     }
   }
@@ -748,8 +785,8 @@ export class TestNetWallet extends Wallet {
       const data = response.data;
       return data.txId;
     } catch (e) {
-      console.log(e);
-      console.log(e.response ? e.response.data : "");
+      //console.log(e);
+      //console.log(e.response ? e.response.data : "");
       throw e;
     }
   }

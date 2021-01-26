@@ -6,7 +6,7 @@ const launchServer = async () => {
   try {
     this.expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
     this.expressServer.launch();
-    logger.info('Express server running');
+    logger.info(`Express server running at ${config.URL_PATH}:${config.URL_PORT}`);
     return this.expressServer;
   } catch (error) {
     logger.error('Express Server failure', error.message, error.stack, error);

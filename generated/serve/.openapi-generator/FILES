@@ -2,6 +2,7 @@
 README.md
 api/openapi.yaml
 controllers/ContractController.js
+controllers/ContractEscrowController.js
 controllers/FaucetController.js
 controllers/MineController.js
 controllers/UtilController.js
