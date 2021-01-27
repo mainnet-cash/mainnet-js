@@ -15,7 +15,6 @@ import {
   SlpAllTokenBalancesTemplate,
   SlpTokenBalanceTemplate,
 } from "./SlpDbTemplates";
-import EventSource from "eventsource";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,

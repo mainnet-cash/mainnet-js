@@ -15,8 +15,15 @@ if (!supportsNativeBigInt) {
   };
 }
 
-if (typeof global !== "undefined" || typeof window !== "undefined") {
+if (typeof window !== "undefined") {
   globalThis.Buffer = require("buffer/").Buffer;
+}
+
+if (typeof window === "undefined") {
+  globalThis.EventSource = require("eventsource/");
+  exports.EventSource = globalThis.EventSource;
+} else {
+  exports.EventSource = window.EventSource;
 }
 
 var isArgumentsObject = require("is-arguments");
