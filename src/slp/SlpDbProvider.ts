@@ -26,7 +26,7 @@ import {
   _convertUtxoBigNumbers,
   _emptyTokenBalance,
 } from "./SlpProvider";
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { btoa } from "../util/base64";
 
 const servers = {
@@ -219,8 +219,16 @@ export class SlpDbProvider implements SlpProvider {
   }
 }
 
+const axiosInstance = axios.create({
+  headers: {
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+    Expires: "0",
+  },
+});
+
 const fetch_retry = (url, options = {}, n = 5) =>
-  axios.get(url, options).catch(function (error) {
+  axiosInstance.get(url, options).catch(function (error) {
     if (n === 0) {
       throw error;
     }
