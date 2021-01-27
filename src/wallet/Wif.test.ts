@@ -496,11 +496,13 @@ describe(`Wallet subscriptions`, () => {
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
 
-    await aliceWallet
-      .send([{ cashaddr: bobWallet.cashaddr!, value: 546, unit: "sat" },
-             { cashaddr: bobWallet.cashaddr!, value: 1500, unit: "sat" }
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: 546, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: 1500, unit: "sat" },
     ]);
 
-    await bobWallet.send([{ cashaddr: aliceWallet.cashaddr!, value: 546, unit: "sat" }]);
+    await bobWallet.send([
+      { cashaddr: aliceWallet.cashaddr!, value: 546, unit: "sat" },
+    ]);
   });
 });
