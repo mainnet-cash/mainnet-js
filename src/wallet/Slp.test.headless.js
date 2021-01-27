@@ -81,7 +81,8 @@ describe(`Wallet should function in the browser`, () => {
   });
 
   test(`Should watch slp testnet balance`, async () => {
-    jestTokenId = "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15";
+    jestTokenId =
+      "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15";
     const result = await page.evaluate(
       async ([wif, tokenId]) => {
         const wallet = await TestNetWallet.fromId(`wif:testnet:${wif}`);
@@ -90,7 +91,7 @@ describe(`Wallet should function in the browser`, () => {
         let balance;
 
         bobWallet.slp.watchBalance((_balance) => {
-          balance = _balance
+          balance = _balance;
         }, tokenId);
 
         await wallet.slp.send([
