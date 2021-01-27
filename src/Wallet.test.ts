@@ -15,13 +15,7 @@ afterAll(async () => {
 });
 
 describe(`Test Wallet library`, () => {
-  beforeEach(async () => {
-    // With persistent global network connections, tests run faster than
-    // fulcrum polls the full node for new transactions
-    // Waiting for a single poll should prevent double spending utxos
-    //delay(550);
-  });
-
+  
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {
@@ -289,20 +283,20 @@ describe(`Test Wallet library`, () => {
     expect(bobBalanceFinal.sat).toBe(0);
   });
 
-  test("Should get a large number of utxos", async () => {
-    let reid = await Wallet.watchOnly(
-      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
-    );
-    //reid.provider = getClientProvider()
-    const reidBalance = (await reid.getBalance()) as BalanceResponse;
-    const reidUtxos = await reid.getUtxos();
-    expect(reidUtxos.utxos!.length).toBeGreaterThan(0);
+  // test("Should get a large number of utxos", async () => {
+  //   let reid = await Wallet.watchOnly(
+  //     "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+  //   );
+  //   //reid.provider = getClientProvider()
+  //   const reidBalance = (await reid.getBalance()) as BalanceResponse;
+  //   const reidUtxos = await reid.getUtxos();
+  //   expect(reidUtxos.utxos!.length).toBeGreaterThan(0);
 
-    expect(reid.getDepositAddress()!).toBe(
-      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
-    );
-    expect(reidBalance.bch).toBeGreaterThan(0);
-    expect(reidBalance.usd).toBeGreaterThan(0);
-    expect(typeof (await reid.getBalance("sat"))).toBe("number");
-  });
+  //   expect(reid.getDepositAddress()!).toBe(
+  //     "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+  //   );
+  //   expect(reidBalance.bch).toBeGreaterThan(0);
+  //   expect(reidBalance.usd).toBeGreaterThan(0);
+  //   expect(typeof (await reid.getBalance("sat"))).toBe("number");
+  // });
 });
