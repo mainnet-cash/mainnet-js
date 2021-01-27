@@ -490,4 +490,17 @@ describe(`Wallet subscriptions`, () => {
 
     await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
   });
+
+  test("Should operate with dust amounts, 'min relay fee not met (code 66)' regression", async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    await aliceWallet
+      .send([{ cashaddr: bobWallet.cashaddr!, value: 546, unit: "sat" },
+             { cashaddr: bobWallet.cashaddr!, value: 1500, unit: "sat" }
+    ]);
+
+    await bobWallet.send([{ cashaddr: aliceWallet.cashaddr!, value: 546, unit: "sat" }]);
+  });
 });
