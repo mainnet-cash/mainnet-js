@@ -15,7 +15,6 @@ afterAll(async () => {
 });
 
 describe(`Test Wallet library`, () => {
-  
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {
