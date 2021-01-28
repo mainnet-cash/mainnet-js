@@ -33,6 +33,9 @@ files.forEach((file) => {
   if (typeof package.browser !== "undefined") {
     package.browser = package.browser.replace(version, newVersion);
   }
+  if (package.name === "mainnet-cash"){
+    package.dependencies["mainnet-js"] = package.dependencies["mainnet-js"].replace(version, newVersion);
+  }
   package.version = newVersion;
 
   fs.writeFileSync(file, JSON.stringify(package, null, 2) + "\n");
