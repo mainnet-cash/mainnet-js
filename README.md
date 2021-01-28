@@ -43,6 +43,18 @@ getting more testnet coins is an annoyance.
 
 # Workflow
 
+## Overview
+
+To implement even the simplest function, is a multi step process. It's fastest to follow these steps in order:
+
+1. Write the finished REST specification
+2. Implement the function in Typescript as closely to the pattern of the spec as possible
+3. **Fully test** the typescript functions 
+4. Rebuild the REST server from spec
+5. Add required endpoint services, adding new files to .openapi-generator-ignore as necessary.
+6. **Fully test** the rest endpoints
+7. Finally, it must work in the browser so, **fully test** an integrated workflow with a `*.test.headless.js` file.
+
 ## Specification
 
 This is a specification driven project. The rest interface is defined using OpenAPI 3
@@ -52,31 +64,37 @@ Changes may be validated using openapi-generator locally using:
 
     yarn api:validate
 
-## Extending the core library
+If you need better validation, you may also try [a swagger web editor](https://editor.swagger.io/)
 
-All code for the javascript bundle should be contained in src/, high level function
-calls should be as close to the swagger specification as possible.
+## Typescript library
 
-Tests may be run with:
+All code for the javascript library should be contained in src/.
 
-    yarn test
+The javascript library is meant to mimic the REST API defined by the specification to the extent possible.
 
-Note this also tests the API server, which depends on the bundled output of src/
+So the endpoint defined at `wallet/send` should match the behavior of `mywallet.send(...)` .
 
-    yarn build
+Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript. 
 
-## Updating the API server
+## Testing
 
-Any changes to the server or documentation will be reflected
-after validation and committed automatically in CI.
+Tests for the library are run with:
 
-The API server is build already, but to rebuild it manually use:
+    yarn test 
+
+## Developing the API server
+
+Much of the code for the REST server is automatically generated from the specification. **NOTE** the express server automatically enforces required fields and return types for the service.
+
+The express server is commited in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
 
     yarn api:build:server
 
-The server uses a nodejs packaged version of the library
+**Important:** To use your local development copy of mainnet-js instead of the published version, run 
 
-    yarn build
+    yarn api:serve:link
+
+By default, the server uses the published library of the same version.
 
 To start the API server for development:
 
@@ -85,6 +103,30 @@ To start the API server for development:
 To run multiple instances of the API server in "cluster" mode:
 
     yarn api:serve:cluster
+
+
+
+## REST Testing
+
+Tests for the express server may be run with:
+
+    yarn test:api
+
+If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
+
+If there are any failing tests in REST assure that similar coverage exists in `mainnet-js` src prior to debugging.
+
+## Browser Testing
+
+Browsers do not have access to many standard node libraries by design. For this reason, some libraries either don't work in the browser or don't work in nodejs.
+
+All browser tests are denoted by `*.test.headless.js`.
+
+Integration tests for the browser can be run so:
+
+    yarn test:browser
+
+Unit testing is not as critical for the browser, but may be helpful in places, to narrow the scope of potential issues.
 
 ## Developing API clients
 

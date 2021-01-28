@@ -16,4 +16,4 @@ coverage
 genserated/serve/coverage
 jest/playwright/*
 dist
-
+mainnet-js.tgz

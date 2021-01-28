@@ -2503,6 +2503,38 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
+mainnet-js@0.2.20:
+  version "0.2.20"
+  resolved "https://registry.yarnpkg.com/mainnet-js/-/mainnet-js-0.2.20.tgz#7c5fb3fd58edf7936a7ea49f4ff72f09dd07c4e9"
+  integrity sha512-gVADms7JqQHhumJtSxcjq/oPQQ0lQtvEIxQFnWBOXTchA6nAQhYyrNVHzhvdke5GXZkc97mSb1NJyVokPe5EOA==
+  optionalDependencies:
+    "@bitauth/libauth" "^1.17.2"
+    assert "^2.0.0"
+    axios "^0.21.1"
+    bchaddrjs-slp "^0.2.11"
+    bigint-polyfill "^0.1.0"
+    bignumber "^1.1.0"
+    bignumber.js "^9.0.1"
+    bip39 "^3.0.3"
+    buffer "^6.0.3"
+    cashscript "^0.5.7"
+    deepmerge "^4.2.2"
+    dexie "^3.0.2"
+    dotenv "^8.2.0"
+    dts-bundle-webpack "^1.0.2"
+    electrum-cash "^2.0.6"
+    eventsource "^1.0.7"
+    parse-database-url "^0.3.0"
+    pg "^8.4.1"
+    pg-format "^1.0.4"
+    qrcode-svg "^1.1.0"
+    slp-parser "^0.0.4"
+    ts-loader "^8.0.5"
+    webpack "^v5.1.0"
+    webpack-cli "^4.3.0"
+    webpack-merge "^5.7.3"
+    yarn "^1.22.10"
+
 md5.js@^1.3.4:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/md5.js/-/md5.js-1.3.5.tgz#b5d07b8e3216e3e27cd728d72f70d1e6a342005f"

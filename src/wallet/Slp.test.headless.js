@@ -1,5 +1,4 @@
 const playwright = require("playwright");
-const { RegTestWallet } = require("./Wif");
 const PAGE_URL = "http://localhost:8080";
 
 describe(`Wallet should function in the browser`, () => {
@@ -79,5 +78,32 @@ describe(`Wallet should function in the browser`, () => {
       [process.env.PRIVATE_WIF, jestTokenId]
     );
     expect(result.value.c[0]).toBe(10000);
+  });
+
+  test(`Should watch slp testnet balance`, async () => {
+    jestTokenId =
+      "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15";
+    const result = await page.evaluate(
+      async ([wif, tokenId]) => {
+        const wallet = await TestNetWallet.fromId(`wif:testnet:${wif}`);
+        const bobWallet = await TestNetWallet.newRandom();
+
+        let balance;
+
+        bobWallet.slp.watchBalance((_balance) => {
+          balance = _balance;
+        }, tokenId);
+
+        await wallet.slp.send([
+          { slpaddr: bobWallet.slp.slpaddr, value: 1, tokenId: tokenId },
+        ]);
+
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+
+        return balance;
+      },
+      [process.env.FAUCET_SLP_WIF, jestTokenId]
+    );
+    expect(result.value.c[0]).toBe(1);
   });
 });

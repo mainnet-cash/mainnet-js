@@ -15,7 +15,7 @@ if (!supportsNativeBigInt) {
   };
 }
 
-if (typeof global !== "undefined" || typeof window !== "undefined") {
+if (typeof window !== "undefined") {
   globalThis.Buffer = require("buffer/").Buffer;
 }
 
