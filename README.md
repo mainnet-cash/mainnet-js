@@ -49,7 +49,7 @@ To implement even the simplest function, is a multi step process. It's fastest t
 
 1. Write the finished REST specification
 2. Implement the function in Typescript as closely to the pattern of the spec as possible
-3. **Fully test** the typescript functions 
+3. **Fully test** the typescript functions
 4. Rebuild the REST server from spec
 5. Add required endpoint services, adding new files to .openapi-generator-ignore as necessary.
 6. **Fully test** the rest endpoints
@@ -74,13 +74,13 @@ The javascript library is meant to mimic the REST API defined by the specificati
 
 So the endpoint defined at `wallet/send` should match the behavior of `mywallet.send(...)` .
 
-Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript. 
+Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript.
 
 ## Testing
 
 Tests for the library are run with:
 
-    yarn test 
+    yarn test
 
 ## Developing the API server
 
@@ -90,7 +90,7 @@ The express server is commited in a folder called `generated/serve` but needs to
 
     yarn api:build:server
 
-**Important:** To use your local development copy of mainnet-js instead of the published version, run 
+**Important:** To use your local development copy of mainnet-js instead of the published version, run
 
     yarn api:serve:link
 
@@ -103,8 +103,6 @@ To start the API server for development:
 To run multiple instances of the API server in "cluster" mode:
 
     yarn api:serve:cluster
-
-
 
 ## REST Testing
 
