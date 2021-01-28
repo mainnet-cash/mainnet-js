@@ -34,7 +34,9 @@ files.forEach((file) => {
     package.browser = package.browser.replace(version, newVersion);
   }
   if (package.name === "mainnet-cash"){
-    package.optionalDependencies["mainnet-js"] = package.optionalDependencies["mainnet-js"].replace(version, newVersion);
+    package.optionalDependencies["mainnet-js"] = package.optionalDependencies[
+      "mainnet-js"
+    ].replace(version, newVersion);
   }
   package.version = newVersion;
 
