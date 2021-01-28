@@ -11,7 +11,7 @@
     "openapi-generator",
     "openapi"
   ],
-  "license": "Unlicense",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "bchaddrjs-slp": "^0.2.11",
