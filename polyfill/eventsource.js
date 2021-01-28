@@ -1,6 +1,6 @@
-if (typeof window === 'object') {
-  module.exports = window.EventSource
+if (typeof window === "object") {
+  module.exports = window.EventSource;
 } else {
-  var EventSource = require('eventsource/');
-  module.exports = EventSource
+  var EventSource = require("eventsource/");
+  module.exports = EventSource;
 }
