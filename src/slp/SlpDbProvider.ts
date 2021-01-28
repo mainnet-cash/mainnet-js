@@ -26,8 +26,10 @@ import {
   _convertUtxoBigNumbers,
   _emptyTokenBalance,
 } from "./SlpProvider";
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 import { btoa } from "../util/base64";
+
+import EventSource from "../../polyfill/eventsource";
 
 const servers = {
   mainnet: {
