@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "node cluster.js",
-    "pretest": "yarn install --check-files --update-checksums",
     "test": "TIMEOUT=10 npx jest --detectOpenHandles --runInBand --forceExit"
   },
   "keywords": [
