@@ -24,7 +24,6 @@
     "express-openapi-validator": "^3.9.1",
     "express-rate-limit": "^5.2.3",
     "js-yaml": "^3.3.0",
-    "mainnet-js": "0.2.21",
     "ono": "^5.0.1",
     "openapi-sampler": "^1.0.0-beta.15",
     "swagger-ui-express": "^4.0.2",
@@ -40,6 +39,9 @@
     "loadtest": "^5.1.2",
     "mocha": "^7.1.1",
     "superwstest": "^1.3.0"
+  },
+  "optionalDependencies": {
+    "mainnet-js": "0.2.21"
   },
   "eslintConfig": {
     "env": {
