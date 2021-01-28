@@ -1268,7 +1268,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SendRequestItem"
-        from:
+        options:
           type: array
           items:
             $ref: "#/components/schemas/SerializedUtxo"
