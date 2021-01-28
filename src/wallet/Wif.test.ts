@@ -569,16 +569,16 @@ describe(`Wallet extrema behavior regression testing`, () => {
     expect(await charlieWallet.getBalance("sat")).toBe(DUST);
   });
 
-    test(`Should operate with dust threshold (${DUST}), 'min relay fee not met (code 66)' regression`, async () => {
-      const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-      const aliceWallet = await RegTestWallet.fromId(aliceWif);
-      const bobWallet = await RegTestWallet.newRandom();
-      const charlieWallet = await RegTestWallet.newRandom();
+  test(`Should operate with dust threshold (${DUST}), 'min relay fee not met (code 66)' regression`, async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+    const charlieWallet = await RegTestWallet.newRandom();
 
-      await aliceWallet.send([
-        { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-        { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-      ]);
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
 
     await bobWallet.send([
       { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
