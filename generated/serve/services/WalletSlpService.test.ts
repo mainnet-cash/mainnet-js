@@ -1,7 +1,7 @@
 
 var server = require("../")
 var request = require("supertest");
-var bchaddr = require('bchaddrjs-slp');
+const mainnet = require("mainnet-js");
 
 var app;
 
@@ -105,7 +105,7 @@ describe("Test Wallet Slp Endpoints", () => {
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
     expect(resp.statusCode).toBe(200);
-    expect(resp.body.slpaddr).toBe(bchaddr.toSlpAddress(process.env.ADDRESS));
+    expect(resp.body.slpaddr).toBe(mainnet.toSlpAddress(process.env.ADDRESS));
   });
 
   /**

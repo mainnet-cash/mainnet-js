@@ -6,7 +6,6 @@ import {
   utf8ToBin,
   validateAuthenticationTemplate,
 } from "@bitauth/libauth";
-import bchaddr from "bchaddrjs-slp";
 import { parseSLP } from "slp-parser";
 
 import { SendRequest } from "../wallet/model";
@@ -15,6 +14,7 @@ import { SlpGenesisOptions, SlpSendRequest, SlpUtxoI } from "../slp/interface";
 import BigNumber from "bignumber.js";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { UnitEnum } from "../enum";
+import { toCashAddress } from "../util/bchaddr";
 
 export const bigIntToBinUint64BE = (value) => {
   const uint64Length = 8;
@@ -55,7 +55,7 @@ export const SlpGetGenesisOutputs = async (
   const bchSendRequests = addrs.map(
     (val) =>
       new SendRequest({
-        cashaddr: bchaddr.toCashAddress(val),
+        cashaddr: toCashAddress(val),
         value: DUST_UTXO_THRESHOLD,
         unit: UnitEnum.SAT,
       })
@@ -114,7 +114,7 @@ export const SlpGetMintOutputs = async (
   const bchSendRequests = addrs.map(
     (val) =>
       new SendRequest({
-        cashaddr: bchaddr.toCashAddress(val),
+        cashaddr: toCashAddress(val),
         value: DUST_UTXO_THRESHOLD,
         unit: UnitEnum.SAT,
       })
@@ -216,7 +216,7 @@ export const SlpGetSendOutputs = async (
   const bchSendRequests = sendRequests.map(
     (val) =>
       new SendRequest({
-        cashaddr: bchaddr.toCashAddress(val.slpaddr),
+        cashaddr: toCashAddress(val.slpaddr),
         value: DUST_UTXO_THRESHOLD,
         unit: UnitEnum.SAT,
       })
