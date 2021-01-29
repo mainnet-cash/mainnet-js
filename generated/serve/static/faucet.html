@@ -2,7 +2,6 @@
   <head>
     <meta charset="utf-8">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
-    <script src="https://unpkg.com/bchaddrjs-slp@0.2.9/dist/bchaddrjs-slp-0.2.9.min.js"></script> 
     <script src="/scripts/mainnet.js"></script>
     <script src="https://unpkg.com/buefy/dist/components/input"></script>
     <script src="https://unpkg.com/buefy/dist/components/button"></script>
@@ -80,11 +79,11 @@
         }).catch(error => alert(error));
       },
       async getBch() {
-        await this.fetch("/faucet/get_testnet_bch", {cashaddr: bchaddr.toCashAddress(this.cashaddr)});
+        await this.fetch("/faucet/get_testnet_bch", {cashaddr: mainnet.toCashAddress(this.cashaddr)});
         await this.update();
       },
       async getTokens(tokenId) {
-        await this.fetch("/faucet/get_testnet_slp", {slpaddr: bchaddr.toSlpAddress(this.cashaddr), tokenId: tokenId});
+        await this.fetch("/faucet/get_testnet_slp", {slpaddr: mainnet.toSlpAddress(this.cashaddr), tokenId: tokenId});
         await this.update();
       },
 
@@ -104,11 +103,10 @@
           this.faucetCashaddr = json.bchtest;
           this.faucetSlpCashaddr = json.slptest;
 
-          const wallet = await TestNetWallet.watchOnly(json.bchtest);
+          const wallet = await Wallet.fromCashaddr(json.bchtest);
           this.balance = await wallet.slpAware().getBalance("bch");
 
-          const caddr = bchaddr.toCashAddress(json.slptest);
-          const slpWallet = await TestNetWallet.watchOnly(caddr);
+          const slpWallet = await Wallet.fromSlpaddr(caddr);
           this.slpbalances = await slpWallet.slp.getAllBalances();
         } catch (error) {
           alert(error.message);

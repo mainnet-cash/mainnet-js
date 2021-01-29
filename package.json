@@ -75,7 +75,7 @@
     "@bitauth/libauth": "^1.17.2",
     "assert": "^2.0.0",
     "axios": "^0.21.1",
-    "bchaddrjs-slp": "^0.2.11",
+    "bchaddrjs-slp": "^0.2.12",
     "bigint-polyfill": "^0.1.0",
     "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
