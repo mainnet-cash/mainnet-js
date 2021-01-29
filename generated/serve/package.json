@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node cluster.js",
+    "pretest": "yarn install --check-files --update-checksums",
+    "postinstall": "yarn link mainnet-js",
     "test": "TIMEOUT=10 npx jest --detectOpenHandles --runInBand --forceExit"
   },
   "keywords": [
     "openapi-generator",
     "openapi"
   ],
-  "license": "Unlicense",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "bchaddrjs-slp": "^0.2.11",
@@ -39,9 +41,6 @@
     "loadtest": "^5.1.2",
     "mocha": "^7.1.1",
     "superwstest": "^1.3.0"
-  },
-  "optionalDependencies": {
-    "mainnet-js": "0.2.21"
   },
   "eslintConfig": {
     "env": {
