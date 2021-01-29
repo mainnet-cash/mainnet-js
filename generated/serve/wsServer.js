@@ -46,7 +46,7 @@ makeWsServer = (server) => {
         if (data.method === "slpWatchBalance") {
           const slpaddr = data.data.slpaddr;
           const tokenId = data.data.tokenId;
-          const w = await mainnet.Wallet.fromSlpaddr(slpaddr);
+          const w = await getSlpWallet(slpaddr);
           fn = await w.slp.watchBalance((balance) => {
             socket.send(JSON.stringify(balance));
           }, tokenId);
@@ -56,13 +56,13 @@ makeWsServer = (server) => {
           const slpaddr = data.data.slpaddr;
           const value = data.data.value;
           const tokenId = data.data.tokenId;
-          const w = await mainnet.Wallet.fromSlpaddr(slpaddr);
+          const w = await getSlpWallet(slpaddr);
           const balance = await w.slp.waitForBalance(value, tokenId);
           socket.send(JSON.stringify(balance));
 
         } else if (data.method === "slpWaitForTransaction") {
           const slpaddr = data.data.slpaddr;
-          const w = await mainnet.Wallet.fromSlpaddr(slpaddr);
+          const w = await getSlpWallet(slpaddr);
           const tokenId = data.data.tokenId;
           const rawTx = await w.slp.waitForTransaction(tokenId);
           socket.send(JSON.stringify(rawTx));
@@ -103,6 +103,12 @@ makeWsServer = (server) => {
   });
 
   return wsServer;
+};
+
+getSlpWallet = async (addr) => {
+  return process.env.JEST_WORKER_ID === undefined ?
+    new mainnet.Wallet.fromSlpaddr(addr) :
+    new mainnet.RegTestWallet().watchOnly(addr);
 };
 
 getProvider = async () => {

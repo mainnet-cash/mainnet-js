@@ -118,7 +118,7 @@ describe("Test websocket server methods", () => {
   });
 
   // slp
-  test.skip("Test slpWatchBalance ws method", async () => {
+  test("Test slpWatchBalance ws method", async () => {
     const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
     const bobWallet = await mainnet.RegTestWallet.newRandom();
     const bobSlp = mainnet.toSlpAddress(bobWallet.cashaddr);
@@ -140,7 +140,7 @@ describe("Test websocket server methods", () => {
       .expectClosed();
   });
 
-  test.skip("Test slpWaitForBalance ws method", async () => {
+  test("Test slpWaitForBalance ws method", async () => {
     const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
     const bobWallet = await mainnet.RegTestWallet.newRandom();
     const bobSlp = mainnet.toSlpAddress(bobWallet.cashaddr);
@@ -162,7 +162,7 @@ describe("Test websocket server methods", () => {
       .expectClosed();
   });
 
-  test.skip("Test slpWaitForTransaction ws method", async () => {
+  test("Test slpWaitForTransaction ws method", async () => {
     const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
     const bobWallet = await mainnet.RegTestWallet.newRandom();
     const bobSlp = mainnet.toSlpAddress(bobWallet.cashaddr);
