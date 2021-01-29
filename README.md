@@ -90,7 +90,11 @@ The express server is committed in a folder called `generated/serve` but needs t
 
     yarn api:build:server
 
-**Important:** The server automatically uses a [link](https://classic.yarnpkg.com/en/docs/cli/link)ed copy of `mainnet-js` in the project root directory. It is important to note that this is essentially a symlink version and removing `node_modules` on the server may attempt to delete the project root directory. To safely remove all packages from `generated/serve/node_modules/`, **mainnet-js** must be [unlink](https://classic.yarnpkg.com/en/docs/cli/unlink)ed first
+To install the requirements from project root:
+
+    yarn api:serve:install
+
+**Important:** The server automatically uses a [link](https://classic.yarnpkg.com/en/docs/cli/link)ed copy of `mainnet-js` referencing the project root directory. It is important to note that this is essentially a symlink version and removing `node_modules/mainnet-js/*` on the server may attempt to delete the project root directory contents. It is safe to remove `generated/serve/node_modules/`, but never attempt to remove the contents of `generated/serve/node_modules/mainnet-js/` without [unlink](https://classic.yarnpkg.com/en/docs/cli/unlink)ing first:
 
 ```
 # in ./generated/serve/
