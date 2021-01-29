@@ -211,8 +211,6 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateWif() {
-    const sha256 = await sha256Promise;
-    const secp256k1 = await secp256k1Promise;
 
     //
     if (!this.privateKey) {
@@ -608,14 +606,7 @@ export class Wallet extends BaseWallet {
     let resp = new UtxoResponse();
     resp.utxos = await Promise.all(
       utxos.map(async (o: UtxoI) => {
-        let utxo = new UtxoItem();
-        utxo.unit = "sat";
-        utxo.value = o.satoshis;
-
-        utxo.txId = o.txid;
-        utxo.index = o.vout;
-        utxo.utxoId = utxo.txId + ":" + utxo.index;
-        return utxo;
+        return UtxoItem.fromElectrum(o)
       })
     );
     return resp;
