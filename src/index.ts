@@ -6,4 +6,5 @@ export * from "./network";
 export * from "./wallet/Wif";
 export * from "./wallet/createWallet";
 export * as Mainnet from "./util/index";
+export * from "./util/bchaddr";
 export { Network } from "./interface";

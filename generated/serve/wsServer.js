@@ -3,7 +3,7 @@ const ws = require('ws');
 const mainnet = require("mainnet-js");
 
 makeWsServer = (server) => {
-  const wsServer = new ws.Server({ noServer: true, path: '/api/v1/wallet' });
+  const wsServer = new ws.Server({ noServer: true, path: '/wallet' });
   wsServer.on('connection', socket => {
     socket.unsubscribeFunctions = [];
 
@@ -15,7 +15,7 @@ makeWsServer = (server) => {
         data = JSON.parse(data);
         if (data.method === "watchBalance") {
           const addr = data.data.cashaddr;
-          const w = await getWallet(addr);
+          const w = await mainnet.Wallet.fromCashaddr(addr);
           fn = await w.watchBalance((balance) => {
             socket.send(JSON.stringify(balance));
           });
@@ -25,13 +25,13 @@ makeWsServer = (server) => {
           const addr = data.data.cashaddr;
           const value = data.data.value;
           const unit = data.data.unit;
-          const w = await getWallet(addr);
+          const w = await mainnet.Wallet.fromCashaddr(addr);
           const balance = await w.waitForBalance(value, unit);
           socket.send(JSON.stringify({ balance: balance }));
 
         } else if (data.method === "waitForTransaction") {
           const addr = data.data.cashaddr;
-          const w = await getWallet(addr);
+          const w = await mainnet.Wallet.fromCashaddr(addr);
           const rawTx = await w.waitForTransaction();
           socket.send(JSON.stringify(rawTx));
 
@@ -40,7 +40,37 @@ makeWsServer = (server) => {
           const provider = await getProvider();
           const blockHeader = await provider.waitForBlock(height);
           socket.send(JSON.stringify(blockHeader));
-        } else {
+        } else
+
+        // slp
+        if (data.method === "slpWatchBalance") {
+          const slpaddr = data.data.slpaddr;
+          const tokenId = data.data.tokenId;
+          const w = await mainnet.Wallet.fromSlpaddr(slpaddr);
+          fn = await w.slp.watchBalance((balance) => {
+            socket.send(JSON.stringify(balance));
+          }, tokenId);
+          socket.unsubscribeFunctions.push(fn);
+
+        } else if (data.method === "slpWaitForBalance") {
+          const slpaddr = data.data.slpaddr;
+          const value = data.data.value;
+          const tokenId = data.data.tokenId;
+          const w = await mainnet.Wallet.fromSlpaddr(slpaddr);
+          const balance = await w.slp.waitForBalance(value, tokenId);
+          socket.send(JSON.stringify(balance));
+
+        } else if (data.method === "slpWaitForTransaction") {
+          const slpaddr = data.data.slpaddr;
+          const w = await mainnet.Wallet.fromSlpaddr(slpaddr);
+          const tokenId = data.data.tokenId;
+          const rawTx = await w.slp.waitForTransaction(tokenId);
+          socket.send(JSON.stringify(rawTx));
+
+        }
+
+        // error
+        else {
           throw Error(`Mainnet websockets: unsupported method ${data.method}`);
         }
       } catch (e) {
@@ -73,13 +103,6 @@ makeWsServer = (server) => {
   });
 
   return wsServer;
-};
-
-getWallet = async (addr) => {
-  let w = process.env.JEST_WORKER_ID === undefined ?
-    new mainnet.Wallet() :
-    new mainnet.RegTestWallet();
-  return w.watchOnly(addr);
 };
 
 getProvider = async () => {
