@@ -254,7 +254,6 @@ export class Wallet extends BaseWallet {
     requests: SendRequest[] | SendRequestArray[]
   ): Promise<SendResponse> {
     let sendRequests = asSendRequestObject(requests);
-    console.log("hello 11");
     let result = await this._processSendRequests(sendRequests);
     let resp = new SendResponse({});
     resp.txId = result;

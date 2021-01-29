@@ -86,15 +86,16 @@ Tests for the library are run with:
 
 Much of the code for the REST server is automatically generated from the specification. **NOTE** the express server automatically enforces required fields and return types for the service.
 
-The express server is commited in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
+The express server is committed in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
 
     yarn api:build:server
 
-**Important:** To use your local development copy of mainnet-js instead of the published version, run
+**Important:** The server automatically uses a [link](https://classic.yarnpkg.com/en/docs/cli/link)ed copy of `mainnet-js` in the project root directory. It is important to note that this is essentially a symlink version and removing `node_modules` on the server may attempt to delete the project root directory.  To safely remove all packages from `generated/serve/node_modules/`, **mainnet-js** must be [unlink](https://classic.yarnpkg.com/en/docs/cli/unlink)ed first
 
-    yarn api:serve:link
-
-By default, the server uses the published library of the same version.
+```
+# in ./generated/serve/
+yarn unlink mainnet-js
+```
 
 To start the API server for development:
 
@@ -109,6 +110,8 @@ To run multiple instances of the API server in "cluster" mode:
 Tests for the express server may be run with:
 
     yarn test:api
+
+The `mainnet-js` package is linked to the REST expressServer automatically after installing the respective package requirements. Updating `mainnet-js` with code changes is handled automatically by the `test:api` command.
 
 If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
 
