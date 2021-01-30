@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 var mainnet = require("mainnet-js");
-var bchaddr = require('bchaddrjs-slp');
 var config  = require('../config');
 
 const assertFaucetAvailable = () => {
@@ -44,7 +43,7 @@ const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!bchaddr.isValidAddress(getTestnetBchRequest.cashaddr))
+      if (!mainnet.isValidAddress(getTestnetBchRequest.cashaddr))
         throw new Error("Incorrect cashaddr");
 
       const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetBchRequest.cashaddr);
@@ -77,7 +76,7 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!bchaddr.isValidAddress(getTestnetSlpRequest.slpaddr))
+      if (!mainnet.isValidAddress(getTestnetSlpRequest.slpaddr))
         throw new Error("Incorrect slpaddr");
 
       const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetSlpRequest.slpaddr);

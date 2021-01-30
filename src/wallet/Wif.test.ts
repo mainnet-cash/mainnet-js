@@ -3,7 +3,7 @@ import { bchParam } from "../chain";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { UnitEnum } from "../enum";
 import { initProviders, disconnectProviders } from "../network/Connection";
-
+import { DUST_UTXO_THRESHOLD as DUST } from "../constant";
 import { delay } from "../util/delay";
 
 beforeAll(async () => {
@@ -489,5 +489,124 @@ describe(`Wallet subscriptions`, () => {
     expect(response.balance).toBe(0);
 
     await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
+  });
+});
+
+describe(`Wallet extrema behavior regression testing`, () => {
+  test(`Should operate very well above dust threshold (${
+    DUST * 3
+  }), 'min relay fee not met (code 66)' regression`, async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+    const charlieWallet = await RegTestWallet.newRandom();
+
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST * 3, unit: "sat" },
+    ]);
+
+    await bobWallet.send([
+      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
+    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+  });
+
+  test(`Should operate very well above dust threshold (${
+    DUST * 2
+  }), 'min relay fee not met (code 66)' regression`, async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+    const charlieWallet = await RegTestWallet.newRandom();
+
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST * 2, unit: "sat" },
+    ]);
+
+    await bobWallet.send([
+      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
+    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+  });
+
+  test(`Should operate well above dust threshold (${
+    DUST + 328
+  }), 'min relay fee not met (code 66)' regression`, async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+    const charlieWallet = await RegTestWallet.newRandom();
+
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST + 328, unit: "sat" },
+    ]);
+
+    await bobWallet.send([
+      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
+    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+  });
+
+  test(`Should operate slightly above dust threshold (${
+    DUST + 1
+  }), 'min relay fee not met (code 66)' regression`, async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+    const charlieWallet = await RegTestWallet.newRandom();
+
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST + 1, unit: "sat" },
+    ]);
+
+    await bobWallet.send([
+      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
+    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+  });
+
+  test(`Should operate with dust threshold (${DUST}), 'min relay fee not met (code 66)' regression`, async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+    const charlieWallet = await RegTestWallet.newRandom();
+
+    await aliceWallet.send([
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
+
+    await bobWallet.send([
+      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+    ]);
+    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+  });
+  test(`Should throw error with dust amounts (${
+    DUST - 1
+  }), 'min relay fee not met (code 66)' regression`, async () => {
+    expect.assertions(1);
+    try {
+      const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
+      const charlieWallet = await RegTestWallet.newRandom();
+
+      await aliceWallet.send([
+        { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+        { cashaddr: bobWallet.cashaddr!, value: DUST - 1, unit: "sat" },
+      ]);
+
+      await bobWallet.send([
+        { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+      ]);
+    } catch (e) {
+      expect(e.message).toBe(
+        `the transaction was rejected by network rules.\n\ndust (code 64)\n`
+      );
+    }
   });
 });

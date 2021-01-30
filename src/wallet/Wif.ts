@@ -62,6 +62,7 @@ import { getRelayFeeCache } from "../network/getRelayFeeCache";
 import { Slp } from "./Slp";
 import axios from "axios";
 import { SlpSendResponse } from "../slp/interface";
+import { toCashAddress } from "../util/bchaddr";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -254,7 +255,6 @@ export class Wallet extends BaseWallet {
     requests: SendRequest[] | SendRequestArray[]
   ): Promise<SendResponse> {
     let sendRequests = asSendRequestObject(requests);
-
     let result = await this._processSendRequests(sendRequests);
     let resp = new SendResponse({});
     resp.txId = result;
@@ -333,6 +333,19 @@ export class Wallet extends BaseWallet {
 
   public static watchOnly(address): Promise<Wallet> {
     return new this().watchOnly(address);
+  }
+
+  public static fromCashaddr(address): Promise<Wallet> {
+    const prefix = derivePrefix(address);
+    return new this(
+      "",
+      prefix as CashAddressNetworkPrefix,
+      WalletTypeEnum.Watch
+    ).watchOnly(address);
+  }
+
+  public static fromSlpaddr(address): Promise<Wallet> {
+    return this.fromCashaddr(toCashAddress(address));
   }
 
   public async sendMax(cashaddr: string): Promise<SendResponse> {

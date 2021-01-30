@@ -1231,7 +1231,7 @@ base@^0.11.1:
     mixin-deep "^1.2.0"
     pascalcase "^0.1.1"
 
-bchaddrjs-slp@^0.2.11:
+bchaddrjs-slp@^0.2.12:
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/bchaddrjs-slp/-/bchaddrjs-slp-0.2.12.tgz#e40574a56adf29ef5ad2e36338b5b8c7d0a74689"
   integrity sha512-yRtNSo/oPqdl3R3LV9H6fvuksdA/FGvn/8A8IH2dkYLiVe5lOtBjiGV4qFMRUHCtwaXWumbBcUwgvdkXxj3cfg==
@@ -6320,7 +6320,7 @@ webidl-conversions@^6.1.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-6.1.0.tgz#9111b4d7ea80acd40f5270d666621afa78b69514"
   integrity sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==
 
-webpack-cli@^4.3.0:
+webpack-cli@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-4.4.0.tgz#38c7fa01ea31510f5c490245dd1bb28018792f1b"
   integrity sha512-/Qh07CXfXEkMu5S8wEpjuaw2Zj/CC0hf/qbTDp6N8N7JjdGuaOjZ7kttz+zhuJO/J5m7alQEhNk9lsc4rC6xgQ==
