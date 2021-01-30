@@ -49,7 +49,7 @@ To implement even the simplest function, is a multi step process. It's fastest t
 
 1. Write the finished REST specification
 2. Implement the function in Typescript as closely to the pattern of the spec as possible
-3. **Fully test** the typescript functions 
+3. **Fully test** the typescript functions
 4. Rebuild the REST server from spec
 5. Add required endpoint services, adding new files to .openapi-generator-ignore as necessary.
 6. **Fully test** the rest endpoints
@@ -74,27 +74,32 @@ The javascript library is meant to mimic the REST API defined by the specificati
 
 So the endpoint defined at `wallet/send` should match the behavior of `mywallet.send(...)` .
 
-Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript. 
+Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript.
 
 ## Testing
 
 Tests for the library are run with:
 
-    yarn test 
+    yarn test
 
 ## Developing the API server
 
 Much of the code for the REST server is automatically generated from the specification. **NOTE** the express server automatically enforces required fields and return types for the service.
 
-The express server is commited in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
+The express server is committed in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
 
     yarn api:build:server
 
-**Important:** To use your local development copy of mainnet-js instead of the published version, run 
+To install the requirements from project root:
 
-    yarn api:serve:link
+    yarn api:serve:install
 
-By default, the server uses the published library of the same version.
+**Important:** The server automatically uses a [link](https://classic.yarnpkg.com/en/docs/cli/link)ed copy of `mainnet-js` referencing the project root directory. It is important to note that this is essentially a symlink version and removing `node_modules/mainnet-js/*` on the server may attempt to delete the project root directory contents. It is safe to remove `generated/serve/node_modules/`, but never attempt to remove the contents of `generated/serve/node_modules/mainnet-js/` without [unlink](https://classic.yarnpkg.com/en/docs/cli/unlink)ing first:
+
+```
+# in ./generated/serve/
+yarn unlink mainnet-js
+```
 
 To start the API server for development:
 
@@ -104,13 +109,13 @@ To run multiple instances of the API server in "cluster" mode:
 
     yarn api:serve:cluster
 
-
-
 ## REST Testing
 
 Tests for the express server may be run with:
 
     yarn test:api
+
+The `mainnet-js` package is linked to the REST expressServer automatically after installing the respective package requirements. Updating `mainnet-js` with code changes is handled automatically by the `test:api` command.
 
 If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
 
