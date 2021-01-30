@@ -1,18 +1,19 @@
 {
   "name": "mainnet-cash",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development ",
   "main": "index.js",
   "scripts": {
     "start": "node cluster.js",
     "pretest": "yarn install --check-files --update-checksums",
+    "postinstall": "yarn link mainnet-js",
     "test": "TIMEOUT=10 npx jest --detectOpenHandles --runInBand --forceExit"
   },
   "keywords": [
     "openapi-generator",
     "openapi"
   ],
-  "license": "Unlicense",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "bchaddrjs-slp": "^0.2.11",
@@ -25,7 +26,6 @@
     "express-openapi-validator": "^3.9.1",
     "express-rate-limit": "^5.2.3",
     "js-yaml": "^3.3.0",
-    "mainnet-js": "../../mainnet-js.tgz",
     "ono": "^5.0.1",
     "openapi-sampler": "^1.0.0-beta.15",
     "swagger-ui-express": "^4.0.2",
