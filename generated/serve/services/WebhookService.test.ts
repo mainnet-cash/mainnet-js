@@ -1,9 +1,8 @@
+import * as mainnet from "mainnet-js";
 var server = require("../")
 var request = require("supertest");
 
 var app;
-
-var mainnet = require("mainnet-js");
 
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
@@ -12,7 +11,6 @@ describe("Test Webhook Endpoints", () => {
   afterAll(async function () {
     await server.killElectrum()
     app.close();
-    await new mainnet.WebhookWorker.db.close();
   });
 
   /**
