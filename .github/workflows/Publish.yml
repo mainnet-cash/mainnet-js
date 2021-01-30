@@ -18,6 +18,39 @@ jobs:
       - run: yarn
       - run: yarn build
 
+  # Update mainnet-docs repository with the latest release version and integrity hash
+  publish-docs:
+    continue-on-error: true
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Setup environment
+      - name: Set REPO_USER env
+        run: echo "REPO_USER=$(echo $GITHUB_REPOSITORY | cut -d / -f1)" >> $GITHUB_ENV
+      - name: Set TAG_NAME env
+        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      # Update sources
+      - name: Clone repo, update release version and integrity hash
+        run: |
+          git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
+          cd mainnet-docs
+          sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/README.md
+          HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
+          sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/README.md
+
+      # Commit
+      - name: Commit to mainnet-docs repository
+        uses: drud/action-cross-commit@master
+        with:
+          source-folder: mainnet-docs
+          destination-repository: https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs
+          destination-folder: .
+          destination-branch: master
+          git-user: "Auto-Generated"
+          git-user-email: hello@mainnet.cash
+          git-commit-message: "Auto: update mainnet release to ${{ env.TAG_NAME }}"
+
   # Build docker image with mainnet REST API server for self hosting
   # More info in generated/serve/docker/README.md
   publish-docker:
@@ -157,6 +190,7 @@ jobs:
   # After being built, the clients are commited to their repositories, new tag and github release are created for them
   # Requires COMMIT_USER_TOKEN github secret to be set which allows you to commit to another repository
   buid-client:
+    needs: build
     continue-on-error: true
     strategy:
       fail-fast: false

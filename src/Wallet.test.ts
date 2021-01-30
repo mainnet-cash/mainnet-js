@@ -15,13 +15,6 @@ afterAll(async () => {
 });
 
 describe(`Test Wallet library`, () => {
-  beforeEach(async () => {
-    // With persistent global network connections, tests run faster than
-    // fulcrum polls the full node for new transactions
-    // Waiting for a single poll should prevent double spending utxos
-    //delay(550);
-  });
-
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {

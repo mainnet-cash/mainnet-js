@@ -2503,10 +2503,9 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-mainnet-js@latest:
+mainnet-js@../../mainnet-js.tgz:
   version "0.2.20"
-  resolved "https://registry.yarnpkg.com/mainnet-js/-/mainnet-js-0.2.20.tgz#7c5fb3fd58edf7936a7ea49f4ff72f09dd07c4e9"
-  integrity sha512-gVADms7JqQHhumJtSxcjq/oPQQ0lQtvEIxQFnWBOXTchA6nAQhYyrNVHzhvdke5GXZkc97mSb1NJyVokPe5EOA==
+  resolved "../../mainnet-js.tgz#ba7fc8c90a39a0f8f7f5e14dfb0c9b51018c1e7f733a396755e3edd946986bae4af2e0c8c56064dc51afc8ced0bf9b7788326850b53db128a950153cef25afc0"
   optionalDependencies:
     "@bitauth/libauth" "^1.17.2"
     assert "^2.0.0"

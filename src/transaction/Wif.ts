@@ -211,7 +211,7 @@ export async function getFeeAmount({
       utxos,
       sendRequests,
       privateKey,
-      1000,
+      0, //DUST_UTXO_THRESHOLD
       false,
       slpOutputs
     );

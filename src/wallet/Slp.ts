@@ -1,5 +1,4 @@
 import { Wallet } from "../wallet/Wif";
-import bchaddr from "bchaddrjs-slp";
 import {
   SlpFormattedUtxo,
   SlpGenesisOptions,
@@ -36,6 +35,7 @@ import {
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
 } from "../slp/SlpProvider";
+import { toSlpAddress } from "../util/bchaddr";
 
 export class Slp {
   slpaddr: string;
@@ -43,7 +43,7 @@ export class Slp {
   public provider: SlpProvider;
 
   constructor(wallet: Wallet) {
-    this.slpaddr = bchaddr.toSlpAddress(wallet.cashaddr!);
+    this.slpaddr = toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
     this.provider = new SlpDbProvider(this.wallet.networkType);
   }
@@ -63,7 +63,7 @@ export class Slp {
   }
 
   public async getSlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
-    return this.provider.SlpUtxos(bchaddr.toSlpAddress(slpaddr));
+    return this.provider.SlpUtxos(toSlpAddress(slpaddr));
   }
 
   public async getFormattedSlpUtxos(
@@ -72,7 +72,7 @@ export class Slp {
     if (!slpaddr) {
       slpaddr = this.slpaddr;
     }
-    const utxos = await this.getSlpUtxos(bchaddr.toSlpAddress(slpaddr));
+    const utxos = await this.getSlpUtxos(toSlpAddress(slpaddr));
     return utxos.map((val) => {
       let utxo: any = {};
       utxo.ticker = val.ticker;

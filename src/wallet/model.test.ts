@@ -5,8 +5,7 @@ test("Should serialize utxo", () => {
   let utxo = new UtxoItem({
     txId: "this",
     index: 42,
-    value: 1,
-    unit: "sat"
+    value: 1
   }).toString();
   expect(utxo.toString()).toBe("this:42:1");
 });
@@ -16,7 +15,6 @@ test("Should deserialize utxo", () => {
   expect(utxo!.txId).toBe("this");
   expect(utxo!.index).toBe(42);
   expect(utxo!.value).toBe(1);
-  expect(utxo!.unit).toBe("sat");
   expect(utxo!.toString()).toBe("this:42:1");
 });
 
@@ -30,6 +28,5 @@ test("Should deserialize utxo", () => {
   expect(utxo!.txId).toBe("this");
   expect(utxo!.index).toBe(42);
   expect(utxo!.value).toBe(1);
-  expect(utxo!.unit).toBe("sat");
   expect(utxo!.toString()).toBe("this:42:1");
 });

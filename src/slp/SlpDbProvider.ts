@@ -15,7 +15,6 @@ import {
   SlpAllTokenBalancesTemplate,
   SlpTokenBalanceTemplate,
 } from "./SlpDbTemplates";
-import EventSource from "eventsource";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,
@@ -29,6 +28,8 @@ import {
 } from "./SlpProvider";
 import axios from "axios";
 import { btoa } from "../util/base64";
+
+import EventSource from "../../polyfill/eventsource";
 
 const servers = {
   mainnet: {
@@ -220,8 +221,16 @@ export class SlpDbProvider implements SlpProvider {
   }
 }
 
+const axiosInstance = axios.create({
+  headers: {
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+    Expires: "0",
+  },
+});
+
 const fetch_retry = (url, options = {}, n = 5) =>
-  axios.get(url, options).catch(function (error) {
+  axiosInstance.get(url, options).catch(function (error) {
     if (n === 0) {
       throw error;
     }
