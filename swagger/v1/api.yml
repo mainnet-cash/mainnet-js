@@ -1269,9 +1269,7 @@ components:
           items:
             $ref: "#/components/schemas/SendRequestItem"
         options:
-          type: array
-          items:
-            $ref: "#/components/schemas/SerializedUtxo"
+          $ref: "#/components/schemas/SendRequestOptions"
       type: object
     SendRequestItem:
       properties:
