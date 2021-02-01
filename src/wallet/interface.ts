@@ -1,5 +1,6 @@
 import { WalletTypeEnum } from "./enum";
 import { NetworkEnum } from "../enum";
+import { UtxoItem } from "./model";
 
 export interface WalletRequestI {
   name?: string;
@@ -30,6 +31,11 @@ export interface WalletInfoI {
   privateKeyWif?: string;
   walletId: string;
   walletDbEntry: string;
+}
+
+export interface SendRequestOptionsI {
+  utxoIds?: string[]
+  changeAddress?: string
 }
 
 export interface MnemonicI {

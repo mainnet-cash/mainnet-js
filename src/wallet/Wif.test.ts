@@ -284,7 +284,6 @@ describe(`Watch only Wallets`, () => {
   });
 
   test("Should send to a testnet coins to a random address", async () => {
-    // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.ALICE_TESTNET_WALLET_ID) {
       throw Error("Attempted to pass an empty address");
     } else {
@@ -506,6 +505,7 @@ describe(`Wallet subscriptions`, () => {
     await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
   });
 });
+
 
 describe(`Wallet extrema behavior regression testing`, () => {
   test(`Should operate very well above dust threshold (${

@@ -26,7 +26,7 @@ import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
-import { MnemonicI, WalletInfoI } from "./interface";
+import { SendRequestOptionsI, MnemonicI, WalletInfoI } from "./interface";
 
 import {
   SendRequest,
@@ -250,10 +250,11 @@ export class Wallet extends BaseWallet {
   }
 
   public async send(
-    requests: SendRequest[] | SendRequestArray[]
+    requests: SendRequest[] | SendRequestArray[], 
+    options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     let sendRequests = asSendRequestObject(requests);
-    let result = await this._processSendRequests(sendRequests);
+    let result = await this._processSendRequests(sendRequests, undefined, options);
     let resp = new SendResponse({});
     resp.txId = result;
     resp.balance = (await this.getBalance()) as BalanceResponse;
@@ -346,16 +347,16 @@ export class Wallet extends BaseWallet {
     return this.fromCashaddr(toCashAddress(address));
   }
 
-  public async sendMax(cashaddr: string): Promise<SendResponse> {
-    let result = await this.sendMaxRaw(cashaddr);
+  public async sendMax(cashaddr: string, options?: SendRequestOptionsI): Promise<SendResponse> {
+    let result = await this.sendMaxRaw(cashaddr, options);
     let resp = new SendResponse({});
     resp.txId = result;
     resp.balance = (await this.getBalance()) as BalanceResponse;
     return resp;
   }
 
-  public async sendMaxRaw(cashaddr: string) {
-    let maxSpendableAmount = await this.getMaxAmountToSend({});
+  public async sendMaxRaw(cashaddr: string, options?:SendRequestOptionsI) {
+    let maxSpendableAmount = await this.getMaxAmountToSend({outputCount:1, options: options});
     if (maxSpendableAmount.sat === undefined) {
       throw Error("no Max amount to send");
     }
@@ -364,7 +365,7 @@ export class Wallet extends BaseWallet {
       value: maxSpendableAmount.sat,
       unit: "sat",
     });
-    return await this._processSendRequests([sendRequest], true);
+    return await this._processSendRequests([sendRequest], true, options);
   }
 
   public getDepositAddress(): string {
@@ -379,6 +380,7 @@ export class Wallet extends BaseWallet {
     return qrAddress(this.cashaddr as string);
   }
 
+  // 
   public async getAddressUtxos(address: string): Promise<UtxoI[]> {
     if (!this.provider) {
       throw Error("Attempting to get utxos from wallet without a client");
@@ -558,6 +560,7 @@ export class Wallet extends BaseWallet {
     }
   }
 
+  // 
   public toDbString() {
     if (this.mnemonic) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
@@ -568,8 +571,10 @@ export class Wallet extends BaseWallet {
 
   public async getMaxAmountToSend({
     outputCount = 1,
+    options
   }: {
     outputCount?: number;
+    options?: SendRequestOptionsI;
   }): Promise<BalanceResponse> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
@@ -577,8 +582,16 @@ export class Wallet extends BaseWallet {
     if (!this.cashaddr) {
       throw Error("attempted to send without a cashaddr");
     }
+
     // get inputs
-    const utxos = await this.getAddressUtxos(this.cashaddr);
+    let utxos: UtxoI[]
+    if(options && options?.utxoIds){
+      utxos = options.utxoIds.map(utxoId => UtxoItem.fromId(utxoId).asElectrum())
+    }else{
+      utxos = await this.getAddressUtxos(this.cashaddr);
+    }
+
+    
 
     // Get current height to assure recently mined coins are not spent.
     const bestHeight = await this.provider!.getBlockHeight();
@@ -609,8 +622,10 @@ export class Wallet extends BaseWallet {
 
     return await balanceResponseFromSatoshi(spendableAmount - fee);
   }
+
   /**
    * utxos Get unspent outputs for the wallet
+   * 
    */
   public async getUtxos() {
     if (!this.cashaddr) {
@@ -665,14 +680,18 @@ export class Wallet extends BaseWallet {
   public getSignatureTemplate() {
     return new SignatureTemplate(this.privateKeyWif as string);
   }
+
   /**
    * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
-   * @param  {SendRequest[]} sendRequests
-   * @param  {} discardChange=false
+   * This function is an internal wrapper and may change.
+   * @param  {SendRequest[]} sendRequests SendRequests
+   * @param  {} discardChange=false  
+   * @param  {SendRequestOptionsI} options Options of the send requests
    */
   private async _processSendRequests(
     sendRequests: SendRequest[],
-    discardChange = false
+    discardChange = false,
+    options?: SendRequestOptionsI
   ) {
     if (!this.privateKey) {
       throw new Error(
@@ -682,8 +701,15 @@ export class Wallet extends BaseWallet {
     if (!this.cashaddr) {
       throw Error("attempted to send without a cashaddr");
     }
-    // get input
-    const utxos = await this.getAddressUtxos(this.cashaddr);
+
+    // get inputs
+    let utxos: UtxoI[]
+    if(options && options?.utxoIds){
+      utxos = options.utxoIds.map(utxoId => UtxoItem.fromId(utxoId).asElectrum())
+    }else{
+      utxos = await this.getAddressUtxos(this.cashaddr);
+    }
+    
 
     const bestHeight = await this.provider!.getBlockHeight()!;
     const spendAmount = await sumSendRequestAmounts(sendRequests);

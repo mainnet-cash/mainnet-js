@@ -29,6 +29,8 @@ export class SendRequest {
   }
 }
 
+
+
 export type SendRequestArray = Array<string | number | UnitEnum>;
 
 export class UtxoItem {
@@ -68,6 +70,15 @@ export class UtxoItem {
         value: u.satoshis
       })
     }
+
+    public asElectrum() : UtxoI {
+      return {
+        txid: this.txId,
+        vout: this.index,
+        satoshis: this.value
+      } as UtxoI
+    }
+
 }
 
 export class UtxoResponse {

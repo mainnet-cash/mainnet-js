@@ -176,6 +176,50 @@ describe(`Test Wallet library`, () => {
     }
   });
 
+  test("Should send a transaction from specific utxos", async () => {
+    // Build Alice's wallet from Wallet Import Format string, send some sats
+    if (!process.env.PRIVATE_WIF) {
+      throw Error("Attempted to pass an empty WIF");
+    } else {
+      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
+      const bob = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+      let sendResponse = await alice.send([
+        {
+          cashaddr: bob.cashaddr!,
+          value: 1001,
+          unit: "satoshis",
+        },
+        {
+          cashaddr: bob.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+        {
+          cashaddr: bob.cashaddr!,
+          value: 1001,
+          unit: "satoshis",
+        },
+      ]);
+      let bobBalance = (await bob.getBalance()) as BalanceResponse;
+      expect(bobBalance.sat).toBe(3002);
+      let bobUtxos = await bob.getUtxos()
+      expect(bobUtxos.utxos!.length).toBe(3)
+      let oddUtxoIds = bobUtxos.utxos!.filter(utxo => { utxo.value % 1  }).map(utxo => {return utxo.utxoId})
+
+      // Build Bob's wallet from a public address, check his balance.
+      bob.send([{
+        cashaddr: bob.cashaddr!,
+        value: 2001,
+        unit: "satoshis",
+      },], {utxoIds: oddUtxoIds})
+      bobBalance = (await bob.getBalance()) as BalanceResponse;
+      expect(bobBalance.sat).toBe(1000);
+    }
+  });
+
   test("Send a transaction in dollars regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {
