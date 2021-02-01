@@ -1,7 +1,10 @@
 Newest changes
 --------------
 
-- Added support for general cashscript.
+- Added API for generic CashScript usage over REST.
+- Added wrapper for generic CashScript via javascript.
+- Switched mainnet-js dependency on REST server to a symlinked package.
+- Fixed bug with fee estimation of small transactions.
 
 
 0.2.0
