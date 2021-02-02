@@ -232,7 +232,7 @@ const noCacheHeaders = {
   "Cache-Control": "no-cache",
   Pragma: "no-cache",
   Expires: "0",
-}
+};
 
 const axiosInstance = axios.create({
   headers: noCacheHeaders,
