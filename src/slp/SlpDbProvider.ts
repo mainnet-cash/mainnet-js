@@ -47,6 +47,7 @@ const servers = {
 };
 
 export class SlpDbProvider implements SlpProvider {
+  public caching: boolean = false;
   constructor(public network: Network = Network.MAINNET) {}
 
   // all utxos, including mint batons
@@ -199,7 +200,13 @@ export class SlpDbProvider implements SlpProvider {
     return cancelFn;
   }
 
-  private SlpDbQuery(queryObject: any): Promise<SlpDbResponse> {
+  public SlpDbQuery(queryObject: any): Promise<SlpDbResponse> {
+    if (this.caching) {
+      axiosInstance.defaults.headers = {};
+    } else {
+      axiosInstance.defaults.headers = noCacheHeaders;
+    }
+
     return new Promise((resolve, reject) => {
       const url = `${servers[this.network].slpdb}/q/${B64QueryString(
         queryObject
@@ -213,7 +220,7 @@ export class SlpDbProvider implements SlpProvider {
     });
   }
 
-  private SlpSocketEventSource(queryObject: any): EventSource {
+  public SlpSocketEventSource(queryObject: any): EventSource {
     const url = `${servers[this.network].slpsockserve}/s/${B64QueryString(
       queryObject
     )}`;
@@ -221,12 +228,14 @@ export class SlpDbProvider implements SlpProvider {
   }
 }
 
+const noCacheHeaders = {
+  "Cache-Control": "no-cache",
+  Pragma: "no-cache",
+  Expires: "0",
+}
+
 const axiosInstance = axios.create({
-  headers: {
-    "Cache-Control": "no-cache",
-    Pragma: "no-cache",
-    Expires: "0",
-  },
+  headers: noCacheHeaders,
 });
 
 const fetch_retry = (url, options = {}, n = 5) =>

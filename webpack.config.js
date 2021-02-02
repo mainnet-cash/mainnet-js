@@ -44,6 +44,7 @@ const nodeConfig = {
       name: "mainnet-js",
       main: "src/index.d.ts",
       out: "../dist/index.d.ts",
+      emitOnIncludedFileNotFound: true
     }),
   ],
 };
