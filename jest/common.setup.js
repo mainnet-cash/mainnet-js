@@ -11,7 +11,10 @@ function delay(ms) {
 
 process.on("unhandledRejection", console.error);
 
-module.exports = async function (cwd = ".") {
+module.exports = async function (cwd) {
+  if (cwd instanceof Object || cwd === undefined) {
+    cwd = ".";
+  }
   if (process.env.SKIP_REGTEST_INIT) {
     return;
   }
