@@ -7,7 +7,7 @@ function setupRateLimits(app) {
   // 1 per 15 minutes from the same ip
   const limiter1p15mIP = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1,
+    max: 5,
     message: message
   });
   app.use("/faucet/get_testnet_*/", limiter1p15mIP);

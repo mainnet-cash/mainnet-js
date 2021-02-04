@@ -1,6 +1,11 @@
 const path = require('path');
 const os = require('os');
 
+if (process.env.USE_DOTENV) {
+  require("dotenv").config({ path: "../../.env.regtest" });
+  require("dotenv").config({ path: "../../.env.testnet" });
+}
+
 const config = {
   ROOT_DIR: __dirname,
   URL_PORT: process.env.PORT ? parseInt(process.env.PORT) : 3000,
