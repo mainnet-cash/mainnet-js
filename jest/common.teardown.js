@@ -1,6 +1,10 @@
 const child_process = require("child_process");
 
-module.exports = async function (cwd = ".") {
+module.exports = async function (cwd) {
+  if (cwd instanceof Object || cwd === undefined) {
+    cwd = ".";
+  }
+
   if (process.env.SKIP_REGTEST_INIT) {
     return;
   }
