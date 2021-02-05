@@ -249,6 +249,12 @@ export class Wallet extends BaseWallet {
     return await this.deriveInfo();
   }
 
+   /**
+   * send Send some amount to an address
+   * 
+   * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility 
+   * 
+   */
   public async send(
     requests: SendRequest[] | SendRequestArray[], 
     options?: SendRequestOptionsI
@@ -585,7 +591,7 @@ export class Wallet extends BaseWallet {
 
     // get inputs
     let utxos: UtxoI[]
-    if(options && options?.utxoIds){
+    if(options && options.utxoIds){
       utxos = options.utxoIds.map(utxoId => UtxoItem.fromId(utxoId).asElectrum())
     }else{
       utxos = await this.getAddressUtxos(this.cashaddr);
@@ -702,9 +708,9 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
 
-    // get inputs
+    // get inputs from options or query all inputs
     let utxos: UtxoI[]
-    if(options && options?.utxoIds){
+    if(options && options.utxoIds){
       utxos = options.utxoIds.map(utxoId => UtxoItem.fromId(utxoId).asElectrum())
     }else{
       utxos = await this.getAddressUtxos(this.cashaddr);
