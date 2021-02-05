@@ -287,13 +287,15 @@ describe(`Watch only Wallets`, () => {
     if (!process.env.ALICE_TESTNET_WALLET_ID) {
       throw Error("Attempted to pass an empty address");
     } else {
-      let alice = await TestNetWallet.fromId(process.env.ALICE_TESTNET_WALLET_ID); // insert WIF from #1
+      let alice = await TestNetWallet.fromId(
+        process.env.ALICE_TESTNET_WALLET_ID
+      ); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       expect(alice.getPublicKeyHash()!.length).toBe(20);
-      let aliceBalance = await alice.send([{cashaddr:alice.cashaddr!, value:526, unit:'sat'}])
-      expect(aliceBalance.balance!.sat!).toBeGreaterThan(
-        5000 
-      );
+      let aliceBalance = await alice.send([
+        { cashaddr: alice.cashaddr!, value: 526, unit: "sat" },
+      ]);
+      expect(aliceBalance.balance!.sat!).toBeGreaterThan(5000);
     }
   });
 
@@ -505,7 +507,6 @@ describe(`Wallet subscriptions`, () => {
     await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
   });
 });
-
 
 describe(`Wallet extrema behavior regression testing`, () => {
   test(`Should operate very well above dust threshold (${

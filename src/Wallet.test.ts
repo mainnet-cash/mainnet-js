@@ -209,20 +209,29 @@ describe(`Test Wallet library`, () => {
       ]);
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
       expect(bobBalance.sat).toBe(3002);
-      let bobUtxos = await bob.getUtxos()
-      expect(bobUtxos.utxos!.length).toBe(3)
+      let bobUtxos = await bob.getUtxos();
+      expect(bobUtxos.utxos!.length).toBe(3);
 
       // Filter the list to only odd value utxos
-      let oddUtxoIds = bobUtxos.utxos!.filter(utxo =>  utxo.value % 2==1  ).map(utxo => {return utxo.utxoId})
+      let oddUtxoIds = bobUtxos
+        .utxos!.filter((utxo) => utxo.value % 2 == 1)
+        .map((utxo) => {
+          return utxo.utxoId;
+        });
 
       // Build Bob's wallet from a public address, check his balance.
-      let sendResponse2  = await bob.send([{
-        cashaddr: charlie.cashaddr!,
-        value: 1675,
-        unit: "satoshis",
-      },], {utxoIds: oddUtxoIds})
+      let sendResponse2 = await bob.send(
+        [
+          {
+            cashaddr: charlie.cashaddr!,
+            value: 1675,
+            unit: "satoshis",
+          },
+        ],
+        { utxoIds: oddUtxoIds }
+      );
       expect(sendResponse2.balance!.sat).toBe(1000);
-      expect(await charlie.getBalance('sat')).toBe(1675);
+      expect(await charlie.getBalance("sat")).toBe(1675);
     }
   });
 
@@ -259,16 +268,22 @@ describe(`Test Wallet library`, () => {
       ]);
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
       expect(bobBalance.sat).toBe(3002);
-      let bobUtxos = await bob.getUtxos()
-      expect(bobUtxos.utxos!.length).toBe(3)
+      let bobUtxos = await bob.getUtxos();
+      expect(bobUtxos.utxos!.length).toBe(3);
 
       // Filter the list to only odd value utxos
-      let oddUtxoIds = bobUtxos.utxos!.filter(utxo =>  utxo.value % 2==1  ).map(utxo => {return utxo.utxoId})
+      let oddUtxoIds = bobUtxos
+        .utxos!.filter((utxo) => utxo.value % 2 == 1)
+        .map((utxo) => {
+          return utxo.utxoId;
+        });
 
       // Build Bob's wallet from a public address, check his balance.
-      let sendResponse2  = await bob.sendMax(charlie.cashaddr!, {utxoIds: oddUtxoIds})
+      let sendResponse2 = await bob.sendMax(charlie.cashaddr!, {
+        utxoIds: oddUtxoIds,
+      });
       expect(sendResponse2.balance!.sat).toBe(1000);
-      expect(await charlie.getBalance('sat')).toBeGreaterThan(1500);
+      expect(await charlie.getBalance("sat")).toBeGreaterThan(1500);
     }
   });
 

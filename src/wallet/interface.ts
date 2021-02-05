@@ -34,8 +34,8 @@ export interface WalletInfoI {
 }
 
 export interface SendRequestOptionsI {
-  utxoIds?: string[]
-  changeAddress?: string
+  utxoIds?: string[];
+  changeAddress?: string;
 }
 
 export interface MnemonicI {

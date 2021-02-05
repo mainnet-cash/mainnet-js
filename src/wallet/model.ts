@@ -29,8 +29,6 @@ export class SendRequest {
   }
 }
 
-
-
 export type SendRequestArray = Array<string | number | UnitEnum>;
 
 export class UtxoItem {
@@ -39,46 +37,48 @@ export class UtxoItem {
   utxoId: string;
   txId: string;
 
-  constructor(
-    {index, value,txId}: {
-    index: number,
-    value: number,
-    txId: string
-  }){
-      this.value = value
-      this.txId = txId
-      this.index = index
-      this.utxoId = this.toString()
-    }
+  constructor({
+    index,
+    value,
+    txId,
+  }: {
+    index: number;
+    value: number;
+    txId: string;
+  }) {
+    this.value = value;
+    this.txId = txId;
+    this.index = index;
+    this.utxoId = this.toString();
+  }
 
-    public toString(){
-      return [this.txId, this.index, this.value].join(DELIMITER);
-    }
+  public toString() {
+    return [this.txId, this.index, this.value].join(DELIMITER);
+  }
 
-    public static fromId(utxoId: string){
-      let [txid, vout, satoshis] = utxoId.split(DELIMITER);
-      return new this({
-        txId: txid,
-        index: parseInt(vout),
-        value: parseInt(satoshis)
-      })
-    }
-    public static fromElectrum(u: UtxoI){
-      return new this({
-        txId: u.txid,
-        index: u.vout,
-        value: u.satoshis
-      })
-    }
+  public static fromId(utxoId: string) {
+    let [txid, vout, satoshis] = utxoId.split(DELIMITER);
+    return new this({
+      txId: txid,
+      index: parseInt(vout),
+      value: parseInt(satoshis),
+    });
+  }
+  public static fromElectrum(u: UtxoI) {
+    return new this({
+      txId: u.txid,
+      index: u.vout,
+      value: u.satoshis,
+    });
+  }
 
-    public asElectrum() : UtxoI {
-      return {
-        txid: this.txId,
-        vout: this.index,
-        satoshis: this.value
-      } as UtxoI
-    }
-
+  public asElectrum(): UtxoI {
+    return {
+      txid: this.txId,
+      vout: this.index,
+      satoshis: this.value,
+    } as UtxoI;
+  }
 }
 
 export class UtxoResponse {
