@@ -6,6 +6,10 @@ Newest changes
 - Switched mainnet-js dependency on REST server to a symlinked package.
 - Fixed bug with fee estimation of small transactions.
 
+- Added support for SLP tokens - create your own, send around and mint more!
+- Full NFT support comes later
+- Added support for SldDb communication, allowing generic queries too.
+- Regtest server now ships with SlpDb, slpserve and slpsockserve
 
 0.2.0
 -----
@@ -14,7 +18,7 @@ Newest changes
 - added browser specific module
 - get min relay fee dynamically
 - Moved escrow nonce to contractId to handle nonces automatically for user
-- added getInfo() wallet method and - REST Endpoint wallet/info 
+- added getInfo() wallet method and - REST Endpoint wallet/info
 - Wallets default to use mnemonic phrase seed by default
 - added getSeed(), fromSeed() wallet gitmethods
 

@@ -107,7 +107,7 @@ makeWsServer = (server) => {
 
 getSlpWallet = async (addr) => {
   return process.env.JEST_WORKER_ID === undefined ?
-    new mainnet.Wallet.fromSlpaddr(addr) :
+    mainnet.Wallet.fromSlpaddr(addr) :
     new mainnet.RegTestWallet().watchOnly(addr);
 };
 

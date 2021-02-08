@@ -11,7 +11,10 @@ function delay(ms) {
 
 process.on("unhandledRejection", console.error);
 
-module.exports = async function () {
+module.exports = async function (cwd) {
+  if (cwd instanceof Object || cwd === undefined) {
+    cwd = ".";
+  }
   if (process.env.SKIP_REGTEST_INIT) {
     return;
   }
@@ -29,9 +32,10 @@ module.exports = async function () {
   }
 
   if (global.fulcrumRegtest === undefined) {
-    global.fulcrumRegtest = spawnSync("./jest/docker/start.sh", null, {
+    global.fulcrumRegtest = spawnSync(`./jest/docker/start.sh`, null, {
       shell: false,
       stdio: "inherit",
+      cwd: cwd,
     });
     console.log("... OKAY");
   } else {
