@@ -201,16 +201,23 @@ describe(`Test Wallet library`, () => {
           value: 1000,
           unit: "satoshis",
         },
+        // Using a larger amount here to test that it would indeed return as change to the sender when specified later.
         {
           cashaddr: bob.cashaddr!,
-          value: 1001,
+          value: 10001,
+          unit: "satoshis",
+        },
+        // Using a second larger amount to assure that if too many utxos are specified, money the utxo isn't used
+        {
+          cashaddr: bob.cashaddr!,
+          value: 10001,
           unit: "satoshis",
         },
       ]);
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(3002);
+      expect(bobBalance.sat).toBe(22003);
       let bobUtxos = await bob.getUtxos();
-      expect(bobUtxos.utxos!.length).toBe(3);
+      expect(bobUtxos.utxos!.length).toBe(4);
 
       // Filter the list to only odd value utxos
       let oddUtxoIds = bobUtxos
@@ -230,7 +237,7 @@ describe(`Test Wallet library`, () => {
         ],
         { utxoIds: oddUtxoIds }
       );
-      expect(sendResponse2.balance!.sat).toBe(1000);
+      expect(sendResponse2.balance!.sat).toBe(19967);
       expect(await charlie.getBalance("sat")).toBe(1675);
     }
   });

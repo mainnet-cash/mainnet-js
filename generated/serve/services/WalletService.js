@@ -140,7 +140,7 @@ const send = ({ sendRequest }) => new Promise(
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
-      let resp = await wallet.send(sendRequest.to);
+      let resp = await wallet.send(sendRequest.to, sendRequest.options);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
@@ -163,7 +163,8 @@ const sendMax = ({ sendMaxRequest }) =>
         throw Error("Could not derive wallet");
       }
       let cashaddr = sendMaxRequest.cashaddr;
-      let resp = await wallet.sendMax(cashaddr);
+      let options = sendMaxRequest.options;
+      let resp = await wallet.sendMax(cashaddr, options);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
