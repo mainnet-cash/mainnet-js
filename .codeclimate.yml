@@ -7,4 +7,5 @@ exclude_patterns:
   - "**/*.test.headless.js"
   - "**/*.d.ts"
   - "generated/"
+  - "polyfill/"
   - "webpack.config.js"
