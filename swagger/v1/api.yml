@@ -787,7 +787,7 @@ components:
           example: 100
         utxoId:
           type: string
-          example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0"
+          example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005"
           description: serialized outpoint
       allOf:
         - $ref: "#/components/schemas/UnitType"
@@ -1125,6 +1125,8 @@ components:
         cashaddr:
            type: string
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        options:
+          $ref: "#/components/schemas/SlpSendRequestOptions"  
       required:
         - walletId
         - cashaddr
@@ -1141,7 +1143,7 @@ components:
           description: |
             (optional) if sending all funds to multiple addresses, the
             count of the number of address funds will be sent
-            to may be included.
+            to may be included.            
       required:
         - walletId
     SerializedWallet:
@@ -1268,6 +1270,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SendRequestItem"
+        options:
+          $ref: "#/components/schemas/SendRequestOptions"
       type: object
     SendRequestItem:
       properties:
@@ -1284,6 +1288,33 @@ components:
         - value
         - unit
       type: object
+    SendRequestOptions:
+      type: object
+      properties:
+        utxoIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/SerializedUtxo"
+        changeAddress:
+          type: string
+          example: "bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2"
+          description: |
+            Cash address to watch
+    SlpSendRequestOptions:
+      type: object
+      properties:
+        utxoIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/SlpSerializedUtxo"            
+    SerializedUtxo:
+      type: string
+      example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000"
+      description: Serialized unspent outpoint
+    SlpSerializedUtxo:
+      type: string
+      example: "shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000"
+      description: Slp Serialized unspent outpoint
     SendMaxResponse:
       properties:
         txId:
@@ -1599,6 +1630,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SlpSendRequestItem"
+        options:
+          $ref: "#/components/schemas/SlpSendRequestOptions"            
       type: object
       required:
         - walletId
@@ -1646,6 +1679,8 @@ components:
           type: string
           example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
           description: Token unique hexadecimal identifier, also the id of the token creation transaction
+        options:
+          $ref: "#/components/schemas/SlpSendRequestOptions"          
       required:
         - walletId
         - slpaddr

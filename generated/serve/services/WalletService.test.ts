@@ -242,6 +242,108 @@ describe("Test Wallet Endpoints", () => {
     }
   });
 
+  // This is an integration test of send w/utxoIds
+  test("Should send from specific utxos", async () => {
+   
+    // make a random wallet for bob
+      const bobsWalletResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      expect(bobsWalletResp.statusCode).toBe(200);
+      const bobsCashaddr = bobsWalletResp.body.cashaddr;
+
+      // send bob utxos worth 1001, 1000 & 1001
+      const sendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+          to: [
+            {
+              cashaddr: bobsCashaddr!,
+              value: 1001,
+              unit: "satoshis",
+            },
+            {
+              cashaddr: bobsCashaddr!,
+              value: 1000,
+              unit: "satoshis",
+            },
+            {
+              cashaddr: bobsCashaddr!,
+              value: 1001,
+              unit: "satoshis",
+            },
+          ]
+        });
+        expect(sendResp.statusCode).toBe(200);
+
+
+        // Check bob's balance
+      const bobBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: bobsWalletResp.body.walletId,
+      });
+      expect(bobBalanceResp.statusCode).toBe(200);
+      expect(bobBalanceResp.body.sat as number).toBe(3002);
+
+      // Get the utxoIds of bob's wallet
+      const utxoResp = await request(app)
+      .post("/wallet/utxo")
+      .send({
+        walletId: bobsWalletResp.body.walletId,
+      });
+      expect(utxoResp.statusCode).toBe(200);
+
+      // Filter utxoIds to a list of odd valued ones
+      let utxoIds = utxoResp.body.utxos!.filter((utxo) => utxo.value % 2 == 1)
+      .map((utxo) => {
+        return utxo.utxoId;
+      });
+
+      // create a random new wallet
+      const charliesWalletResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      expect(charliesWalletResp.statusCode).toBe(200);
+
+      // Send to charlie using odd valued utxoIds from bob
+      const finalSendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: bobsWalletResp.body.walletId,
+          to: [
+            {
+              cashaddr: charliesWalletResp.body.cashaddr!,
+              value: 1600,
+              unit: "satoshis",
+            },
+          ],
+          options:{"utxoIds":utxoIds}
+        });
+        expect(finalSendResp.statusCode).toBe(200);
+        
+        // Assure that bob now has 1 utxo
+      const utxoResp2 = await request(app)
+      .post("/wallet/utxo")
+      .send({
+        walletId: bobsWalletResp.body.walletId,
+      });
+      expect(utxoResp2.body.utxos!.length).toBe(1);
+
+      // Assure that bob still has 1000 sat
+      let bobBalanceResp2 = await request(app).post("/wallet/balance").send({
+        walletId: bobsWalletResp.body.walletId,
+      });
+      expect(bobBalanceResp2.body.sat).toBe(1000)
+
+      // Assure that charlie has the amount sent
+      let charlieBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: charliesWalletResp.body.walletId,
+      });
+      expect(charlieBalanceResp.body.sat).toBe(1600)
+  });
+
   /**
    * sendMax
    */
@@ -249,9 +351,9 @@ describe("Test Wallet Endpoints", () => {
   it("Should send all available funds", async () => {
     let bobWalletReq = {
       name:"Bob's Regtest Wallet",
-  type:"seed", 
-  network:"regtest"
-};
+      type:"seed", 
+      network:"regtest"
+    };
 
     const bobsWalletResp = await request(app)
       .post("/wallet/create")
@@ -285,6 +387,109 @@ describe("Test Wallet Endpoints", () => {
     expect(body.balance!.bch as number).toBe(0);
     expect(body.balance!.sat as number).toBe(0);
   });
+
+  // This is an integration test of sendMax w/utxoIds
+  test("Should send from specific utxos", async () => {
+   
+    // Create a random wallet to send utxos from
+    const bobsWalletResp = await request(app).post("/wallet/create").send({
+      type: "wif",
+      network: "regtest",
+    });
+    expect(bobsWalletResp.statusCode).toBe(200);
+    const bobsCashaddr = bobsWalletResp.body.cashaddr;
+
+    // send bob 1001,1000 & 1001 utxos
+    const sendResp = await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        to: [
+          {
+            cashaddr: bobsCashaddr!,
+            value: 1001,
+            unit: "satoshis",
+          },
+          {
+            cashaddr: bobsCashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+          {
+            cashaddr: bobsCashaddr!,
+            value: 1001,
+            unit: "satoshis",
+          },
+        ]
+      });
+      expect(sendResp.statusCode).toBe(200);
+      expect((sendResp.body.txId as string).length).toBe(64);
+
+      // request bob's balance 
+    const bobBalanceResp = await request(app).post("/wallet/balance").send({
+      walletId: bobsWalletResp.body.walletId,
+    });
+
+    // expect bob's balance is correct
+    expect(bobBalanceResp.statusCode).toBe(200);
+    expect(bobBalanceResp.body.sat as number).toBe(3002);
+
+    // get bob's utxos
+    const utxoResp = await request(app)
+    .post("/wallet/utxo")
+    .send({
+      walletId: bobsWalletResp.body.walletId,
+    });
+    expect(utxoResp.statusCode).toBe(200);
+    expect(utxoResp.body.utxos!.length).toBe(3);
+
+    // filter to just even odd valued utxos
+    let utxoIds = utxoResp.body.utxos!.filter((utxo) => utxo.value % 2 == 1)
+    .map((utxo) => {
+      return utxo.utxoId;
+    });
+    expect(utxoIds!.length).toBe(2);
+    
+    // create a random charlie wallet
+    const charliesWalletResp = await request(app).post("/wallet/create").send({
+      type: "wif",
+      network: "regtest",
+    });
+    expect(charliesWalletResp.statusCode).toBe(200);
+
+    // Send money from bob to charlie using only the odd utxos
+    const finalSendResp = await request(app)
+      .post("/wallet/send_max")
+      .send({
+        walletId: bobsWalletResp.body.walletId,
+        cashaddr: charliesWalletResp.body.cashaddr!,
+        options:{"utxoIds":utxoIds}
+      });
+      expect(finalSendResp.statusCode).toBe(200);
+
+      // Request bob's final balance
+    let bobBalanceResp2 = await request(app).post("/wallet/balance").send({
+      walletId: bobsWalletResp.body.walletId,
+    });
+
+    const utxoResp2 = await request(app)
+    .post("/wallet/utxo")
+    .send({
+      walletId: bobsWalletResp.body.walletId,
+    });
+
+    // Should only include the one even utxo
+    expect(utxoResp2.body.utxos!.length).toBe(1);
+    expect(utxoResp2.body.utxos[0].value).toBe(1000)
+
+
+    // Should have the balance sent 
+    let charlieBalanceResp = await request(app).post("/wallet/balance").send({
+      walletId: charliesWalletResp.body.walletId,
+    });
+    expect(charlieBalanceResp.body.sat).toBeGreaterThan(1600)
+});
+
   /**
    * utxos
    */

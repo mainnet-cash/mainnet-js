@@ -150,7 +150,21 @@ describe(`Create Contract Tests`, () => {
         value: 10000,
         unit: "satoshis",
       },
+      {
+        cashaddr: contract.getDepositAddress()!,
+        value: 10001,
+        unit: "satoshis",
+      },
     ]);
+
+    let contractUtxos = await contract.getUtxos();
+    // Filter the list to only odd value utxos
+    let oddUtxoIds = contractUtxos
+      .utxos!.filter((utxo) => utxo.value % 2 == 1)
+      .map((utxo) => {
+        return utxo.utxoId;
+      });
+
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString().slice(0, 8)).toBe("regtest:");
     let txn = await contract.runFunctionFromStrings({
@@ -162,11 +176,14 @@ describe(`Create Contract Tests`, () => {
         amount: 7000,
       },
       time: 215,
+      utxoIds: oddUtxoIds,
     } as CashscriptTransactionI);
     expect(txn.length).toBeGreaterThan(500);
 
+    let contractUtxos2 = await contract.getUtxos();
+    expect(await contractUtxos2.utxos[0].value).toBe(10000);
     await charlie.provider!.sendRawTransaction(txn);
-    expect(await contract.getBalance()).toBeLessThan(3000);
+    expect(await contract.getBalance()).toBeGreaterThan(12690);
     expect(await charlie.getBalance("sat")).toBe(7000);
   });
 });

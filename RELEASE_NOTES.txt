@@ -5,6 +5,7 @@ Newest changes
 - Added wrapper for generic CashScript via javascript.
 - Switched mainnet-js dependency on REST server to a symlinked package.
 - Fixed bug with fee estimation of small transactions.
+- Added option for sending from specific utxos to send and send max
 
 - Added support for SLP tokens - create your own, send around and mint more!
 - Full NFT support comes later
