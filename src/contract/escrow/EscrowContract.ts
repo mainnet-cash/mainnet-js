@@ -70,7 +70,13 @@ export class EscrowContract extends Contract {
         throw Error("Could not determine output address");
       }
     }
-    return await this._sendMax(wif, funcName, outputAddress, getHexOnly, utxoIds);
+    return await this._sendMax(
+      wif,
+      funcName,
+      outputAddress,
+      getHexOnly,
+      utxoIds
+    );
   }
 
   static getContractText() {
