@@ -12,7 +12,6 @@ import { Network, UtxoI } from "../interface";
 import { ContractI, CashscriptTransactionI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
-import { deserializeUtxo } from "../util/serializeUtxo";
 import {
   castConstructorParametersFromArtifact,
   castStringArgumentsFromArtifact,
@@ -21,6 +20,7 @@ import {
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
 import { ContractFunction } from "cashscript/dist/module/Contract";
+import { UtxoItem } from "../wallet/model";
 
 export class Contract implements ContractI {
   private script: string;
@@ -118,8 +118,11 @@ export class Contract implements ContractI {
    * Get the unspent transaction outputs of the contract
    * @returns A promise to the utxos of the contract
    */
-  public getUtxos() {
-    return this.contract.getUtxos();
+  public async getUtxos() {
+    return {utxos: (await this.contract.getUtxos()).map(u => {
+      return UtxoItem.fromElectrum(u)
+      })
+    }
   }
 
   /**
@@ -192,7 +195,7 @@ export class Contract implements ContractI {
     func = func.to(await transformContractToRequests(request.to));
     if (request.utxoIds) {
       let utxos = request.utxoIds.map((u) => {
-        return deserializeUtxo(u);
+        return UtxoItem.fromId(u).asElectrum();
       });
       func = func.from(utxos);
     }
@@ -245,7 +248,7 @@ export class Contract implements ContractI {
     funcName: string,
     outputAddress: string,
     getHexOnly = false,
-    utxos?: UtxoI[]
+    utxoIds?: string[]
   ) {
     const sig = new SignatureTemplate(wif);
     const secp256k1 = await instantiateSecp256k1();
@@ -261,8 +264,14 @@ export class Contract implements ContractI {
     const method = getHexOnly ? "build" : "send";
 
     // If no utxos were provided, automatically get them
-    if (typeof utxos === "undefined") {
+    let utxos
+    if (typeof utxoIds === "undefined") {
       utxos = await this.contract.getUtxos();
+    }else{
+      console.log("here")
+       utxos = utxoIds.map((u) => {
+        return UtxoItem.fromId(u).asElectrum();
+      });
     }
     if (utxos.length > 0) {
       try {

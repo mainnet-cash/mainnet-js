@@ -37,13 +37,12 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
     try {
       let contract = await mainnet.EscrowContract.fromId(escrowFnRequest.contractId);
       let wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
-      let utxos = escrowFnRequest.utxoIds ? escrowFnRequest.utxoIds.map(u => {return mainnet.Mainnet.deserializeUtxo(u)}) : undefined
       let resp = await contract._sendMax(
         wallet.privateKeyWif,
         escrowFnRequest.method, 
         escrowFnRequest.to,
         escrowFnRequest.getHexOnly, 
-        utxos
+        escrowFnRequest.utxoIds
         );
 
       resolve(Service.successResponse({

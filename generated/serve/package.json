@@ -28,7 +28,6 @@
     "js-yaml": "^3.3.0",
     "ono": "^5.0.1",
     "openapi-sampler": "^1.0.0-beta.15",
-    "mainnet-js":"latest",
     "swagger-ui-express": "^4.0.2",
     "winston": "^3.2.1"
   },

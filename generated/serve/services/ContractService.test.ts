@@ -1,7 +1,6 @@
 var server = require("../")
 import { RegTestWallet } from "../../../src/wallet/Wif";
-import { serializeUtxo } from "../../../src/util/serializeUtxo"
-import { UtxoI } from "../../../src/interface";
+import { UtxoItem } from "../../../src/wallet/model";
 var request = require("supertest");
 
 
@@ -177,7 +176,7 @@ describe("Test Contract Services", () => {
       contractId: contractId,
     });
     expect(utxoResp.statusCode).toEqual(200);
-    expect(utxoResp.body["0"].txid.length).toEqual(64);
+    expect(utxoResp.body.utxos[0].txId.length).toEqual(64);
 
 
   });
@@ -216,18 +215,10 @@ describe("Test Contract Services", () => {
               unit: 'satoshis',
               value: 21000,
             },
-          ],
-        });
-
-    await request(app)
-        .post("/wallet/send")
-        .send({
-          walletId: buyerId,
-          to: [
             {
               cashaddr: contractAddress,
               unit: 'satoshis',
-              value: 21000,
+              value: 21001,
             },
           ],
         });
@@ -237,10 +228,12 @@ describe("Test Contract Services", () => {
     });
 
     expect(utxoResp.statusCode).toEqual(200);
-    expect(utxoResp.body["1"].satoshis).toEqual(21000);
+    expect(utxoResp.body.utxos[0].value).toEqual(21000);
+    expect(utxoResp.body.utxos[1].value).toEqual(21001);
     
-    let utxos = [serializeUtxo(utxoResp.body["1"] as UtxoI)]
+    let utxos = [utxoResp.body.utxos[0].utxoId]
 
+    console.log(utxos)
     const respSpend = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
@@ -266,7 +259,8 @@ describe("Test Contract Services", () => {
     });
     
     expect(utxo2Resp.statusCode).toEqual(200);
-    expect(utxo2Resp.body["0"].satoshis).toEqual(21000);
+    console.log(utxo2Resp.body)
+    expect(utxo2Resp.body.utxos.length).toEqual(1);
 
   });
 
@@ -327,7 +321,8 @@ describe("Test Contract Services", () => {
     });
 
     expect(utxoResp.statusCode).toEqual(200);
-    expect(utxoResp.body["0"].satoshis).toEqual(21000);
+    console.log(utxoResp.body.utxos)
+    expect(utxoResp.body.utxos[0].value).toEqual(21000);
     
     let respSpend = await request(app).post("/contract/call").send({
       contractId: contractId,
