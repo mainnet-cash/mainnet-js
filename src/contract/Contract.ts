@@ -119,10 +119,11 @@ export class Contract implements ContractI {
    * @returns A promise to the utxos of the contract
    */
   public async getUtxos() {
-    return {utxos: (await this.contract.getUtxos()).map(u => {
-      return UtxoItem.fromElectrum(u)
-      })
-    }
+    return {
+      utxos: (await this.contract.getUtxos()).map((u) => {
+        return UtxoItem.fromElectrum(u);
+      }),
+    };
   }
 
   /**
@@ -264,12 +265,12 @@ export class Contract implements ContractI {
     const method = getHexOnly ? "build" : "send";
 
     // If no utxos were provided, automatically get them
-    let utxos
+    let utxos;
     if (typeof utxoIds === "undefined") {
       utxos = await this.contract.getUtxos();
-    }else{
-      console.log("here")
-       utxos = utxoIds.map((u) => {
+    } else {
+      console.log("here");
+      utxos = utxoIds.map((u) => {
         return UtxoItem.fromId(u).asElectrum();
       });
     }
