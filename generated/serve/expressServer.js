@@ -37,7 +37,7 @@ class ExpressServer {
     this.app.use(cors());
     const latest = fs.readdirSync(__dirname + '/node_modules/mainnet-js/dist/').filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
     this.app.use('/scripts/mainnet.js', express.static(__dirname + `/node_modules/mainnet-js/dist/${latest}`));
-    this.app.use(express.static('static'));
+    this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
     this.app.use(timeout(`${config.TIMEOUT}s`));

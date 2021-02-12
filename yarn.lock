@@ -275,6 +275,11 @@
   resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.17.3.tgz#4a29ff6a8b157d10050f0ba3c0f5a062805536d6"
   integrity sha512-F8RewY6td3fyIQaUTMO1lV/aWLotB3HZ0UWKRCC+4pJbNCKlh8WLNNkiIPAFn6Mf3sPgYgrUnS3YlLRqMhzv7g==
 
+"@bitauth/libauth@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.18.0.tgz#e1ada70befd9a2aaada27da4cf16413ae33829d4"
+  integrity sha512-xi5Ejji7Q+SFaPkWz8GPMi5mZLLhFdHkEn10M23vXlRoh2dC/aLEfNsdiDpS4vPWJjWbSg3fzzBb9SGlExnEeg==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
