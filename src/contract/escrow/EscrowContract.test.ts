@@ -118,7 +118,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
 
     expect(await escrow.getBalance()).toBeGreaterThan(18000);
-    let utxos = (await escrow.getUtxos()).slice(0, 2);
+    let utxos = (await escrow.getUtxos()).utxos.slice(0, 2).map((u) => {
+      return u.utxoId;
+    });
 
     // spend the escrow contract
     await escrow.run(buyer.privateKeyWif!, "spend", undefined, false, utxos);

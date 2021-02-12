@@ -1,5 +1,5 @@
 const { spawnSync } = require("child_process");
-import { browserNotSupported } from "./util/browserNotSupported";
+import { browserNotSupported } from "../util/browserNotSupported";
 /**
  * Mine blocks to a regtest address
  *

@@ -14,7 +14,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.28
+  version: 0.2.29
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -799,7 +799,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/UnitType'
       example:
-        utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
         index: 0.8008281904610115
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
         value: 100
@@ -815,7 +815,7 @@ components:
           type: number
         utxoId:
           description: serialized outpoint
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
           type: string
       required:
       - txId
@@ -1233,6 +1233,10 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        options:
+          utxoIds:
+          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
       properties:
         walletId:
           description: |
@@ -1242,6 +1246,8 @@ components:
         cashaddr:
           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           type: string
+        options:
+          $ref: '#/components/schemas/SlpSendRequestOptions'
       required:
       - cashaddr
       - walletId
@@ -1256,10 +1262,9 @@ components:
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         output_count:
-          description: |
-            (optional) if sending all funds to multiple addresses, the
-            count of the number of address funds will be sent
-            to may be included.
+          description: "(optional) if sending all funds to multiple addresses, the\n\
+            count of the number of address funds will be sent\nto may be included.\
+            \            \n"
           format: int32
           type: integer
       required:
@@ -1287,11 +1292,11 @@ components:
     UtxoResponse:
       example:
         utxos:
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
           index: 0.8008281904610115
           txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           value: 100
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
           index: 0.8008281904610115
           txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           value: 100
@@ -1400,6 +1405,11 @@ components:
     SendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        options:
+          changeAddress: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+          utxoIds:
+          - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
+          - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
         to:
         - cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           value: 100
@@ -1415,6 +1425,8 @@ components:
           items:
             $ref: '#/components/schemas/SendRequestItem'
           type: array
+        options:
+          $ref: '#/components/schemas/SendRequestOptions'
       type: object
     SendRequestItem:
       allOf:
@@ -1434,6 +1446,42 @@ components:
       - unit
       - value
       type: object
+    SendRequestOptions:
+      example:
+        changeAddress: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+        utxoIds:
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
+      properties:
+        utxoIds:
+          items:
+            $ref: '#/components/schemas/SerializedUtxo'
+          type: array
+        changeAddress:
+          description: |
+            Cash address to watch
+          example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+          type: string
+      type: object
+    SlpSendRequestOptions:
+      example:
+        utxoIds:
+        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+      properties:
+        utxoIds:
+          items:
+            $ref: '#/components/schemas/SlpSerializedUtxo'
+          type: array
+      type: object
+    SerializedUtxo:
+      description: Serialized unspent outpoint
+      example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
+      type: string
+    SlpSerializedUtxo:
+      description: Slp Serialized unspent outpoint
+      example: shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+      type: string
     SendMaxResponse:
       example:
         balance:
@@ -1806,6 +1854,10 @@ components:
     SlpSendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        options:
+          utxoIds:
+          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
         to:
         - tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
@@ -1823,6 +1875,8 @@ components:
           items:
             $ref: '#/components/schemas/SlpSendRequestItem'
           type: array
+        options:
+          $ref: '#/components/schemas/SlpSendRequestOptions'
       required:
       - to
       - walletId
@@ -1870,6 +1924,10 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        options:
+          utxoIds:
+          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
       properties:
         walletId:
           description: |
@@ -1884,6 +1942,8 @@ components:
             creation transaction
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
+        options:
+          $ref: '#/components/schemas/SlpSendRequestOptions'
       required:
       - slpaddr
       - tokenId

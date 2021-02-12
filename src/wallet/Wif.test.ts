@@ -283,6 +283,22 @@ describe(`Watch only Wallets`, () => {
     }
   });
 
+  test("Should send to a testnet coins to a random address", async () => {
+    if (!process.env.ALICE_TESTNET_WALLET_ID) {
+      throw Error("Attempted to pass an empty address");
+    } else {
+      let alice = await TestNetWallet.fromId(
+        process.env.ALICE_TESTNET_WALLET_ID
+      ); // insert WIF from #1
+      // Build Bob's wallet from a public address, check his balance.
+      expect(alice.getPublicKeyHash()!.length).toBe(20);
+      let aliceBalance = await alice.send([
+        { cashaddr: alice.cashaddr!, value: 526, unit: "sat" },
+      ]);
+      expect(aliceBalance.balance!.sat!).toBeGreaterThan(5000);
+    }
+  });
+
   test("Should get the testnet wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {

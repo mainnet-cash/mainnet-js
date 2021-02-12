@@ -4,7 +4,7 @@ import { Network } from "../interface";
 import { initProviders, disconnectProviders } from "../network/Connection";
 
 import { RegTestWallet } from "../wallet/Wif";
-import { mine } from "../mine";
+import { mine } from "../mine/mine";
 
 let worker: WebhookWorker;
 let responses: any = {};

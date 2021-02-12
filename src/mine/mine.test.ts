@@ -1,5 +1,5 @@
 import { mine } from "./mine";
-import { RegTestWallet } from "./wallet/Wif";
+import { RegTestWallet } from "../wallet/Wif";
 
 describe(`Test Mining on Regtest`, () => {
   test("Should mine two blocks", async () => {

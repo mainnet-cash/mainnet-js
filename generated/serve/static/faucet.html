@@ -106,7 +106,7 @@
           const wallet = await Wallet.fromCashaddr(json.bchtest);
           this.balance = await wallet.slpAware().getBalance("bch");
 
-          const slpWallet = await Wallet.fromSlpaddr(caddr);
+          const slpWallet = await Wallet.fromSlpaddr(json.slptest);
           this.slpbalances = await slpWallet.slp.getAllBalances();
         } catch (error) {
           alert(error.message);
