@@ -28,7 +28,6 @@ export class BaseWallet implements WalletI {
    * @throws {Error} if called on BaseWallet
    */
   constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
-
     this.name = name;
     this.networkPrefix = networkPrefix;
 
@@ -111,9 +110,9 @@ export class BaseWallet implements WalletI {
 
   /**
    * _fromId - creates a wallet from serialized string
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @throws {Error} if called on BaseWallet
    */
   public _fromId(secret?: string): Promise<this> {
@@ -123,7 +122,7 @@ export class BaseWallet implements WalletI {
 
   /**
    * toDbString - store the serialized version of the wallet in the database, not just the name
-   * 
+   *
    * @throws {Error} if called on BaseWallet
    */
   public toDbString(): string {

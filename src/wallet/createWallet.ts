@@ -12,8 +12,7 @@ import {
 } from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
 
-
-// Convenience map to access classes by types and network 
+// Convenience map to access classes by types and network
 export const walletClassMap = {
   wif: {
     mainnet: () => {

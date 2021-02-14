@@ -365,9 +365,9 @@ export class Wallet extends BaseWallet {
   ): Promise<SendResponse> {
     let txId = await this.sendMaxRaw(cashaddr, options);
     return {
-      txId : txId,
-      balance : (await this.getBalance()) as BalanceResponse
-    }
+      txId: txId,
+      balance: (await this.getBalance()) as BalanceResponse,
+    };
   }
 
   public async sendMaxRaw(cashaddr: string, options?: SendRequestOptionsI) {
@@ -387,14 +387,14 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-	 * getDepositAddress - get a wallet deposit address
-   * 
-   * a high-level function, 
-   * 
+   * getDepositAddress - get a wallet deposit address
+   *
+   * a high-level function,
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositAddress|/wallet/deposit_address} for REST endpoint
-	 *
-	 * @returns The deposit address as a string
-	 */
+   *
+   * @returns The deposit address as a string
+   */
   public getDepositAddress(): string {
     if (this.cashaddr) {
       return this.cashaddr;

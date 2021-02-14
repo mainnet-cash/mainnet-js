@@ -11,7 +11,6 @@ const contractClassMap = {
   },
 };
 
-
 /**
  * createContract - Create a new contract, from a json request
  * @param body A create contract request

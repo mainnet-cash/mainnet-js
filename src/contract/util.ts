@@ -11,7 +11,7 @@ import { amountInSatoshi } from "../util/amountInSatoshi";
 import { walletFromId } from "../wallet/createWallet";
 import { SendRequest } from "../wallet/model";
 
-// TODO - DELETE ME 
+// TODO - DELETE ME
 // export type Op = number;
 // export type OpOrData = Op | Uint8Array;
 // export type Script = OpOrData[];
@@ -31,9 +31,9 @@ import { SendRequest } from "../wallet/model";
 // TODO - DELETE ME
 // /**
 //  * bytecodeToAsm - convert bytecode to assembly
-//  * 
+//  *
 //  * low-level utility function
-//  * 
+//  *
 //  * @param bytecode Bitcoin Script bytecode as Uint8Array
 //  * @returns assembly code as string
 //  */
@@ -54,9 +54,9 @@ import { SendRequest } from "../wallet/model";
 
 /**
  * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input
- * 
+ *
  * low-level utility function
- * 
+ *
  * @param parameters String arguments to construct inputs from
  * @param inputs The name and type of required arguments for the transaction constructor
  * @returns A list of constructor parameters
