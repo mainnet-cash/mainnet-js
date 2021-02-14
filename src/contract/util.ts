@@ -11,39 +11,52 @@ import { amountInSatoshi } from "../util/amountInSatoshi";
 import { walletFromId } from "../wallet/createWallet";
 import { SendRequest } from "../wallet/model";
 
-export type Op = number;
-export type OpOrData = Op | Uint8Array;
-export type Script = OpOrData[];
+// TODO - DELETE ME 
+// export type Op = number;
+// export type OpOrData = Op | Uint8Array;
+// export type Script = OpOrData[];
 
-export function bytecodeToScript(bytecode: Uint8Array): Script {
-  // Convert the bytecode to AuthenticationInstructions
-  const instructions = parseBytecode(bytecode) as AuthenticationInstructions;
+// export function bytecodeToScript(bytecode: Uint8Array): Script {
+//   // Convert the bytecode to AuthenticationInstructions
+//   const instructions = parseBytecode(bytecode) as AuthenticationInstructions;
 
-  // Convert the AuthenticationInstructions to script elements
-  const script = instructions.map((instruction) =>
-    "data" in instruction ? instruction.data : instruction.opcode
-  );
+//   // Convert the AuthenticationInstructions to script elements
+//   const script = instructions.map((instruction) =>
+//     "data" in instruction ? instruction.data : instruction.opcode
+//   );
 
-  return script;
-}
+//   return script;
+// }
 
-export function bytecodeToAsm(bytecode: Uint8Array): string {
-  // Convert the bytecode to libauth's ASM format
-  let asm = disassembleBytecodeBCH(bytecode);
+// TODO - DELETE ME
+// /**
+//  * bytecodeToAsm - convert bytecode to assembly
+//  * 
+//  * low-level utility function
+//  * 
+//  * @param bytecode Bitcoin Script bytecode as Uint8Array
+//  * @returns assembly code as string
+//  */
+// export function bytecodeToAsm(bytecode: Uint8Array): string {
+//   // Convert the bytecode to libauth's ASM format
+//   let asm = disassembleBytecodeBCH(bytecode);
 
-  // COnvert libauth's ASM format to BITBOX's
-  asm = asm.replace(/OP_PUSHBYTES_[^\s]+/g, "");
-  asm = asm.replace(/OP_PUSHDATA[^\s]+ [^\s]+/g, "");
-  asm = asm.replace(/(^|\s)0x/g, " ");
+//   // Convert libauth's ASM format to BITBOX's
+//   asm = asm.replace(/OP_PUSHBYTES_[^\s]+/g, "");
+//   asm = asm.replace(/OP_PUSHDATA[^\s]+ [^\s]+/g, "");
+//   asm = asm.replace(/(^|\s)0x/g, " ");
 
-  // Remove any duplicate whitespace
-  asm = asm.replace(/\s+/g, " ").trim();
+//   // Remove any duplicate whitespace
+//   asm = asm.replace(/\s+/g, " ").trim();
 
-  return asm;
-}
+//   return asm;
+// }
 
 /**
- * Cast string arguments to form suitable for the appropriate cashscript contract constructor input
+ * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input
+ * 
+ * low-level utility function
+ * 
  * @param parameters String arguments to construct inputs from
  * @param inputs The name and type of required arguments for the transaction constructor
  * @returns A list of constructor parameters

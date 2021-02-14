@@ -40,7 +40,7 @@ export class Contract implements ContractI {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
-    this.artifact = this.getArtifact();
+    this.artifact = CashCompiler.compileString(script);
     this.provider = getNetworkProvider(this.network);
     this.contract = this.getContractInstance();
     this.nonce = nonce ? nonce : getRandomInt(2147483647);
@@ -53,27 +53,15 @@ export class Contract implements ContractI {
   getNonce() {
     return this.nonce;
   }
+ 
 
-  getArtifact() {
-    const contractText = this.script;
-    if (typeof contractText === "string") {
-      return CashCompiler.compileString(contractText);
-    }
-    // If the contract text is not a string, it's an error to be thrown
-    else {
-      throw contractText;
-    }
-  }
-
-  private getSerializedParameters() {
-    return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
-  }
-
-  private getSerializedScript() {
-    return btoa(this.script);
-  }
-
-  // Serialize the contract
+  /**
+   * toString - Serialize a contract as a string
+   * 
+   * an intermediate function
+	 *
+   * @returns A serialized contract
+   */
   public toString() {
     return [
       this.network,
@@ -83,7 +71,35 @@ export class Contract implements ContractI {
     ].join(DELIMITER);
   }
 
-  // Deserialize from a string
+  /**
+   * getSerializedScript - Serialize just the script component of a contract
+   * 
+   * a low-level function
+	 *
+   * @returns A serialized script
+   */
+  private getSerializedScript() {
+    return btoa(this.script);
+  }
+
+  /**
+   * getSerializedParameters - Serialize just the parameters of a contract
+   * 
+   * a low-level function
+	 *
+   * @returns A serialized script
+   */
+  private getSerializedParameters() {
+    return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
+  }
+
+  /**
+   * fromId - Deserialize a contract from a string
+   * 
+   * an intermediate function
+	 *
+   * @returns A new contract
+   */
   public static fromId(contractId: string) {
     let [network, serializedParams, serializedScript, nonce] = contractId.split(
       DELIMITER
@@ -98,7 +114,14 @@ export class Contract implements ContractI {
     return new Contract(script, params, network as Network, parseInt(nonce));
   }
 
-  // Static convenience constructor
+  /**
+   * _create - Static convenience method for the constructor
+   * 
+   * an intermediate function similar to the constructor for rest
+	 *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
+   * @returns A new contract
+   */
   static _create(
     script: string,
     parameters: string[],
@@ -116,7 +139,11 @@ export class Contract implements ContractI {
 
   /**
    * Get the unspent transaction outputs of the contract
-   * @returns A promise to the utxos of the contract
+   * 
+   * a high-level function
+	 *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/contractUtxos|/contract/utxos} REST endpoint
+   * @returns A list of utxos on the contract
    */
   public async getUtxos() {
     return {
@@ -134,6 +161,10 @@ export class Contract implements ContractI {
     return this.contract.getBalance();
   }
 
+  /**
+   * getContractInstance - get the object directly as a cashscript contract.
+   * @returns A Cashscript Contract
+   */
   private getContractInstance() {
     return new CashScriptContract(
       this.artifact,
@@ -143,7 +174,7 @@ export class Contract implements ContractI {
   }
 
   /**
-   * Get a contract object the wrapper object
+   * fromCashScript - initialize the artifact and cashscript object from existing script
    * @returns A cashscript Contract
    */
   public fromCashScript() {
@@ -158,7 +189,7 @@ export class Contract implements ContractI {
    * @param parameters Contract constructor arguments
    * @param network Network for the contract
    * @param nonce A unique number to differentiate the contract
-   * @returns A cashscript Contract
+   * @returns A new Contract
    */
   public static fromCashScript(
     script: string,

@@ -20,9 +20,16 @@ export class BaseWallet implements WalletI {
   networkType: NetworkType;
   network: NetworkEnum;
 
+  /**
+   * constructor for a new wallet
+   * @param {string} name              name of the wallet
+   * @param networkPrefix              network for wallet
+   *
+   * @throws {Error} if called on BaseWallet
+   */
   constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
-    this.name = name;
 
+    this.name = name;
     this.networkPrefix = networkPrefix;
 
     switch (this.networkPrefix) {
@@ -49,7 +56,6 @@ export class BaseWallet implements WalletI {
    * generate creates a new wallet
    * @throws {Error} if called on BaseWallet
    */
-
   generate(): Promise<this> {
     throw Error("Cannot generate with the baseWallet class");
   }
@@ -104,7 +110,10 @@ export class BaseWallet implements WalletI {
   };
 
   /**
-   * _fromId (internal) creates a wallet from serialized string
+   * _fromId - creates a wallet from serialized string
+   * 
+   * 
+   * 
    * @throws {Error} if called on BaseWallet
    */
   public _fromId(secret?: string): Promise<this> {
@@ -113,7 +122,8 @@ export class BaseWallet implements WalletI {
   }
 
   /**
-   * toDbString store the serialized version of the wallet in the database, not just the name
+   * toDbString - store the serialized version of the wallet in the database, not just the name
+   * 
    * @throws {Error} if called on BaseWallet
    */
   public toDbString(): string {

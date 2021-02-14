@@ -12,6 +12,8 @@ import {
 } from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
 
+
+// Convenience map to access classes by types and network 
 export const walletClassMap = {
   wif: {
     mainnet: () => {
@@ -48,6 +50,11 @@ export const walletClassMap = {
   },
 };
 
+/**
+ * Create a new wallet
+ * @param body A wallet request object
+ * @returns A promise to a new wallet object
+ */
 export async function createWallet(body: WalletRequestI): Promise<Wallet> {
   let wallet;
   let walletType = body.type ? body.type : "seed";
@@ -93,6 +100,11 @@ export async function createWalletResponse(
   }
 }
 
+/**
+ * asJsonResponse return a wallet as json
+ * @param wallet A wallet object
+ * @returns A json wallet response
+ */
 function asJsonResponse(wallet: Wallet): WalletResponseI {
   if (wallet.mnemonic) {
     return {
@@ -113,6 +125,11 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
   }
 }
 
+/**
+ * walletFromId - get a wallet from a serialized wallet
+ * @param {string} walletId A serialized wallet object
+ * @returns A wallet
+ */
 export async function walletFromId(walletId: string): Promise<any> {
   let [walletType, network]: string[] = walletId.split(":");
 
