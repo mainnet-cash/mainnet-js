@@ -2,6 +2,8 @@ const path = require('path');
 const os = require('os');
 
 if (process.env.USE_DOTENV) {
+  require("dotenv").config({ path: ".env.regtest" });
+  require("dotenv").config({ path: ".env.testnet" });
   require("dotenv").config({ path: "../../.env.regtest" });
   require("dotenv").config({ path: "../../.env.testnet" });
 }

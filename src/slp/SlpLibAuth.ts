@@ -17,13 +17,7 @@ import { UnitEnum } from "../enum";
 import { toCashAddress } from "../util/bchaddr";
 
 export const bigIntToBinUint64BE = (value) => {
-  const uint64Length = 8;
-  const bin = new Uint8Array(uint64Length);
-  const writeAsLittleEndian = false;
-  const view = new DataView(bin.buffer, bin.byteOffset, bin.byteLength);
-  // eslint-disable-next-line functional/no-expression-statement
-  view.setBigUint64(0, value, writeAsLittleEndian);
-  return bin;
+  return bigIntToBinUint64LE(value).reverse();
 };
 
 const stringToBin = (value, hex = false) => {
