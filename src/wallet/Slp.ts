@@ -299,7 +299,9 @@ export class Slp {
    *
    * @returns Token Id and new token balance
    */
-  public async nftParentGenesis(options: SlpGenesisOptions): Promise<SlpGenesisResult> {
+  public async nftParentGenesis(
+    options: SlpGenesisOptions
+  ): Promise<SlpGenesisResult> {
     options.type = SlpTokenType.NftParent;
     let result = await this._processGenesis(options);
     return {
@@ -316,8 +318,14 @@ export class Slp {
    *
    * @returns Token Id and new token balance
    */
-  public async nftChildGenesis(parentTokenId: string, options: SlpGenesisOptions): Promise<SlpGenesisResult> {
-    let parentUtxos = await this.provider.SlpSpendableUtxos(this.slpaddr, parentTokenId);
+  public async nftChildGenesis(
+    parentTokenId: string,
+    options: SlpGenesisOptions
+  ): Promise<SlpGenesisResult> {
+    let parentUtxos = await this.provider.SlpSpendableUtxos(
+      this.slpaddr,
+      parentTokenId
+    );
     parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
     if (!parentUtxos.length) {
@@ -325,13 +333,21 @@ export class Slp {
     }
 
     if (parentUtxos[0].type !== SlpTokenType.NftParent) {
-      throw new Error(`The 'parentTokenId' is not of type ${SlpTokenType.NftParent}`);
+      throw new Error(
+        `The 'parentTokenId' is not of type ${SlpTokenType.NftParent}`
+      );
     }
 
     // we are about to spend exactly 1 NFT parent
     // if we do not have it, we have to make one by splitting
     if (parentUtxos[0].value.isGreaterThan(new BigNumber(1))) {
-      await this.send([{ slpaddr: this.slpaddr, tokenId: parentTokenId, value: new BigNumber(1) }]);
+      await this.send([
+        {
+          slpaddr: this.slpaddr,
+          tokenId: parentTokenId,
+          value: new BigNumber(1),
+        },
+      ]);
       return await this.nftChildGenesis(parentTokenId, options);
     }
 
@@ -355,18 +371,19 @@ export class Slp {
    *
    * @returns the created tokenId (which is genesis transaction id) and token balance
    */
-  private async _processGenesis(options: SlpGenesisOptions, ensureInputs: UtxoI[] = []) {
+  private async _processGenesis(
+    options: SlpGenesisOptions,
+    ensureInputs: UtxoI[] = []
+  ) {
     options = this.substituteOptionals(options);
 
-    let slpOutputsResult = await SlpGetGenesisOutputs(
-      options
-    );
+    let slpOutputsResult = await SlpGetGenesisOutputs(options);
 
     let fundingBchUtxos = await this.wallet
       .slpAware(true)
       .getAddressUtxos(this.wallet.cashaddr!);
 
-    fundingBchUtxos = [...ensureInputs, ...fundingBchUtxos]
+    fundingBchUtxos = [...ensureInputs, ...fundingBchUtxos];
 
     return this.processSlpTransaction(fundingBchUtxos, slpOutputsResult);
   }
@@ -478,13 +495,8 @@ export class Slp {
    *
    * @returns transaction id and token balance
    */
-  public async mint(
-    options: SlpMintOptions
-  ): Promise<SlpMintResult> {
-
-    let [actualTokenId, result] = await this._processMint(
-      options
-    );
+  public async mint(options: SlpMintOptions): Promise<SlpMintResult> {
+    let [actualTokenId, result] = await this._processMint(options);
     return {
       txId: result,
       balance: await this.getBalance(actualTokenId),
@@ -502,25 +514,25 @@ export class Slp {
    *
    * @returns the tokenId and minting transaction id
    */
-  private async _processMint(
-    options: SlpMintOptions
-  ) {
+  private async _processMint(options: SlpMintOptions) {
     options = this.substituteOptionals(options);
 
     options.value = new BigNumber(options.value);
-    if (options.value.isLessThanOrEqualTo(0) && options.batonReceiverSlpAddr === this.slpaddr) {
+    if (
+      options.value.isLessThanOrEqualTo(0) &&
+      options.batonReceiverSlpAddr === this.slpaddr
+    ) {
       throw Error("Mint amount should be greater than zero");
     }
 
     const slpBatonUtxos = await this.getBatonUtxos(options.tokenId);
     if (!slpBatonUtxos.length) {
-      throw Error(`You do not possess the minting baton for ${options.tokenId}`);
+      throw Error(
+        `You do not possess the minting baton for ${options.tokenId}`
+      );
     }
 
-    let slpOutputsResult = await SlpGetMintOutputs(
-      options,
-      slpBatonUtxos
-    );
+    let slpOutputsResult = await SlpGetMintOutputs(options, slpBatonUtxos);
 
     let bchUtxos = await this.wallet
       .slpAware(true)

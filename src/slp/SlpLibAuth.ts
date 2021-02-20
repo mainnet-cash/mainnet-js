@@ -9,7 +9,13 @@ import {
 import { parseSLP } from "slp-parser";
 
 import { SendRequest } from "../wallet/model";
-import { SlpGenesisOptions, SlpMintOptions, SlpSendRequest, SlpTokenType, SlpUtxoI } from "../slp/interface";
+import {
+  SlpGenesisOptions,
+  SlpMintOptions,
+  SlpSendRequest,
+  SlpTokenType,
+  SlpUtxoI,
+} from "../slp/interface";
 
 import BigNumber from "bignumber.js";
 import { DUST_UTXO_THRESHOLD } from "../constant";
@@ -29,11 +35,13 @@ const stringToBin = (value, hex = false) => {
   return Uint8Array.from([...[length], ...utf8ToBin(value)]);
 };
 
-const supportedTokenTypes = [SlpTokenType.Type1, SlpTokenType.NftParent, SlpTokenType.NftChild];
+const supportedTokenTypes = [
+  SlpTokenType.Type1,
+  SlpTokenType.NftParent,
+  SlpTokenType.NftChild,
+];
 
-export const SlpGetGenesisOutputs = async (
-  options: SlpGenesisOptions
-) => {
+export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
   if (!options.type) {
     options.type = SlpTokenType.Type1;
   }
@@ -73,7 +81,7 @@ export const SlpGetGenesisOutputs = async (
     options.initialAmount.shiftedBy(options.decimals)
   );
 
-  const batonVout = options.endBaton ? [0x4c,0x00] : [0x01,0x02];
+  const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
   let genesisTxoBytecode = compiler.generateBytecode("genesis_lock", {
     bytecode: {
@@ -84,11 +92,14 @@ export const SlpGetGenesisOutputs = async (
       g_token_document_hash: stringToBin(options.documentHash, true),
       g_decimals: Uint8Array.from([...[0x01], ...[options.decimals]]),
       g_mint_baton_vout: Uint8Array.from(batonVout),
-      g_initial_token_mint_quantity: Uint8Array.from([...[0x08], ...bigIntToBinUint64BE(rawTokenAmount)]),
+      g_initial_token_mint_quantity: Uint8Array.from([
+        ...[0x08],
+        ...bigIntToBinUint64BE(rawTokenAmount),
+      ]),
     },
   });
   if (!genesisTxoBytecode.success) {
-    throw new Error(genesisTxoBytecode.errors.map(e => e.error).join("\n"));
+    throw new Error(genesisTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
 
   return {
@@ -133,18 +144,21 @@ export const SlpGetMintOutputs = async (
   const decimals = slpBatonUtxos[0].decimals;
   const amount = new BigNumber(options.value).shiftedBy(decimals);
 
-  const batonVout = options.endBaton ? [0x4c,0x00] : [0x01,0x02];
+  const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
   let mintTxoBytecode = compiler.generateBytecode("mint_lock", {
     bytecode: {
       m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
       m_token_id: hexToBin(options.tokenId),
       m_mint_baton_vout: Uint8Array.from(batonVout),
-      m_additional_token_quantity: Uint8Array.from([...[0x08], ...bigIntToBinUint64BE(BigInt(amount))]),
+      m_additional_token_quantity: Uint8Array.from([
+        ...[0x08],
+        ...bigIntToBinUint64BE(BigInt(amount)),
+      ]),
     },
   });
   if (!mintTxoBytecode.success) {
-    throw new Error(mintTxoBytecode.errors.map(e => e.error).join("\n"));
+    throw new Error(mintTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
 
   return {
@@ -252,7 +266,7 @@ export const SlpGetSendOutputs = async (
     },
   });
   if (!sendTxoBytecode.success) {
-    throw new Error(sendTxoBytecode.errors.map(e => e.error).join("\n"));
+    throw new Error(sendTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
 
   // enforce checking

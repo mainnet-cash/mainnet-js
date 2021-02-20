@@ -4,7 +4,7 @@ import { UtxoI } from "../interface";
 export enum SlpTokenType {
   Type1 = 0x01,
   NftParent = 0x81,
-  NftChild = 0x41
+  NftChild = 0x41,
 }
 
 export interface SlpDbResponse {
@@ -76,8 +76,8 @@ export interface SlpGenesisOptions {
 }
 
 export interface SlpMintOptions {
-  value: BigNumber.Value,
-  tokenId: string,
+  value: BigNumber.Value;
+  tokenId: string;
   endBaton?: boolean;
   tokenReceiverSlpAddr?: string;
   batonReceiverSlpAddr?: string;

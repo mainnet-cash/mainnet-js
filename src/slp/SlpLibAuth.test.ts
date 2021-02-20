@@ -6,7 +6,11 @@ import {
   SlpGetMintOutputs,
   SlpGetSendOutputs,
 } from "../slp/SlpLibAuth";
-import { SlpGenesisOptions, SlpSendRequest, SlpTokenType } from "../slp/interface";
+import {
+  SlpGenesisOptions,
+  SlpSendRequest,
+  SlpTokenType,
+} from "../slp/interface";
 import { RegTestWallet } from "../wallet/Wif";
 import { SlpUtxoI } from "./interface";
 import BigNumber from "bignumber.js";
@@ -24,12 +28,10 @@ test("Test SLP genesis txo bytecode per SLP Spec", async () => {
     documentHash:
       "db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916",
     tokenReceiverSlpAddr: wallet.slp.slpaddr,
-    batonReceiverSlpAddr: wallet.slp.slpaddr
+    batonReceiverSlpAddr: wallet.slp.slpaddr,
   };
 
-  const result = await SlpGetGenesisOutputs(
-    genesisOptions
-  );
+  const result = await SlpGetGenesisOutputs(genesisOptions);
   const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
 
   const hex = binToHex(genesisTxoBytecode);
@@ -51,12 +53,10 @@ test("Test SLP genesis txo bytecode with empty strings", async () => {
     documentUrl: "",
     documentHash: "",
     tokenReceiverSlpAddr: wallet.slp.slpaddr,
-    batonReceiverSlpAddr: wallet.slp.slpaddr
+    batonReceiverSlpAddr: wallet.slp.slpaddr,
   };
 
-  const result = await SlpGetGenesisOutputs(
-    genesisOptions
-  );
+  const result = await SlpGetGenesisOutputs(genesisOptions);
   const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
 
   const hex = binToHex(genesisTxoBytecode);
@@ -78,12 +78,10 @@ test("Test SLP genesis txo bytecode with utf strings", async () => {
     documentUrl: "http://tiny.cc/gcmzcz",
     documentHash: "",
     tokenReceiverSlpAddr: wallet.slp.slpaddr,
-    batonReceiverSlpAddr: wallet.slp.slpaddr
+    batonReceiverSlpAddr: wallet.slp.slpaddr,
   };
 
-  const result = await SlpGetGenesisOutputs(
-    genesisOptions
-  );
+  const result = await SlpGetGenesisOutputs(genesisOptions);
   const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
 
   const hex = binToHex(genesisTxoBytecode);
@@ -104,7 +102,7 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
     satoshis: DUST_UTXO_THRESHOLD,
     ticker: "USDT",
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
-    type: SlpTokenType.Type1
+    type: SlpTokenType.Type1,
   };
   const sendRequest: SlpSendRequest = {
     slpaddr: wallet.slp.slpaddr,
@@ -137,16 +135,17 @@ test("Test SLP mint txo bytecode per SLP Spec", async () => {
     satoshis: DUST_UTXO_THRESHOLD,
     ticker: "USDT",
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
-    type: 0x01
+    type: 0x01,
   };
 
   const result = await SlpGetMintOutputs(
     {
-      tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
+      tokenId:
+        "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
       value: 100000000,
       tokenReceiverSlpAddr: wallet.slp.slpaddr,
       batonReceiverSlpAddr: wallet.slp.slpaddr,
-      endBaton: false
+      endBaton: false,
     },
     [batonSlpUtxo]
   );
