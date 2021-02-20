@@ -59,7 +59,7 @@ describe(`Wallet should function in the browser`, () => {
         const { balance } = await wallet.slp.mint({
           value: 10,
           tokenId: tokenId,
-          endBaton: false
+          endBaton: false,
         });
         return balance;
       },
