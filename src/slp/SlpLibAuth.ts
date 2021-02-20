@@ -9,7 +9,7 @@ import {
 import { parseSLP } from "slp-parser";
 
 import { SendRequest } from "../wallet/model";
-import { SlpGenesisOptions, SlpSendRequest, SlpUtxoI } from "../slp/interface";
+import { SlpGenesisOptions, SlpMintOptions, SlpSendRequest, SlpTokenType, SlpUtxoI } from "../slp/interface";
 
 import BigNumber from "bignumber.js";
 import { DUST_UTXO_THRESHOLD } from "../constant";
@@ -29,11 +29,19 @@ const stringToBin = (value, hex = false) => {
   return Uint8Array.from([...[length], ...utf8ToBin(value)]);
 };
 
+const supportedTokenTypes = [SlpTokenType.Type1, SlpTokenType.NftParent, SlpTokenType.NftChild];
+
 export const SlpGetGenesisOutputs = async (
-  options: SlpGenesisOptions,
-  genesis_token_receiver_slpaddr: string,
-  mint_baton_receiver_slpaddr: string
+  options: SlpGenesisOptions
 ) => {
+  if (!options.type) {
+    options.type = SlpTokenType.Type1;
+  }
+
+  if (!supportedTokenTypes.includes(options.type)) {
+    throw new Error(`Unsupported token type ${options.type}`);
+  }
+
   // explicitly convert initial amount to bignumber
   options.initialAmount = new BigNumber(options.initialAmount);
   if (options.initialAmount.isLessThanOrEqualTo(0)) {
@@ -44,12 +52,12 @@ export const SlpGetGenesisOutputs = async (
     throw new Error("Genesis allows decimal places between 0");
   }
   const addrs = options.endBaton
-    ? [genesis_token_receiver_slpaddr]
-    : [genesis_token_receiver_slpaddr, mint_baton_receiver_slpaddr];
+    ? [options.tokenReceiverSlpAddr]
+    : [options.tokenReceiverSlpAddr, options.batonReceiverSlpAddr];
   const bchSendRequests = addrs.map(
     (val) =>
       new SendRequest({
-        cashaddr: toCashAddress(val),
+        cashaddr: toCashAddress(val!),
         value: DUST_UTXO_THRESHOLD,
         unit: UnitEnum.SAT,
       })
@@ -65,21 +73,22 @@ export const SlpGetGenesisOutputs = async (
     options.initialAmount.shiftedBy(options.decimals)
   );
 
-  const batonVout = options.endBaton ? 0x00 : 0x02;
+  const batonVout = options.endBaton ? [0x4c,0x00] : [0x01,0x02];
 
   let genesisTxoBytecode = compiler.generateBytecode("genesis_lock", {
     bytecode: {
+      g_token_type: Uint8Array.from([...[0x01], ...[options.type]]),
       g_token_ticker: stringToBin(options.ticker),
       g_token_name: stringToBin(options.name),
       g_token_document_url: stringToBin(options.documentUrl),
       g_token_document_hash: stringToBin(options.documentHash, true),
-      g_decimals: Uint8Array.from([options.decimals]),
-      g_mint_baton_vout: Uint8Array.from([batonVout]),
-      g_initial_token_mint_quantity: bigIntToBinUint64BE(rawTokenAmount),
+      g_decimals: Uint8Array.from([...[0x01], ...[options.decimals]]),
+      g_mint_baton_vout: Uint8Array.from(batonVout),
+      g_initial_token_mint_quantity: Uint8Array.from([...[0x08], ...bigIntToBinUint64BE(rawTokenAmount)]),
     },
   });
   if (!genesisTxoBytecode.success) {
-    throw new Error(genesisTxoBytecode.toString());
+    throw new Error(genesisTxoBytecode.errors.map(e => e.error).join("\n"));
   }
 
   return {
@@ -95,20 +104,22 @@ export const SlpGetGenesisOutputs = async (
 };
 
 export const SlpGetMintOutputs = async (
-  slpBatonUtxos: SlpUtxoI[],
-  tokenId: string,
-  amount: BigNumber.Value,
-  mint_tokens_receiver_slpaddr: string,
-  mint_baton_receiver_slpaddr: string,
-  endBaton: boolean = false
+  options: SlpMintOptions,
+  slpBatonUtxos: SlpUtxoI[]
 ) => {
-  const addrs = endBaton
-    ? [mint_tokens_receiver_slpaddr]
-    : [mint_tokens_receiver_slpaddr, mint_baton_receiver_slpaddr];
+  const tokenType = slpBatonUtxos[0].type;
+
+  if (!supportedTokenTypes.includes(tokenType)) {
+    throw new Error(`Unsupported token type ${tokenType}`);
+  }
+
+  const addrs = options.endBaton
+    ? [options.tokenReceiverSlpAddr]
+    : [options.tokenReceiverSlpAddr, options.batonReceiverSlpAddr];
   const bchSendRequests = addrs.map(
     (val) =>
       new SendRequest({
-        cashaddr: toCashAddress(val),
+        cashaddr: toCashAddress(val!),
         value: DUST_UTXO_THRESHOLD,
         unit: UnitEnum.SAT,
       })
@@ -120,19 +131,20 @@ export const SlpGetMintOutputs = async (
   }
   const compiler = await authenticationTemplateToCompilerBCH(template);
   const decimals = slpBatonUtxos[0].decimals;
-  amount = new BigNumber(amount).shiftedBy(decimals);
+  const amount = new BigNumber(options.value).shiftedBy(decimals);
 
-  const batonVout = endBaton ? 0x00 : 0x02;
+  const batonVout = options.endBaton ? [0x4c,0x00] : [0x01,0x02];
 
   let mintTxoBytecode = compiler.generateBytecode("mint_lock", {
     bytecode: {
-      m_token_id: hexToBin(tokenId),
-      m_mint_baton_vout: Uint8Array.from([batonVout]),
-      m_additional_token_quantity: bigIntToBinUint64BE(BigInt(amount)),
+      m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
+      m_token_id: hexToBin(options.tokenId),
+      m_mint_baton_vout: Uint8Array.from(batonVout),
+      m_additional_token_quantity: Uint8Array.from([...[0x08], ...bigIntToBinUint64BE(BigInt(amount))]),
     },
   });
   if (!mintTxoBytecode.success) {
-    throw new Error(mintTxoBytecode.toString());
+    throw new Error(mintTxoBytecode.errors.map(e => e.error).join("\n"));
   }
 
   return {
@@ -158,6 +170,11 @@ export const SlpGetSendOutputs = async (
 
   const decimals = slpUtxos[0].decimals;
   const tokenId = slpUtxos[0].tokenId;
+  const tokenType = slpUtxos[0].type;
+
+  if (!supportedTokenTypes.includes(tokenType)) {
+    throw new Error(`Unsupported token type ${tokenType}`);
+  }
 
   // sort inputs in ascending order to eliminate the unnecessary splitting
   // and to prefer the consolidation of small inputs
@@ -222,19 +239,20 @@ export const SlpGetSendOutputs = async (
   for (const val of values) {
     result = new Uint8Array([
       ...result,
-      ...Uint8Array.from([8]),
+      ...[0x08],
       ...bigIntToBinUint64BE(BigInt(val)),
     ]);
   }
 
   let sendTxoBytecode = compiler.generateBytecode("send_lock", {
     bytecode: {
+      s_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
       s_token_id: hexToBin(tokenId!),
       s_token_output_quantities: result,
     },
   });
   if (!sendTxoBytecode.success) {
-    throw new Error(sendTxoBytecode.toString());
+    throw new Error(sendTxoBytecode.errors.map(e => e.error).join("\n"));
   }
 
   // enforce checking
@@ -266,6 +284,11 @@ export const SlpTxoTemplate = {
         "genesis_unlock"
       ],
       "variables": {
+        "g_token_type": {
+          "description": "1 to 2 byte integer",
+          "name": "token_type",
+          "type": "AddressData"
+        },
         "g_token_ticker": {
           "description": "0 to ∞ bytes, suggested utf-8",
           "name": "token_ticker",
@@ -311,6 +334,11 @@ export const SlpTxoTemplate = {
         "send_unlock"
       ],
       "variables": {
+        "s_token_type": {
+          "description": "1 to 2 byte integer",
+          "name": "token_type",
+          "type": "AddressData"
+        },
         "s_token_id": {
           "description": "Token Id, genesis transaction hex",
           "name": "Token_Id",
@@ -331,6 +359,11 @@ export const SlpTxoTemplate = {
         "mint_unlock"
       ],
       "variables": {
+        "m_token_type": {
+          "description": "1 to 2 byte integer",
+          "name": "token_type",
+          "type": "AddressData"
+        },
         "m_token_id": {
           "description": "Token Id, genesis transaction hex",
           "name": "Token_Id",
@@ -353,6 +386,7 @@ export const SlpTxoTemplate = {
     "genesis": {
       "data": {
         "bytecode": {
+          "g_token_type": "0x01",
           "g_token_ticker": "0x00",
           "g_token_name": "0x00",
           "g_token_document_url": "0x00",
@@ -371,6 +405,7 @@ export const SlpTxoTemplate = {
     "send": {
       "data": {
         "bytecode": {
+          "s_token_type": "0x01",
           "s_token_id": "0x0000000000000000'0000000000000000'0000000000000000'0000000000000000'",
           "s_token_output_quantities": "0x0000000000000000"
         }
@@ -384,6 +419,7 @@ export const SlpTxoTemplate = {
     "mint": {
       "data": {
         "bytecode": {
+          "m_token_type": "0x01",
           "m_token_id": "0x0000000000000000'0000000000000000'0000000000000000'0000000000000000'",
           "m_mint_baton_vout": "0x00",
           "m_additional_token_quantity": "0x0000000000000000"
@@ -424,17 +460,17 @@ export const SlpTxoTemplate = {
     "genesis_lock": {
       "lockingType": "standard",
       "name": "Genesis",
-      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'GENESIS'> g_token_ticker g_token_name g_token_document_url g_token_document_hash 0x01 g_decimals 0x01 g_mint_baton_vout 0x08 g_initial_token_mint_quantity"
+      "script": "OP_RETURN <'SLP'0x00> g_token_type <'GENESIS'> g_token_ticker g_token_name g_token_document_url g_token_document_hash g_decimals g_mint_baton_vout g_initial_token_mint_quantity"
     },
     "send_lock": {
       "lockingType": "standard",
       "name": "Send",
-      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'SEND'> <s_token_id> s_token_output_quantities"
+      "script": "OP_RETURN <'SLP'0x00> s_token_type <'SEND'> <s_token_id> s_token_output_quantities"
     },
     "mint_lock": {
       "lockingType": "standard",
       "name": "Mint",
-      "script": "OP_RETURN <'SLP'0x00> 0x0101 <'MINT'> <m_token_id> 0x01 m_mint_baton_vout 0x08 m_additional_token_quantity"
+      "script": "OP_RETURN <'SLP'0x00> m_token_type <'MINT'> <m_token_id> m_mint_baton_vout m_additional_token_quantity"
     }
   },
   "supported": [

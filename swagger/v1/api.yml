@@ -540,6 +540,50 @@ paths:
       tags:
         - wallet/slp
 
+  /wallet/slp/nft_parent_genesis:
+    post:
+      operationId: nftParentGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpGenesisRequest"
+        description: |
+          Request to create a new NFT parent token (genesis)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new NFT token balance of the wallet
+      tags:
+        - wallet/slp
+
+  /wallet/slp/nft_child_genesis:
+    post:
+      operationId: nftChildGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlpGenesisRequest"
+        description: |
+          Request to create a new NFT child token (genesis) by consuming a parent token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new NFT child token balance of the wallet
+      tags:
+        - wallet/slp
+
   /wallet/slp/mint:
     post:
       operationId: slpMint
@@ -1477,6 +1521,20 @@ components:
           type: boolean
           example: false
           description: Indicates if token should not be 'mintable', e.g. total circluation amount increased
+        type:
+          type: number
+          example: 1
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+        tokenReceiverSlpAddr:
+          type: string
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        batonReceiverSlpAddr:
+          type: string
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        parentTokenId:
+          type: string
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          description: Identifier of the NFT parent token
       required:
         - walletId
         - name
@@ -1546,6 +1604,10 @@ components:
           type: string
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           description: Document hash of the token. Empty or 64 character long hex string.
+        type:
+          type: number
+          example: 1
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
 
     SlpMintRequest:
       properties:
@@ -1565,6 +1627,13 @@ components:
           type: boolean
           example: false
           description: Indicates if token should not be 'mintable' anymore, e.g. total circluation amount increased
+        tokenReceiverSlpAddr:
+          type: string
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        batonReceiverSlpAddr:
+          type: string
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+
       required:
         - walletId
         - value
@@ -1618,6 +1687,10 @@ components:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           description: Token unique hexadecimal identifier, also the id of the token creation transaction
+        type:
+          type: number
+          example: 1
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
 
     SlpSendRequest:
       properties:
@@ -1631,7 +1704,7 @@ components:
           items:
             $ref: "#/components/schemas/SlpSendRequestItem"
         options:
-          $ref: "#/components/schemas/SlpSendRequestOptions"            
+          $ref: "#/components/schemas/SlpSendRequestOptions"
       type: object
       required:
         - walletId
@@ -1680,7 +1753,7 @@ components:
           example: "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"
           description: Token unique hexadecimal identifier, also the id of the token creation transaction
         options:
-          $ref: "#/components/schemas/SlpSendRequestOptions"          
+          $ref: "#/components/schemas/SlpSendRequestOptions"
       required:
         - walletId
         - slpaddr
@@ -1722,6 +1795,10 @@ components:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           description: Token unique hexadecimal identifier, also the id of the token creation transaction
+        type:
+          type: number
+          example: 1
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
 
     GetTestnetBchRequest:
       properties:

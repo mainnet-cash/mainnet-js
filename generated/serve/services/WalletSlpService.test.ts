@@ -39,6 +39,74 @@ describe("Test Wallet Slp Endpoints", () => {
     tokenId = resp.body.tokenId;
   });
 
+  /**
+   * NFT genesis
+   */
+  it("Should create a new NFT Parent and Child tokens (genesis)", async () => {
+    const options = {
+      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      name: "Mainnet coin NFT Parent",
+      ticker: ticker,
+      initialAmount: "10000",
+      decimals: 2,
+      documentUrl: "https://mainnet.cash",
+      documentHash: "db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916",
+      endBaton: false,
+      parentTokenId: undefined
+    };
+
+    let resp = await request(app)
+      .post("/wallet/slp/nft_parent_genesis")
+      .send(options);
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.tokenId.length).toBe(64);
+    expect(Number(resp.body.balance.value)).toBe(10000);
+
+    const nftParentId = resp.body.tokenId;
+
+    resp = await request(app)
+      .post("/wallet/slp/token_info")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        tokenId: nftParentId,
+      });
+
+    let body = resp.body;
+
+    expect(resp.statusCode).toBe(200);
+    expect(body).toBeDefined();
+    expect(body.tokenId).toBe(nftParentId);
+    expect(body.type).toBe(0x81);
+
+    options.name = "Mainnet coin NFT Child";
+    options.parentTokenId = nftParentId;
+
+    resp = await request(app)
+      .post("/wallet/slp/nft_child_genesis")
+      .send(options);
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.tokenId.length).toBe(64);
+    expect(Number(resp.body.balance.value)).toBe(1);
+
+    const nftChildId = resp.body.tokenId;
+
+    resp = await request(app)
+      .post("/wallet/slp/token_info")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        tokenId: nftChildId,
+      });
+
+    body = resp.body;
+
+    expect(resp.statusCode).toBe(200);
+    expect(body).toBeDefined();
+    expect(body.tokenId).toBe(nftChildId);
+    expect(body.type).toBe(0x41);
+  });
+
   it("Should get token infos", async () => {
     let resp = await request(app)
       .post("/wallet/slp/token_info")
