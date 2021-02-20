@@ -56,7 +56,11 @@ describe(`Wallet should function in the browser`, () => {
       async ([wif, tokenId]) => {
         const wallet = await RegTestWallet.fromId(`wif:regtest:${wif}`);
 
-        const { balance } = await wallet.slp.mint(10, tokenId);
+        const { balance } = await wallet.slp.mint({
+          value: 10,
+          tokenId: tokenId,
+          endBaton: false
+        });
         return balance;
       },
       [process.env.PRIVATE_WIF, jestTokenId]
@@ -64,7 +68,7 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.value.c[0]).toBe(10010);
   });
 
-  test(`Should mint extra slp tokens`, async () => {
+  test(`Should send slp tokens`, async () => {
     const result = await page.evaluate(
       async ([wif, tokenId]) => {
         const wallet = await RegTestWallet.fromId(`wif:regtest:${wif}`);
