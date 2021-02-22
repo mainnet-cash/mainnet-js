@@ -8,6 +8,11 @@ export interface ContractI {
    * @returns returns a serialized representation of the contract
    */
   toString(): string;
+
+  /**
+   * getDepositAddress
+   * @returns returns the contract cashaddr
+   */
   getDepositAddress(): string | Error;
 
   /**

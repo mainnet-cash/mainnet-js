@@ -233,7 +233,6 @@ describe("Test Contract Services", () => {
     
     let utxos = [utxoResp.body.utxos[0].utxoId]
 
-    console.log(utxos)
     const respSpend = await request(app).post("/contract/escrow/call").send({
       contractId: contractId,
       walletId: buyerId,
@@ -259,7 +258,6 @@ describe("Test Contract Services", () => {
     });
     
     expect(utxo2Resp.statusCode).toEqual(200);
-    console.log(utxo2Resp.body)
     expect(utxo2Resp.body.utxos.length).toEqual(1);
 
   });
@@ -321,7 +319,6 @@ describe("Test Contract Services", () => {
     });
 
     expect(utxoResp.statusCode).toEqual(200);
-    console.log(utxoResp.body.utxos)
     expect(utxoResp.body.utxos[0].value).toEqual(21000);
     
     let respSpend = await request(app).post("/contract/call").send({
