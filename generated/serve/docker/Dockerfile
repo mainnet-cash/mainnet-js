@@ -14,6 +14,8 @@ RUN apt-get update \
   && cd opt \
   && git clone ${GIT_REPO} mainnet-js \
   && cd mainnet-js && git checkout ${GIT_COMMIT} \
+  && yarn install --production \
+  && yarn build \
   && cd generated/serve \
   && yarn add mainnet-js@${MAINNET_TAG} \
   && yarn install --production
