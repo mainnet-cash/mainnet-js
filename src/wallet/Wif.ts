@@ -439,9 +439,9 @@ export class Wallet extends BaseWallet {
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = sanitizeUnit(rawUnit);
-      return await balanceFromSatoshi(await this.getBalanceFromUtxos(), unit);
+      return await balanceFromSatoshi(await this.getBalanceFromProvider(), unit);
     } else {
-      return await balanceResponseFromSatoshi(await this.getBalanceFromUtxos());
+      return await balanceResponseFromSatoshi(await this.getBalanceFromProvider());
     }
   }
 
@@ -527,6 +527,17 @@ export class Wallet extends BaseWallet {
   public async getBalanceFromUtxos(): Promise<number> {
     const utxos = await this.getAddressUtxos(this.cashaddr!);
     return await sumUtxoValue(utxos);
+  }
+
+  // Gets balance from fulcrum
+  public async getBalanceFromProvider(): Promise<number> {
+    // TODO not sure why getting the balance from a provider doesn't work
+    if(this._slpAware){
+      return await this.getBalanceFromUtxos()     
+    }
+    else{
+      return await this.provider!.getBalance(this.cashaddr!);
+    }
   }
 
   // Get mnemonic and derivation path for wallet

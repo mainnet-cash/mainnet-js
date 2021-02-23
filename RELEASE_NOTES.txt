@@ -5,8 +5,10 @@ Newest changes
 - Added wrapper for generic CashScript via javascript.
 - Switched mainnet-js dependency on REST server to a symlinked package.
 - Fixed bug with fee estimation of small transactions.
+- Fixed bug with docker configuration.
 - Added option for sending from specific utxos to send and send max
 
+- Optimize getBalance to use electrum blockchain.address.balance instead of utxos
 - Added support for SLP tokens - create your own, send around and mint more!
 - Full NFT support comes later
 - Added support for SldDb communication, allowing generic queries too.
