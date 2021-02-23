@@ -439,9 +439,14 @@ export class Wallet extends BaseWallet {
   public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = sanitizeUnit(rawUnit);
-      return await balanceFromSatoshi(await this.getBalanceFromProvider(), unit);
+      return await balanceFromSatoshi(
+        await this.getBalanceFromProvider(),
+        unit
+      );
     } else {
-      return await balanceResponseFromSatoshi(await this.getBalanceFromProvider());
+      return await balanceResponseFromSatoshi(
+        await this.getBalanceFromProvider()
+      );
     }
   }
 
@@ -532,10 +537,9 @@ export class Wallet extends BaseWallet {
   // Gets balance from fulcrum
   public async getBalanceFromProvider(): Promise<number> {
     // TODO not sure why getting the balance from a provider doesn't work
-    if(this._slpAware){
-      return await this.getBalanceFromUtxos()     
-    }
-    else{
+    if (this._slpAware) {
+      return await this.getBalanceFromUtxos();
+    } else {
       return await this.provider!.getBalance(this.cashaddr!);
     }
   }
