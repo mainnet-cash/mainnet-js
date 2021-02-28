@@ -78,17 +78,17 @@ export class EscrowContract extends Contract {
   }
 
   /**
-   * create - Static convenience method for the constructor
+   * call - Run a method on an escrow contract
    * 
-   * an intermediate function similar to the constructor, for REST
+   * an high level function
 	 *
-   * @param sellerAddr Party receiving of funds
-   * @param buyerAddr Party sending of funds
-   * @param arbiterAddr Third party mediating the contract
-   * @param amount Contract amount in satoshi
-   * @param nonce A unique number to differentiate the contract
+   * @param wif Private key of the wallet signing the transaction
+   * @param funcName Escrow function to call
+   * @param outputAddress Destination cashaddr
+   * @param getHexOnly Boolean to build the transaction without broadcasting
+   * @param utxoIds Serialized unspent transaction outputs to spend
    * 
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract%2Fescrow/createEscrow|/contract/escrow/create} REST endpoint
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract%2Fescrow/createEscrow|/contract/escrow/call} REST endpoint
    * @returns A new contract
    */
   public async call(
