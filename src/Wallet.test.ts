@@ -418,5 +418,4 @@ describe(`Test Wallet library`, () => {
   //   expect(reidBalance.usd).toBeGreaterThan(0);
   //   expect(typeof (await reid.getBalance("sat"))).toBe("number");
   // });
-
 });
