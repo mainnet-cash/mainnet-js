@@ -2,7 +2,6 @@ import { Contract } from "../Contract";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
-import { UtxoI } from "../../interface";
 import { EscrowArguments } from "./interface";
 import { getRandomInt } from "../../util/randomInt";
 
