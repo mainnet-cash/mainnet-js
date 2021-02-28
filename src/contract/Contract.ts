@@ -22,7 +22,6 @@ import { DELIMITER } from "../constant";
 import { ContractFunction } from "cashscript/dist/module/Contract";
 import { UtxoItem } from "../wallet/model";
 
-
 /**
  * Class that manages the Contract source, network, parameters, CashScript artifact and calls
  */
@@ -35,15 +34,14 @@ export class Contract implements ContractI {
   public network: Network;
   private nonce: number;
 
-
   /**
    * Initializes a Contract
-   * 
+   *
    * @param script The contract in CashScript syntax
    * @param parameters Stored values of a contract passed to the CashScript constructor
    * @param network Network for the contract
    * @param nonce A unique number to differentiate the contract
-   * 
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
    * @returns A new contract
    */
@@ -150,9 +148,9 @@ export class Contract implements ContractI {
 
   /**
    * Get the unspent transaction outputs of the contract
-   * 
+   *
    * an intermediate function
-	 *
+   *
    * @note For REST, the address is automatically returned from the create interface
    * @returns A the address for a contract
    */
@@ -225,7 +223,7 @@ export class Contract implements ContractI {
 
   /**
    * getContractFunction - Get a function object from a contract
-   * 
+   *
    * @param funcName The string identifying the function in the cashscript contract
    * @returns A cashscript Transaction
    */
@@ -235,10 +233,10 @@ export class Contract implements ContractI {
 
   /**
    * runFunctionFromStrings -  Call a cashscript contract function using an interface object of strings.
-   * 
+   *
    * This is a helper function for the REST or serialized interfaces and not intended
    * for native use within the library, although it may be useful for running stored transactions.
-   * 
+   *
    * @param request Parameters for the transaction call, serialized as strings.
    * @returns A CashScript Transaction result
    */
