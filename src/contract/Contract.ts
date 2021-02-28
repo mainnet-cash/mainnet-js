@@ -69,13 +69,12 @@ export class Contract implements ContractI {
   public getNonce() {
     return this.nonce;
   }
- 
 
   /**
    * toString - Serialize a contract as a string
-   * 
+   *
    * an intermediate function
-	 *
+   *
    * @returns A serialized contract
    */
   public toString() {
@@ -89,9 +88,9 @@ export class Contract implements ContractI {
 
   /**
    * getSerializedScript - Serialize just the script component of a contract
-   * 
+   *
    * a low-level function
-	 *
+   *
    * @returns A serialized script
    */
   private getSerializedScript() {
@@ -100,9 +99,9 @@ export class Contract implements ContractI {
 
   /**
    * getSerializedParameters - Serialize just the parameters of a contract
-   * 
+   *
    * a low-level function
-	 *
+   *
    * @returns A serialized script
    */
   private getSerializedParameters() {
@@ -111,9 +110,9 @@ export class Contract implements ContractI {
 
   /**
    * fromId - Deserialize a contract from a string
-   * 
+   *
    * an intermediate function
-	 *
+   *
    * @returns A new contract
    */
   public static fromId(contractId: string) {
@@ -132,9 +131,10 @@ export class Contract implements ContractI {
 
   /**
    * _create - Static convenience method for the constructor
-   * 
+   *
    * an intermediate function similar to the constructor for rest
-	 *
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
    * @returns A new contract
    */
   static _create(
@@ -162,9 +162,9 @@ export class Contract implements ContractI {
 
   /**
    * Get the unspent transaction outputs of the contract
-   * 
+   *
    * a high-level function
-	 *
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/contractUtxos|/contract/utxos} REST endpoint
    * @returns A list of utxos on the contract
    */
@@ -240,7 +240,7 @@ export class Contract implements ContractI {
    * for native use within the library, although it may be useful for running stored transactions.
    * 
    * @param request Parameters for the transaction call, serialized as strings.
-   * @returns A cashscript Transaction result
+   * @returns A CashScript Transaction result
    */
   public async runFunctionFromStrings(request: CashscriptTransactionI) {
     let fn = this.getContractFunction(request.function);

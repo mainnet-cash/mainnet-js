@@ -45,10 +45,10 @@ export class Slp {
   readonly wallet: Wallet;
   public provider: SlpProvider;
 
-	/**
-	 * Initializes an Slp Wallet.
-	 *
-	 * @param wallet     A non-slp wallet object
+  /**
+   * Initializes an Slp Wallet.
+   *
+   * @param wallet     A non-slp wallet object
    */
   constructor(wallet: Wallet) {
     this.slpaddr = toSlpAddress(wallet.cashaddr!);
@@ -56,28 +56,28 @@ export class Slp {
     this.provider = new SlpDbProvider(this.wallet.networkType);
   }
 
-   /**
-	 * getDepositAddress - get the slp deposit address
-   * 
-   * a high-level function, 
-   * 
+  /**
+   * getDepositAddress - get the slp deposit address
+   *
+   * a high-level function,
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet%2Fslp/slpDepositAddress|/wallet/slp/deposit_address} for REST endpoint
-	 *
-	 * @returns The the slp address as a string
-	 */
+   *
+   * @returns The the slp address as a string
+   */
   public getDepositAddress() {
     return this.slpaddr;
   }
 
   /**
-	 * getDepositQr - get an slp address qrcode, encoded for display on the web
-   * 
+   * getDepositQr - get an slp address qrcode, encoded for display on the web
+   *
    * a high-level function
-	 *
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet%2Fslp/slpDepositQr|/wallet/slp/deposit_qr} for REST endpoint
-   * 
-	 * @returns The qrcode for the slp address
-	 */
+   *
+   * @returns The qrcode for the slp address
+   */
   public getDepositQr(): ImageI {
     const result = qrAddress(this.slpaddr);
     result.alt = "A Bitcoin Cash Simple Ledger Protocol QR Code";
@@ -85,42 +85,42 @@ export class Slp {
   }
 
   /**
-	 * getTokenInfo - get data associated with a token
-   * 
+   * getTokenInfo - get data associated with a token
+   *
    * a high-level function
-	 *
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet%2Fslp/slpTokenInfo|/wallet/slp/token_info} for REST endpoint
-   * 
-	 * @param tokenId  The tokenId to request information about
-	 *
-	 * @returns Promise the slp token info or undefined.
-	 */
+   *
+   * @param tokenId  The tokenId to request information about
+   *
+   * @returns Promise the slp token info or undefined.
+   */
   public getTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
     return this.provider.SlpTokenInfo(tokenId);
   }
 
   /**
-	 * getSlpUtxos - get a list of unspent outputs
-   * 
+   * getSlpUtxos - get a list of unspent outputs
+   *
    * an intermediate function contributing to the output of wallet.getUtxos() and /wallet/utxos for slp enabled wallets
-	 *
-	 * @param slpaddr  The slpaddr to request slp unspent outputs for
-	 *
-	 * @returns Promise to a list of slp unspent outputs
-	 */
+   *
+   * @param slpaddr  The slpaddr to request slp unspent outputs for
+   *
+   * @returns Promise to a list of slp unspent outputs
+   */
   public async getSlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
     return this.provider.SlpUtxos(toSlpAddress(slpaddr));
   }
 
   /**
-	 * getFormattedSlpUtxos - get a list of unspent outputs
-   * 
-   * an intermediate function 
-	 *
-	 * @param slpaddr  The slpaddr to request slp formatted outputs
-	 *
-	 * @returns Promise to a list of slp formatted unspent outputs
-	 */
+   * getFormattedSlpUtxos - get a list of unspent outputs
+   *
+   * an intermediate function
+   *
+   * @param slpaddr  The slpaddr to request slp formatted outputs
+   *
+   * @returns Promise to a list of slp formatted unspent outputs
+   */
   public async getFormattedSlpUtxos(
     slpaddr?: string
   ): Promise<SlpFormattedUtxo[]> {
@@ -142,41 +142,41 @@ export class Slp {
     });
   }
 
-   /**
-	 * getBatonUtxos - get a list of baton unspent outputs
-   * 
-   * an intermediate function 
-	 *
-	 * @param tokenId   The id of the slp token
-	 *
-	 * @returns Promise to a list of slp unspent outputs
-	 */
+  /**
+   * getBatonUtxos - get a list of baton unspent outputs
+   *
+   * an intermediate function
+   *
+   * @param tokenId   The id of the slp token
+   *
+   * @returns Promise to a list of slp unspent outputs
+   */
   public async getBatonUtxos(tokenId?: string): Promise<SlpUtxoI[]> {
     return this.provider.SlpBatonUtxos(this.slpaddr, tokenId);
   }
 
   /**
-	 * getHistory - get a transaction history for a particular address
-   * 
-   * an intermediate function 
-	 *
-	 * @param tokenId   The id of the slp token
-	 *
-	 * @returns Promise to a list of transactions
-	 */
+   * getHistory - get a transaction history for a particular address
+   *
+   * an intermediate function
+   *
+   * @param tokenId   The id of the slp token
+   *
+   * @returns Promise to a list of transactions
+   */
   public async getHistory(tokenId?: string): Promise<TxI[]> {
     return this.provider.SlpAddressTransactionHistory(this.slpaddr, tokenId);
   }
 
   /**
-	 * getLastTransaction - get a token balance for a particular address
-   * 
+   * getLastTransaction - get a token balance for a particular address
+   *
    * a high-level function, see also /wallet/slp/balance REST endpoint
-	 *
-	 * @param {boolean} [confirmedOnly=false]  When confirmedOnly is true, results will be limited to only transactions included in a block.
-	 *
-	 * @returns Promise to the transaction hex or error
-	 */
+   *
+   * @param {boolean} [confirmedOnly=false]  When confirmedOnly is true, results will be limited to only transactions included in a block.
+   *
+   * @returns Promise to the transaction hex or error
+   */
   public async getLastTransaction(
     confirmedOnly: boolean = false
   ): Promise<ElectrumRawTransaction> {
@@ -189,14 +189,14 @@ export class Slp {
   }
 
   /**
-	 * getBalance - get a token balance for a particular address
-   * 
+   * getBalance - get a token balance for a particular address
+   *
    * a high-level function, see also /wallet/slp/balance REST endpoint
-	 *
-	 * @param tokenId   The id of the slp token
-	 *
-	 * @returns Promise to an SlpTokenBalance
-	 */
+   *
+   * @param tokenId   The id of the slp token
+   *
+   * @returns Promise to an SlpTokenBalance
+   */
   public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
     return this.provider.SlpTokenBalance(this.slpaddr, tokenId);
   }
@@ -261,15 +261,15 @@ export class Slp {
   }
 
   /**
-	 * sendMax - send the maximum spendable amount for a token to an slpaddr.
-   * 
+   * sendMax - send the maximum spendable amount for a token to an slpaddr.
+   *
    * a high-level function, see also /wallet/slp/send_max REST endpoint
-	 *
-	 * @param slpaddr   destination address
-	 * @param tokenId   the id of the token to be spent
-	 *
-	 * @returns transaction id and token balance
-	 */
+   *
+   * @param slpaddr   destination address
+   * @param tokenId   the id of the token to be spent
+   *
+   * @returns transaction id and token balance
+   */
   public async sendMax(
     slpaddr: string,
     tokenId: string
@@ -285,14 +285,14 @@ export class Slp {
   }
 
   /**
-	 * send - attempt to process a list of slp send requests.
-   * 
+   * send - attempt to process a list of slp send requests.
+   *
    * a high-level function, see also /wallet/slp/send REST endpoint
-	 *
-	 * @param [requests]   list of send requests
-	 *
-	 * @returns transaction id and token balance
-	 */
+   *
+   * @param [requests]   list of send requests
+   *
+   * @returns transaction id and token balance
+   */
   public async send(requests: SlpSendRequest[]): Promise<SlpSendResponse> {
     let [actualTokenId, result] = await this._processSendRequests(requests);
     return {
@@ -303,11 +303,11 @@ export class Slp {
 
   /**
    * _processSendRequests - given a list of sendRequests, estimate fees, build the transaction and submit it.
-   * 
+   *
    * A private utility wrapper to pre-process transactions
-   * 
+   *
    * Unstable - behavior may change without notice.
-   * 
+   *
    * @param  {SlpSendRequest[]} sendRequests
    */
   private async _processSendRequests(sendRequests: SlpSendRequest[]) {
@@ -357,16 +357,16 @@ export class Slp {
   }
 
   /**
-	 * mint - attempt to process a list of slp send requests.
-   * 
+   * mint - attempt to process a list of slp send requests.
+   *
    * a high-level function, see also /wallet/slp/mint endpoint
-	 *
-	 * @param value   amount to mint
-	 * @param tokenId   the tokenId of the slp being minted
-	 * @param endBaton   boolean indicating whether the token should continue to be "mintable" 
-	 *
-	 * @returns transaction id and token balance
-	 */
+   *
+   * @param value   amount to mint
+   * @param tokenId   the tokenId of the slp being minted
+   * @param endBaton   boolean indicating whether the token should continue to be "mintable"
+   *
+   * @returns transaction id and token balance
+   */
   public async mint(
     value: BigNumber.Value,
     tokenId: string,
@@ -383,16 +383,15 @@ export class Slp {
     };
   }
 
-
   /**
    * _processMint - given mint parameters, prepare the transaction
-   * 
+   *
    * a private utility wrapper to pre-process transactions
-   * 
+   *
    * @param value   amount to mint
-	 * @param tokenId   the tokenId of the slp being minted
-	 * @param endBaton   boolean indicating whether the token should continue to be "mintable" 
-   * 
+   * @param tokenId   the tokenId of the slp being minted
+   * @param endBaton   boolean indicating whether the token should continue to be "mintable"
+   *
    * @returns the tokenId and minting transaction id
    */
   private async _processMint(
@@ -501,13 +500,13 @@ export class Slp {
     return this._submitTransaction(encodedTransaction);
   }
 
-   /**
+  /**
    * _submitTransaction - transform binary transaction to hex and submit it to the network provider
-   * 
+   *
    * a private utility wrapper submit raw transactions
-   * 
+   *
    * @param transaction   raw transaction
-   * 
+   *
    * @returns the transaction id of the broadcasted transaction
    */
   private async _submitTransaction(transaction: Uint8Array): Promise<string> {

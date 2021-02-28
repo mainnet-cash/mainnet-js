@@ -120,12 +120,12 @@ export function prepareInputs(
 }
 
 /**
-	 * prepareOutputs - create outputs for a transaction from a list of send requests
-   * 
-   * a wrapper function
-	 *
-	 * @returns A promise to a list of unspent outputs
-	 */
+ * prepareOutputs - create outputs for a transaction from a list of send requests
+ *
+ * a wrapper function
+ *
+ * @returns A promise to a list of unspent outputs
+ */
 export async function prepareOutputs(outputs: SendRequest[]) {
   let lockedOutputs: any[] = [];
   for (const output of outputs) {
@@ -158,19 +158,19 @@ export async function prepareOutputs(outputs: SendRequest[]) {
 }
 
 /**
-	 * getSuitableUtxos - Filter a list of unspent transaction outputs to the minimum needed to complete a transaction
-   * 
-   * a intermediate function
-   * 
-	 * @param unspentOutputs  An unfiltered list of available unspent transaction outputs
-   *
-	 * @returns A promise to a list of unspent outputs
-	 */
+ * getSuitableUtxos - Filter a list of unspent transaction outputs to the minimum needed to complete a transaction
+ *
+ * a intermediate function
+ *
+ * @param unspentOutputs  An unfiltered list of available unspent transaction outputs
+ *
+ * @returns A promise to a list of unspent outputs
+ */
 export async function getSuitableUtxos(
   unspentOutputs: UtxoI[],
   amountRequired: BigInt | undefined,
   bestHeight: number
-) : Promise<UtxoI[]> {
+): Promise<UtxoI[]> {
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = BigInt(0);
   for (const u of unspentOutputs) {

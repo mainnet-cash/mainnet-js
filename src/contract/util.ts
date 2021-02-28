@@ -1,8 +1,5 @@
 import {
-  AuthenticationInstructions,
-  disassembleBytecodeBCH,
   hexToBin,
-  parseBytecode,
 } from "@bitauth/libauth";
 
 import { Argument, Artifact, Recipient as CashscriptReceipt } from "cashscript";
@@ -14,9 +11,9 @@ import { SendRequest } from "../wallet/model";
 
 /**
  * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input
- * 
+ *
  * low-level utility function
- * 
+ *
  * @param parameters String arguments to construct inputs from
  * @param inputs The name and type of required arguments for the transaction constructor
  * @returns A list of constructor parameters
