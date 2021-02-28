@@ -79,15 +79,15 @@ export class EscrowContract extends Contract {
 
   /**
    * call - Run a method on an escrow contract
-   * 
+   *
    * an high level function
-	 *
+   *
    * @param wif Private key of the wallet signing the transaction
    * @param funcName Escrow function to call
    * @param outputAddress Destination cashaddr
    * @param getHexOnly Boolean to build the transaction without broadcasting
    * @param utxoIds Serialized unspent transaction outputs to spend
-   * 
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract%2Fescrow/createEscrow|/contract/escrow/call} REST endpoint
    * @returns A new contract
    */
