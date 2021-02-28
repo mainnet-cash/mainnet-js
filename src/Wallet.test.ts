@@ -400,20 +400,23 @@ describe(`Test Wallet library`, () => {
     expect(bobBalanceFinal.sat).toBe(0);
   });
 
-  test("Should get a large number of utxos", async () => {
-    let reid = await Wallet.watchOnly(
-      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
-    );
-    //reid.provider = getClientProvider()
-    const reidBalance = (await reid.getBalance()) as BalanceResponse;
-    const reidUtxos = await reid.getUtxos();
-    //expect(reidUtxos.utxos!.length).toBeDefined();
+  // This use case has been moved off to use a specially configured fulcrum service
+  //
+  // test("Should get a large number of utxos", async () => {
+  //   let reid = await Wallet.watchOnly(
+  //     "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+  //   );
+  //   //reid.provider = getClientProvider()
+  //   const reidBalance = (await reid.getBalance()) as BalanceResponse;
+  //   const reidUtxos = await reid.getUtxos();
+  //   expect(reidUtxos.utxos!.length).toBeDefined();
 
-    expect(reid.getDepositAddress()!).toBe(
-      "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
-    );
-    // expect(reidBalance.bch).toBeGreaterThan(0);
-    // expect(reidBalance.usd).toBeGreaterThan(0);
-    expect(typeof (await reid.getBalance("sat"))).toBe("number");
-  });
+  //   expect(reid.getDepositAddress()!).toBe(
+  //     "bitcoincash:qr6cwfje4mv2q7srq5rav0up8ahc68hrtsy6ee7tk2"
+  //   );
+  //   expect(reidBalance.bch).toBeGreaterThan(0);
+  //   expect(reidBalance.usd).toBeGreaterThan(0);
+  //   expect(typeof (await reid.getBalance("sat"))).toBe("number");
+  // });
+
 });
