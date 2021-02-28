@@ -5,16 +5,14 @@ info:
   description: |
     A developer friendly bitcoin cash wallet api
 
-    This API is currently in active development, breaking changes may
-    be made prior to official release of version 1.
-
-    **Important:** This library is in active development
+    This API is currently in *active* development, breaking changes may
+    be made prior to official release of version 1.0.0.
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.29
+  version: 0.2.31
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -71,6 +69,15 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              contractId: testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1996128042
+              action: send
+              function: timeout
+              to:
+                unit: sat
+                cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+                value: 2000
+              feePerByte: 1
             schema:
               $ref: '#/components/schemas/ContractFnRequest'
         description: Request a new cashscript contract
@@ -848,17 +855,21 @@ components:
         sat:
           description: Amount in satoshis
           example: 100000000
-          type: integer
+          format: integer
+          type: number
         usd:
           description: Amount in United States Dollars
           example: 438.02
           type: number
     Error:
+      example:
+        message: An server error occurred
+        code: 500
       properties:
         message:
           type: string
-        stack:
-          type: string
+        code:
+          type: number
     WatchAddressRequest:
       example:
         recurrence: recurrent
@@ -928,7 +939,8 @@ components:
         sat:
           description: Amount in satoshis
           example: 0
-          type: integer
+          format: integer
+          type: number
         usd:
           description: Amount in United States Dollars
           example: 0
@@ -1081,13 +1093,13 @@ components:
             type: string
           type: array
         to:
-          description: The output destination, as a SendRequest, cashscript style
-            output(s), array of either.
-          oneOf:
+          anyOf:
           - $ref: '#/components/schemas/SendRequestItem'
           - $ref: '#/components/schemas/SendRequestArray'
           - $ref: '#/components/schemas/CashscriptReceipt'
           - $ref: '#/components/schemas/CashscriptReceiptArray'
+          description: The output destination, as a SendRequest, cashscript style
+            output(s), array of either.
         utxoIds:
           description: Serialized utxoId(s) to spend from
           items:

@@ -5,16 +5,15 @@ info:
   description: |
     A developer friendly bitcoin cash wallet api
 
-    This API is currently in active development, breaking changes may
-    be made prior to official release of version 1.
+    This API is currently in *active* development, breaking changes may
+    be made prior to official release of version 1.0.0.
 
-    **Important:** This library is in active development
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.29
+  version: 0.2.31
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -73,6 +72,15 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ContractFnRequest"
+            example:
+              contractId: "testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1996128042"
+              action: "send"
+              function: "timeout"
+              to: 
+                unit: "sat"
+                cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
+                value: 2000
+              feePerByte: 1
         description: Request a new cashscript contract
         required: true
       responses:
@@ -176,6 +184,8 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Contract"
+              example:
+                contractId: "testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1932794556"
         required: true
       responses:
         "200":
@@ -814,7 +824,8 @@ components:
           example: 1
           description: Amount in whole Bitcoin Cash
         sat:
-          type: integer
+          type: number
+          format: integer
           example: 100000000
           description: Amount in satoshis
         usd:
@@ -825,8 +836,11 @@ components:
       properties:
         message:
           type: string
-        stack:
-          type: string
+        code:
+          type: number
+      example:
+        message: "An server error occurred"
+        code: 500
     WatchAddressRequest:
       properties:
         cashaddr:
@@ -884,7 +898,8 @@ components:
           example: 0
           description: Amount in whole Bitcoin Cash
         sat:
-          type: integer
+          type: number
+          format: integer
           example: 0
           description: Amount in satoshis
         usd:
@@ -992,7 +1007,7 @@ components:
               type: string
         to:
           description: The output destination, as a SendRequest, cashscript style output(s), array of either.
-          oneOf:
+          anyOf:
           - $ref: "#/components/schemas/SendRequestItem"
           - $ref: "#/components/schemas/SendRequestArray"
           - $ref: "#/components/schemas/CashscriptReceipt"

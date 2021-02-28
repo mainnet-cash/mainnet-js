@@ -327,7 +327,6 @@ export class Contract implements ContractI {
     if (typeof utxoIds === "undefined") {
       utxos = await this.contract.getUtxos();
     } else {
-      console.log("here");
       utxos = utxoIds.map((u) => {
         return UtxoItem.fromId(u).asElectrum();
       });
