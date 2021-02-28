@@ -16,13 +16,13 @@ export class EscrowContract extends Contract {
   private amount: number;
 
   /**
-	 *
+   *
    * @param sellerAddr Party receiving of funds
    * @param buyerAddr Party sending of funds
    * @param arbiterAddr Third party mediating the contract
    * @param amount Contract amount in satoshi
    * @param nonce A unique number to differentiate the contract
-   * 
+   *
    * @returns A new contract
    */
   constructor({
@@ -55,15 +55,15 @@ export class EscrowContract extends Contract {
 
   /**
    * create - Static convenience method for the constructor
-   * 
+   *
    * an intermediate function similar to the constructor, for REST
-	 *
+   *
    * @param sellerAddr Party receiving funds
    * @param buyerAddr Party sending funds
    * @param arbiterAddr Third party mediating the contract disputes
    * @param amount Contract amount required to be paid in satoshi
    * @param nonce A unique number to differentiate the contract
-   * 
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/createEscrow|/contract/escrow/create} REST endpoint
    * @returns A new contract
    */
@@ -79,15 +79,15 @@ export class EscrowContract extends Contract {
 
   /**
    * create - Static convenience method for the constructor
-   * 
+   *
    * an intermediate function similar to the constructor, for REST
-	 *
+   *
    * @param sellerAddr Party receiving of funds
    * @param buyerAddr Party sending of funds
    * @param arbiterAddr Third party mediating the contract
    * @param amount Contract amount in satoshi
    * @param nonce A unique number to differentiate the contract
-   * 
+   *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract%2Fescrow/createEscrow|/contract/escrow/create} REST endpoint
    * @returns A new contract
    */
@@ -117,7 +117,7 @@ export class EscrowContract extends Contract {
   }
 
   /**
-   * 
+   *
    * @returns The contract text in CashScript
    */
   static getContractText() {

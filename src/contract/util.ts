@@ -1,13 +1,10 @@
-import {
-  hexToBin,
-} from "@bitauth/libauth";
+import { hexToBin } from "@bitauth/libauth";
 
 import { Argument, Artifact, Recipient as CashscriptReceipt } from "cashscript";
 
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { walletFromId } from "../wallet/createWallet";
 import { SendRequest } from "../wallet/model";
-
 
 /**
  * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input
