@@ -1686,7 +1686,7 @@ components:
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           type: string
         endBaton:
-          description: Indicates if token should not be 'mintable', e.g. total circluation
+          description: Indicates if token should not be 'mintable', e.g. total circulation
             amount increased
           example: false
           type: boolean
@@ -1795,7 +1795,7 @@ components:
           type: string
         endBaton:
           description: Indicates if token should not be 'mintable' anymore, e.g. total
-            circluation amount increased
+            circulation amount increased
           example: false
           type: boolean
       required:
