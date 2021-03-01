@@ -1,6 +1,12 @@
 import BigNumber from "bignumber.js";
 import { UtxoI } from "../interface";
 
+export enum SlpTokenType {
+  Type1 = 0x01,
+  NftParent = 0x81,
+  NftChild = 0x41,
+}
+
 export interface SlpDbResponse {
   t: any[];
   u: any[];
@@ -16,6 +22,7 @@ export interface SlpTokenBalance {
   ticker: string;
   name: string;
   tokenId: string;
+  type: SlpTokenType;
 }
 
 export interface SlpUtxoI extends UtxoI {
@@ -23,6 +30,7 @@ export interface SlpUtxoI extends UtxoI {
   decimals: number;
   ticker: string;
   tokenId: string;
+  type: SlpTokenType;
 }
 
 export interface SlpFormattedUtxo {
@@ -34,6 +42,7 @@ export interface SlpFormattedUtxo {
   txId: string;
   index: number;
   utxoId: string;
+  type: SlpTokenType;
 }
 
 export interface SlpSendRequest {
@@ -50,6 +59,7 @@ export interface SlpTokenInfo {
   decimals: number;
   documentUrl?: string;
   documentHash?: string;
+  type: SlpTokenType;
 }
 
 export interface SlpGenesisOptions {
@@ -60,6 +70,17 @@ export interface SlpGenesisOptions {
   documentUrl?: string;
   documentHash?: string;
   endBaton?: boolean;
+  type?: SlpTokenType;
+  tokenReceiverSlpAddr?: string;
+  batonReceiverSlpAddr?: string;
+}
+
+export interface SlpMintOptions {
+  value: BigNumber.Value;
+  tokenId: string;
+  endBaton?: boolean;
+  tokenReceiverSlpAddr?: string;
+  batonReceiverSlpAddr?: string;
 }
 
 export interface SlpGenesisResult {

@@ -69,6 +69,9 @@ const sha256Promise = instantiateSha256();
 
 type WatchBalanceCancel = () => void;
 
+/**
+ * Class to manage a bitcoin cash wallet.
+ */
 export class Wallet extends BaseWallet {
   cashaddr?: string;
   derivationPath?: string;
@@ -255,7 +258,7 @@ export class Wallet extends BaseWallet {
    *
    */
   public async send(
-    requests: SendRequest[] | SendRequestArray[],
+    requests: SendRequest | SendRequest[] | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     let sendRequests = asSendRequestObject(requests);
@@ -360,11 +363,11 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let result = await this.sendMaxRaw(cashaddr, options);
-    let resp = new SendResponse({});
-    resp.txId = result;
-    resp.balance = (await this.getBalance()) as BalanceResponse;
-    return resp;
+    let txId = await this.sendMaxRaw(cashaddr, options);
+    return {
+      txId: txId,
+      balance: (await this.getBalance()) as BalanceResponse,
+    };
   }
 
   public async sendMaxRaw(cashaddr: string, options?: SendRequestOptionsI) {
@@ -383,6 +386,15 @@ export class Wallet extends BaseWallet {
     return await this._processSendRequests([sendRequest], true, options);
   }
 
+  /**
+   * getDepositAddress - get a wallet deposit address
+   *
+   * a high-level function,
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositAddress|/wallet/deposit_address} for REST endpoint
+   *
+   * @returns The deposit address as a string
+   */
   public getDepositAddress(): string {
     if (this.cashaddr) {
       return this.cashaddr;
@@ -798,6 +810,9 @@ export class Wallet extends BaseWallet {
   }
 }
 
+/**
+ * Class to manage a testnet wallet.
+ */
 export class TestNetWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static faucetServer = "https://rest-unstable.mainnet.cash";
@@ -868,6 +883,9 @@ export class TestNetWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a regtest wallet.
+ */
 export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
@@ -875,6 +893,9 @@ export class RegTestWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a bitcoin cash wif wallet.
+ */
 export class WifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
   static walletType = WalletTypeEnum.Wif;
@@ -883,6 +904,9 @@ export class WifWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a testnet wif wallet.
+ */
 export class TestNetWifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static walletType = WalletTypeEnum.Wif;
@@ -891,6 +915,9 @@ export class TestNetWifWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a regtest wif wallet.
+ */
 export class RegTestWifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   static walletType = WalletTypeEnum.Wif;
@@ -899,6 +926,9 @@ export class RegTestWifWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a bitcoin cash watch wallet.
+ */
 export class WatchWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
   static walletType = WalletTypeEnum.Watch;
@@ -907,6 +937,9 @@ export class WatchWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a testnet watch wallet.
+ */
 export class TestNetWatchWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static walletType = WalletTypeEnum.Watch;
@@ -915,6 +948,9 @@ export class TestNetWatchWallet extends Wallet {
   }
 }
 
+/**
+ * Class to manage a regtest watch wallet.
+ */
 export class RegTestWatchWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   static walletType = WalletTypeEnum.Watch;

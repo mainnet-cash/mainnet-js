@@ -22,6 +22,9 @@ import { DELIMITER } from "../constant";
 import { ContractFunction } from "cashscript/dist/module/Contract";
 import { UtxoItem } from "../wallet/model";
 
+/**
+ * Class that manages the Contract source, network, parameters, CashScript artifact and calls
+ */
 export class Contract implements ContractI {
   private script: string;
   public parameters: Argument[];
@@ -31,6 +34,17 @@ export class Contract implements ContractI {
   public network: Network;
   private nonce: number;
 
+  /**
+   * Initializes a Contract
+   *
+   * @param script The contract in CashScript syntax
+   * @param parameters Stored values of a contract passed to the CashScript constructor
+   * @param network Network for the contract
+   * @param nonce A unique number to differentiate the contract
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
+   * @returns A new contract
+   */
   constructor(
     script: string,
     parameters: any,
@@ -40,40 +54,27 @@ export class Contract implements ContractI {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
-    this.artifact = this.getArtifact();
+    this.artifact = CashCompiler.compileString(script);
     this.provider = getNetworkProvider(this.network);
     this.contract = this.getContractInstance();
     this.nonce = nonce ? nonce : getRandomInt(2147483647);
   }
 
-  getContractText(): string | Error {
+  public getContractText(): string | Error {
     return this.script;
   }
 
-  getNonce() {
+  public getNonce() {
     return this.nonce;
   }
 
-  getArtifact() {
-    const contractText = this.script;
-    if (typeof contractText === "string") {
-      return CashCompiler.compileString(contractText);
-    }
-    // If the contract text is not a string, it's an error to be thrown
-    else {
-      throw contractText;
-    }
-  }
-
-  private getSerializedParameters() {
-    return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
-  }
-
-  private getSerializedScript() {
-    return btoa(this.script);
-  }
-
-  // Serialize the contract
+  /**
+   * toString - Serialize a contract as a string
+   *
+   * an intermediate function
+   *
+   * @returns A serialized contract
+   */
   public toString() {
     return [
       this.network,
@@ -83,7 +84,35 @@ export class Contract implements ContractI {
     ].join(DELIMITER);
   }
 
-  // Deserialize from a string
+  /**
+   * getSerializedScript - Serialize just the script component of a contract
+   *
+   * a low-level function
+   *
+   * @returns A serialized script
+   */
+  private getSerializedScript() {
+    return btoa(this.script);
+  }
+
+  /**
+   * getSerializedParameters - Serialize just the parameters of a contract
+   *
+   * a low-level function
+   *
+   * @returns A serialized script
+   */
+  private getSerializedParameters() {
+    return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
+  }
+
+  /**
+   * fromId - Deserialize a contract from a string
+   *
+   * an intermediate function
+   *
+   * @returns A new contract
+   */
   public static fromId(contractId: string) {
     let [network, serializedParams, serializedScript, nonce] = contractId.split(
       DELIMITER
@@ -98,7 +127,14 @@ export class Contract implements ContractI {
     return new Contract(script, params, network as Network, parseInt(nonce));
   }
 
-  // Static convenience constructor
+  /**
+   * _create - Static convenience method for the constructor
+   *
+   * an intermediate function similar to the constructor for rest
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
+   * @returns A new contract
+   */
   static _create(
     script: string,
     parameters: string[],
@@ -110,13 +146,25 @@ export class Contract implements ContractI {
     return new this(script, params, network, nonce);
   }
 
+  /**
+   * Get the unspent transaction outputs of the contract
+   *
+   * an intermediate function
+   *
+   * @note For REST, the address is automatically returned from the create interface
+   * @returns The address for a contract
+   */
   public getDepositAddress() {
     return this.contract.address;
   }
 
   /**
    * Get the unspent transaction outputs of the contract
-   * @returns A promise to the utxos of the contract
+   *
+   * a high-level function
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/contractUtxos|/contract/utxos} REST endpoint
+   * @returns A list of utxos on the contract
    */
   public async getUtxos() {
     return {
@@ -134,6 +182,10 @@ export class Contract implements ContractI {
     return this.contract.getBalance();
   }
 
+  /**
+   * getContractInstance - get the object directly as a cashscript contract.
+   * @returns A CashScript Contract
+   */
   private getContractInstance() {
     return new CashScriptContract(
       this.artifact,
@@ -143,7 +195,7 @@ export class Contract implements ContractI {
   }
 
   /**
-   * Get a contract object the wrapper object
+   * fromCashScript - initialize the artifact and cashscript object from existing script
    * @returns A cashscript Contract
    */
   public fromCashScript() {
@@ -158,7 +210,7 @@ export class Contract implements ContractI {
    * @param parameters Contract constructor arguments
    * @param network Network for the contract
    * @param nonce A unique number to differentiate the contract
-   * @returns A cashscript Contract
+   * @returns A new Contract
    */
   public static fromCashScript(
     script: string,
@@ -170,7 +222,8 @@ export class Contract implements ContractI {
   }
 
   /**
-   * Get a function object from a contract
+   * getContractFunction - Get a function object from a contract
+   *
    * @param funcName The string identifying the function in the cashscript contract
    * @returns A cashscript Transaction
    */
@@ -179,11 +232,13 @@ export class Contract implements ContractI {
   }
 
   /**
-   * Call a cashscript contract function using an interface object of strings.
-   * This function is a helper for the rest or serialized interfaces and not intended
+   * runFunctionFromStrings -  Call a cashscript contract function using an interface object of strings.
+   *
+   * This is a helper function for the REST or serialized interfaces and not intended
    * for native use within the library, although it may be useful for running stored transactions.
+   *
    * @param request Parameters for the transaction call, serialized as strings.
-   * @returns A cashscript Transaction result
+   * @returns A CashScript Transaction result
    */
   public async runFunctionFromStrings(request: CashscriptTransactionI) {
     let fn = this.getContractFunction(request.function);
@@ -244,6 +299,7 @@ export class Contract implements ContractI {
     return Math.round(estimatedTxHex.length * 2 * feePerByte);
   }
 
+  // TODO, should this move to escrow?
   public async _sendMax(
     wif: string,
     funcName: string,

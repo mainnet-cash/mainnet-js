@@ -127,6 +127,52 @@ const slpGenesis = ({ slpGenesisRequest }) => new Promise(
   },
 );
 /**
+* Get created tokenId back and new NFT token balance of the wallet
+*
+* slpGenesisRequest SlpGenesisRequest Request to create a new NFT parent token (genesis) 
+* returns SlpGenesisResponse
+* */
+const nftParentGenesis = ({ slpGenesisRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(slpGenesisRequest.walletId);
+      let args = slpGenesisRequest;
+      delete args.walletId;
+      let resp = await wallet.slp.nftParentGenesis(args);
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      console.log(e)
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get created tokenId back and new NFT child token balance of the wallet
+*
+* slpGenesisRequest SlpGenesisRequest Request to create a new NFT child token (genesis) by consuming a parent token 
+* returns SlpGenesisResponse
+* */
+const nftChildGenesis = ({ slpGenesisRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(slpGenesisRequest.walletId);
+      let args = slpGenesisRequest;
+      delete args.walletId;
+      let resp = await wallet.slp.nftChildGenesis(args.parentTokenId, args);
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      console.log(e)
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
 * Get created tokenId back and new slp balances of the wallet
 *
 * slpMintRequest SlpMintRequest Request to mint more of SLP tokens 
@@ -136,7 +182,9 @@ const slpMint = ({ slpMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       let wallet = await mainnet.walletFromId(slpMintRequest.walletId);
-      let resp = await wallet.slp.mint(slpMintRequest.value, slpMintRequest.tokenId, slpMintRequest.endBaton);
+      let args = slpMintRequest;
+      delete args.walletId;
+      let resp = await wallet.slp.mint(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e);
@@ -246,6 +294,8 @@ module.exports = {
   slpDepositAddress,
   slpDepositQr,
   slpGenesis,
+  nftParentGenesis,
+  nftChildGenesis,
   slpMint,
   slpSend,
   slpSendMax,
