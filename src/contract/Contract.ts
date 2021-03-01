@@ -152,7 +152,7 @@ export class Contract implements ContractI {
    * an intermediate function
    *
    * @note For REST, the address is automatically returned from the create interface
-   * @returns A the address for a contract
+   * @returns The address for a contract
    */
   public getDepositAddress() {
     return this.contract.address;
@@ -184,7 +184,7 @@ export class Contract implements ContractI {
 
   /**
    * getContractInstance - get the object directly as a cashscript contract.
-   * @returns A Cashscript Contract
+   * @returns A CashScript Contract
    */
   private getContractInstance() {
     return new CashScriptContract(

@@ -1491,7 +1491,7 @@ components:
         endBaton:
           type: boolean
           example: false
-          description: Indicates if token should not be 'mintable', e.g. total circluation amount increased
+          description: Indicates if token should not be 'mintable', e.g. total circulation amount increased
       required:
         - walletId
         - name
@@ -1579,7 +1579,7 @@ components:
         endBaton:
           type: boolean
           example: false
-          description: Indicates if token should not be 'mintable' anymore, e.g. total circluation amount increased
+          description: Indicates if token should not be 'mintable' anymore, e.g. total circulation amount increased
       required:
         - walletId
         - value

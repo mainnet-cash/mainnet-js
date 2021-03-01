@@ -71,7 +71,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBeGreaterThan(12000);
 
     // spend the escrow contract
-    await escrow.run(buyer.privateKeyWif!, "spend");
+    await escrow.call(buyer.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
     expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
 
@@ -123,7 +123,7 @@ describe(`Test Escrow Contracts`, () => {
     });
 
     // spend the escrow contract
-    await escrow.run(buyer.privateKeyWif!, "spend", undefined, false, utxos);
+    await escrow.call(buyer.privateKeyWif!, "spend", undefined, false, utxos);
     expect(await escrow.getBalance()).toBe(9400);
     expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
 
@@ -166,7 +166,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // spend the escrow contract
-    await escrow.run(arbiter.privateKeyWif!, "spend");
+    await escrow.call(arbiter.privateKeyWif!, "spend");
     expect(await escrow.getBalance()).toBe(0);
     expect(await seller.getBalance("sat")).toBeGreaterThan(445000);
 
@@ -209,7 +209,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    await escrow.run(seller.privateKeyWif!, "refund");
+    await escrow.call(seller.privateKeyWif!, "refund");
     expect(await escrow.getBalance()).toBe(0);
     expect(await buyer.getBalance("sat")).toBeGreaterThan(448000);
 
@@ -252,7 +252,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    await escrow.run(arbiter.privateKeyWif!, "refund");
+    await escrow.call(arbiter.privateKeyWif!, "refund");
     expect(await escrow.getBalance()).toBe(0);
     expect(await buyer.getBalance("sat")).toBeGreaterThan(448000);
 
@@ -294,7 +294,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    let hexOnly = await escrow.run(
+    let hexOnly = await escrow.call(
       arbiter.privateKeyWif!,
       "refund",
       undefined,
@@ -339,7 +339,7 @@ describe(`Test Escrow Contracts`, () => {
       ]);
 
       // refund the escrow contract
-      await escrow.run(buyer.privateKeyWif!, "refund");
+      await escrow.call(buyer.privateKeyWif!, "refund");
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
@@ -379,7 +379,7 @@ describe(`Test Escrow Contracts`, () => {
         },
       ]);
       // refund the escrow contract
-      await escrow.run(seller.privateKeyWif!, "spend");
+      await escrow.call(seller.privateKeyWif!, "spend");
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."

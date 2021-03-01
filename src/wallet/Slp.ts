@@ -38,7 +38,7 @@ import {
 import { toSlpAddress } from "../util/bchaddr";
 
 /**
- * Class that class to manage an slp enabled wallet.
+ * Class to manage an slp enabled wallet.
  */
 export class Slp {
   slpaddr: string;
@@ -93,7 +93,7 @@ export class Slp {
    *
    * @param tokenId  The tokenId to request information about
    *
-   * @returns Promise the slp token info or undefined.
+   * @returns Promise to the slp token info or undefined.
    */
   public getTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
     return this.provider.SlpTokenInfo(tokenId);
@@ -317,8 +317,8 @@ export class Slp {
     if (sendRequests.length > 19) {
       throw Error("Too many send requests in one transaction");
     }
-    const uniqueTockenIds = new Set(sendRequests.map((val) => val.tokenId));
-    if (uniqueTockenIds.size > 1) {
+    const uniqueTokenIds = new Set(sendRequests.map((val) => val.tokenId));
+    if (uniqueTokenIds.size > 1) {
       throw Error(
         "You have two different token types with the same ticker. Pass tokenId parameter"
       );
@@ -327,7 +327,7 @@ export class Slp {
     const tokenId = sendRequests[0].tokenId;
     if (!tokenId.match(/^[0-9a-fA-F]{64}$/)) {
       throw new Error(
-        "Invalid tokenId, must be 64 characte long hexadecimal string"
+        "Invalid tokenId, must be 64 character long hexadecimal string"
       );
     }
 
