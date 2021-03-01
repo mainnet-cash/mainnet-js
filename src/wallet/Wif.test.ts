@@ -522,9 +522,11 @@ describe(`Wallet extrema behavior regression testing`, () => {
       { cashaddr: bobWallet.cashaddr!, value: DUST * 3, unit: "sat" },
     ]);
 
-    await bobWallet.send(
-      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" }
-    );
+    await bobWallet.send({
+      cashaddr: charlieWallet.cashaddr!,
+      value: DUST,
+      unit: "sat",
+    });
     expect(await charlieWallet.getBalance("sat")).toBe(DUST);
   });
 
@@ -541,9 +543,11 @@ describe(`Wallet extrema behavior regression testing`, () => {
       { cashaddr: bobWallet.cashaddr!, value: DUST * 2, unit: "sat" },
     ]);
 
-    await bobWallet.send(
-      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
-    );
+    await bobWallet.send({
+      cashaddr: charlieWallet.cashaddr!,
+      value: DUST,
+      unit: "sat",
+    });
     expect(await charlieWallet.getBalance("sat")).toBe(DUST);
   });
 
