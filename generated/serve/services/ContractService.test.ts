@@ -397,12 +397,60 @@ describe("Test Contract Services", () => {
       arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
       to: {
         to: sender.getDepositAddress(),
-        amount: 17000,
+        amount: 1000,
       },
     }
     );
 
+    // test building with array of CashScript style requests
+    let hexOnlyAlt = await request(app).post("/contract/call").send({
+      contractId: contractId,
+      action: "build",
+      function: "timeout",
+      arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
+      to: [{
+        to: sender.getDepositAddress(),
+        amount: 1000,
+      },
+      {
+        to: sender.getDepositAddress(),
+        amount: 2000,
+      }],
+    }
+    );
+    let hexOnlyAlt2 = await request(app).post("/contract/call").send({
+      contractId: contractId,
+      action: "build",
+      function: "timeout",
+      arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
+      to: {
+        unit: 'sat',
+        cashaddr: sender.getDepositAddress(),
+        value: 1000,
+      },
+    }
+    );
+    let hexOnlyAlt3 = await request(app).post("/contract/call").send({
+      contractId: contractId,
+      action: "build",
+      function: "timeout",
+      arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
+      to: [{
+        unit: 'sat',
+        cashaddr: sender.getDepositAddress(),
+        value: 1000,
+      },
+      {
+        unit: 'sat',
+        cashaddr: sender.getDepositAddress(),
+        value: 2000,
+      }],
+    }
+    );
     expect(hexOnly.statusCode).toEqual(200);
+    expect(hexOnlyAlt.statusCode).toEqual(200);
+    expect(hexOnlyAlt2.statusCode).toEqual(200);
+    expect(hexOnlyAlt3.statusCode).toEqual(200);
     expect(hexOnly.body.hex).toMatch(/[0-f]{604}/);
 
     let debug = await request(app).post("/contract/call").send({

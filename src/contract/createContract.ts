@@ -2,12 +2,20 @@ import { EscrowContract } from "./escrow";
 import { Contract } from "./Contract";
 import { ContractResponseI } from "./interface";
 
+/**
+ * contractClassMap - Convenience map to access hardcoded contract types by name
+ */
 const contractClassMap = {
   escrow: () => {
     return EscrowContract;
   },
 };
 
+/**
+ * createContract - Create a new contract, from a json request
+ * @param body A create contract request
+ * @returns A new contract object
+ */
 export async function createContract(body: any): Promise<Contract> {
   let contractType = body.type;
   // This handles unsaved/unnamed wallets
@@ -21,7 +29,7 @@ export async function createContract(body: any): Promise<Contract> {
 }
 
 /**
- * Create a new contract,  from a serialized string
+ * Create a new contract, from a serialized string
  * @param contractId A serialized contractId string
  * @returns A new contract object
  */
@@ -30,7 +38,7 @@ export async function contractFromId(contractId: string): Promise<Contract> {
 }
 
 /**
- * Create a new contract,  but respond with a json object
+ * Create a new contract, but respond with a json object
  * @param request A contract request object
  * @returns A new contract object
  */
@@ -45,6 +53,11 @@ export async function createContractResponse(
   }
 }
 
+/**
+ * Serialize a contract as json
+ * @param contract A contract object
+ * @returns A json response
+ */
 function asJsonResponse(contract: Contract): ContractResponseI {
   return {
     contractId: contract.toString(),

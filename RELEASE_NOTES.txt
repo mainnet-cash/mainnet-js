@@ -13,6 +13,8 @@ Newest changes
 - Full NFT support comes later
 - Added support for SldDb communication, allowing generic queries too.
 - Regtest server now ships with SlpDb, slpserve and slpsockserve
+- Fixes bug with types passed to contract 'to' field over REST
+- Added ability to pass a single sendRequestItem to send()
 
 0.2.0
 -----

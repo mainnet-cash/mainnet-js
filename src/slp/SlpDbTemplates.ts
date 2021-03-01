@@ -35,10 +35,11 @@ export const SlpAllUtxosTemplate = (slpaddr: string) => ({
                     "graphTxn": 1
                 }
             }
-        ]
+        ],
+        "limit": 1e6,
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType } ]"
     }
 });
 
@@ -81,7 +82,7 @@ export const SlpSpendableUtxosTemplate = (slpaddr: string, tokenId?: string) => 
         ]
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType } ]"
     }
   };
 
@@ -150,7 +151,7 @@ export const SlpAllTokenBalancesTemplate = (slpaddr: string) => {
        }
     },
     "r": {
-      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, } ]"
+      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, type: .token[0].tokenDetails.versionType } ]"
     }
   }
 
@@ -211,7 +212,7 @@ export const SlpTokenBalanceTemplate = (slpaddr: string, tokenId: string) => {
        }
     },
     "r": {
-      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, } ]"
+      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, type: .token[0].tokenDetails.versionType } ]"
     }
   }
 
@@ -296,7 +297,7 @@ export const SlpTokenInfoTemplate = (tokenId?: string, limit: number = 100, skip
       "skip": skip,
     },
     "r": {
-      "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex, decimals: .tokenDetails.decimals, documentUrl: .tokenDetails.documentUri, documentHash: .tokenDetails.documentSha256Hex, initialAmount: .tokenDetails.genesisOrMintQuantity } ]"
+      "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex, decimals: .tokenDetails.decimals, documentUrl: .tokenDetails.documentUri, documentHash: .tokenDetails.documentSha256Hex, initialAmount: .tokenDetails.genesisOrMintQuantity, type: .tokenDetails.versionType } ]"
     }
   }
 
@@ -348,7 +349,7 @@ export const SlpBatonUtxosTemplate = (slpaddr: string, tokenId?: string) => {
         ]
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType } ]"
     }
   }
 

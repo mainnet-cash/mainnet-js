@@ -60,7 +60,7 @@ describe(`Should handle contracts in the browser`, () => {
       await buyer.sendMax(escrow.getDepositAddress());
 
       // spend the escrow contract
-      await escrow.run(buyer.privateKeyWif, "spend");
+      await escrow.call(buyer.privateKeyWif, "spend");
 
       // spend the sellers funds to another wallet
       await seller.sendMax(seller2.getDepositAddress());

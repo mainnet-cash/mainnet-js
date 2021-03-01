@@ -5,16 +5,14 @@ info:
   description: |
     A developer friendly bitcoin cash wallet api
 
-    This API is currently in active development, breaking changes may
-    be made prior to official release of version 1.
-
-    **Important:** This library is in active development
+    This API is currently in *active* development, breaking changes may
+    be made prior to official release of version 1.0.0.
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.31
+  version: 0.2.32
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -71,6 +69,15 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              contractId: testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1996128042
+              action: send
+              function: timeout
+              to:
+                unit: sat
+                cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+                value: 2000
+              feePerByte: 1
             schema:
               $ref: '#/components/schemas/ContractFnRequest'
         description: Request a new cashscript contract
@@ -498,7 +505,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SendMaxRequest'
-        description: Request to all available funds to a given address
+        description: Request to send all available funds to a given address
         required: true
       responses:
         "202":
@@ -555,6 +562,50 @@ paths:
                 $ref: '#/components/schemas/SlpGenesisResponse'
           description: successful operation
       summary: Get created tokenId back and new slp token balance of the wallet
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
+  /wallet/slp/nft_parent_genesis:
+    post:
+      operationId: nftParentGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlpGenesisRequest'
+        description: |
+          Request to create a new NFT parent token (genesis)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new NFT token balance of the wallet
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
+  /wallet/slp/nft_child_genesis:
+    post:
+      operationId: nftChildGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlpGenesisRequest'
+        description: |
+          Request to create a new NFT child token (genesis) by consuming a parent token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new NFT child token balance of the wallet
       tags:
       - wallet/slp
       x-eov-operation-handler: controllers/WalletSlpController
@@ -848,17 +899,21 @@ components:
         sat:
           description: Amount in satoshis
           example: 100000000
-          type: integer
+          format: integer
+          type: number
         usd:
           description: Amount in United States Dollars
           example: 438.02
           type: number
     Error:
+      example:
+        message: An server error occurred
+        code: 500
       properties:
         message:
           type: string
-        stack:
-          type: string
+        code:
+          type: number
     WatchAddressRequest:
       example:
         recurrence: recurrent
@@ -928,7 +983,8 @@ components:
         sat:
           description: Amount in satoshis
           example: 0
-          type: integer
+          format: integer
+          type: number
         usd:
           description: Amount in United States Dollars
           example: 0
@@ -1081,13 +1137,13 @@ components:
             type: string
           type: array
         to:
-          description: The output destination, as a SendRequest, cashscript style
-            output(s), array of either.
-          oneOf:
+          anyOf:
           - $ref: '#/components/schemas/SendRequestItem'
           - $ref: '#/components/schemas/SendRequestArray'
           - $ref: '#/components/schemas/CashscriptReceipt'
           - $ref: '#/components/schemas/CashscriptReceiptArray'
+          description: The output destination, as a SendRequest, cashscript style
+            output(s), array of either.
         utxoIds:
           description: Serialized utxoId(s) to spend from
           items:
@@ -1233,10 +1289,6 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-        options:
-          utxoIds:
-          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
       properties:
         walletId:
           description: |
@@ -1247,7 +1299,7 @@ components:
           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           type: string
         options:
-          $ref: '#/components/schemas/SlpSendRequestOptions'
+          $ref: '#/components/schemas/SendRequestOptions'
       required:
       - cashaddr
       - walletId
@@ -1405,16 +1457,10 @@ components:
     SendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        options:
-          changeAddress: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
-          utxoIds:
-          - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
-          - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
         to:
-        - cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          value: 100
-        - cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          value: 100
+          unit: sat
+          cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+          value: 1000
       properties:
         walletId:
           description: |
@@ -1422,18 +1468,15 @@ components:
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         to:
-          items:
-            $ref: '#/components/schemas/SendRequestItem'
-          type: array
+          anyOf:
+          - $ref: '#/components/schemas/SendRequestItem'
+          - $ref: '#/components/schemas/SendRequestArray'
         options:
           $ref: '#/components/schemas/SendRequestOptions'
       type: object
     SendRequestItem:
       allOf:
       - $ref: '#/components/schemas/UnitType'
-      example:
-        cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-        value: 100
       properties:
         cashaddr:
           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
@@ -1447,11 +1490,6 @@ components:
       - value
       type: object
     SendRequestOptions:
-      example:
-        changeAddress: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
-        utxoIds:
-        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
-        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
       properties:
         utxoIds:
           items:
@@ -1583,17 +1621,21 @@ components:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
       example:
-        cashaddr: cashaddr
-        privateKey: privateKey
-        walletId: walletId
-        walletDbEntry: walletDbEntry
-        seed: seed
-        derivationPath: derivationPath
-        name: name
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf
         isTestnet: true
-        publicKey: publicKey
-        privateKeyWif: privateKeyWif
-        publicKeyHash: publicKeyHash
+        name: ""
+        network: testnet
+        seed: empty solar plunge document bridge announce purse erupt joy vague illegal
+          angle
+        derivationPath: m/44'/0'/0'/0/0
+        publicKey: 04410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a72e8d04d8a1634f35a05d6bd59d20c545e165f5d7dd6043fe3e843e7ec547b6df
+        publicKeyHash: 56b6b22042b90dd67bf2fbfb9aff7d37fbee1124
+        privateKey: 207efc5233effadd4f2df00410526dc4d0ca901ca8f0b7a1e92a42d3baf14e7f
+        privateKeyWif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        walletId: wif:testnet:empty solar plunge document bridge announce purse erupt
+          joy vague illegal angle:m/44'/0'/0'/0/0
+        walletDbEntry: wif:testnet:empty solar plunge document bridge announce purse
+          erupt joy vague illegal angle:m/44'/0'/0'/0/0
       properties:
         cashaddr:
           type: string
@@ -1641,10 +1683,14 @@ components:
         endBaton: false
         ticker: MNC
         documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
+        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        parentTokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         initialAmount: "10000"
         decimals: 0.8008281904610115
         documentUrl: https://mainnet.cash
         name: Mainnet coin
+        type: 1
       properties:
         walletId:
           description: |
@@ -1674,10 +1720,24 @@ components:
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           type: string
         endBaton:
-          description: Indicates if token should not be 'mintable', e.g. total circluation
+          description: Indicates if token should not be 'mintable', e.g. total circulation
             amount increased
           example: false
           type: boolean
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
+        tokenReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+        batonReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+        parentTokenId:
+          description: Identifier of the NFT parent token
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
       required:
       - decimals
       - initialAmount
@@ -1691,6 +1751,7 @@ components:
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          type: 1
           value: "10000"
       properties:
         tokenId:
@@ -1735,6 +1796,7 @@ components:
         decimals: 2
         documentUrl: https://mainnet.cash
         name: Mainnet coin
+        type: 1
       properties:
         name:
           example: Mainnet coin
@@ -1762,11 +1824,17 @@ components:
             string.
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     SlpMintRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         endBaton: false
+        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         value: "10000"
       properties:
         walletId:
@@ -1783,9 +1851,15 @@ components:
           type: string
         endBaton:
           description: Indicates if token should not be 'mintable' anymore, e.g. total
-            circluation amount increased
+            circulation amount increased
           example: false
           type: boolean
+        tokenReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+        batonReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
       required:
       - tokenId
       - value
@@ -1796,6 +1870,7 @@ components:
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          type: 1
           value: "10000"
         txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
@@ -1831,6 +1906,7 @@ components:
         ticker: MNC
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         name: Mainnet coin
+        type: 1
         value: "10000"
       properties:
         value:
@@ -1851,6 +1927,10 @@ components:
             creation transaction
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     SlpSendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -1909,6 +1989,7 @@ components:
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          type: 1
           value: "10000"
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
       properties:
@@ -1960,6 +2041,7 @@ components:
         decimals: 2
         index: 0.8008281904610115
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+        type: 1
         value: "10000"
         satoshis: 546
       properties:
@@ -1994,6 +2076,10 @@ components:
             creation transaction
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     GetTestnetBchRequest:
       example:
         cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
