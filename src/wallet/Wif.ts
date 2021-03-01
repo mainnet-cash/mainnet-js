@@ -258,7 +258,7 @@ export class Wallet extends BaseWallet {
    *
    */
   public async send(
-    requests: SendRequest[] | SendRequestArray[],
+    requests: SendRequest | SendRequest[] | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     let sendRequests = asSendRequestObject(requests);
