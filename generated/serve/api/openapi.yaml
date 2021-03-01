@@ -565,6 +565,50 @@ paths:
       tags:
       - wallet/slp
       x-eov-operation-handler: controllers/WalletSlpController
+  /wallet/slp/nft_parent_genesis:
+    post:
+      operationId: nftParentGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlpGenesisRequest'
+        description: |
+          Request to create a new NFT parent token (genesis)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new NFT token balance of the wallet
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
+  /wallet/slp/nft_child_genesis:
+    post:
+      operationId: nftChildGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlpGenesisRequest'
+        description: |
+          Request to create a new NFT child token (genesis) by consuming a parent token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpGenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new NFT child token balance of the wallet
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
   /wallet/slp/mint:
     post:
       operationId: slpMint
@@ -1653,10 +1697,14 @@ components:
         endBaton: false
         ticker: MNC
         documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
+        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        parentTokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         initialAmount: "10000"
         decimals: 0.8008281904610115
         documentUrl: https://mainnet.cash
         name: Mainnet coin
+        type: 1
       properties:
         walletId:
           description: |
@@ -1690,6 +1738,20 @@ components:
             amount increased
           example: false
           type: boolean
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
+        tokenReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+        batonReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+        parentTokenId:
+          description: Identifier of the NFT parent token
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
       required:
       - decimals
       - initialAmount
@@ -1703,6 +1765,7 @@ components:
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          type: 1
           value: "10000"
       properties:
         tokenId:
@@ -1747,6 +1810,7 @@ components:
         decimals: 2
         documentUrl: https://mainnet.cash
         name: Mainnet coin
+        type: 1
       properties:
         name:
           example: Mainnet coin
@@ -1774,11 +1838,17 @@ components:
             string.
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     SlpMintRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         endBaton: false
+        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         value: "10000"
       properties:
         walletId:
@@ -1798,6 +1868,12 @@ components:
             circulation amount increased
           example: false
           type: boolean
+        tokenReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+        batonReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
       required:
       - tokenId
       - value
@@ -1808,6 +1884,7 @@ components:
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          type: 1
           value: "10000"
         txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
@@ -1843,6 +1920,7 @@ components:
         ticker: MNC
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
         name: Mainnet coin
+        type: 1
         value: "10000"
       properties:
         value:
@@ -1863,6 +1941,10 @@ components:
             creation transaction
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     SlpSendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -1921,6 +2003,7 @@ components:
           ticker: MNC
           tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           name: Mainnet coin
+          type: 1
           value: "10000"
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
       properties:
@@ -1972,6 +2055,7 @@ components:
         decimals: 2
         index: 0.8008281904610115
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+        type: 1
         value: "10000"
         satoshis: 546
       properties:
@@ -2006,6 +2090,10 @@ components:
             creation transaction
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     GetTestnetBchRequest:
       example:
         cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8

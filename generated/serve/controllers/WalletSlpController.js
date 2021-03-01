@@ -8,6 +8,14 @@
 
 const Controller = require('./Controller');
 const service = require('../services/WalletSlpService');
+const nftChildGenesis = async (request, response) => {
+  await Controller.handleRequest(request, response, service.nftChildGenesis);
+};
+
+const nftParentGenesis = async (request, response) => {
+  await Controller.handleRequest(request, response, service.nftParentGenesis);
+};
+
 const slpAllBalances = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpAllBalances);
 };
@@ -50,6 +58,8 @@ const slpUtxos = async (request, response) => {
 
 
 module.exports = {
+  nftChildGenesis,
+  nftParentGenesis,
   slpAllBalances,
   slpBalance,
   slpDepositAddress,

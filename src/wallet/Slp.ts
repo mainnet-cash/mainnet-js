@@ -3,11 +3,13 @@ import {
   SlpFormattedUtxo,
   SlpGenesisOptions,
   SlpGenesisResult,
+  SlpMintOptions,
   SlpMintResult,
   SlpSendRequest,
   SlpSendResponse,
   SlpTokenBalance,
   SlpTokenInfo,
+  SlpTokenType,
   SlpUtxoI,
 } from "../slp/interface";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
@@ -100,7 +102,7 @@ export class Slp {
   }
 
   /**
-   * getSlpUtxos - get a list of unspent outputs
+   * getSlpUtxos - get a list of SLP unspent outputs
    *
    * an intermediate function contributing to the output of wallet.getUtxos() and /wallet/utxos for slp enabled wallets
    *
@@ -129,7 +131,7 @@ export class Slp {
     }
     const utxos = await this.getSlpUtxos(toSlpAddress(slpaddr));
     return utxos.map((val) => {
-      let utxo: any = {};
+      let utxo = {} as SlpFormattedUtxo;
       utxo.ticker = val.ticker;
       utxo.tokenId = val.tokenId;
       utxo.value = val.value.toString();
@@ -138,7 +140,8 @@ export class Slp {
       utxo.txId = val.txid;
       utxo.index = val.vout;
       utxo.utxoId = utxo.txId + ":" + utxo.index;
-      return utxo as SlpFormattedUtxo;
+      utxo.type = val.type;
+      return utxo;
     });
   }
 
@@ -169,9 +172,7 @@ export class Slp {
   }
 
   /**
-   * getLastTransaction - get a token balance for a particular address
-   *
-   * a high-level function, see also /wallet/slp/balance REST endpoint
+   * getLastTransaction - get a last SLP token transaction of a particular address
    *
    * @param {boolean} [confirmedOnly=false]  When confirmedOnly is true, results will be limited to only transactions included in a block.
    *
@@ -201,13 +202,27 @@ export class Slp {
     return this.provider.SlpTokenBalance(this.slpaddr, tokenId);
   }
 
-  // get all token balances of this wallet
+  /**
+   * getAllBalances - get all token balances for a particular address
+   *
+   * a high-level function, see also /wallet/slp/all_balances REST endpoint
+   *
+   * @returns Promise to an array of SlpTokenBalance
+   */
   public async getAllBalances(): Promise<SlpTokenBalance[]> {
     return this.provider.SlpAllTokenBalances(this.slpaddr);
   }
 
-  // sets up a callback to be called upon wallet's slp balance change
-  // can be cancelled by calling the function returned from this one
+  /**
+   * watchBalance - set up a callback to be called upon wallet's slp balance change
+   *
+   * can be cancelled by calling the function returned from this one
+   *
+   * @param callback   The callback function to be called each time the balance changes
+   * @param tokenId    Specific token id to watch, optional
+   *
+   * @returns A function to cancel the watching
+   */
   public watchBalance(
     callback: SlpWatchBalanceCallback,
     tokenId?: string
@@ -215,8 +230,16 @@ export class Slp {
     return this.provider.SlpWatchBalance(callback, this.slpaddr, tokenId);
   }
 
-  // waits for address balance to be greater than or equal to the target value
-  // this call halts the execution
+  /**
+   * waitForBalance - wait for address balance to be greater than or equal to the target value
+   *
+   * This call halts the program execution
+   *
+   * @param value      Target balance value
+   * @param tokenId    Specific token id to watch
+   *
+   * @returns Actual token balance after reaching or surpassing the target value
+   */
   public async waitForBalance(
     value: BigNumber.Value,
     tokenId: string
@@ -224,8 +247,16 @@ export class Slp {
     return this.provider.SlpWaitForBalance(value, this.slpaddr, tokenId);
   }
 
-  // sets up a callback to be called upon wallet's slp transactions occurring
-  // can be cancelled by calling the function returned from this one
+  /**
+   * watchBalance - set up a callback to be called upon wallet's slp transactions occurring
+   *
+   * can be cancelled by calling the function returned from this one
+   *
+   * @param callback   The callback function to be called each time the balance changes
+   * @param tokenId    Specific token id to watch, optional
+   *
+   * @returns A function to cancel the watching
+   */
   public watchTransactions(
     callback: SlpWatchTransactionCallback,
     tokenId?: string
@@ -233,11 +264,26 @@ export class Slp {
     return this.provider.SlpWatchTransactions(callback, this.slpaddr, tokenId);
   }
 
-  // waits for next transaction, program execution is halted
+  /**
+   * waitForBalance - wait for the next SLP transaction to occur
+   *
+   * This call halts the program execution
+   *
+   * @param tokenId    Specific token id to watch, optional
+   *
+   * @returns Transaction object
+   */
   public async waitForTransaction(tokenId?: string): Promise<any> {
     return this.provider.SlpWaitForTransaction(this.slpaddr, tokenId);
   }
 
+  /**
+   * genesis - create a new Type1 SLP token
+   *
+   * @param options    Token creation options @see SlpGenesisOptions
+   *
+   * @returns Token Id and new token balance
+   */
   public async genesis(options: SlpGenesisOptions): Promise<SlpGenesisResult> {
     let result = await this._processGenesis(options);
     return {
@@ -246,16 +292,98 @@ export class Slp {
     };
   }
 
-  private async _processGenesis(options: SlpGenesisOptions) {
-    let slpOutputsResult = await SlpGetGenesisOutputs(
-      options,
-      this.slpaddr,
-      this.slpaddr
-    );
+  /**
+   * nftParentGenesis - create a new NFT Parent token
+   *
+   * @param options    Token creation options @see SlpGenesisOptions
+   *
+   * @returns Token Id and new token balance
+   */
+  public async nftParentGenesis(
+    options: SlpGenesisOptions
+  ): Promise<SlpGenesisResult> {
+    options.type = SlpTokenType.NftParent;
+    let result = await this._processGenesis(options);
+    return {
+      tokenId: result,
+      balance: await this.getBalance(result),
+    };
+  }
 
-    const fundingBchUtxos = await this.wallet
+  /**
+   * nftParentGenesis - create a new NFT Child token
+   *
+   * @param parentTokenId    Parent token id, at least one is required and will be spent in the child genesis process
+   * @param options    Token creation options @see SlpGenesisOptions
+   *
+   * @returns Token Id and new token balance
+   */
+  public async nftChildGenesis(
+    parentTokenId: string,
+    options: SlpGenesisOptions
+  ): Promise<SlpGenesisResult> {
+    let parentUtxos = await this.provider.SlpSpendableUtxos(
+      this.slpaddr,
+      parentTokenId
+    );
+    parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
+
+    if (!parentUtxos.length) {
+      throw new Error(`You do not own any tokens with id ${parentTokenId}`);
+    }
+
+    if (parentUtxos[0].type !== SlpTokenType.NftParent) {
+      throw new Error(
+        `The 'parentTokenId' is not of type ${SlpTokenType.NftParent}`
+      );
+    }
+
+    // we are about to spend exactly 1 NFT parent
+    // if we do not have it, we have to make one by splitting
+    if (parentUtxos[0].value.isGreaterThan(new BigNumber(1))) {
+      await this.send([
+        {
+          slpaddr: this.slpaddr,
+          tokenId: parentTokenId,
+          value: new BigNumber(1),
+        },
+      ]);
+      return await this.nftChildGenesis(parentTokenId, options);
+    }
+
+    options.type = SlpTokenType.NftChild;
+    options.endBaton = true;
+    options.initialAmount = 1;
+    options.decimals = 0;
+    let result = await this._processGenesis(options, [parentUtxos[0]]);
+    return {
+      tokenId: result,
+      balance: await this.getBalance(result),
+    };
+  }
+
+  /**
+   * _processGenesis - prepare the genesis transaction with given parameters
+   *
+   * a private utility wrapper to pre-process transactions
+   *
+   * @param options   genesis options to controll the process
+   *
+   * @returns the created tokenId (which is genesis transaction id) and token balance
+   */
+  private async _processGenesis(
+    options: SlpGenesisOptions,
+    ensureInputs: UtxoI[] = []
+  ) {
+    options = this.substituteOptionals(options);
+
+    let slpOutputsResult = await SlpGetGenesisOutputs(options);
+
+    let fundingBchUtxos = await this.wallet
       .slpAware(true)
       .getAddressUtxos(this.wallet.cashaddr!);
+
+    fundingBchUtxos = [...ensureInputs, ...fundingBchUtxos];
 
     return this.processSlpTransaction(fundingBchUtxos, slpOutputsResult);
   }
@@ -265,7 +393,7 @@ export class Slp {
    *
    * a high-level function, see also /wallet/slp/send_max REST endpoint
    *
-   * @param slpaddr   destination address
+   * @param slpaddr   destination SLP address
    * @param tokenId   the id of the token to be spent
    *
    * @returns transaction id and token balance
@@ -357,7 +485,7 @@ export class Slp {
   }
 
   /**
-   * mint - attempt to process a list of slp send requests.
+   * mint - create new tokens to increase the circulation supply.
    *
    * a high-level function, see also /wallet/slp/mint endpoint
    *
@@ -367,16 +495,8 @@ export class Slp {
    *
    * @returns transaction id and token balance
    */
-  public async mint(
-    value: BigNumber.Value,
-    tokenId: string,
-    endBaton: boolean = false
-  ): Promise<SlpMintResult> {
-    let [actualTokenId, result] = await this._processMint(
-      value,
-      tokenId,
-      endBaton
-    );
+  public async mint(options: SlpMintOptions): Promise<SlpMintResult> {
+    let [actualTokenId, result] = await this._processMint(options);
     return {
       txId: result,
       balance: await this.getBalance(actualTokenId),
@@ -394,29 +514,25 @@ export class Slp {
    *
    * @returns the tokenId and minting transaction id
    */
-  private async _processMint(
-    value: BigNumber.Value,
-    tokenId: string,
-    endBaton: boolean = false
-  ) {
-    value = new BigNumber(value);
-    if (value.isLessThanOrEqualTo(0)) {
+  private async _processMint(options: SlpMintOptions) {
+    options = this.substituteOptionals(options);
+
+    options.value = new BigNumber(options.value);
+    if (
+      options.value.isLessThanOrEqualTo(0) &&
+      options.batonReceiverSlpAddr === this.slpaddr
+    ) {
       throw Error("Mint amount should be greater than zero");
     }
 
-    const slpBatonUtxos = await this.getBatonUtxos(tokenId);
+    const slpBatonUtxos = await this.getBatonUtxos(options.tokenId);
     if (!slpBatonUtxos.length) {
-      throw Error(`You do not posses the minting baton for ${tokenId}`);
+      throw Error(
+        `You do not possess the minting baton for ${options.tokenId}`
+      );
     }
 
-    let slpOutputsResult = await SlpGetMintOutputs(
-      slpBatonUtxos,
-      tokenId,
-      value,
-      this.slpaddr,
-      this.slpaddr,
-      endBaton
-    );
+    let slpOutputsResult = await SlpGetMintOutputs(options, slpBatonUtxos);
 
     let bchUtxos = await this.wallet
       .slpAware(true)
@@ -428,11 +544,19 @@ export class Slp {
     fundingBchUtxos = [...slpToBchUtxos, ...fundingBchUtxos];
 
     return [
-      tokenId,
+      options.tokenId,
       await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult),
     ];
   }
 
+  /**
+   * processSlpTransaction - process the prepared SLP transaction and submit it to the network
+   *
+   * @param fundingBchUtxos   ensure these BCH utxos to be spent in the process
+   * @param slpOutputsResult  prepared SLP outputs to be added to transaction
+   *
+   * @returns the tokenId and minting transaction id
+   */
   private async processSlpTransaction(
     fundingBchUtxos: UtxoI[],
     slpOutputsResult: {
@@ -512,5 +636,30 @@ export class Slp {
   private async _submitTransaction(transaction: Uint8Array): Promise<string> {
     let rawTransaction = binToHex(transaction);
     return this.wallet.provider!.sendRawTransaction(rawTransaction);
+  }
+
+  /**
+   * substituteOptionals - substitute optional fields with default values
+   *
+   * will ensure that baton and token receiver are intialized as SLP address of this wallet if absent
+   * will ensure that baton will not be ended if endBaton is undefined
+   * a private utility wrapper substitute optionals
+   *
+   * @param options   genesis or mint options to substitute values int
+   *
+   * @returns options with relevant values substituted/initialized
+   */
+  private substituteOptionals(options: any): any {
+    if (!options.batonReceiverSlpAddr) {
+      options.batonReceiverSlpAddr = this.slpaddr;
+    }
+    if (!options.tokenReceiverSlpAddr) {
+      options.tokenReceiverSlpAddr = this.slpaddr;
+    }
+    if (options.endBaton === undefined) {
+      options.endBaton = false;
+    }
+
+    return options;
   }
 }
