@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.2.31
+  version: 0.2.32
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -491,7 +491,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/SendMaxRequest"
-        description: Request to all available funds to a given address
+        description: Request to send all available funds to a given address
         required: true
       responses:
         "202":
@@ -1185,7 +1185,10 @@ components:
            type: string
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
         options:
-          $ref: "#/components/schemas/SlpSendRequestOptions"  
+          $ref: "#/components/schemas/SendRequestOptions"  
+      example:
+          walletId: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
       required:
         - walletId
         - cashaddr
@@ -1326,11 +1329,17 @@ components:
           description: |
             The walletId of the source of funds to spend from.
         to:
-          type: array
-          items:
-            $ref: "#/components/schemas/SendRequestItem"
+          anyOf:
+          - $ref: "#/components/schemas/SendRequestItem"
+          - $ref: "#/components/schemas/SendRequestArray"
         options:
           $ref: "#/components/schemas/SendRequestOptions"
+      example:
+        walletId: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+        to:  
+          unit: "sat"
+          cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
+          value: 1000
       type: object
     SendRequestItem:
       properties:
@@ -1488,6 +1497,19 @@ components:
           type: string
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
+      example:
+        cashaddr: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf"
+        isTestnet: true
+        name: ""
+        network: "testnet"
+        seed: "empty solar plunge document bridge announce purse erupt joy vague illegal angle"
+        derivationPath: "m/44'/0'/0'/0/0"
+        publicKey: "04410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a72e8d04d8a1634f35a05d6bd59d20c545e165f5d7dd6043fe3e843e7ec547b6df"
+        publicKeyHash: "56b6b22042b90dd67bf2fbfb9aff7d37fbee1124"
+        privateKey: "207efc5233effadd4f2df00410526dc4d0ca901ca8f0b7a1e92a42d3baf14e7f"
+        privateKeyWif: "cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+        walletId: "wif:testnet:empty solar plunge document bridge announce purse erupt joy vague illegal angle:m/44'/0'/0'/0/0"
+        walletDbEntry: "wif:testnet:empty solar plunge document bridge announce purse erupt joy vague illegal angle:m/44'/0'/0'/0/0"
     WalletMnemonic:
       properties:
         seed:
