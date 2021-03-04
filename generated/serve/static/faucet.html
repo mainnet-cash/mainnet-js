@@ -79,11 +79,11 @@
         }).catch(error => alert(error));
       },
       async getBch() {
-        await this.fetch("/faucet/get_testnet_bch", {cashaddr: mainnet.toCashAddress(this.cashaddr)});
+        await this.fetch("/faucet/get_testnet_bch", {cashaddr: toCashAddress(this.cashaddr)});
         await this.update();
       },
       async getTokens(tokenId) {
-        await this.fetch("/faucet/get_testnet_slp", {slpaddr: mainnet.toSlpAddress(this.cashaddr), tokenId: tokenId});
+        await this.fetch("/faucet/get_testnet_slp", {slpaddr: toSlpAddress(this.cashaddr), tokenId: tokenId});
         await this.update();
       },
 
