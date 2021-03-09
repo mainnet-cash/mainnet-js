@@ -11,15 +11,21 @@
 //     decrypt: DecryptedMessageFunc
 // }
 
-interface SignMessageFunc {
-  (message: string, privateKey: string): string;
-}
+// interface SignMessageFunc {
+//   sign(message: string, privateKey: Uint8Array): Promise<string>
+// }
 
-interface VerifyMessageFunc {
-  (message: string, publicKeyHash: string): string;
-}
+// interface VerifyMessageFunc {
+//   verify(message: string,
+//     signature: string,
+//     cashaddr: string): Promise<boolean>;
+// }
 
 export interface SignedMessageI {
-  sign: SignMessageFunc;
-  verify: VerifyMessageFunc;
+  sign(message: string, privateKey: Uint8Array): Promise<string>;
+  verify(
+    message: string,
+    signature: string,
+    cashaddr: string
+  ): Promise<boolean>;
 }

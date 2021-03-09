@@ -70,4 +70,30 @@ describe("Test message Signing and Verification", () => {
     let result = await SignedMessage.verify(msg, sig, w.cashaddr!);
     expect(result).toBe(true);
   });
+
+  test("Test mainnet signature example from electron cash", async () => {
+    let msg1 = "Chancellor on brink of second bailout for banks";
+    let w1 = await Wallet.fromId(
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+    );
+    expect(w1.cashaddr!).toBe(
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+    );
+    let sig = await Wallet.signedMessage.sign(msg1, w1.privateKey!);
+    let result = await Wallet.signedMessage.verify(msg1, sig, w1.cashaddr);
+    expect(result).toBe(true);
+  });
+
+  test("Test mainnet signature example from electron cash", async () => {
+    let msg1 = "Chancellor on brink of second bailout for banks";
+    let w1 = await Wallet.fromId(
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+    );
+    expect(w1.cashaddr!).toBe(
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+    );
+    let sig = await w1.sign(msg1);
+    let result = await w1.verify(msg1, sig);
+    expect(result).toBe(true);
+  });
 });

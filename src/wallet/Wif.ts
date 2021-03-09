@@ -808,6 +808,16 @@ export class Wallet extends BaseWallet {
     let rawTransaction = binToHex(transaction);
     return await this.provider.sendRawTransaction(rawTransaction);
   }
+
+  // Convenience wrapper to sign interface
+  public async sign(message: string) {
+    return await BaseWallet.signedMessage.sign(message, this.privateKey!);
+  }
+
+  // Convenience wrapper to verify interface
+  public async verify(message: string, sig: string) {
+    return await BaseWallet.signedMessage.verify(message, sig, this.cashaddr!);
+  }
 }
 
 /**

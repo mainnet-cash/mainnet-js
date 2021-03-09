@@ -11,10 +11,11 @@ import {
 
 import { derivePrefix } from "../util/derivePublicKeyHash";
 import { hash160 } from "../util/hash160";
+import { SignedMessageI } from "./interface";
 
 /**
  * message_magic - "Magic" per standard bitcoin message signing.
- * 
+ *
  * In this case, the magic is simply adding "b'24' + Bitcoin Signed Message\n" followed
  * by the size of the message in binary and the message encoded as binary.
  *
@@ -45,21 +46,16 @@ export async function hash_magic(str: string) {
   return h(h(message_magic(str)));
 }
 
-export class SignedMessage {
-
-
-/**
- * sign - Calculate the recoverable signed checksum of a string message.
- *
- * @param {message} string          The 
- * @param {privateKey} Uint8Array   The private key to sign the message with
- *
- * @returns a promise to signature as a string
- */
-  public static async sign(
-    message: string,
-    privateKey: Uint8Array
-  ): Promise<string> {
+export class SignedMessage implements SignedMessageI {
+  /**
+   * sign - Calculate the recoverable signed checksum of a string message.
+   *
+   * @param {message} string          The
+   * @param {privateKey} Uint8Array   The private key to sign the message with
+   *
+   * @returns a promise to signature as a string
+   */
+  public async sign(message: string, privateKey: Uint8Array): Promise<string> {
     const secp256k1 = await instantiateSecp256k1();
 
     let messageHash = await hash_magic(message);
@@ -70,21 +66,23 @@ export class SignedMessage {
     return binToBase64(rs.signature);
   }
 
-/**
- * verify - Validate that the message is valid
- *
- * @param {message} string     The message to verify as a utf8 string
- * @param {signature} string   The signature as a base64 encoded string
- * @param {cashaddr} string    The cashaddr to validate the signature against.
- *
- * @returns a promise to signature as a string
- */
-  public static async verify(
+  public static async sign(message: string, privateKey: Uint8Array) {
+    return new this().sign(message, privateKey);
+  }
+  /**
+   * verify - Validate that the message is valid against a given signature
+   *
+   * @param {message} string     The message to verify as a utf8 string
+   * @param {signature} string   The signature as a base64 encoded string
+   * @param {cashaddr} string    The cashaddr to validate the signature against.
+   *
+   * @returns a promise to signature as a string
+   */
+  public async verify(
     message: string,
     signature: string,
     cashaddr: string
   ): Promise<boolean> {
-
     // Check that the signature is valid for the given message.
     const secp256k1 = await instantiateSecp256k1();
     let messageHash = await hash_magic(message);
@@ -101,7 +99,15 @@ export class SignedMessage {
       console.log("cashaddr match failed");
       return false;
     }
-    
+
     return valid;
+  }
+
+  public static async verify(
+    message: string,
+    signature: string,
+    cashaddr: string
+  ) {
+    return new this().verify(message, signature, cashaddr);
   }
 }
