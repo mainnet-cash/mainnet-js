@@ -1,6 +1,5 @@
 import { instantiateSha256, instantiateRipemd160 } from "@bitauth/libauth";
 
-
 /**
  * hash160 - Calculate the sha256, ripemd160 hash of a value
  *

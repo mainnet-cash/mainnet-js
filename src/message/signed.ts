@@ -14,7 +14,7 @@ import { hash160 } from "../util/hash160";
 
 /**
  * message_magic - "Magic" per standard bitcoin message signing.
- * 
+ *
  * In this case, the magic is simply adding "b'24' + Bitcoin Signed Message\n" followed
  * by the size of the message in binary and the message encoded as binary.
  *
@@ -46,16 +46,14 @@ export async function hash_magic(str: string) {
 }
 
 export class SignedMessage {
-
-
-/**
- * sign - Calculate the recoverable signed checksum of a string message.
- *
- * @param {message} string          The 
- * @param {privateKey} Uint8Array   The private key to sign the message with
- *
- * @returns a promise to signature as a string
- */
+  /**
+   * sign - Calculate the recoverable signed checksum of a string message.
+   *
+   * @param {message} string          The
+   * @param {privateKey} Uint8Array   The private key to sign the message with
+   *
+   * @returns a promise to signature as a string
+   */
   public static async sign(
     message: string,
     privateKey: Uint8Array
@@ -70,21 +68,20 @@ export class SignedMessage {
     return binToBase64(rs.signature);
   }
 
-/**
- * verify - Validate that the message is valid
- *
- * @param {message} string     The message to verify as a utf8 string
- * @param {signature} string   The signature as a base64 encoded string
- * @param {cashaddr} string    The cashaddr to validate the signature against.
- *
- * @returns a promise to signature as a string
- */
+  /**
+   * verify - Validate that the message is valid
+   *
+   * @param {message} string     The message to verify as a utf8 string
+   * @param {signature} string   The signature as a base64 encoded string
+   * @param {cashaddr} string    The cashaddr to validate the signature against.
+   *
+   * @returns a promise to signature as a string
+   */
   public static async verify(
     message: string,
     signature: string,
     cashaddr: string
   ): Promise<boolean> {
-
     // Check that the signature is valid for the given message.
     const secp256k1 = await instantiateSecp256k1();
     let messageHash = await hash_magic(message);
@@ -101,7 +98,7 @@ export class SignedMessage {
       console.log("cashaddr match failed");
       return false;
     }
-    
+
     return valid;
   }
 }
