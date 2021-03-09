@@ -16,7 +16,7 @@ import { SignedMessageI } from "./interface";
 /**
  * message_magic - "Magic" per standard bitcoin message signing.
  *
- * In this case, the magic is simply adding "b'24' + Bitcoin Signed Message\n" followed
+ * In this case, the magic is simply adding the number 24 as binary "\x16" + "Bitcoin Signed Message\n" followed
  * by the size of the message in binary and the message encoded as binary.
  *
  * @param {str} string    The string to add the magic syntax to.
