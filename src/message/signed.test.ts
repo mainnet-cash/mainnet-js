@@ -1,17 +1,13 @@
 import { SignedMessage, hash_magic } from "./signed";
 import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
-import {
-  binToHex
-} from "@bitauth/libauth";
+import { binToHex } from "@bitauth/libauth";
 
-
-const fs = require('fs').promises;
+const fs = require("fs").promises;
 
 async function loadLargeMessage() {
-    const data = await fs.readFile("./jest/data/bitcoin.tex", "utf-8");
-    return data;
+  const data = await fs.readFile("./jest/data/bitcoin.tex", "utf-8");
+  return data;
 }
-
 
 describe("Test message Signing and Verification", () => {
   test("Test the magic hash function", async () => {

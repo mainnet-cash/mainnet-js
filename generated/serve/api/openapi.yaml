@@ -581,7 +581,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/VerifySignedMessageResponse'
           description: successful operation
-      summary: Returns the boolean indicating whether message was valid
+      summary: Returns a boolean indicating whether message was valid for a given
+        address
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -1399,13 +1400,13 @@ components:
     WalletResponse:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
+      anyOf:
+      - $ref: '#/components/schemas/Wif'
+      - $ref: '#/components/schemas/WalletMnemonic'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         name: username1
-      oneOf:
-      - $ref: '#/components/schemas/Wif'
-      - $ref: '#/components/schemas/WalletMnemonic'
       properties:
         walletId:
           description: |

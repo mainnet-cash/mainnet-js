@@ -64,8 +64,8 @@ export class SignedMessage implements SignedMessageI {
       privateKey,
       messageHash
     );
-    let sig = new Uint8Array([...[31+rs.recoveryId] , ...rs.signature ])
-    return binToBase64(sig)
+    let sig = new Uint8Array([...[31 + rs.recoveryId], ...rs.signature]);
+    return binToBase64(sig);
   }
 
   public static async sign(message: string, privateKey: Uint8Array) {
@@ -91,9 +91,13 @@ export class SignedMessage implements SignedMessageI {
     let sig = base64ToBin(signature);
     let prefix = derivePrefix(cashaddr);
 
-    let recoveryId = sig.slice(0,1)[0]-31
-    
-    let pk = secp256k1.recoverPublicKeyCompressed(sig.slice(1), recoveryId as RecoveryId, messageHash);
+    let recoveryId = sig.slice(0, 1)[0] - 31;
+
+    let pk = secp256k1.recoverPublicKeyCompressed(
+      sig.slice(1),
+      recoveryId as RecoveryId,
+      messageHash
+    );
     let pkh = await hash160(pk);
     let valid = secp256k1.verifySignatureCompact(sig.slice(1), pk, messageHash);
 
