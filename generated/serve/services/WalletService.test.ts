@@ -490,6 +490,39 @@ describe("Test Wallet Endpoints", () => {
     expect(charlieBalanceResp.body.sat).toBeGreaterThan(1600)
 });
 
+ /**
+   * sign message
+   */
+ it("Should return a signed message", async () => {
+  const resp = await request(app)
+    .post("/wallet/signed/sign")
+    .send({
+      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      message: "test"
+    });
+
+   expect(resp.statusCode).toBe(200)
+   expect(resp.body!.signature).toBe("IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U=");
+  
+});
+
+/**
+   * verify signed message
+   */
+ it("Should verify a signed message", async () => {
+  const resp = await request(app)
+    .post("/wallet/signed/verify")
+    .send({
+      walletId: `watch:regtest:${process.env.ADDRESS}`,
+      message: "test",
+      signature: "IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U="
+    });
+
+   expect(resp.statusCode).toBe(200)
+   expect(resp.body!.valid).toBe(true);
+  
+});
+
   /**
    * utxos
    */

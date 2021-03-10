@@ -173,6 +173,51 @@ const sendMax = ({ sendMaxRequest }) =>
     }
   });
 /**
+* Sign a message string
+*
+* createSignedMessageRequest CreateSignedMessageRequest Request sign a message string using a private key
+* returns SignedMessageResponse
+* */
+const signedMessageSign = ({ createSignedMessageRequest }) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(createSignedMessageRequest.walletId);
+      if (!wallet) {
+        throw Error("Could not derive wallet");
+      }
+      let msg = createSignedMessageRequest.message;
+      let sig = await wallet.sign(msg);
+      resolve(Service.successResponse({ signature: sig }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  });
+  /**
+* Verify a signed a message signature
+*
+* verifySignedMessageRequest VerifySignedMessageRequest Request sign a message string using a private key
+* returns SignedMessageResponse
+* */
+const signedMessageVerify = ({ verifySignedMessageRequest }) =>
+new Promise(async (resolve, reject) => {
+  try {
+    let wallet = await mainnet.walletFromId(verifySignedMessageRequest.walletId);
+    if (!wallet) {
+      throw Error("Could not derive wallet");
+    }
+    let msg = verifySignedMessageRequest.message;
+    let sig = verifySignedMessageRequest.signature;
+    let valid = await wallet.verify(msg, sig);
+    resolve(Service.successResponse({ valid: valid }));
+  } catch (e) {
+    reject(
+      Service.rejectResponse(e, e.status || 500)
+    );
+  }
+});
+/**
 * Get detailed information about unspent outputs (utxos)
 *
 * serializedWallet SerializedWallet Request detailed list of unspent transaction outputs 
@@ -203,5 +248,7 @@ module.exports = {
   maxAmountToSend,
   send,
   sendMax,
+  signedMessageSign,
+  signedMessageVerify,
   utxos,
 };

@@ -1,6 +1,7 @@
 import {
   base64ToBin,
   binToBase64,
+  binToHex,
   encodeCashAddress,
   hexToBin,
   instantiateSecp256k1,
@@ -63,7 +64,8 @@ export class SignedMessage implements SignedMessageI {
       privateKey,
       messageHash
     );
-    return binToBase64(rs.signature);
+    let sig = new Uint8Array([...[31+rs.recoveryId] , ...rs.signature ])
+    return binToBase64(sig)
   }
 
   public static async sign(message: string, privateKey: Uint8Array) {
@@ -88,15 +90,17 @@ export class SignedMessage implements SignedMessageI {
     let messageHash = await hash_magic(message);
     let sig = base64ToBin(signature);
     let prefix = derivePrefix(cashaddr);
-    let recoveryId = prefix === "bitcoincash" ? 0 : (1 as RecoveryId);
-    let pk = secp256k1.recoverPublicKeyCompressed(sig, recoveryId, messageHash);
+
+    let recoveryId = sig.slice(0,1)[0]-31
+    
+    let pk = secp256k1.recoverPublicKeyCompressed(sig.slice(1), recoveryId as RecoveryId, messageHash);
     let pkh = await hash160(pk);
-    let valid = secp256k1.verifySignatureCompact(sig, pk, messageHash);
+    let valid = secp256k1.verifySignatureCompact(sig.slice(1), pk, messageHash);
 
     // Validate that the signature actually matches the provided cashaddr
     let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
     if (resultingCashaddr !== cashaddr) {
-      console.log("cashaddr match failed");
+      console.warn("cashaddr match failed");
       return false;
     }
 

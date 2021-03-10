@@ -528,6 +528,46 @@ paths:
       tags:
         - wallet
 
+  /wallet/signed/sign:
+    post: 
+      operationId: signedMessageSign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSignedMessageRequest"
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedMessageResponse"
+          description: successful operation
+      summary: Returns the message signature
+      tags:
+        - wallet
+  /wallet/signed/verify:
+    post: 
+      operationId: signedMessageVerify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifySignedMessageRequest"
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifySignedMessageResponse"
+          description: successful operation
+      summary: Returns a boolean indicating whether message was valid for a given address
+      tags:
+        - wallet
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -868,8 +908,7 @@ components:
           example: 1
           description: Amount in whole Bitcoin Cash
         sat:
-          type: number
-          format: integer
+          type: integer
           example: 100000000
           description: Amount in satoshis
         usd:
@@ -930,8 +969,7 @@ components:
     WatchAddressResponse:
       properties:
         id:
-          type: number
-          format: integer
+          type: integer
           example: 1
           description: Webhook Id created in the system
     ZeroBalanceResponse:
@@ -942,8 +980,7 @@ components:
           example: 0
           description: Amount in whole Bitcoin Cash
         sat:
-          type: number
-          format: integer
+          type: integer
           example: 0
           description: Amount in satoshis
         usd:
@@ -1247,7 +1284,7 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
       type: object
-      oneOf:
+      anyOf:
        - $ref: "#/components/schemas/Wif"
        - $ref: "#/components/schemas/WalletMnemonic"
       allOf:
@@ -1469,6 +1506,34 @@ components:
             type: string
       discriminator:
         propertyName: wallet_type
+    CreateSignedMessageRequest:
+      properties:
+        walletId: 
+          type: string
+          example: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
+        message:
+          example: Chancellor on brink of second bailout for banks
+    SignedMessageResponse:
+      properties:
+        signature: 
+          type: string
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+    VerifySignedMessageRequest:
+      properties:
+        walletId: 
+          type: string
+          example: watch:mainnet:bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
+        message:
+          type: string
+          example: Chancellor on brink of second bailout for banks
+        signature:
+          description: The base64 signature of the double sha265 hash of a bitcoin message formatted string signed using the private key associated with the related cashaddr
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+    VerifySignedMessageResponse:
+      properties:
+        valid: 
+          type: boolean
+          description: Whether the message was signed by a given address
     WalletInfo:
       properties:
         cashaddr:

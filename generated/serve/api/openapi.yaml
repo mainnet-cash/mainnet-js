@@ -543,6 +543,48 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/signed/sign:
+    post:
+      operationId: signedMessageSign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSignedMessageRequest'
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedMessageResponse'
+          description: successful operation
+      summary: Returns the message signature
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/signed/verify:
+    post:
+      operationId: signedMessageVerify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifySignedMessageRequest'
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifySignedMessageResponse'
+          description: successful operation
+      summary: Returns the boolean indicating whether message was valid
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -899,8 +941,7 @@ components:
         sat:
           description: Amount in satoshis
           example: 100000000
-          format: integer
-          type: number
+          type: integer
         usd:
           description: Amount in United States Dollars
           example: 438.02
@@ -967,8 +1008,7 @@ components:
         id:
           description: Webhook Id created in the system
           example: 1
-          format: integer
-          type: number
+          type: integer
     ZeroBalanceResponse:
       example:
         bch: 0
@@ -983,8 +1023,7 @@ components:
         sat:
           description: Amount in satoshis
           example: 0
-          format: integer
-          type: number
+          type: integer
         usd:
           description: Amount in United States Dollars
           example: 0
@@ -1617,6 +1656,47 @@ components:
           - watch
           example: seed
           type: string
+    CreateSignedMessageRequest:
+      example:
+        walletId: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
+        message: Chancellor on brink of second bailout for banks
+      properties:
+        walletId:
+          example: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
+          type: string
+        message:
+          example: Chancellor on brink of second bailout for banks
+    SignedMessageResponse:
+      example:
+        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+      properties:
+        signature:
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+          type: string
+    VerifySignedMessageRequest:
+      example:
+        walletId: watch:mainnet:bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
+        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        message: Chancellor on brink of second bailout for banks
+      properties:
+        walletId:
+          example: watch:mainnet:bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
+          type: string
+        message:
+          example: Chancellor on brink of second bailout for banks
+          type: string
+        signature:
+          description: The base64 signature of the double sha265 hash of a bitcoin
+            message formatted string signed using the private key associated with
+            the related cashaddr
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+    VerifySignedMessageResponse:
+      example:
+        valid: true
+      properties:
+        valid:
+          description: Whether the message was signed by a given address
+          type: boolean
     WalletInfo:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
