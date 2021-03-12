@@ -1670,9 +1670,53 @@ components:
     SignedMessageResponse:
       example:
         signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        raw:
+          schnorr: schnorr
+          der: der
+          ecdsa: ecdsa
+        details:
+          messageHash: messageHash
+          compressed: true
+          recoveryId: 0.8008281904610115
       properties:
         signature:
           example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+          type: string
+        raw:
+          $ref: '#/components/schemas/SignedMessageResponseRaw'
+        details:
+          $ref: '#/components/schemas/SignedMessageResponseDetails'
+    SignedMessageResponseRaw:
+      example:
+        schnorr: schnorr
+        der: der
+        ecdsa: ecdsa
+      properties:
+        ecdsa:
+          description: Elliptic Curve Digital messageHash encoded as a base64 string
+          type: string
+        schnorr:
+          description: |
+            Schnorr signature of the messageHash encoded as a base64 string, Note from libauth: Nonces are generated using RFC6979, where the Section 3.6, 16-byte ASCII "additional data" is set to Schnorr+SHA256, see https://libauth.org/interfaces/secp256k1.html#signmessagehashschnorr
+          type: string
+        der:
+          description: |
+            Signature of messageHash using DER (Distinguished Encoding Rules)
+          type: string
+    SignedMessageResponseDetails:
+      example:
+        messageHash: messageHash
+        compressed: true
+        recoveryId: 0.8008281904610115
+      properties:
+        recoveryId:
+          description: A tag used for recovering the public key from a compact signature.
+          type: number
+        compressed:
+          type: boolean
+        messageHash:
+          description: The double sha256 hash of the string encoded as Bitcoin Message
+            binary.
           type: string
     VerifySignedMessageRequest:
       example:
@@ -1694,9 +1738,38 @@ components:
     VerifySignedMessageResponse:
       example:
         valid: true
+        details:
+          signatureValid: true
+          signatureType: signatureType
+          messageHash: messageHash
+          publicKeyHashMatch: true
       properties:
         valid:
           description: Whether the message was signed by a given address
+          type: boolean
+        details:
+          $ref: '#/components/schemas/VerifySignedMessageResponseDetails'
+    VerifySignedMessageResponseDetails:
+      example:
+        signatureValid: true
+        signatureType: signatureType
+        messageHash: messageHash
+        publicKeyHashMatch: true
+      properties:
+        signatureType:
+          description: The type of signature passed
+          type: string
+        messageHash:
+          description: The double sha256 hash of the string encoded as Bitcoin Message
+            binary.
+          type: string
+        signatureValid:
+          description: A boolean indicating whether the signature is valid for the
+            message
+          type: boolean
+        publicKeyHashMatch:
+          description: A boolean indicating whether the publicKeyHash of the signature
+            matches the provided cashaddr
           type: boolean
     WalletInfo:
       allOf:

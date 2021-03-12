@@ -185,9 +185,11 @@ const signedMessageSign = ({ createSignedMessageRequest }) =>
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
-      let msg = createSignedMessageRequest.message;
-      let sig = await wallet.sign(msg);
-      resolve(Service.successResponse({ signature: sig }));
+      let args = createSignedMessageRequest;
+      delete args.walletId;
+      let msg = args.message;
+      let resp = await wallet.sign(msg);
+      resolve(Service.successResponse({ ... resp }));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -203,14 +205,13 @@ const signedMessageSign = ({ createSignedMessageRequest }) =>
 const signedMessageVerify = ({ verifySignedMessageRequest }) =>
 new Promise(async (resolve, reject) => {
   try {
-    let wallet = await mainnet.walletFromId(verifySignedMessageRequest.walletId);
+    let args = verifySignedMessageRequest
+    let wallet = await mainnet.walletFromId(args.walletId);
     if (!wallet) {
       throw Error("Could not derive wallet");
     }
-    let msg = verifySignedMessageRequest.message;
-    let sig = verifySignedMessageRequest.signature;
-    let valid = await wallet.verify(msg, sig);
-    resolve(Service.successResponse({ valid: valid }));
+    let resp = await wallet.verify(args.message, args.signature);
+    resolve(Service.successResponse({... resp}));
   } catch (e) {
     reject(
       Service.rejectResponse(e, e.status || 500)

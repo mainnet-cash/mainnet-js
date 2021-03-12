@@ -1,7 +1,6 @@
 import {
   base64ToBin,
   binToBase64,
-  binToHex,
   encodeCashAddress,
   hexToBin,
   instantiateSecp256k1,
@@ -12,13 +11,13 @@ import {
 
 import { derivePrefix } from "../util/derivePublicKeyHash";
 import { hash160 } from "../util/hash160";
-import { SignedMessageI } from "./interface";
+import { SignedMessageI, SignedMessageResponseI, VerifyMessageResponseI } from "./interface";
 
 /**
- * message_magic - "Magic" per standard bitcoin message signing.
+ * message_magic - Add "Magic", per standard bitcoin message signing.
  *
- * In this case, the magic is simply adding the number 24 as binary "\x16" + "Bitcoin Signed Message\n" followed
- * by the size of the message in binary and the message encoded as binary.
+ * In this case, the magic is simply adding the number 24 as binary "\x16", and "Bitcoin Signed Message\n" followed
+ * by the size of the message in binary followed by the message encoded as binary.
  *
  * @param {str} string    The string to add the magic syntax to.
  *
@@ -42,7 +41,7 @@ function message_magic(str: string) {
  *
  * @returns a promise to the hash of the string.
  */
-export async function hash_magic(str: string) {
+export async function hash_message(str: string) {
   const h = (await instantiateSha256()).hash;
   return h(h(message_magic(str)));
 }
@@ -56,16 +55,36 @@ export class SignedMessage implements SignedMessageI {
    *
    * @returns a promise to signature as a string
    */
-  public async sign(message: string, privateKey: Uint8Array): Promise<string> {
+  public async sign(message: string, privateKey: Uint8Array): Promise<SignedMessageResponseI> {
     const secp256k1 = await instantiateSecp256k1();
 
-    let messageHash = await hash_magic(message);
+    let messageHash = await hash_message(message);
     let rs = secp256k1.signMessageHashRecoverableCompact(
       privateKey,
       messageHash
     );
-    let sig = new Uint8Array([...[31 + rs.recoveryId], ...rs.signature]);
-    return binToBase64(sig);
+    let sigDer = secp256k1.signMessageHashDER(
+      privateKey,
+      messageHash
+    );
+    let sigSchnorr = secp256k1.signMessageHashSchnorr(
+      privateKey,
+      messageHash
+    );
+    let electronEncoding = new Uint8Array([...[31 + rs.recoveryId], ...rs.signature]);
+    return {
+      raw:{
+        ecdsa: binToBase64(rs.signature),
+        schnorr: binToBase64(sigSchnorr),
+        der: binToBase64(sigDer),
+      },
+      details:{
+        recoveryId: rs.recoveryId,
+        compressed: true,
+        messageHash: binToBase64(messageHash)
+      },
+      signature: binToBase64(electronEncoding)
+    }
   }
 
   public static async sign(message: string, privateKey: Uint8Array) {
@@ -76,46 +95,78 @@ export class SignedMessage implements SignedMessageI {
    *
    * @param {message} string     The message to verify as a utf8 string
    * @param {signature} string   The signature as a base64 encoded string
-   * @param {cashaddr} string    The cashaddr to validate the signature against.
+   * @param {cashaddr} string    The cashaddr to validate the signature against a recoverable signature.
+   * @param {publicKey} string    If publicKey is not recoverable from the signature type, the publicKey may be passed instead of the signature.
    *
    * @returns a promise to signature as a string
    */
   public async verify(
     message: string,
     signature: string,
-    cashaddr: string
-  ): Promise<boolean> {
+    cashaddr?: string,
+    publicKey?: Uint8Array
+  ): Promise<VerifyMessageResponseI> {
     // Check that the signature is valid for the given message.
     const secp256k1 = await instantiateSecp256k1();
-    let messageHash = await hash_magic(message);
+    let messageHash = await hash_message(message);
     let sig = base64ToBin(signature);
-    let prefix = derivePrefix(cashaddr);
-
-    let recoveryId = sig.slice(0, 1)[0] - 31;
-
-    let pk = secp256k1.recoverPublicKeyCompressed(
-      sig.slice(1),
-      recoveryId as RecoveryId,
-      messageHash
-    );
-    let pkh = await hash160(pk);
-    let valid = secp256k1.verifySignatureCompact(sig.slice(1), pk, messageHash);
-
-    // Validate that the signature actually matches the provided cashaddr
-    let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
-    if (resultingCashaddr !== cashaddr) {
-      console.warn("cashaddr match failed");
-      return false;
+    
+    let valid = false
+    let pkh, signatureType
+    if(sig.length === 65){
+      let rawSig = sig.length === 65 ? sig.slice(1): sig
+      let recoveryId = sig.slice(0, 1)[0] - 31; 
+      let recoveredPk = secp256k1.recoverPublicKeyCompressed(
+        rawSig,
+        recoveryId as RecoveryId,
+        messageHash
+      );
+      
+      pkh = await hash160(recoveredPk);
+      signatureType = 'bitcoin'
+      valid = secp256k1.verifySignatureCompact(rawSig, recoveredPk, messageHash);  
+    }else if (publicKey){
+      if(secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)){
+        signatureType = 'schnorr'
+        valid = true
+      } else if(secp256k1.verifySignatureDER(sig, publicKey, messageHash)){
+        signatureType = 'der'
+        valid = true
+      } else if(secp256k1.verifySignatureCompact(sig, publicKey, messageHash)){
+        signatureType = 'ecdsa'
+        valid = true
+      } else{
+        signatureType = 'na'
+      }
     }
+    
+    let pkhMatch = false
+    if(cashaddr){
+      // Validate that the signature actually matches the provided cashaddr
+      let prefix = derivePrefix(cashaddr);
+      let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
+      if (resultingCashaddr === cashaddr) {
+        pkhMatch = true;
+      }
+    } 
 
-    return valid;
+    return {
+      valid:valid,
+      details:{
+          signatureValid: valid,
+          signatureType: signatureType,
+          messageHash: binToBase64(messageHash),
+          publicKeyHashMatch: pkhMatch
+        }
+      };
   }
 
   public static async verify(
     message: string,
     signature: string,
-    cashaddr: string
+    cashaddr?: string,
+    publicKey?: Uint8Array
   ) {
-    return new this().verify(message, signature, cashaddr);
+    return new this().verify(message, signature, cashaddr, publicKey);
   }
 }

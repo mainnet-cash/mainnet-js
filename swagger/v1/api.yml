@@ -1518,6 +1518,33 @@ components:
         signature: 
           type: string
           example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        raw:
+          $ref: "#/components/schemas/SignedMessageResponseRaw"
+        details:
+          $ref: "#/components/schemas/SignedMessageResponseDetails"
+    SignedMessageResponseRaw:
+      properties:
+        ecdsa: 
+          type: string
+          description: Elliptic Curve Digital messageHash encoded as a base64 string
+        schnorr:
+          type: string
+          description: |
+             Schnorr signature of the messageHash encoded as a base64 string, Note from libauth: Nonces are generated using RFC6979, where the Section 3.6, 16-byte ASCII "additional data" is set to Schnorr+SHA256, see https://libauth.org/interfaces/secp256k1.html#signmessagehashschnorr
+        der:
+          type: string
+          description: |
+            Signature of messageHash using DER (Distinguished Encoding Rules)
+    SignedMessageResponseDetails:
+      properties:
+        recoveryId: 
+          type: number
+          description: A tag used for recovering the public key from a compact signature.
+        compressed: 
+          type: boolean
+        messageHash: 
+          type: string
+          description: The double sha256 hash of the string encoded as Bitcoin Message binary. 
     VerifySignedMessageRequest:
       properties:
         walletId: 
@@ -1534,6 +1561,22 @@ components:
         valid: 
           type: boolean
           description: Whether the message was signed by a given address
+        details:
+          $ref: "#/components/schemas/VerifySignedMessageResponseDetails"
+    VerifySignedMessageResponseDetails:
+      properties:
+        signatureType: 
+          type: string
+          description: The type of signature passed
+        messageHash: 
+          type: string
+          description: The double sha256 hash of the string encoded as Bitcoin Message binary. 
+        signatureValid: 
+          type: boolean
+          description: A boolean indicating whether the signature is valid for the message
+        publicKeyHashMatch: 
+          type: boolean
+          description: A boolean indicating whether the publicKeyHash of the signature matches the provided cashaddr
     WalletInfo:
       properties:
         cashaddr:

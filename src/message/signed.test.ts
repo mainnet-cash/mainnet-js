@@ -1,4 +1,4 @@
-import { SignedMessage, hash_magic } from "./signed";
+import { SignedMessage, hash_message } from "./signed";
 import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
 import { binToHex } from "@bitauth/libauth";
 
@@ -14,13 +14,13 @@ describe("Test message Signing and Verification", () => {
     // Test that the double sha256 hash of the wrapped messages matches
     // what would be had internally in electron-cash
     // b'\x18Bitcoin Signed Message:\n' + b'{message.length}' + b'{message}'
-    let test_hash = await hash_magic("test");
+    let test_hash = await hash_message("test");
     expect(binToHex(test_hash)).toBe(
       "9ce428d58e8e4caf619dc6fc7b2c2c28f0561654d1f80f322c038ad5e67ff8a6"
     );
 
     // b'\xe6\xb5\x8b\xe8\xaf\x95' in binary python
-    let 测试_hash = await hash_magic("测试");
+    let 测试_hash = await hash_message("测试");
     expect(binToHex(测试_hash)).toBe(
       "8d8405050b7a763ccd5683f8470ea7dcbd10a87da2b7fe07eb2679ba71229688"
     );
@@ -38,9 +38,13 @@ describe("Test message Signing and Verification", () => {
 
     let coreLibSig =
       "H/9jMOnj4MFbH3d7t4yCQ9i7DgZU/VZ278w3+ySv2F4yIsdqjsc5ng3kmN8OZAThgyfCZOQxZCWza9V5XzlVY0Y=";
-    expect(sig).toBe(coreLibSig);
-    let result = await SignedMessage.verify(msg1, sig, w1.cashaddr!);
-    expect(result).toBe(true);
+    expect(sig.signature).toBe(coreLibSig);
+    let result = await SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
+    expect(result.valid).toBe(true);
+    expect(result.details.messageHash).toBe("gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU=");
+    expect(result.details.publicKeyHashMatch).toBe(true);
+    expect(result.details.signatureValid).toBe(true);
+    expect(result.details.signatureType).toBe("bitcoin");
   });
 
   // cTHMu3b13uh4i4GANQKm1XeziZhph18fwZgdaVftxh4FSuqj2AGM
@@ -56,8 +60,8 @@ describe("Test message Signing and Verification", () => {
     );
     let msg = "test";
     let sig = await SignedMessage.sign(msg, w.privateKey!);
-    let result = await SignedMessage.verify(msg, sig, w.cashaddr!);
-    expect(result).toBe(true);
+    let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(true);
   });
 
   test("Test signing and verifying regtest signature using Alice's wallet", async () => {
@@ -67,8 +71,8 @@ describe("Test message Signing and Verification", () => {
     let msg = "test";
     let sig = await SignedMessage.sign(msg, w.privateKey!);
 
-    let result = await SignedMessage.verify(msg, sig, w.cashaddr!);
-    expect(result).toBe(true);
+    let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(true);
   });
 
   test("Test signing and verifying regtest signature using Alice's wallet", async () => {
@@ -77,8 +81,41 @@ describe("Test message Signing and Verification", () => {
     );
     let msg = "测试";
     let sig = await SignedMessage.sign(msg, w.privateKey!);
-    let result = await SignedMessage.verify(msg, sig, w.cashaddr!);
-    expect(result).toBe(true);
+    let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(true);
+  });
+
+  test("Test signing and verifying a schnorr signature", async () => {
+    let w = await Wallet.fromId(
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+    );
+    let msg = "test";
+    let sig = await SignedMessage.sign(msg, w.privateKey!);
+    let result = await SignedMessage.verify(msg, sig.raw.schnorr, undefined, w.publicKey!);
+    expect(result.valid).toBe(true);
+    expect(result.details.signatureType).toBe('schnorr');
+  });
+
+  test("Test signing and verifying a der signature", async () => {
+    let w = await Wallet.fromId(
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+    );
+    let msg = "test";
+    let sig = await SignedMessage.sign(msg, w.privateKey!);
+    let result = await SignedMessage.verify(msg, sig.raw.der, undefined, w.publicKey!);
+    expect(result.valid).toBe(true);
+    expect(result.details.signatureType).toBe('der');
+  });
+
+  test("Test signing and verifying a ecdsa signature", async () => {
+    let w = await Wallet.fromId(
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+    );
+    let msg = "test";
+    let sig = await SignedMessage.sign(msg, w.privateKey!);
+    let result = await SignedMessage.verify(msg, sig.raw.ecdsa, undefined, w.publicKey!);
+    expect(result.valid).toBe(true);
+    expect(result.details.signatureType).toBe('ecdsa');
   });
 
   test("Test signing and verifying a long message", async () => {
@@ -87,8 +124,8 @@ describe("Test message Signing and Verification", () => {
     );
     let msg = await loadLargeMessage();
     let sig = await SignedMessage.sign(msg, w.privateKey!);
-    let result = await SignedMessage.verify(msg, sig, w.cashaddr!);
-    expect(result).toBe(true);
+    let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(true);
   });
 
   test("Test electron-cash example from static wallet methods", async () => {
@@ -100,8 +137,8 @@ describe("Test message Signing and Verification", () => {
       "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
     );
     let sig = await Wallet.signedMessage.sign(msg1, w1.privateKey!);
-    let result = await Wallet.signedMessage.verify(msg1, sig, w1.cashaddr!);
-    expect(result).toBe(true);
+    let result = await Wallet.signedMessage.verify(msg1, sig.signature, w1.cashaddr!);
+    expect(result.valid).toBe(true);
   });
 
   test("Test electron cash example from a wallet instance", async () => {
@@ -113,7 +150,7 @@ describe("Test message Signing and Verification", () => {
       "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
     );
     let sig = await w1.sign(msg1);
-    let result = await w1.verify(msg1, sig);
-    expect(result).toBe(true);
+    let result = await w1.verify(msg1, sig.signature);
+    expect(result.valid).toBe(true);
   });
 });
