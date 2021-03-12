@@ -23,7 +23,7 @@ export class BaseWallet implements WalletI {
   network: NetworkEnum;
 
   static signedMessage: SignedMessageI = new SignedMessage();
-  
+
   /**
    * constructor for a new wallet
    * @param {string} name              name of the wallet

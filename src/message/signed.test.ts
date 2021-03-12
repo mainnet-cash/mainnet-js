@@ -41,7 +41,9 @@ describe("Test message Signing and Verification", () => {
     expect(sig.signature).toBe(coreLibSig);
     let result = await SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
     expect(result.valid).toBe(true);
-    expect(result.details.messageHash).toBe("gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU=");
+    expect(result.details.messageHash).toBe(
+      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
+    );
     expect(result.details.publicKeyHashMatch).toBe(true);
     expect(result.details.signatureValid).toBe(true);
     expect(result.details.signatureType).toBe("bitcoin");
@@ -91,9 +93,14 @@ describe("Test message Signing and Verification", () => {
     );
     let msg = "test";
     let sig = await SignedMessage.sign(msg, w.privateKey!);
-    let result = await SignedMessage.verify(msg, sig.raw.schnorr, undefined, w.publicKey!);
+    let result = await SignedMessage.verify(
+      msg,
+      sig.raw.schnorr,
+      undefined,
+      w.publicKey!
+    );
     expect(result.valid).toBe(true);
-    expect(result.details.signatureType).toBe('schnorr');
+    expect(result.details.signatureType).toBe("schnorr");
   });
 
   test("Test signing and verifying a der signature", async () => {
@@ -102,9 +109,14 @@ describe("Test message Signing and Verification", () => {
     );
     let msg = "test";
     let sig = await SignedMessage.sign(msg, w.privateKey!);
-    let result = await SignedMessage.verify(msg, sig.raw.der, undefined, w.publicKey!);
+    let result = await SignedMessage.verify(
+      msg,
+      sig.raw.der,
+      undefined,
+      w.publicKey!
+    );
     expect(result.valid).toBe(true);
-    expect(result.details.signatureType).toBe('der');
+    expect(result.details.signatureType).toBe("der");
   });
 
   test("Test signing and verifying a ecdsa signature", async () => {
@@ -113,9 +125,14 @@ describe("Test message Signing and Verification", () => {
     );
     let msg = "test";
     let sig = await SignedMessage.sign(msg, w.privateKey!);
-    let result = await SignedMessage.verify(msg, sig.raw.ecdsa, undefined, w.publicKey!);
+    let result = await SignedMessage.verify(
+      msg,
+      sig.raw.ecdsa,
+      undefined,
+      w.publicKey!
+    );
     expect(result.valid).toBe(true);
-    expect(result.details.signatureType).toBe('ecdsa');
+    expect(result.details.signatureType).toBe("ecdsa");
   });
 
   test("Test signing and verifying a long message", async () => {
@@ -137,7 +154,11 @@ describe("Test message Signing and Verification", () => {
       "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
     );
     let sig = await Wallet.signedMessage.sign(msg1, w1.privateKey!);
-    let result = await Wallet.signedMessage.verify(msg1, sig.signature, w1.cashaddr!);
+    let result = await Wallet.signedMessage.verify(
+      msg1,
+      sig.signature,
+      w1.cashaddr!
+    );
     expect(result.valid).toBe(true);
   });
 

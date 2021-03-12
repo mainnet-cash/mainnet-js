@@ -11,7 +11,11 @@ import {
 
 import { derivePrefix } from "../util/derivePublicKeyHash";
 import { hash160 } from "../util/hash160";
-import { SignedMessageI, SignedMessageResponseI, VerifyMessageResponseI } from "./interface";
+import {
+  SignedMessageI,
+  SignedMessageResponseI,
+  VerifyMessageResponseI,
+} from "./interface";
 
 /**
  * message_magic - Add "Magic", per standard bitcoin message signing.
@@ -55,7 +59,10 @@ export class SignedMessage implements SignedMessageI {
    *
    * @returns a promise to signature as a string
    */
-  public async sign(message: string, privateKey: Uint8Array): Promise<SignedMessageResponseI> {
+  public async sign(
+    message: string,
+    privateKey: Uint8Array
+  ): Promise<SignedMessageResponseI> {
     const secp256k1 = await instantiateSecp256k1();
 
     let messageHash = await hash_message(message);
@@ -63,28 +70,25 @@ export class SignedMessage implements SignedMessageI {
       privateKey,
       messageHash
     );
-    let sigDer = secp256k1.signMessageHashDER(
-      privateKey,
-      messageHash
-    );
-    let sigSchnorr = secp256k1.signMessageHashSchnorr(
-      privateKey,
-      messageHash
-    );
-    let electronEncoding = new Uint8Array([...[31 + rs.recoveryId], ...rs.signature]);
+    let sigDer = secp256k1.signMessageHashDER(privateKey, messageHash);
+    let sigSchnorr = secp256k1.signMessageHashSchnorr(privateKey, messageHash);
+    let electronEncoding = new Uint8Array([
+      ...[31 + rs.recoveryId],
+      ...rs.signature,
+    ]);
     return {
-      raw:{
+      raw: {
         ecdsa: binToBase64(rs.signature),
         schnorr: binToBase64(sigSchnorr),
         der: binToBase64(sigDer),
       },
-      details:{
+      details: {
         recoveryId: rs.recoveryId,
         compressed: true,
-        messageHash: binToBase64(messageHash)
+        messageHash: binToBase64(messageHash),
       },
-      signature: binToBase64(electronEncoding)
-    }
+      signature: binToBase64(electronEncoding),
+    };
   }
 
   public static async sign(message: string, privateKey: Uint8Array) {
@@ -110,55 +114,61 @@ export class SignedMessage implements SignedMessageI {
     const secp256k1 = await instantiateSecp256k1();
     let messageHash = await hash_message(message);
     let sig = base64ToBin(signature);
-    
-    let valid = false
-    let pkh, signatureType
-    if(sig.length === 65){
-      let rawSig = sig.length === 65 ? sig.slice(1): sig
-      let recoveryId = sig.slice(0, 1)[0] - 31; 
+
+    let valid = false;
+    let pkh, signatureType;
+    if (sig.length === 65) {
+      let rawSig = sig.length === 65 ? sig.slice(1) : sig;
+      let recoveryId = sig.slice(0, 1)[0] - 31;
       let recoveredPk = secp256k1.recoverPublicKeyCompressed(
         rawSig,
         recoveryId as RecoveryId,
         messageHash
       );
-      
+
       pkh = await hash160(recoveredPk);
-      signatureType = 'bitcoin'
-      valid = secp256k1.verifySignatureCompact(rawSig, recoveredPk, messageHash);  
-    }else if (publicKey){
-      if(secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)){
-        signatureType = 'schnorr'
-        valid = true
-      } else if(secp256k1.verifySignatureDER(sig, publicKey, messageHash)){
-        signatureType = 'der'
-        valid = true
-      } else if(secp256k1.verifySignatureCompact(sig, publicKey, messageHash)){
-        signatureType = 'ecdsa'
-        valid = true
-      } else{
-        signatureType = 'na'
+      signatureType = "bitcoin";
+      valid = secp256k1.verifySignatureCompact(
+        rawSig,
+        recoveredPk,
+        messageHash
+      );
+    } else if (publicKey) {
+      if (secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)) {
+        signatureType = "schnorr";
+        valid = true;
+      } else if (secp256k1.verifySignatureDER(sig, publicKey, messageHash)) {
+        signatureType = "der";
+        valid = true;
+      } else if (
+        secp256k1.verifySignatureCompact(sig, publicKey, messageHash)
+      ) {
+        signatureType = "ecdsa";
+        valid = true;
+      } else {
+        signatureType = "na";
       }
     }
-    
-    let pkhMatch = false
-    if(cashaddr){
+
+    let pkhMatch = false;
+    if (cashaddr) {
       // Validate that the signature actually matches the provided cashaddr
       let prefix = derivePrefix(cashaddr);
       let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
       if (resultingCashaddr === cashaddr) {
         pkhMatch = true;
       }
-    } 
+    }
 
     return {
-      valid:valid,
-      details:{
-          signatureValid: valid,
-          signatureType: signatureType,
-          messageHash: binToBase64(messageHash),
-          publicKeyHashMatch: pkhMatch
-        }
-      };
+      valid: valid,
+      details: {
+        signatureValid: valid,
+        signatureType: signatureType,
+        messageHash: binToBase64(messageHash),
+        publicKeyHashMatch: pkhMatch,
+      },
+    };
   }
 
   public static async verify(
