@@ -207,7 +207,7 @@ describe(`Wallet should function in the browser`, () => {
       let result = await alice.sign("test");
       return {
         valid: await alice.verify("test", result.signature),
-        signature: sig,
+        signature: result.signature,
       };
     }, process.env.PRIVATE_WIF);
     expect(result.signature).toBe(
