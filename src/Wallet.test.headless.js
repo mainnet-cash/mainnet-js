@@ -204,9 +204,9 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should sign a message and verify it`, async () => {
     const result = await page.evaluate(async (wif) => {
       const alice = await walletFromId(`wif:regtest:${wif}`);
-      let sig = await alice.sign("test");
+      let result = await alice.sign("test");
       return {
-        valid: await alice.verify("test", sig),
+        valid: await alice.verify("test", result.signature),
         signature: sig,
       };
     }, process.env.PRIVATE_WIF);
