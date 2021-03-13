@@ -206,14 +206,14 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await walletFromId(`wif:regtest:${wif}`);
       let result = await alice.sign("test");
       return {
-        valid: await alice.verify("test", result.signature),
+        resp: await alice.verify("test", result.signature),
         signature: result.signature,
       };
     }, process.env.PRIVATE_WIF);
     expect(result.signature).toBe(
       "IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U="
     );
-    expect(result.valid).toBe(true);
+    expect(result.resp.valid).toBe(true);
   });
 
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
