@@ -23,6 +23,7 @@ export interface SlpTokenBalance {
   name: string;
   tokenId: string;
   type: SlpTokenType;
+  decimals: number;
 }
 
 export interface SlpUtxoI extends UtxoI {
@@ -31,6 +32,7 @@ export interface SlpUtxoI extends UtxoI {
   ticker: string;
   tokenId: string;
   type: SlpTokenType;
+  isBaton: boolean;
 }
 
 export interface SlpFormattedUtxo {

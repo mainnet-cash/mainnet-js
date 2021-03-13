@@ -84,6 +84,7 @@
     "bignumber.js": "^9.0.1",
     "bip39": "^3.0.3",
     "buffer": "^6.0.3",
+    "cashaddrjs": "^0.4.4",
     "cashscript": "^0.5.7",
     "deepmerge": "^4.2.2",
     "dexie": "^3.0.2",

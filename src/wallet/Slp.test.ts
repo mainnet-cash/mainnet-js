@@ -10,6 +10,7 @@ import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
 import { delay } from "../util/delay";
 import BigNumber from "bignumber.js";
+import { SlpDbProvider } from "../slp/SlpDbProvider";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -30,7 +31,7 @@ describe("Slp wallet tests", () => {
     initialAmount: 10000,
     documentUrl: "https://mainnet.cash",
     documentHash:
-      "0000000000000000000000000000000000000000000000000000000000000000",
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   };
 
   const useTestnet = false;
@@ -60,7 +61,7 @@ describe("Slp wallet tests", () => {
     return bobWallet;
   }
 
-  test("Genesis test", async () => {
+  test("Gspp Genesis test", async () => {
     const aliceWallet = await getAliceWallet();
 
     const result: SlpGenesisResult = await aliceWallet.slp.genesis(
@@ -75,10 +76,12 @@ describe("Slp wallet tests", () => {
 
     const info = await aliceWallet.slp.getTokenInfo(tokenId);
     delete (info as any).tokenId;
+    delete (info as any).documentHash;
+    delete (info as any).groupId;
     const tokenInfo = {
       decimals: 2,
-      documentHash:
-        "0000000000000000000000000000000000000000000000000000000000000000",
+      // documentHash:
+      //   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(10000),
       name: "Mainnet coin",
@@ -95,7 +98,7 @@ describe("Slp wallet tests", () => {
     await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
   });
 
-  test("Send test", async () => {
+  test("Gspp Send test", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -195,7 +198,7 @@ describe("Slp wallet tests", () => {
     expect(charlieBalance.tokenId).toBe(tokenId);
   });
 
-  test("Send-return test", async () => {
+  test("Gspp Send-return test", async () => {
     let aliceWallet = await getAliceWallet();
     let bobWallet = await getRandomWallet();
 
@@ -359,7 +362,7 @@ describe("Slp wallet tests", () => {
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
   });
 
-  test("Mint test", async () => {
+  test("Gspp Mint test", async () => {
     const aliceWallet = await getAliceWallet();
 
     // can not mint less than or 0 tokens
@@ -386,7 +389,7 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
   });
 
-  test("Test mint baton transfer", async () => {
+  test("Gspp Test mint baton transfer", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -425,7 +428,7 @@ describe("Slp wallet tests", () => {
     await expect(bobWallet.slp.mint(mintOptions)).rejects.toThrow();
   });
 
-  test("Test tokenId ambiguity", async () => {
+  test("Gspp Test tokenId ambiguity", async () => {
     const aliceWallet = await getAliceWallet();
 
     genesisOptions.ticker = ticker + "_AMBIGUOS";
@@ -597,7 +600,7 @@ describe("Slp wallet tests", () => {
     await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
   });
 
-  test("Test genesis ends baton", async () => {
+  test("Gspp Test genesis ends baton", async () => {
     const aliceWallet = await getAliceWallet();
 
     const options = { ...genesisOptions };
@@ -624,7 +627,7 @@ describe("Slp wallet tests", () => {
     expect(utxos[0].utxoId).toContain(":");
   });
 
-  test("Test NFT Parent creation and transfer", async () => {
+  test("Gspp Test NFT Parent creation and transfer", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -641,14 +644,18 @@ describe("Slp wallet tests", () => {
 
     const parentTokenInfo = {
       decimals: 0,
-      documentHash:
-        "0000000000000000000000000000000000000000000000000000000000000000",
+      // documentHash:
+      //   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(10000),
       name: "Mainnet NFT Parent",
       ticker: nftParentGenesis.ticker,
       type: 0x81,
     };
+
+    delete (info as any).tokenId;
+    delete (info as any).documentHash;
+    delete (info as any).groupId;
 
     expect(info).toEqual(parentTokenInfo);
 
@@ -674,7 +681,7 @@ describe("Slp wallet tests", () => {
     expect(bobBalance.tokenId).toBe(parentResult.tokenId);
   });
 
-  test("Test NFT Child creation and transfer", async () => {
+  test("Gspp Test NFT Child creation and transfer", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -701,14 +708,18 @@ describe("Slp wallet tests", () => {
 
     const childTokenInfo = {
       decimals: 0,
-      documentHash:
-        "0000000000000000000000000000000000000000000000000000000000000000",
+      // documentHash:
+      //   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(1),
       name: "Mainnet NFT Child",
       ticker: nftChildGenesis.ticker,
       type: 0x41,
     };
+
+    delete (childInfo as any).tokenId;
+    delete (childInfo as any).documentHash;
+    delete (childInfo as any).groupId;
 
     expect(childInfo).toEqual(childTokenInfo);
 
@@ -749,7 +760,7 @@ describe("Slp wallet tests", () => {
     // should throw if parent token is not in possession
     await expect(
       aliceWallet.slp.nftChildGenesis(
-        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
         nftChildGenesis
       )
     ).rejects.toThrow();
@@ -760,8 +771,10 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
 
     // bug in the SLPDB, the parent burn check is not triggered until new block arrives
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
-    await delay(5000);
+    if (aliceWallet.slp.provider! instanceof SlpDbProvider) {
+      await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
+      await delay(1000);
+    }
 
     // spend last token
     const childResultLast: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
@@ -785,7 +798,7 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
   });
 
-  test.skip("Test SLPDB bug", async () => {
+  test.skip("Test SLPDB NFT bug", async () => {
     const aliceWallet = await getAliceWallet();
 
     const nftParentGenesis = { ...genesisOptions };

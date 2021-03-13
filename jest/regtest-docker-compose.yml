@@ -90,6 +90,43 @@ services:
     restart: always
     networks:
       - bitcoin
+
+  gspp:
+    image: mainnet/gspp
+    restart: always
+    build:
+      context: "./docker/gspp"
+    command: "gs++ /data/config.toml"
+    # healthcheck:
+    #   test: ["CMD", "/entrypoint.sh", "gs++-cli", "status"]
+    expose:
+      - "50051"
+      - "29069"
+      - "8082"
+    ports:
+      - "50051:50051"
+      - "29069:28339"
+      - "8082:8082"
+    volumes:
+      - ./docker/gspp/regtest.toml:/data/config.toml
+      # - ./go1.13.8.linux-amd64.tar.gz:/go1.13.8.linux-amd64.tar.gz
+    networks:
+      - bitcoin
+  gspp-rest:
+    image: mainnet/gspp-rest
+    restart: always
+    build:
+      context: "./docker/gspp-rest"
+    expose:
+      - "7007"
+    ports:
+      - "7007:7007"
+    volumes:
+      - ./docker/gspp-rest/.env:/home/cpp_slp_graph_search/rest/.env
+    networks:
+      - bitcoin
+    depends_on:
+      - gspp
 networks:
   bitcoin:
 

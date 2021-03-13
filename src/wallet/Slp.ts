@@ -38,6 +38,7 @@ import {
   SlpWatchTransactionCallback,
 } from "../slp/SlpProvider";
 import { toSlpAddress } from "../util/bchaddr";
+import { GsppProvider } from "../slp/GsppProvider";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -56,6 +57,7 @@ export class Slp {
     this.slpaddr = toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
     this.provider = new SlpDbProvider(this.wallet.networkType);
+    // this.provider = new GsppProvider(this.wallet.networkType);
   }
 
   /**
