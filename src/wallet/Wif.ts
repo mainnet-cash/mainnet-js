@@ -815,8 +815,8 @@ export class Wallet extends BaseWallet {
   }
 
   // Convenience wrapper to verify interface
-  public async verify(message: string, sig: string) {
-    return await BaseWallet.signedMessage.verify(message, sig, this.cashaddr!);
+  public async verify(message: string, sig: string, publicKey?: Uint8Array) {
+    return await BaseWallet.signedMessage.verify(message, sig, this.cashaddr!, publicKey);
   }
 }
 

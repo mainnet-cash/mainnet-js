@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
+const { base64ToBin } = require('@bitauth/libauth');
 
 /**
 * Get total balance for wallet
@@ -206,11 +207,17 @@ const signedMessageVerify = ({ verifySignedMessageRequest }) =>
 new Promise(async (resolve, reject) => {
   try {
     let args = verifySignedMessageRequest
-    let wallet = await mainnet.walletFromId(args.walletId);
+    let resp, wallet
+    wallet = await mainnet.walletFromId(args.walletId);
     if (!wallet) {
       throw Error("Could not derive wallet");
     }
-    let resp = await wallet.verify(args.message, args.signature);
+    if("publicKey" in verifySignedMessageRequest){
+      args.publicKey = base64ToBin(verifySignedMessageRequest.publicKey)
+      resp = await mainnet.SignedMessage.verify(args.message, args.signature, wallet.cashaddr, args.publicKey)
+    }else{
+      resp = await wallet.verify(args.message, args.signature);
+    }
     resolve(Service.successResponse({... resp}));
   } catch (e) {
     reject(

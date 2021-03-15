@@ -1,6 +1,6 @@
 import { SignedMessage, hash_message } from "./signed";
 import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
-import { binToHex } from "@bitauth/libauth";
+import { binToBase64, binToHex } from "@bitauth/libauth";
 
 const fs = require("fs").promises;
 
@@ -100,6 +100,7 @@ describe("Test message Signing and Verification", () => {
       w.publicKey!
     );
     expect(result.valid).toBe(true);
+    console.log(binToBase64(w.publicKey!))
     expect(result.details.signatureType).toBe("schnorr");
   });
 

@@ -29,7 +29,8 @@ export interface SignedMessageI {
   verify(
     message: string,
     signature: string,
-    cashaddr: string
+    cashaddr: string,
+    publicKey?: Uint8Array
   ): Promise<VerifyMessageResponseI>;
 }
 

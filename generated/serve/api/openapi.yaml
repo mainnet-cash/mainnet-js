@@ -1720,9 +1720,9 @@ components:
           type: string
     VerifySignedMessageRequest:
       example:
-        walletId: watch:mainnet:bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
-        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        walletId: watch:mainnet:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
         message: Chancellor on brink of second bailout for banks
+        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
       properties:
         walletId:
           example: watch:mainnet:bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
@@ -1735,6 +1735,10 @@ components:
             message formatted string signed using the private key associated with
             the related cashaddr
           example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        publicKey:
+          description: If the publicKey is not recoverable from the signature, the
+            base64 encoded public key may be passed as instead of the walletId
+          type: string
     VerifySignedMessageResponse:
       example:
         valid: true

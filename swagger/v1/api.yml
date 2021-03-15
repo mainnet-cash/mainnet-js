@@ -1556,6 +1556,13 @@ components:
         signature:
           description: The base64 signature of the double sha265 hash of a bitcoin message formatted string signed using the private key associated with the related cashaddr
           example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        publicKey: 
+          type: string
+          description: If the publicKey is not recoverable from the signature, the base64 encoded public key may be passed as instead of the walletId
+      example:
+        walletId: "watch:mainnet:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+        message: "Chancellor on brink of second bailout for banks"
+        signature: "IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg="
     VerifySignedMessageResponse:
       properties:
         valid: 
@@ -1576,7 +1583,7 @@ components:
           description: A boolean indicating whether the signature is valid for the message
         publicKeyHashMatch: 
           type: boolean
-          description: A boolean indicating whether the publicKeyHash of the signature matches the provided cashaddr
+          description: A boolean indicating whether the publicKeyHash of a recoverable signature matches the provided cashaddr, false otherwise
     WalletInfo:
       properties:
         cashaddr:

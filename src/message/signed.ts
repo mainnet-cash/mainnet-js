@@ -116,7 +116,9 @@ export class SignedMessage implements SignedMessageI {
     let sig = base64ToBin(signature);
 
     let valid = false;
+    let pkhMatch = false;
     let pkh, signatureType;
+    
     if (sig.length === 65) {
       let rawSig = sig.length === 65 ? sig.slice(1) : sig;
       let recoveryId = sig.slice(0, 1)[0] - 31;
@@ -133,6 +135,14 @@ export class SignedMessage implements SignedMessageI {
         recoveredPk,
         messageHash
       );
+      if (cashaddr) {
+        // Validate that the signature actually matches the provided cashaddr
+        let prefix = derivePrefix(cashaddr);
+        let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
+        if (resultingCashaddr === cashaddr) {
+          pkhMatch = true;
+        }
+      }
     } else if (publicKey) {
       if (secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)) {
         signatureType = "schnorr";
@@ -150,15 +160,7 @@ export class SignedMessage implements SignedMessageI {
       }
     }
 
-    let pkhMatch = false;
-    if (cashaddr) {
-      // Validate that the signature actually matches the provided cashaddr
-      let prefix = derivePrefix(cashaddr);
-      let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
-      if (resultingCashaddr === cashaddr) {
-        pkhMatch = true;
-      }
-    }
+    
 
     return {
       valid: valid,
