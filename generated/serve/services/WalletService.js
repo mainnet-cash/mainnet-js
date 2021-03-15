@@ -176,7 +176,7 @@ const sendMax = ({ sendMaxRequest }) =>
 /**
 * Sign a message string
 *
-* createSignedMessageRequest CreateSignedMessageRequest Request sign a message string using a private key
+* signedMessageSign CreateSignedMessageRequest Request to sign a message string using a given walletId
 * returns SignedMessageResponse
 * */
 const signedMessageSign = ({ createSignedMessageRequest }) =>
@@ -198,9 +198,9 @@ const signedMessageSign = ({ createSignedMessageRequest }) =>
     }
   });
   /**
-* Verify a signed a message signature
+* Verify a signed message signature
 *
-* verifySignedMessageRequest VerifySignedMessageRequest Request sign a message string using a private key
+* verifySignedMessageRequest VerifySignedMessageRequest Request to verify a message given a signature
 * returns SignedMessageResponse
 * */
 const signedMessageVerify = ({ verifySignedMessageRequest }) =>

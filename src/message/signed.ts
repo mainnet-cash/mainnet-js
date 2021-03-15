@@ -100,7 +100,7 @@ export class SignedMessage implements SignedMessageI {
    * @param {message} string     The message to verify as a utf8 string
    * @param {signature} string   The signature as a base64 encoded string
    * @param {cashaddr} string    The cashaddr to validate the signature against a recoverable signature.
-   * @param {publicKey} string    If publicKey is not recoverable from the signature type, the publicKey may be passed instead of the signature.
+   * @param {publicKey} string    If publicKey is not recoverable from the signature type, the publicKey must be passed.
    *
    * @returns a promise to signature as a string
    */

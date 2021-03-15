@@ -532,7 +532,6 @@ describe("Test Wallet Endpoints", () => {
       signature: "8vgrWti0BItJ2wlY4s/8bT4jCNjGCLaDAoAWoj/r73Y4xiiLsU8PVVHPDB0MTnMgQzS3+rY1amLgON7lhW0EEA==",
       publicKey: "BHjUqiocZD/Gig3lRU5HxSDPWWQ1JkdOY7MgFE3p4NWa1BVOWh8oeK0vmwNs4K71d1gVVmkS43hbW3HL16PmtNo="
     });
-    console.log(resp)
    expect(resp.statusCode).toBe(200)
    expect(resp.body!.valid).toBe(true);
 });
