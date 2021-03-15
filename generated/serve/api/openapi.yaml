@@ -1772,8 +1772,8 @@ components:
             message
           type: boolean
         publicKeyHashMatch:
-          description: A boolean indicating whether the publicKeyHash of the signature
-            matches the provided cashaddr
+          description: A boolean indicating whether the publicKeyHash of a recoverable
+            signature matches the provided cashaddr, false otherwise
           type: boolean
     WalletInfo:
       allOf:
