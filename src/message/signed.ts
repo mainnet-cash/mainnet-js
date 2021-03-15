@@ -118,7 +118,7 @@ export class SignedMessage implements SignedMessageI {
     let valid = false;
     let pkhMatch = false;
     let pkh, signatureType;
-    
+
     if (sig.length === 65) {
       let rawSig = sig.length === 65 ? sig.slice(1) : sig;
       let recoveryId = sig.slice(0, 1)[0] - 31;
@@ -159,8 +159,6 @@ export class SignedMessage implements SignedMessageI {
         signatureType = "na";
       }
     }
-
-    
 
     return {
       valid: valid,
