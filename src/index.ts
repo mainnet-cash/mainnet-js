@@ -3,7 +3,7 @@ export * from "./db/index";
 export * from "./mine";
 export { UnitEnum } from "./enum";
 export * from "./network";
-export { SignedMessage } from "./message/signed"
+export { SignedMessage } from "./message/signed";
 export * from "./wallet/Wif";
 export * from "./wallet/createWallet";
 export * as Mainnet from "./util/index";

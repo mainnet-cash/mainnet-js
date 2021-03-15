@@ -100,7 +100,7 @@ describe("Test message Signing and Verification", () => {
       w.publicKey!
     );
     expect(result.valid).toBe(true);
-    console.log(binToBase64(w.publicKey!))
+    console.log(binToBase64(w.publicKey!));
     expect(result.details.signatureType).toBe("schnorr");
   });
 
