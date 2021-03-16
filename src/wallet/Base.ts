@@ -3,6 +3,8 @@ import { getNetworkProvider } from "../network/default";
 import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getStorageProvider } from "../db/util";
 import { WalletI } from "./interface";
+import { SignedMessageI } from "../message/interface";
+import { SignedMessage } from "../message/signed";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
@@ -20,6 +22,8 @@ export class BaseWallet implements WalletI {
   networkType: NetworkType;
   network: NetworkEnum;
 
+  static signedMessage: SignedMessageI = new SignedMessage();
+
   /**
    * constructor for a new wallet
    * @param {string} name              name of the wallet
@@ -30,7 +34,6 @@ export class BaseWallet implements WalletI {
   constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
     this.name = name;
     this.networkPrefix = networkPrefix;
-
     switch (this.networkPrefix) {
       case CashAddressNetworkPrefix.regtest:
         this.network = NetworkEnum.Regtest;
@@ -82,6 +85,8 @@ export class BaseWallet implements WalletI {
     this.name = name;
     dbName = dbName ? dbName : (this.networkPrefix as string);
     let db = getStorageProvider(dbName);
+
+    // If there is a database, force saving or error
     if (db) {
       await db.init();
       let savedWalletRecord = await db.getWallet(name);

@@ -577,11 +577,11 @@ export class Wallet extends BaseWallet {
       isTestnet: this.isTestnet,
       name: this.name,
       network: this.network,
-      seed: this.getSeed().seed,
-      derivationPath: this.getSeed().derivationPath,
-      publicKey: binToHex(this.publicKey!),
+      seed: this.mnemonic ? this.getSeed().seed : undefined,
+      derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
+      publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
       publicKeyHash: binToHex(this.publicKeyHash!),
-      privateKey: binToHex(this.privateKey!),
+      privateKey: this.privateKey ? binToHex(this.privateKey!) : undefined,
       privateKeyWif: this.privateKeyWif,
       walletId: this.toString(),
       walletDbEntry: this.toDbString(),
@@ -807,6 +807,21 @@ export class Wallet extends BaseWallet {
     }
     let rawTransaction = binToHex(transaction);
     return await this.provider.sendRawTransaction(rawTransaction);
+  }
+
+  // Convenience wrapper to sign interface
+  public async sign(message: string) {
+    return await BaseWallet.signedMessage.sign(message, this.privateKey!);
+  }
+
+  // Convenience wrapper to verify interface
+  public async verify(message: string, sig: string, publicKey?: Uint8Array) {
+    return await BaseWallet.signedMessage.verify(
+      message,
+      sig,
+      this.cashaddr!,
+      publicKey
+    );
   }
 }
 

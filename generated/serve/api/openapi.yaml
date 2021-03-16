@@ -543,6 +543,49 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/signed/sign:
+    post:
+      operationId: signedMessageSign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSignedMessageRequest'
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedMessageResponse'
+          description: successful operation
+      summary: Returns the message signature
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/signed/verify:
+    post:
+      operationId: signedMessageVerify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifySignedMessageRequest'
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifySignedMessageResponse'
+          description: successful operation
+      summary: Returns a boolean indicating whether message was valid for a given
+        address
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -899,8 +942,7 @@ components:
         sat:
           description: Amount in satoshis
           example: 100000000
-          format: integer
-          type: number
+          type: integer
         usd:
           description: Amount in United States Dollars
           example: 438.02
@@ -967,8 +1009,7 @@ components:
         id:
           description: Webhook Id created in the system
           example: 1
-          format: integer
-          type: number
+          type: integer
     ZeroBalanceResponse:
       example:
         bch: 0
@@ -983,8 +1024,7 @@ components:
         sat:
           description: Amount in satoshis
           example: 0
-          format: integer
-          type: number
+          type: integer
         usd:
           description: Amount in United States Dollars
           example: 0
@@ -1360,13 +1400,13 @@ components:
     WalletResponse:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
+      anyOf:
+      - $ref: '#/components/schemas/Wif'
+      - $ref: '#/components/schemas/WalletMnemonic'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
         name: username1
-      oneOf:
-      - $ref: '#/components/schemas/Wif'
-      - $ref: '#/components/schemas/WalletMnemonic'
       properties:
         walletId:
           description: |
@@ -1617,6 +1657,124 @@ components:
           - watch
           example: seed
           type: string
+    CreateSignedMessageRequest:
+      example:
+        walletId: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
+        message: Chancellor on brink of second bailout for banks
+      properties:
+        walletId:
+          example: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
+          type: string
+        message:
+          example: Chancellor on brink of second bailout for banks
+    SignedMessageResponse:
+      example:
+        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        raw:
+          schnorr: schnorr
+          der: der
+          ecdsa: ecdsa
+        details:
+          messageHash: messageHash
+          compressed: true
+          recoveryId: 0.8008281904610115
+      properties:
+        signature:
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+          type: string
+        raw:
+          $ref: '#/components/schemas/SignedMessageResponseRaw'
+        details:
+          $ref: '#/components/schemas/SignedMessageResponseDetails'
+    SignedMessageResponseRaw:
+      example:
+        schnorr: schnorr
+        der: der
+        ecdsa: ecdsa
+      properties:
+        ecdsa:
+          description: Elliptic Curve Digital messageHash encoded as a base64 string
+          type: string
+        schnorr:
+          description: |
+            Schnorr signature of the messageHash encoded as a base64 string, Note from libauth: Nonces are generated using RFC6979, where the Section 3.6, 16-byte ASCII "additional data" is set to Schnorr+SHA256, see https://libauth.org/interfaces/secp256k1.html#signmessagehashschnorr
+          type: string
+        der:
+          description: |
+            Signature of messageHash using DER (Distinguished Encoding Rules)
+          type: string
+    SignedMessageResponseDetails:
+      example:
+        messageHash: messageHash
+        compressed: true
+        recoveryId: 0.8008281904610115
+      properties:
+        recoveryId:
+          description: A tag used for recovering the public key from a compact signature.
+          type: number
+        compressed:
+          type: boolean
+        messageHash:
+          description: The double sha256 hash of the string encoded as Bitcoin Message
+            binary.
+          type: string
+    VerifySignedMessageRequest:
+      example:
+        walletId: watch:mainnet:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
+        message: Chancellor on brink of second bailout for banks
+        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+      properties:
+        walletId:
+          example: watch:mainnet:bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
+          type: string
+        message:
+          example: Chancellor on brink of second bailout for banks
+          type: string
+        signature:
+          description: The base64 signature of the double sha265 hash of a bitcoin
+            message formatted string signed using the private key associated with
+            the related cashaddr
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        publicKey:
+          description: If the publicKey is not recoverable from the signature, the
+            base64 encoded public key may be passed as instead of the walletId
+          type: string
+    VerifySignedMessageResponse:
+      example:
+        valid: true
+        details:
+          signatureValid: true
+          signatureType: signatureType
+          messageHash: messageHash
+          publicKeyHashMatch: true
+      properties:
+        valid:
+          description: Whether the message was signed by a given address
+          type: boolean
+        details:
+          $ref: '#/components/schemas/VerifySignedMessageResponseDetails'
+    VerifySignedMessageResponseDetails:
+      example:
+        signatureValid: true
+        signatureType: signatureType
+        messageHash: messageHash
+        publicKeyHashMatch: true
+      properties:
+        signatureType:
+          description: The type of signature passed
+          type: string
+        messageHash:
+          description: The double sha256 hash of the string encoded as Bitcoin Message
+            binary.
+          type: string
+        signatureValid:
+          description: A boolean indicating whether the signature is valid for the
+            message
+          type: boolean
+        publicKeyHashMatch:
+          description: A boolean indicating whether the publicKeyHash of a recoverable
+            signature matches the provided cashaddr, false otherwise
+          type: boolean
     WalletInfo:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
