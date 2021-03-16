@@ -8,10 +8,10 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.2.32",
+  "version": "0.3.0",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.2.32.js",
-  "browser": "dist/mainnet-0.2.32.js",
+  "main": "dist/mainnet-node-0.3.0.js",
+  "browser": "dist/mainnet-0.3.0.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*.js",
@@ -36,6 +36,7 @@
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "docs": "npx typedoc",
     "test": "npx jest --runInBand --detectOpenHandles --forceExit",
+    "test:sign": "npx jest src/message/signed.test.ts --runInBand --detectOpenHandles --forceExit",
     "test:api": "yarn build && yarn api:serve:test",
     "test:browser": "yarn build && npx jest --config jest.config.browser.js --detectOpenHandles",
     "format": "prettier --write .",
