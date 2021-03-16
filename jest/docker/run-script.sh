@@ -24,8 +24,8 @@ export zmq_outgoing_port=28339
 # Turn off graph search
 export enable_graph_search=0
 
-export core_from=215
-export core_from_testnet=215
+export core_from=210
+export core_from_testnet=210
 export db_name=slpdb
 
 # Turn off ZMQ output port

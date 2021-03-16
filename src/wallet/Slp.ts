@@ -56,8 +56,8 @@ export class Slp {
   constructor(wallet: Wallet) {
     this.slpaddr = toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
-    this.provider = new SlpDbProvider(this.wallet.networkType);
-    // this.provider = new GsppProvider(this.wallet.networkType);
+    // this.provider = new SlpDbProvider(this.wallet.networkType);
+    this.provider = new GsppProvider(this.wallet.networkType);
   }
 
   /**

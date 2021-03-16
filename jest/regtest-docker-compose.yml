@@ -97,15 +97,15 @@ services:
     build:
       context: "./docker/gspp"
     command: "gs++ /data/config.toml"
-    # healthcheck:
-    #   test: ["CMD", "/entrypoint.sh", "gs++-cli", "status"]
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "gs++-cli", "status"]
     expose:
       - "50051"
-      - "29069"
+      - "28339"
       - "8082"
     ports:
       - "50051:50051"
-      - "29069:28339"
+      - "28339:28339"
       - "8082:8082"
     volumes:
       - ./docker/gspp/regtest.toml:/data/config.toml

@@ -65,8 +65,10 @@ RUN cd /home \
 
 COPY ./regtest.toml ./config.toml
 COPY ./docker-entrypoint.sh ./entrypoint.sh
-COPY ./go1.13.8.linux-amd64.tar.gz /
+# COPY ./go1.13.8.linux-amd64.tar.gz /
 
+RUN wget -q https://golang.org/dl/go1.13.8.linux-amd64.tar.gz
+RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.13.8.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go1.13.8.linux-amd64.tar.gz
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/root/go

@@ -11,6 +11,8 @@ import { ElectrumRawTransaction } from "../network/interface";
 import { delay } from "../util/delay";
 import BigNumber from "bignumber.js";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
+import { GsppProvider } from "../slp/GsppProvider";
+import { count } from "console";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -61,7 +63,7 @@ describe("Slp wallet tests", () => {
     return bobWallet;
   }
 
-  test("Gspp Genesis test", async () => {
+  test("Gspp1 Genesis test", async () => {
     const aliceWallet = await getAliceWallet();
 
     const result: SlpGenesisResult = await aliceWallet.slp.genesis(
@@ -92,7 +94,7 @@ describe("Slp wallet tests", () => {
     expect(info).toEqual(tokenInfo);
   });
 
-  test("Genesis test, utxos are not suitable", async () => {
+  test("Gspp1 Genesis test, utxos are not suitable", async () => {
     const bobWallet = await getRandomWallet();
     await mine({ cashaddr: bobWallet.cashaddr!, blocks: 5 });
     await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
@@ -362,7 +364,7 @@ describe("Slp wallet tests", () => {
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
   });
 
-  test("Gspp Mint test", async () => {
+  test("Gspp1 Mint test", async () => {
     const aliceWallet = await getAliceWallet();
 
     // can not mint less than or 0 tokens
@@ -830,5 +832,23 @@ describe("Slp wallet tests", () => {
         ...{ ticker: ticker + "1_Bug" },
       })
     ).rejects.toThrow();
+  });
+
+  test("Gspp test times", async () => {
+    const aliceWallet = await getAliceWallet();
+
+    const slpDbProvider = new SlpDbProvider(Network.REGTEST);
+    const gsppProvider = new GsppProvider(Network.REGTEST);
+
+    console.time("SlpDb");
+    const count1 = await slpDbProvider.SlpUtxos(aliceWallet.slp.slpaddr);
+    console.timeEnd("SlpDb");
+
+    console.time("Gspp");
+    const count2 = await gsppProvider.SlpUtxos(aliceWallet.slp.slpaddr);
+    console.timeEnd("Gspp");
+
+    expect(count1.length).toBe(count2.length);
+    console.log(count1.length, count2.length);
   });
 });

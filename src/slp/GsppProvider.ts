@@ -211,7 +211,7 @@ export class GsppProvider implements SlpProvider {
       axiosInstance.defaults.headers = noCacheHeaders;
     }
 
-    // console.log(queryObject, endpoint);
+    console.log(queryObject, endpoint);
 
     return new Promise((resolve) => {
       const url = `${servers[this.network].gspp}/${endpoint}`;
