@@ -46,7 +46,7 @@ describe("Test message Signing and Verification", () => {
     );
     expect(result.details.publicKeyHashMatch).toBe(true);
     expect(result.details.signatureValid).toBe(true);
-    expect(result.details.signatureType).toBe("bitcoin");
+    expect(result.details.signatureType).toBe("recoverable");
   });
 
   // cTHMu3b13uh4i4GANQKm1XeziZhph18fwZgdaVftxh4FSuqj2AGM
