@@ -129,7 +129,7 @@ export class SignedMessage implements SignedMessageI {
       );
 
       pkh = await hash160(recoveredPk);
-      signatureType = "bitcoin";
+      signatureType = "recoverable";
       valid = secp256k1.verifySignatureCompact(
         rawSig,
         recoveredPk,

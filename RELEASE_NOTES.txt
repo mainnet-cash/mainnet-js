@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.1
+
+- Fix signatureType for 'recoverable' signatures
+
 0.3.0
 -----
 
