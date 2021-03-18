@@ -85,7 +85,8 @@
     "bignumber.js": "^9.0.1",
     "bip39": "^3.0.3",
     "buffer": "^6.0.3",
-    "cashscript": "^0.5.7",
+    "cashc": "^0.6.0",
+    "cashscript": "^0.6.0",
     "deepmerge": "^4.2.2",
     "dexie": "^3.0.2",
     "dotenv": "^8.2.0",
@@ -108,5 +109,8 @@
     "bch",
     "bitcoin cash"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4"
+  }
 }
