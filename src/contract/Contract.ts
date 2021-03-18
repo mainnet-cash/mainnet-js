@@ -6,7 +6,7 @@ import {
   SignatureTemplate,
   NetworkProvider,
 } from "cashscript";
-import { compileString, compileFile } from 'cashc';
+import { compileString, compileFile } from "cashc";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
 import { ContractI, CashscriptTransactionI } from "./interface";
