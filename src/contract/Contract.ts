@@ -2,11 +2,11 @@ import { instantiateSecp256k1 } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,
-  CashCompiler,
   Contract as CashScriptContract,
   SignatureTemplate,
   NetworkProvider,
 } from "cashscript";
+import { compileString, compileFile } from "cashc";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
 import { ContractI, CashscriptTransactionI } from "./interface";
@@ -54,7 +54,7 @@ export class Contract implements ContractI {
     this.script = script;
     this.parameters = parameters;
     this.network = network ? network : "mainnet";
-    this.artifact = CashCompiler.compileString(script);
+    this.artifact = compileString(script);
     this.provider = getNetworkProvider(this.network);
     this.contract = this.getContractInstance();
     this.nonce = nonce ? nonce : getRandomInt(2147483647);
@@ -118,7 +118,7 @@ export class Contract implements ContractI {
       DELIMITER
     );
     let script = atob(serializedScript);
-    let artifact = CashCompiler.compileString(script);
+    let artifact = compileString(script);
     let paramStrings = atob(serializedParams)
       .split(DELIMITER)
       .map((s) => atob(s));
@@ -141,7 +141,7 @@ export class Contract implements ContractI {
     network: Network,
     nonce?
   ) {
-    let artifact = CashCompiler.compileString(script);
+    let artifact = compileString(script);
     let params = castConstructorParametersFromArtifact(parameters, artifact);
     return new this(script, params, network, nonce);
   }
@@ -199,7 +199,7 @@ export class Contract implements ContractI {
    * @returns A cashscript Contract
    */
   public fromCashScript() {
-    this.artifact = CashCompiler.compileFile(this.script);
+    this.artifact = compileFile(this.script);
     this.contract = new CashScriptContract(this.artifact, [], this.provider);
     return this;
   }
