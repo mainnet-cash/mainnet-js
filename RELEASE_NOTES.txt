@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.2
+
+- Bump CashScript to 0.6.0
+
 0.3.1
 
 - Fix signatureType for 'recoverable' signatures
