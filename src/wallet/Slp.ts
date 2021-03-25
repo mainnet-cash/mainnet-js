@@ -61,6 +61,13 @@ export class Slp {
   }
 
   /**
+   * setProvider - sets the provider to fetch slp data from
+   */
+   public setProvider(provider: SlpProvider) {
+    return this.provider = provider;
+  }
+
+  /**
    * getDepositAddress - get the slp deposit address
    *
    * a high-level function,
@@ -104,9 +111,20 @@ export class Slp {
   }
 
   /**
-   * getSlpUtxos - get a list of SLP unspent outputs
+   * getSlpOutpoints - get a list of SLP unspent outpoints
    *
    * an intermediate function contributing to the output of wallet.getUtxos() and /wallet/utxos for slp enabled wallets
+   *
+   * @param slpaddr  The slpaddr to request slp unspent outpoints for
+   *
+   * @returns Promise to a list of slp unspent outpoints
+   */
+   public async getSlpOutpoints(): Promise<String[]> {
+    return this.provider.SlpOutpoints(this.slpaddr);
+  }
+
+  /**
+   * getSlpUtxos - get a list of SLP unspent outputs
    *
    * @param slpaddr  The slpaddr to request slp unspent outputs for
    *
@@ -221,13 +239,13 @@ export class Slp {
    * can be cancelled by calling the function returned from this one
    *
    * @param callback   The callback function to be called each time the balance changes
-   * @param tokenId    Specific token id to watch, optional
+   * @param tokenId    Specific token id to watch
    *
    * @returns A function to cancel the watching
    */
   public watchBalance(
     callback: SlpWatchBalanceCallback,
-    tokenId?: string
+    tokenId: string
   ): SlpCancelWatchFn {
     return this.provider.SlpWatchBalance(callback, this.slpaddr, tokenId);
   }

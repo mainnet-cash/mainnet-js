@@ -1,20 +1,9 @@
 import { Network, TxI } from "../interface";
 import {
-  SlpDbResponse,
   SlpTokenBalance,
   SlpTokenInfo,
   SlpUtxoI,
 } from "./interface";
-import {
-  SlpAllUtxosTemplate,
-  SlpAddressTransactionHistoryTemplate,
-  SlpWaitForTransactionTemplate,
-  SlpBatonUtxosTemplate,
-  SlpSpendableUtxosTemplate,
-  SlpTokenInfoTemplate,
-  SlpAllTokenBalancesTemplate,
-  SlpTokenBalanceTemplate,
-} from "./SlpDbTemplates";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,
@@ -23,7 +12,7 @@ import {
   SlpWatchTransactionCallback,
   _emptyTokenBalance,
 } from "./SlpProvider";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { btoa } from "../util/base64";
 
 const cashaddrjs = require('cashaddrjs');
@@ -34,15 +23,15 @@ import { toCashAddress } from "../util/bchaddr";
 const servers = {
   mainnet: {
     gspp: "https://gs.fountainhead.cash",
-    slpsockserve: "https://slpsocket.fountainhead.cash",
+    eventsource: "https://slpsocket.fountainhead.cash",
   },
   testnet: {
     gspp: "https://gs-testnet.fountainhead.cash",
-    slpsockserve: "https://slpsocket-testnet.fountainhead.cash",
+    eventsource: "https://slpsocket-testnet.fountainhead.cash",
   },
   regtest: {
-    gspp: "http://localhost:8082",
-    slpsockserve: "http://localhost:12301",
+    gspp: "http://localhost:12400",
+    eventsource: "http://localhost:12401",
   },
 };
 
@@ -50,10 +39,14 @@ export class GsppProvider implements SlpProvider {
   public caching: boolean = false;
   constructor(public network: Network = Network.MAINNET) {}
 
+  // all oupoints, including mint batons
+  async SlpOutpoints(slpaddr: string): Promise<String[]> {
+    return (await this.GsppQuery({cashaddr: slpaddr}, "v1/graphsearch/slpoutpoints")).outpoints as String[];
+  }
+
   // all utxos, including mint batons
   async SlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
-    const pubkeyBase64 = addressToScriptpubkey(slpaddr);
-    const response = (await this.GsppQuery({"scriptpubkey": pubkeyBase64}, "v1/graphsearch/slputxos")).utxos as SlpUtxoI[];
+    const response = (await this.GsppQuery({cashaddr: slpaddr}, "v1/graphsearch/slputxos")).utxos as SlpUtxoI[];
 
     if (!response) {
       return [];
@@ -83,10 +76,8 @@ export class GsppProvider implements SlpProvider {
 
   // get all token balances
   async SlpAllTokenBalances(slpaddr: string): Promise<SlpTokenBalance[]> {
-    const pubkeyBase64 = addressToScriptpubkey(slpaddr);
-
     return _convertBalanceBigNumbers(
-      ((await this.GsppQuery({"scriptpubkey": pubkeyBase64}, "v1/graphsearch/slpalltokenbalances")).balances || []) as SlpTokenBalance[]
+      ((await this.GsppQuery({cashaddr: slpaddr}, "v1/graphsearch/slpalltokenbalances")).balances || []) as SlpTokenBalance[]
     );
   }
 
@@ -95,8 +86,7 @@ export class GsppProvider implements SlpProvider {
     slpaddr: string,
     tokenId: string
   ): Promise<SlpTokenBalance> {
-    const pubkeyBase64 = addressToScriptpubkey(slpaddr);
-    const response = await this.GsppQuery({"scriptpubkey": pubkeyBase64, "tokenId": tokenId}, "v1/graphsearch/slptokenbalance");
+    const response = await this.GsppQuery({cashaddr: slpaddr, tokenId: tokenId}, "v1/graphsearch/slptokenbalance");
     if (!response) {
       return _emptyTokenBalance(tokenId);
     }
@@ -110,24 +100,22 @@ export class GsppProvider implements SlpProvider {
 
   // get all slp transactions of this address
   async SlpAddressTransactionHistory(
-    slpaddr: string,
-    tokenId?: string,
-    limit: number = 100,
-    skip: number = 0
+    _slpaddr: string,
+    _tokenId?: string,
+    _limit: number = 100,
+    _skip: number = 0
   ): Promise<TxI[]> {
-    const response = await this.GsppQuery(
-      SlpAddressTransactionHistoryTemplate(slpaddr, tokenId, limit, skip)
-    );
-    return response.c.concat(response.u) as TxI[];
+    // return await (new SlpDbProvider(this.network)).SlpAddressTransactionHistory(slpaddr, tokenId, limit, skip);
+    throw "Not implemented";
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
   async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any> {
     return new Promise(async (resolve) => {
-      this.SlpWatchTransactions(
+      const cancelFn = this.SlpWatchTransactions(
         (data) => {
+          cancelFn();
           resolve(data);
-          return true;
         },
         slpaddr,
         tokenId
@@ -157,7 +145,7 @@ export class GsppProvider implements SlpProvider {
     );
   }
 
-  // set's up a callback to be executed each time the token balance of the wallet is changed
+  // sets up a callback to be executed each time the token balance of the wallet is changed
   SlpWatchBalance(
     callback: SlpWatchBalanceCallback,
     slpaddr: string,
@@ -182,7 +170,7 @@ export class GsppProvider implements SlpProvider {
     tokenId?: string
   ): SlpCancelWatchFn {
     const eventSource: EventSource = this.SlpSocketEventSource(
-      SlpWaitForTransactionTemplate(slpaddr, tokenId)
+      {query: {slpaddr, tokenId}}
     );
     const cancelFn: SlpCancelWatchFn = () => {
       eventSource.close();
@@ -192,8 +180,8 @@ export class GsppProvider implements SlpProvider {
       "message",
       (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
-        if (data.data && data.data.length) {
-          if (!!callback(data.data[0])) {
+        if (data.type === "rawtx") {
+          if (!!callback(data.data)) {
             cancelFn();
           }
         }
@@ -211,22 +199,25 @@ export class GsppProvider implements SlpProvider {
       axiosInstance.defaults.headers = noCacheHeaders;
     }
 
-    console.log(queryObject, endpoint);
+    if (process.env.DEBUG) console.log(queryObject, endpoint);
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const url = `${servers[this.network].gspp}/${endpoint}`;
       fetch_retry(url, queryObject).then((response: any) => {
         resolve(response.data);
-      }).catch(error => {
-        console.trace(JSON.stringify(error.response.data, null, 2));
-        // reject(new Error(error.response.data));
-        resolve(undefined);
+      }).catch((error) => {
+        if (error.isAxiosError) {
+          // console.trace(JSON.stringify(error, null, 2));
+          reject(error.response.data);
+        }
+
+        reject(error);
       });
     });
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
-    const url = `${servers[this.network].slpsockserve}/s/${B64QueryString(
+    const url = `${servers[this.network].eventsource}/s/${B64QueryString(
       queryObject
     )}`;
     return new EventSource(url);

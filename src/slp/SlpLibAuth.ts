@@ -20,7 +20,7 @@ import {
 import BigNumber from "bignumber.js";
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { UnitEnum } from "../enum";
-import { toCashAddress } from "../util/bchaddr";
+import { isValidAddress, toCashAddress } from "../util/bchaddr";
 
 export const bigIntToBinUint64BE = (value) => {
   return bigIntToBinUint64LE(value).reverse();
@@ -42,6 +42,14 @@ const supportedTokenTypes = [
 ];
 
 export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
+  if (!isValidAddress(options.tokenReceiverSlpAddr!)) {
+    throw new Error(`Invalid tokenReceiverSlpAddr ${options.tokenReceiverSlpAddr}`);
+  }
+
+  if (!isValidAddress(options.batonReceiverSlpAddr!)) {
+    throw new Error(`Invalid batonReceiverSlpAddr ${options.batonReceiverSlpAddr}`);
+  }
+
   if (!options.type) {
     options.type = SlpTokenType.Type1;
   }
@@ -118,6 +126,14 @@ export const SlpGetMintOutputs = async (
   options: SlpMintOptions,
   slpBatonUtxos: SlpUtxoI[]
 ) => {
+  if (!isValidAddress(options.tokenReceiverSlpAddr!)) {
+    throw new Error(`Invalid tokenReceiverSlpAddr ${options.tokenReceiverSlpAddr}`);
+  }
+
+  if (!isValidAddress(options.batonReceiverSlpAddr!)) {
+    throw new Error(`Invalid batonReceiverSlpAddr ${options.batonReceiverSlpAddr}`);
+  }
+
   const tokenType = slpBatonUtxos[0].type;
 
   if (!supportedTokenTypes.includes(tokenType)) {
@@ -153,7 +169,7 @@ export const SlpGetMintOutputs = async (
       m_mint_baton_vout: Uint8Array.from(batonVout),
       m_additional_token_quantity: Uint8Array.from([
         ...[0x08],
-        ...bigIntToBinUint64BE(BigInt(amount)),
+        ...bigIntToBinUint64BE(BigInt(amount.toString())),
       ]),
     },
   });
@@ -178,6 +194,10 @@ export const SlpGetSendOutputs = async (
   slpUtxos: SlpUtxoI[],
   sendRequests: SlpSendRequest[]
 ) => {
+  if (!isValidAddress(changeSlpaddr!)) {
+    throw new Error(`Invalid changeSlpaddr ${changeSlpaddr}`);
+  }
+
   if (!slpUtxos.length) {
     throw new Error("No available tokens to spend");
   }
@@ -254,7 +274,7 @@ export const SlpGetSendOutputs = async (
     result = new Uint8Array([
       ...result,
       ...[0x08],
-      ...bigIntToBinUint64BE(BigInt(val)),
+      ...bigIntToBinUint64BE(BigInt(val.toString())),
     ]);
   }
 

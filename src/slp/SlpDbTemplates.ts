@@ -43,6 +43,51 @@ export const SlpAllUtxosTemplate = (slpaddr: string) => ({
     }
 });
 
+// Slp outpoints for bch operation, to prevent accident burning of tokens and baton
+// prettier-ignore
+export const SlpAllOutpointsTemplate = (slpaddr: string) => ({
+  "v": 3,
+  "q": {
+      "db": ["g"],
+      "aggregate": [
+          {
+              "$match": {
+                  "graphTxn.outputs.address": slpaddr,
+                  "graphTxn.outputs.status": {
+                  "$in": [
+                      "UNSPENT",
+                      "BATON_UNSPENT"
+                      ]
+                  }
+              }
+          },
+          {
+              "$unwind": "$graphTxn.outputs"
+          },
+          {
+              "$match": {
+                  "graphTxn.outputs.address": slpaddr,
+                  "graphTxn.outputs.status": {
+                      "$in": [
+                          "UNSPENT",
+                          "BATON_UNSPENT"
+                          ]
+                      }
+              }
+          },
+          {
+              "$project": {
+                  "graphTxn": 1
+              }
+          }
+      ],
+      "limit": 1e6,
+  },
+  "r": {
+    "f": "[ .[] | [.graphTxn.txid, .graphTxn.outputs.vout | tostring] | join(\":\") ]"
+  }
+});
+
 // Slp Utxos for spending
 // prettier-ignore
 export const SlpSpendableUtxosTemplate = (slpaddr: string, tokenId?: string) => {

@@ -12,7 +12,6 @@ import { delay } from "../util/delay";
 import BigNumber from "bignumber.js";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
 import { GsppProvider } from "../slp/GsppProvider";
-import { count } from "console";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -63,7 +62,7 @@ describe("Slp wallet tests", () => {
     return bobWallet;
   }
 
-  test("Gspp1 Genesis test", async () => {
+  test("Genesis test", async () => {
     const aliceWallet = await getAliceWallet();
 
     const result: SlpGenesisResult = await aliceWallet.slp.genesis(
@@ -78,12 +77,11 @@ describe("Slp wallet tests", () => {
 
     const info = await aliceWallet.slp.getTokenInfo(tokenId);
     delete (info as any).tokenId;
-    delete (info as any).documentHash;
     delete (info as any).groupId;
     const tokenInfo = {
       decimals: 2,
-      // documentHash:
-      //   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      documentHash:
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(10000),
       name: "Mainnet coin",
@@ -94,13 +92,13 @@ describe("Slp wallet tests", () => {
     expect(info).toEqual(tokenInfo);
   });
 
-  test("Gspp1 Genesis test, utxos are not suitable", async () => {
+  test("Genesis test, utxos are not suitable", async () => {
     const bobWallet = await getRandomWallet();
     await mine({ cashaddr: bobWallet.cashaddr!, blocks: 5 });
     await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
   });
 
-  test("Gspp Send test", async () => {
+  test("Send test", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -200,7 +198,7 @@ describe("Slp wallet tests", () => {
     expect(charlieBalance.tokenId).toBe(tokenId);
   });
 
-  test("Gspp Send-return test", async () => {
+  test("Send-return test", async () => {
     let aliceWallet = await getAliceWallet();
     let bobWallet = await getRandomWallet();
 
@@ -364,7 +362,7 @@ describe("Slp wallet tests", () => {
     expect(aliceSlpNewBalance.toString()).toBe(aliceSlpBalance.toString());
   });
 
-  test("Gspp1 Mint test", async () => {
+  test("Mint test", async () => {
     const aliceWallet = await getAliceWallet();
 
     // can not mint less than or 0 tokens
@@ -391,7 +389,7 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
   });
 
-  test("Gspp Test mint baton transfer", async () => {
+  test("Test mint baton transfer", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -430,7 +428,7 @@ describe("Slp wallet tests", () => {
     await expect(bobWallet.slp.mint(mintOptions)).rejects.toThrow();
   });
 
-  test("Gspp Test tokenId ambiguity", async () => {
+  test("Test tokenId ambiguity", async () => {
     const aliceWallet = await getAliceWallet();
 
     genesisOptions.ticker = ticker + "_AMBIGUOS";
@@ -507,9 +505,10 @@ describe("Slp wallet tests", () => {
 
     genesisOptions.ticker = ticker + "WB";
     const genesis = await aliceWallet.slp.genesis(genesisOptions);
+
     const cancelFn = bobWallet.slp.watchBalance((balance) => {
       expect(balance.value.toNumber()).toBeGreaterThan(0);
-    });
+    }, genesis.tokenId);
     await aliceWallet.slp.send([
       {
         slpaddr: bobWallet.slp.slpaddr,
@@ -518,7 +517,7 @@ describe("Slp wallet tests", () => {
       },
     ]);
 
-    delay(5000);
+    delay(2000);
     cancelFn();
   });
 
@@ -536,12 +535,13 @@ describe("Slp wallet tests", () => {
           tokenId: genesis.tokenId,
         },
       ]);
-    }, 5000);
+    }, 3000);
     const balance = await bobWallet.slp.waitForBalance(10, genesis.tokenId);
     expect(balance.value.isEqualTo(20));
+    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
   });
 
-  test.skip("Test waiting for slp transaction", async () => {
+  test("Test waiting for slp transaction", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -558,13 +558,22 @@ describe("Slp wallet tests", () => {
           tokenId: genesis.tokenId,
         },
       ]);
-    }, 5000);
+    }, 3000);
     const transaction = await bobWallet.slp.waitForTransaction(genesis.tokenId);
-    expect(transaction.tx.h.length).toBe(64);
+
+    if (aliceWallet.slp.provider instanceof SlpDbProvider) {
+      expect(transaction.tx.h.length).toBe(64);
+    } else {
+      expect(transaction.txHash.length).toBe(64)
+    }
   });
 
   test("Test getting history", async () => {
     const aliceWallet = await getAliceWallet();
+
+    if (aliceWallet.slp.provider instanceof GsppProvider) {
+      return;
+    }
 
     const history = await aliceWallet.slp.getHistory();
     expect(history.length).toBeGreaterThan(0);
@@ -581,28 +590,44 @@ describe("Slp wallet tests", () => {
   });
 
   test("Test faulty wallet", async () => {
+    let options = { ...genesisOptions };
+
     const bobWallet = await getRandomWallet();
     bobWallet.privateKey = Uint8Array.from([0, 1, 2, 3, 4]);
     // not enough funds
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
 
     // no private key set
     bobWallet.privateKey = undefined;
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
     bobWallet.privateKey = Uint8Array.from([0, 1, 2, 3, 4]);
 
     // no network provider set
     const provider = bobWallet.provider;
     bobWallet.provider = undefined;
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
     bobWallet.provider = provider;
 
-    // cashaddr is bad
-    bobWallet.slp.slpaddr = "";
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    // tokenReceiverSlpAddr is bad
+    options.tokenReceiverSlpAddr = "test";
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
+
+    options = {...genesisOptions};
+
+    // batonReceiverSlpAddr is bad
+    options.batonReceiverSlpAddr = "test";
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
+
+    options = {...genesisOptions};
+
+    // bob's slpaddr is bad
+    bobWallet.slp.slpaddr = "test";
+    options.batonReceiverSlpAddr = undefined;
+    options.tokenReceiverSlpAddr = undefined;
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
   });
 
-  test("Gspp Test genesis ends baton", async () => {
+  test("Test genesis ends baton", async () => {
     const aliceWallet = await getAliceWallet();
 
     const options = { ...genesisOptions };
@@ -629,7 +654,7 @@ describe("Slp wallet tests", () => {
     expect(utxos[0].utxoId).toContain(":");
   });
 
-  test("Gspp Test NFT Parent creation and transfer", async () => {
+  test("Test NFT Parent creation and transfer", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -646,8 +671,8 @@ describe("Slp wallet tests", () => {
 
     const parentTokenInfo = {
       decimals: 0,
-      // documentHash:
-      //   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      documentHash:
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(10000),
       name: "Mainnet NFT Parent",
@@ -656,7 +681,6 @@ describe("Slp wallet tests", () => {
     };
 
     delete (info as any).tokenId;
-    delete (info as any).documentHash;
     delete (info as any).groupId;
 
     expect(info).toEqual(parentTokenInfo);
@@ -683,7 +707,7 @@ describe("Slp wallet tests", () => {
     expect(bobBalance.tokenId).toBe(parentResult.tokenId);
   });
 
-  test("Gspp Test NFT Child creation and transfer", async () => {
+  test("Test NFT Child creation and transfer", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
@@ -710,8 +734,8 @@ describe("Slp wallet tests", () => {
 
     const childTokenInfo = {
       decimals: 0,
-      // documentHash:
-      //   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      documentHash:
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(1),
       name: "Mainnet NFT Child",
@@ -720,7 +744,6 @@ describe("Slp wallet tests", () => {
     };
 
     delete (childInfo as any).tokenId;
-    delete (childInfo as any).documentHash;
     delete (childInfo as any).groupId;
 
     expect(childInfo).toEqual(childTokenInfo);
@@ -834,21 +857,23 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
   });
 
-  test("Gspp test times", async () => {
-    const aliceWallet = await getAliceWallet();
+  test("test times", async () => {
+    // const aliceWallet = await getAliceWallet();
 
     const slpDbProvider = new SlpDbProvider(Network.REGTEST);
     const gsppProvider = new GsppProvider(Network.REGTEST);
 
-    console.time("SlpDb");
-    const count1 = await slpDbProvider.SlpUtxos(aliceWallet.slp.slpaddr);
-    console.timeEnd("SlpDb");
+    const start1 = new Date().getTime();
+    const count1 = await slpDbProvider.SlpUtxos("simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump");
+    const end1 = new Date().getTime();
 
-    console.time("Gspp");
-    const count2 = await gsppProvider.SlpUtxos(aliceWallet.slp.slpaddr);
-    console.timeEnd("Gspp");
+    const start2 = new Date().getTime();
+    const count2 = await gsppProvider.SlpUtxos("simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump");
+    const end2 = new Date().getTime();
+    // console.log("Slpdb", end1-start1);
+    console.log("Slpdb", end1-start1, "Gspp", end2-start2, count1.length, count2.length);
 
-    expect(count1.length).toBe(count2.length);
-    console.log(count1.length, count2.length);
+    // expect(count1.length).toBe(count2.length);
+    // console.log(count1.length, count2.length);
   });
 });

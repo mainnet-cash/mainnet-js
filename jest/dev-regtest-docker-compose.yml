@@ -98,11 +98,11 @@ services:
     networks:
       - bitcoin
 
-  gspp:
-    image: mainnet/gspp
+  gspp-dev:
+    image: mainnet/gspp-dev
     restart: always
     build:
-      context: "./docker/gspp"
+      context: "./docker/gspp-dev"
     command: "gs++ /data/config.toml"
     expose:
       - "50051"
@@ -115,7 +115,7 @@ services:
       - "12400:8082"  # grpc-rest gateway
       - "12401:12401" # SSE notifications
     volumes:
-      - ./docker/gspp/regtest.toml:/data/config.toml
+      - ./docker/gspp-dev/regtest.toml:/data/config.toml
       # - ./docker/data/gspp:/tmp/gs++ # uncomment to make persistent
     networks:
       - bitcoin

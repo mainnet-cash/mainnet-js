@@ -14,6 +14,7 @@ import {
   SlpTokenInfoTemplate,
   SlpAllTokenBalancesTemplate,
   SlpTokenBalanceTemplate,
+  SlpAllOutpointsTemplate,
 } from "./SlpDbTemplates";
 import BigNumber from "bignumber.js";
 import {
@@ -49,6 +50,11 @@ const servers = {
 export class SlpDbProvider implements SlpProvider {
   public caching: boolean = false;
   constructor(public network: Network = Network.MAINNET) {}
+
+  // all oupoints, including mint batons
+  async SlpOutpoints(slpaddr: string): Promise<String[]> {
+    return (await this.SlpDbQuery(SlpAllOutpointsTemplate(slpaddr))).g as String[];
+  }
 
   // all utxos, including mint batons
   async SlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
