@@ -75,8 +75,6 @@ services:
   slpserve:
     image: mainnet/slpserve
     container_name: slpserve
-    build:
-      context: "./docker/slpserve"
     volumes:
       - ./docker/slpserve/env:/home/safeuser/slpserve/.env
     ports:
@@ -88,8 +86,6 @@ services:
   slpsockserve:
     image: mainnet/slpsockserve
     container_name: slpsockserve
-    build:
-      context: "./docker/slpsockserve"
     volumes:
       - ./docker/slpsockserve/env:/home/safeuser/slpsockserve/.env
     ports:
@@ -101,8 +97,6 @@ services:
   gspp:
     image: mainnet/gspp
     restart: always
-    build:
-      context: "./docker/gspp"
     command: "gs++ /data/config.toml"
     expose:
       - "50051"
@@ -116,7 +110,6 @@ services:
       - "12401:12401" # SSE notifications
     volumes:
       - ./docker/gspp/regtest.toml:/data/config.toml
-      # - ./docker/gspp/prod.toml:/data/config.toml
       # - ./docker/data/gspp:/tmp/gs++ # uncomment to make persistent
     networks:
       - bitcoin
