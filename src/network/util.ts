@@ -1,12 +1,22 @@
 import { ElectrumTransport, TransportScheme } from "electrum-cash";
+import { getRuntimePlatform, RuntimePlatform } from "../util/getRuntimePlatform";
 import { ElectrumHostParams } from "./interface";
 
 export function parseElectrumUrl(givenUrl: string): ElectrumHostParams {
+  console.log(givenUrl)
   let url = new URL(givenUrl);
-  let port = parseInt(url.port || "443");
-  let scheme = getElectrumScheme(url.protocol);
+  let port, scheme, hostname
+  if(RuntimePlatform.app === getRuntimePlatform()){
+    port = "443"
+    scheme = "wss"
+    hostname = "fulcrum.fountainhead.cash"
+  } else{
+    port = parseInt(url.port || "443");
+    scheme = getElectrumScheme(url.protocol);  
+    hostname = url.hostname
+  }
 
-  return { host: url.hostname, port: port, scheme: scheme };
+  return { host: hostname, port: port, scheme: scheme };
 }
 
 function getElectrumScheme(protocol: string) {
