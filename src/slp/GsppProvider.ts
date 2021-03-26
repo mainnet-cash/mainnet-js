@@ -15,10 +15,7 @@ import {
 import axios, { AxiosError } from "axios";
 import { btoa } from "../util/base64";
 
-const cashaddrjs = require('cashaddrjs');
-
 import EventSource from "../../polyfill/eventsource";
-import { toCashAddress } from "../util/bchaddr";
 
 const servers = {
   mainnet: {
@@ -105,7 +102,6 @@ export class GsppProvider implements SlpProvider {
     _limit: number = 100,
     _skip: number = 0
   ): Promise<TxI[]> {
-    // return await (new SlpDbProvider(this.network)).SlpAddressTransactionHistory(slpaddr, tokenId, limit, skip);
     throw "Not implemented";
   }
 
@@ -199,7 +195,7 @@ export class GsppProvider implements SlpProvider {
       axiosInstance.defaults.headers = noCacheHeaders;
     }
 
-    console.log(queryObject, endpoint);
+    // console.log(queryObject, endpoint);
 
     return new Promise((resolve, reject) => {
       const url = `${servers[this.network].gspp}/${endpoint}`;
@@ -246,20 +242,9 @@ const fetch_retry = (url, data = {}, n = 1) =>
 
 const B64QueryString = function (queryObject): string {
   if (!queryObject || !Object.keys(queryObject).length) {
-    throw new Error("Empty SLPDB query");
+    throw new Error("Empty query");
   }
   return btoa(JSON.stringify(queryObject));
-};
-
-const addressToScriptpubkey = (address) => {
-  const x = cashaddrjs.decode(toCashAddress(address));
-  return Buffer.from(
-      (x.type === 'P2PKH')
-    ? [0x76, 0xA9, x.hash.length].concat(...x.hash, [0x88, 0xAC])
-    : (x.type === 'P2PK')
-    ? [0xAC, x.hash.length].concat(...x.hash, [0x87])
-    : [0xA9, x.hash.length].concat(...x.hash, [0x87]) // assume p2sh
-  ).toString('base64');
 };
 
 export function _convertBalanceBigNumbers(

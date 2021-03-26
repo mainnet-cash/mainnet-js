@@ -1,47 +1,35 @@
-import { Network, RegTestWallet } from "..";
-import { disconnectProviders, initProviders } from "../network";
+import { Network, RegTestWallet, toCashAddress } from "..";
 import { GsppProvider } from "./GsppProvider";
-import axios from "axios";
-import { base64ToBin, binToBase64, binToHex } from "@bitauth/libauth";
+import { base64ToBin, binToBase64, binToHex, hexToBin } from "@bitauth/libauth";
+const cashaddrjs = require('cashaddrjs');
 
 const rotate = function(str) {
   return str.match(/.{1,2}/g).reverse().join('');
 }
 
+const addressToScriptpubkey = (address) => {
+  const x = cashaddrjs.decode(toCashAddress(address));
+  return Buffer.from(
+      (x.type === 'P2PKH')
+    ? [0x76, 0xA9, x.hash.length].concat(...x.hash, [0x88, 0xAC])
+    : (x.type === 'P2PK')
+    ? [0xAC, x.hash.length].concat(...x.hash, [0x87])
+    : [0xA9, x.hash.length].concat(...x.hash, [0x87]) // assume p2sh
+  ).toString('base64');
+};
 
 
 describe("Gspp Provider tests", () => {
-  // test("Test should fail query", async () => {
-  //   const provider = new GsppProvider(Network.MAINNET);
-  //   // const result = await provider.GsppQuery({txid: rotate("28a6661fdce36f5d04ffe97c1651bc4c9400170f1940fb4be339e0e58f738539"), vout: 1}, "v1/graphsearch/outputoracle");
-  //   const result = await provider.GsppQuery({}, "v1/graphsearch/status");
 
-  //   console.log(JSON.stringify(result, null, 2));
-  //   console.log(rotate(binToHex(base64ToBin(result.tokenid))));
-  //   // console.log(rotate(binToHex(base64ToBin(result.groupid))));
-  // });
-  // qRRWtrIgQrkN1nvy+/ua/303++4RJIc=
-  // dqkUVrayIEK5DdZ78vv7mv99N/vuESSIrA==
-  test("Test GsppProvider SlpAllTokenBalances", async () => {
-    const provider = new GsppProvider(Network.REGTEST);
-    const aliceWif = `${process.env.PRIVATE_WIF!}`;
-    const aliceWallet = await RegTestWallet.fromWIF(aliceWif);
+  // other GsppProvider tests are covered in the Slp.test.ts integration test suite
 
-    // const result = await provider.SlpAllTokenBalances(aliceWallet.slp.slpaddr);
+  test("Test graphsearch methods", async () => {
+    const provider = new GsppProvider(Network.MAINNET);
+    const resultStatus = await provider.GsppQuery({}, "v1/graphsearch/status");
+    expect(resultStatus.block_height).toBeGreaterThan(0);
 
-    // console.log(JSON.stringify(result, null, 2));
-
-    // const otherResult = await provider.SlpTokenBalance(aliceWallet.slp.slpaddr, "ee8eb1d71fbe9815a35d01e8c9db3bd0607002f94e24ad4d1cdebcf8040a3fb5");
-
-    // console.log(JSON.stringify(otherResult, null, 2));
-
-    // const infoResult = await provider.SlpTokenInfo("ee8eb1d71fbe9815a35d01e8c9db3bd0607002f94e24ad4d1cdebcf8040a3fb5");
-    // console.log(JSON.stringify(infoResult, null, 2));
-
-    const all = await aliceWallet.slp.getSlpUtxos(aliceWallet.slp.slpaddr);
-    const batons = await aliceWallet.slp.getBatonUtxos();
-    const nonBatons = await aliceWallet.slp.provider.SlpSpendableUtxos(aliceWallet.slp.slpaddr);
-
-    console.log(all, batons, nonBatons);
+    const tokenId = "a2987562a405648a6c5622ed6c205fca6169faa8afeb96a994b48010bd186a66";
+    const resultOracle = await provider.GsppQuery({ vout: 1, txid: rotate(tokenId) }, "v1/graphsearch/outputoracle");
+    expect(rotate(binToHex(base64ToBin(resultOracle.tokenid)))).toBe(tokenId);
   });
 });
