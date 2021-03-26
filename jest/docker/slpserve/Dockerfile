@@ -1,5 +1,4 @@
 FROM christroutner/ct-base-ubuntu
-MAINTAINER Chris Troutner <chris.troutner@gmail.com>
 
 RUN apt-get update -y
 
