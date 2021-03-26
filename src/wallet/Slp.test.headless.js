@@ -86,7 +86,7 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.value.c[0]).toBe(10000);
   });
 
-  test(`Should watch slp testnet balance`, async () => {
+  test.skip(`Should watch slp testnet balance`, async () => {
     jestTokenId =
       "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15";
     const result = await page.evaluate(

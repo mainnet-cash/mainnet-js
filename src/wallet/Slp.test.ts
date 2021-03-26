@@ -541,7 +541,7 @@ describe("Slp wallet tests", () => {
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
   });
 
-  test("Test waiting for slp transaction", async () => {
+  test.skip("Test waiting for slp transaction", async () => {
     const aliceWallet = await getAliceWallet();
     const bobWallet = await getRandomWallet();
 
