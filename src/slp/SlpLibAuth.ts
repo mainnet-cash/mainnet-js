@@ -43,11 +43,15 @@ const supportedTokenTypes = [
 
 export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
   if (!isValidAddress(options.tokenReceiverSlpAddr!)) {
-    throw new Error(`Invalid tokenReceiverSlpAddr ${options.tokenReceiverSlpAddr}`);
+    throw new Error(
+      `Invalid tokenReceiverSlpAddr ${options.tokenReceiverSlpAddr}`
+    );
   }
 
   if (!isValidAddress(options.batonReceiverSlpAddr!)) {
-    throw new Error(`Invalid batonReceiverSlpAddr ${options.batonReceiverSlpAddr}`);
+    throw new Error(
+      `Invalid batonReceiverSlpAddr ${options.batonReceiverSlpAddr}`
+    );
   }
 
   if (!options.type) {
@@ -127,11 +131,15 @@ export const SlpGetMintOutputs = async (
   slpBatonUtxos: SlpUtxoI[]
 ) => {
   if (!isValidAddress(options.tokenReceiverSlpAddr!)) {
-    throw new Error(`Invalid tokenReceiverSlpAddr ${options.tokenReceiverSlpAddr}`);
+    throw new Error(
+      `Invalid tokenReceiverSlpAddr ${options.tokenReceiverSlpAddr}`
+    );
   }
 
   if (!isValidAddress(options.batonReceiverSlpAddr!)) {
-    throw new Error(`Invalid batonReceiverSlpAddr ${options.batonReceiverSlpAddr}`);
+    throw new Error(
+      `Invalid batonReceiverSlpAddr ${options.batonReceiverSlpAddr}`
+    );
   }
 
   const tokenType = slpBatonUtxos[0].type;

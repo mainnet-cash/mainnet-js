@@ -112,7 +112,7 @@ services:
     ports:
       # - "50051:50051" # grpc
       # - "28339:28339" # zmq notifications
-      - "12400:8082"  # grpc-rest gateway
+      - "12400:8082" # grpc-rest gateway
       - "12401:12401" # SSE notifications
     volumes:
       - ./docker/gspp/regtest.toml:/data/config.toml

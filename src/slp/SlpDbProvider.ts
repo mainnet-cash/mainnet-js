@@ -53,7 +53,8 @@ export class SlpDbProvider implements SlpProvider {
 
   // all oupoints, including mint batons
   async SlpOutpoints(slpaddr: string): Promise<String[]> {
-    return (await this.SlpDbQuery(SlpAllOutpointsTemplate(slpaddr))).g as String[];
+    return (await this.SlpDbQuery(SlpAllOutpointsTemplate(slpaddr)))
+      .g as String[];
   }
 
   // all utxos, including mint batons

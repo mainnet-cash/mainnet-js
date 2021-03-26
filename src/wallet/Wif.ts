@@ -421,8 +421,7 @@ export class Wallet extends BaseWallet {
       return bchUtxos.filter(
         (bchutxo) =>
           slpOutpoints.findIndex(
-            (slpOutpoint) =>
-              `${bchutxo.txid}:${bchutxo.vout}` === slpOutpoint
+            (slpOutpoint) => `${bchutxo.txid}:${bchutxo.vout}` === slpOutpoint
           ) === -1
       );
     } else {

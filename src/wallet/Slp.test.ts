@@ -564,7 +564,7 @@ describe("Slp wallet tests", () => {
     if (aliceWallet.slp.provider instanceof SlpDbProvider) {
       expect(transaction.tx.h.length).toBe(64);
     } else {
-      expect(transaction.txHash.length).toBe(64)
+      expect(transaction.txHash.length).toBe(64);
     }
   });
 
@@ -612,13 +612,13 @@ describe("Slp wallet tests", () => {
     options.tokenReceiverSlpAddr = "test";
     await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
 
-    options = {...genesisOptions};
+    options = { ...genesisOptions };
 
     // batonReceiverSlpAddr is bad
     options.batonReceiverSlpAddr = "test";
     await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
 
-    options = {...genesisOptions};
+    options = { ...genesisOptions };
 
     // bob's slpaddr is bad
     bobWallet.slp.slpaddr = "test";
@@ -864,14 +864,25 @@ describe("Slp wallet tests", () => {
     const gsppProvider = new GsppProvider(Network.REGTEST);
 
     const start1 = new Date().getTime();
-    const count1 = await slpDbProvider.SlpUtxos("simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump");
+    const count1 = await slpDbProvider.SlpUtxos(
+      "simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump"
+    );
     const end1 = new Date().getTime();
 
     const start2 = new Date().getTime();
-    const count2 = await gsppProvider.SlpUtxos("simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump");
+    const count2 = await gsppProvider.SlpUtxos(
+      "simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump"
+    );
     const end2 = new Date().getTime();
     // console.log("Slpdb", end1-start1);
-    console.log("Slpdb", end1-start1, "Gspp", end2-start2, count1.length, count2.length);
+    console.log(
+      "Slpdb",
+      end1 - start1,
+      "Gspp",
+      end2 - start2,
+      count1.length,
+      count2.length
+    );
 
     // expect(count1.length).toBe(count2.length);
     // console.log(count1.length, count2.length);

@@ -63,8 +63,8 @@ export class Slp {
   /**
    * setProvider - sets the provider to fetch slp data from
    */
-   public setProvider(provider: SlpProvider) {
-    return this.provider = provider;
+  public setProvider(provider: SlpProvider) {
+    return (this.provider = provider);
   }
 
   /**
@@ -119,7 +119,7 @@ export class Slp {
    *
    * @returns Promise to a list of slp unspent outpoints
    */
-   public async getSlpOutpoints(): Promise<String[]> {
+  public async getSlpOutpoints(): Promise<String[]> {
     return this.provider.SlpOutpoints(this.slpaddr);
   }
 

@@ -95,7 +95,7 @@ describe(`Wallet should function in the browser`, () => {
 
         // FIXME: we do not have gspp testnet yet
         if (wallet.slp.provider instanceof GsppProvider) {
-          return {value: new BigNumber(1) };
+          return { value: new BigNumber(1) };
         }
 
         const bobWallet = await TestNetWallet.newRandom();
