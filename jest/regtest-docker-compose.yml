@@ -11,9 +11,9 @@ services:
       retries: 3
       start_period: 10s
     container_name: bitcoind
-    ports:
-      - "18443:18443"
-      - "28332:28332"
+    # ports:
+    #   - "18443:18443" # rpc
+    #   - "28332:28332" # zmq pub
     expose: [18443, 28332]
     volumes:
       - bitcoin-data:/data
@@ -47,17 +47,17 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - "sql-data:/var/lib/postgresql/data"
-    ports:
-      - 15432:5432
+    # ports:
+    #   - 15432:5432
 
   mongodb:
     image: mongo:4.4.2-bionic
     container_name: mongo-slpdb
-    ports:
-      - "27017:27017"
+    # ports:
+    #   - "27017:27017"
     # volumes:
     #   - ./docker/data/mongodb:/data/db # uncomment to make persistent
-    command: mongod --logpath=/dev/null # -- quiet
+    command: mongod # --logpath=/dev/null # -- quiet
     restart: always
     networks:
       - bitcoin
@@ -110,12 +110,13 @@ services:
       - "8082"
       - "12401"
     ports:
-      - "50051:50051" # grpc
-      - "28339:28339" # zmq notifications
+      # - "50051:50051" # grpc
+      # - "28339:28339" # zmq notifications
       - "12400:8082"  # grpc-rest gateway
       - "12401:12401" # SSE notifications
     volumes:
       - ./docker/gspp/regtest.toml:/data/config.toml
+      # - ./docker/gspp/prod.toml:/data/config.toml
       # - ./docker/data/gspp:/tmp/gs++ # uncomment to make persistent
     networks:
       - bitcoin

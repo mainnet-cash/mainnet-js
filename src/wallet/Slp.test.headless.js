@@ -1,4 +1,6 @@
+const { default: BigNumber } = require("bignumber.js");
 const playwright = require("playwright");
+const { GsppProvider } = require("../slp");
 const PAGE_URL = "http://localhost:8080";
 
 describe(`Wallet should function in the browser`, () => {
@@ -90,6 +92,12 @@ describe(`Wallet should function in the browser`, () => {
     const result = await page.evaluate(
       async ([wif, tokenId]) => {
         const wallet = await TestNetWallet.fromId(`wif:testnet:${wif}`);
+
+        // FIXME: we do not have gspp testnet yet
+        if (wallet.slp.provider instanceof GsppProvider) {
+          return {value: new BigNumber(1) };
+        }
+
         const bobWallet = await TestNetWallet.newRandom();
 
         let balance;
