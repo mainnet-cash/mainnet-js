@@ -57,8 +57,8 @@ export class Slp {
   constructor(wallet: Wallet) {
     this.slpaddr = toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
-    // this.provider = new SlpDbProvider(this.wallet.networkType);
-    this.provider = new GsppProvider(this.wallet.networkType);
+    this.provider = new SlpDbProvider(this.wallet.networkType);
+    // this.provider = new GsppProvider(this.wallet.networkType);
   }
 
   /**
@@ -127,12 +127,10 @@ export class Slp {
   /**
    * getSlpUtxos - get a list of SLP unspent outputs
    *
-   * @param slpaddr  The slpaddr to request slp unspent outputs for
-   *
    * @returns Promise to a list of slp unspent outputs
    */
-  public async getSlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
-    return this.provider.SlpUtxos(toSlpAddress(slpaddr));
+  public async getSlpUtxos(): Promise<SlpUtxoI[]> {
+    return this.provider.SlpUtxos(this.slpaddr);
   }
 
   /**
@@ -140,17 +138,10 @@ export class Slp {
    *
    * an intermediate function
    *
-   * @param slpaddr  The slpaddr to request slp formatted outputs
-   *
    * @returns Promise to a list of slp formatted unspent outputs
    */
-  public async getFormattedSlpUtxos(
-    slpaddr?: string
-  ): Promise<SlpFormattedUtxo[]> {
-    if (!slpaddr) {
-      slpaddr = this.slpaddr;
-    }
-    const utxos = await this.getSlpUtxos(toSlpAddress(slpaddr));
+  public async getFormattedSlpUtxos(): Promise<SlpFormattedUtxo[]> {
+    const utxos = await this.getSlpUtxos();
     return utxos.map((val) => {
       let utxo = {} as SlpFormattedUtxo;
       utxo.ticker = val.ticker;

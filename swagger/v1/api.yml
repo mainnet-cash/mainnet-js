@@ -799,6 +799,29 @@ paths:
       summary: Get detailed information about unspent SLP outputs (utxos)
       tags:
         - wallet/slp
+
+  /wallet/slp/outpoints:
+    post:
+      operationId: slpOutpoints
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request of unspent SLP outpoints
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlpOutpointsResponse'
+          description: successful operation
+      summary: Get list of unspent SLP outpoints.
+      tags:
+      - wallet/slp
+
   /webhook/watch_address:
     post:
       operationId: watchAddress
@@ -1797,9 +1820,11 @@ components:
         - tokenId
 
     SlpUtxoResponse:
-      type: "array"
-      items:
-        $ref: "#/components/schemas/SlpUtxo"
+      properties:
+        utxos:
+          type: array
+          items:
+            $ref: "#/components/schemas/SlpUtxo"
     SlpUtxo:
       properties:
         index:
@@ -1836,6 +1861,15 @@ components:
           type: number
           example: 1
           description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+
+    SlpOutpointsResponse:
+      properties:
+        outpoints:
+          type: array
+          items:
+            type: string
+            description: a list of slp outpoints
+            example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
 
     GetTestnetBchRequest:
       properties:

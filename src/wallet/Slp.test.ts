@@ -643,9 +643,7 @@ describe("Slp wallet tests", () => {
   test("Test should get formatted slp utxos", async () => {
     const aliceWallet = await getAliceWallet();
 
-    const utxos: any = await aliceWallet.slp.getFormattedSlpUtxos(
-      aliceWallet.cashaddr!
-    );
+    const utxos: any = await aliceWallet.slp.getFormattedSlpUtxos();
     expect(utxos.length).toBeGreaterThan(0);
     expect(utxos[0].utxoId).toContain(":");
   });

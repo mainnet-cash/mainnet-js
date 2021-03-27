@@ -275,8 +275,31 @@ const slpUtxos = ({ serializedWallet }) => new Promise(
       let wallet = await mainnet.walletFromId(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
-      let resp = await wallet.getUtxos(args);
-      resolve(Service.successResponse({ ...resp }));
+      let resp = await wallet.slp.getSlpUtxos();
+      resolve(Service.successResponse({ utxos: resp }));
+    } catch (e) {
+      console.log(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get list of unspent SLP outpoints.
+*
+* serializedWallet SerializedWallet Request of unspent SLP outpoints 
+* returns List
+* */
+const slpOutpoints = ({ serializedWallet }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
+      let args = serializedWallet;
+      delete args.walletId;
+      let resp = await wallet.slp.getSlpOutpoints();
+      resolve(Service.successResponse({ outpoints: resp }));
     } catch (e) {
       console.log(e);
       reject(Service.rejectResponse(
@@ -300,4 +323,5 @@ module.exports = {
   slpSendMax,
   slpTokenInfo,
   slpUtxos,
+  slpOutpoints
 };
