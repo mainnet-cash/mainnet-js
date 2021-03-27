@@ -1,5 +1,11 @@
 import { Network, TxI } from "../interface";
-import { GsppTx, SlpTokenBalance, SlpTokenInfo, SlpTxI, SlpUtxoI } from "./interface";
+import {
+  GsppTx,
+  SlpTokenBalance,
+  SlpTokenInfo,
+  SlpTxI,
+  SlpUtxoI,
+} from "./interface";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,
@@ -123,7 +129,10 @@ export class GsppProvider implements SlpProvider {
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<SlpTxI> {
+  async SlpWaitForTransaction(
+    slpaddr: string,
+    tokenId?: string
+  ): Promise<SlpTxI> {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
         (tx) => {
@@ -194,7 +203,11 @@ export class GsppProvider implements SlpProvider {
       (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
         if (data.type === "rawtx") {
-          const tx: SlpTxI = { tx_hash: data.data.txHash, height: 0, details: data.data as GsppTx };
+          const tx: SlpTxI = {
+            tx_hash: data.data.txHash,
+            height: 0,
+            details: data.data as GsppTx,
+          };
           if (!!callback(tx)) {
             cancelFn();
           }

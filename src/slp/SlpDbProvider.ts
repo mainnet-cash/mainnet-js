@@ -198,7 +198,11 @@ export class SlpDbProvider implements SlpProvider {
       (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
         if (data.data && data.data.length) {
-          const tx: SlpTxI = { tx_hash: data.data[0].tx.h, height: 0, details: data.data[0] as SlpDbTx }
+          const tx: SlpTxI = {
+            tx_hash: data.data[0].tx.h,
+            height: 0,
+            details: data.data[0] as SlpDbTx,
+          };
           if (!!callback(tx)) {
             cancelFn();
           }

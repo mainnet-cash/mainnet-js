@@ -19,23 +19,23 @@ export interface SlpDbResponse {
 }
 
 export interface SlpDbTx {
-  tx: any,
-  in: any[],
-  out: any[],
-  slp: any,
-  blk: any
-};
+  tx: any;
+  in: any[];
+  out: any[];
+  slp: any;
+  blk: any;
+}
 
 export interface GsppTx {
-  inputs: String[],
-  outputs: String[],
-  tokenId: string,
-  groupId: string,
-  type: SlpTokenType,
-  ticker: string,
-  decimals: number,
-  txType: string,
-  txHash: string
+  inputs: String[];
+  outputs: String[];
+  tokenId: string;
+  groupId: string;
+  type: SlpTokenType;
+  ticker: string;
+  decimals: number;
+  txType: string;
+  txHash: string;
 }
 
 export interface SlpTxI extends TxI {
