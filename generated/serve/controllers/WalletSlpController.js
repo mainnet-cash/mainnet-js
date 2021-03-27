@@ -40,6 +40,10 @@ const slpMint = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpMint);
 };
 
+const slpOutpoints = async (request, response) => {
+  await Controller.handleRequest(request, response, service.slpOutpoints);
+};
+
 const slpSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpSend);
 };
@@ -66,6 +70,7 @@ module.exports = {
   slpDepositQr,
   slpGenesis,
   slpMint,
+  slpOutpoints,
   slpSend,
   slpSendMax,
   slpTokenInfo,

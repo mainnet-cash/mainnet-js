@@ -10,6 +10,8 @@ import { DUST_UTXO_THRESHOLD } from "../constant";
 import { ElectrumRawTransaction } from "../network/interface";
 import { delay } from "../util/delay";
 import BigNumber from "bignumber.js";
+import { SlpDbProvider } from "../slp/SlpDbProvider";
+import { GsppProvider } from "../slp/GsppProvider";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -30,7 +32,7 @@ describe("Slp wallet tests", () => {
     initialAmount: 10000,
     documentUrl: "https://mainnet.cash",
     documentHash:
-      "0000000000000000000000000000000000000000000000000000000000000000",
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   };
 
   const useTestnet = false;
@@ -74,11 +76,13 @@ describe("Slp wallet tests", () => {
     expect(result.balance.tokenId).toBe(tokenId);
 
     const info = await aliceWallet.slp.getTokenInfo(tokenId);
+    expect(info!.tokenId).toBe(result.tokenId);
     delete (info as any).tokenId;
+    delete (info as any).groupId;
     const tokenInfo = {
       decimals: 2,
       documentHash:
-        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(10000),
       name: "Mainnet coin",
@@ -502,9 +506,10 @@ describe("Slp wallet tests", () => {
 
     genesisOptions.ticker = ticker + "WB";
     const genesis = await aliceWallet.slp.genesis(genesisOptions);
+
     const cancelFn = bobWallet.slp.watchBalance((balance) => {
       expect(balance.value.toNumber()).toBeGreaterThan(0);
-    });
+    }, genesis.tokenId);
     await aliceWallet.slp.send([
       {
         slpaddr: bobWallet.slp.slpaddr,
@@ -513,7 +518,7 @@ describe("Slp wallet tests", () => {
       },
     ]);
 
-    delay(5000);
+    delay(2000);
     cancelFn();
   });
 
@@ -531,9 +536,10 @@ describe("Slp wallet tests", () => {
           tokenId: genesis.tokenId,
         },
       ]);
-    }, 5000);
+    }, 3000);
     const balance = await bobWallet.slp.waitForBalance(10, genesis.tokenId);
     expect(balance.value.isEqualTo(20));
+    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
   });
 
   test.skip("Test waiting for slp transaction", async () => {
@@ -553,13 +559,17 @@ describe("Slp wallet tests", () => {
           tokenId: genesis.tokenId,
         },
       ]);
-    }, 5000);
+    }, 3000);
     const transaction = await bobWallet.slp.waitForTransaction(genesis.tokenId);
-    expect(transaction.tx.h.length).toBe(64);
+    expect(transaction.tx_hash.length).toBe(64);
   });
 
   test("Test getting history", async () => {
     const aliceWallet = await getAliceWallet();
+
+    if (aliceWallet.slp.provider instanceof GsppProvider) {
+      return;
+    }
 
     const history = await aliceWallet.slp.getHistory();
     expect(history.length).toBeGreaterThan(0);
@@ -576,25 +586,41 @@ describe("Slp wallet tests", () => {
   });
 
   test("Test faulty wallet", async () => {
+    let options = { ...genesisOptions };
+
     const bobWallet = await getRandomWallet();
     bobWallet.privateKey = Uint8Array.from([0, 1, 2, 3, 4]);
     // not enough funds
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
 
     // no private key set
     bobWallet.privateKey = undefined;
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
     bobWallet.privateKey = Uint8Array.from([0, 1, 2, 3, 4]);
 
     // no network provider set
     const provider = bobWallet.provider;
     bobWallet.provider = undefined;
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
     bobWallet.provider = provider;
 
-    // cashaddr is bad
-    bobWallet.slp.slpaddr = "";
-    await expect(bobWallet.slp.genesis(genesisOptions)).rejects.toThrow();
+    // tokenReceiverSlpAddr is bad
+    options.tokenReceiverSlpAddr = "test";
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
+
+    options = { ...genesisOptions };
+
+    // batonReceiverSlpAddr is bad
+    options.batonReceiverSlpAddr = "test";
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
+
+    options = { ...genesisOptions };
+
+    // bob's slpaddr is bad
+    bobWallet.slp.slpaddr = "test";
+    options.batonReceiverSlpAddr = undefined;
+    options.tokenReceiverSlpAddr = undefined;
+    await expect(bobWallet.slp.genesis(options)).rejects.toThrow();
   });
 
   test("Test genesis ends baton", async () => {
@@ -617,9 +643,7 @@ describe("Slp wallet tests", () => {
   test("Test should get formatted slp utxos", async () => {
     const aliceWallet = await getAliceWallet();
 
-    const utxos: any = await aliceWallet.slp.getFormattedSlpUtxos(
-      aliceWallet.cashaddr!
-    );
+    const utxos: any = await aliceWallet.slp.getFormattedSlpUtxos();
     expect(utxos.length).toBeGreaterThan(0);
     expect(utxos[0].utxoId).toContain(":");
   });
@@ -637,18 +661,22 @@ describe("Slp wallet tests", () => {
     );
 
     const info = await aliceWallet.slp.getTokenInfo(parentResult.tokenId);
+    expect(info!.tokenId).toBe(parentResult.tokenId);
     delete (info as any).tokenId;
 
     const parentTokenInfo = {
       decimals: 0,
       documentHash:
-        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(10000),
       name: "Mainnet NFT Parent",
       ticker: nftParentGenesis.ticker,
       type: 0x81,
     };
+
+    delete (info as any).tokenId;
+    delete (info as any).groupId;
 
     expect(info).toEqual(parentTokenInfo);
 
@@ -697,18 +725,25 @@ describe("Slp wallet tests", () => {
     );
 
     const childInfo = await aliceWallet.slp.getTokenInfo(childResult.tokenId);
+    expect(childInfo!.tokenId).toBe(childResult.tokenId);
+    if (aliceWallet.slp.provider instanceof GsppProvider)
+      expect((childInfo! as any).groupId).toBe(parentResult.tokenId);
+
     delete (childInfo as any).tokenId;
 
     const childTokenInfo = {
       decimals: 0,
       documentHash:
-        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       documentUrl: "https://mainnet.cash",
       initialAmount: new BigNumber(1),
       name: "Mainnet NFT Child",
       ticker: nftChildGenesis.ticker,
       type: 0x41,
     };
+
+    delete (childInfo as any).tokenId;
+    delete (childInfo as any).groupId;
 
     expect(childInfo).toEqual(childTokenInfo);
 
@@ -749,7 +784,7 @@ describe("Slp wallet tests", () => {
     // should throw if parent token is not in possession
     await expect(
       aliceWallet.slp.nftChildGenesis(
-        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
         nftChildGenesis
       )
     ).rejects.toThrow();
@@ -760,8 +795,10 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
 
     // bug in the SLPDB, the parent burn check is not triggered until new block arrives
-    await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
-    await delay(5000);
+    if (aliceWallet.slp.provider! instanceof SlpDbProvider) {
+      await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
+      await delay(1000);
+    }
 
     // spend last token
     const childResultLast: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
@@ -785,7 +822,7 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
   });
 
-  test.skip("Test SLPDB bug", async () => {
+  test.skip("Test SLPDB NFT bug", async () => {
     const aliceWallet = await getAliceWallet();
 
     const nftParentGenesis = { ...genesisOptions };
@@ -817,5 +854,36 @@ describe("Slp wallet tests", () => {
         ...{ ticker: ticker + "1_Bug" },
       })
     ).rejects.toThrow();
+  });
+
+  test("test times", async () => {
+    // const aliceWallet = await getAliceWallet();
+
+    const slpDbProvider = new SlpDbProvider(Network.REGTEST);
+    const gsppProvider = new GsppProvider(Network.REGTEST);
+
+    const start1 = new Date().getTime();
+    const count1 = await slpDbProvider.SlpUtxos(
+      "simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump"
+    );
+    const end1 = new Date().getTime();
+
+    const start2 = new Date().getTime();
+    const count2 = await gsppProvider.SlpUtxos(
+      "simpleledger:qqr7rg6t5pd0xux35297etxklhe4l6p6uua8f5gump"
+    );
+    const end2 = new Date().getTime();
+    // console.log("Slpdb", end1-start1);
+    console.log(
+      "Slpdb",
+      end1 - start1,
+      "Gspp",
+      end2 - start2,
+      count1.length,
+      count2.length
+    );
+
+    // expect(count1.length).toBe(count2.length);
+    // console.log(count1.length, count2.length);
   });
 });

@@ -3,62 +3,66 @@ import {
   SlpGenesisOptions,
   SlpTokenBalance,
   SlpTokenInfo,
+  SlpTxI,
   SlpUtxoI,
 } from "./interface";
 import BigNumber from "bignumber.js";
 
-export type SlpWatchTransactionCallback = (tx: any) => boolean | void;
+export type SlpWatchTransactionCallback = (tx: SlpTxI) => boolean | void;
 export type SlpCancelWatchFn = () => void;
 export type SlpWatchBalanceCallback = (
   balance: SlpTokenBalance
 ) => boolean | void;
 
 export interface SlpProvider {
+  // all oupoints, including mint batons
+  SlpOutpoints(slpaddr: string): Promise<String[]>;
+
   // all utxos, including mint batons
-  SlpUtxos(cashaddr: string): Promise<SlpUtxoI[]>;
+  SlpUtxos(slpaddr: string): Promise<SlpUtxoI[]>;
 
   // look up the token information
   SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined>;
 
   // safe-spendable token utxos, without baton
-  SlpSpendableUtxos(cashaddr: string, tokenId?: string): Promise<SlpUtxoI[]>;
+  SlpSpendableUtxos(slpaddr: string, tokenId?: string): Promise<SlpUtxoI[]>;
 
   // token mint baton utxos
-  SlpBatonUtxos(cashaddr: string, tokenId?: string): Promise<SlpUtxoI[]>;
+  SlpBatonUtxos(slpaddr: string, tokenId?: string): Promise<SlpUtxoI[]>;
 
   // get all token balances
-  SlpAllTokenBalances(cashaddr: string): Promise<SlpTokenBalance[]>;
+  SlpAllTokenBalances(slpaddr: string): Promise<SlpTokenBalance[]>;
 
   // get specific token balance
-  SlpTokenBalance(cashaddr: string, tokenId: string): Promise<SlpTokenBalance>;
+  SlpTokenBalance(slpaddr: string, tokenId: string): Promise<SlpTokenBalance>;
 
   // get all slp transactions of this address
   SlpAddressTransactionHistory(
-    cashaddr: string,
+    slpaddr: string,
     tokenId?: string
-  ): Promise<TxI[]>;
+  ): Promise<SlpTxI[]>;
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  SlpWaitForTransaction(cashaddr: string, tokenId?: string): Promise<any>;
+  SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<SlpTxI>;
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   SlpWaitForBalance(
     value: BigNumber.Value,
-    cashaddr: string,
+    slpaddr: string,
     tokenId: string
   ): Promise<SlpTokenBalance>;
 
   // set's up a callback to be executed each time the token balance of the wallet is changed
   SlpWatchBalance(
     callback: SlpWatchBalanceCallback,
-    cashaddr: string,
-    tokenId?: string
+    slpaddr: string,
+    tokenId: string
   ): SlpCancelWatchFn;
 
   // sets up a callback to be executed each time a new transaction associated with this wallet's address is entering the mempool
   SlpWatchTransactions(
     callback: SlpWatchTransactionCallback,
-    cashaddr: string,
+    slpaddr: string,
     tokenId?: string
   ): SlpCancelWatchFn;
 }

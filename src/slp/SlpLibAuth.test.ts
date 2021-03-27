@@ -103,6 +103,7 @@ test("Test SLP send txo bytecode per SLP Spec", async () => {
     ticker: "USDT",
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
     type: SlpTokenType.Type1,
+    isBaton: false,
   };
   const sendRequest: SlpSendRequest = {
     slpaddr: wallet.slp.slpaddr,
@@ -136,6 +137,7 @@ test("Test SLP mint txo bytecode per SLP Spec", async () => {
     ticker: "USDT",
     tokenId: "550d19eb820e616a54b8a73372c4420b5a0567d8dc00f613b71c5234dc884b35",
     type: 0x01,
+    isBaton: false,
   };
 
   const result = await SlpGetMintOutputs(
