@@ -1897,7 +1897,6 @@ components:
           type: string
       required:
       - walletId
-      - tokenId
     SlpBalanceArrayResponse:
       items:
         $ref: '#/components/schemas/SlpBalanceResponse'
