@@ -75,7 +75,7 @@ RUN cd /home/cpp_slp_graph_search \
   && git remote add fork https://github.com/mainnet-pat/cpp_slp_graph_search.git \
   && git fetch fork \
   && git checkout mainnet.cash \
-  && cd build && make && echo 9
+  && cd build && make && echo 10
 
 RUN cd /home/cpp_slp_graph_search/server/proxy \
   && go mod download \
@@ -87,7 +87,7 @@ RUN cd /home/cpp_slp_graph_search/server/proxy \
   && rm -rf gw && make
 
 RUN cd /home/cpp_slp_graph_search \
-  && git clone https://github.com/mainnet-pat/gspp-zmq && echo 9 \
+  && git clone https://github.com/mainnet-pat/gspp-zmq && echo 10 \
   && cd gspp-zmq && yarn
 
 COPY ./regtest.toml ./config.toml

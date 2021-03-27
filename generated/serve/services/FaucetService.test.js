@@ -20,6 +20,13 @@ describe("Test faucet endpoints", () => {
    * test mining blocks
    */
   it("Should send testnet bch to recepient", async () => {
+    const random = await mainnet.TestNetWallet.newRandom();
+    // FIXME: we do not have gspp testnet yet
+    if (random.slp.provider instanceof GsppProvider) {
+      console.warn("we do not have gspp testnet yet");
+      return;
+    }
+
     let resp = await request(app).post("/faucet/get_testnet_bch/").send({
       cashaddr: ""
     });
@@ -50,6 +57,13 @@ describe("Test faucet endpoints", () => {
   });
 
   it("Should send testnet slp tokens to recepient", async () => {
+    const random = await mainnet.TestNetWallet.newRandom();
+    // FIXME: we do not have gspp testnet yet
+    if (random.slp.provider instanceof GsppProvider) {
+      console.warn("we do not have gspp testnet yet");
+      return;
+    }
+
     const tokenId = "132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15";
 
     let resp = await request(app).post("/faucet/get_testnet_slp/").send({

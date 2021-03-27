@@ -10,6 +10,7 @@ import {
   SlpTokenBalance,
   SlpTokenInfo,
   SlpTokenType,
+  SlpTxI,
   SlpUtxoI,
 } from "../slp/interface";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
@@ -187,7 +188,7 @@ export class Slp {
    *
    * @returns Promise to a list of transactions
    */
-  public async getHistory(tokenId?: string): Promise<TxI[]> {
+  public async getHistory(tokenId?: string): Promise<SlpTxI[]> {
     return this.provider.SlpAddressTransactionHistory(this.slpaddr, tokenId);
   }
 
@@ -219,6 +220,9 @@ export class Slp {
    * @returns Promise to an SlpTokenBalance
    */
   public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
+    if (!tokenId) {
+      throw new Error(`Invalid tokenId ${tokenId}`);
+    }
     return this.provider.SlpTokenBalance(this.slpaddr, tokenId);
   }
 
@@ -293,7 +297,7 @@ export class Slp {
    *
    * @returns Transaction object
    */
-  public async waitForTransaction(tokenId?: string): Promise<any> {
+  public async waitForTransaction(tokenId?: string): Promise<SlpTxI> {
     return this.provider.SlpWaitForTransaction(this.slpaddr, tokenId);
   }
 

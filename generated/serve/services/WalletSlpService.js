@@ -43,7 +43,6 @@ const slpBalance = ({ slpBalanceRequest }) => new Promise(
         throw Error("Could not derive wallet");
       }
 
-      // the balance unit may also be empty
       let resp = await wallet.slp.getBalance(slpBalanceRequest.tokenId);
       resolve(Service.successResponse(resp));
     } catch (e) {

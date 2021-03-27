@@ -1,5 +1,5 @@
 import { Network, TxI } from "../interface";
-import { SlpTokenBalance, SlpTokenInfo, SlpUtxoI } from "./interface";
+import { GsppTx, SlpTokenBalance, SlpTokenInfo, SlpTxI, SlpUtxoI } from "./interface";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,
@@ -118,17 +118,17 @@ export class GsppProvider implements SlpProvider {
     _tokenId?: string,
     _limit: number = 100,
     _skip: number = 0
-  ): Promise<TxI[]> {
+  ): Promise<SlpTxI[]> {
     throw "Not implemented";
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any> {
+  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<SlpTxI> {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
-        (data) => {
+        (tx) => {
           cancelFn();
-          resolve(data);
+          resolve(tx);
         },
         slpaddr,
         tokenId
@@ -194,7 +194,8 @@ export class GsppProvider implements SlpProvider {
       (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
         if (data.type === "rawtx") {
-          if (!!callback(data.data)) {
+          const tx: SlpTxI = { tx_hash: data.data.txHash, height: 0, details: data.data as GsppTx };
+          if (!!callback(tx)) {
             cancelFn();
           }
         }

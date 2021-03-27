@@ -1,8 +1,10 @@
 import { Network, TxI } from "../interface";
 import {
   SlpDbResponse,
+  SlpDbTx,
   SlpTokenBalance,
   SlpTokenInfo,
+  SlpTxI,
   SlpUtxoI,
 } from "./interface";
 import {
@@ -117,19 +119,19 @@ export class SlpDbProvider implements SlpProvider {
     tokenId?: string,
     limit: number = 100,
     skip: number = 0
-  ): Promise<TxI[]> {
+  ): Promise<SlpTxI[]> {
     const response = await this.SlpDbQuery(
       SlpAddressTransactionHistoryTemplate(slpaddr, tokenId, limit, skip)
     );
-    return response.c.concat(response.u) as TxI[];
+    return response.c.concat(response.u) as SlpTxI[];
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
   async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any> {
     return new Promise(async (resolve) => {
       this.SlpWatchTransactions(
-        (data) => {
-          resolve(data);
+        (tx: SlpTxI) => {
+          resolve(tx);
           return true;
         },
         slpaddr,
@@ -196,7 +198,8 @@ export class SlpDbProvider implements SlpProvider {
       (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
         if (data.data && data.data.length) {
-          if (!!callback(data.data[0])) {
+          const tx: SlpTxI = { tx_hash: data.data[0].tx.h, height: 0, details: data.data[0] as SlpDbTx }
+          if (!!callback(tx)) {
             cancelFn();
           }
         }

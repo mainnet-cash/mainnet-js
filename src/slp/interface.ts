@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { TxI } from "mainnet-js/interface";
 import { UtxoI } from "../interface";
 
 export enum SlpTokenType {
@@ -17,13 +18,28 @@ export interface SlpDbResponse {
   s: any[];
 }
 
-export interface SlpTokenBalance {
-  value: BigNumber;
-  ticker: string;
-  name: string;
-  tokenId: string;
-  type: SlpTokenType;
-  decimals: number;
+export interface SlpDbTx {
+  tx: any,
+  in: any[],
+  out: any[],
+  slp: any,
+  blk: any
+};
+
+export interface GsppTx {
+  inputs: String[],
+  outputs: String[],
+  tokenId: string,
+  groupId: string,
+  type: SlpTokenType,
+  ticker: string,
+  decimals: number,
+  txType: string,
+  txHash: string
+}
+
+export interface SlpTxI extends TxI {
+  details: SlpDbTx | GsppTx;
 }
 
 export interface SlpUtxoI extends UtxoI {
@@ -45,6 +61,15 @@ export interface SlpFormattedUtxo {
   index: number;
   utxoId: string;
   type: SlpTokenType;
+}
+
+export interface SlpTokenBalance {
+  value: BigNumber;
+  ticker: string;
+  name: string;
+  tokenId: string;
+  type: SlpTokenType;
+  decimals: number;
 }
 
 export interface SlpSendRequest {

@@ -76,6 +76,7 @@ describe("Slp wallet tests", () => {
     expect(result.balance.tokenId).toBe(tokenId);
 
     const info = await aliceWallet.slp.getTokenInfo(tokenId);
+    expect(info!.tokenId).toBe(result.tokenId);
     delete (info as any).tokenId;
     delete (info as any).groupId;
     const tokenInfo = {
@@ -560,12 +561,7 @@ describe("Slp wallet tests", () => {
       ]);
     }, 3000);
     const transaction = await bobWallet.slp.waitForTransaction(genesis.tokenId);
-
-    if (aliceWallet.slp.provider instanceof SlpDbProvider) {
-      expect(transaction.tx.h.length).toBe(64);
-    } else {
-      expect(transaction.txHash.length).toBe(64);
-    }
+    expect(transaction.tx_hash.length).toBe(64);
   });
 
   test("Test getting history", async () => {
@@ -667,6 +663,7 @@ describe("Slp wallet tests", () => {
     );
 
     const info = await aliceWallet.slp.getTokenInfo(parentResult.tokenId);
+    expect(info!.tokenId).toBe(parentResult.tokenId);
     delete (info as any).tokenId;
 
     const parentTokenInfo = {
@@ -730,6 +727,10 @@ describe("Slp wallet tests", () => {
     );
 
     const childInfo = await aliceWallet.slp.getTokenInfo(childResult.tokenId);
+    expect(childInfo!.tokenId).toBe(childResult.tokenId);
+    if (aliceWallet.slp.provider instanceof GsppProvider)
+      expect((childInfo! as any).groupId).toBe(parentResult.tokenId);
+
     delete (childInfo as any).tokenId;
 
     const childTokenInfo = {

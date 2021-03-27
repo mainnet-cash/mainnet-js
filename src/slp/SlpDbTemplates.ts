@@ -288,7 +288,7 @@ export const SlpAddressTransactionHistoryTemplate = (address: string, tokenId?: 
       "skip": skip,
     },
     "r": {
-      "f": "[ .[] | { tx_hash: .tx.h, height: .blk.i} ]"
+      "f": "[ .[] | { tx_hash: .tx.h, height: .blk.i, details: . } ]"
     }
   };
 

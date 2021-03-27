@@ -57,7 +57,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
     let resp = await request(app)
       .post("/wallet/slp/nft_parent_genesis")
-      .send(options);
+      .send({...options});
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
@@ -84,7 +84,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
     resp = await request(app)
       .post("/wallet/slp/nft_child_genesis")
-      .send(options);
+      .send({...options});
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
@@ -217,6 +217,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
       const resp = await request(app).post("/wallet/slp/balance").send({
         walletId: bobsWalletResp.body.walletId,
+        tokenId: tokenId
       });
 
       const body = resp.body;

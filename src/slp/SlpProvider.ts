@@ -3,11 +3,12 @@ import {
   SlpGenesisOptions,
   SlpTokenBalance,
   SlpTokenInfo,
+  SlpTxI,
   SlpUtxoI,
 } from "./interface";
 import BigNumber from "bignumber.js";
 
-export type SlpWatchTransactionCallback = (tx: any) => boolean | void;
+export type SlpWatchTransactionCallback = (tx: SlpTxI) => boolean | void;
 export type SlpCancelWatchFn = () => void;
 export type SlpWatchBalanceCallback = (
   balance: SlpTokenBalance
@@ -39,10 +40,10 @@ export interface SlpProvider {
   SlpAddressTransactionHistory(
     slpaddr: string,
     tokenId?: string
-  ): Promise<TxI[]>;
+  ): Promise<SlpTxI[]>;
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any>;
+  SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<SlpTxI>;
 
   // waits for a certain slp token balance to be available in this wallet, code execution is halted
   SlpWaitForBalance(

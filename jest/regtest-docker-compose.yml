@@ -96,6 +96,8 @@ services:
 
   gspp:
     image: mainnet/gspp
+    # build:
+    #   context: "./docker/gspp"
     restart: always
     command: "gs++ /data/config.toml"
     expose:
