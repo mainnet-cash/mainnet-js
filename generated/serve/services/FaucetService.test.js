@@ -22,7 +22,7 @@ describe("Test faucet endpoints", () => {
   it("Should send testnet bch to recepient", async () => {
     const random = await mainnet.TestNetWallet.newRandom();
     // FIXME: we do not have gspp testnet yet
-    if (random.slp.provider instanceof GsppProvider) {
+    if (random.slp.provider instanceof mainnet.GsppProvider) {
       console.warn("we do not have gspp testnet yet");
       return;
     }
@@ -59,7 +59,7 @@ describe("Test faucet endpoints", () => {
   it("Should send testnet slp tokens to recepient", async () => {
     const random = await mainnet.TestNetWallet.newRandom();
     // FIXME: we do not have gspp testnet yet
-    if (random.slp.provider instanceof GsppProvider) {
+    if (random.slp.provider instanceof mainnet.GsppProvider) {
       console.warn("we do not have gspp testnet yet");
       return;
     }
