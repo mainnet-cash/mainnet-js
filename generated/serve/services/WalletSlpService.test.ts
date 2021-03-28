@@ -57,7 +57,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
     let resp = await request(app)
       .post("/wallet/slp/nft_parent_genesis")
-      .send(options);
+      .send({...options});
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
@@ -84,7 +84,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
     resp = await request(app)
       .post("/wallet/slp/nft_child_genesis")
-      .send(options);
+      .send({...options});
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.tokenId.length).toBe(64);
@@ -217,6 +217,7 @@ describe("Test Wallet Slp Endpoints", () => {
 
       const resp = await request(app).post("/wallet/slp/balance").send({
         walletId: bobsWalletResp.body.walletId,
+        tokenId: tokenId
       });
 
       const body = resp.body;
@@ -313,6 +314,24 @@ describe("Test Wallet Slp Endpoints", () => {
 
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
-    expect(body!.utxos!.length).toBeGreaterThan(0);
+    expect(body.utxos.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * outpoints
+   */
+   it("Should return the unspent slp transaction outpoints for a regtest wallet", async () => {
+    const resp = await request(app)
+      .post("/wallet/slp/outpoints")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      });
+
+    const body = resp.body;
+    expect(resp.statusCode).toBe(200);
+    expect(body.outpoints.length).toBeGreaterThan(0);
+    const outpoint = body.outpoints[0].split(':');
+    expect(outpoint[0].length).toBe(64);
+    expect(parseInt(outpoint[1])).toBeGreaterThanOrEqual(0);
   });
 });

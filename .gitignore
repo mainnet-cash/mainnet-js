@@ -15,5 +15,6 @@ src/**/*.js.map
 coverage
 genserated/serve/coverage
 jest/playwright/*
+jest/docker/data
 dist
 mainnet-js.tgz

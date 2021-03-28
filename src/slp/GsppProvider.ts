@@ -1,52 +1,37 @@
 import { Network, TxI } from "../interface";
 import {
-  SlpDbResponse,
-  SlpDbTx,
+  GsppTx,
   SlpTokenBalance,
   SlpTokenInfo,
   SlpTxI,
   SlpUtxoI,
 } from "./interface";
-import {
-  SlpAllUtxosTemplate,
-  SlpAddressTransactionHistoryTemplate,
-  SlpWaitForTransactionTemplate,
-  SlpBatonUtxosTemplate,
-  SlpSpendableUtxosTemplate,
-  SlpTokenInfoTemplate,
-  SlpAllTokenBalancesTemplate,
-  SlpTokenBalanceTemplate,
-  SlpAllOutpointsTemplate,
-} from "./SlpDbTemplates";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,
   SlpProvider,
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
-  _convertBalanceBigNumbers,
-  _convertSlpTokenInfo,
-  _convertUtxoBigNumbers,
   _emptyTokenBalance,
 } from "./SlpProvider";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { btoa } from "../util/base64";
 
 import EventSource from "../../polyfill/eventsource";
 
-export class SlpDbProvider implements SlpProvider {
+export class GsppProvider implements SlpProvider {
   public static servers = {
     mainnet: {
-      dataSource: "https://slpdb.fountainhead.cash",
-      eventSource: "https://slpsocket.fountainhead.cash",
+      dataSource: "https://gs.fountainhead.cash",
+      eventsource: "https://slpsocket.fountainhead.cash",
     },
     testnet: {
-      dataSource: "https://slpdb-testnet.fountainhead.cash",
-      eventSource: "https://slpsocket-testnet.fountainhead.cash",
+      dataSource: "https://gs-testnet.fountainhead.cash",
+      eventsource: "https://slpsocket-testnet.fountainhead.cash",
     },
     regtest: {
-      dataSource: "http://localhost:12300",
-      eventSource: "http://localhost:12301",
+      dataSource: "http://localhost:12400",
+      eventsource: "http://localhost:12401",
     },
   };
 
@@ -55,22 +40,22 @@ export class SlpDbProvider implements SlpProvider {
 
   // all oupoints, including mint batons
   async SlpOutpoints(slpaddr: string): Promise<String[]> {
-    return (await this.SlpDbQuery(SlpAllOutpointsTemplate(slpaddr)))
-      .g as String[];
+    return (
+      await this.GsppQuery({ cashaddr: slpaddr }, "v1/graphsearch/slpoutpoints")
+    ).outpoints as String[];
   }
 
   // all utxos, including mint batons
   async SlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
-    return _convertUtxoBigNumbers(
-      (await this.SlpDbQuery(SlpAllUtxosTemplate(slpaddr))).g as SlpUtxoI[]
-    );
-  }
+    const response = (
+      await this.GsppQuery({ cashaddr: slpaddr }, "v1/graphsearch/slputxos")
+    ).utxos as SlpUtxoI[];
 
-  // look up the token information
-  async SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
-    const infos = (await this.SlpDbQuery(SlpTokenInfoTemplate(tokenId)))
-      .t as SlpTokenInfo[];
-    return _convertSlpTokenInfo(infos[0]);
+    if (!response) {
+      return [];
+    }
+
+    return _convertUtxoBigNumbers(response);
   }
 
   // safe-spendable token utxos, without baton
@@ -78,25 +63,38 @@ export class SlpDbProvider implements SlpProvider {
     slpaddr: string,
     tokenId?: string
   ): Promise<SlpUtxoI[]> {
-    return _convertUtxoBigNumbers(
-      (await this.SlpDbQuery(SlpSpendableUtxosTemplate(slpaddr, tokenId)))
-        .g as SlpUtxoI[]
+    return (await this.SlpUtxos(slpaddr)).filter(
+      (val) =>
+        val.isBaton === false && (tokenId ? val.tokenId === tokenId : true)
     );
   }
 
   // token mint baton utxos
   async SlpBatonUtxos(slpaddr: string, tokenId?: string): Promise<SlpUtxoI[]> {
-    return _convertUtxoBigNumbers(
-      (await this.SlpDbQuery(SlpBatonUtxosTemplate(slpaddr, tokenId)))
-        .g as SlpUtxoI[]
+    return (await this.SlpUtxos(slpaddr)).filter(
+      (val) =>
+        val.isBaton === true && (tokenId ? val.tokenId === tokenId : true)
     );
+  }
+
+  // look up the token information
+  async SlpTokenInfo(tokenId: string): Promise<SlpTokenInfo | undefined> {
+    const info = (await this.GsppQuery(
+      { tokenId: tokenId },
+      "v1/graphsearch/slptokeninfo"
+    )) as SlpTokenInfo;
+    return _convertSlpTokenInfo(info);
   }
 
   // get all token balances
   async SlpAllTokenBalances(slpaddr: string): Promise<SlpTokenBalance[]> {
     return _convertBalanceBigNumbers(
-      (await this.SlpDbQuery(SlpAllTokenBalancesTemplate(slpaddr)))
-        .g as SlpTokenBalance[]
+      ((
+        await this.GsppQuery(
+          { cashaddr: slpaddr },
+          "v1/graphsearch/slpalltokenbalances"
+        )
+      ).balances || []) as SlpTokenBalance[]
     );
   }
 
@@ -105,34 +103,41 @@ export class SlpDbProvider implements SlpProvider {
     slpaddr: string,
     tokenId: string
   ): Promise<SlpTokenBalance> {
-    const balances = _convertBalanceBigNumbers(
-      (await this.SlpDbQuery(SlpTokenBalanceTemplate(slpaddr, tokenId)))
-        .g as SlpTokenBalance[]
+    const response = await this.GsppQuery(
+      { cashaddr: slpaddr, tokenId: tokenId },
+      "v1/graphsearch/slptokenbalance"
     );
+    if (!response) {
+      return _emptyTokenBalance(tokenId);
+    }
 
-    return balances[0] || _emptyTokenBalance(tokenId);
+    const balances = _convertBalanceBigNumbers([response]);
+    if (balances[0].value.isZero()) {
+      return _emptyTokenBalance(tokenId);
+    }
+    return balances[0];
   }
 
   // get all slp transactions of this address
   async SlpAddressTransactionHistory(
-    slpaddr: string,
-    tokenId?: string,
-    limit: number = 100,
-    skip: number = 0
+    _slpaddr: string,
+    _tokenId?: string,
+    _limit: number = 100,
+    _skip: number = 0
   ): Promise<SlpTxI[]> {
-    const response = await this.SlpDbQuery(
-      SlpAddressTransactionHistoryTemplate(slpaddr, tokenId, limit, skip)
-    );
-    return response.c.concat(response.u) as SlpTxI[];
+    throw "Not implemented";
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any> {
+  async SlpWaitForTransaction(
+    slpaddr: string,
+    tokenId?: string
+  ): Promise<SlpTxI> {
     return new Promise(async (resolve) => {
-      this.SlpWatchTransactions(
-        (tx: SlpTxI) => {
+      const cancelFn = this.SlpWatchTransactions(
+        (tx) => {
+          cancelFn();
           resolve(tx);
-          return true;
         },
         slpaddr,
         tokenId
@@ -162,7 +167,7 @@ export class SlpDbProvider implements SlpProvider {
     );
   }
 
-  // set's up a callback to be executed each time the token balance of the wallet is changed
+  // sets up a callback to be executed each time the token balance of the wallet is changed
   SlpWatchBalance(
     callback: SlpWatchBalanceCallback,
     slpaddr: string,
@@ -186,9 +191,9 @@ export class SlpDbProvider implements SlpProvider {
     slpaddr: string,
     tokenId?: string
   ): SlpCancelWatchFn {
-    const eventSource: EventSource = this.SlpSocketEventSource(
-      SlpWaitForTransactionTemplate(slpaddr, tokenId)
-    );
+    const eventSource: EventSource = this.SlpSocketEventSource({
+      query: { slpaddr, tokenId },
+    });
     const cancelFn: SlpCancelWatchFn = () => {
       eventSource.close();
     };
@@ -197,11 +202,11 @@ export class SlpDbProvider implements SlpProvider {
       "message",
       (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
-        if (data.data && data.data.length) {
+        if (data.type === "rawtx") {
           const tx: SlpTxI = {
-            tx_hash: data.data[0].tx.h,
+            tx_hash: data.data.txHash,
             height: 0,
-            details: data.data[0] as SlpDbTx,
+            details: data.data as GsppTx,
           };
           if (!!callback(tx)) {
             cancelFn();
@@ -214,29 +219,37 @@ export class SlpDbProvider implements SlpProvider {
     return cancelFn;
   }
 
-  public SlpDbQuery(queryObject: any): Promise<SlpDbResponse> {
+  public GsppQuery(queryObject: any, endpoint?: string): Promise<any> {
     if (this.caching) {
       axiosInstance.defaults.headers = {};
     } else {
       axiosInstance.defaults.headers = noCacheHeaders;
     }
 
+    // console.log(queryObject, endpoint);
+
     return new Promise((resolve, reject) => {
       const url = `${
-        SlpDbProvider.servers[this.network].dataSource
-      }/q/${B64QueryString(queryObject)}`;
-      fetch_retry(url).then((response: any) => {
-        if (response.hasOwnProperty("error")) {
-          reject(new Error(response["error"]));
-        }
-        resolve(response.data as SlpDbResponse);
-      });
+        GsppProvider.servers[this.network].dataSource
+      }/${endpoint}`;
+      fetch_retry(url, queryObject)
+        .then((response: any) => {
+          resolve(response.data);
+        })
+        .catch((error) => {
+          if (error.isAxiosError) {
+            // console.trace(JSON.stringify(error, null, 2));
+            reject(error.response.data);
+          }
+
+          reject(error);
+        });
     });
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
     const url = `${
-      SlpDbProvider.servers[this.network].eventSource
+      GsppProvider.servers[this.network].eventsource
     }/s/${B64QueryString(queryObject)}`;
     return new EventSource(url);
   }
@@ -252,19 +265,48 @@ const axiosInstance = axios.create({
   headers: noCacheHeaders,
 });
 
-const fetch_retry = (url, options = {}, n = 5) =>
-  axiosInstance.get(url, options).catch(function (error) {
+const fetch_retry = (url, data = {}, n = 1) =>
+  axiosInstance.post(url, data).catch(function (error) {
     if (n === 0) {
       throw error;
     }
     return new Promise((resolve) => {
-      setTimeout(() => resolve(fetch_retry(url, options, n - 1)), 1000);
+      setTimeout(() => resolve(fetch_retry(url, data, n - 1)), 1000);
     });
   });
 
 const B64QueryString = function (queryObject): string {
   if (!queryObject || !Object.keys(queryObject).length) {
-    throw new Error("Empty SLPDB query");
+    throw new Error("Empty query");
   }
   return btoa(JSON.stringify(queryObject));
 };
+
+export function _convertBalanceBigNumbers(
+  balances: SlpTokenBalance[]
+): SlpTokenBalance[] {
+  balances.forEach(
+    (val) => (val.value = new BigNumber(val.value).shiftedBy(-1 * val.decimals))
+  );
+  return balances;
+}
+
+export function _convertUtxoBigNumbers(utxos: SlpUtxoI[]): SlpUtxoI[] {
+  utxos.forEach((val) => {
+    val.value = new BigNumber(val.value).shiftedBy(-1 * val.decimals);
+    val.satoshis = Number(val.satoshis);
+  });
+  return utxos;
+}
+
+export function _convertSlpTokenInfo(
+  tokenInfo: SlpTokenInfo | undefined
+): SlpTokenInfo | undefined {
+  if (!tokenInfo) return tokenInfo;
+
+  tokenInfo.initialAmount = new BigNumber(tokenInfo.initialAmount).shiftedBy(
+    -1 * tokenInfo.decimals
+  );
+
+  return tokenInfo;
+}

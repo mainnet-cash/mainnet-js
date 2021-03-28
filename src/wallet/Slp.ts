@@ -10,6 +10,7 @@ import {
   SlpTokenBalance,
   SlpTokenInfo,
   SlpTokenType,
+  SlpTxI,
   SlpUtxoI,
 } from "../slp/interface";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
@@ -38,6 +39,7 @@ import {
   SlpWatchTransactionCallback,
 } from "../slp/SlpProvider";
 import { toSlpAddress } from "../util/bchaddr";
+import { GsppProvider } from "../slp/GsppProvider";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -56,6 +58,14 @@ export class Slp {
     this.slpaddr = toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
     this.provider = new SlpDbProvider(this.wallet.networkType);
+    // this.provider = new GsppProvider(this.wallet.networkType);
+  }
+
+  /**
+   * setProvider - sets the provider to fetch slp data from
+   */
+  public setProvider(provider: SlpProvider) {
+    return (this.provider = provider);
   }
 
   /**
@@ -102,16 +112,25 @@ export class Slp {
   }
 
   /**
-   * getSlpUtxos - get a list of SLP unspent outputs
+   * getSlpOutpoints - get a list of SLP unspent outpoints
    *
    * an intermediate function contributing to the output of wallet.getUtxos() and /wallet/utxos for slp enabled wallets
    *
-   * @param slpaddr  The slpaddr to request slp unspent outputs for
+   * @param slpaddr  The slpaddr to request slp unspent outpoints for
+   *
+   * @returns Promise to a list of slp unspent outpoints
+   */
+  public async getSlpOutpoints(): Promise<String[]> {
+    return this.provider.SlpOutpoints(this.slpaddr);
+  }
+
+  /**
+   * getSlpUtxos - get a list of SLP unspent outputs
    *
    * @returns Promise to a list of slp unspent outputs
    */
-  public async getSlpUtxos(slpaddr: string): Promise<SlpUtxoI[]> {
-    return this.provider.SlpUtxos(toSlpAddress(slpaddr));
+  public async getSlpUtxos(): Promise<SlpUtxoI[]> {
+    return this.provider.SlpUtxos(this.slpaddr);
   }
 
   /**
@@ -119,17 +138,10 @@ export class Slp {
    *
    * an intermediate function
    *
-   * @param slpaddr  The slpaddr to request slp formatted outputs
-   *
    * @returns Promise to a list of slp formatted unspent outputs
    */
-  public async getFormattedSlpUtxos(
-    slpaddr?: string
-  ): Promise<SlpFormattedUtxo[]> {
-    if (!slpaddr) {
-      slpaddr = this.slpaddr;
-    }
-    const utxos = await this.getSlpUtxos(toSlpAddress(slpaddr));
+  public async getFormattedSlpUtxos(): Promise<SlpFormattedUtxo[]> {
+    const utxos = await this.getSlpUtxos();
     return utxos.map((val) => {
       let utxo = {} as SlpFormattedUtxo;
       utxo.ticker = val.ticker;
@@ -167,7 +179,7 @@ export class Slp {
    *
    * @returns Promise to a list of transactions
    */
-  public async getHistory(tokenId?: string): Promise<TxI[]> {
+  public async getHistory(tokenId?: string): Promise<SlpTxI[]> {
     return this.provider.SlpAddressTransactionHistory(this.slpaddr, tokenId);
   }
 
@@ -199,6 +211,9 @@ export class Slp {
    * @returns Promise to an SlpTokenBalance
    */
   public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
+    if (!tokenId) {
+      throw new Error(`Invalid tokenId ${tokenId}`);
+    }
     return this.provider.SlpTokenBalance(this.slpaddr, tokenId);
   }
 
@@ -219,13 +234,13 @@ export class Slp {
    * can be cancelled by calling the function returned from this one
    *
    * @param callback   The callback function to be called each time the balance changes
-   * @param tokenId    Specific token id to watch, optional
+   * @param tokenId    Specific token id to watch
    *
    * @returns A function to cancel the watching
    */
   public watchBalance(
     callback: SlpWatchBalanceCallback,
-    tokenId?: string
+    tokenId: string
   ): SlpCancelWatchFn {
     return this.provider.SlpWatchBalance(callback, this.slpaddr, tokenId);
   }
@@ -273,7 +288,7 @@ export class Slp {
    *
    * @returns Transaction object
    */
-  public async waitForTransaction(tokenId?: string): Promise<any> {
+  public async waitForTransaction(tokenId?: string): Promise<SlpTxI> {
     return this.provider.SlpWaitForTransaction(this.slpaddr, tokenId);
   }
 
