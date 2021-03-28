@@ -222,9 +222,9 @@ export class SlpDbProvider implements SlpProvider {
     }
 
     return new Promise((resolve, reject) => {
-      const url = `${SlpDbProvider.servers[this.network].dataSource}/q/${B64QueryString(
-        queryObject
-      )}`;
+      const url = `${
+        SlpDbProvider.servers[this.network].dataSource
+      }/q/${B64QueryString(queryObject)}`;
       fetch_retry(url).then((response: any) => {
         if (response.hasOwnProperty("error")) {
           reject(new Error(response["error"]));
@@ -235,9 +235,9 @@ export class SlpDbProvider implements SlpProvider {
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
-    const url = `${SlpDbProvider.servers[this.network].eventSource}/s/${B64QueryString(
-      queryObject
-    )}`;
+    const url = `${
+      SlpDbProvider.servers[this.network].eventSource
+    }/s/${B64QueryString(queryObject)}`;
     return new EventSource(url);
   }
 }

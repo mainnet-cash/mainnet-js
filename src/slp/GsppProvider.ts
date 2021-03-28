@@ -229,7 +229,9 @@ export class GsppProvider implements SlpProvider {
     // console.log(queryObject, endpoint);
 
     return new Promise((resolve, reject) => {
-      const url = `${GsppProvider.servers[this.network].dataSource}/${endpoint}`;
+      const url = `${
+        GsppProvider.servers[this.network].dataSource
+      }/${endpoint}`;
       fetch_retry(url, queryObject)
         .then((response: any) => {
           resolve(response.data);
@@ -246,9 +248,9 @@ export class GsppProvider implements SlpProvider {
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
-    const url = `${GsppProvider.servers[this.network].eventsource}/s/${B64QueryString(
-      queryObject
-    )}`;
+    const url = `${
+      GsppProvider.servers[this.network].eventsource
+    }/s/${B64QueryString(queryObject)}`;
     return new EventSource(url);
   }
 }
