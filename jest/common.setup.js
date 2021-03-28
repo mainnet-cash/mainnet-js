@@ -50,7 +50,7 @@ module.exports = async function (cwd) {
 
   for (
     let i = 0;
-    (await getRegtestUtxos(process.env.ADDRESS)) < 105 && i < 45;
+    (await getRegtestUtxos(process.env.ADDRESS)) < 210 && i < 45;
     i++
   ) {
     console.log("Waiting for blocks to be mined");

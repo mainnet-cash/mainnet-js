@@ -414,15 +414,14 @@ export class Wallet extends BaseWallet {
     }
 
     if (this._slpAware) {
-      const [bchUtxos, slpUtxos] = await Promise.all([
+      const [bchUtxos, slpOutpoints] = await Promise.all([
         this.provider!.getUtxos(address),
-        this.slp.getSlpUtxos(address),
+        this.slp.getSlpOutpoints(),
       ]);
       return bchUtxos.filter(
         (bchutxo) =>
-          slpUtxos.findIndex(
-            (slputxo) =>
-              bchutxo.txid === slputxo.txid && bchutxo.vout === slputxo.vout
+          slpOutpoints.findIndex(
+            (slpOutpoint) => `${bchutxo.txid}:${bchutxo.vout}` === slpOutpoint
           ) === -1
       );
     } else {

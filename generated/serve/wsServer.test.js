@@ -179,7 +179,7 @@ describe("Test websocket server methods", () => {
     await request(app)
       .ws('/wallet')
       .sendJson({ method: "slpWaitForTransaction", data: { slpaddr: aliceSlp, tokenId: tokenId }})
-      .expectJson((actual) => (actual !== undefined && actual.tx.h !== undefined))
+      .expectJson((actual) => (actual !== undefined && actual.tx_hash !== undefined))
       .close()
       .expectClosed();
   });

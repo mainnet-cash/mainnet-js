@@ -101,6 +101,7 @@ To install the requirements from project root:
 yarn unlink mainnet-js
 ```
 
+rm 'generated/client/typescript-mock/model/valueType.ts'
 To start the API server for development:
 
     yarn api:serve

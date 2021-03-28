@@ -135,6 +135,7 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.derivationPath!).toBe("m/44'/0'/0'/0/0");
     expect(body!.walletId!.startsWith("seed:mainnet:")).toBeTruthy();
   });
+
   /**
    * depositAddress
    */

@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+0.3.3
+
+- Added experimental support for GraphSearch++ as a backing solution for SLP functionality.
+- Added mainnet.cash relevant functionality to GraphSearch++ see https://github.com/blockparty-sh/cpp_slp_graph_search/pull/20
+- Added zmq to SSE bridge to GraphSearch++ to enable watching and waiting for SLP transactions
+- New getSlpOutpoints and /wallet/slp/outpoints methods return compact list of SLP outpoints
+- GsppProvider, thanks to its fast queries to the server, allows for SLP awareness to become a default, rather than opt-in option.
+- Reworked docker-compose project sturcture, removed unnecessary port exposure
+
 0.3.1
 
 - Fix signatureType for 'recoverable' signatures
