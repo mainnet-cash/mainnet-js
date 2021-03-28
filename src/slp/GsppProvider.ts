@@ -19,22 +19,22 @@ import { btoa } from "../util/base64";
 
 import EventSource from "../../polyfill/eventsource";
 
-const servers = {
-  mainnet: {
-    gspp: "https://gs.fountainhead.cash",
-    eventsource: "https://slpsocket.fountainhead.cash",
-  },
-  testnet: {
-    gspp: "https://gs-testnet.fountainhead.cash",
-    eventsource: "https://slpsocket-testnet.fountainhead.cash",
-  },
-  regtest: {
-    gspp: "http://localhost:12400",
-    eventsource: "http://localhost:12401",
-  },
-};
-
 export class GsppProvider implements SlpProvider {
+  public static servers = {
+    mainnet: {
+      dataSource: "https://gs.fountainhead.cash",
+      eventsource: "https://slpsocket.fountainhead.cash",
+    },
+    testnet: {
+      dataSource: "https://gs-testnet.fountainhead.cash",
+      eventsource: "https://slpsocket-testnet.fountainhead.cash",
+    },
+    regtest: {
+      dataSource: "http://localhost:12400",
+      eventsource: "http://localhost:12401",
+    },
+  };
+
   public caching: boolean = false;
   constructor(public network: Network = Network.MAINNET) {}
 
@@ -229,7 +229,7 @@ export class GsppProvider implements SlpProvider {
     // console.log(queryObject, endpoint);
 
     return new Promise((resolve, reject) => {
-      const url = `${servers[this.network].gspp}/${endpoint}`;
+      const url = `${GsppProvider.servers[this.network].dataSource}/${endpoint}`;
       fetch_retry(url, queryObject)
         .then((response: any) => {
           resolve(response.data);
@@ -246,7 +246,7 @@ export class GsppProvider implements SlpProvider {
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
-    const url = `${servers[this.network].eventsource}/s/${B64QueryString(
+    const url = `${GsppProvider.servers[this.network].eventsource}/s/${B64QueryString(
       queryObject
     )}`;
     return new EventSource(url);

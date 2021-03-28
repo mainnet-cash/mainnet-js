@@ -34,22 +34,22 @@ import { btoa } from "../util/base64";
 
 import EventSource from "../../polyfill/eventsource";
 
-const servers = {
-  mainnet: {
-    slpdb: "https://slpdb.fountainhead.cash",
-    slpsockserve: "https://slpsocket.fountainhead.cash",
-  },
-  testnet: {
-    slpdb: "https://slpdb-testnet.fountainhead.cash",
-    slpsockserve: "https://slpsocket-testnet.fountainhead.cash",
-  },
-  regtest: {
-    slpdb: "http://localhost:12300",
-    slpsockserve: "http://localhost:12301",
-  },
-};
-
 export class SlpDbProvider implements SlpProvider {
+  public static servers = {
+    mainnet: {
+      dataSource: "https://slpdb.fountainhead.cash",
+      eventSource: "https://slpsocket.fountainhead.cash",
+    },
+    testnet: {
+      dataSource: "https://slpdb-testnet.fountainhead.cash",
+      eventSource: "https://slpsocket-testnet.fountainhead.cash",
+    },
+    regtest: {
+      dataSource: "http://localhost:12300",
+      eventSource: "http://localhost:12301",
+    },
+  };
+
   public caching: boolean = false;
   constructor(public network: Network = Network.MAINNET) {}
 
@@ -222,7 +222,7 @@ export class SlpDbProvider implements SlpProvider {
     }
 
     return new Promise((resolve, reject) => {
-      const url = `${servers[this.network].slpdb}/q/${B64QueryString(
+      const url = `${SlpDbProvider.servers[this.network].dataSource}/q/${B64QueryString(
         queryObject
       )}`;
       fetch_retry(url).then((response: any) => {
@@ -235,7 +235,7 @@ export class SlpDbProvider implements SlpProvider {
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
-    const url = `${servers[this.network].slpsockserve}/s/${B64QueryString(
+    const url = `${SlpDbProvider.servers[this.network].eventSource}/s/${B64QueryString(
       queryObject
     )}`;
     return new EventSource(url);

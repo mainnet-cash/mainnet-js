@@ -9,6 +9,7 @@ Newest changes
 - New getSlpOutpoints and /wallet/slp/outpoints methods return compact list of SLP outpoints
 - GsppProvider, thanks to its fast queries to the server, allows for SLP awareness to become a default, rather than opt-in option.
 - Reworked docker-compose project sturcture, removed unnecessary port exposure
+- SlpProvider's endpoints can now be customized via static accessor
 
 0.3.1
 
