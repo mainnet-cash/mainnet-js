@@ -120,7 +120,7 @@ export class EscrowContract extends Contract {
    * @returns The contract text in CashScript
    */
   static getContractText() {
-    return `pragma cashscript ^0.6.0;
+    return `pragma cashscript ^0.6.1;
             contract escrow(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
 
                 function spend(pubkey signingPk, sig s, int amount, int nonce) {
