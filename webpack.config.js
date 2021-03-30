@@ -1,6 +1,6 @@
 const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
-const NpmDtsPlugin = require('npm-dts-webpack-plugin')
+const NpmDtsPlugin = require("npm-dts-webpack-plugin");
 
 const baseConfig = {
   entry: "./src/index.ts",
@@ -41,10 +41,10 @@ const nodeConfig = {
   },
   plugins: [
     new NpmDtsPlugin({
-      logLevel: 'debug',
+      logLevel: "debug",
       name: "mainnet-js",
       entry: "src/index.d.ts",
-      output: "../dist/index.d.ts"
+      output: "../dist/index.d.ts",
     }),
   ],
 };
