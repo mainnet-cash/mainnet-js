@@ -44,7 +44,7 @@ const nodeConfig = {
       logLevel: "debug",
       name: "mainnet-js",
       entry: "src/index.d.ts",
-      output: "../dist/index.d.ts",
+      output: "dist/index.d.ts",
     }),
   ],
 };
