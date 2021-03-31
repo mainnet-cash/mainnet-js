@@ -1,5 +1,5 @@
 
-import * as mainnet from "mainnet-js";
+var mainnet = require("mainnet-js");
 var server = require("../")
 var request = require("supertest");
 var app;
