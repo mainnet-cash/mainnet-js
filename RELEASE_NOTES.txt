@@ -1,6 +1,19 @@
 Newest changes
 --------------
 
+0.3.6
+
+- Bump CashScript to 0.6.1
+- Switch from dts-bundle-webpack to npm-dts-webpack-plugin
+
+0.3.5
+
+- Revert SlpDbProvider
+
+0.3.4
+
+- Use gspp SLP provider
+
 0.3.3
 
 - Added experimental support for GraphSearch++ as a backing solution for SLP functionality.
