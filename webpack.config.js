@@ -1,6 +1,6 @@
 const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
-const DtsBundleWebpack = require("dts-bundle-webpack");
+const NpmDtsPlugin = require("npm-dts-webpack-plugin");
 
 const baseConfig = {
   entry: "./src/index.ts",
@@ -40,11 +40,9 @@ const nodeConfig = {
     library: "mainnet",
   },
   plugins: [
-    new DtsBundleWebpack({
-      name: "mainnet-js",
-      main: "src/index.d.ts",
-      out: "../dist/index.d.ts",
-      emitOnIncludedFileNotFound: true,
+    new NpmDtsPlugin({
+      entry: "src/index.d.ts",
+      output: "dist/index.d.ts",
     }),
   ],
 };
