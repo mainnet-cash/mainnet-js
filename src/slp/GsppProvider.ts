@@ -22,8 +22,10 @@ import EventSource from "../../polyfill/eventsource";
 export class GsppProvider implements SlpProvider {
   public static servers = {
     mainnet: {
-      dataSource: "https://gs.fountainhead.cash",
-      eventsource: "https://slpsocket.fountainhead.cash",
+      // dataSource: "https://gs.fountainhead.cash",
+      // eventsource: "https://slpsocket.fountainhead.cash",
+      dataSource: "http://159.69.3.184:12400",
+      eventsource: "http://159.69.3.184:12401",
     },
     testnet: {
       dataSource: "https://gs-testnet.fountainhead.cash",
