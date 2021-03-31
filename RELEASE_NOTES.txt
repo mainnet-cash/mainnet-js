@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.7
+
+- Fix deploy
+
 0.3.6
 
 - Bump CashScript to 0.6.1
