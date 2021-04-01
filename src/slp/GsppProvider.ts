@@ -307,6 +307,7 @@ export function _convertSlpTokenInfo(
   tokenInfo.initialAmount = new BigNumber(tokenInfo.initialAmount).shiftedBy(
     -1 * tokenInfo.decimals
   );
+  tokenInfo.parentTokenId = (tokenInfo as any).groupId;
 
   return tokenInfo;
 }

@@ -334,17 +334,22 @@ export class Slp {
    * @returns Token Id and new token balance
    */
   public async nftChildGenesis(
-    parentTokenId: string,
     options: SlpGenesisOptions
   ): Promise<SlpGenesisResult> {
+    if (!options.parentTokenId) {
+      throw new Error(
+        `The 'parentTokenId' was not set or invalid ${options.parentTokenId}`
+      );
+    }
+
     let parentUtxos = await this.provider.SlpSpendableUtxos(
       this.slpaddr,
-      parentTokenId
+      options.parentTokenId
     );
     parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
     if (!parentUtxos.length) {
-      throw new Error(`You do not own any tokens with id ${parentTokenId}`);
+      throw new Error(`You do not own any NFT parent tokens with id ${options.parentTokenId}`);
     }
 
     if (parentUtxos[0].type !== SlpTokenType.NftParent) {
@@ -359,11 +364,11 @@ export class Slp {
       await this.send([
         {
           slpaddr: this.slpaddr,
-          tokenId: parentTokenId,
+          tokenId: options.parentTokenId,
           value: new BigNumber(1),
         },
       ]);
-      return await this.nftChildGenesis(parentTokenId, options);
+      return await this.nftChildGenesis(options);
     }
 
     options.type = SlpTokenType.NftChild;
