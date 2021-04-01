@@ -1,6 +1,8 @@
 Newest changes
 --------------
 
+Changed nftChildGenesis interface and move parentTokenId to genesis options for consistency between js and REST.
+
 0.3.7
 
 - Fix deploy

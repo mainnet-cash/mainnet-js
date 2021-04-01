@@ -160,7 +160,7 @@ const nftChildGenesis = ({ slpGenesisRequest }) => new Promise(
       let wallet = await mainnet.walletFromId(slpGenesisRequest.walletId);
       let args = slpGenesisRequest;
       delete args.walletId;
-      let resp = await wallet.slp.nftChildGenesis(args.parentTokenId, args);
+      let resp = await wallet.slp.nftChildGenesis(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(e)

@@ -29,17 +29,12 @@ export const SlpAllUtxosTemplate = (slpaddr: string) => ({
                             ]
                         }
                 }
-            },
-            {
-                "$project": {
-                    "graphTxn": 1
-                }
             }
         ],
         "limit": 1e6,
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType, parentTokenId: .tokenDetails.nftGroupIdHex } ]"
     }
 });
 
@@ -112,11 +107,6 @@ export const SlpSpendableUtxosTemplate = (slpaddr: string, tokenId?: string) => 
                 }
             },
             {
-                "$project": {
-                    "graphTxn": 1
-                }
-            },
-            {
               "$lookup": {
                 "from": "tokens",
                 "localField": "graphTxn.details.tokenIdHex",
@@ -127,7 +117,7 @@ export const SlpSpendableUtxosTemplate = (slpaddr: string, tokenId?: string) => 
         ]
     },
     "r": {
-      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType } ]"
+      "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .token[0].tokenDetails.decimals, ticker: .token[0].tokenDetails.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType, parentTokenId: .token[0].nftParentId } ]"
     }
   };
 
@@ -196,7 +186,7 @@ export const SlpAllTokenBalancesTemplate = (slpaddr: string) => {
        }
     },
     "r": {
-      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, type: .token[0].tokenDetails.versionType } ]"
+      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, type: .token[0].tokenDetails.versionType, parentTokenId: .token[0].nftParentId } ]"
     }
   }
 
@@ -257,7 +247,7 @@ export const SlpTokenBalanceTemplate = (slpaddr: string, tokenId: string) => {
        }
     },
     "r": {
-      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, type: .token[0].tokenDetails.versionType } ]"
+      "f": "[ .[] | { value: .slpAmount, ticker: .token[0].tokenDetails.symbol, name: .token[0].tokenDetails.name, tokenId: ._id, type: .token[0].tokenDetails.versionType, parentTokenId: .token[0].nftParentId } ]"
     }
   }
 
@@ -342,7 +332,7 @@ export const SlpTokenInfoTemplate = (tokenId?: string, limit: number = 100, skip
       "skip": skip,
     },
     "r": {
-      "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex, decimals: .tokenDetails.decimals, documentUrl: .tokenDetails.documentUri, documentHash: .tokenDetails.documentSha256Hex, initialAmount: .tokenDetails.genesisOrMintQuantity, type: .tokenDetails.versionType } ]"
+      "f": "[ .[] | { ticker: .tokenDetails.symbol, name: .tokenDetails.name, tokenId: .tokenDetails.tokenIdHex, decimals: .tokenDetails.decimals, documentUrl: .tokenDetails.documentUri, documentHash: .tokenDetails.documentSha256Hex, initialAmount: .tokenDetails.genesisOrMintQuantity, type: .tokenDetails.versionType, parentTokenId: .nftParentId } ]"
     }
   }
 

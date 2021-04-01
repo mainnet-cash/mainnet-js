@@ -81,6 +81,7 @@ export interface SlpTokenInfo {
   name: string;
   ticker: string;
   tokenId: string;
+  parentTokenId: string;
   initialAmount: BigNumber.Value;
   decimals: number;
   documentUrl?: string;
@@ -99,6 +100,7 @@ export interface SlpGenesisOptions {
   type?: SlpTokenType;
   tokenReceiverSlpAddr?: string;
   batonReceiverSlpAddr?: string;
+  parentTokenId?: string;
 }
 
 export interface SlpMintOptions {

@@ -78,7 +78,7 @@ describe("Slp wallet tests", () => {
     const info = await aliceWallet.slp.getTokenInfo(tokenId);
     expect(info!.tokenId).toBe(result.tokenId);
     delete (info as any).tokenId;
-    delete (info as any).groupId;
+    delete (info as any).parentTokenId;
     const tokenInfo = {
       decimals: 2,
       documentHash:
@@ -676,7 +676,7 @@ describe("Slp wallet tests", () => {
     };
 
     delete (info as any).tokenId;
-    delete (info as any).groupId;
+    delete (info as any).parentTokenId;
 
     expect(info).toEqual(parentTokenInfo);
 
@@ -718,16 +718,16 @@ describe("Slp wallet tests", () => {
     const nftChildGenesis = { ...genesisOptions };
     nftChildGenesis.ticker = ticker + "NFTC";
     nftChildGenesis.name = "Mainnet NFT Child";
+    nftChildGenesis.parentTokenId = parentResult.tokenId;
 
     const childResult: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
-      parentResult.tokenId,
       nftChildGenesis
     );
 
     const childInfo = await aliceWallet.slp.getTokenInfo(childResult.tokenId);
     expect(childInfo!.tokenId).toBe(childResult.tokenId);
     if (aliceWallet.slp.provider instanceof GsppProvider)
-      expect((childInfo! as any).groupId).toBe(parentResult.tokenId);
+      expect((childInfo! as any).parentTokenId).toBe(parentResult.tokenId);
 
     delete (childInfo as any).tokenId;
 
@@ -743,7 +743,7 @@ describe("Slp wallet tests", () => {
     };
 
     delete (childInfo as any).tokenId;
-    delete (childInfo as any).groupId;
+    delete (childInfo as any).parentTokenId;
 
     expect(childInfo).toEqual(childTokenInfo);
 
@@ -782,16 +782,17 @@ describe("Slp wallet tests", () => {
     expect(bobBalance.tokenId).toBe(childResult.tokenId);
 
     // should throw if parent token is not in possession
+    nftChildGenesis.parentTokenId =
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
     await expect(
-      aliceWallet.slp.nftChildGenesis(
-        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-        nftChildGenesis
-      )
+      aliceWallet.slp.nftChildGenesis(nftChildGenesis)
     ).rejects.toThrow();
 
     // should throw if parent token is not of type 0x81
+    nftChildGenesis.parentTokenId = childResult.tokenId;
     await expect(
-      aliceWallet.slp.nftChildGenesis(childResult.tokenId, nftChildGenesis)
+      aliceWallet.slp.nftChildGenesis(nftChildGenesis)
     ).rejects.toThrow();
 
     // bug in the SLPDB, the parent burn check is not triggered until new block arrives
@@ -801,9 +802,12 @@ describe("Slp wallet tests", () => {
     }
 
     // spend last token
+    const genesis1 = { ...nftChildGenesis };
+    genesis1.parentTokenId = parentResult.tokenId;
+    genesis1.ticker = ticker + "1";
+
     const childResultLast: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
-      parentResult.tokenId,
-      { ...nftChildGenesis, ...{ ticker: ticker + "1" } }
+      genesis1
     );
 
     aliceParentBalance = await aliceWallet.slp.getBalance(parentResult.tokenId);
@@ -814,12 +818,11 @@ describe("Slp wallet tests", () => {
     expect(aliceParentBalance.value.isEqualTo(1));
 
     // fail to to perform child genesis. we are out of parent tokens
-    await expect(
-      aliceWallet.slp.nftChildGenesis(parentResult.tokenId, {
-        ...nftChildGenesis,
-        ...{ ticker: ticker + "0" },
-      })
-    ).rejects.toThrow();
+    const genesis2 = { ...nftChildGenesis };
+    genesis2.parentTokenId = parentResult.tokenId;
+    genesis2.ticker = ticker + "0";
+
+    await expect(aliceWallet.slp.nftChildGenesis(genesis2)).rejects.toThrow();
   });
 
   test.skip("Test SLPDB NFT bug", async () => {
@@ -834,13 +837,13 @@ describe("Slp wallet tests", () => {
       nftParentGenesis
     );
 
-    const nftChildGenesis = { ...genesisOptions };
-    nftChildGenesis.ticker = ticker + "NFTC_Bug";
-    nftChildGenesis.name = "Mainnet NFT Child";
+    const nftChildGenesis1 = { ...genesisOptions };
+    nftChildGenesis1.ticker = ticker + "NFTC_Bug";
+    nftChildGenesis1.name = "Mainnet NFT Child";
+    nftChildGenesis1.parentTokenId = parentResult.tokenId;
 
     const childResult: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
-      parentResult.tokenId,
-      nftChildGenesis
+      nftChildGenesis1
     );
 
     // // bug in the SLPDB, the parent burn check is not triggered until new block arrives
@@ -848,11 +851,12 @@ describe("Slp wallet tests", () => {
     // await delay(5000);
 
     // fail to to perform child genesis. we are out of parent tokens
+    const nftChildGenesis2 = { ...genesisOptions };
+    nftChildGenesis2.ticker = ticker + "1_Bug";
+    nftChildGenesis2.parentTokenId = parentResult.tokenId;
+
     await expect(
-      aliceWallet.slp.nftChildGenesis(parentResult.tokenId, {
-        ...nftChildGenesis,
-        ...{ ticker: ticker + "1_Bug" },
-      })
+      aliceWallet.slp.nftChildGenesis(nftChildGenesis2)
     ).rejects.toThrow();
   });
 

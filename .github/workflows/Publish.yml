@@ -214,6 +214,7 @@ jobs:
           git-user: "Auto-Generated"
           git-user-email: hello@mainnet.cash
           git-commit-message: "Generated"
+          excludes: .git
       - name: Create new tag
         run: |
           git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/${{ env.REPO_USER }}/${{ env.REPO_NAME }} ${{ env.REPO_NAME }}
