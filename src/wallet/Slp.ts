@@ -349,7 +349,9 @@ export class Slp {
     parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
     if (!parentUtxos.length) {
-      throw new Error(`You do not own any NFT parent tokens with id ${options.parentTokenId}`);
+      throw new Error(
+        `You do not own any NFT parent tokens with id ${options.parentTokenId}`
+      );
     }
 
     if (parentUtxos[0].type !== SlpTokenType.NftParent) {

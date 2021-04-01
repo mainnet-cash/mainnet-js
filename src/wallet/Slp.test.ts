@@ -782,12 +782,11 @@ describe("Slp wallet tests", () => {
     expect(bobBalance.tokenId).toBe(childResult.tokenId);
 
     // should throw if parent token is not in possession
-    nftChildGenesis.parentTokenId = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    nftChildGenesis.parentTokenId =
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     await expect(
-      aliceWallet.slp.nftChildGenesis(
-        nftChildGenesis
-      )
+      aliceWallet.slp.nftChildGenesis(nftChildGenesis)
     ).rejects.toThrow();
 
     // should throw if parent token is not of type 0x81
@@ -823,9 +822,7 @@ describe("Slp wallet tests", () => {
     genesis2.parentTokenId = parentResult.tokenId;
     genesis2.ticker = ticker + "0";
 
-    await expect(
-      aliceWallet.slp.nftChildGenesis(genesis2)
-    ).rejects.toThrow();
+    await expect(aliceWallet.slp.nftChildGenesis(genesis2)).rejects.toThrow();
   });
 
   test.skip("Test SLPDB NFT bug", async () => {
