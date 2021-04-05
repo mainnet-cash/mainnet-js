@@ -890,4 +890,31 @@ describe("Slp wallet tests", () => {
     // expect(count1.length).toBe(count2.length);
     // console.log(count1.length, count2.length);
   });
+
+  test("Slp wallet creation", async () => {
+    const m = await Wallet.slp.named('wallet');
+    expect(m.name).toBe('wallet');
+    expect(m.network).toBe(Network.MAINNET);
+    expect(m.derivationPath).toBe("m/44'/245'/0'/0/0");
+
+    const t = await TestNetWallet.slp.named('testnetwallet');
+    expect(t.name).toBe('testnetwallet');
+    expect(t.network).toBe(Network.TESTNET);
+    expect(t.derivationPath).toBe("m/44'/245'/0'/0/0");
+
+    const r = await RegTestWallet.slp.named('regwallet');
+    expect(r.name).toBe('regwallet');
+    expect(r.network).toBe(Network.REGTEST);
+    expect(r.derivationPath).toBe("m/44'/245'/0'/0/0");
+
+
+    let wallet;
+    wallet = await Wallet.slp.fromSeed(new Array(12).join("abandon "));
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.MAINNET);
+
+    wallet = await TestNetWallet.slp.fromSeed(new Array(12).join("abandon "), "m/44'/200'/0'/0/0");
+    expect(wallet.derivationPath).toBe("m/44'/200'/0'/0/0");
+    expect(wallet.network).toBe(Network.TESTNET);
+  });
 });

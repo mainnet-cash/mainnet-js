@@ -41,7 +41,7 @@ export interface ElectrumRawTransaction {
 }
 
 export interface ElectrumRawTransactionVinScriptSig {
-  ams: string;
+  asm: string;
   hex: string;
 }
 
