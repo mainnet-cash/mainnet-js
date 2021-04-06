@@ -1,4 +1,14 @@
-import { Wallet } from "../wallet/Wif";
+import {
+  Wallet,
+  RegTestWallet,
+  TestNetWallet,
+  WifWallet,
+  TestNetWifWallet,
+  RegTestWifWallet,
+  WatchWallet,
+  TestNetWatchWallet,
+  RegTestWatchWallet,
+} from "../wallet/Wif";
 import {
   SlpFormattedUtxo,
   SlpGenesisOptions,
@@ -38,7 +48,7 @@ import {
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
 } from "../slp/SlpProvider";
-import { toSlpAddress } from "../util/bchaddr";
+import { toCashAddress, toSlpAddress } from "../util/bchaddr";
 import { GsppProvider } from "../slp/GsppProvider";
 
 /**
@@ -48,6 +58,9 @@ export class Slp {
   slpaddr: string;
   readonly wallet: Wallet;
   public provider: SlpProvider;
+  static get walletType() {
+    return Wallet;
+  }
 
   /**
    * Initializes an Slp Wallet.
@@ -684,4 +697,219 @@ export class Slp {
 
     return options;
   }
+
+  //#region Convenience methods to initialize Slp aware BCH wallet.
+
+  /**
+   * fromId - create an SLP aware wallet from encoded walletId string
+   *
+   * @param walletId   walletId options to steer the creation process
+   *
+   * @returns wallet instantiated accordingly to the walletId rules
+   */
+  public static async fromId(walletId: string): Promise<Wallet> {
+    const wallet = await this.walletType.fromId(walletId);
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * named - create an SLP aware named wallet
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   * @param force  force recreate wallet in the database if a record already exist
+   *
+   * @returns instantiated wallet
+   */
+  public static async named(
+    name: string,
+    dbName?: string,
+    force?: boolean
+  ): Promise<Wallet> {
+    const wallet = await this.walletType.named(name, dbName, force);
+    wallet.derivationPath = "m/44'/245'/0'/0/0";
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * fromSeed - create an SLP aware wallet using the seed phrase and derivation path
+   *
+   * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
+   * this derivation path is standard for Electron Cash SLP and other SLP enabled wallets
+   *
+   * @param seed   BIP39 12 word seed phrase
+   * @param derivationPath BIP44 HD wallet derivation path to get a single the private key from hierarchy
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromSeed(
+    seed: string,
+    derivationPath: string = "m/44'/245'/0'/0/0"
+  ): Promise<Wallet> {
+    const wallet = await this.walletType.fromSeed(seed, derivationPath);
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * newRandom - create an SLP aware random wallet
+   *
+   * if `name` parameter is specified, the wallet will also be persisted to DB
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns instantiated wallet
+   */
+  public static async newRandom(
+    name: string = "",
+    dbName?: string
+  ): Promise<Wallet> {
+    const wallet = await this.walletType.newRandom(name, dbName);
+    wallet.derivationPath = "m/44'/245'/0'/0/0";
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * fromWIF - create an SLP aware wallet using the private key supplied in `Wallet Import Format`
+   *
+   * @param wif   WIF encoded private key string
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromWIF(wif: string): Promise<Wallet> {
+    const wallet = await this.walletType.fromWIF(wif);
+    wallet.derivationPath = "m/44'/245'/0'/0/0";
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * watchOnly - create an SLP aware watch-only wallet
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   cashaddress or slpaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static async watchOnly(address: string): Promise<Wallet> {
+    const wallet = await this.walletType.watchOnly(toCashAddress(address));
+    wallet.derivationPath = "m/44'/245'/0'/0/0";
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * fromCashaddr - create an SLP aware watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   cashaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromCashaddr(address: string): Promise<Wallet> {
+    const wallet = await this.walletType.fromCashaddr(address);
+    wallet.derivationPath = "m/44'/245'/0'/0/0";
+    wallet._slpAware = true;
+    return wallet;
+  }
+
+  /**
+   * fromSlpaddr - create an SLP aware watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   slpaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromSlpaddr(address: string): Promise<Wallet> {
+    const wallet = await this.walletType.fromSlpaddr(address);
+    wallet.derivationPath = "m/44'/245'/0'/0/0";
+    wallet._slpAware = true;
+    return wallet;
+  }
+  //#endregion
 }
+
+//#region Specific wallet classes
+/**
+ * Class to manage an slp enabled testnet wallet.
+ */
+export class TestNetSlp extends Slp {
+  static get walletType() {
+    return TestNetWallet;
+  }
+}
+
+/**
+ * Class to manage an slp enabled regtest wallet.
+ */
+export class RegTestSlp extends Slp {
+  static get walletType() {
+    return RegTestWallet;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash wif wallet.
+ */
+export class WifSlp extends Slp {
+  static get walletType() {
+    return WifWallet;
+  }
+}
+
+/**
+ * Class to manage a testnet wif wallet.
+ */
+export class TestNetWifSlp extends Slp {
+  static get walletType() {
+    return TestNetWifWallet;
+  }
+}
+
+/**
+ * Class to manage a regtest wif wallet.
+ */
+export class RegTestWifSlp extends Slp {
+  static get walletType() {
+    return RegTestWifWallet;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash watch wallet.
+ */
+export class WatchSlp extends Slp {
+  static get walletType() {
+    return WatchWallet;
+  }
+}
+
+/**
+ * Class to manage a testnet watch wallet.
+ */
+export class TestNetWatchSlp extends Slp {
+  static get walletType() {
+    return TestNetWatchWallet;
+  }
+}
+
+/**
+ * Class to manage a regtest watch wallet.
+ */
+export class RegTestWatchSlp extends Slp {
+  static get walletType() {
+    return RegTestWatchWallet;
+  }
+}
+//#endregion

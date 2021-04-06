@@ -56,6 +56,25 @@ const slpBalance = ({ slpBalanceRequest }) => new Promise(
   },
 );
 /**
+* create a new SLP wallet
+*
+* walletRequest WalletRequest Request a new SLP wallet
+* returns WalletResponse
+* */
+const slpCreateWallet = ({ walletRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.createSlpWalletResponse(walletRequest);
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
 * Get an SLP deposit address in cash address format
 *
 * serializedWallet SerializedWallet Request for an SLP deposit address given a wallet 
@@ -313,6 +332,7 @@ const slpOutpoints = ({ serializedWallet }) => new Promise(
 module.exports = {
   slpAllBalances,
   slpBalance,
+  slpCreateWallet,
   slpDepositAddress,
   slpDepositQr,
   slpGenesis,

@@ -11,6 +11,7 @@ export interface WalletRequestI {
 export interface WalletResponseI {
   name: string;
   cashaddr: string;
+  slpaddr: string;
   walletId: string;
   network?: NetworkEnum;
   wif?: string;
@@ -36,6 +37,7 @@ export interface WalletInfoI {
 export interface SendRequestOptionsI {
   utxoIds?: string[];
   changeAddress?: string;
+  slpAware?: boolean;
 }
 
 export interface MnemonicI {
