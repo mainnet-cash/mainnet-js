@@ -17,6 +17,46 @@ describe("Test Wallet Slp Endpoints", () => {
   let tokenId: string;
 
   /**
+   * slpCreateWallet
+   */
+   it("Should create a named Mainnet SLP wallet with the API", async () => {
+    let req = {
+      name: "slpTest",
+      type : "seed",
+      network:"mainnet"
+    }
+
+    let resp = await request(app).post("/wallet/slp/create").send(req);
+    const body = resp.body;
+    expect(resp.statusCode).toBe(200);
+    expect(body!.name).toBe(req.name);
+    expect(body!.network).toBe(req.network);
+    expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
+    expect(body!.slpaddr!.startsWith("simpleledger:")).toBeTruthy();
+    expect(body!.derivationPath!).toBe("m/44'/245'/0'/0/0");
+    expect(body!.walletId!.startsWith("named:mainnet:")).toBeTruthy();
+  });
+
+  /**
+   * slpCreateWallet
+   */
+  it("Should create an unnamed Mainnet SLP wallet with the API", async () => {
+    let req = {
+      type : "seed",
+      network:"mainnet"
+    }
+
+    let resp = await request(app).post("/wallet/slp/create").send(req);
+    const body = resp.body;
+    expect(resp.statusCode).toBe(200);
+    expect(body!.network).toBe(req.network);
+    expect(body!.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
+    expect(body!.slpaddr!.startsWith("simpleledger:")).toBeTruthy();
+    expect(body!.derivationPath!).toBe("m/44'/245'/0'/0/0");
+    expect(body!.walletId!.startsWith("seed:mainnet:")).toBeTruthy();
+  });
+
+  /**
    * genesis
    */
   it("Should create a new token (genesis)", async () => {
@@ -198,7 +238,7 @@ describe("Test Wallet Slp Endpoints", () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      const bobsWalletResp = await request(app).post("/wallet/create").send({
+      const bobsWalletResp = await request(app).post("/wallet/slp/create").send({
         type: "wif",
         network: "regtest",
       });
@@ -242,7 +282,7 @@ describe("Test Wallet Slp Endpoints", () => {
     };
 
     const bobsWalletResp = await request(app)
-      .post("/wallet/create")
+      .post("/wallet/slp/create")
       .send(bobWalletReq);
     const bobsWallet = bobsWalletResp.body;
 

@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.8
+  version: 0.3.9
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -586,6 +586,30 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/slp/create:
+    post:
+      operationId: slpCreateWallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRequest'
+        description: Request a new SLP wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new SLP wallet
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -1428,6 +1452,7 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        slpaddr: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
         name: username1
       properties:
         walletId:
@@ -1443,6 +1468,11 @@ components:
           description: |
             The address in cashaddr format.
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+        slpaddr:
+          description: |
+            The SLP address of the wallet in cashaddr format.
+          example: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
           type: string
       type: object
     MineRequest:
@@ -1559,9 +1589,15 @@ components:
           type: array
         changeAddress:
           description: |
-            Cash address to watch
+            Cash address to receive change to
           example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
           type: string
+        slpAware:
+          description: If you have any SLP tokens on the address, you should set `slpAware`
+            to `true` to prevent accidental token burning So far this option is not
+            switched on by default
+          example: true
+          type: boolean
       type: object
     SlpSendRequestOptions:
       example:

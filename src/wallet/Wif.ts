@@ -59,7 +59,17 @@ import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { ElectrumRawTransaction } from "../network/interface";
 import { getRelayFeeCache } from "../network/getRelayFeeCache";
-import { Slp } from "./Slp";
+import {
+  RegTestSlp,
+  RegTestWatchSlp,
+  RegTestWifSlp,
+  Slp,
+  TestNetSlp,
+  TestNetWatchSlp,
+  TestNetWifSlp,
+  WatchSlp,
+  WifSlp,
+} from "./Slp";
 import axios from "axios";
 import { SlpSendResponse } from "../slp/interface";
 import { toCashAddress } from "../util/bchaddr";
@@ -74,7 +84,7 @@ type WatchBalanceCancel = () => void;
  */
 export class Wallet extends BaseWallet {
   cashaddr?: string;
-  derivationPath?: string;
+  derivationPath: string = "m/44'/0'/0'/0/0";
   mnemonic?: string;
   privateKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
@@ -96,13 +106,18 @@ export class Wallet extends BaseWallet {
   }
 
   // interface to slp functions. see Slp.ts
-  get slp() {
+  public get slp() {
     if (!this._slp) {
       this._slp = new Slp(this);
       this._slpAware = true;
     }
 
     return this._slp;
+  }
+
+  // interface to slp functions. see Slp.ts
+  public static get slp() {
+    return Slp;
   }
 
   public slpAware(value: boolean = true): Wallet {
@@ -143,7 +158,10 @@ export class Wallet extends BaseWallet {
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
-    this.derivationPath = derivationPath ? derivationPath : `m/44'/0'/0'/0/0`;
+    if (derivationPath) {
+      this.derivationPath = derivationPath;
+    }
+
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,
@@ -239,7 +257,7 @@ export class Wallet extends BaseWallet {
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
-    this.derivationPath = `m/44'/0'/0'/0/0`;
+
     let zerothChild = deriveHdPath(
       crypto,
       hdNode,
@@ -273,6 +291,13 @@ export class Wallet extends BaseWallet {
     return resp;
   }
 
+  /**
+   * fromId - create a wallet from encoded walletId string
+   *
+   * @param walletId   walletId options to steer the creation process
+   *
+   * @returns wallet instantiated accordingly to the walletId rules
+   */
   public static async fromId(walletId: string) {
     return await new this()._fromId(walletId);
   }
@@ -320,6 +345,15 @@ export class Wallet extends BaseWallet {
     }
   };
 
+  /**
+   * named - create a named wallet
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   * @param force  force recreate wallet in the database if a record already exist
+   *
+   * @returns instantiated wallet
+   */
   public static named(
     name: string,
     dbName?: string,
@@ -328,6 +362,17 @@ export class Wallet extends BaseWallet {
     return new this()._named(name, dbName, force);
   }
 
+  /**
+   * fromSeed - create a wallet using the seed phrase and derivation path
+   *
+   * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
+   * this derivation path is standard for Electron Cash SLP and other SLP enabled wallets
+   *
+   * @param seed   BIP39 12 word seed phrase
+   * @param derivationPath BIP44 HD wallet derivation path to get a single the private key from hierarchy
+   *
+   * @returns instantiated wallet
+   */
   public static fromSeed(
     seed: string,
     derivationPath?: string
@@ -335,18 +380,56 @@ export class Wallet extends BaseWallet {
     return new this().fromSeed(seed, derivationPath);
   }
 
-  public static newRandom(name = "", dbName?: string): Promise<Wallet> {
+  /**
+   * newRandom - create a random wallet
+   *
+   * if `name` parameter is specified, the wallet will also be persisted to DB
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns instantiated wallet
+   */
+  public static newRandom(name: string = "", dbName?: string): Promise<Wallet> {
     return new this()._newRandom(name, dbName);
   }
-  public static fromWIF(wif): Promise<Wallet> {
+
+  /**
+   * fromWIF - create a wallet using the private key supplied in `Wallet Import Format`
+   *
+   * @param wif   WIF encoded private key string
+   *
+   * @returns instantiated wallet
+   */
+  public static fromWIF(wif: string): Promise<Wallet> {
     return new this().fromWIF(wif);
   }
 
-  public static watchOnly(address): Promise<Wallet> {
+  /**
+   * watchOnly - create a watch-only wallet
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   cashaddress or slpaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static watchOnly(address: string): Promise<Wallet> {
     return new this().watchOnly(address);
   }
 
-  public static fromCashaddr(address): Promise<Wallet> {
+  /**
+   * fromCashaddr - create a watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   cashaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static fromCashaddr(address: string): Promise<Wallet> {
     const prefix = derivePrefix(address);
     return new this(
       "",
@@ -355,7 +438,17 @@ export class Wallet extends BaseWallet {
     ).watchOnly(address);
   }
 
-  public static fromSlpaddr(address): Promise<Wallet> {
+  /**
+   * fromSlpaddr - create an SLP aware watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   slpaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static fromSlpaddr(address: string): Promise<Wallet> {
     return this.fromCashaddr(toCashAddress(address));
   }
 
@@ -624,6 +717,10 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
 
+    if (options && options.slpAware) {
+      this._slpAware = true;
+    }
+
     // get inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
@@ -741,6 +838,10 @@ export class Wallet extends BaseWallet {
     }
     if (!this.cashaddr) {
       throw Error("attempted to send without a cashaddr");
+    }
+
+    if (options && options.slpAware) {
+      this._slpAware = true;
     }
 
     // get inputs from options or query all inputs
@@ -895,6 +996,11 @@ export class TestNetWallet extends Wallet {
       throw e;
     }
   }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return TestNetSlp;
+  }
 }
 
 /**
@@ -904,6 +1010,11 @@ export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest);
+  }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return RegTestSlp;
   }
 }
 
@@ -916,6 +1027,11 @@ export class WifWallet extends Wallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Wif);
   }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return WifSlp;
+  }
 }
 
 /**
@@ -926,6 +1042,11 @@ export class TestNetWifWallet extends Wallet {
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Wif);
+  }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return TestNetWifSlp;
   }
 }
 
@@ -938,6 +1059,11 @@ export class RegTestWifWallet extends Wallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Wif);
   }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return RegTestWifSlp;
+  }
 }
 
 /**
@@ -948,6 +1074,11 @@ export class WatchWallet extends Wallet {
   static walletType = WalletTypeEnum.Watch;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Watch);
+  }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return WatchSlp;
   }
 }
 
@@ -960,6 +1091,11 @@ export class TestNetWatchWallet extends Wallet {
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Watch);
   }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return TestNetWatchSlp;
+  }
 }
 
 /**
@@ -970,5 +1106,10 @@ export class RegTestWatchWallet extends Wallet {
   static walletType = WalletTypeEnum.Watch;
   constructor(name = "") {
     super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Watch);
+  }
+
+  // interface to static slp functions. see Slp.ts
+  public static get slp() {
+    return RegTestWatchSlp;
   }
 }

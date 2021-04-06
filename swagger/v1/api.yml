@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.8
+  version: 0.3.9
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -568,6 +568,30 @@ paths:
       summary: Returns a boolean indicating whether message was valid for a given address
       tags:
         - wallet
+
+  /wallet/slp/create:
+    post:
+      operationId: slpCreateWallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletRequest"
+        description: Request a new SLP wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new SLP wallet
+      tags:
+        - wallet/slp
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -1306,6 +1330,11 @@ components:
             The address in cashaddr format.
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
+        slpaddr:
+          description: |
+            The SLP address of the wallet in cashaddr format.
+          example: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
+          type: string
       type: object
       anyOf:
        - $ref: "#/components/schemas/Wif"
@@ -1427,14 +1456,20 @@ components:
           type: string
           example: "bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2"
           description: |
-            Cash address to watch
+            Cash address to receive change to
+        slpAware:
+          type: boolean
+          example: true
+          description:
+            If you have any SLP tokens on the address, you should set `slpAware` to `true` to prevent accidental token burning
+            So far this option is not switched on by default
     SlpSendRequestOptions:
       type: object
       properties:
         utxoIds:
           type: array
           items:
-            $ref: "#/components/schemas/SlpSerializedUtxo"            
+            $ref: "#/components/schemas/SlpSerializedUtxo"
     SerializedUtxo:
       type: string
       example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000"
