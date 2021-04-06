@@ -368,7 +368,7 @@ describe(`Test Wallet library`, () => {
   test("Send a transaction on regtest, send it back", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
-    const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF);
+    const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
     const bob = await createWallet({
       type: WalletTypeEnum.Seed,
       network: "regtest",

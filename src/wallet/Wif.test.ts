@@ -305,7 +305,7 @@ describe(`Watch only Wallets`, () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       let alice = await TestNetWallet.watchOnly(
-        process.env.ALICE_TESTNET_ADDRESS
+        process.env.ALICE_TESTNET_ADDRESS!
       ); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
