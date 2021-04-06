@@ -88,14 +88,16 @@ export async function createWallet(body: WalletRequestI): Promise<Wallet> {
  * @param body A wallet request object
  * @returns A promise to a new wallet object
  */
- export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
+export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   let wallet;
   let walletType = body.type ? body.type : "seed";
   let networkType = body.network ? body.network : "mainnet";
 
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
-    wallet = await walletClassMap[walletType][networkType]().slp.named(body.name);
+    wallet = await walletClassMap[walletType][networkType]().slp.named(
+      body.name
+    );
     if (wallet.network != networkType) {
       throw Error(
         `A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`
@@ -137,7 +139,7 @@ export async function createWalletResponse(
  * @param walletRequest A wallet request object
  * @returns A new wallet object
  */
- export async function createSlpWalletResponse(
+export async function createSlpWalletResponse(
   walletRequest: WalletRequestI
 ): Promise<WalletResponseI> {
   let wallet = await createSlpWallet(walletRequest);

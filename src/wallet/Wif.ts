@@ -59,7 +59,17 @@ import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { ElectrumRawTransaction } from "../network/interface";
 import { getRelayFeeCache } from "../network/getRelayFeeCache";
-import { RegTestSlp, RegTestWatchSlp, RegTestWifSlp, Slp, TestNetSlp, TestNetWatchSlp, TestNetWifSlp, WatchSlp, WifSlp } from "./Slp";
+import {
+  RegTestSlp,
+  RegTestWatchSlp,
+  RegTestWifSlp,
+  Slp,
+  TestNetSlp,
+  TestNetWatchSlp,
+  TestNetWifSlp,
+  WatchSlp,
+  WifSlp,
+} from "./Slp";
 import axios from "axios";
 import { SlpSendResponse } from "../slp/interface";
 import { toCashAddress } from "../util/bchaddr";

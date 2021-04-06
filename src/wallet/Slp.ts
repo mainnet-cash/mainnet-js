@@ -1,4 +1,14 @@
-import { Wallet, RegTestWallet, TestNetWallet, WifWallet, TestNetWifWallet, RegTestWifWallet, WatchWallet, TestNetWatchWallet, RegTestWatchWallet } from "../wallet/Wif";
+import {
+  Wallet,
+  RegTestWallet,
+  TestNetWallet,
+  WifWallet,
+  TestNetWifWallet,
+  RegTestWifWallet,
+  WatchWallet,
+  TestNetWatchWallet,
+  RegTestWatchWallet,
+} from "../wallet/Wif";
 import {
   SlpFormattedUtxo,
   SlpGenesisOptions,
@@ -48,7 +58,9 @@ export class Slp {
   slpaddr: string;
   readonly wallet: Wallet;
   public provider: SlpProvider;
-  static get walletType() { return Wallet; }
+  static get walletType() {
+    return Wallet;
+  }
 
   /**
    * Initializes an Slp Wallet.
@@ -350,7 +362,9 @@ export class Slp {
     parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
     if (!parentUtxos.length) {
-      throw new Error(`You do not own any NFT parent tokens with id ${options.parentTokenId}`);
+      throw new Error(
+        `You do not own any NFT parent tokens with id ${options.parentTokenId}`
+      );
     }
 
     if (parentUtxos[0].type !== SlpTokenType.NftParent) {
@@ -697,7 +711,7 @@ export class Slp {
     const wallet = await this.walletType.fromId(walletId);
     wallet._slpAware = true;
     return wallet;
-  };
+  }
 
   /**
    * named - create an SLP aware named wallet
@@ -749,7 +763,10 @@ export class Slp {
    *
    * @returns instantiated wallet
    */
-  public static async newRandom(name: string = "", dbName?: string): Promise<Wallet> {
+  public static async newRandom(
+    name: string = "",
+    dbName?: string
+  ): Promise<Wallet> {
     const wallet = await this.walletType.newRandom(name, dbName);
     wallet.derivationPath = "m/44'/245'/0'/0/0";
     wallet._slpAware = true;
@@ -827,56 +844,72 @@ export class Slp {
 /**
  * Class to manage an slp enabled testnet wallet.
  */
- export class TestNetSlp extends Slp {
-  static get walletType() { return TestNetWallet };
+export class TestNetSlp extends Slp {
+  static get walletType() {
+    return TestNetWallet;
+  }
 }
 
 /**
  * Class to manage an slp enabled regtest wallet.
  */
 export class RegTestSlp extends Slp {
-  static get walletType() { return RegTestWallet };
+  static get walletType() {
+    return RegTestWallet;
+  }
 }
 
 /**
  * Class to manage a bitcoin cash wif wallet.
  */
 export class WifSlp extends Slp {
-  static get walletType() { return WifWallet };
+  static get walletType() {
+    return WifWallet;
+  }
 }
 
 /**
  * Class to manage a testnet wif wallet.
  */
 export class TestNetWifSlp extends Slp {
-  static get walletType() { return TestNetWifWallet };
+  static get walletType() {
+    return TestNetWifWallet;
+  }
 }
 
 /**
  * Class to manage a regtest wif wallet.
  */
 export class RegTestWifSlp extends Slp {
-  static get walletType() { return RegTestWifWallet };
+  static get walletType() {
+    return RegTestWifWallet;
+  }
 }
 
 /**
  * Class to manage a bitcoin cash watch wallet.
  */
 export class WatchSlp extends Slp {
-  static get walletType() { return WatchWallet };
+  static get walletType() {
+    return WatchWallet;
+  }
 }
 
 /**
  * Class to manage a testnet watch wallet.
  */
 export class TestNetWatchSlp extends Slp {
-  static get walletType() { return TestNetWatchWallet };
+  static get walletType() {
+    return TestNetWatchWallet;
+  }
 }
 
 /**
  * Class to manage a regtest watch wallet.
  */
 export class RegTestWatchSlp extends Slp {
-  static get walletType() { return RegTestWatchWallet };
+  static get walletType() {
+    return RegTestWatchWallet;
+  }
 }
 //#endregion
