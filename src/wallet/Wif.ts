@@ -707,6 +707,10 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
 
+    if (options && options.slpAware) {
+      this._slpAware = true;
+    }
+
     // get inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
@@ -824,6 +828,10 @@ export class Wallet extends BaseWallet {
     }
     if (!this.cashaddr) {
       throw Error("attempted to send without a cashaddr");
+    }
+
+    if (options && options.slpAware) {
+      this._slpAware = true;
     }
 
     // get inputs from options or query all inputs

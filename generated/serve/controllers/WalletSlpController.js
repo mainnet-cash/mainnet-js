@@ -24,6 +24,10 @@ const slpBalance = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpBalance);
 };
 
+const slpCreateWallet = async (request, response) => {
+  await Controller.handleRequest(request, response, service.slpCreateWallet);
+};
+
 const slpDepositAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpDepositAddress);
 };
@@ -66,6 +70,7 @@ module.exports = {
   nftParentGenesis,
   slpAllBalances,
   slpBalance,
+  slpCreateWallet,
   slpDepositAddress,
   slpDepositQr,
   slpGenesis,

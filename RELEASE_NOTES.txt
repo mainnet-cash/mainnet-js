@@ -2,6 +2,8 @@ Newest changes
 --------------
 
 Changed nftChildGenesis interface and move parentTokenId to genesis options for consistency between js and REST.
+Added convenince constructors to create SLP aware wallets, e.g. Wallet.slp.newRandom()
+Added REST interfaces to create SLP aware wallets - wallet/slp/create
 
 0.3.7
 

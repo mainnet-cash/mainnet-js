@@ -586,6 +586,30 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/slp/create:
+    post:
+      operationId: slpCreateWallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRequest'
+        description: Request a new SLP wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new SLP wallet
+      tags:
+      - wallet/slp
+      x-eov-operation-handler: controllers/WalletSlpController
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -1559,9 +1583,15 @@ components:
           type: array
         changeAddress:
           description: |
-            Cash address to watch
+            Cash address to receive change to
           example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
           type: string
+        slpAware:
+          description: If you have any SLP tokens on the address, you should set `slpAware`
+            to `true` to prevent accidental token burning So far this option is not
+            switched on by default
+          example: true
+          type: boolean
       type: object
     SlpSendRequestOptions:
       example:

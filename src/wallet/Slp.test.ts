@@ -12,6 +12,8 @@ import { delay } from "../util/delay";
 import BigNumber from "bignumber.js";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
 import { GsppProvider } from "../slp/GsppProvider";
+import { createSlpWallet } from "./createWallet";
+import { WalletTypeEnum } from "./enum";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -895,26 +897,71 @@ describe("Slp wallet tests", () => {
     const m = await Wallet.slp.named('wallet');
     expect(m.name).toBe('wallet');
     expect(m.network).toBe(Network.MAINNET);
+    expect(m.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(m.derivationPath).toBe("m/44'/245'/0'/0/0");
 
     const t = await TestNetWallet.slp.named('testnetwallet');
     expect(t.name).toBe('testnetwallet');
     expect(t.network).toBe(Network.TESTNET);
+    expect(t.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(t.derivationPath).toBe("m/44'/245'/0'/0/0");
 
     const r = await RegTestWallet.slp.named('regwallet');
     expect(r.name).toBe('regwallet');
     expect(r.network).toBe(Network.REGTEST);
+    expect(r.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(r.derivationPath).toBe("m/44'/245'/0'/0/0");
 
 
-    let wallet;
+    let wallet: Wallet;
     wallet = await Wallet.slp.fromSeed(new Array(12).join("abandon "));
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.network).toBe(Network.MAINNET);
 
     wallet = await TestNetWallet.slp.fromSeed(new Array(12).join("abandon "), "m/44'/200'/0'/0/0");
     expect(wallet.derivationPath).toBe("m/44'/200'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/200'/0'/0/0");
     expect(wallet.network).toBe(Network.TESTNET);
+
+    wallet = await Wallet.slp.newRandom();
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.MAINNET);
+
+    wallet = await Wallet.slp.newRandom("name", "name");
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.MAINNET);
+
+    wallet = await createSlpWallet({name: "test", network: "mainnet", type: WalletTypeEnum.Seed});
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.MAINNET);
+
+    wallet = await createSlpWallet({name: "test2", network: "testnet", type: WalletTypeEnum.Seed});
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.TESTNET);
+
+    wallet = await createSlpWallet({name: "test3", network: "regtest", type: WalletTypeEnum.Seed});
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.REGTEST);
+
+    wallet = await createSlpWallet({network: "mainnet", type: WalletTypeEnum.Seed});
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.MAINNET);
+
+    wallet = await createSlpWallet({network: "testnet", type: WalletTypeEnum.Seed});
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.TESTNET);
+
+    wallet = await createSlpWallet({network: "regtest", type: WalletTypeEnum.Seed});
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.REGTEST);
   });
 });
