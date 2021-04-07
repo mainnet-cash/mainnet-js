@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+0.3.11
+
+- Rework webhooks to be provider agnostic - REST can register and handle webhooks from all networks
+- Fix a bug causing webhooks to not start
+- Document usage of database and env variables, see `generated/serve/docker/README.md`
+- Improve REST webhook tests
+- Update CI workflow to run in parallel
+- Update Publish workflow to run in parallel
+
 0.3.10
 
 - Fix deploy and pubished packages
