@@ -7,7 +7,14 @@ var app;
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
+
+    mainnet.WebhookWorker.debug.setupAxiosMocks();
   });
+
+  beforeEach(function () {
+    mainnet.WebhookWorker.debug.reset();
+  });
+
   afterAll(async function () {
     await server.killElectrum()
     app.close();
@@ -23,11 +30,30 @@ describe("Test Webhook Endpoints", () => {
       .post("/webhook/watch_address")
       .send({
         cashaddr: bobWallet.cashaddr,
-        url: 'http://example.com/',
+        url: 'http://example.com/balance',
         type: 'balance'
       });
+    if (resp.statusCode !== 200) {
+      console.log(resp.error.text);
+    }
     expect(resp.statusCode).toEqual(200);
     expect(resp.body!.id).toBeGreaterThan(0);
+
+    await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF!}`,
+        to: [
+          {
+            cashaddr: bobWallet.cashaddr!,
+            unit: 'satoshis',
+            value: 2000,
+          },
+        ],
+      });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(mainnet.WebhookWorker.debug.responses["http://example.com/balance"].length).toBe(1);
   });
 
   it("Should register a transaction watch webhook", async () => {
@@ -37,11 +63,30 @@ describe("Test Webhook Endpoints", () => {
       .post("/webhook/watch_address")
       .send({
         cashaddr: bobWallet.cashaddr,
-        url: 'http://example.com/',
+        url: 'http://example.com/transaction',
         type: 'transaction:in'
       });
+    if (resp.statusCode !== 200) {
+      console.log(resp.error.text);
+    }
     expect(resp.statusCode).toEqual(200);
     expect(resp.body!.id).toBeGreaterThan(0);
+
+    await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF!}`,
+        to: [
+          {
+            cashaddr: bobWallet.cashaddr!,
+            unit: 'satoshis',
+            value: 2000,
+          },
+        ],
+      });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(mainnet.WebhookWorker.debug.responses["http://example.com/transaction"].length).toBe(1);
   });
 
   it("Should fail register a webhook of unknown type", async () => {

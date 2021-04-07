@@ -1,13 +1,11 @@
 import WebhookWorker from "./WebhookWorker";
 import { default as axios } from "axios";
 import { Network } from "../interface";
-import { initProviders, disconnectProviders } from "../network/Connection";
 
 import { RegTestWallet } from "../wallet/Wif";
 import { mine } from "../mine/mine";
 
 let worker: WebhookWorker;
-let responses: any = {};
 let alice = "";
 let aliceWif = "";
 
@@ -26,35 +24,8 @@ describe("Webhook worker tests", () => {
         console.error("regtest env vars not set");
       }
 
-      axios.interceptors.request.use((config) => {
-        if (config.url!.indexOf("example.com")) {
-          config.url = "x" + config.url!;
-        }
-        return config;
-      });
-
-      axios.interceptors.response.use(
-        (response) => {
-          return response;
-        },
-        (error) => {
-          let url = error.config.url!.slice(1);
-
-          if (url in responses) {
-            responses[url].push(error);
-          } else {
-            responses[url] = [error];
-          }
-
-          if (url === "http://example.com/fail")
-            return Promise.reject({ status: 503 });
-
-          return Promise.resolve({ status: 200 });
-        }
-      );
-      await initProviders([Network.REGTEST]);
-      worker = new WebhookWorker(Network.REGTEST);
-      await worker.init();
+      WebhookWorker.debug.setupAxiosMocks();
+      worker = await WebhookWorker.instance();
     } catch (e) {
       throw e;
     }
@@ -65,13 +36,12 @@ describe("Webhook worker tests", () => {
   });
 
   afterEach(async () => {
-    responses = {};
+    WebhookWorker.debug.reset();
   });
 
   afterAll(async () => {
     await worker.destroy();
     await worker.db.close();
-    await disconnectProviders([Network.REGTEST]);
   });
 
   test("Test posting hook", async () => {
@@ -81,7 +51,9 @@ describe("Webhook worker tests", () => {
     let fail = await worker.postWebHook("http://example.com/fail", {});
     expect(fail).toBe(false);
 
-    expect(responses["http://example.com/fail"].length).toBe(1);
+    expect(
+      WebhookWorker.debug.responses["http://example.com/fail"].length
+    ).toBe(1);
   });
 
   test("Test empty hook db", async () => {
@@ -89,7 +61,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(0);
-          expect(responses).toStrictEqual({});
+          expect(WebhookWorker.debug.responses).toStrictEqual({});
           resolve(true);
         }, 0)
       );
@@ -116,7 +88,7 @@ describe("Webhook worker tests", () => {
     try {
       expect(worker.activeHooks.size).toBe(0);
       expect((await worker.db.getWebhooks()).length).toBe(0);
-      expect(responses).toStrictEqual({});
+      expect(WebhookWorker.debug.responses).toStrictEqual({});
     } catch (e) {
       console.log(e, e.stack, e.message);
       throw e;
@@ -148,7 +120,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/success"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/success"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);
@@ -182,7 +156,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/fail"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/fail"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           // return funds
@@ -221,7 +197,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/bob"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/bob"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -259,7 +237,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/bob"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/bob"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -299,7 +279,9 @@ describe("Webhook worker tests", () => {
       expect(hook!.status).not.toBe("");
       expect(hook!.tx_seen).not.toBe([]);
       hook!.tx_seen[0];
-      expect(responses["http://example.com/bob"].length).toBe(1);
+      expect(
+        WebhookWorker.debug.responses["http://example.com/bob"].length
+      ).toBe(1);
 
       // shutdown
       await worker.destroy();
@@ -307,7 +289,6 @@ describe("Webhook worker tests", () => {
 
       // also mine a block while offline)
       await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
-      await worker.provider.waitForBlock();
 
       // make two more transactions "offline"
       await aliceWallet.send([
@@ -324,19 +305,18 @@ describe("Webhook worker tests", () => {
           unit: "satoshis",
         },
       ]);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
       await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
-      await worker.provider.waitForBlock();
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // wait worker to process the transactions occured while offline
-      await worker.provider.disconnect();
-      await worker.provider.connect();
       await worker.init();
 
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(1);
-          expect(responses["http://example.com/bob"].length).toBe(3);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/bob"].length
+          ).toBe(3);
 
           resolve(true);
         }, 10000)
@@ -372,7 +352,10 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/watchBalance"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/watchBalance"]
+              .length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);
