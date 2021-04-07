@@ -11,11 +11,8 @@ const mainnet = require("mainnet-js");
 const watchAddress = ({ watchAddressRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let network = process.env.JEST_WORKER_ID === undefined ? mainnet.Network.MAINNET : mainnet.Network.REGTEST;
-
-      const worker = new mainnet.WebhookWorker(network);
-      const id =  await worker.registerWebhook({ ...watchAddressRequest }, false);
-      await worker.destroy();
+      const worker = await mainnet.WebhookWorker.instance();
+      const id =  await worker.registerWebhook({ ...watchAddressRequest }, true);
       resolve(Service.successResponse({
         id: id,
       }));
