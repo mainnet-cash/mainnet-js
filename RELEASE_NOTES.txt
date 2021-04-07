@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.10
+
+- Fix deploy and pubished packages
+
 0.3.9
 
 - Changed nftChildGenesis interface and move parentTokenId to genesis options for consistency between js and REST.
