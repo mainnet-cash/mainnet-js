@@ -311,4 +311,41 @@ export default class WebhookWorker {
       return false;
     }
   }
+
+  public static debug = class {
+    static setupAxiosMocks() {
+      axios.interceptors.request.use((config) => {
+        if (config.url!.indexOf("example.com")) {
+          config.url = "x" + config.url!;
+        }
+        return config;
+      });
+
+      axios.interceptors.response.use(
+        (response) => {
+          return response;
+        },
+        (error) => {
+          let url = error.config.url!.slice(1);
+
+          if (url in this.responses) {
+            this.responses[url].push(error);
+          } else {
+            this.responses[url] = [error];
+          }
+
+          if (url === "http://example.com/fail")
+            return Promise.reject({ status: 503 });
+
+          return Promise.resolve({ status: 200 });
+        }
+      );
+    }
+
+    static reset() {
+      this.responses = {};
+    }
+
+    static responses: any = {};
+  }
 }
