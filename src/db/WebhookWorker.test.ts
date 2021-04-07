@@ -1,7 +1,6 @@
 import WebhookWorker from "./WebhookWorker";
 import { default as axios } from "axios";
 import { Network } from "../interface";
-import { initProviders, disconnectProviders } from "../network/Connection";
 
 import { RegTestWallet } from "../wallet/Wif";
 import { mine } from "../mine/mine";
@@ -52,9 +51,7 @@ describe("Webhook worker tests", () => {
           return Promise.resolve({ status: 200 });
         }
       );
-      await initProviders([Network.REGTEST]);
-      worker = new WebhookWorker(Network.REGTEST);
-      await worker.init();
+      worker = await WebhookWorker.instance();
     } catch (e) {
       throw e;
     }
@@ -71,7 +68,6 @@ describe("Webhook worker tests", () => {
   afterAll(async () => {
     await worker.destroy();
     await worker.db.close();
-    await disconnectProviders([Network.REGTEST]);
   });
 
   test("Test posting hook", async () => {
@@ -307,7 +303,6 @@ describe("Webhook worker tests", () => {
 
       // also mine a block while offline)
       await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
-      await worker.provider.waitForBlock();
 
       // make two more transactions "offline"
       await aliceWallet.send([
@@ -326,11 +321,8 @@ describe("Webhook worker tests", () => {
       ]);
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
-      await worker.provider.waitForBlock();
 
       // wait worker to process the transactions occured while offline
-      await worker.provider.disconnect();
-      await worker.provider.connect();
       await worker.init();
 
       await new Promise((resolve) =>

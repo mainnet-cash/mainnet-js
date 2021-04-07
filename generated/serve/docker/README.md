@@ -33,6 +33,7 @@ Then you can target your browser or API consumers to http://localhost
 
 ### SSL. Secured with letsencrypt
 You can alternatively run the server in secure mode with SSL certificates which will be fetched from https://letsencrypt.org
+
 For this you must own a web server with a valid domain name and have root access to it.
 This is required by letsencrypt to prove your ownership of the server and its authenticity.
 
@@ -66,7 +67,6 @@ mkdir -p certs
 openssl req -x509 -newkey rsa:4096 -out certs/fullchain.pem -keyout certs/privkey.pem -nodes -subj '/CN=localhost'
 ```
 
-
 Note, that your web server will be visible to the outer world.
 
 ## Running docker containers in background
@@ -82,3 +82,17 @@ execute
 ```bash
 sudo docker run -d ....
 ```
+
+## Database connectivity
+
+Postgresql is required if you plan to use named (persistent) wallets and webhooks. You can either use a postgres docker container or a system-wide postgres installation of your host OS. In mainnet.cash we use `postgres:12-alpine` image. You can refer to our docker configuration used for regression tests located in `jest/regtest-docker-compose.yml`. The configuration is governed by `DATABASE_URL` environment variable.
+
+Example would be:
+
+```bash
+sudo docker run -d --env DATABASE_URL=postgres://postgres:trusted@localhost:15432/wallet -p 3000:80 mainnet/mainnet-rest
+```
+
+## Webhooks
+
+You can change maximum webhook duration with the `WEBHOOK_EXPIRE_TIMEOUT_SECONDS` environment variable. The default is 86400 seconds which is 24 hours. After this interval the webhook will be removed from DB.

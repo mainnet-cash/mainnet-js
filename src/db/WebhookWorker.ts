@@ -2,10 +2,9 @@ import { default as SqlProvider } from "../db/SqlProvider";
 import { RegisterWebhookParams, WebhookI } from "../db/interface";
 
 import { Network, TxI } from "../interface";
-import NetworkProvider from "../network/NetworkProvider";
 import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
-import { getNetworkProvider } from "../network";
 import { ElectrumRawTransaction } from "../network/interface";
+import { Wallet } from "../wallet/Wif";
 
 const axios = require("axios").default;
 
@@ -15,13 +14,22 @@ export default class WebhookWorker {
     number,
     (data: any | string | Array<string>) => void
   > = new Map();
-  provider: NetworkProvider;
   db: SqlProvider;
   interval: any = undefined;
   seenStatuses: string[] = [];
 
+  private static _instance: WebhookWorker;
+
+  static async instance() {
+    if (!WebhookWorker._instance) {
+      WebhookWorker._instance = new WebhookWorker();
+      await WebhookWorker._instance.init();
+    }
+
+    return WebhookWorker._instance;
+  }
+
   constructor(network: Network = Network.MAINNET) {
-    this.provider = getNetworkProvider(network, undefined, true);
     this.db = new SqlProvider(network);
   }
 
@@ -137,14 +145,17 @@ export default class WebhookWorker {
     };
 
     this.callbacks.set(hook.id!, webhookCallback);
-    await this.provider.subscribeToAddress(hook.cashaddr, webhookCallback);
+    const wallet = await Wallet.fromCashaddr(hook.cashaddr);
+    await wallet.provider!.subscribeToAddress(hook.cashaddr, webhookCallback);
   }
 
   async webhookHandler(hook: WebhookI, status: string): Promise<void> {
     // console.debug("Dispatching action for a webhook", JSON.stringify(hook));
 
+    const wallet = await Wallet.fromCashaddr(hook.cashaddr);
+
     // get transactions
-    const history: TxI[] = await this.provider.getHistory(hook.cashaddr);
+    const history: TxI[] = await wallet.provider!.getHistory(hook.cashaddr);
 
     // figure out which transactions to send to the hook
     let txs: TxI[] = [];
@@ -184,11 +195,11 @@ export default class WebhookWorker {
 
       if (hook.type.indexOf("transaction:") >= 0) {
         // console.debug("Getting raw tx", tx.tx_hash);
-        const rawTx: ElectrumRawTransaction = await this.provider.getRawTransactionObject(
+        const rawTx: ElectrumRawTransaction = await wallet.provider!.getRawTransactionObject(
           tx.tx_hash
         );
         const parentTxs: ElectrumRawTransaction[] = await Promise.all(
-          rawTx.vin.map((t) => this.provider.getRawTransactionObject(t.txid))
+          rawTx.vin.map((t) => wallet.provider!.getRawTransactionObject(t.txid))
         );
         // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
@@ -226,7 +237,7 @@ export default class WebhookWorker {
         }
       } else if (hook.type.indexOf("balance") >= 0) {
         // watching address balance
-        const balanceSat = await this.provider!.getBalance(hook.cashaddr);
+        const balanceSat = await wallet.provider!.getBalance(hook.cashaddr);
         const balanceObject = await balanceResponseFromSatoshi(balanceSat);
         result = await this.postWebHook(hook.hook_url, balanceObject);
       }
@@ -279,7 +290,9 @@ export default class WebhookWorker {
 
   async stopHook(hook: WebhookI): Promise<void> {
     if (this.activeHooks.has(hook.id!)) {
-      await this.provider.unsubscribeFromAddress(
+      const wallet = await Wallet.fromCashaddr(hook.cashaddr);
+
+      await wallet.provider!.unsubscribeFromAddress(
         hook.cashaddr,
         this.callbacks.get(hook.id!)!
       );
