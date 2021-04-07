@@ -36,7 +36,7 @@ describe("Webhook worker tests", () => {
   });
 
   afterEach(async () => {
-    WebhookWorker.debug.reset();;
+    WebhookWorker.debug.reset();
   });
 
   afterAll(async () => {
@@ -51,7 +51,9 @@ describe("Webhook worker tests", () => {
     let fail = await worker.postWebHook("http://example.com/fail", {});
     expect(fail).toBe(false);
 
-    expect(WebhookWorker.debug.responses["http://example.com/fail"].length).toBe(1);
+    expect(
+      WebhookWorker.debug.responses["http://example.com/fail"].length
+    ).toBe(1);
   });
 
   test("Test empty hook db", async () => {
@@ -118,7 +120,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(WebhookWorker.debug.responses["http://example.com/success"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/success"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);
@@ -152,7 +156,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(WebhookWorker.debug.responses["http://example.com/fail"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/fail"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           // return funds
@@ -191,7 +197,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(WebhookWorker.debug.responses["http://example.com/bob"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/bob"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -229,7 +237,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(WebhookWorker.debug.responses["http://example.com/bob"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/bob"].length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -269,7 +279,9 @@ describe("Webhook worker tests", () => {
       expect(hook!.status).not.toBe("");
       expect(hook!.tx_seen).not.toBe([]);
       hook!.tx_seen[0];
-      expect(WebhookWorker.debug.responses["http://example.com/bob"].length).toBe(1);
+      expect(
+        WebhookWorker.debug.responses["http://example.com/bob"].length
+      ).toBe(1);
 
       // shutdown
       await worker.destroy();
@@ -302,7 +314,9 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(1);
-          expect(WebhookWorker.debug.responses["http://example.com/bob"].length).toBe(3);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/bob"].length
+          ).toBe(3);
 
           resolve(true);
         }, 10000)
@@ -338,7 +352,10 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(WebhookWorker.debug.responses["http://example.com/watchBalance"].length).toBe(1);
+          expect(
+            WebhookWorker.debug.responses["http://example.com/watchBalance"]
+              .length
+          ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);

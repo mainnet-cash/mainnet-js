@@ -16,7 +16,9 @@ export default class SqlProvider implements StorageProvider {
     this.walletTable = walletTable ? walletTable : "wallet";
     this.webhookTable = "webhook";
     if (!process.env.DATABASE_URL) {
-      throw new Error("Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set");
+      throw new Error(
+        "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
+      );
     }
     const dbConfig = parseDbUrl(process.env.DATABASE_URL);
     this.db = new Pool(dbConfig);

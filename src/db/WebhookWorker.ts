@@ -347,5 +347,5 @@ export default class WebhookWorker {
     }
 
     static responses: any = {};
-  }
+  };
 }
