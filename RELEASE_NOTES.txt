@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.12
+
+- Fix docker publishing
+
 0.3.11
 
 - Rework webhooks to be provider agnostic - REST can register and handle webhooks from all networks

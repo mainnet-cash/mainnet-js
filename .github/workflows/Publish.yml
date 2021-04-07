@@ -46,7 +46,7 @@ jobs:
   # Build docker image with mainnet REST API server for self hosting
   # More info in generated/serve/docker/README.md
   publish-docker:
-    needs: build
+    needs: publish-npm
     runs-on: ubuntu-latest
     steps:
       # Build project
