@@ -1,8 +1,9 @@
 import StorageProvider from "./StorageProvider";
-import { WalletI, WebhookI } from "./interface";
+import { WalletI } from "./interface";
 import { Pool } from "pg";
 import { default as format } from "pg-format";
 import { TxI } from "../interface";
+import { WebhookI } from "../webhook/interface";
 var parseDbUrl = require("parse-database-url");
 
 export default class SqlProvider implements StorageProvider {

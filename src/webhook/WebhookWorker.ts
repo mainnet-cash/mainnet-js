@@ -1,5 +1,5 @@
 import { default as SqlProvider } from "../db/SqlProvider";
-import { RegisterWebhookParams, WebhookI } from "../db/interface";
+import { RegisterWebhookParams, WebhookI } from "./interface";
 
 import { Network, TxI } from "../interface";
 import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
@@ -117,6 +117,15 @@ export default class WebhookWorker {
   }
 
   async startHook(hook: WebhookI): Promise<void> {
+    const wallet = await Wallet.fromCashaddr(hook.cashaddr);
+    const stopHookCalback = async () => {
+      await wallet.provider!.unsubscribeFromAddress(
+        hook.cashaddr,
+        this.callbacks.get(hook.id!)!
+      );
+    }
+    hook.stopCallback = stopHookCalback;
+
     const webhookCallback = async (data: string | Array<string>) => {
       // console.debug(data);
       let status: string = "";
@@ -145,7 +154,6 @@ export default class WebhookWorker {
     };
 
     this.callbacks.set(hook.id!, webhookCallback);
-    const wallet = await Wallet.fromCashaddr(hook.cashaddr);
     await wallet.provider!.subscribeToAddress(hook.cashaddr, webhookCallback);
   }
 
@@ -290,12 +298,7 @@ export default class WebhookWorker {
 
   async stopHook(hook: WebhookI): Promise<void> {
     if (this.activeHooks.has(hook.id!)) {
-      const wallet = await Wallet.fromCashaddr(hook.cashaddr);
-
-      await wallet.provider!.unsubscribeFromAddress(
-        hook.cashaddr,
-        this.callbacks.get(hook.id!)!
-      );
+      await hook.stopCallback!();
       this.activeHooks.delete(hook.id!);
       this.callbacks.delete(hook.id!);
     }
@@ -347,5 +350,5 @@ export default class WebhookWorker {
     }
 
     static responses: any = {};
-  };
+  }
 }

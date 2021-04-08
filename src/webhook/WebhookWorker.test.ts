@@ -1,7 +1,4 @@
-import WebhookWorker from "./WebhookWorker";
-import { default as axios } from "axios";
-import { Network } from "../interface";
-
+import WebhookWorker from "../webhook/WebhookWorker";
 import { RegTestWallet } from "../wallet/Wif";
 import { mine } from "../mine/mine";
 
