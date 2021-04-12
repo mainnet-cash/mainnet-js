@@ -8,7 +8,7 @@ import {
 } from "./interface";
 import BigNumber from "bignumber.js";
 
-export type SlpWatchTransactionCallback = (tx: SlpTxI) => boolean | void;
+export type SlpWatchTransactionCallback = (tx: SlpTxI) => boolean | void | Promise<boolean | void>;
 export type SlpCancelWatchFn = () => void;
 export type SlpWatchBalanceCallback = (
   balance: SlpTokenBalance

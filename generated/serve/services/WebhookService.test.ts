@@ -8,11 +8,11 @@ describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
 
-    mainnet.WebhookWorker.debug.setupAxiosMocks();
+    mainnet.Webhook.debug.setupAxiosMocks();
   });
 
   beforeEach(function () {
-    mainnet.WebhookWorker.debug.reset();
+    mainnet.Webhook.debug.reset();
   });
 
   afterAll(async function () {
@@ -53,7 +53,7 @@ describe("Test Webhook Endpoints", () => {
       });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(mainnet.WebhookWorker.debug.responses["http://example.com/balance"].length).toBe(1);
+    expect(mainnet.Webhook.debug.responses["http://example.com/balance"].length).toBe(1);
   });
 
   it("Should register a transaction watch webhook", async () => {
@@ -86,7 +86,7 @@ describe("Test Webhook Endpoints", () => {
       });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(mainnet.WebhookWorker.debug.responses["http://example.com/transaction"].length).toBe(1);
+    expect(mainnet.Webhook.debug.responses["http://example.com/transaction"].length).toBe(1);
   });
 
   it("Should fail register a webhook of unknown type", async () => {

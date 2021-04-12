@@ -1,3 +1,4 @@
+import SqlProvider from "../db/SqlProvider";
 import { TxI } from "../interface";
 
 export interface WebhookI {
@@ -5,12 +6,18 @@ export interface WebhookI {
   cashaddr: string;
   type: string;
   recurrence: string;
-  hook_url: string;
+  url: string;
   status: string;
   last_height: number;
   tx_seen: Array<TxI>;
   expires_at: Date;
   stopCallback?: () => void;
+
+  start: () => void;
+  stop: () => void;
+  destroy: () => void;
+
+  db: SqlProvider;
 }
 
 export interface RegisterWebhookParams {
@@ -18,5 +25,6 @@ export interface RegisterWebhookParams {
   url: string;
   type: string;
   recurrence: string;
+  tokenId?: string;
   duration_sec?: number;
 }
