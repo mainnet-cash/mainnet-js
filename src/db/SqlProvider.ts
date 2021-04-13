@@ -107,10 +107,10 @@ export default class SqlProvider implements StorageProvider {
     hook.tokenId = (hook as any).token_id;
     delete (hook as any).token_id;
 
-    if (isCashAddress(hook.cashaddr)) {
-      return new WebhookBch(hook);
-    } else if (hook.type.indexOf("slp") === 0) {
+    if (hook.type.indexOf("slp") === 0) {
       return new WebhookSlp(hook);
+    } else if (isCashAddress(hook.cashaddr)) {
+      return new WebhookBch(hook);
     }
 
     throw new Error(`Unsupported or incorrect hook address ${hook.cashaddr}`);

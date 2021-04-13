@@ -11,4 +11,5 @@ controllers/WalletSlpController.js
 controllers/WebhookController.js
 controllers/index.js
 logger.js
+services/WebhookService.js
 utils/openapiRouter.js
