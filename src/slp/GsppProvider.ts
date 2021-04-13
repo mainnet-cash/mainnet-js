@@ -135,9 +135,9 @@ export class GsppProvider implements SlpProvider {
   ): Promise<SlpTxI> {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
-        (tx) => {
-          cancelFn();
-          resolve(tx);
+        async (tx: SlpTxI) => {
+          await cancelFn();
+          await resolve(tx);
         },
         slpaddr,
         tokenId
@@ -174,10 +174,9 @@ export class GsppProvider implements SlpProvider {
     tokenId: string
   ): SlpCancelWatchFn {
     const cancelFn = this.SlpWatchTransactions(
-      () => {
-        this.SlpTokenBalance(slpaddr, tokenId).then((balance) => {
-          if (!!callback(balance)) cancelFn();
-        });
+      async () => {
+        const balance = await this.SlpTokenBalance(slpaddr, tokenId);
+        await callback(balance);
       },
       slpaddr,
       tokenId
@@ -200,7 +199,7 @@ export class GsppProvider implements SlpProvider {
 
     eventSource.addEventListener(
       "message",
-      (txEvent: MessageEvent) => {
+      async (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
         if (data.type === "rawtx") {
           const tx: SlpTxI = {
@@ -208,9 +207,8 @@ export class GsppProvider implements SlpProvider {
             height: 0,
             details: data.data as GsppTx,
           };
-          if (!!callback(tx)) {
-            cancelFn();
-          }
+
+          await callback(tx);
         }
       },
       false

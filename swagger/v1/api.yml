@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.12
+  version: 0.3.14
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -895,9 +895,18 @@ paths:
             schema:
               $ref: "#/components/schemas/WatchAddressRequest"
         description: |
-          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url' -
-          'transaction:in' for incoming only, 'transaction:out' for outgoing only and 'transaction:in,out' both for incoming and outgoing transactions.
-          'balance' will post the object according to 'BalanceResponse' schema
+          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url':
+          - 'transaction:in' for incoming BCH transactions
+          - 'transaction:out' for outgoing BCH transactions
+          - 'transaction:in,out' both for incoming and outgoing BCH transactions
+          - 'balance' will post the object according to 'BalanceResponse' schema
+          - 'slptransaction:in' for incoming SLP transactions
+          - 'slptransaction:out' for outgoing SLP transactions
+          - 'slptransaction:in,out' both for incoming and outgoing SLP transactions
+          - 'slpbalance' will post the object according to 'SlpBalanceResponse' schema
+
+          'tokenId' parameter is mandatory when using SLP webhooks.
+
         required: true
       responses:
         "200":
@@ -992,6 +1001,10 @@ components:
             - transaction:out
             - transaction:in,out
             - balance
+            - slptransaction:in
+            - slptransaction:out
+            - slptransaction:in,out
+            - slpbalance
           example: transaction:in,out
           default: transaction:in,out
         recurrence:
@@ -1003,6 +1016,9 @@ components:
             - recurrent
           example: recurrent
           default: once
+        tokenId:
+          description:
+            Token unique hexadecimal identifier to use. Mandatory in SLP webhooks.
         duration_sec:
           description:
             Duration of the webhook lifetime in seconds before it will expire.
