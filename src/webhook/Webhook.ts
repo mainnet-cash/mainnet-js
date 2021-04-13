@@ -17,9 +17,8 @@ export enum WebhookType {
 
 export enum WebhookRecurrence {
   once = "once",
-  recurrent = "recurrent"
+  recurrent = "recurrent",
 }
-
 
 export class Webhook {
   id?: number;
@@ -40,12 +39,10 @@ export class Webhook {
   }
 
   // abstract, empty implementation
-  async start(): Promise<void> {
-  }
+  async start(): Promise<void> {}
 
   // abstract, empty implementation
-  async stop(): Promise<void> {
-  }
+  async stop(): Promise<void> {}
 
   async destroy(): Promise<void> {
     if (this.id) {
@@ -73,7 +70,7 @@ export class Webhook {
     static setupAxiosMocks() {
       axios.interceptors.request.use((config) => {
         const url = config.url!;
-        let response;;
+        let response;
         if (url === "http://example.com/fail") {
           response = { status: 503 };
         } else {
@@ -89,7 +86,7 @@ export class Webhook {
         // cancel actual http request
         return {
           ...config,
-          cancelToken: new axios.CancelToken((cancel) => cancel(response))
+          cancelToken: new axios.CancelToken((cancel) => cancel(response)),
         };
       });
     }
@@ -99,6 +96,6 @@ export class Webhook {
     }
 
     static responses: any = {};
-  }
+  };
   //#endregion
 }

@@ -114,7 +114,6 @@ export default class WebhookWorker {
 
   async stopHook(hook: Webhook): Promise<void> {
     if (this.activeHooks.has(hook.id!)) {
-
       await hook.stop();
       this.activeHooks.delete(hook.id!);
     }

@@ -1,4 +1,10 @@
-export { toCashAddress, toSlpAddress, isValidAddress, isCashAddress, isSlpAddress } from "bchaddrjs-slp";
+export {
+  toCashAddress,
+  toSlpAddress,
+  isValidAddress,
+  isCashAddress,
+  isSlpAddress,
+} from "bchaddrjs-slp";
 
 // import bchaddr from "bchaddrjs-slp";
 

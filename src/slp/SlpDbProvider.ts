@@ -127,7 +127,10 @@ export class SlpDbProvider implements SlpProvider {
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<SlpTxI> {
+  async SlpWaitForTransaction(
+    slpaddr: string,
+    tokenId?: string
+  ): Promise<SlpTxI> {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
         async (tx: SlpTxI) => {

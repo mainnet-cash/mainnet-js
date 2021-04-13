@@ -9,8 +9,8 @@ let alice;
 let aliceWif;
 let tokenId;
 
-const serversSlpDb = {...{}, ...SlpDbProvider.servers}
-const serversGspp = {...{}, ...GsppProvider.servers}
+const serversSlpDb = { ...{}, ...SlpDbProvider.servers };
+const serversGspp = { ...{}, ...GsppProvider.servers };
 
 /**
  * @jest-environment jsdom
@@ -74,17 +74,19 @@ describe("Webhook worker tests", () => {
         url: "http://example.com/success",
         type: WebhookType.slpTransactionIn,
         recurrence: WebhookRecurrence.once,
-        tokenId: tokenId
+        tokenId: tokenId,
       });
 
-      await Promise.all([aliceWallet.slp.send([
-        {
-          slpaddr: bobWallet.slp.slpaddr,
-          value: 1000,
-          tokenId: tokenId,
-        },
-      ]),
-      bobWallet.slp.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.slp.send([
+          {
+            slpaddr: bobWallet.slp.slpaddr,
+            value: 1000,
+            tokenId: tokenId,
+          },
+        ]),
+        bobWallet.slp.waitForTransaction(),
+      ]);
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -114,17 +116,19 @@ describe("Webhook worker tests", () => {
         url: "http://example.com/fail",
         type: WebhookType.slpTransactionIn,
         recurrence: WebhookRecurrence.once,
-        tokenId: tokenId
+        tokenId: tokenId,
       });
 
-      await Promise.all([aliceWallet.slp.send([
-        {
-          slpaddr: bobWallet.slp.slpaddr,
-          value: 1000,
-          tokenId: tokenId
-        },
-      ]),
-      bobWallet.slp.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.slp.send([
+          {
+            slpaddr: bobWallet.slp.slpaddr,
+            value: 1000,
+            tokenId: tokenId,
+          },
+        ]),
+        bobWallet.slp.waitForTransaction(),
+      ]);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
@@ -153,26 +157,28 @@ describe("Webhook worker tests", () => {
         url: "http://example.com/bob",
         type: WebhookType.slpTransactionIn,
         recurrence: WebhookRecurrence.recurrent,
-        tokenId: tokenId
+        tokenId: tokenId,
       });
 
-      await Promise.all([aliceWallet.slp.send([
-        {
-          slpaddr: bobWallet.slp.slpaddr,
-          value: 1000,
-          tokenId: tokenId,
-        },
-      ]),
-      bobWallet.slp.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.slp.send([
+          {
+            slpaddr: bobWallet.slp.slpaddr,
+            value: 1000,
+            tokenId: tokenId,
+          },
+        ]),
+        bobWallet.slp.waitForTransaction(),
+      ]);
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            Webhook.debug.responses["http://example.com/bob"].length
-          ).toBe(1);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            1
+          );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -193,35 +199,39 @@ describe("Webhook worker tests", () => {
         url: "http://example.com/bob",
         type: WebhookType.slpTransactionOut,
         recurrence: WebhookRecurrence.recurrent,
-        tokenId: tokenId
+        tokenId: tokenId,
       });
 
       await aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
           value: 1000,
-          unit: "satoshi"
+          unit: "satoshi",
         },
       ]);
 
-      await Promise.all([aliceWallet.slp.send([
-        {
-          slpaddr: bobWallet.slp.slpaddr,
-          value: 1000,
-          tokenId: tokenId,
-        },
-      ]),
-      bobWallet.slp.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.slp.send([
+          {
+            slpaddr: bobWallet.slp.slpaddr,
+            value: 1000,
+            tokenId: tokenId,
+          },
+        ]),
+        bobWallet.slp.waitForTransaction(),
+      ]);
 
       // return funds
-      await Promise.all([bobWallet.slp.sendMax(aliceWallet.cashaddr!, tokenId),
-      aliceWallet.slp.waitForTransaction()]);
+      await Promise.all([
+        bobWallet.slp.sendMax(aliceWallet.cashaddr!, tokenId),
+        aliceWallet.slp.waitForTransaction(),
+      ]);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            Webhook.debug.responses["http://example.com/bob"].length
-          ).toBe(1);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            1
+          );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -242,17 +252,19 @@ describe("Webhook worker tests", () => {
         url: "http://example.com/watchBalance",
         type: WebhookType.slpBalance,
         recurrence: WebhookRecurrence.once,
-        tokenId: tokenId
+        tokenId: tokenId,
       });
 
-      await Promise.all([aliceWallet.slp.send([
-        {
-          slpaddr: bobWallet.slp.slpaddr,
-          value: 1000,
-          tokenId: tokenId,
-        },
-      ]),
-      bobWallet.slp.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.slp.send([
+          {
+            slpaddr: bobWallet.slp.slpaddr,
+            value: 1000,
+            tokenId: tokenId,
+          },
+        ]),
+        bobWallet.slp.waitForTransaction(),
+      ]);
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -260,8 +272,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            Webhook.debug.responses["http://example.com/watchBalance"]
-              .length
+            Webhook.debug.responses["http://example.com/watchBalance"].length
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 

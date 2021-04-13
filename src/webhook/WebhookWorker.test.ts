@@ -50,13 +50,9 @@ describe("Webhook worker tests", () => {
     let fail = await hook2.post({});
     expect(fail).toBe(false);
 
-    expect(
-      Webhook.debug.responses["http://example.com/pass"].length
-    ).toBe(1);
+    expect(Webhook.debug.responses["http://example.com/pass"].length).toBe(1);
 
-    expect(
-      Webhook.debug.responses["http://example.com/fail"].length
-    ).toBe(1);
+    expect(Webhook.debug.responses["http://example.com/fail"].length).toBe(1);
   });
 
   test("Test empty hook db", async () => {

@@ -54,13 +54,18 @@ export class WebhookBch extends Webhook {
 
     this.callback = webhookCallback;
     this.wallet = await Wallet.fromCashaddr(this.cashaddr);
-    await this.wallet.provider!.subscribeToAddress(this.cashaddr, this.callback);
+    await this.wallet.provider!.subscribeToAddress(
+      this.cashaddr,
+      this.callback
+    );
   }
 
   async handler(status: string): Promise<void> {
     // console.debug("Dispatching action for a webhook", this);
     // get transactions
-    const history: TxI[] = await this.wallet.provider!.getHistory(this.cashaddr);
+    const history: TxI[] = await this.wallet.provider!.getHistory(
+      this.cashaddr
+    );
 
     // figure out which transactions to send to the hook
     let txs: TxI[] = [];
@@ -104,7 +109,9 @@ export class WebhookBch extends Webhook {
           tx.tx_hash
         );
         const parentTxs: ElectrumRawTransaction[] = await Promise.all(
-          rawTx.vin.map((t) => this.wallet.provider!.getRawTransactionObject(t.txid))
+          rawTx.vin.map((t) =>
+            this.wallet.provider!.getRawTransactionObject(t.txid)
+          )
         );
         // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
@@ -142,7 +149,9 @@ export class WebhookBch extends Webhook {
         }
       } else if (this.type === WebhookType.balance) {
         // watching address balance
-        const balanceSat = await this.wallet.provider!.getBalance(this.cashaddr);
+        const balanceSat = await this.wallet.provider!.getBalance(
+          this.cashaddr
+        );
         const balanceObject = await balanceResponseFromSatoshi(balanceSat);
         result = await this.post(balanceObject);
       }

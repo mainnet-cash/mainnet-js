@@ -51,14 +51,16 @@ describe("Webhook worker tests", () => {
         recurrence: WebhookRecurrence.once,
       });
 
-      await Promise.all([aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-      bobWallet.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
+      ]);
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -90,14 +92,16 @@ describe("Webhook worker tests", () => {
         recurrence: WebhookRecurrence.once,
       });
 
-      await Promise.all([aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-      bobWallet.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
+      ]);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
@@ -128,23 +132,25 @@ describe("Webhook worker tests", () => {
         recurrence: WebhookRecurrence.recurrent,
       });
 
-      await Promise.all([aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-      bobWallet.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
+      ]);
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            Webhook.debug.responses["http://example.com/bob"].length
-          ).toBe(1);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            1
+          );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -167,24 +173,28 @@ describe("Webhook worker tests", () => {
         recurrence: WebhookRecurrence.recurrent,
       });
 
-      await Promise.all([aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-      bobWallet.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
+      ]);
 
       // return funds
-      await Promise.all([bobWallet.sendMax(aliceWallet.cashaddr!),
-      aliceWallet.waitForTransaction()]);
+      await Promise.all([
+        bobWallet.sendMax(aliceWallet.cashaddr!),
+        aliceWallet.waitForTransaction(),
+      ]);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            Webhook.debug.responses["http://example.com/bob"].length
-          ).toBe(1);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            1
+          );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -224,9 +234,7 @@ describe("Webhook worker tests", () => {
       expect(hook!.status).not.toBe("");
       expect(hook!.tx_seen).not.toBe([]);
       hook!.tx_seen[0];
-      expect(
-        Webhook.debug.responses["http://example.com/bob"].length
-      ).toBe(1);
+      expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(1);
 
       // shutdown
       await worker.destroy();
@@ -259,9 +267,9 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(1);
-          expect(
-            Webhook.debug.responses["http://example.com/bob"].length
-          ).toBe(3);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            3
+          );
 
           resolve(true);
         }, 10000)
@@ -283,14 +291,16 @@ describe("Webhook worker tests", () => {
         recurrence: WebhookRecurrence.once,
       });
 
-      await Promise.all([aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
-      ]),
-      bobWallet.waitForTransaction()]);
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
+      ]);
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -298,8 +308,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            Webhook.debug.responses["http://example.com/watchBalance"]
-              .length
+            Webhook.debug.responses["http://example.com/watchBalance"].length
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 

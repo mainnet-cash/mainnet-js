@@ -1,5 +1,8 @@
 import { GsppTx, SlpDbTx, SlpTxI } from "../slp";
-import { SlpCancelWatchFn, SlpWatchTransactionCallback } from "../slp/SlpProvider";
+import {
+  SlpCancelWatchFn,
+  SlpWatchTransactionCallback,
+} from "../slp/SlpProvider";
 import { toSlpAddress } from "../util/bchaddr";
 import { Wallet } from "../wallet/Wif";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
@@ -17,7 +20,9 @@ export class WebhookSlp extends Webhook {
   }
 
   async start(): Promise<void> {
-    const webhookCallback: SlpWatchTransactionCallback = async (rawTx: SlpTxI) => {
+    const webhookCallback: SlpWatchTransactionCallback = async (
+      rawTx: SlpTxI
+    ) => {
       let result = false;
       if ("_id" in rawTx.details) {
         result = await this.slpDbHandler(rawTx);
@@ -34,7 +39,10 @@ export class WebhookSlp extends Webhook {
 
     this.callback = webhookCallback;
     this.wallet = await Wallet.fromSlpaddr(this.cashaddr);
-    this.cancelFn = this.wallet.slp.watchTransactions(webhookCallback, this.tokenId);
+    this.cancelFn = this.wallet.slp.watchTransactions(
+      webhookCallback,
+      this.tokenId
+    );
   }
 
   async slpDbHandler(rawTx: SlpTxI) {
@@ -46,12 +54,18 @@ export class WebhookSlp extends Webhook {
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === WebhookType.slpTransactionIn && details.out.findIndex(val => val.e.a === this.cashaddr) > -1) {
+    } else if (
+      this.type === WebhookType.slpTransactionIn &&
+      details.out.findIndex((val) => val.e.a === this.cashaddr) > -1
+    ) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === WebhookType.slpTransactionOut && details.in.findIndex(val => val.e.a === this.cashaddr) > -1) {
+    } else if (
+      this.type === WebhookType.slpTransactionOut &&
+      details.in.findIndex((val) => val.e.a === this.cashaddr) > -1
+    ) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
@@ -76,12 +90,18 @@ export class WebhookSlp extends Webhook {
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === WebhookType.slpTransactionIn && details.outputs.findIndex(val => val === this.cashaddr) > -1) {
+    } else if (
+      this.type === WebhookType.slpTransactionIn &&
+      details.outputs.findIndex((val) => val === this.cashaddr) > -1
+    ) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === WebhookType.slpTransactionOut && details.inputs.findIndex(val => val === this.cashaddr) > -1) {
+    } else if (
+      this.type === WebhookType.slpTransactionOut &&
+      details.inputs.findIndex((val) => val === this.cashaddr) > -1
+    ) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,

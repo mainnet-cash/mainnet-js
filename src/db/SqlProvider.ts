@@ -125,14 +125,17 @@ export default class SqlProvider implements StorageProvider {
     const expireTimeout =
       Number(process.env.WEBHOOK_EXPIRE_TIMEOUT_SECONDS) || 86400;
     params.duration_sec = params.duration_sec || expireTimeout;
-    params.duration_sec = params.duration_sec > expireTimeout ? expireTimeout : params.duration_sec;
+    params.duration_sec =
+      params.duration_sec > expireTimeout ? expireTimeout : params.duration_sec;
     params.tokenId = params.tokenId || "";
 
     if (params.type.indexOf("slp") === 0 && !params.tokenId) {
       throw new Error("'tokenId' parameter is required for SLP webhooks");
     }
 
-    const expires_at = new Date(new Date().getTime() + params.duration_sec * 1000);
+    const expires_at = new Date(
+      new Date().getTime() + params.duration_sec * 1000
+    );
     let text = format(
       "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,token_id,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
       this.webhookTable
