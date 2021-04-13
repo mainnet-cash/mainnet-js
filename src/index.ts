@@ -10,3 +10,4 @@ export * as Mainnet from "./util/index";
 export * from "./util/bchaddr";
 export { Network } from "./interface";
 export * from "./slp";
+export * from "./webhook/index";

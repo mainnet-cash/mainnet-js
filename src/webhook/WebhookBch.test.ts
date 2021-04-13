@@ -1,19 +1,15 @@
-import WebhookWorker from "./WebhookWorker";
-import { default as axios } from "axios";
-import { Network } from "../interface";
-
+import WebhookWorker from "../webhook/WebhookWorker";
 import { RegTestWallet } from "../wallet/Wif";
 import { mine } from "../mine/mine";
+import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
 
 let worker: WebhookWorker;
-let alice = "";
-let aliceWif = "";
+let alice;
+let aliceWif;
 
 /**
  * @jest-environment jsdom
  */
-
-// mock axios requests
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
@@ -24,7 +20,7 @@ describe("Webhook worker tests", () => {
         console.error("regtest env vars not set");
       }
 
-      WebhookWorker.debug.setupAxiosMocks();
+      Webhook.debug.setupAxiosMocks();
       worker = await WebhookWorker.instance();
     } catch (e) {
       throw e;
@@ -36,63 +32,12 @@ describe("Webhook worker tests", () => {
   });
 
   afterEach(async () => {
-    WebhookWorker.debug.reset();
+    Webhook.debug.reset();
   });
 
   afterAll(async () => {
     await worker.destroy();
     await worker.db.close();
-  });
-
-  test("Test posting hook", async () => {
-    let result = await worker.postWebHook("http://example.com/pass", {});
-    expect(result).toBe(true);
-
-    let fail = await worker.postWebHook("http://example.com/fail", {});
-    expect(fail).toBe(false);
-
-    expect(
-      WebhookWorker.debug.responses["http://example.com/fail"].length
-    ).toBe(1);
-  });
-
-  test("Test empty hook db", async () => {
-    try {
-      await new Promise((resolve) =>
-        setTimeout(async () => {
-          expect(worker.activeHooks.size).toBe(0);
-          expect(WebhookWorker.debug.responses).toStrictEqual({});
-          resolve(true);
-        }, 0)
-      );
-    } catch (e) {
-      console.log(e, e.stack, e.message);
-      throw e;
-    }
-  });
-
-  test("Test starting with expired hook", async () => {
-    await worker.registerWebhook(
-      {
-        cashaddr: alice,
-        url: "http://example.com/pass",
-        type: "transaction:in",
-        recurrence: "once",
-        duration_sec: -1000,
-      },
-      false
-    );
-
-    await worker.init();
-
-    try {
-      expect(worker.activeHooks.size).toBe(0);
-      expect((await worker.db.getWebhooks()).length).toBe(0);
-      expect(WebhookWorker.debug.responses).toStrictEqual({});
-    } catch (e) {
-      console.log(e, e.stack, e.message);
-      throw e;
-    }
   });
 
   test("Test non-recurrent hook to be deleted after successful call", async () => {
@@ -102,18 +47,20 @@ describe("Webhook worker tests", () => {
       await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/success",
-        type: "transaction:in",
-        recurrence: "once",
+        type: WebhookType.transactionIn,
+        recurrence: WebhookRecurrence.once,
       });
 
-      aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
       ]);
-      await bobWallet.waitForTransaction();
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -121,7 +68,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            WebhookWorker.debug.responses["http://example.com/success"].length
+            Webhook.debug.responses["http://example.com/success"].length
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
@@ -141,23 +88,25 @@ describe("Webhook worker tests", () => {
       await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/fail",
-        type: "transaction:in",
-        recurrence: "once",
+        type: WebhookType.transactionIn,
+        recurrence: WebhookRecurrence.once,
       });
 
-      aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
       ]);
-      await bobWallet.waitForTransaction();
 
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            WebhookWorker.debug.responses["http://example.com/fail"].length
+            Webhook.debug.responses["http://example.com/fail"].length
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
@@ -179,27 +128,29 @@ describe("Webhook worker tests", () => {
       await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
-        type: "transaction:in",
-        recurrence: "recurrent",
+        type: WebhookType.transactionIn,
+        recurrence: WebhookRecurrence.recurrent,
       });
 
-      aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
       ]);
-      await bobWallet.waitForTransaction();
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            WebhookWorker.debug.responses["http://example.com/bob"].length
-          ).toBe(1);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            1
+          );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -218,28 +169,32 @@ describe("Webhook worker tests", () => {
       await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
-        type: "transaction:out",
-        recurrence: "recurrent",
+        type: WebhookType.transactionOut,
+        recurrence: WebhookRecurrence.recurrent,
       });
 
-      aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
       ]);
-      await bobWallet.waitForTransaction();
 
       // return funds
-      bobWallet.sendMax(aliceWallet.cashaddr!);
-      await aliceWallet.waitForTransaction();
+      await Promise.all([
+        bobWallet.sendMax(aliceWallet.cashaddr!),
+        aliceWallet.waitForTransaction(),
+      ]);
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            WebhookWorker.debug.responses["http://example.com/bob"].length
-          ).toBe(1);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            1
+          );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -259,8 +214,8 @@ describe("Webhook worker tests", () => {
       const hookId = await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/bob",
-        type: "transaction:in",
-        recurrence: "recurrent",
+        type: WebhookType.transactionIn,
+        recurrence: WebhookRecurrence.recurrent,
       });
 
       // initial transaction
@@ -279,9 +234,7 @@ describe("Webhook worker tests", () => {
       expect(hook!.status).not.toBe("");
       expect(hook!.tx_seen).not.toBe([]);
       hook!.tx_seen[0];
-      expect(
-        WebhookWorker.debug.responses["http://example.com/bob"].length
-      ).toBe(1);
+      expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(1);
 
       // shutdown
       await worker.destroy();
@@ -314,9 +267,9 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(1);
-          expect(
-            WebhookWorker.debug.responses["http://example.com/bob"].length
-          ).toBe(3);
+          expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
+            3
+          );
 
           resolve(true);
         }, 10000)
@@ -334,18 +287,20 @@ describe("Webhook worker tests", () => {
       await worker.registerWebhook({
         cashaddr: bobWallet.cashaddr!,
         url: "http://example.com/watchBalance",
-        type: "balance",
-        recurrence: "once",
+        type: WebhookType.balance,
+        recurrence: WebhookRecurrence.once,
       });
 
-      aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
-        },
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
       ]);
-      await bobWallet.waitForTransaction();
 
       // return funds
       // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -353,8 +308,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            WebhookWorker.debug.responses["http://example.com/watchBalance"]
-              .length
+            Webhook.debug.responses["http://example.com/watchBalance"].length
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
