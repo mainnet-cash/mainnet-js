@@ -1,9 +1,8 @@
-import { toSlpAddress } from "bchaddrjs-slp";
 import { GsppTx, SlpDbTx, SlpTxI } from "../slp";
 import { SlpCancelWatchFn, SlpWatchTransactionCallback } from "../slp/SlpProvider";
+import { toSlpAddress } from "../util/bchaddr";
 import { Wallet } from "../wallet/Wif";
-import { WebhookI } from "./interface";
-import { Webhook, WebhookRecurrence } from "./Webhook";
+import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
 import WebhookWorker from "./WebhookWorker";
 
 export class WebhookSlp extends Webhook {
@@ -11,19 +10,19 @@ export class WebhookSlp extends Webhook {
   cancelFn!: SlpCancelWatchFn;
   wallet!: Wallet;
 
-  constructor(hook: WebhookI | Object) {
+  constructor(hook: Webhook | Object) {
     super(hook);
     Object.assign(this, hook);
     this.cashaddr = toSlpAddress(this.cashaddr);
   }
 
   async start(): Promise<void> {
-    const webhookCallback: SlpWatchTransactionCallback = async (tx: SlpTxI) => {
+    const webhookCallback: SlpWatchTransactionCallback = async (rawTx: SlpTxI) => {
       let result = false;
-      if ("blk" in tx.details) {
-        result = await this.slpDbHandler(tx);
+      if ("_id" in rawTx.details) {
+        result = await this.slpDbHandler(rawTx);
       } else {
-        result = await this.gsppHandler(tx);
+        result = await this.gsppHandler(rawTx);
       }
 
       if (result && this.recurrence === WebhookRecurrence.once) {
@@ -42,23 +41,23 @@ export class WebhookSlp extends Webhook {
     let result: boolean = false;
     const txDirection = this.type;
     const details: SlpDbTx = rawTx.details as SlpDbTx;
-    if (this.type === "slptransaction:in,out") {
+    if (this.type === WebhookType.slpTransactionInOut) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === "slptransaction:in" && details.in.findIndex(val => val.e.a === this.cashaddr) > -1) {
+    } else if (this.type === WebhookType.slpTransactionIn && details.out.findIndex(val => val.e.a === this.cashaddr) > -1) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === "slptransaction:out" && details.out.findIndex(val => val.e.a === this.cashaddr) > -1) {
+    } else if (this.type === WebhookType.slpTransactionOut && details.in.findIndex(val => val.e.a === this.cashaddr) > -1) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === "slpbalance") {
-      const balance = this.wallet.slp.getBalance(this.tokenId);
+    } else if (this.type === WebhookType.slpBalance) {
+      const balance = this.wallet.slp.getBalance(this.tokenId!);
       result = await this.post({
         direction: txDirection,
         data: balance,
@@ -72,23 +71,23 @@ export class WebhookSlp extends Webhook {
     let result: boolean = false;
     const txDirection = this.type;
     const details: GsppTx = rawTx.details as GsppTx;
-    if (this.type === "slptransaction:in,out") {
+    if (this.type === WebhookType.slpTransactionInOut) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === "slptransaction:in" && details.inputs.findIndex(val => val === this.cashaddr) > -1) {
+    } else if (this.type === WebhookType.slpTransactionIn && details.outputs.findIndex(val => val === this.cashaddr) > -1) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === "slptransaction:out" && details.outputs.findIndex(val => val === this.cashaddr) > -1) {
+    } else if (this.type === WebhookType.slpTransactionOut && details.inputs.findIndex(val => val === this.cashaddr) > -1) {
       result = await this.post({
         direction: txDirection,
         data: rawTx,
       });
-    } else if (this.type === "slpbalance") {
-      const balance = this.wallet.slp.getBalance(this.tokenId);
+    } else if (this.type === WebhookType.slpBalance) {
+      const balance = this.wallet.slp.getBalance(this.tokenId!);
       result = await this.post({
         direction: txDirection,
         data: balance,
@@ -100,8 +99,5 @@ export class WebhookSlp extends Webhook {
 
   async stop(): Promise<void> {
     await this.cancelFn();
-  }
-
-  async destroy(): Promise<void> {
   }
 }

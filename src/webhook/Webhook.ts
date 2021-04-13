@@ -1,6 +1,5 @@
 import SqlProvider from "../db/SqlProvider";
 import { TxI } from "../interface";
-import { WebhookI } from "./interface";
 
 const axios = require("axios").default;
 
@@ -22,7 +21,7 @@ export enum WebhookRecurrence {
 }
 
 
-export class Webhook implements WebhookI {
+export class Webhook {
   id?: number;
   cashaddr!: string; // depending on type of the hook, either cashaddr or slpaddr
   type!: string;
@@ -31,12 +30,12 @@ export class Webhook implements WebhookI {
   status!: string; // bch only
   last_height!: number; // bch only
   tx_seen!: TxI[]; // bch only
-  tokenId!: string; // slp only
+  tokenId?: string; // slp only
   expires_at!: Date;
 
   db!: SqlProvider;
 
-  constructor(hook: WebhookI | Object) {
+  constructor(hook: Webhook | Object) {
     Object.assign(this, hook);
   }
 

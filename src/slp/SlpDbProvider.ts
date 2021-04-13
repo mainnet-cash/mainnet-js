@@ -127,12 +127,12 @@ export class SlpDbProvider implements SlpProvider {
   }
 
   // waits for next slp transaction to appear in mempool, code execution is halted
-  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<any> {
+  async SlpWaitForTransaction(slpaddr: string, tokenId?: string): Promise<SlpTxI> {
     return new Promise(async (resolve) => {
-      this.SlpWatchTransactions(
-        (tx: SlpTxI) => {
-          resolve(tx);
-          return true;
+      const cancelFn = this.SlpWatchTransactions(
+        async (tx: SlpTxI) => {
+          await cancelFn();
+          await resolve(tx);
         },
         slpaddr,
         tokenId
@@ -151,10 +151,7 @@ export class SlpDbProvider implements SlpProvider {
         (balance: SlpTokenBalance) => {
           if (balance.value.isGreaterThanOrEqualTo(new BigNumber(value))) {
             resolve(balance);
-            return true;
           }
-
-          return false;
         },
         slpaddr,
         tokenId
@@ -169,10 +166,9 @@ export class SlpDbProvider implements SlpProvider {
     tokenId: string
   ): SlpCancelWatchFn {
     const cancelFn = this.SlpWatchTransactions(
-      () => {
-        this.SlpTokenBalance(slpaddr, tokenId).then((balance) => {
-          if (!!callback(balance)) cancelFn();
-        });
+      async () => {
+        const balance = await this.SlpTokenBalance(slpaddr, tokenId);
+        await callback(balance);
       },
       slpaddr,
       tokenId
@@ -195,7 +191,7 @@ export class SlpDbProvider implements SlpProvider {
 
     eventSource.addEventListener(
       "message",
-      (txEvent: MessageEvent) => {
+      async (txEvent: MessageEvent) => {
         const data = JSON.parse(txEvent.data);
         if (data.data && data.data.length) {
           const tx: SlpTxI = {
@@ -203,9 +199,7 @@ export class SlpDbProvider implements SlpProvider {
             height: 0,
             details: data.data[0] as SlpDbTx,
           };
-          if (!!callback(tx)) {
-            cancelFn();
-          }
+          await callback(tx);
         }
       },
       false

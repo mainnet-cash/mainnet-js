@@ -1,6 +1,4 @@
-import { TxI } from "../interface";
 import {
-  SlpGenesisOptions,
   SlpTokenBalance,
   SlpTokenInfo,
   SlpTxI,
@@ -8,11 +6,9 @@ import {
 } from "./interface";
 import BigNumber from "bignumber.js";
 
-export type SlpWatchTransactionCallback = (tx: SlpTxI) => boolean | void | Promise<boolean | void>;
+export type SlpWatchTransactionCallback = (tx: SlpTxI) => void;
 export type SlpCancelWatchFn = () => void;
-export type SlpWatchBalanceCallback = (
-  balance: SlpTokenBalance
-) => boolean | void;
+export type SlpWatchBalanceCallback = (balance: SlpTokenBalance) => void;
 
 export interface SlpProvider {
   // all oupoints, including mint batons

@@ -6,8 +6,8 @@ import { TxI } from "../interface";
 import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook";
 import { WebhookBch } from "../webhook/WebhookBch";
 import { WebhookSlp } from "../webhook/WebhookSlp";
-import { isCashAddress } from "bchaddrjs-slp";
 import { RegisterWebhookParams } from "../webhook/interface";
+import { isCashAddress } from "../util/bchaddr";
 var parseDbUrl = require("parse-database-url");
 
 export default class SqlProvider implements StorageProvider {
@@ -49,7 +49,7 @@ export default class SqlProvider implements StorageProvider {
           "status TEXT," +
           "tx_seen JSON," +
           "last_height INTEGER," +
-          "tokenId TEXT," +
+          "token_id TEXT," +
           "expires_at TIMESTAMPTZ" +
           ");",
         this.webhookTable
@@ -103,22 +103,20 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async webhookFromDb(hook: Webhook) {
+    // map tokenId field from postgres
+    hook.tokenId = (hook as any).token_id;
+    delete (hook as any).token_id;
+
     if (isCashAddress(hook.cashaddr)) {
       return new WebhookBch(hook);
-    } else if (hook.type.indexOf("slp") !== 0) {
+    } else if (hook.type.indexOf("slp") === 0) {
       return new WebhookSlp(hook);
     }
 
-    throw new Error(`Unsupported or incorrect cashaddr ${hook.cashaddr}`);
+    throw new Error(`Unsupported or incorrect hook address ${hook.cashaddr}`);
   }
 
-  public async addWebhook(params: RegisterWebhookParams
-    // cashaddr: string,
-    // url: string,
-    // type?: string,
-    // recurrence?: string,
-    // duration_sec?: number
-  ): Promise<Webhook> {
+  public async addWebhook(params: RegisterWebhookParams): Promise<Webhook> {
     // init db if it was not, useful for external api calls
     await this.init();
 
@@ -129,9 +127,14 @@ export default class SqlProvider implements StorageProvider {
     params.duration_sec = params.duration_sec || expireTimeout;
     params.duration_sec = params.duration_sec > expireTimeout ? expireTimeout : params.duration_sec;
     params.tokenId = params.tokenId || "";
+
+    if (params.type.indexOf("slp") === 0 && !params.tokenId) {
+      throw new Error("'tokenId' parameter is required for SLP webhooks");
+    }
+
     const expires_at = new Date(new Date().getTime() + params.duration_sec * 1000);
     let text = format(
-      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,tokenId,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
+      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,token_id,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
       this.webhookTable
     );
 

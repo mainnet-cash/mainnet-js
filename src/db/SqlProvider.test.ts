@@ -1,5 +1,6 @@
 import { default as SqlProvider } from "./SqlProvider";
 import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
+import { WebhookRecurrence, WebhookType } from "../webhook";
 
 /**
  * @jest-environment jsdom
@@ -76,17 +77,15 @@ test("Should handle basic sql injection", async () => {
   sh.close();
 });
 
-// test("Store and retrieve a webhook", async () => {
-//   let db = new SqlProvider("testnet");
-//   await db.init();
-//   await db.addWebHook("transaction:in:123123123", "https://mysite.com/api/webhook");
-//   let webHook = await db.getWebHook("transaction:in:123123123");
-//   expect(webHook!.tx_id).toBe("transaction:in:123123123");
-//   expect(webHook!.hook_url).toBe("https://mysite.com/api/webhook");
-//   expect(new Date() >= webHook!.expires_at);
+test("Should fail registering SLP webhook without tokenId", async () => {
+  let db = new SqlProvider("regtest");
+  await db.init();
+  await expect(db.addWebhook({
+    cashaddr: "",
+    url: "https://example.com/fail",
+    type: WebhookType.slpTransactionIn,
+    recurrence: WebhookRecurrence.recurrent
+  })).rejects.toThrow();
 
-//   let allHooks = await db.getWebHooks();
-//   expect(allHooks.length == 1);
-
-//   db.close();
-// });
+  db.close();
+});
