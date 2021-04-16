@@ -307,9 +307,8 @@ exports.isBoxedPrimitive = isBoxedPrimitive;
 function isAnyArrayBuffer(value) {
   return (
     typeof Uint8Array !== "undefined" &&
-    (isArrayBuffer(value) 
+    isArrayBuffer(value)
     //|| isSharedArrayBuffer(value)
-    )
   );
 }
 exports.isAnyArrayBuffer = isAnyArrayBuffer;
