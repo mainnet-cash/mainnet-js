@@ -58,10 +58,14 @@ const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
       // console.log(e);
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      //   Service.rejectResponse(
+        
+      //   e.message || 'Invalid input',
+      //   e.status || 405,
+      // )
+      );
     }
   },
 );

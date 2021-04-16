@@ -31,7 +31,7 @@ describe("Test faucet endpoints", () => {
       cashaddr: ""
     });
 
-    expect(resp.statusCode).toEqual(405);
+    expect(resp.statusCode).toEqual(500);
     expect(resp.body.message).toBe("Incorrect cashaddr");
 
     const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_WIF);
@@ -50,7 +50,7 @@ describe("Test faucet endpoints", () => {
       cashaddr: bobwallet.cashaddr
     });
 
-    expect(resp.statusCode).toEqual(405);
+    expect(resp.statusCode).toEqual(500);
     expect(resp.body.message).toBe("You have 10000 sats or more. Refusing to refill.");
 
     await bobwallet.slpAware().sendMax(wallet.cashaddr);
@@ -72,7 +72,7 @@ describe("Test faucet endpoints", () => {
     });
 
     expect(resp.statusCode).toEqual(405);
-    expect(resp.body.message).toBe("Incorrect slpaddr");
+    expect(resp.error.text).toBe("Incorrect slpaddr");
 
     const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_SLP_WIF);
     const bobwallet = await mainnet.TestNetWallet.newRandom();
