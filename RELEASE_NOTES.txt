@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+0.3.14
+
+- Redo the SLP watching/waiting callbacks to be strictly void returning. Watching/waiting cancellation is thus made explicit.
+- Split up the webhook code into smaller classes
+- Add support for SLP webhooks to monitor address balance and transaction activities
+- Important: webhook table was altered. Existing databases should be recreated/migrated.
+
 0.3.12
 
 - Fix docker publishing

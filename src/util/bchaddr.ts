@@ -1,4 +1,14 @@
-import bchaddr from "bchaddrjs-slp";
+export {
+  toCashAddress,
+  toSlpAddress,
+  isValidAddress,
+  isCashAddress,
+  isSlpAddress,
+} from "bchaddrjs-slp";
+
+// import bchaddr from "bchaddrjs-slp";
+
+// export { isValidAddress, isCashAddress, isSlpAddress } from "bchaddrjs-slp";
 
 // export function toCashAddress(address: string) {
 //   if (["bchreg", "slpreg"].some(val => address.includes(val))) {
@@ -15,5 +25,3 @@ import bchaddr from "bchaddrjs-slp";
 
 //   return bchaddr.toSlpAddress(address);
 // }
-
-export { toCashAddress, toSlpAddress, isValidAddress } from "bchaddrjs-slp";

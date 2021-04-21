@@ -1,8 +1,13 @@
 import StorageProvider from "./StorageProvider";
-import { WalletI, WebhookI } from "./interface";
+import { WalletI } from "./interface";
 import { Pool } from "pg";
 import { default as format } from "pg-format";
 import { TxI } from "../interface";
+import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook";
+import { WebhookBch } from "../webhook/WebhookBch";
+import { WebhookSlp } from "../webhook/WebhookSlp";
+import { RegisterWebhookParams } from "../webhook/interface";
+import { isCashAddress } from "../util/bchaddr";
 var parseDbUrl = require("parse-database-url");
 
 export default class SqlProvider implements StorageProvider {
@@ -40,10 +45,11 @@ export default class SqlProvider implements StorageProvider {
           "cashaddr TEXT," +
           "type TEXT," +
           "recurrence TEXT," +
-          "hook_url TEXT," +
+          "url TEXT," +
           "status TEXT," +
           "tx_seen JSON," +
           "last_height INTEGER," +
+          "token_id TEXT," +
           "expires_at TIMESTAMPTZ" +
           ");",
         this.webhookTable
@@ -96,47 +102,69 @@ export default class SqlProvider implements StorageProvider {
     return w;
   }
 
-  public async addWebhook(
-    cashaddr: string,
-    hook_url: string,
-    type?: string,
-    recurrence?: string,
-    duration_sec?: number
-  ): Promise<WebhookI> {
+  public async webhookFromDb(hook: Webhook) {
+    // map tokenId field from postgres
+    hook.tokenId = (hook as any).token_id;
+    delete (hook as any).token_id;
+
+    if (hook.type.indexOf("slp") === 0) {
+      return new WebhookSlp(hook);
+    } else if (isCashAddress(hook.cashaddr)) {
+      return new WebhookBch(hook);
+    }
+
+    throw new Error(`Unsupported or incorrect hook address ${hook.cashaddr}`);
+  }
+
+  public async addWebhook(params: RegisterWebhookParams): Promise<Webhook> {
     // init db if it was not, useful for external api calls
     await this.init();
 
-    type = type || "transaction:in,out";
-    recurrence = recurrence || "once";
+    params.type = params.type || WebhookType.transactionInOut;
+    params.recurrence = params.recurrence || WebhookRecurrence.once;
     const expireTimeout =
       Number(process.env.WEBHOOK_EXPIRE_TIMEOUT_SECONDS) || 86400;
-    duration_sec = duration_sec || expireTimeout;
-    duration_sec = duration_sec > expireTimeout ? expireTimeout : duration_sec;
-    const expires_at = new Date(new Date().getTime() + duration_sec * 1000);
+    params.duration_sec = params.duration_sec || expireTimeout;
+    params.duration_sec =
+      params.duration_sec > expireTimeout ? expireTimeout : params.duration_sec;
+    params.tokenId = params.tokenId || "";
+
+    if (params.type.indexOf("slp") === 0 && !params.tokenId) {
+      throw new Error("'tokenId' parameter is required for SLP webhooks");
+    }
+
+    const expires_at = new Date(
+      new Date().getTime() + params.duration_sec * 1000
+    );
     let text = format(
-      "INSERT into %I (cashaddr,type,recurrence,hook_url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
+      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,token_id,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
       this.webhookTable
     );
 
     const result = await this.db.query(text, [
-      cashaddr,
-      type,
-      recurrence,
-      hook_url,
+      params.cashaddr,
+      params.type,
+      params.recurrence,
+      params.url,
       "",
       "[]",
       0,
+      params.tokenId,
       expires_at.toISOString(),
     ]);
-    return result.rows[0];
+    const hook = await this.webhookFromDb(result.rows[0]);
+    hook.db = this;
+    return hook;
   }
 
-  public async getWebhooks(): Promise<Array<WebhookI>> {
+  public async getWebhooks(): Promise<Array<Webhook>> {
     let text = format("SELECT * FROM %I", this.webhookTable);
     let result = await this.db.query(text);
     if (result) {
-      const WebhookArray: WebhookI[] = await Promise.all(
-        result.rows.map(async (obj: WebhookI) => {
+      const WebhookArray: Webhook[] = await Promise.all(
+        result.rows.map(async (obj: any) => {
+          obj = await this.webhookFromDb(obj);
+          obj.db = this;
           return obj;
         })
       );
@@ -146,11 +174,15 @@ export default class SqlProvider implements StorageProvider {
     }
   }
 
-  public async getWebhook(id: number): Promise<WebhookI | undefined> {
-    let text = format("SELECT * FROM %I WHERE id = $1;", this.webhookTable);
-    let result = await this.db.query(text, [id]);
-    let w = result.rows[0];
-    return w;
+  public async getWebhook(id: number): Promise<Webhook | undefined> {
+    const text = format("SELECT * FROM %I WHERE id = $1;", this.webhookTable);
+    const result = await this.db.query(text, [id]);
+    let hook = result.rows[0];
+    if (hook) {
+      hook = this.webhookFromDb(hook);
+      hook.db = this;
+    }
+    return hook;
   }
 
   public async setWebhookStatus(id: number, status: string): Promise<void> {
