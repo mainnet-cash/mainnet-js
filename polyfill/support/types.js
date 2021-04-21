@@ -226,23 +226,6 @@ function isDataView(value) {
 }
 exports.isDataView = isDataView;
 
-function isSharedArrayBufferToString(value) {
-  return ObjectToString(value) === "[object SharedArrayBuffer]";
-}
-isSharedArrayBufferToString.working =
-  typeof SharedArrayBuffer !== "undefined" &&
-  isSharedArrayBufferToString(new SharedArrayBuffer());
-function isSharedArrayBuffer(value) {
-  if (typeof SharedArrayBuffer === "undefined") {
-    return false;
-  }
-
-  return isSharedArrayBufferToString.working
-    ? isSharedArrayBufferToString(value)
-    : value instanceof SharedArrayBuffer;
-}
-exports.isSharedArrayBuffer = isSharedArrayBuffer;
-
 function isAsyncFunction(value) {
   return ObjectToString(value) === "[object AsyncFunction]";
 }
@@ -305,10 +288,7 @@ function isBoxedPrimitive(value) {
 exports.isBoxedPrimitive = isBoxedPrimitive;
 
 function isAnyArrayBuffer(value) {
-  return (
-    typeof Uint8Array !== "undefined" &&
-    (isArrayBuffer(value) || isSharedArrayBuffer(value))
-  );
+  return typeof Uint8Array !== "undefined" && isArrayBuffer(value);
 }
 exports.isAnyArrayBuffer = isAnyArrayBuffer;
 
