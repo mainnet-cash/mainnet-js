@@ -288,10 +288,7 @@ function isBoxedPrimitive(value) {
 exports.isBoxedPrimitive = isBoxedPrimitive;
 
 function isAnyArrayBuffer(value) {
-  return (
-    typeof Uint8Array !== "undefined" &&
-    (isArrayBuffer(value))
-  );
+  return typeof Uint8Array !== "undefined" && isArrayBuffer(value);
 }
 exports.isAnyArrayBuffer = isAnyArrayBuffer;
 
