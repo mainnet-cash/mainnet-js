@@ -105,9 +105,8 @@ export class WebhookBch extends Webhook {
 
       if (this.type.indexOf("transaction:") >= 0) {
         // console.debug("Getting raw tx", tx.tx_hash);
-        const rawTx: ElectrumRawTransaction = await this.wallet.provider!.getRawTransactionObject(
-          tx.tx_hash
-        );
+        const rawTx: ElectrumRawTransaction =
+          await this.wallet.provider!.getRawTransactionObject(tx.tx_hash);
         const parentTxs: ElectrumRawTransaction[] = await Promise.all(
           rawTx.vin.map((t) =>
             this.wallet.provider!.getRawTransactionObject(t.txid)

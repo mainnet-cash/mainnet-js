@@ -11,9 +11,8 @@ export async function getRelayFeeCache(provider: NetworkProvider) {
   }
   if (typeof relayFeePerKbInCoins !== "number") {
     relayFeePerKbInCoins = await provider.getRelayFee();
-    globalThis[
-      networkTickerMap[provider.network] + "_RELAY_FEE"
-    ] = relayFeePerKbInCoins;
+    globalThis[networkTickerMap[provider.network] + "_RELAY_FEE"] =
+      relayFeePerKbInCoins;
   }
   if (typeof relayFeePerKbInCoins === "number") {
     return Math.round(relayFeePerKbInCoins * bchParam.subUnits) / 1000;
