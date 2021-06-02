@@ -114,9 +114,8 @@ export class Contract implements ContractI {
    * @returns A new contract
    */
   public static fromId(contractId: string) {
-    let [network, serializedParams, serializedScript, nonce] = contractId.split(
-      DELIMITER
-    );
+    let [network, serializedParams, serializedScript, nonce] =
+      contractId.split(DELIMITER);
     let script = atob(serializedScript);
     let artifact = compileString(script);
     let paramStrings = atob(serializedParams)

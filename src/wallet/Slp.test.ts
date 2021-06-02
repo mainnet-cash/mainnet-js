@@ -658,9 +658,8 @@ describe("Slp wallet tests", () => {
     nftParentGenesis.ticker = ticker + "NFTP";
     nftParentGenesis.name = "Mainnet NFT Parent";
     nftParentGenesis.decimals = 0;
-    const parentResult: SlpGenesisResult = await aliceWallet.slp.nftParentGenesis(
-      nftParentGenesis
-    );
+    const parentResult: SlpGenesisResult =
+      await aliceWallet.slp.nftParentGenesis(nftParentGenesis);
 
     const info = await aliceWallet.slp.getTokenInfo(parentResult.tokenId);
     expect(info!.tokenId).toBe(parentResult.tokenId);
@@ -713,9 +712,8 @@ describe("Slp wallet tests", () => {
     nftParentGenesis.name = "Mainnet NFT Parent";
     nftParentGenesis.decimals = 0;
     nftParentGenesis.initialAmount = 2;
-    const parentResult: SlpGenesisResult = await aliceWallet.slp.nftParentGenesis(
-      nftParentGenesis
-    );
+    const parentResult: SlpGenesisResult =
+      await aliceWallet.slp.nftParentGenesis(nftParentGenesis);
 
     const nftChildGenesis = { ...genesisOptions };
     nftChildGenesis.ticker = ticker + "NFTC";
@@ -808,9 +806,8 @@ describe("Slp wallet tests", () => {
     genesis1.parentTokenId = parentResult.tokenId;
     genesis1.ticker = ticker + "1";
 
-    const childResultLast: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
-      genesis1
-    );
+    const childResultLast: SlpGenesisResult =
+      await aliceWallet.slp.nftChildGenesis(genesis1);
 
     aliceParentBalance = await aliceWallet.slp.getBalance(parentResult.tokenId);
     expect(aliceParentBalance.value.isEqualTo(0));
@@ -835,9 +832,8 @@ describe("Slp wallet tests", () => {
     nftParentGenesis.name = "Mainnet NFT Parent";
     nftParentGenesis.decimals = 0;
     nftParentGenesis.initialAmount = 1;
-    const parentResult: SlpGenesisResult = await aliceWallet.slp.nftParentGenesis(
-      nftParentGenesis
-    );
+    const parentResult: SlpGenesisResult =
+      await aliceWallet.slp.nftParentGenesis(nftParentGenesis);
 
     const nftChildGenesis1 = { ...genesisOptions };
     nftChildGenesis1.ticker = ticker + "NFTC_Bug";

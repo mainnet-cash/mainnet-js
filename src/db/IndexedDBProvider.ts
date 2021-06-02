@@ -4,7 +4,8 @@ import { WalletI } from "./interface";
 
 export default class IndexedDBProvider
   extends Dexie
-  implements StorageProvider {
+  implements StorageProvider
+{
   private db: Dexie.Table<WalletI, number>;
 
   public constructor(dbName: string) {
