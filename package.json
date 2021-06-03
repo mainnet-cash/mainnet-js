@@ -8,10 +8,10 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.3.15.js",
-  "browser": "dist/mainnet-0.3.15.js",
+  "main": "dist/mainnet-node-0.3.16.js",
+  "browser": "dist/mainnet-0.3.16.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*.js",
@@ -47,7 +47,6 @@
     "reload": "npx reload --dir=jest/playwright"
   },
   "devDependencies": {
-    "@types/bip39": "^3.0.0",
     "@types/jest": "^26.0.20",
     "@types/js-yaml": "^3.12.5",
     "@types/node": "^14.11.8",

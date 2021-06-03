@@ -5,10 +5,8 @@ import { Webhook } from "./Webhook";
 
 export default class WebhookWorker {
   activeHooks: Map<number, Webhook> = new Map();
-  callbacks: Map<
-    number,
-    (data: any | string | Array<string>) => void
-  > = new Map();
+  callbacks: Map<number, (data: any | string | Array<string>) => void> =
+    new Map();
   db: SqlProvider;
   checkInterval: any = undefined;
 
