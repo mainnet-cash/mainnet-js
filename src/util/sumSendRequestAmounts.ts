@@ -21,5 +21,5 @@ function sumBalance(a: BigInt, b: BigInt | Error) {
   if (b instanceof Error) {
     throw b;
   }
-  return BigInt(a) + BigInt(b);
+  return BigInt(a as bigint) + BigInt(b as bigint);
 }
