@@ -75,7 +75,7 @@ RUN cd /home/cpp_slp_graph_search \
   && git remote add fork https://github.com/mainnet-pat/cpp_slp_graph_search.git \
   && git fetch fork \
   && git checkout mainnet.cash \
-  && cd build && make && echo 10
+  && cd build && make && echo 11
 
 RUN cd /home/cpp_slp_graph_search/server/proxy \
   && go mod download \

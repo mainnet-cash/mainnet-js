@@ -67,6 +67,10 @@ services:
     container_name: slpdb
     volumes:
       - ./docker/slpdb/run-script.sh:/home/safeuser/config/run-script.sh
+      - /Users/pat/Code/SLPDB/filters.ts://home/safeuser/SLPDB/filters.ts
+      - /Users/pat/Code/SLPDB/bit.ts://home/safeuser/SLPDB/bit.ts
+      - /Users/pat/Code/SLPDB/slpgraphmanager.ts://home/safeuser/SLPDB/slpgraphmanager.ts
+      - /Users/pat/Code/SLPDB/interfaces.ts://home/safeuser/SLPDB/interfaces.ts
       # - ./docker/data/leveldb:/home/safeuser/SLPDB/_leveldb # uncomment to make persistent
     restart: always
     networks:

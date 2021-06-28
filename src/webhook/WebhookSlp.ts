@@ -1,9 +1,9 @@
-import { GsppTx, SlpDbTx, SlpTxI } from "../slp";
+import { GsppTx, SlpDbProvider, SlpDbTx, SlpTxI } from "../slp";
 import {
   SlpCancelWatchFn,
   SlpWatchTransactionCallback,
 } from "../slp/SlpProvider";
-import { toSlpAddress } from "../util/bchaddr";
+import { isSameAddress, toSlpAddress } from "../util/bchaddr";
 import { Wallet } from "../wallet/Wif";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
 import WebhookWorker from "./WebhookWorker";
@@ -24,7 +24,7 @@ export class WebhookSlp extends Webhook {
       rawTx: SlpTxI
     ) => {
       let result = false;
-      if ("_id" in rawTx.details) {
+      if (this.wallet.slp.provider instanceof SlpDbProvider) {
         result = await this.slpDbHandler(rawTx);
       } else {
         result = await this.gsppHandler(rawTx);
@@ -56,7 +56,7 @@ export class WebhookSlp extends Webhook {
       });
     } else if (
       this.type === WebhookType.slpTransactionIn &&
-      details.out.findIndex((val) => val.e.a === this.cashaddr) > -1
+      details.out.some((val) => isSameAddress(val.e.a, this.cashaddr))
     ) {
       result = await this.post({
         direction: txDirection,
@@ -64,7 +64,7 @@ export class WebhookSlp extends Webhook {
       });
     } else if (
       this.type === WebhookType.slpTransactionOut &&
-      details.in.findIndex((val) => val.e.a === this.cashaddr) > -1
+      details.in.some((val) => isSameAddress(val.e.a, this.cashaddr))
     ) {
       result = await this.post({
         direction: txDirection,
@@ -85,6 +85,7 @@ export class WebhookSlp extends Webhook {
     let result: boolean = false;
     const txDirection = this.type;
     const details: GsppTx = rawTx.details as GsppTx;
+    console.log("gsppHandler slpTransactionInOut", rawTx, txDirection, this.wallet.cashaddr, this.cashaddr);
     if (this.type === WebhookType.slpTransactionInOut) {
       result = await this.post({
         direction: txDirection,
@@ -92,7 +93,7 @@ export class WebhookSlp extends Webhook {
       });
     } else if (
       this.type === WebhookType.slpTransactionIn &&
-      details.outputs.findIndex((val) => val === this.cashaddr) > -1
+      details.outputs.some((val) => isSameAddress(val, this.cashaddr))
     ) {
       result = await this.post({
         direction: txDirection,
@@ -100,7 +101,7 @@ export class WebhookSlp extends Webhook {
       });
     } else if (
       this.type === WebhookType.slpTransactionOut &&
-      details.inputs.findIndex((val) => val === this.cashaddr) > -1
+      details.inputs.some((val) => isSameAddress(val, this.cashaddr))
     ) {
       result = await this.post({
         direction: txDirection,

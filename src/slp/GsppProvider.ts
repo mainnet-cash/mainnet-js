@@ -306,6 +306,7 @@ export function _convertSlpTokenInfo(
     -1 * tokenInfo.decimals
   );
   tokenInfo.parentTokenId = (tokenInfo as any).groupId;
+  delete (tokenInfo as any).groupId;
 
   return tokenInfo;
 }

@@ -160,3 +160,87 @@ test("Test SLP mint txo bytecode per SLP Spec", async () => {
 
   parseSLP(Buffer.from(hex, "hex"));
 });
+
+test("Test NFT Parent Genesis", async () => {
+  const wallet = await RegTestWallet.newRandom();
+
+  const genesisOptions: SlpGenesisOptions = {
+    name: "Waifu Faucet",
+    ticker: "WGRP",
+    decimals: 0,
+    initialAmount: 100000,
+    documentUrl: "https://waifufaucet.com/",
+    documentHash: "",
+    tokenReceiverSlpAddr: wallet.slp.slpaddr,
+    batonReceiverSlpAddr: wallet.slp.slpaddr,
+    type: SlpTokenType.NftParent
+  };
+
+  const result = await SlpGetGenesisOutputs(genesisOptions);
+  const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
+
+  const hex = binToHex(genesisTxoBytecode);
+
+  expect(hex).toBe(
+    "6a04534c500001810747454e4553495304574752500c5761696675204661756365741868747470733a2f2f77616966756661756365742e636f6d2f4c00010001020800000000000186a0"
+  );
+});
+
+test("Test NFT Parent Split send", async () => {
+  const wallet = await RegTestWallet.newRandom();
+
+  const fundingSlpUtxo: SlpUtxoI = {
+    value: new BigNumber(10),
+    decimals: 0,
+    txid: "",
+    vout: 2,
+    satoshis: DUST_UTXO_THRESHOLD,
+    ticker: "WGRP",
+    tokenId: "a2987562a405648a6c5622ed6c205fca6169faa8afeb96a994b48010bd186a66",
+    type: SlpTokenType.NftParent,
+    isBaton: false,
+  };
+  const sendRequest: SlpSendRequest = {
+    slpaddr: wallet.slp.slpaddr,
+    value: 1,
+    tokenId: "a2987562a405648a6c5622ed6c205fca6169faa8afeb96a994b48010bd186a66",
+  };
+
+  const result = await SlpGetSendOutputs(
+    wallet.slp.slpaddr,
+    [fundingSlpUtxo],
+    [sendRequest]
+  );
+  const sendTxoBytecode = result.SlpOutputs[0].lockingBytecode;
+
+  const hex = binToHex(sendTxoBytecode);
+  expect(hex).toBe(
+    "6a04534c500001810453454e4420a2987562a405648a6c5622ed6c205fca6169faa8afeb96a994b48010bd186a66080000000000000001080000000000000009"
+  );
+});
+
+test("Test NFT Child Genesis", async () => {
+  const wallet = await RegTestWallet.newRandom();
+
+  const genesisOptions: SlpGenesisOptions = {
+    name: "Chisei Sakanoue",
+    ticker: "WAIFU",
+    decimals: 0,
+    initialAmount: 1,
+    documentUrl: "https://waifufaucet.com",
+    documentHash: "",
+    tokenReceiverSlpAddr: wallet.slp.slpaddr,
+    batonReceiverSlpAddr: wallet.slp.slpaddr,
+    type: SlpTokenType.NftChild,
+    endBaton: true
+  };
+
+  const result = await SlpGetGenesisOutputs(genesisOptions);
+  const genesisTxoBytecode = result.SlpOutputs[0].lockingBytecode;
+
+  const hex = binToHex(genesisTxoBytecode);
+
+  expect(hex).toBe(
+    "6a04534c500001410747454e455349530557414946550f4368697365692053616b616e6f75651768747470733a2f2f77616966756661756365742e636f6d4c0001004c00080000000000000001"
+  );
+});

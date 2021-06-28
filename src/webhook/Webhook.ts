@@ -53,14 +53,14 @@ export class Webhook {
   async post(data: any): Promise<boolean> {
     try {
       await axios.post(this.url, data);
-      // console.debug("Posted webhook", this.url, data);
+      console.debug("Posted webhook", this.url, data);
       return true;
     } catch (e) {
       if (e.message && e.message.status === 200) {
         return true;
       }
 
-      // console.debug("Failed to post webhook", this.url, e);
+      console.debug("Failed to post webhook", this.url, e);
       return false;
     }
   }

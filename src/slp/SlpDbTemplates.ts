@@ -31,7 +31,7 @@ export const SlpAllUtxosTemplate = (slpaddr: string) => ({
                 }
             }
         ],
-        "limit": 1e6,
+        "limit": 1e6
     },
     "r": {
       "f": "[ .[] | { txid: .graphTxn.txid, vout: .graphTxn.outputs.vout, satoshis: .graphTxn.outputs.bchSatoshis, value: .graphTxn.outputs.slpAmount, decimals: .graphTxn.details.decimals, ticker: .graphTxn.details.symbol, tokenId: .graphTxn.details.tokenIdHex, type: .graphTxn.details.versionType, parentTokenId: .tokenDetails.nftGroupIdHex } ]"
