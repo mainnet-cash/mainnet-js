@@ -175,7 +175,11 @@ describe("Slp wallet tests", () => {
     const charlieWallet = await getRandomWallet();
     result = await aliceWallet.slp.send([
       { slpaddr: bobWallet.slp.slpaddr, value: 5, tokenId: genesis.tokenId },
-      { slpaddr: charlieWallet.slp.slpaddr, value: 5, tokenId: genesis.tokenId },
+      {
+        slpaddr: charlieWallet.slp.slpaddr,
+        value: 5,
+        tokenId: genesis.tokenId,
+      },
     ]);
 
     expect(result.balance.value.toNumber()).toBe(9970);
@@ -251,7 +255,9 @@ describe("Slp wallet tests", () => {
       aliceWallet.cashaddr
     );
 
-    expect(result.balance.value.toNumber()).toBe(aliceSlpBalance.minus(5).toNumber());
+    expect(result.balance.value.toNumber()).toBe(
+      aliceSlpBalance.minus(5).toNumber()
+    );
 
     let bobSlpBalance = await bobWallet.slp.getBalance(genesis.tokenId);
     expect(bobSlpBalance.value.toNumber()).toBe(5);
@@ -326,7 +332,9 @@ describe("Slp wallet tests", () => {
       aliceWallet.cashaddr
     );
 
-    expect(result.balance.value.toNumber()).toBe(aliceSlpBalance.minus(5).toNumber());
+    expect(result.balance.value.toNumber()).toBe(
+      aliceSlpBalance.minus(5).toNumber()
+    );
 
     result = await bobWallet.slp.sendMax(
       aliceWallet.slp.slpaddr,
@@ -379,14 +387,21 @@ describe("Slp wallet tests", () => {
       aliceWallet.slp.mint({ value: -1, tokenId })
     ).rejects.toThrow();
 
-    let result = await aliceWallet.slp.mint({ value: 50, tokenId: genesis.tokenId });
+    let result = await aliceWallet.slp.mint({
+      value: 50,
+      tokenId: genesis.tokenId,
+    });
     expect(result.balance.value.toNumber()).toBe(10050);
     expect(result.balance.name).toBe("Mainnet coin");
     expect(result.balance.ticker).toBe(options.ticker);
     expect(result.balance.tokenId).toBe(genesis.tokenId);
 
     // the baton must survive the first mint, and we end it now
-    result = await aliceWallet.slp.mint({ value: 50, tokenId: genesis.tokenId, endBaton: true });
+    result = await aliceWallet.slp.mint({
+      value: 50,
+      tokenId: genesis.tokenId,
+      endBaton: true,
+    });
     expect(result.balance.value.toNumber()).toBe(10100);
     expect(result.balance.name).toBe("Mainnet coin");
     expect(result.balance.ticker).toBe(options.ticker);
@@ -865,11 +880,16 @@ describe("Slp wallet tests", () => {
     console.log(JSON.stringify(childResult1, null, 2));
     expect(childResult1.balance.value.toNumber()).toBe(1);
 
-    const parentBalance1 = await aliceWallet.slp.getBalance(parentResult.tokenId);
+    const parentBalance1 = await aliceWallet.slp.getBalance(
+      parentResult.tokenId
+    );
     console.log(JSON.stringify(parentBalance1, null, 2));
     console.log(parentBalance1.value.toNumber());
     expect(parentBalance1.value.toNumber()).toBe(9);
-    const parentSpendableUtxos1 = await aliceWallet.slp.provider.SlpSpendableUtxos(aliceWallet.slp.slpaddr, parentResult.tokenId);
+    const parentSpendableUtxos1 = await aliceWallet.slp.provider.SlpSpendableUtxos(
+      aliceWallet.slp.slpaddr,
+      parentResult.tokenId
+    );
     expect(parentSpendableUtxos1.length).toBe(1);
     expect(parentSpendableUtxos1[0].value.toNumber()).toBe(9);
 
@@ -884,14 +904,18 @@ describe("Slp wallet tests", () => {
     nftChildGenesis2.ticker = ticker + "1_Bug";
     nftChildGenesis2.parentTokenId = parentResult.tokenId;
 
-    const childResult2: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(nftChildGenesis2);
+    const childResult2: SlpGenesisResult = await aliceWallet.slp.nftChildGenesis(
+      nftChildGenesis2
+    );
     expect(childResult2.balance.value.toNumber()).toBe(1);
     console.log(childResult2);
     // await expect(
     //   aliceWallet.slp.nftChildGenesis(nftChildGenesis2)
     // ).rejects.toThrow();
 
-    const parentBalance2 = await aliceWallet.slp.getBalance(parentResult.tokenId);
+    const parentBalance2 = await aliceWallet.slp.getBalance(
+      parentResult.tokenId
+    );
     console.log(parentBalance1.value.toNumber());
     expect(parentBalance1.value.toNumber()).toBe(8);
   });
@@ -902,7 +926,6 @@ describe("Slp wallet tests", () => {
 
     await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
 
-
     const options = { ...genesisOptions };
     options.ticker = ticker + "_burn";
     const genesis: SlpGenesisResult = await aliceWallet.slp.genesis(options);
@@ -911,8 +934,8 @@ describe("Slp wallet tests", () => {
       {
         cashaddr: bobWallet.cashaddr!,
         value: 10000,
-        unit: "sat"
-      }
+        unit: "sat",
+      },
     ]);
 
     await aliceWallet.slp.send([
@@ -920,7 +943,7 @@ describe("Slp wallet tests", () => {
         slpaddr: bobWallet.slp.slpaddr,
         value: 5,
         tokenId: genesis.tokenId,
-      }
+      },
     ]);
 
     let balanceSlp = await bobWallet.slp.getBalance(genesis.tokenId);

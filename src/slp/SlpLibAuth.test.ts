@@ -173,7 +173,7 @@ test("Test NFT Parent Genesis", async () => {
     documentHash: "",
     tokenReceiverSlpAddr: wallet.slp.slpaddr,
     batonReceiverSlpAddr: wallet.slp.slpaddr,
-    type: SlpTokenType.NftParent
+    type: SlpTokenType.NftParent,
   };
 
   const result = await SlpGetGenesisOutputs(genesisOptions);
@@ -232,7 +232,7 @@ test("Test NFT Child Genesis", async () => {
     tokenReceiverSlpAddr: wallet.slp.slpaddr,
     batonReceiverSlpAddr: wallet.slp.slpaddr,
     type: SlpTokenType.NftChild,
-    endBaton: true
+    endBaton: true,
   };
 
   const result = await SlpGetGenesisOutputs(genesisOptions);

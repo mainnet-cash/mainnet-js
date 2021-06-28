@@ -85,7 +85,13 @@ export class WebhookSlp extends Webhook {
     let result: boolean = false;
     const txDirection = this.type;
     const details: GsppTx = rawTx.details as GsppTx;
-    console.log("gsppHandler slpTransactionInOut", rawTx, txDirection, this.wallet.cashaddr, this.cashaddr);
+    console.log(
+      "gsppHandler slpTransactionInOut",
+      rawTx,
+      txDirection,
+      this.wallet.cashaddr,
+      this.cashaddr
+    );
     if (this.type === WebhookType.slpTransactionInOut) {
       result = await this.post({
         direction: txDirection,
