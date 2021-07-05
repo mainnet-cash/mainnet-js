@@ -72,12 +72,12 @@ export default class SqlProvider implements StorageProvider {
     return this.info;
   }
 
-  public async addWallet(name: string, wallet: string): Promise<boolean> {
+  public async addWallet(name: string, walletId: string): Promise<boolean> {
     let text = format(
       "INSERT into %I (name,wallet) VALUES ($1, $2);",
       this.walletTable
     );
-    return await this.db.query(text, [name, wallet]);
+    return await this.db.query(text, [name, walletId]);
   }
 
   public async getWallets(): Promise<Array<WalletI>> {
@@ -100,6 +100,15 @@ export default class SqlProvider implements StorageProvider {
     let result = await this.db.query(text, [name]);
     let w = result.rows[0];
     return w;
+  }
+
+  public async updateWallet(name: string, walletId: string): Promise<void> {
+    let text = format("UPDATE %I SET wallet = $1 WHERE name = $2;", this.walletTable);
+    await this.db.query(text, [walletId, name]);
+  }
+
+  public async walletExists(name: string): Promise<boolean> {
+    return (await this.getWallet(name)) !== undefined;
   }
 
   public async webhookFromDb(hook: Webhook) {

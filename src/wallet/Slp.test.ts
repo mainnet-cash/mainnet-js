@@ -858,7 +858,7 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
   });
 
-  test("test times", async () => {
+  test.skip("test times", async () => {
     // const aliceWallet = await getAliceWallet();
 
     const slpDbProvider = new SlpDbProvider(Network.REGTEST);

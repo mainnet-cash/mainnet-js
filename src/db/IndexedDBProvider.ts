@@ -6,7 +6,7 @@ export default class IndexedDBProvider
   extends Dexie
   implements StorageProvider
 {
-  private db: Dexie.Table<WalletI, number>;
+  public db: Dexie.Table<WalletI, number>;
 
   public constructor(dbName: string) {
     super(dbName);
@@ -28,10 +28,10 @@ export default class IndexedDBProvider
     return "indexedDB";
   }
 
-  public async addWallet(name: string, wallet: string): Promise<boolean> {
+  public async addWallet(name: string, walletId: string): Promise<boolean> {
     return this.transaction("rw", this.db, async () => {
       if ((await this.db.where({ name: name }).count()) === 0) {
-        await this.db.add({ name: name, wallet: wallet }).catch((e) => {
+        await this.db.add({ name: name, wallet: walletId }).catch((e) => {
           throw Error(e);
         });
         return true;
@@ -66,5 +66,26 @@ export default class IndexedDBProvider
     } else {
       return [];
     }
+  }
+
+  public async updateWallet(name: string, walletId: string): Promise<void> {
+    this.transaction("rw", this.db, async () => {
+      const collection = this.db.where({ name: name });
+      if ((await collection.count()) === 0) {
+        return false;
+      } else {
+        const wallet = (await collection.first())!;
+        await this.db.put({id: wallet.id!, name: name, wallet: walletId }, wallet.id!).catch((e) => {
+          throw Error(e);
+        });
+        return true;
+      }
+    }).catch((e) => {
+      throw e.stack || e;
+    });
+  }
+
+  public async walletExists(name: string): Promise<boolean> {
+    return (await this.getWallet(name)) !== undefined;
   }
 }

@@ -567,8 +567,6 @@ describe("Test Wallet Endpoints", () => {
    * info
    */
   it("Should return information about a wallet", async () => {
-
-    
     const resp = await request(app)
       .post("/wallet/info")
       .send({
@@ -577,6 +575,45 @@ describe("Test Wallet Endpoints", () => {
       expect(resp.statusCode).toBe(200);
       let expectedResult = {"cashaddr":"bchreg:qzghep5tpvpsu35j4mdv8xpycr6fujlxmvhm50wzu2","isTestnet":true,"name":"","network":"regtest","seed":"circle absurd gown body core shine aisle valid aspect grit material muscle","derivationPath":"m/44'/0'/0'/0/0","publicKey":"040eb64bec66609ffe66befa74ad1973b72c1d6d957c919c39a5caf5bfe7571b109e299534bb5fdf1499a73e22c0a82ee784da9e21571285facd2ad73a0fe747ed","publicKeyHash":"917c868b0b030e4692aedac39824c0f49e4be6db","privateKey":"3ddbfcdb089ad3a72299538d575bc22c3bd1d99a6a7b2ff04b6e02ad6beb38eb","privateKeyWif":"cPewwd9EdxfFgLdNR2cx5asjywa5YYvGMWPZLenArEoP8U6XfC8a","walletId":"seed:regtest:circle absurd gown body core shine aisle valid aspect grit material muscle:m/44'/0'/0'/0/0","walletDbEntry":"seed:regtest:circle absurd gown body core shine aisle valid aspect grit material muscle:m/44'/0'/0'/0/0"}
       expect(resp.body).toMatchObject(expectedResult);
-    
+  });
+
+  /**
+   * replaceNamed, namedExists
+   */
+   it("Should Store and replace a Regtest wallet, check wallet existence", async () => {
+    const name = `storereplace ${Math.random()}`
+
+    let resp;
+    resp = await request(app)
+      .post("/wallet/named_exists")
+      .send({
+        name: name,
+        type : "seed",
+        network: "regtest"
+      });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body.result).toBe(false);
+
+    const seedId = `seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon:m/44'/0'/0'/0/0`;
+    resp = await request(app)
+      .post("/wallet/replace_named")
+      .send({
+        name: name,
+        walletId: seedId,
+        type : "seed",
+        network: "regtest"
+    });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body.result).toBe(true);
+
+    resp = await request(app)
+      .post("/wallet/named_exists")
+      .send({
+        name: name,
+        type : "seed",
+        network: "regtest"
+      });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body.result).toBe(true);
   });
 });

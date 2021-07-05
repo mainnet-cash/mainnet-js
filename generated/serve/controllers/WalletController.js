@@ -32,6 +32,14 @@ const maxAmountToSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.maxAmountToSend);
 };
 
+const namedExists = async (request, response) => {
+  await Controller.handleRequest(request, response, service.namedExists);
+};
+
+const replaceNamed = async (request, response) => {
+  await Controller.handleRequest(request, response, service.replaceNamed);
+};
+
 const send = async (request, response) => {
   await Controller.handleRequest(request, response, service.send);
 };
@@ -60,6 +68,8 @@ module.exports = {
   depositQr,
   info,
   maxAmountToSend,
+  namedExists,
+  replaceNamed,
   send,
   sendMax,
   signedMessageSign,
