@@ -374,7 +374,7 @@ export class Wallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-   public static replaceNamed(
+  public static replaceNamed(
     name: string,
     walletId: string,
     dbName?: string
@@ -390,10 +390,7 @@ export class Wallet extends BaseWallet {
    *
    * @returns boolean
    */
-   public static namedExists(
-    name: string,
-    dbName?: string
-  ): Promise<boolean> {
+  public static namedExists(name: string, dbName?: string): Promise<boolean> {
     return new this()._namedExists(name, dbName);
   }
 

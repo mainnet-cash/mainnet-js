@@ -103,7 +103,10 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async updateWallet(name: string, walletId: string): Promise<void> {
-    let text = format("UPDATE %I SET wallet = $1 WHERE name = $2;", this.walletTable);
+    let text = format(
+      "UPDATE %I SET wallet = $1 WHERE name = $2;",
+      this.walletTable
+    );
     await this.db.query(text, [walletId, name]);
   }
 

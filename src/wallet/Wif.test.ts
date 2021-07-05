@@ -630,12 +630,14 @@ describe(`Wallet extrema behavior regression testing`, () => {
   });
 
   test("Store and replace a Regtest wallet", async () => {
-    const name = `storereplace ${Math.random()}`
+    const name = `storereplace ${Math.random()}`;
     expect(await RegTestWallet.namedExists(name)).toBe(false);
     let w1 = await RegTestWallet.named(name);
     expect(await RegTestWallet.namedExists(name)).toBe(true);
 
-    let seedId = (await RegTestWallet.fromSeed(new Array(12).join("abandon "))).toDbString()
+    let seedId = (
+      await RegTestWallet.fromSeed(new Array(12).join("abandon "))
+    ).toDbString();
     let w3 = await RegTestWallet.replaceNamed(name, seedId);
     let w4 = await RegTestWallet.named(name);
     expect(w4.toDbString()).not.toBe(w1.toDbString());
@@ -644,5 +646,5 @@ describe(`Wallet extrema behavior regression testing`, () => {
     let w5 = await RegTestWallet.replaceNamed(`${name}_nonexistent`, seedId);
     let w6 = await RegTestWallet.named(`${name}_nonexistent`);
     expect(w6.toDbString()).toBe(w5.toDbString());
-    });
+  });
 });

@@ -50,11 +50,11 @@ export default interface StorageProvider {
    * @param walletId String used to reconstruct the wallet.
    * @throws {Error} If the wallet could not be saved.
    */
-   updateWallet(name: string, walletId: string): Promise<void>;
+  updateWallet(name: string, walletId: string): Promise<void>;
 
-   /**
-    * Check if wallet exists in the database
-    * @param name A user defined name for the wallet, and the walletId.
-    */
-   walletExists(name: string): Promise<boolean>;
+  /**
+   * Check if wallet exists in the database
+   * @param name A user defined name for the wallet, and the walletId.
+   */
+  walletExists(name: string): Promise<boolean>;
 }

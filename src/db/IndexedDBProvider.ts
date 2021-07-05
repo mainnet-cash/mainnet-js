@@ -75,9 +75,11 @@ export default class IndexedDBProvider
         return false;
       } else {
         const wallet = (await collection.first())!;
-        await this.db.put({id: wallet.id!, name: name, wallet: walletId }, wallet.id!).catch((e) => {
-          throw Error(e);
-        });
+        await this.db
+          .put({ id: wallet.id!, name: name, wallet: walletId }, wallet.id!)
+          .catch((e) => {
+            throw Error(e);
+          });
         return true;
       }
     }).catch((e) => {

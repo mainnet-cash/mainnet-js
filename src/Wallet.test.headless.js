@@ -238,20 +238,33 @@ describe(`Wallet should function in the browser`, () => {
 
   test("Store and replace a Regtest wallet", async () => {
     const result = await page.evaluate(async () => {
-      const name = `storereplace ${Math.random()}`
+      const name = `storereplace ${Math.random()}`;
 
       const check1 = await RegTestWallet.namedExists(name);
       const w1 = await RegTestWallet.named(name);
       const check2 = await RegTestWallet.namedExists(name);
 
-      const seedId = (await RegTestWallet.fromSeed(new Array(12).join("abandon "))).toDbString()
+      const seedId = (
+        await RegTestWallet.fromSeed(new Array(12).join("abandon "))
+      ).toDbString();
       const w3 = await RegTestWallet.replaceNamed(name, seedId);
       const w4 = await RegTestWallet.named(name);
 
-      const w5 = await RegTestWallet.replaceNamed(`${name}_nonexistent`, seedId);
+      const w5 = await RegTestWallet.replaceNamed(
+        `${name}_nonexistent`,
+        seedId
+      );
       const w6 = await RegTestWallet.named(`${name}_nonexistent`);
 
-      return {check1, check2, w1: w1.toDbString(), w4: w4.toDbString(), w5: w5.toDbString(), w6: w6.toDbString(), seedId};
+      return {
+        check1,
+        check2,
+        w1: w1.toDbString(),
+        w4: w4.toDbString(),
+        w5: w5.toDbString(),
+        w6: w6.toDbString(),
+        seedId,
+      };
     });
 
     expect(result.check1).toBe(false);

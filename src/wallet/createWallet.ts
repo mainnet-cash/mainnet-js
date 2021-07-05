@@ -85,12 +85,14 @@ export async function namedWalletExists(body): Promise<boolean> {
  * @param networkType wallet network type
  * @returns A promise to a new wallet object
  */
-export async function namedWallet(name, walletType, networkType): Promise<Wallet> {
+export async function namedWallet(
+  name,
+  walletType,
+  networkType
+): Promise<Wallet> {
   // Named wallets are saved in the database
   if (!name) {
-    throw Error(
-      `Wallet name is required for this operation`
-    );
+    throw Error(`Wallet name is required for this operation`);
   }
 
   const wallet = await walletClassMap[walletType][networkType]().named(name);
@@ -112,12 +114,13 @@ export async function replaceNamedWallet(body): Promise<Wallet> {
 
   // Named wallets are saved in the database
   if (!name || !walletId) {
-    throw Error(
-      `Wallet name and walletId are required for this operation`
-    );
+    throw Error(`Wallet name and walletId are required for this operation`);
   }
 
-  wallet = await walletClassMap[walletType][networkType]().replaceNamed(name, walletId);
+  wallet = await walletClassMap[walletType][networkType]().replaceNamed(
+    name,
+    walletId
+  );
   return wallet;
 }
 

@@ -164,10 +164,7 @@ export class BaseWallet implements WalletI {
    *
    * @returns boolean
    */
-   async _namedExists(
-    name: string,
-    dbName?: string
-  ): Promise<boolean> {
+  async _namedExists(name: string, dbName?: string): Promise<boolean> {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
