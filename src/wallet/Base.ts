@@ -113,6 +113,78 @@ export class BaseWallet implements WalletI {
   };
 
   /**
+   * replaceNamed - Replace (recover) named wallet with a new walletId
+   *
+   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+   * If wallet exists it will be overwritten without exception
+   *
+   * @param name   user friendly wallet alias
+   * @param walletId walletId options to steer the creation process
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns instantiated wallet
+   */
+  async _replaceNamed(
+    name: string,
+    walletId: string,
+    dbName?: string
+  ): Promise<this> {
+    if (name.length === 0) {
+      throw Error("Named wallets must have a non-empty name");
+    }
+    _checkContextSafety(this);
+    this.name = name;
+    dbName = dbName ? dbName : (this.networkPrefix as string);
+    let db = getStorageProvider(dbName);
+
+    if (db) {
+      await db.init();
+      let savedWalletRecord = await db.getWallet(name);
+      await this._fromId(walletId);
+      if (savedWalletRecord) {
+        await db.updateWallet(name, walletId);
+      } else {
+        await db.addWallet(name, walletId);
+      }
+
+      await db.close();
+      return this;
+    } else {
+      throw Error(
+        "No database was available or configured to store the named wallet."
+      );
+    }
+  }
+
+  /**
+   * namedExists - check if a named wallet already exists
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns boolean
+   */
+  async _namedExists(name: string, dbName?: string): Promise<boolean> {
+    if (name.length === 0) {
+      throw Error("Named wallets must have a non-empty name");
+    }
+    _checkContextSafety(this);
+    dbName = dbName ? dbName : (this.networkPrefix as string);
+    let db = getStorageProvider(dbName);
+
+    if (db) {
+      await db.init();
+      let savedWalletRecord = await db.getWallet(name);
+      await db.close();
+      return savedWalletRecord !== undefined;
+    } else {
+      throw Error(
+        "No database was available or configured to store the named wallet."
+      );
+    }
+  }
+
+  /**
    * _fromId - creates a wallet from serialized string
    *
    *

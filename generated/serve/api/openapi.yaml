@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.16
+  version: 0.3.18
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -344,6 +344,57 @@ paths:
           content: {}
           description: Invalid input
       summary: create a new wallet
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/replace_named:
+    post:
+      operationId: replaceNamed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletReplaceNamedRequest'
+        description: Request parameters
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletReplaceNamedResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Replace (recover) named wallet with a new walletId.
+        If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+        If wallet exists it will be overwritten without exception
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/named_exists:
+    post:
+      operationId: namedExists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletNamedExistsRequest'
+        description: Request parameters
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletNamedExistsResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Check if a named wallet already exists
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -1562,6 +1613,52 @@ components:
           example: username1
           type: string
       type: object
+    WalletReplaceNamedRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      - $ref: '#/components/schemas/WalletType'
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        name: walletName
+      properties:
+        name:
+          description: User friendly wallet alias
+          example: walletName
+          type: string
+        walletId:
+          description: The walletId of the source of funds to spend from.
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+      type: object
+    WalletReplaceNamedResponse:
+      description: |
+        True if operation was successful
+        False if service database was not configured or other exception occured
+      properties:
+        result:
+          example: true
+          type: boolean
+      type: boolean
+    WalletNamedExistsRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      - $ref: '#/components/schemas/WalletType'
+      example:
+        name: walletName
+      properties:
+        name:
+          description: User friendly wallet alias
+          example: walletName
+          type: string
+      type: object
+    WalletNamedExistsResponse:
+      description: |
+        Boolean true or false
+      properties:
+        result:
+          example: true
+          type: boolean
+      type: boolean
     SendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6

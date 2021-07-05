@@ -1,4 +1,4 @@
-FROM node:14-buster-slim
+FROM --platform=$BUILDPLATFORM node:14-buster-slim
 
 # Get g++ for compiling, wget to download Boost, git to clone source code repo,
 # and make to automate program compilation with Makefile provided
@@ -10,7 +10,7 @@ RUN apt-get update \
 
 # Download boost, untar, setup install with bootstrap and only do the Program Options library,
 # and then install
-RUN cd /home && wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz \
+RUN cd /home && wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
   && tar xfz boost_1_74_0.tar.gz \
   && rm boost_1_74_0.tar.gz \
   && cd boost_1_74_0 \
@@ -22,22 +22,12 @@ RUN cd /home && wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost
 # Install build-essential, etc.
 RUN apt install -y build-essential \
                    autoconf libtool \
-                   pkg-config
-
-# Install CMAKE (>3.13 required for gRPC build)
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Linux-x86_64.sh \
-      -q -O /tmp/cmake-install.sh \
-      && chmod u+x /tmp/cmake-install.sh \
-      && mkdir /usr/bin/cmake \
-      && /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake \
-      && rm /tmp/cmake-install.sh
-ENV PATH="/usr/bin/cmake/bin:${PATH}"
-
-# Install zmq and gmp
-RUN apt install -y libzmq3-dev
+                   pkg-config \
+                   cmake \
+                   libzmq3-dev
 
 # Install gRPC and Protocol Buffers
-RUN git clone -b v1.30.2 --depth 1 --recursive --shallow-submodules https://github.com/grpc/grpc \
+RUN git clone -b v1.38.1 --depth 1 --recursive --shallow-submodules https://github.com/grpc/grpc \
   && cd grpc \
   && mkdir -p cmake/build \
   && cd cmake/build \
@@ -54,27 +44,30 @@ RUN apt-get install -y python libgmp-dev
 
 # clone and build gs++
 RUN cd /home \
-  && git clone https://github.com/blockparty-sh/cpp_slp_graph_search.git \
+  && git clone https://github.com/mainnet-pat/cpp_slp_graph_search.git \
   && cd cpp_slp_graph_search \
+  && git checkout absl \
   && mkdir build \
   && cd build \
   && cmake \
       -DCMAKE_BUILD_TYPE=Release \
       .. \
-  && make -j4
+  && make -j1 \
+  && echo 1
 
-RUN wget -q https://golang.org/dl/go1.13.8.linux-amd64.tar.gz
-RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.13.8.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go1.13.8.linux-amd64.tar.gz
+ARG BUILDPLATFORM
+
+RUN export GOPLATFORM=$(echo ${BUILDPLATFORM} | tr "/" "-") && echo ${GOPLATFORM} \
+  && wget -q https://golang.org/dl/go1.13.8.${GOPLATFORM}.tar.gz \
+  && rm -rf /usr/local/go && tar -C /usr/local -xzf go1.13.8.${GOPLATFORM}.tar.gz \
+  && tar -C /usr/local -xzf go1.13.8.${GOPLATFORM}.tar.gz
+
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/root/go
 ENV GOBIN=/root/go/bin
 ENV PATH=/usr/local/go/bin:/root/go/bin:/usr/bin/cmake/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 RUN cd /home/cpp_slp_graph_search \
-  && git remote add fork https://github.com/mainnet-pat/cpp_slp_graph_search.git \
-  && git fetch fork \
-  && git checkout mainnet.cash \
   && cd build && make && echo 10
 
 RUN cd /home/cpp_slp_graph_search/server/proxy \
