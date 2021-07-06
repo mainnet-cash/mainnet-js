@@ -1,4 +1,4 @@
-import { instantiateSecp256k1 } from "@bitauth/libauth";
+import { binToHex, instantiateSecp256k1 } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,
@@ -107,6 +107,17 @@ export class Contract implements ContractI {
   }
 
   /**
+   * getParameterList - Get the parameters as a list
+   *
+   * a low-level function
+   *
+   * @returns A list of parameters as strings
+   */
+   private getParameterList() : any[] {
+    return this.parameters.map(x => ArrayBuffer.isView(x) ? binToHex(x) :x.toString() );
+  }
+
+  /**
    * fromId - Deserialize a contract from a string
    *
    * an intermediate function
@@ -162,7 +173,7 @@ export class Contract implements ContractI {
    *
    * a high-level function
    *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/contractUtxos|/contract/utxos} REST endpoint
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/utxos} REST endpoint
    * @returns A list of utxos on the contract
    */
   public async getUtxos() {
@@ -175,6 +186,7 @@ export class Contract implements ContractI {
 
   /**
    * Get the current balance of the contract
+   * 
    * @returns The balance in satoshi
    */
   public getBalance() {
@@ -183,6 +195,10 @@ export class Contract implements ContractI {
 
   /**
     * Get the information about the contract
+    * 
+    * a high-level function
+    *
+    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/info} REST endpoint
     * @returns The contract info
     */
   public info() : ContractInfoResponseI {
@@ -190,6 +206,7 @@ export class Contract implements ContractI {
       contractId: this.toString(),
       cashaddr: this.contract.address,
       script: this.script,
+      parameters: this.getParameterList(),
       nonce: this.nonce
     };
   }

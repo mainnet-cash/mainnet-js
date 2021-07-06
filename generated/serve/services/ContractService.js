@@ -70,6 +70,7 @@ const contractInfo = ( {contractInfoRequest } ) => new Promise(
       let contract = await mainnet.Contract.fromId(contractInfoRequest.contractId);    
       
       let resp = contract.info();
+      console.log(resp)
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(

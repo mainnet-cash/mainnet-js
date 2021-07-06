@@ -36,6 +36,7 @@ export interface ContractInfoResponseI {
   contractId: string;
   cashaddr: string;
   script: string;
+  parameters: string[];
   nonce: number;
 }
 
