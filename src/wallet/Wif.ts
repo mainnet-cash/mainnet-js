@@ -363,6 +363,38 @@ export class Wallet extends BaseWallet {
   }
 
   /**
+   * replaceNamed - replace (recover) named wallet with a new walletId
+   *
+   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+   * If wallet exists it will be overwritten without exception
+   *
+   * @param name   user friendly wallet alias
+   * @param walletId walletId options to steer the creation process
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns instantiated wallet
+   */
+  public static replaceNamed(
+    name: string,
+    walletId: string,
+    dbName?: string
+  ): Promise<Wallet> {
+    return new this()._replaceNamed(name, walletId, dbName);
+  }
+
+  /**
+   * namedExists - check if a named wallet already exists
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns boolean
+   */
+  public static namedExists(name: string, dbName?: string): Promise<boolean> {
+    return new this()._namedExists(name, dbName);
+  }
+
+  /**
    * fromSeed - create a wallet using the seed phrase and derivation path
    *
    * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
@@ -959,7 +991,7 @@ export class TestNetWallet extends Wallet {
       );
       const data = response.data;
       return await this.slpAware().sendMax(data.bchtest);
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
       console.log(e.response ? e.response.data : "");
       throw e;
@@ -990,7 +1022,7 @@ export class TestNetWallet extends Wallet {
       );
       const data = response.data;
       return await this.slp.sendMax(data.slptest, tokenId);
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
       console.log(e.response ? e.response.data : "");
       throw e;

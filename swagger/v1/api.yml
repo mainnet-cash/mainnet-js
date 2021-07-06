@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.17
+  version: 0.3.18
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -368,6 +368,58 @@ paths:
       summary: create a new wallet
       tags:
         - wallet
+
+  /wallet/replace_named:
+    post:
+      operationId: replaceNamed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletReplaceNamedRequest"
+        description: Request parameters
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletReplaceNamedResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Replace (recover) named wallet with a new walletId.
+        If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+        If wallet exists it will be overwritten without exception
+      tags:
+        - wallet
+
+  /wallet/named_exists:
+    post:
+      operationId: namedExists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletNamedExistsRequest"
+        description: Request parameters
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletNamedExistsResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Check if a named wallet already exists
+      tags:
+        - wallet
+
   /wallet/info:
     post:
       operationId: info
@@ -1484,6 +1536,47 @@ components:
       allOf:
        - $ref: "#/components/schemas/NetworkEnum"
        - $ref: "#/components/schemas/WalletType"
+    WalletReplaceNamedRequest:
+      properties:
+        name:
+          example: walletName
+          type: string
+          description: User friendly wallet alias
+        walletId:
+          type: string
+          example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          description: The walletId of the source of funds to spend from.
+      type: object
+      allOf:
+       - $ref: "#/components/schemas/NetworkEnum"
+       - $ref: "#/components/schemas/WalletType"
+    WalletReplaceNamedResponse:
+      type: boolean
+      properties:
+        result:
+          type: boolean
+          example: true
+      description: |
+        True if operation was successful
+        False if service database was not configured or other exception occured
+    WalletNamedExistsRequest:
+      properties:
+        name:
+          example: walletName
+          type: string
+          description: User friendly wallet alias
+      type: object
+      allOf:
+       - $ref: "#/components/schemas/NetworkEnum"
+       - $ref: "#/components/schemas/WalletType"
+    WalletNamedExistsResponse:
+      type: boolean
+      properties:
+        result:
+          type: boolean
+          example: true
+      description: |
+        Boolean true or false
     SendRequest:
       properties:
         walletId:

@@ -107,8 +107,44 @@ const info = ({ serializedWallet }) =>
         Service.rejectResponse(e, e.status || 500)
       );
     }
-  });  
+  });
 /**
+* Check if a named wallet already exists
+*
+* walletNamedExistsRequest WalletNamedExistsRequest Request parameters
+* returns Boolean
+* */
+const namedExists = ({ walletNamedExistsRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.namedWalletExists(walletNamedExistsRequest);
+      resolve(Service.successResponse({ result: resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Replace (recover) named wallet with a new walletId. If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied If wallet exists it will be overwritten without exception 
+*
+* walletReplaceNamedRequest WalletReplaceNamedRequest Request parameters
+* returns Boolean
+* */
+const replaceNamed = ({ walletReplaceNamedRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const resp = await mainnet.replaceNamedWallet(walletReplaceNamedRequest);
+      resolve(Service.successResponse({ result: true }));
+    } catch (e) {
+      console.log(e);
+      resolve(Service.successResponse({ result: false }));
+    }
+  },
+);
+  /**
 * Get maximum spendable amount
 *
 * maxAmountToSendRequest MaxAmountToSendRequest get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
@@ -253,6 +289,8 @@ module.exports = {
   depositAddress,
   depositQr,
   info,
+  namedExists,
+  replaceNamed,
   maxAmountToSend,
   send,
   sendMax,
