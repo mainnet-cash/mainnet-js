@@ -9,7 +9,7 @@ import {
 import { compileString, compileFile } from "cashc";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
-import { ContractI, CashscriptTransactionI } from "./interface";
+import { ContractI, CashscriptTransactionI, ContractInfoResponseI, ContractResponseI } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
 import {
@@ -179,6 +179,19 @@ export class Contract implements ContractI {
    */
   public getBalance() {
     return this.contract.getBalance();
+  }
+
+  /**
+    * Get the information about the contract
+    * @returns The contract info
+    */
+  public info() : ContractInfoResponseI {
+    return {
+      contractId: this.toString(),
+      cashaddr: this.contract.address,
+      script: this.script,
+      nonce: this.nonce
+    };
   }
 
   /**
@@ -356,7 +369,7 @@ export class Contract implements ContractI {
         } else {
           return txResult;
         }
-      } catch (e) {
+      } catch (e:any) {
         throw Error(e);
       }
     } else {

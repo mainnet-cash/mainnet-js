@@ -1,5 +1,4 @@
 import { SendRequest } from "../wallet/model";
-import { UtxoI } from "../interface";
 import { Argument, Recipient as CashscriptRecipientI } from "cashscript";
 
 export interface ContractI {
@@ -15,6 +14,12 @@ export interface ContractI {
    */
   getDepositAddress(): string | Error;
 
+    /**
+   * info
+   * @returns returns the contract info
+   */
+     info(): ContractInfoResponseI | Error;
+
   /**
    * getContractText should return the cashscript text
    * @returns returns contract in script as a string
@@ -25,6 +30,13 @@ export interface ContractI {
 export interface ContractResponseI {
   contractId: string;
   cashaddr: string;
+}
+
+export interface ContractInfoResponseI {
+  contractId: string;
+  cashaddr: string;
+  script: string;
+  nonce: number;
 }
 
 export interface CashscriptTransactionI {

@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
+const json = require('body-parser/lib/types/json');
 
 /**
 * Create a cashscript contract
@@ -58,6 +59,28 @@ const contractFn = ({ contractFnRequest }) => new Promise(
 
 
 /**
+* Call a method on a contract
+*
+* contractFnRequest ContractFnRequest null
+* returns ContractFnResponse
+* */
+const contractInfo = ( {contractInfoRequest } ) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let contract = await mainnet.Contract.fromId(contractInfoRequest.contractId);    
+      
+      let resp = contract.info();
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+   },
+);
+
+
+/**
 * List specific utxos in a contract
 * Returns all UTXOs that can be spent by the  contract. Both confirmed and unconfirmed UTXOs are included. 
 *
@@ -81,5 +104,6 @@ const contractUtxos = ({contract}) => new Promise(
 module.exports = {
   createContract,
   contractFn,
+  contractInfo,
   contractUtxos,
 };
