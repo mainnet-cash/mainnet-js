@@ -114,7 +114,7 @@ export class Contract implements ContractI {
    * @returns A list of parameters as strings
    */
    private getParameterList() : any[] {
-    return this.parameters.map(x => ArrayBuffer.isView(x) ? binToHex(x) :x.toString() );
+    return this.parameters.map(x => ArrayBuffer.isView(x) ? binToHex(x) :x );
   }
 
   /**

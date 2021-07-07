@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
-const json = require('body-parser/lib/types/json');
 
 /**
 * Create a cashscript contract
@@ -70,7 +69,6 @@ const contractInfo = ( {contractInfoRequest } ) => new Promise(
       let contract = await mainnet.Contract.fromId(contractInfoRequest.contractId);    
       
       let resp = contract.info();
-      console.log(resp)
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(

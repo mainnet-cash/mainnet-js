@@ -511,7 +511,7 @@ describe("Test Contract Services", () => {
     expect(contractInfoResp.body.contractId).toBe(contractResp.body.contractId);
     expect(contractInfoResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     expect(contractInfoResp.body.script).toBe(script);
-    expect(contractInfoResp.body.parameters).toStrictEqual([sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), "215"]);
+    expect(contractInfoResp.body.parameters).toStrictEqual([sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), 215]);
   });
 
   /**
