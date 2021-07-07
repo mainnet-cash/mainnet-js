@@ -74,6 +74,23 @@ class ExpressServer {
       apiSpec: this.openApiPath,
       operationHandlers: path.join(__dirname),
       fileUploader: { dest: config.FILE_UPLOAD_PATH },
+      validateSecurity: config.API_KEY ? {
+        handlers: {
+          bearerAuth: (req, scopes, schema) => {
+            if (!req.headers.authorization || req.headers.authorization.split(" ")[0].toLowerCase() != "bearer") {
+              throw { status: 401, message: 'No bearer authorization header provided' };
+            }
+
+            const token = req.headers.authorization.split("bearer ")[1];
+
+            if (config.API_KEY !== token) {
+              throw { status: 403, message: 'forbidden' };
+            }
+
+            return true;
+          }
+        }
+      } : false
     }).install(this.app)
       .catch(e => console.log(e))
       .then(async () => {
@@ -98,6 +115,7 @@ class ExpressServer {
         });
 
         server.app = this.app;
+        this.server = server;
         return server;
       });
   }
@@ -106,7 +124,7 @@ class ExpressServer {
     await mainnet.disconnectProviders();
     if (this.server !== undefined) {
       await this.server.close();
-      console.log(`Server on port ${this.port} shut down`);
+      // console.log(`Server on port ${this.port} shut down`);
     }
   }
 }
