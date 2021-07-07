@@ -21,6 +21,8 @@ servers:
   url: https://rest-unstable.mainnet.cash/
 - description: local development server via `yarn api:serve`
   url: http://localhost:3000/
+security:
+- bearerAuth: []
 tags:
 - description: Use Cashscript contracts
   externalDocs:
@@ -2568,3 +2570,7 @@ components:
         slptest:
           description: Slpaddr to return testnet SLP tokens
           type: string
+  securitySchemes:
+    bearerAuth:
+      scheme: bearer
+      type: http

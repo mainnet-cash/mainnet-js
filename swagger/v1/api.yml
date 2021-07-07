@@ -1003,6 +1003,10 @@ paths:
       tags:
         - webhook
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     Utxo:
       properties:
@@ -2245,3 +2249,7 @@ components:
       example:
         bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
         slptest: "slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866"
+
+# global security requirement. for per-endpoint configuration see https://swagger.io/docs/specification/authentication/bearer-authentication/
+security:
+  - bearerAuth: []
