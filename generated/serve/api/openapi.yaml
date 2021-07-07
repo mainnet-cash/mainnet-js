@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.18
+  version: 0.3.20
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -21,6 +21,8 @@ servers:
   url: https://rest-unstable.mainnet.cash/
 - description: local development server via `yarn api:serve`
   url: http://localhost:3000/
+security:
+- bearerAuth: []
 tags:
 - description: Use Cashscript contracts
   externalDocs:
@@ -2490,3 +2492,7 @@ components:
         slptest:
           description: Slpaddr to return testnet SLP tokens
           type: string
+  securitySchemes:
+    bearerAuth:
+      scheme: bearer
+      type: http
