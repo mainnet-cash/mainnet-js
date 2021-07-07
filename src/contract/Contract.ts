@@ -9,7 +9,12 @@ import {
 import { compileString, compileFile } from "cashc";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
-import { ContractI, CashscriptTransactionI, ContractInfoResponseI, ContractResponseI } from "./interface";
+import {
+  ContractI,
+  CashscriptTransactionI,
+  ContractInfoResponseI,
+  ContractResponseI,
+} from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
 import {
@@ -113,8 +118,10 @@ export class Contract implements ContractI {
    *
    * @returns A list of parameters as strings
    */
-   private getParameterList() : any[] {
-    return this.parameters.map(x => ArrayBuffer.isView(x) ? binToHex(x) :x );
+  private getParameterList(): any[] {
+    return this.parameters.map((x) =>
+      ArrayBuffer.isView(x) ? binToHex(x) : x
+    );
   }
 
   /**
@@ -186,7 +193,7 @@ export class Contract implements ContractI {
 
   /**
    * Get the current balance of the contract
-   * 
+   *
    * @returns The balance in satoshi
    */
   public getBalance() {
@@ -194,20 +201,20 @@ export class Contract implements ContractI {
   }
 
   /**
-    * Get the information about the contract
-    * 
-    * a high-level function
-    *
-    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/info} REST endpoint
-    * @returns The contract info
-    */
-  public info() : ContractInfoResponseI {
+   * Get the information about the contract
+   *
+   * a high-level function
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/info} REST endpoint
+   * @returns The contract info
+   */
+  public info(): ContractInfoResponseI {
     return {
       contractId: this.toString(),
       cashaddr: this.contract.address,
       script: this.script,
       parameters: this.getParameterList(),
-      nonce: this.nonce
+      nonce: this.nonce,
     };
   }
 
@@ -386,7 +393,7 @@ export class Contract implements ContractI {
         } else {
           return txResult;
         }
-      } catch (e:any) {
+      } catch (e: any) {
         throw Error(e);
       }
     } else {

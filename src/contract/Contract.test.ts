@@ -5,7 +5,6 @@ import { Contract } from "./Contract";
 import { instantiateSecp256k1 } from "@bitauth/libauth";
 
 describe(`Create Contract Tests`, () => {
-
   test("Should return info about a contract", async () => {
     let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
       function transfer(pubkey signingPk, sig s) {
@@ -33,17 +32,20 @@ describe(`Create Contract Tests`, () => {
       1
     );
 
-    let info = contract.info()
+    let info = contract.info();
 
-    expect(info.cashaddr).toBe("bchreg:ppt0dzpt8xmt9h2apv9r60cydmy9k0jkfg4atpnp2f");
+    expect(info.cashaddr).toBe(
+      "bchreg:ppt0dzpt8xmt9h2apv9r60cydmy9k0jkfg4atpnp2f"
+    );
     expect(info.contractId).toBe(
       "regtest:T0RZc01UZ3lMREUzT0N3ek1pdzJOaXd4T0RVc01UTXNNakUwTERFeU15d3lORElzTWpVeExESTFNU3d4TlRRc01qVTFMREV5TlN3MU5Td3lOVEVzTWpNNExERTNMRE0yOk9EWXNNVGd5TERFM09Dd3pNaXcyTml3eE9EVXNNVE1zTWpFMExERXlNeXd5TkRJc01qVXhMREkxTVN3eE5UUXNNalUxTERFeU5TdzFOU3d5TlRFc01qTTRMREUzTERNMjpNVEF3:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CiAgCiAgICAgIGZ1bmN0aW9uIHRpbWVvdXQocHVia2V5IHNpZ25pbmdQaywgc2lnIHMpIHsKICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IHNlbmRlclBraCk7CiAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgICB9CiAgfQ==:1"
     );
-    expect(info.parameters).toStrictEqual(
-      ["56b6b22042b90dd67bf2fbfb9aff7d37fbee1124", "56b6b22042b90dd67bf2fbfb9aff7d37fbee1124", now]
-    );
+    expect(info.parameters).toStrictEqual([
+      "56b6b22042b90dd67bf2fbfb9aff7d37fbee1124",
+      "56b6b22042b90dd67bf2fbfb9aff7d37fbee1124",
+      now,
+    ]);
     expect(info.script).toBe(script);
-
   });
 
   test("Should send a transfer with timeout script", async () => {

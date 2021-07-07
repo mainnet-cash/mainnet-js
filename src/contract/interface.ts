@@ -14,11 +14,11 @@ export interface ContractI {
    */
   getDepositAddress(): string | Error;
 
-    /**
+  /**
    * info
    * @returns returns the contract info
    */
-     info(): ContractInfoResponseI | Error;
+  info(): ContractInfoResponseI | Error;
 
   /**
    * getContractText should return the cashscript text
