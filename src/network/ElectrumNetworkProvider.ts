@@ -63,25 +63,36 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getRawTransaction(
-    txHex: string,
+    txHash: string,
     verbose: boolean = false
   ): Promise<string> {
-    return (await this.performRequest(
-      "blockchain.transaction.get",
-      txHex,
-      verbose
-    )) as string;
+    try {
+      return (await this.performRequest(
+        "blockchain.transaction.get",
+        txHash,
+        verbose
+      )) as string;
+    } catch (error: any) {
+      if (
+        (error.message as string).indexOf(
+          "No such mempool or blockchain transaction."
+        ) > -1
+      )
+        throw Error(
+          `Could not decode transaction. It might not exist on the current blockchain (${this.network}).`
+        );
+      else throw error;
+    }
   }
 
   // gets the decoded transaction in human readable form
   async getRawTransactionObject(
-    txHex: string
+    txHash: string
   ): Promise<ElectrumRawTransaction> {
-    return (await this.performRequest(
-      "blockchain.transaction.get",
-      txHex,
+    return (await this.getRawTransaction(
+      txHash,
       true
-    )) as ElectrumRawTransaction;
+    )) as unknown as ElectrumRawTransaction;
   }
 
   async sendRawTransaction(txHex: string): Promise<string> {

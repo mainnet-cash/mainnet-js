@@ -32,20 +32,20 @@ export default interface NetworkProvider {
 
   /**
    * Retrieve the Hex transaction details for a given transaction ID.
-   * @param txHex Hex transaction ID.
+   * @param txHash Hex of transaction hash.
    * @param verbose Whether a verbose coin-specific response is required.
    * @throws {Error} If the transaction does not exist
    * @returns The full hex transaction for the provided transaction ID.
    */
-  getRawTransaction(txHex: string): Promise<string>;
+  getRawTransaction(txHash: string): Promise<string>;
 
   /**
    * Retrieve a verbose coin-specific response transaction details for a given transaction ID.
-   * @param txHex Hex transaction ID.
+   * @param txHash Hex of transaction hash.
    * @throws {Error} If the transaction does not exist
    * @returns The full hex transaction for the provided transaction ID.
    */
-  getRawTransactionObject(txHex: string): Promise<any>;
+  getRawTransactionObject(txHash: string): Promise<any>;
 
   /**
    * Broadcast a raw hex transaction to the Bitcoin Cash network.
