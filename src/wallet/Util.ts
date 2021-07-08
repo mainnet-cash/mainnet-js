@@ -1,7 +1,11 @@
+import { Wallet } from "../wallet/Wif";
 import {
-  Wallet,
-} from "../wallet/Wif";
-import { binToHex, hexToBin, instantiateSha256, instantiateSha256Bytes, Sha256 } from "@bitauth/libauth";
+  binToHex,
+  hexToBin,
+  instantiateSha256,
+  instantiateSha256Bytes,
+  Sha256,
+} from "@bitauth/libauth";
 import { ElectrumRawTransaction } from "../network/interface";
 
 /**
@@ -26,11 +30,17 @@ export class Util {
     return binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
   }
 
-  public async decodeTransaction(transactionHashOrHex: string): Promise<ElectrumRawTransaction> {
+  public async decodeTransaction(
+    transactionHashOrHex: string
+  ): Promise<ElectrumRawTransaction> {
     if (transactionHashOrHex.length > 64) {
-      transactionHashOrHex = await this.getTransactionHash(transactionHashOrHex);
+      transactionHashOrHex = await this.getTransactionHash(
+        transactionHashOrHex
+      );
     }
 
-    return await this.wallet.provider!.getRawTransactionObject(transactionHashOrHex);
+    return await this.wallet.provider!.getRawTransactionObject(
+      transactionHashOrHex
+    );
   }
 }
