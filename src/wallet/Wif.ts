@@ -73,6 +73,7 @@ import {
 import axios from "axios";
 import { SlpSendResponse } from "../slp/interface";
 import { toCashAddress } from "../util/bchaddr";
+import { Util } from "./Util";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -94,6 +95,7 @@ export class Wallet extends BaseWallet {
   walletType?: WalletTypeEnum;
   _slp?: Slp;
   _slpAware: boolean = false;
+  _util?: Util;
 
   constructor(
     name = "",
@@ -118,6 +120,20 @@ export class Wallet extends BaseWallet {
   // interface to slp functions. see Slp.ts
   public static get slp() {
     return Slp;
+  }
+
+  // interface to util functions. see Util.ts
+  public get util() {
+    if (!this._util) {
+      this._util = new Util(this);
+    }
+
+    return this._util;
+  }
+
+  // interface to util functions. see Util.ts
+  public static get util() {
+    return Util;
   }
 
   public slpAware(value: boolean = true): Wallet {

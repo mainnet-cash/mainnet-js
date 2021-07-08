@@ -32,7 +32,7 @@ tags:
     description: Use a stock escrow contract, with some helpers.
     externalDocs:
       description: Find out more
-      url: https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/      
+      url: https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/
   - name: faucet
     description: Testnet faucet
     externalDocs:
@@ -58,6 +58,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/slp
+  - name: wallet/util
+    description: Invoke wallet utility functions
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/util
   - name: webhook
     description: Create webhooks
     externalDocs:
@@ -644,6 +649,7 @@ paths:
       summary: create a new SLP wallet
       tags:
         - wallet/slp
+
   /wallet/slp/genesis:
     post:
       operationId: slpGenesis
@@ -819,6 +825,7 @@ paths:
       summary: Get an SLP deposit address in cash address format
       tags:
         - wallet/slp
+
   /wallet/slp/deposit_qr:
     post:
       operationId: slpDepositQr
@@ -937,6 +944,28 @@ paths:
       summary: Get list of unspent SLP outpoints.
       tags:
       - wallet/slp
+
+  /wallet/util/decode_transaction:
+    post:
+      operationId: utilDecodeTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UtilDecodeTransactionRequest'
+        description: |
+          Request to decode a transaction
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilDecodeTransactionResponse'
+          description: successful operation
+      summary: Decode a bitcoin transaction. Accepts both transaction hash or raw transaction in hex format.
+      tags:
+      - wallet/util
 
   /webhook/watch_address:
     post:
@@ -2133,6 +2162,84 @@ components:
             type: string
             description: a list of slp outpoints
             example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
+
+    ElectrumRawTransaction:
+      properties:
+        blockhash:
+          type: string
+        blocktime:
+          type: number
+        configrmations:
+          type: number
+        hash:
+          type: string
+        hex:
+          type: string
+        locktime:
+          type: number
+        size:
+          type: number
+        time:
+          type: number
+        txid:
+          type: string
+        version:
+          type: number
+        vin:
+          type: array
+          items:
+            type: object
+            properties:
+              scriptSig:
+                type: object
+                properties:
+                  asm:
+                    type: string
+                  hex:
+                    type: string
+              sequence:
+                type: number
+              txid:
+                type: string
+              vout:
+                type: number
+        vout:
+          type: array
+          items:
+            type: object
+            properties:
+              n:
+                type: number
+              scriptPubKey:
+                type: object
+                properties:
+                  addresses:
+                    type: array
+                    items:
+                      type: string
+                  asm:
+                    type: string
+                  hex:
+                    type: string
+                  reqSigs:
+                    type: number
+                  type:
+                    type: string
+              value:
+                type: number
+
+    UtilDecodeTransactionRequest:
+      properties:
+        transactionHashOrHex:
+          type:
+            string
+      allOf:
+        - $ref: "#/components/schemas/NetworkEnum"
+      required:
+        - transactionHashOrHex
+
+    UtilDecodeTransactionResponse:
+      $ref: "#/components/schemas/ElectrumRawTransaction"
 
     GetTestnetBchRequest:
       properties:
