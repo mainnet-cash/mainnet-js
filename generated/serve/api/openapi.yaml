@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.20
+  version: 0.3.21
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -2574,7 +2574,7 @@ components:
           txid: txid
           vout: 9.301444243932576
         time: 5.637376656633329
-        version: 2.3021358869347655
+        version: 0.3.21
         hash: hash
         vout:
         - scriptPubKey:
