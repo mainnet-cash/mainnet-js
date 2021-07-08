@@ -59,6 +59,11 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/slp
   name: wallet/slp
+- description: Invoke wallet utility functions
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/util
+  name: wallet/util
 - description: Create webhooks
   externalDocs:
     description: Find out more
@@ -987,6 +992,29 @@ paths:
       tags:
       - wallet/slp
       x-eov-operation-handler: controllers/WalletSlpController
+  /wallet/util/decode_transaction:
+    post:
+      operationId: utilDecodeTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UtilDecodeTransactionRequest'
+        description: |
+          Request to decode a transaction
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilDecodeTransactionResponse'
+          description: successful operation
+      summary: Decode a bitcoin transaction. Accepts both transaction hash or raw
+        transaction in hex format.
+      tags:
+      - wallet/util
+      x-eov-operation-handler: controllers/WalletUtilController
   /webhook/watch_address:
     post:
       operationId: watchAddress
@@ -2523,6 +2551,93 @@ components:
             example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
             type: string
           type: array
+    ElectrumRawTransaction:
+      example:
+        blockhash: blockhash
+        configrmations: 6.027456183070403
+        locktime: 1.4658129805029452
+        size: 5.962133916683182
+        blocktime: 0.8008281904610115
+        txid: txid
+        hex: hex
+        vin:
+        - sequence: 7.061401241503109
+          scriptSig:
+            asm: asm
+            hex: hex
+          txid: txid
+          vout: 9.301444243932576
+        - sequence: 7.061401241503109
+          scriptSig:
+            asm: asm
+            hex: hex
+          txid: txid
+          vout: 9.301444243932576
+        time: 5.637376656633329
+        version: 2.3021358869347655
+        hash: hash
+        vout:
+        - scriptPubKey:
+            addresses:
+            - addresses
+            - addresses
+            asm: asm
+            hex: hex
+            type: type
+            reqSigs: 2.027123023002322
+          value: 4.145608029883936
+          n: 3.616076749251911
+        - scriptPubKey:
+            addresses:
+            - addresses
+            - addresses
+            asm: asm
+            hex: hex
+            type: type
+            reqSigs: 2.027123023002322
+          value: 4.145608029883936
+          n: 3.616076749251911
+      properties:
+        blockhash:
+          type: string
+        blocktime:
+          type: number
+        configrmations:
+          type: number
+        hash:
+          type: string
+        hex:
+          type: string
+        locktime:
+          type: number
+        size:
+          type: number
+        time:
+          type: number
+        txid:
+          type: string
+        version:
+          type: number
+        vin:
+          items:
+            $ref: '#/components/schemas/ElectrumRawTransaction_vin'
+          type: array
+        vout:
+          items:
+            $ref: '#/components/schemas/ElectrumRawTransaction_vout'
+          type: array
+    UtilDecodeTransactionRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        transactionHashOrHex: transactionHashOrHex
+      properties:
+        transactionHashOrHex:
+          type: string
+      required:
+      - transactionHashOrHex
+    UtilDecodeTransactionResponse:
+      $ref: '#/components/schemas/ElectrumRawTransaction'
     GetTestnetBchRequest:
       example:
         cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
@@ -2570,6 +2685,77 @@ components:
         slptest:
           description: Slpaddr to return testnet SLP tokens
           type: string
+    ElectrumRawTransaction_scriptSig:
+      example:
+        asm: asm
+        hex: hex
+      properties:
+        asm:
+          type: string
+        hex:
+          type: string
+      type: object
+    ElectrumRawTransaction_vin:
+      example:
+        sequence: 7.061401241503109
+        scriptSig:
+          asm: asm
+          hex: hex
+        txid: txid
+        vout: 9.301444243932576
+      properties:
+        scriptSig:
+          $ref: '#/components/schemas/ElectrumRawTransaction_scriptSig'
+        sequence:
+          type: number
+        txid:
+          type: string
+        vout:
+          type: number
+      type: object
+    ElectrumRawTransaction_scriptPubKey:
+      example:
+        addresses:
+        - addresses
+        - addresses
+        asm: asm
+        hex: hex
+        type: type
+        reqSigs: 2.027123023002322
+      properties:
+        addresses:
+          items:
+            type: string
+          type: array
+        asm:
+          type: string
+        hex:
+          type: string
+        reqSigs:
+          type: number
+        type:
+          type: string
+      type: object
+    ElectrumRawTransaction_vout:
+      example:
+        scriptPubKey:
+          addresses:
+          - addresses
+          - addresses
+          asm: asm
+          hex: hex
+          type: type
+          reqSigs: 2.027123023002322
+        value: 4.145608029883936
+        n: 3.616076749251911
+      properties:
+        n:
+          type: number
+        scriptPubKey:
+          $ref: '#/components/schemas/ElectrumRawTransaction_scriptPubKey'
+        value:
+          type: number
+      type: object
   securitySchemes:
     bearerAuth:
       scheme: bearer
