@@ -73,10 +73,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         verbose
       )) as string;
     } catch (error: any) {
-      if ((error.message as string).indexOf("No such mempool or blockchain transaction.") > -1)
-        throw Error(`Could not decode transaction. It might not exist on the current blockchain (${this.network}).`);
-      else
-        throw error;
+      if (
+        (error.message as string).indexOf(
+          "No such mempool or blockchain transaction."
+        ) > -1
+      )
+        throw Error(
+          `Could not decode transaction. It might not exist on the current blockchain (${this.network}).`
+        );
+      else throw error;
     }
   }
 
@@ -84,7 +89,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async getRawTransactionObject(
     txHash: string
   ): Promise<ElectrumRawTransaction> {
-    return await this.getRawTransaction(txHash, true) as unknown as ElectrumRawTransaction;
+    return (await this.getRawTransaction(
+      txHash,
+      true
+    )) as unknown as ElectrumRawTransaction;
   }
 
   async sendRawTransaction(txHex: string): Promise<string> {
