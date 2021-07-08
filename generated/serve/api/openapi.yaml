@@ -2496,7 +2496,7 @@ components:
           txid: txid
           vout: 9.301444243932576
         time: 5.637376656633329
-        version: 0.3.21
+        version: 2.3021358869347655
         hash: hash
         vout:
         - scriptPubKey:
