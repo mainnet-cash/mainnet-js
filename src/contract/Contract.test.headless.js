@@ -1,3 +1,4 @@
+const { Contract } = require("cashscript");
 const playwright = require("playwright");
 const PAGE_URL = "http://localhost:8080";
 
@@ -25,13 +26,36 @@ describe(`Should handle contracts in the browser`, () => {
     await browser.close();
   });
 
-  test(`Should create a random testnet wallet`, async () => {
-    let params = {};
-    const result = await page.evaluate(async (p) => {
-      let w = await TestNetWallet.newRandom();
-      return w.getDepositAddress();
-    }, params);
-    expect(result.slice(0, 9)).toBe("bchtest:q");
+  test(`Should parse info from a contractId`, async () => {
+    let contractId = "regtest:T0RZc01UZ3lMREUzT0N3ek1pdzJOaXd4T0RVc01UTXNNakUwTERFeU15d3lORElzTWpVeExESTFNU3d4TlRRc01qVTFMREV5TlN3MU5Td3lOVEVzTWpNNExERTNMRE0yOk9EWXNNVGd5TERFM09Dd3pNaXcyTml3eE9EVXNNVE1zTWpFMExERXlNeXd5TkRJc01qVXhMREkxTVN3eE5UUXNNalUxTERFeU5TdzFOU3d5TlRFc01qTTRMREUzTERNMjpNVEF3:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CiAgCiAgICAgIGZ1bmN0aW9uIHRpbWVvdXQocHVia2V5IHNpZ25pbmdQaywgc2lnIHMpIHsKICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IHNlbmRlclBraCk7CiAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgICB9CiAgfQ==:1"
+    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+      function transfer(pubkey signingPk, sig s) {
+        require(hash160(signingPk) == recipientPkh);
+        require(checkSig(s, signingPk));
+      }
+  
+      function timeout(pubkey signingPk, sig s) {
+          require(hash160(signingPk) == senderPkh);
+          require(checkSig(s, signingPk));
+          require(tx.time >= timeout);
+      }
+  }`;
+    const info = await page.evaluate(async (contractId) => {
+      let c = await Contract.fromId(contractId)
+      return c.info();
+    }, contractId);
+    expect(info.cashaddr).toBe(
+      "bchreg:ppt0dzpt8xmt9h2apv9r60cydmy9k0jkfg4atpnp2f"
+    );
+    expect(info.contractId).toBe(
+      "regtest:T0RZc01UZ3lMREUzT0N3ek1pdzJOaXd4T0RVc01UTXNNakUwTERFeU15d3lORElzTWpVeExESTFNU3d4TlRRc01qVTFMREV5TlN3MU5Td3lOVEVzTWpNNExERTNMRE0yOk9EWXNNVGd5TERFM09Dd3pNaXcyTml3eE9EVXNNVE1zTWpFMExERXlNeXd5TkRJc01qVXhMREkxTVN3eE5UUXNNalUxTERFeU5TdzFOU3d5TlRFc01qTTRMREUzTERNMjpNVEF3:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CiAgCiAgICAgIGZ1bmN0aW9uIHRpbWVvdXQocHVia2V5IHNpZ25pbmdQaywgc2lnIHMpIHsKICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IHNlbmRlclBraCk7CiAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgICB9CiAgfQ==:1"
+    );
+    expect(info.parameters).toStrictEqual([
+      "56b6b22042b90dd67bf2fbfb9aff7d37fbee1124",
+      "56b6b22042b90dd67bf2fbfb9aff7d37fbee1124",
+      100,
+    ]);
+    expect(info.script).toBe(script);
   });
 
   test(`Basic escrow integration test`, async () => {
