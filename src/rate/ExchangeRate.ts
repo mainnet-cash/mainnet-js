@@ -39,7 +39,9 @@ export class ExchangeRate {
           const mockedResponse = axios.interceptors.mocks[url];
           return {
             ...config,
-            cancelToken: new axios.CancelToken((cancel) => cancel({ status: 200, data: mockedResponse }))
+            cancelToken: new axios.CancelToken((cancel) =>
+              cancel({ status: 200, data: mockedResponse })
+            ),
           };
         }
 
@@ -47,17 +49,20 @@ export class ExchangeRate {
         return config;
       });
 
-      axios.interceptors.response.use(function (response) {
-        return response;
-      }, function (error) {
-        // resolve response with our mocked data
-        if (axios.isCancel(error)) {
-          return Promise.resolve(error.message);
-        }
+      axios.interceptors.response.use(
+        function (response) {
+          return response;
+        },
+        function (error) {
+          // resolve response with our mocked data
+          if (axios.isCancel(error)) {
+            return Promise.resolve(error.message);
+          }
 
-        // handle all other errors gracefully
-        return Promise.reject(error);
-      });
+          // handle all other errors gracefully
+          return Promise.reject(error);
+        }
+      );
     }
 
     axios.interceptors.mocks[mockUrl] = responseData;
