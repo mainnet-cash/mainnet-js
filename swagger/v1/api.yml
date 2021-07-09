@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.23
+  version: 0.3.24
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -1706,6 +1706,10 @@ components:
           description: The hash of a transaction
         balance:
           $ref: "#/components/schemas/BalanceResponse"
+        explorerUrl:
+          type: string
+          example: "https://explorer.bitcoin.com/tbch/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
+          description: Web url to a transaction on a block explorer
       type: object
     SendRequestArray:
       type: array
@@ -2155,6 +2159,10 @@ components:
           description: The hash of a transaction
         balance:
           $ref: "#/components/schemas/SlpBalanceResponse"
+        explorerUrl:
+          type: string
+          example: "https://testnet.simpleledger.info/#tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
+          description: Web url to a transaction on a block explorer
       type: object
 
     SlpSendMaxRequest:

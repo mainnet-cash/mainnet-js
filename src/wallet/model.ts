@@ -88,9 +88,19 @@ export class UtxoResponse {
 export class SendResponse {
   txId?: string;
   balance?: BalanceResponse;
+  explorerUrl?: string;
 
-  constructor({ txId, balance }: { txId?: string; balance?: any }) {
+  constructor({
+    txId,
+    balance,
+    explorerUrl,
+  }: {
+    txId?: string;
+    balance?: any;
+    explorerUrl?: string;
+  }) {
     this.txId = txId;
     this.balance = new BalanceResponse(balance);
+    this.explorerUrl = explorerUrl;
   }
 }
