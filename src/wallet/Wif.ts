@@ -73,7 +73,7 @@ import {
 import axios from "axios";
 import { SlpSendResponse } from "../slp/interface";
 import { toCashAddress } from "../util/bchaddr";
-import { Util } from "./Util";
+import { RegTestUtil, RegTestWatchUtil, RegTestWifUtil, TestNetUtil, TestNetWatchUtil, TestNetWifUtil, Util, WatchUtil, WifUtil } from "./Util";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -131,7 +131,7 @@ export class Wallet extends BaseWallet {
     return this._util;
   }
 
-  // interface to util functions. see Util.ts
+  // interface to util util. see Util.Util
   public static get util() {
     return Util;
   }
@@ -1049,6 +1049,11 @@ export class TestNetWallet extends Wallet {
   public static get slp() {
     return TestNetSlp;
   }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return TestNetUtil;
+  }
 }
 
 /**
@@ -1063,6 +1068,11 @@ export class RegTestWallet extends Wallet {
   // interface to static slp functions. see Slp.ts
   public static get slp() {
     return RegTestSlp;
+  }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return RegTestUtil;
   }
 }
 
@@ -1080,6 +1090,11 @@ export class WifWallet extends Wallet {
   public static get slp() {
     return WifSlp;
   }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return WifUtil;
+  }
 }
 
 /**
@@ -1095,6 +1110,11 @@ export class TestNetWifWallet extends Wallet {
   // interface to static slp functions. see Slp.ts
   public static get slp() {
     return TestNetWifSlp;
+  }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return TestNetWifUtil;
   }
 }
 
@@ -1112,6 +1132,11 @@ export class RegTestWifWallet extends Wallet {
   public static get slp() {
     return RegTestWifSlp;
   }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return RegTestWifUtil;
+  }
 }
 
 /**
@@ -1127,6 +1152,11 @@ export class WatchWallet extends Wallet {
   // interface to static slp functions. see Slp.ts
   public static get slp() {
     return WatchSlp;
+  }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return WatchUtil;
   }
 }
 
@@ -1144,6 +1174,11 @@ export class TestNetWatchWallet extends Wallet {
   public static get slp() {
     return TestNetWatchSlp;
   }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return TestNetWatchUtil;
+  }
 }
 
 /**
@@ -1159,5 +1194,10 @@ export class RegTestWatchWallet extends Wallet {
   // interface to static slp functions. see Slp.ts
   public static get slp() {
     return RegTestWatchSlp;
+  }
+
+  // interface to static util functions. see Util.ts
+  public static get util() {
+    return RegTestWatchUtil;
   }
 }
