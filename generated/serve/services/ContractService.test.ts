@@ -471,6 +471,48 @@ describe("Test Contract Services", () => {
 
   });
 
+/**
+   * Test other cashscript actions
+   */
+ it("Should return info for a contract", async () => {
+    
+    let sender =  await RegTestWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`)
+    let receiver = await RegTestWallet.watchOnly("bchreg:qznjmr5de89zv850lta6jeg5a6ftps4lyu58j8qcp8")
+    
+
+    // This contract has a bug, senderPkh and receiptPkh are swapped
+    let script = `contract FailingContractWithSwappedSigners(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+      function transfer(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == senderPkh);
+      }
+
+      function timeout(pubkey signingPk, sig s) {
+        require(checkSig(s, signingPk));
+        require(hash160(signingPk) == recipientPkh);
+        require(tx.time >= timeout);
+      }
+    }`;
+
+    const contractResp = await request(app).post("/contract/create").send({
+      script: script,
+      parameters: [sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), "215"],
+      network: 'regtest'
+    });
+    
+    expect(contractResp.statusCode).toEqual(200);
+    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
+
+    const contractInfoResp = await request(app).post("/contract/info").send({
+      contractId: contractResp.body.contractId
+    });
+    expect(contractInfoResp.statusCode).toEqual(200);
+    expect(contractInfoResp.body.contractId).toBe(contractResp.body.contractId);
+    expect(contractInfoResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
+    expect(contractInfoResp.body.script).toBe(script);
+    expect(contractInfoResp.body.parameters).toStrictEqual([sender.getPublicKeyHash(true), receiver.getPublicKeyHash(true), 215]);
+  });
 
   /**
    * Test other cashscript actions

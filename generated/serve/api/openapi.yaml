@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.22
+  version: 0.3.23
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -186,6 +186,35 @@ paths:
       tags:
       - contract/escrow
       x-eov-operation-handler: controllers/ContractEscrowController
+  /contract/info:
+    post:
+      operationId: contractInfo
+      requestBody:
+        content:
+          application/json:
+            example:
+              contractId: testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1996128042
+            schema:
+              $ref: '#/components/schemas/ContractInfoRequest'
+        description: Request parsed information regarding a contract from the contractId
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractInfoResponse'
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Get information about a contract from the contractId
+      tags:
+      - contract
+      x-eov-operation-handler: controllers/ContractController
   /contract/utxos:
     post:
       description: |
@@ -1446,6 +1475,55 @@ components:
             return here.
           example: |
             meep debug --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000 --idx=0 --amt=21000 --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
+          type: string
+    ContractInfoRequest:
+      example:
+        contractId: contractId
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+    ContractInfoResponse:
+      example:
+        cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        contractId: contractId
+        parameters:
+        - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
+        - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
+        - 215
+        script: "contract TransferWithTimeout(pubkey sender, pubkey recipient, int\
+          \ timeout) {\n    function transfer(sig recipientSig) {\n        require(checkSig(recipientSig,\
+          \ recipient));\n    }\n\n    function timeout(sig senderSig) {\n       \
+          \ require(checkSig(senderSig, sender));\n        require(tx.time >= timeout);\n\
+          \    }\n}            \n"
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+        script:
+          description: |
+            The smart contract in cashscript syntax
+          example: "contract TransferWithTimeout(pubkey sender, pubkey recipient,\
+            \ int timeout) {\n    function transfer(sig recipientSig) {\n        require(checkSig(recipientSig,\
+            \ recipient));\n    }\n\n    function timeout(sig senderSig) {\n     \
+            \   require(checkSig(senderSig, sender));\n        require(tx.time >=\
+            \ timeout);\n    }\n}            \n"
+          type: string
+        parameters:
+          description: Parameters passed when the contract was created
+          example:
+          - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
+          - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
+          - 215
+          items:
+            description: Parameters passed as an array, where binary values are passed
+              as hex
+            type: string
+          type: array
+        cashaddr:
+          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           type: string
     ScalableVectorGraphic:
       example:
