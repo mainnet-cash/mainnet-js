@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.21
+  version: 0.3.22
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -1654,10 +1654,11 @@ components:
         amount:
           type: number
           example: 100
-    Cashaddr:
-      type: string
-      example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
-      description: A bitcoin cash address
+    # Pat 07.09.21: Schema not used, commenting out to fix validator warnings
+    # Cashaddr:
+    #   type: string
+    #   example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+    #   description: A bitcoin cash address
     NetworkEnum:
       properties:
         network:
@@ -1927,9 +1928,6 @@ components:
     SlpTokenInfoResponse:
       type: object
       nullable: true
-      $ref: "#/components/schemas/SlpTokenInfoResponseItem"
-
-    SlpTokenInfoResponseItem:
       properties:
         name:
           type: string

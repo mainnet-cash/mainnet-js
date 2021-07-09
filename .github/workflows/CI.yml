@@ -29,24 +29,18 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - name: Validate Specification
-        uses: 2qx/codegen-docker-action@v1.1
-        with:
-          args: |
-            validate -i swagger/v1/api.yml
-      - name: Generate Mock Client
-        uses: 2qx/codegen-docker-action@v1.1
-        with:
-          args: |
-            generate -i swagger/v1/api.yml -g typescript-node -o generated/client/typescript-mock
+        run: yarn api:validate
+      # Pat 07.09.21: This step's build products are ignored, commenting out
+      # - name: Generate Mock Client
+      #   run: yarn api:build:ts-mock
       - name: Generate Server
-        uses: 2qx/codegen-docker-action@v1.1
-        with:
-          args: |
-            generate -i swagger/v1/api.yml -g nodejs-express-server -o generated/serve
+        run: yarn api:build:server
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.11.0
         with:
           commit_message: Update generated
+          branch: ${{ github.ref }}
+
   format:
     runs-on: ubuntu-latest
     steps:
@@ -61,9 +55,11 @@ jobs:
           yarn
           yarn format
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.11.0
         with:
           commit_message: Apply formatting changes
+          branch: ${{ github.ref }}
+
   test_browsers:
     runs-on: ubuntu-latest
     steps:

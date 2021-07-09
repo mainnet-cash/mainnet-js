@@ -8,10 +8,10 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.3.21",
+  "version": "0.3.22",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.3.21.js",
-  "browser": "dist/mainnet-0.3.21.js",
+  "main": "dist/mainnet-node-0.3.22.js",
+  "browser": "dist/mainnet-0.3.22.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*.js",
@@ -21,6 +21,7 @@
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
     "api:build:server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/generated/serve",
+    "api:build:ts-mock": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/swagger/v1/api.yml -g typescript-node -o /local/generated/client/typescript-mock",
     "api:build:client": "node swagger/generate.js",
     "api:serve": "yarn run api:serve:install && node generated/serve/serve.js",
     "api:serve:install": "yarn install --production=true --cwd generated/serve/ --prefix generated/serve/",
