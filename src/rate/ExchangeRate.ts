@@ -161,3 +161,5 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
       );
   }
 }
+
+ExchangeRate.get("usd");
