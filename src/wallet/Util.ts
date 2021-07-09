@@ -1,4 +1,4 @@
-import { Wallet } from "../wallet/Wif";
+import { RegTestWallet, RegTestWatchWallet, RegTestWifWallet, TestNetWallet, TestNetWatchWallet, TestNetWifWallet, Wallet, WatchWallet, WifWallet } from "../wallet/Wif";
 import {
   binToHex,
   hexToBin,
@@ -13,6 +13,10 @@ import { ElectrumRawTransaction } from "../network/interface";
  */
 export class Util {
   readonly wallet: Wallet;
+  static get walletType() {
+    return Wallet;
+  }
+
   /**
    * Initializes a wallet Util class.
    *
@@ -30,6 +34,10 @@ export class Util {
     return binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
   }
 
+  public static async getTransactionHash(rawTransactionHex: string): Promise<string> {
+    return new this.walletType().util.getTransactionHash(rawTransactionHex);
+  }
+
   public async decodeTransaction(
     transactionHashOrHex: string
   ): Promise<ElectrumRawTransaction> {
@@ -43,4 +51,82 @@ export class Util {
       transactionHashOrHex
     );
   }
+
+  public static async decodeTransaction(transactionHashOrHex: string): Promise<ElectrumRawTransaction> {
+    return new this.walletType().util.decodeTransaction(transactionHashOrHex);
+  }
 }
+
+//#region Specific wallet classes
+/**
+ * Class to manage an slp enabled testnet wallet.
+ */
+ export class TestNetUtil extends Util {
+  static get walletType() {
+    return TestNetWallet;
+  }
+}
+
+/**
+ * Class to manage an slp enabled regtest wallet.
+ */
+export class RegTestUtil extends Util {
+  static get walletType() {
+    return RegTestWallet;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash wif wallet.
+ */
+export class WifUtil extends Util {
+  static get walletType() {
+    return WifWallet;
+  }
+}
+
+/**
+ * Class to manage a testnet wif wallet.
+ */
+export class TestNetWifUtil extends Util {
+  static get walletType() {
+    return TestNetWifWallet;
+  }
+}
+
+/**
+ * Class to manage a regtest wif wallet.
+ */
+export class RegTestWifUtil extends Util {
+  static get walletType() {
+    return RegTestWifWallet;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash watch wallet.
+ */
+export class WatchUtil extends Util {
+  static get walletType() {
+    return WatchWallet;
+  }
+}
+
+/**
+ * Class to manage a testnet watch wallet.
+ */
+export class TestNetWatchUtil extends Util {
+  static get walletType() {
+    return TestNetWatchWallet;
+  }
+}
+
+/**
+ * Class to manage a regtest watch wallet.
+ */
+export class RegTestWatchUtil extends Util {
+  static get walletType() {
+    return RegTestWatchWallet;
+  }
+}
+//#endregion
