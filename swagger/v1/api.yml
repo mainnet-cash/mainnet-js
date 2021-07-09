@@ -1723,10 +1723,11 @@ components:
         amount:
           type: number
           example: 100
-    Cashaddr:
-      type: string
-      example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
-      description: A bitcoin cash address
+    # Pat 07.09.21: Schema not used, commenting out to fix validator warnings
+    # Cashaddr:
+    #   type: string
+    #   example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+    #   description: A bitcoin cash address
     NetworkEnum:
       properties:
         network:
@@ -1996,9 +1997,6 @@ components:
     SlpTokenInfoResponse:
       type: object
       nullable: true
-      $ref: "#/components/schemas/SlpTokenInfoResponseItem"
-
-    SlpTokenInfoResponseItem:
       properties:
         name:
           type: string
