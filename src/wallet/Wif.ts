@@ -296,6 +296,22 @@ export class Wallet extends BaseWallet {
   }
 
   /**
+   *  explorerUrl   Web url to a transaction on a block explorer
+   *
+   * @param txId   transaction Id
+   * @returns   Url string
+   */
+  public explorerUrl(txId: string) {
+    const explorerUrlMap = {
+      mainnet: "https://explorer.bitcoin.com/bch/tx/",
+      testnet: "https://explorer.bitcoin.com/tbch/tx/",
+      regtest: "",
+    }
+
+    return explorerUrlMap[this.network] + txId;
+  }
+
+  /**
    * send Send some amount to an address
    *
    * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
@@ -314,6 +330,7 @@ export class Wallet extends BaseWallet {
     let resp = new SendResponse({});
     resp.txId = result;
     resp.balance = (await this.getBalance()) as BalanceResponse;
+    resp.explorerUrl = this.explorerUrl(resp.txId);
     return resp;
   }
 
@@ -518,6 +535,7 @@ export class Wallet extends BaseWallet {
     return {
       txId: txId,
       balance: (await this.getBalance()) as BalanceResponse,
+      explorerUrl: this.explorerUrl(txId)
     };
   }
 

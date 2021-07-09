@@ -294,6 +294,7 @@ describe(`Watch only Wallets`, () => {
       let aliceBalance = await alice.send([
         { cashaddr: alice.cashaddr!, value: 526, unit: "sat" },
       ]);
+      expect(aliceBalance.explorerUrl!).toContain("explorer.bitcoin.com");
       expect(aliceBalance.balance!.sat!).toBeGreaterThan(5000);
     }
   });
