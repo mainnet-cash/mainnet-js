@@ -73,7 +73,17 @@ import {
 import axios from "axios";
 import { SlpSendResponse } from "../slp/interface";
 import { toCashAddress } from "../util/bchaddr";
-import { RegTestUtil, RegTestWatchUtil, RegTestWifUtil, TestNetUtil, TestNetWatchUtil, TestNetWifUtil, Util, WatchUtil, WifUtil } from "./Util";
+import {
+  RegTestUtil,
+  RegTestWatchUtil,
+  RegTestWifUtil,
+  TestNetUtil,
+  TestNetWatchUtil,
+  TestNetWifUtil,
+  Util,
+  WatchUtil,
+  WifUtil,
+} from "./Util";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
