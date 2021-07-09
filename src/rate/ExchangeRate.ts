@@ -6,7 +6,7 @@ import {
 import ExchangeRateProvider from "../db/ExchangeRateProvider";
 import { indexedDbIsAvailable } from "../db/util";
 
-import get from "axios";
+const axios = require("axios").default;
 
 export class ExchangeRate {
   symbol: string;
@@ -24,6 +24,43 @@ export class ExchangeRate {
     this.symbol = symbol;
     this.rate = rate;
     this.ttl = ttl;
+  }
+
+  static setupAxiosMock(mockUrl, responseData) {
+    if (!axios.interceptors.mocks) {
+      axios.interceptors.mocks = {};
+
+      // install our interceptors
+      axios.interceptors.request.use((config) => {
+        const url = config.url!;
+
+        if (axios.interceptors.mocks[url]) {
+          // if we have set up a mocked response for this url, cancel the actual request with a cancelToken containing our mocked data
+          const mockedResponse = axios.interceptors.mocks[url];
+          return {
+            ...config,
+            cancelToken: new axios.CancelToken((cancel) => cancel({ status: 200, data: mockedResponse }))
+          };
+        }
+
+        // otherwise proceed with usual request
+        return config;
+      });
+
+      axios.interceptors.response.use(function (response) {
+        return response;
+      }, function (error) {
+        // resolve response with our mocked data
+        if (axios.isCancel(error)) {
+          return Promise.resolve(error.message);
+        }
+
+        // handle all other errors gracefully
+        return Promise.reject(error);
+      });
+    }
+
+    axios.interceptors.mocks[mockUrl] = responseData;
   }
 
   toString() {
@@ -99,13 +136,13 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   switch (symbol) {
     case "usd":
       try {
-        let response = await get(
+        let response = await axios.get(
           "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd"
         );
         return response.data["bitcoin-cash"].usd;
       } catch (e1) {
         try {
-          let response = await get(
+          let response = await axios.get(
             "https://markets.api.bitcoin.com/live/bitcoin"
           );
           return response.data["data"]["BCH"];
