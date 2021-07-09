@@ -306,7 +306,7 @@ export class Wallet extends BaseWallet {
       mainnet: "https://explorer.bitcoin.com/bch/tx/",
       testnet: "https://explorer.bitcoin.com/tbch/tx/",
       regtest: "",
-    }
+    };
 
     return explorerUrlMap[this.network] + txId;
   }
@@ -535,7 +535,7 @@ export class Wallet extends BaseWallet {
     return {
       txId: txId,
       balance: (await this.getBalance()) as BalanceResponse,
-      explorerUrl: this.explorerUrl(txId)
+      explorerUrl: this.explorerUrl(txId),
     };
   }
 

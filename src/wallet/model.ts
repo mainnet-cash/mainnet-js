@@ -90,7 +90,15 @@ export class SendResponse {
   balance?: BalanceResponse;
   explorerUrl?: string;
 
-  constructor({ txId, balance, explorerUrl }: { txId?: string; balance?: any, explorerUrl?: string}) {
+  constructor({
+    txId,
+    balance,
+    explorerUrl,
+  }: {
+    txId?: string;
+    balance?: any;
+    explorerUrl?: string;
+  }) {
     this.txId = txId;
     this.balance = new BalanceResponse(balance);
     this.explorerUrl = explorerUrl;
