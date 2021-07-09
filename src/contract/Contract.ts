@@ -12,7 +12,7 @@ import { Network, UtxoI } from "../interface";
 import {
   ContractI,
   CashscriptTransactionI,
-  ContractInfoResponseI
+  ContractInfoResponseI,
 } from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
