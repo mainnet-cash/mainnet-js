@@ -453,12 +453,12 @@ export class Slp {
    * @param txId   transaction Id
    * @returns   Url string
    */
-   public explorerUrl(txId: string) {
+  public explorerUrl(txId: string) {
     const explorerUrlMap = {
       mainnet: "https://simpleledger.info/#tx/",
       testnet: "https://testnet.simpleledger.info/#tx/",
       regtest: "",
-    }
+    };
 
     return explorerUrlMap[this.wallet.network] + txId;
   }
@@ -477,7 +477,7 @@ export class Slp {
     return {
       txId: result,
       balance: await this.getBalance(actualTokenId),
-      explorerUrl: this.explorerUrl(result)
+      explorerUrl: this.explorerUrl(result),
     };
   }
 
