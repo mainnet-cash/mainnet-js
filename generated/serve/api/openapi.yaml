@@ -1885,10 +1885,6 @@ components:
         amount:
           example: 100
           type: number
-    Cashaddr:
-      description: A bitcoin cash address
-      example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-      type: string
     NetworkEnum:
       discriminator:
         propertyName: network
@@ -2223,8 +2219,6 @@ components:
       - tokenId
       - walletId
     SlpTokenInfoResponse:
-      $ref: '#/components/schemas/SlpTokenInfoResponseItem'
-    SlpTokenInfoResponseItem:
       example:
         ticker: MNC
         documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
@@ -2234,6 +2228,7 @@ components:
         documentUrl: https://mainnet.cash
         name: Mainnet coin
         type: 1
+      nullable: true
       properties:
         name:
           example: Mainnet coin
@@ -2265,6 +2260,7 @@ components:
           description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
           example: 1
           type: number
+      type: object
     SlpMintRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
