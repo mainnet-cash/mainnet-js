@@ -119,6 +119,7 @@ export interface SlpGenesisResult {
 export interface SlpSendResponse {
   txId: string;
   balance: SlpTokenBalance;
+  explorerUrl: string;
 }
 
 export interface SlpMintResult {
