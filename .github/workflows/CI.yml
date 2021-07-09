@@ -44,9 +44,11 @@ jobs:
           args: |
             generate -i swagger/v1/api.yml -g nodejs-express-server -o generated/serve
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.11.0
         with:
           commit_message: Update generated
+          branch: ${{ github.ref }}
+
   format:
     runs-on: ubuntu-latest
     steps:
@@ -61,9 +63,11 @@ jobs:
           yarn
           yarn format
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.11.0
         with:
           commit_message: Apply formatting changes
+          branch: ${{ github.ref }}
+
   test_browsers:
     runs-on: ubuntu-latest
     steps:
