@@ -1,4 +1,14 @@
-import { RegTestWallet, RegTestWatchWallet, RegTestWifWallet, TestNetWallet, TestNetWatchWallet, TestNetWifWallet, Wallet, WatchWallet, WifWallet } from "../wallet/Wif";
+import {
+  RegTestWallet,
+  RegTestWatchWallet,
+  RegTestWifWallet,
+  TestNetWallet,
+  TestNetWatchWallet,
+  TestNetWifWallet,
+  Wallet,
+  WatchWallet,
+  WifWallet,
+} from "../wallet/Wif";
 import {
   binToHex,
   hexToBin,
@@ -34,7 +44,9 @@ export class Util {
     return binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
   }
 
-  public static async getTransactionHash(rawTransactionHex: string): Promise<string> {
+  public static async getTransactionHash(
+    rawTransactionHex: string
+  ): Promise<string> {
     return new this.walletType().util.getTransactionHash(rawTransactionHex);
   }
 
@@ -52,7 +64,9 @@ export class Util {
     );
   }
 
-  public static async decodeTransaction(transactionHashOrHex: string): Promise<ElectrumRawTransaction> {
+  public static async decodeTransaction(
+    transactionHashOrHex: string
+  ): Promise<ElectrumRawTransaction> {
     return new this.walletType().util.decodeTransaction(transactionHashOrHex);
   }
 }
@@ -61,7 +75,7 @@ export class Util {
 /**
  * Class to manage an slp enabled testnet wallet.
  */
- export class TestNetUtil extends Util {
+export class TestNetUtil extends Util {
   static get walletType() {
     return TestNetWallet;
   }

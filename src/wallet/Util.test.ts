@@ -15,7 +15,6 @@ test("Should compute raw transaction hash", async () => {
       "01000000015bb9142c960a838329694d3fe9ba08c2a6421c5158d8f7044cb7c48006c1b484000000006a4730440220229ea5359a63c2b83a713fcc20d8c41b20d48fe639a639d2a8246a137f29d0fc02201de12de9c056912a4e581a62d12fb5f43ee6c08ed0238c32a1ee769213ca8b8b412103bcf9a004f1f7a9a8d8acce7b51c983233d107329ff7c4fb53e44c855dbe1f6a4feffffff02c6b68200000000001976a9141041fb024bd7a1338ef1959026bbba860064fe5f88ac50a8cf00000000001976a91445dac110239a7a3814535c15858b939211f8529888ac61ee0700"
     )
   ).toBe("36a3692a41a8ac60b73f7f41ee23f5c917413e5b2fad9e44b34865bd0d601a3d");
-
 });
 
 test("Should throw on non-existent transaction and invalid hash", async () => {
@@ -44,9 +43,9 @@ test("Should get raw transaction", async () => {
   );
 
   // test static accessor
-  expect((await RegTestWallet.util.decodeTransaction(transaction.hex)).txid).toBe(
-    utxo.txId
-  );
+  expect(
+    (await RegTestWallet.util.decodeTransaction(transaction.hex)).txid
+  ).toBe(utxo.txId);
 });
 
 test("Should decode a transaction from fist block", async () => {
