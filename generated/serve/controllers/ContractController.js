@@ -12,6 +12,10 @@ const contractFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractFn);
 };
 
+const contractInfo = async (request, response) => {
+  await Controller.handleRequest(request, response, service.contractInfo);
+};
+
 const contractUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractUtxos);
 };
@@ -23,6 +27,7 @@ const createContract = async (request, response) => {
 
 module.exports = {
   contractFn,
+  contractInfo,
   contractUtxos,
   createContract,
 };

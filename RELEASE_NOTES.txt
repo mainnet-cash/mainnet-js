@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.23
+
+- Add Contract.info() and /contract/info for parsing contractIds 
+
 0.3.14
 
 - Redo the SLP watching/waiting callbacks to be strictly void returning. Watching/waiting cancellation is thus made explicit.

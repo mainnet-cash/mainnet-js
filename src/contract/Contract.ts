@@ -1,4 +1,4 @@
-import { instantiateSecp256k1 } from "@bitauth/libauth";
+import { binToHex, instantiateSecp256k1 } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,
@@ -9,7 +9,11 @@ import {
 import { compileString, compileFile } from "cashc";
 import { getNetworkProvider } from "../network/default";
 import { Network, UtxoI } from "../interface";
-import { ContractI, CashscriptTransactionI } from "./interface";
+import {
+  ContractI,
+  CashscriptTransactionI,
+  ContractInfoResponseI,
+} from "./interface";
 import { atob, btoa } from "../util/base64";
 import { getRandomInt } from "../util/randomInt";
 import {
@@ -107,6 +111,19 @@ export class Contract implements ContractI {
   }
 
   /**
+   * getParameterList - Get the parameters as a list
+   *
+   * a low-level function
+   *
+   * @returns A list of parameters as strings
+   */
+  private getParameterList(): any[] {
+    return this.parameters.map((x) =>
+      ArrayBuffer.isView(x) ? binToHex(x) : x
+    );
+  }
+
+  /**
    * fromId - Deserialize a contract from a string
    *
    * an intermediate function
@@ -162,7 +179,7 @@ export class Contract implements ContractI {
    *
    * a high-level function
    *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/contractUtxos|/contract/utxos} REST endpoint
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/utxos} REST endpoint
    * @returns A list of utxos on the contract
    */
   public async getUtxos() {
@@ -175,10 +192,29 @@ export class Contract implements ContractI {
 
   /**
    * Get the current balance of the contract
+   *
    * @returns The balance in satoshi
    */
   public getBalance() {
     return this.contract.getBalance();
+  }
+
+  /**
+   * Get the information about the contract
+   *
+   * a high-level function
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/info} REST endpoint
+   * @returns The contract info
+   */
+  public info(): ContractInfoResponseI {
+    return {
+      contractId: this.toString(),
+      cashaddr: this.contract.address,
+      script: this.script,
+      parameters: this.getParameterList(),
+      nonce: this.nonce,
+    };
   }
 
   /**
@@ -356,7 +392,7 @@ export class Contract implements ContractI {
         } else {
           return txResult;
         }
-      } catch (e) {
+      } catch (e: any) {
         throw Error(e);
       }
     } else {
