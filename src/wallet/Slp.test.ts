@@ -117,6 +117,7 @@ describe("Slp wallet tests", () => {
     expect(result.balance.name).toBe("Mainnet coin");
     expect(result.balance.ticker).toBe(ticker);
     expect(result.balance.tokenId).toBe(tokenId);
+    expect(result.explorerUrl).toContain(result.txId);
 
     expect(await bobWallet.slpAware(false).getBalance("satoshi")).toBe(
       DUST_UTXO_THRESHOLD

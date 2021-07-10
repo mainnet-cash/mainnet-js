@@ -448,6 +448,22 @@ export class Slp {
   }
 
   /**
+   *  explorerUrl   Web url to a transaction on a block explorer
+   *
+   * @param txId   transaction Id
+   * @returns   Url string
+   */
+  public explorerUrl(txId: string) {
+    const explorerUrlMap = {
+      mainnet: "https://simpleledger.info/#tx/",
+      testnet: "https://testnet.simpleledger.info/#tx/",
+      regtest: "",
+    };
+
+    return explorerUrlMap[this.wallet.network] + txId;
+  }
+
+  /**
    * send - attempt to process a list of slp send requests.
    *
    * a high-level function, see also /wallet/slp/send REST endpoint
@@ -461,6 +477,7 @@ export class Slp {
     return {
       txId: result,
       balance: await this.getBalance(actualTokenId),
+      explorerUrl: this.explorerUrl(result),
     };
   }
 
