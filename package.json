@@ -110,5 +110,8 @@
     "bch",
     "bitcoin cash"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "dependencies": {
+    "async-mutex": "^0.3.1"
+  }
 }

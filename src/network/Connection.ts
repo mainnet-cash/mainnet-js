@@ -1,5 +1,5 @@
 import { default as NetworkProvider } from "./NetworkProvider";
-import { getNetworkProvider } from "./default";
+import { getNetworkProvider, setGlobalProvider, getGlobalProvider, removeGlobalProvider } from "./default";
 import { Network } from "../interface";
 import { networkTickerMap } from "./constant";
 import { prefixFromNetworkMap } from "../enum";
@@ -7,10 +7,12 @@ import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
 async function initProvider(network: Network) {
   const ticker = networkTickerMap[network];
-  if (!(ticker in globalThis)) {
+  if (!getGlobalProvider(network)) {
     try {
-      let conn = new Connection(network);
-      return (globalThis[ticker] = (await conn.ready()).networkProvider);
+      const conn = new Connection(network);
+      const provider = (await conn.ready()).networkProvider;
+      setGlobalProvider(network, provider);
+      return provider;
     } catch (e) {
       throw `${network} ${e}`;
     }
@@ -31,10 +33,11 @@ export async function initProviders(networks?: Network[]) {
 }
 
 async function disconnectProvider(network: Network) {
-  const ticker = networkTickerMap[network];
-  if (ticker in globalThis) {
-    await globalThis[ticker].disconnect();
-    return delete globalThis[ticker];
+  const provider = getGlobalProvider(network);
+  if (provider) {
+    await provider.disconnect();
+    removeGlobalProvider(network);
+    return;
   } else {
     console.warn(
       `Ignoring attempt to disconnect non-existent ${network} provider`
@@ -68,11 +71,7 @@ export class Connection {
   }
 
   public async disconnect() {
-    try {
-      await this.networkProvider.disconnect();
-      return this;
-    } catch (e) {
-      throw Error(e);
-    }
+    await this.networkProvider.disconnect();
+    return this;
   }
 }

@@ -15,21 +15,6 @@ afterAll(async () => {
 });
 
 describe(`Test Wallet library`, () => {
-  test("Should get the regtest wallet balance", async () => {
-    // Build Alice's wallet from Wallet Import Format string, send some sats
-    if (!process.env.PRIVATE_WIF) {
-      throw Error("Attempted to pass an empty WIF");
-    } else {
-      let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
-      // Build Bob's wallet from a public address, check his balance.
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * bchParam.subUnits
-      );
-    }
-  });
-
   test("Should get a random regtest wallet", async () => {
     let alice = await RegTestWallet.newRandom("alice_random");
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
