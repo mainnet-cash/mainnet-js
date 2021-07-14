@@ -7,7 +7,7 @@
     "start": "node cluster.js",
     "postinstall": "yarn link mainnet-js",
     "pretest": "yarn install --check-files --update-checksums",
-    "test": "TIMEOUT=10 npx jest --detectOpenHandles --runInBand --forceExit"
+    "test": "TIMEOUT=30 npx jest --detectOpenHandles --runInBand --forceExit"
   },
   "keywords": [
     "openapi-generator",

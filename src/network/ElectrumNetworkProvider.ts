@@ -10,10 +10,14 @@ import { Network } from "../interface";
 import { delay } from "../util/delay";
 import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 
+import { Mutex } from "async-mutex";
+
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
-  public concurrentRequests: number = 0;
   public subscriptions: number = 0;
+  private connectPromise;
+  private mutex = new Mutex();
+  private random = Math.random();
 
   constructor(
     electrum: ElectrumCluster | ElectrumClient,
@@ -22,11 +26,29 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ) {
     if (electrum) {
       this.electrum = electrum;
-
-      return;
+      this.connectPromise = this.getConnectPromise();
     } else {
       throw new Error(`A electrum-cash cluster or client is required.`);
     }
+  }
+
+  private getConnectPromise(_timeout: number = 10000) {
+    // connects to the electrum cash and waits until the connection is ready to accept requests
+    let timeoutHandle;
+
+    return Promise.race([
+      new Promise(async (resolve) => {
+        this.connectPromise = undefined;
+
+        if (this.electrum instanceof ElectrumCluster) {
+          await this.connectCluster();
+          resolve(await this.readyCluster());
+        } else {
+          resolve(await this.connectClient());
+        }
+      }),
+      // new Promise((_resolve, reject) => timeoutHandle = setTimeout(() => { console.warn(`Could not connect to electrum network ${this.network}`); reject(new Error(`Could not connect to electrum network ${this.network}`))}, timeout))
+    ]).then(() => clearTimeout(timeoutHandle));
   }
 
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
@@ -106,6 +128,35 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
+  async sendRawTransactionFast(
+    txHex: string,
+    cashaddr: string
+  ): Promise<string> {
+    return new Promise(async (resolve) => {
+      let txHash;
+
+      const waitForTransactionCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== cashaddr) {
+            return;
+          }
+
+          this.unsubscribeFromAddress(cashaddr, waitForTransactionCallback);
+
+          resolve(txHash);
+        }
+      };
+      this.subscribeToAddress(cashaddr, waitForTransactionCallback);
+
+      this.performRequest("blockchain.transaction.broadcast", txHex).then(
+        (result) => {
+          txHash = result as string;
+        }
+      );
+    });
+  }
+
   // Get transaction history of a given cashaddr
   async getHistory(cashaddr: string): Promise<TxI[]> {
     const result = (await this.performRequest(
@@ -182,26 +233,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     name: string,
     ...parameters: (string | number | boolean)[]
   ): Promise<RequestResponse> {
-    // Only connect the cluster when no concurrent requests are running
-    if (this.shouldConnect()) {
-      await this.connect();
-      this.concurrentRequests += 1;
-    }
+    await this.ready();
 
-    await this.ready().catch((e) => {
-      throw e;
-    });
-
-    let result;
-    try {
-      result = await this.electrum.request(name, ...parameters);
-    } finally {
-      // Always disconnect the cluster, also if the request fails
-      if (this.shouldDisconnect()) {
-        await this.disconnect();
-        this.concurrentRequests -= 1;
-      }
-    }
+    const result = await this.electrum.request(name, ...parameters);
 
     if (result instanceof Error) throw result;
 
@@ -213,31 +247,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     callback: (data) => void,
     ...parameters: (string | number | boolean)[]
   ): Promise<true> {
-    // Only connect the cluster when no concurrent requests are running
-    if (this.shouldConnect()) {
-      await this.connect();
-      this.concurrentRequests += 1;
-    }
-
     await this.ready();
 
-    let result;
-    try {
-      result = await this.electrum.subscribe(
-        callback,
-        methodName,
-        ...parameters
-      );
-      this.subscriptions += 1;
-    } finally {
-      // Always disconnect the cluster, also if the request fails
-      if (this.shouldDisconnect()) {
-        await this.disconnect();
-        this.concurrentRequests -= 1;
-      }
-    }
+    const result = await this.electrum.subscribe(
+      callback,
+      methodName,
+      ...parameters
+    );
 
-    if (result instanceof Error) throw result;
+    this.subscriptions++;
 
     return result;
   }
@@ -247,58 +265,29 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     callback: (data) => void,
     ...parameters: (string | number | boolean)[]
   ): Promise<true> {
-    // Only connect the cluster when no concurrent requests are running
-    if (this.shouldConnect()) {
-      await this.connect();
-      this.concurrentRequests += 1;
-    }
-
     await this.ready();
 
-    let result;
-    try {
-      result = await this.electrum.unsubscribe(
-        callback,
-        methodName,
-        ...parameters
-      );
-      this.subscriptions -= 1;
-    } finally {
-      // Always disconnect the cluster, also if the request fails
-      if (this.shouldDisconnect()) {
-        await this.disconnect();
-        this.concurrentRequests -= 1;
-      }
-    }
+    const result = this.electrum.unsubscribe(
+      callback,
+      methodName,
+      ...parameters
+    );
 
-    if (result instanceof Error) throw result;
+    this.subscriptions--;
 
     return result;
   }
 
-  private shouldConnect(): boolean {
-    if (this.manualConnectionManagement) return false;
-    if (this.concurrentRequests !== 0) return false;
-    if (this.subscriptions !== 0) return false;
-    return true;
-  }
-
-  private shouldDisconnect(): boolean {
-    if (this.manualConnectionManagement) return false;
-    if (this.concurrentRequests !== 1) return false;
-    if (this.subscriptions !== 0) return false;
-    return true;
-  }
-
   async ready(): Promise<boolean | unknown> {
-    return this.isElectrumClient() ? this.readyClient() : this.readyCluster();
+    return (await this.connect()) as void[];
   }
 
-  connect(): Promise<void[]> {
-    return this.isElectrumClient()
-      ? this.connectClient()
-      : this.connectCluster();
+  async connect(): Promise<void[]> {
+    return await this.mutex.runExclusive(async () => {
+      return await this.connectPromise;
+    });
   }
+
   disconnect(): Promise<boolean[]> {
     if (this.subscriptions > 0) {
       console.warn(

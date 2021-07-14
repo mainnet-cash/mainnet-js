@@ -38,6 +38,7 @@ export interface SendRequestOptionsI {
   utxoIds?: string[];
   changeAddress?: string;
   slpAware?: boolean;
+  queryBalance?: boolean;
 }
 
 export interface MnemonicI {

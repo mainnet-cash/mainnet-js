@@ -11,7 +11,7 @@ describe(`Create Contract Tests`, () => {
         require(hash160(signingPk) == recipientPkh);
         require(checkSig(s, signingPk));
       }
-  
+
       function timeout(pubkey signingPk, sig s) {
           require(hash160(signingPk) == senderPkh);
           require(checkSig(s, signingPk));
@@ -54,7 +54,7 @@ describe(`Create Contract Tests`, () => {
         require(hash160(signingPk) == recipientPkh);
         require(checkSig(s, signingPk));
       }
-  
+
       function timeout(pubkey signingPk, sig s) {
           require(hash160(signingPk) == senderPkh);
           require(checkSig(s, signingPk));
@@ -63,7 +63,7 @@ describe(`Create Contract Tests`, () => {
   }`;
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
-    const bob = await RegTestWallet.fromId(process.env.BOB_ID!);
+    const bob = await RegTestWallet.newRandom();
 
     const alicePkh = alice.getPublicKeyHash();
     const bobPkh = bob.getPublicKeyHash();
@@ -107,7 +107,7 @@ describe(`Create Contract Tests`, () => {
         require(checkSig(s, signingPk));
         require(hash160(signingPk) == recipientPkh);
       }
-  
+
       function timeout(pubkey signingPk, sig s) {
         require(checkSig(s, signingPk));
         require(hash160(signingPk) == senderPkh);
@@ -163,7 +163,7 @@ describe(`Create Contract Tests`, () => {
         require(checkSig(s, signingPk));
         require(hash160(signingPk) == recipientPkh);
       }
-  
+
       function timeout(pubkey signingPk, sig s) {
         require(checkSig(s, signingPk));
         require(hash160(signingPk) == senderPkh);

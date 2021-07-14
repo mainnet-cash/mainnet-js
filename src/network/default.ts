@@ -8,25 +8,24 @@ import { Network } from "../interface";
 import { networkTickerMap, clusterParams } from "./constant";
 import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant";
 
-function setGlobalProvider(
+export function setGlobalProvider(
   network: Network,
   provider: NetworkProvider
 ): NetworkProvider {
-  let accessor = networkTickerMap[network];
-  if (globalThis[accessor]) {
-    return globalThis[accessor];
-  } else {
-    globalThis[accessor] = provider;
-    return globalThis[accessor];
-  }
+  const accessor = networkTickerMap[network];
+  globalThis[accessor] = provider;
+  return provider;
 }
 
-function getGlobalProvider(network: Network): NetworkProvider | void {
-  let accessor = networkTickerMap[network];
-  if (globalThis[accessor]) {
-    return globalThis[accessor];
-  } else {
-    return;
+export function getGlobalProvider(network: Network): NetworkProvider | void {
+  const accessor = networkTickerMap[network];
+  return globalThis[accessor];
+}
+
+export function removeGlobalProvider(network: Network): NetworkProvider | void {
+  const accessor = networkTickerMap[network];
+  if (accessor in globalThis) {
+    delete globalThis[accessor];
   }
 }
 
@@ -36,16 +35,20 @@ export function getNetworkProvider(
   manualConnectionManagement?: boolean,
   options?: ElectrumClusterParams
 ): NetworkProvider {
+  const globalContext = servers === undefined && manualConnectionManagement === undefined && options === undefined;
+  if (globalContext) {
+    const globalProvider = getGlobalProvider(network);
+    if (globalProvider) {
+      return globalProvider;
+    }
+  }
+
   let useCluster;
   manualConnectionManagement = manualConnectionManagement
     ? manualConnectionManagement
     : false;
   servers = servers ? servers : defaultServers[network];
 
-  let globalProvider = getGlobalProvider(network);
-  if (globalProvider) {
-    return globalProvider;
-  }
   // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {
     servers = [servers as string];
@@ -77,7 +80,12 @@ export function getNetworkProvider(
       network,
       manualConnectionManagement
     );
-    return setGlobalProvider(network, provider);
+
+    if (globalContext) {
+      return setGlobalProvider(network, provider);
+    }
+
+    return provider;
   } else {
     throw Error("No servers provided, defaults not available.");
   }
@@ -97,7 +105,7 @@ function getCluster(servers: string[], params) {
 // create a client with a list of servers
 function getClient(servers: string[]) {
   let url = parseElectrumUrl(servers[0]);
-  return getElectrumClient(url, 50000);
+  return getElectrumClient(url, 120000);
 }
 
 function getElectrumCluster(params: ElectrumClusterParams) {
