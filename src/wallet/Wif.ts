@@ -329,7 +329,8 @@ export class Wallet extends BaseWallet {
     );
     let resp = new SendResponse({});
     resp.txId = result;
-    const queryBalance = !options || options.queryBalance === undefined || options.queryBalance;
+    const queryBalance =
+      !options || options.queryBalance === undefined || options.queryBalance;
     if (queryBalance) {
       resp.balance = (await this.getBalance()) as BalanceResponse;
     }
@@ -535,10 +536,13 @@ export class Wallet extends BaseWallet {
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     const txId = await this.sendMaxRaw(cashaddr, options);
-    const queryBalance = !options || options.queryBalance === undefined || options.queryBalance;
+    const queryBalance =
+      !options || options.queryBalance === undefined || options.queryBalance;
     return {
       txId: txId,
-      balance: queryBalance ? (await this.getBalance()) as BalanceResponse : undefined,
+      balance: queryBalance
+        ? ((await this.getBalance()) as BalanceResponse)
+        : undefined,
       explorerUrl: this.explorerUrl(txId),
     };
   }
@@ -689,7 +693,9 @@ export class Wallet extends BaseWallet {
   }
 
   // waits for next transaction, program execution is halted
-  public async waitForTransaction(returnTransactionInfo: boolean = true): Promise<ElectrumRawTransaction | undefined> {
+  public async waitForTransaction(
+    returnTransactionInfo: boolean = true
+  ): Promise<ElectrumRawTransaction | undefined> {
     return new Promise(async (resolve) => {
       const waitForTransactionCallback = async (data) => {
         if (data instanceof Array) {
