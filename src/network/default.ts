@@ -35,7 +35,10 @@ export function getNetworkProvider(
   manualConnectionManagement?: boolean,
   options?: ElectrumClusterParams
 ): NetworkProvider {
-  const globalContext = servers === undefined && manualConnectionManagement === undefined && options === undefined;
+  const globalContext =
+    servers === undefined &&
+    manualConnectionManagement === undefined &&
+    options === undefined;
   if (globalContext) {
     const globalProvider = getGlobalProvider(network);
     if (globalProvider) {

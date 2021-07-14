@@ -1,5 +1,10 @@
 import { default as NetworkProvider } from "./NetworkProvider";
-import { getNetworkProvider, setGlobalProvider, getGlobalProvider, removeGlobalProvider } from "./default";
+import {
+  getNetworkProvider,
+  setGlobalProvider,
+  getGlobalProvider,
+  removeGlobalProvider,
+} from "./default";
 import { Network } from "../interface";
 import { networkTickerMap } from "./constant";
 import { prefixFromNetworkMap } from "../enum";

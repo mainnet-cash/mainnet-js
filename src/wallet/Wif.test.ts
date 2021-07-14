@@ -348,13 +348,16 @@ describe(`Wallet subscriptions`, () => {
 
     setTimeout(
       () =>
-        aliceWallet.send([
-          {
-            cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
-          },
-        ], { queryBalance: false }),
+        aliceWallet.send(
+          [
+            {
+              cashaddr: bobWallet.cashaddr!,
+              value: 1000,
+              unit: "satoshis",
+            },
+          ],
+          { queryBalance: false }
+        ),
       0
     );
 
@@ -397,9 +400,12 @@ describe(`Wallet subscriptions`, () => {
   //   // console.timeEnd("sendMaxFast");
   // });
 
-
   test("Create two wallets concurrently", async () => {
-    await (await Wallet.newRandom()).provider!.getRawTransaction("4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251")
+    await (
+      await Wallet.newRandom()
+    ).provider!.getRawTransaction(
+      "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251"
+    );
 
     // const w2 = await Wallet.newRandom();
     // w1.getBalance(); w2.getBalance();
