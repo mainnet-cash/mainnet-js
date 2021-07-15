@@ -2,8 +2,10 @@ import { Contract } from "../Contract";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
-import { EscrowArguments } from "./interface";
+import { EscrowArguments, EscrowContractResponseI, EscrowInfoResponseI } from "./interface";
 import { getRandomInt } from "../../util/randomInt";
+import { Network } from "../..";
+import { DELIMITER } from "../../constant";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
@@ -116,10 +118,75 @@ export class EscrowContract extends Contract {
   }
 
   /**
+   * toString - Serialize an escrow contract as a string
+   *
+   * an intermediate function
+   *
+   * @returns A serialized contract
+   */
+  public toString() {
+
+    let addressArgs =  
+    [this.sellerAddr,
+                  this.buyerAddr,
+    this.arbiterAddr].map(x=> x.split(":")[1]).join(DELIMITER)
+    return [
+      "escrowContract",
+      this.network,
+      addressArgs,
+      this.amount,
+      this.getNonce(),
+    ].join(DELIMITER);
+  }
+
+  /**
+   * fromId - Deserialize a contract from a string
+   *
+   * an intermediate function
+   *
+   * @returns A new escrow contract
+   */
+  public static fromId(escrowContractId: string) {
+    let [type, network, sellerAddr, buyerAddr, arbiterAddr, amount, nonce] =
+    escrowContractId.split(DELIMITER);
+
+    let contract =  new EscrowContract({
+      sellerAddr: sellerAddr,
+      buyerAddr: buyerAddr,
+      arbiterAddr: arbiterAddr,
+      amount: parseInt(amount),
+      nonce: parseInt(nonce),
+    });
+    contract.network = (network as Network)
+    return contract
+  }
+
+   /**
+ * Create a new escrow contract, but respond with a json object
+ * @param request A escrow contract request object
+ * @returns A new escrow contract object
+ */
+public static fromJsonRequest(
+  request: any
+): EscrowContractResponseI {
+  let contract =  EscrowContract.create(request)
+  if (contract) {
+    return {
+      contractId: "",
+      escrowContractId: contract.toString(),
+      cashaddr: contract.getDepositAddress(),
+    };
+  } else {
+    throw Error("Error creating contract");
+  }
+}
+
+
+  /**
    *
    * @returns The contract text in CashScript
    */
-  static getContractText() {
+  static getContractText(): string {
     return `pragma cashscript ^0.6.1;
             contract escrow(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
 
@@ -142,5 +209,24 @@ export class EscrowContract extends Contract {
                 }
             }
         `;
+  }
+
+  /**
+   * Get information about an escrow contract
+   *
+   * a high-level function
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/info} REST endpoint
+   * @returns The contract info
+   */
+  public info(): EscrowInfoResponseI {
+    return {
+      ...super.info(),
+      escrowContractId: this.toString(),
+      buyerAddr: this.buyerAddr,
+      sellerAddr: this.sellerAddr,
+      arbiterAddr: this.arbiterAddr,
+      amount: this.amount,
+    };
   }
 }

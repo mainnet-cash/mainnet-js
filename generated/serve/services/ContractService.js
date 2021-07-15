@@ -11,7 +11,7 @@ const mainnet = require("mainnet-js");
 const createContract = ({ contractRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.createContractResponse(contractRequest);
+      let resp = await mainnet.Contract.fromJsonRequest(contractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -89,7 +89,7 @@ const contractInfo = ( {contractInfoRequest } ) => new Promise(
 const contractUtxos = ({contract}) => new Promise(
   async (resolve, reject) => {
     try {
-      let c = await mainnet.contractFromId(contract.contractId);
+      let c = await mainnet.Contract.fromId(contract.contractId);
       let resp = await c.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {

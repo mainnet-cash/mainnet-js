@@ -145,7 +145,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ContractResponse"
+                $ref: "#/components/schemas/EscrowResponse"
           description: successful operation
         "500":
           content:
@@ -181,6 +181,61 @@ paths:
       summary: Finalize an escrow contract
       tags:
         - contract/escrow
+  /contract/escrow/info:
+    post:
+      operationId: escrowInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscrowInfoRequest"
+            example:
+              escrowContractId: "escrowContract:testnet:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:1996128042"
+        description: Request parsed information regarding a contract from the escrowContractId
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscrowInfoResponse"
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
+      summary: Get information about a contract from the contractId
+      tags:
+        - contract/escrow
+  /contract/escrow/utxos:
+    post:
+      operationId: escrowUtxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscrowContract"
+              example:
+                contractId: "escrowContract:testnet:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:741991676"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UtxoResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: List specific utxos on any escrow contract
+      description: |
+        Returns all UTXOs that can be spent by the
+        contract. Both confirmed and unconfirmed UTXOs are included. The endpoint works with contracts generated from templates (i.e. escrow).
+      tags:
+        - contract/escrow             
   /contract/info:
     post:
       operationId: contractInfo
@@ -190,7 +245,7 @@ paths:
             schema:
               $ref: "#/components/schemas/ContractInfoRequest"
             example:
-              contractId: "testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1996128042"
+              contractId: "contract:testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1996128042"
         description: Request parsed information regarding a contract from the contractId
         required: true
       responses:
@@ -218,7 +273,7 @@ paths:
             schema:
               $ref: "#/components/schemas/Contract"
               example:
-                contractId: "testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1932794556"
+                contractId: "contract:testnet:TURNME1UQmxaakEwT0dJelpHRXpOVEUzT1RObU5tVmtNVFJqWXpKbVpHVTBOakJpWldOak5XSTJOVGhrT1RFek9EUTBNMkk1WVRNd01EQTNNRGRoTm1FMzpNRE0wT1RjNFlXTTBOalJtTXpVNFlqSXpOV1l4TVRJeE1tVmlObVV3TVRkaFpqa3dNakUxWWprd1lqRm1aamMwTnpGa09XRmxNbUZpWWpWbE1Ea3lOak5pOk1qRTE=:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChwdWJrZXkgc2VuZGVyLCBwdWJrZXkgcmVjaXBpZW50LCBpbnQgdGltZW91dCkgewogICAgZnVuY3Rpb24gdHJhbnNmZXIoc2lnIHJlY2lwaWVudFNpZykgewogICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocmVjaXBpZW50U2lnLCByZWNpcGllbnQpKTsKICAgIH0KCiAgICBmdW5jdGlvbiB0aW1lb3V0KHNpZyBzZW5kZXJTaWcpIHsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHNlbmRlclNpZywgc2VuZGVyKSk7CiAgICAgICAgcmVxdWlyZSh0eC50aW1lID49IHRpbWVvdXQpOwogICAgfQp9Cg==:1932794556"
         required: true
       responses:
         "200":
@@ -1171,6 +1226,14 @@ components:
             serialized contract
       required:
         - contractId
+    EscrowContract:
+      properties:
+        escrowContractId:
+          type: string
+          description:  |
+            serialized escrow contract
+      required:
+        - escrowContractId
     EscrowRequest:
       properties:
         buyerAddr:
@@ -1191,6 +1254,16 @@ components:
         - arbiterAddr
         - sellerAddr
         - amount
+    EscrowResponse:
+      properties:
+        escrowContractId:
+            type: string
+            description:  |
+              serialized escrow contract
+            example: "escrowContract:testnet:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:741991676"
+        cashaddr:
+          example: "bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+          description: The funding address for the escrow contract        
     ContractRequest:
       properties:
           script:
@@ -1311,9 +1384,63 @@ components:
         - contractId
         - function
         - to
+    EscrowInfoResponse:
+      properties:
+        escrowContractId:
+            type: string
+            description:  |
+              serialized contract
+        script:
+          type: string
+          description:  |
+            The smart contract in cashscript syntax
+          example: |
+            contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
+                function transfer(sig recipientSig) {
+                    require(checkSig(recipientSig, recipient));
+                }
+            
+                function timeout(sig senderSig) {
+                    require(checkSig(senderSig, sender));
+                    require(tx.time >= timeout);
+                }
+            }            
+        parameters:
+          description: Parameters passed when the contract was created
+          type: array
+          items:
+            type: string
+            description: 
+              Parameters passed as an array, where binary values are passed as hex
+          example:
+            - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
+            - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
+            - 215
+        cashaddr:
+           type: string
+           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        buyerAddr:
+          example: "bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah"
+          description: The cashaddress of the buyer
+        arbiterAddr:
+          example: "bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt"
+          description: The cashaddress of the arbiter
+        sellerAddr:
+          example: "bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2"
+          description: The cashaddress of the seller
+        amount:
+          description: Numeric amount to be transferred by the contract in satoshi, amount must be less than 21 BCH.
+          type: number
+          example: 10000
+    EscrowInfoRequest:
+      properties:
+        escrowContractId:
+            type: string
+            description:  |
+              serialized escrow contract
     EscrowFnRequest:
       properties:
-        contractId:
+        escrowContractId:
             type: string
             description:  |
               serialized contract
@@ -1348,7 +1475,7 @@ components:
               example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000"
               description: The hash of a transaction and index of the utxo and amount in satoshi
       required:
-        - contractId
+        - escrowContractId
         - walletId
         - method        
     ContractFnResponse:

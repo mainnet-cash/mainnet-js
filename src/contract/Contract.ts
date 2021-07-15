@@ -12,6 +12,7 @@ import { Network, UtxoI } from "../interface";
 import {
   ContractI,
   CashscriptTransactionI,
+  ContractResponseI,
   ContractInfoResponseI,
 } from "./interface";
 import { atob, btoa } from "../util/base64";
@@ -72,21 +73,6 @@ export class Contract implements ContractI {
     return this.nonce;
   }
 
-  /**
-   * toString - Serialize a contract as a string
-   *
-   * an intermediate function
-   *
-   * @returns A serialized contract
-   */
-  public toString() {
-    return [
-      this.network,
-      this.getSerializedParameters(),
-      this.getSerializedScript(),
-      this.nonce,
-    ].join(DELIMITER);
-  }
 
   /**
    * getSerializedScript - Serialize just the script component of a contract
@@ -124,6 +110,24 @@ export class Contract implements ContractI {
   }
 
   /**
+   * toString - Serialize a contract as a string
+   *
+   * an intermediate function
+   *
+   * @returns A serialized contract
+   */
+     public toString() {
+      return [
+        "contract",
+        this.network,
+        this.getSerializedParameters(),
+        this.getSerializedScript(),
+        this.nonce,
+      ].join(DELIMITER);
+    }
+
+    
+  /**
    * fromId - Deserialize a contract from a string
    *
    * an intermediate function
@@ -131,7 +135,7 @@ export class Contract implements ContractI {
    * @returns A new contract
    */
   public static fromId(contractId: string) {
-    let [network, serializedParams, serializedScript, nonce] =
+    let [type, network, serializedParams, serializedScript, nonce] =
       contractId.split(DELIMITER);
     let script = atob(serializedScript);
     let artifact = compileString(script);
@@ -215,6 +219,10 @@ export class Contract implements ContractI {
       parameters: this.getParameterList(),
       nonce: this.nonce,
     };
+  }
+
+  public _info(): ContractInfoResponseI {
+    return this.info();
   }
 
   /**
@@ -399,4 +407,25 @@ export class Contract implements ContractI {
       throw Error("There were no UTXOs provided or available on the contract");
     }
   }
+
+  /**
+ * Create a new contract, but respond with a json object
+ * @param request A contract request object
+ * @returns A new contract object
+ */
+public static fromJsonRequest(
+  request: any
+): ContractResponseI {
+  let contract =  Contract._create(request.script, request.parameters, request.network)
+  if (contract) {
+    return {
+      contractId: contract.toString(),
+      cashaddr: contract.getDepositAddress(),
+    };
+  } else {
+    throw Error("Error creating contract");
+  }
+}
+
+
 }

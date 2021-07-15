@@ -13,7 +13,28 @@ const createEscrow = ({ escrowRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       escrowRequest.type = 'escrow'
-      let resp = await mainnet.createContractResponse(escrowRequest);
+      let resp = await mainnet.EscrowContract.fromJsonRequest(escrowRequest);
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e,
+        e.status || 405,
+      ));
+    }
+  },
+);
+
+/**
+* Get information about an escrow contract
+*
+* escrowInfoRequest EscrowInfoRequest Request a new escrow contract
+* returns EscrowInfoResponse
+* */
+const escrowInfo = ({ escrowInfoRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let contract = await mainnet.EscrowContract.fromId(escrowInfoRequest.escrowContractId);
+      resp = contract.info()
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -35,7 +56,7 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 const escrowFn = ( {escrowFnRequest} ) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await mainnet.EscrowContract.fromId(escrowFnRequest.contractId);
+      let contract = await mainnet.EscrowContract.fromId(escrowFnRequest.escrowContractId);
       let wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
       let resp = await contract._sendMax(
         wallet.privateKeyWif,
@@ -46,7 +67,7 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
         );
 
       resolve(Service.successResponse({
-        contractId: escrowFnRequest.contractId, 
+        escrowContractId: escrowFnRequest.escrowContractId, 
         txId: resp.txid,
         hex: resp.hex
       }));
@@ -59,8 +80,31 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
    },
 );
 
+/**
+* List specific utxos in a contract
+* Returns all UTXOs that can be spent by the  contract. Both confirmed and unconfirmed UTXOs are included. 
+*
+* contract Contract 
+* returns UtxoResponse
+* */
+const escrowUtxos = ({escrowContract}) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let c = await mainnet.EscrowContract.fromId(escrowContract.escrowContractId);
+      let resp = await c.getUtxos();
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+
 
 module.exports = {
   createEscrow,
-  escrowFn
+  escrowFn,
+  escrowInfo,
+  escrowUtxos
 };
