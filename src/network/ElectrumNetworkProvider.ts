@@ -121,7 +121,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     txHex: string,
     awaitPropagation: boolean = true
   ): Promise<string> {
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       let txHash = await Util.getTransactionHash(txHex);
       if (!awaitPropagation) {
         resolve(txHash);
@@ -134,7 +134,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         };
         this.subscribeToTransaction(txHash, waitForTransactionCallback);
 
-        this.performRequest("blockchain.transaction.broadcast", txHex);
+        this.performRequest("blockchain.transaction.broadcast", txHex).catch((error) => {
+          this.unsubscribeFromTransaction(txHash, waitForTransactionCallback);
+          reject(error);
+        });
       }
     });
   }

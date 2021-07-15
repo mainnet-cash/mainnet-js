@@ -687,7 +687,7 @@ export class Slp {
    */
   private async _submitTransaction(transaction: Uint8Array): Promise<string> {
     let rawTransaction = binToHex(transaction);
-    return this.wallet.provider!.sendRawTransaction(rawTransaction);
+    return this.wallet.provider!.sendRawTransaction(rawTransaction, true);
   }
 
   /**
