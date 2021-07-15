@@ -2,7 +2,11 @@ import { Contract } from "../Contract";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
 import { sanitizeAddress } from "../../util/sanitizeAddress";
-import { EscrowArguments, EscrowContractResponseI, EscrowInfoResponseI } from "./interface";
+import {
+  EscrowArguments,
+  EscrowContractResponseI,
+  EscrowInfoResponseI,
+} from "./interface";
 import { getRandomInt } from "../../util/randomInt";
 import { Network } from "../..";
 import { DELIMITER } from "../../constant";
@@ -125,11 +129,9 @@ export class EscrowContract extends Contract {
    * @returns A serialized contract
    */
   public toString() {
-
-    let addressArgs =  
-    [this.sellerAddr,
-                  this.buyerAddr,
-    this.arbiterAddr].map(x=> x.split(":")[1]).join(DELIMITER)
+    let addressArgs = [this.sellerAddr, this.buyerAddr, this.arbiterAddr]
+      .map((x) => x.split(":")[1])
+      .join(DELIMITER);
     return [
       "escrowContract",
       this.network,
@@ -148,39 +150,36 @@ export class EscrowContract extends Contract {
    */
   public static fromId(escrowContractId: string) {
     let [type, network, sellerAddr, buyerAddr, arbiterAddr, amount, nonce] =
-    escrowContractId.split(DELIMITER);
+      escrowContractId.split(DELIMITER);
 
-    let contract =  new EscrowContract({
+    let contract = new EscrowContract({
       sellerAddr: sellerAddr,
       buyerAddr: buyerAddr,
       arbiterAddr: arbiterAddr,
       amount: parseInt(amount),
       nonce: parseInt(nonce),
     });
-    contract.network = (network as Network)
-    return contract
+    contract.network = network as Network;
+    return contract;
   }
 
-   /**
- * Create a new escrow contract, but respond with a json object
- * @param request A escrow contract request object
- * @returns A new escrow contract object
- */
-public static fromJsonRequest(
-  request: any
-): EscrowContractResponseI {
-  let contract =  EscrowContract.create(request)
-  if (contract) {
-    return {
-      contractId: "",
-      escrowContractId: contract.toString(),
-      cashaddr: contract.getDepositAddress(),
-    };
-  } else {
-    throw Error("Error creating contract");
+  /**
+   * Create a new escrow contract, but respond with a json object
+   * @param request A escrow contract request object
+   * @returns A new escrow contract object
+   */
+  public static fromJsonRequest(request: any): EscrowContractResponseI {
+    let contract = EscrowContract.create(request);
+    if (contract) {
+      return {
+        contractId: "",
+        escrowContractId: contract.toString(),
+        cashaddr: contract.getDepositAddress(),
+      };
+    } else {
+      throw Error("Error creating contract");
+    }
   }
-}
-
 
   /**
    *

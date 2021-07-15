@@ -11,13 +11,12 @@ afterAll(async () => {
 });
 
 describe(`Test Escrow Contracts`, () => {
-
-  test("Should serialize and deserialize", async ()=>{
-    let escrowContractId = "escrowContract:regtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:741991676"
-    let e = EscrowContract.fromId(escrowContractId)
-    expect(e.toString()).toBe(escrowContractId)
-  })
-
+  test("Should serialize and deserialize", async () => {
+    let escrowContractId =
+      "escrowContract:regtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:741991676";
+    let e = EscrowContract.fromId(escrowContractId);
+    expect(e.toString()).toBe(escrowContractId);
+  });
 
   test("Should serialize and deserialize", async () => {
     let escrow = new EscrowContract({
@@ -395,7 +394,6 @@ describe(`Test Escrow Contracts`, () => {
     }
   });
 
-  
   test("Should create an escrow contract", async () => {
     let contractResp = EscrowContract.fromJsonRequest({
       type: "escrow",
@@ -405,10 +403,10 @@ describe(`Test Escrow Contracts`, () => {
       amount: 5000,
     });
 
-    console.log(contractResp.escrowContractId)
+    console.log(contractResp.escrowContractId);
     expect(contractResp.escrowContractId.length).toBeGreaterThan(30);
     expect(contractResp.escrowContractId).toBe(
-      (EscrowContract.fromId(contractResp.escrowContractId)).toString()
+      EscrowContract.fromId(contractResp.escrowContractId).toString()
     );
   });
 
@@ -422,12 +420,12 @@ describe(`Test Escrow Contracts`, () => {
     });
 
     expect(response.escrowContractId).toBe(
-      (EscrowContract.fromId(response.escrowContractId)).toString()
+      EscrowContract.fromId(response.escrowContractId).toString()
     );
   });
 
   test("Should create a contract from serialized id", async () => {
-    let createResponse =  EscrowContract.fromJsonRequest({
+    let createResponse = EscrowContract.fromJsonRequest({
       type: "escrow",
       sellerAddr: "bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e",
       buyerAddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
@@ -435,12 +433,10 @@ describe(`Test Escrow Contracts`, () => {
       amount: 12000,
     });
 
-    let response =  EscrowContract.fromId(createResponse.escrowContractId);
+    let response = EscrowContract.fromId(createResponse.escrowContractId);
     expect(response.getDepositAddress()).toBe(createResponse.cashaddr);
     expect(response.toString().slice(0, 201)).toBe(
       createResponse.escrowContractId.slice(0, 201)
     );
   });
-
-
 });

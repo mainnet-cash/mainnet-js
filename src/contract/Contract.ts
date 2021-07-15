@@ -73,7 +73,6 @@ export class Contract implements ContractI {
     return this.nonce;
   }
 
-
   /**
    * getSerializedScript - Serialize just the script component of a contract
    *
@@ -116,17 +115,16 @@ export class Contract implements ContractI {
    *
    * @returns A serialized contract
    */
-     public toString() {
-      return [
-        "contract",
-        this.network,
-        this.getSerializedParameters(),
-        this.getSerializedScript(),
-        this.nonce,
-      ].join(DELIMITER);
-    }
+  public toString() {
+    return [
+      "contract",
+      this.network,
+      this.getSerializedParameters(),
+      this.getSerializedScript(),
+      this.nonce,
+    ].join(DELIMITER);
+  }
 
-    
   /**
    * fromId - Deserialize a contract from a string
    *
@@ -409,23 +407,23 @@ export class Contract implements ContractI {
   }
 
   /**
- * Create a new contract, but respond with a json object
- * @param request A contract request object
- * @returns A new contract object
- */
-public static fromJsonRequest(
-  request: any
-): ContractResponseI {
-  let contract =  Contract._create(request.script, request.parameters, request.network)
-  if (contract) {
-    return {
-      contractId: contract.toString(),
-      cashaddr: contract.getDepositAddress(),
-    };
-  } else {
-    throw Error("Error creating contract");
+   * Create a new contract, but respond with a json object
+   * @param request A contract request object
+   * @returns A new contract object
+   */
+  public static fromJsonRequest(request: any): ContractResponseI {
+    let contract = Contract._create(
+      request.script,
+      request.parameters,
+      request.network
+    );
+    if (contract) {
+      return {
+        contractId: contract.toString(),
+        cashaddr: contract.getDepositAddress(),
+      };
+    } else {
+      throw Error("Error creating contract");
+    }
   }
-}
-
-
 }
