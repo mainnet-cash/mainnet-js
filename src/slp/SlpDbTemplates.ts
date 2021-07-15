@@ -292,22 +292,25 @@ export const SlpAddressTransactionHistoryTemplate = (address: string, tokenId?: 
 };
 
 // prettier-ignore
-export const SlpWaitForTransactionTemplate = (slpaddr: string, tokenId?: string) => {
+export const SlpWaitForTransactionTemplate = (slpaddr?: string, tokenId?: string) => {
   let q = {
     "v": 3,
     "q": {
       "db": ["c", "u"],
       "find": {
-        "$or": [
-          {
-            "in.e.a": slpaddr
-          },
-          {
-            "out.e.a": slpaddr
-          }
-        ]
       }
     }
+  }
+
+  if (slpaddr) {
+    q["q"]["find"]["$or"] = [
+      {
+        "in.e.a": slpaddr
+      },
+      {
+        "out.e.a": slpaddr
+      }
+    ]
   }
 
   if (tokenId) {
