@@ -1814,10 +1814,26 @@ components:
           example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
           type: string
         slpAware:
+          default: false
           description: If you have any SLP tokens on the address, you should set `slpAware`
             to `true` to prevent accidental token burning So far this option is not
             switched on by default
           example: true
+          type: boolean
+        queryBalance:
+          default: true
+          description: A boolean flag to include the wallet balance after the successful
+            `send` operation to the returned result If set to false, the balance will
+            not be queried and returned, making the `send` call faster
+          example: false
+          type: boolean
+        awaitTransactionPropagation:
+          default: true
+          description: A boolean flag to wait for transaction to propagate through
+            the network and be registered in the bitcoind and indexer. If set to false,
+            the `send` call will be very fast, but the wallet UTXO state might be
+            invalid for some 500ms.
+          example: false
           type: boolean
       type: object
     SlpSendRequestOptions:
@@ -2372,10 +2388,6 @@ components:
     SlpSendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        options:
-          utxoIds:
-          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
         to:
         - tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
@@ -2393,8 +2405,6 @@ components:
           items:
             $ref: '#/components/schemas/SlpSendRequestItem'
           type: array
-        options:
-          $ref: '#/components/schemas/SlpSendRequestOptions'
       required:
       - to
       - walletId
