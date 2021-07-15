@@ -337,11 +337,15 @@ describe(`Wallet subscriptions`, () => {
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
 
-
   test("Create two wallets, get balances concurrently", async () => {
-    let balance1 = 999, balance2 = 666;
-    Wallet.newRandom().then(wallet => wallet.getBalance("sat").then((balance) => balance1 = balance as number));
-    Wallet.newRandom().then(wallet => wallet.getBalance("sat").then((balance) => balance2 = balance as number));
+    let balance1 = 999,
+      balance2 = 666;
+    Wallet.newRandom().then((wallet) =>
+      wallet.getBalance("sat").then((balance) => (balance1 = balance as number))
+    );
+    Wallet.newRandom().then((wallet) =>
+      wallet.getBalance("sat").then((balance) => (balance2 = balance as number))
+    );
     await delay(5000);
     expect(balance1).toBe(0);
     expect(balance2).toBe(0);

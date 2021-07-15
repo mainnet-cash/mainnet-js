@@ -54,7 +54,10 @@ export default interface NetworkProvider {
    * @throws {Error} If the transaction was not accepted by the network.
    * @returns The transaction ID (hash) corresponding to the broadcast transaction.
    */
-  sendRawTransaction(txHex: string, awaitPropagation?: boolean): Promise<string>;
+  sendRawTransaction(
+    txHex: string,
+    awaitPropagation?: boolean
+  ): Promise<string>;
 
   /**
    * Return the confirmed and unconfirmed history of a Bitcoin Cash address.
