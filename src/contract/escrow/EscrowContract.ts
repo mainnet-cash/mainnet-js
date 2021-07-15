@@ -129,8 +129,7 @@ export class EscrowContract extends Contract {
    * @returns A serialized contract
    */
   public toString() {
-
-  // Take the cashaddrs, disgarding the network, rejoin with delimiter
+    // Take the cashaddrs, disgarding the network, rejoin with delimiter
     let addressArgs = [this.sellerAddr, this.buyerAddr, this.arbiterAddr]
       .map((x) => x.split(":")[1])
       .join(DELIMITER);
