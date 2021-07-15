@@ -1,4 +1,3 @@
-import { string } from "pg-format";
 import { ContractInfoResponseI, ContractResponseI } from "../interface";
 
 export interface EscrowArguments {

@@ -211,7 +211,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Error
-      summary: Get information about a contract from the contractId
+      summary: Get information about an escrow contract from the escrowContractId
       tags:
       - contract/escrow
       x-eov-operation-handler: controllers/ContractEscrowController
@@ -1479,48 +1479,72 @@ components:
       - to
     EscrowInfoResponse:
       example:
-        cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        cashaddr: bchtest:prxla49zwqm8m2nzgn82qza3ssrqnpt8vgv60hlwm2
         arbiterAddr: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
         amount: 10000
-        escrowContractId: escrowContractId
+        escrowContractId: escrowContract:testnet:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:1996128042
         buyerAddr: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
         sellerAddr: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
         parameters:
-        - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
-        - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
-        - 215
-        script: "contract TransferWithTimeout(pubkey sender, pubkey recipient, int\
-          \ timeout) {\n    function transfer(sig recipientSig) {\n        require(checkSig(recipientSig,\
-          \ recipient));\n    }\n\n    function timeout(sig senderSig) {\n       \
-          \ require(checkSig(senderSig, sender));\n        require(tx.time >= timeout);\n\
-          \    }\n}            \n"
+        - 9ef0d8bf4c1f62a68c4c647beb404ec1d458f3c5
+        - e7fe7119a6bb73409a087e0ac46cefada815b69f
+        - a01c11c6deea905d25b487698f1140e0c53396c8
+        - 10000
+        - 1996128042
+        nonce: 1996128042
+        script: "pragma cashscript ^0.6.1;\ncontract escrow(bytes20 sellerPkh, bytes20\
+          \ buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {\n\
+          \n    function spend(pubkey signingPk, sig s, int amount, int nonce) {\n\
+          \        require(hash160(signingPk) == arbiterPkh || hash160(signingPk)\
+          \ == buyerPkh);\n        require(checkSig(s, signingPk));\n        require(amount\
+          \ >= contractAmount);\n        require(nonce == contractNonce);\n      \
+          \  bytes34 output = new OutputP2PKH(bytes8(amount), sellerPkh);\n      \
+          \  require(hash256(output) == tx.hashOutputs);\n    }\n\n    function refund(pubkey\
+          \ signingPk, sig s, int amount, int nonce) {\n        require(hash160(signingPk)\
+          \ == arbiterPkh||hash160(signingPk) == sellerPkh);\n        require(checkSig(s,\
+          \ signingPk));\n        require(amount >= contractAmount);\n        require(nonce\
+          \ == contractNonce);\n        bytes34 output = new OutputP2PKH(bytes8(amount),\
+          \ buyerPkh);\n        require(hash256(output) == tx.hashOutputs);\n    }\n\
+          }            \n"
       properties:
         escrowContractId:
           description: |
-            serialized contract
+            serialized escrow contract
+          example: escrowContract:testnet:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt:10000:1996128042
           type: string
         script:
           description: |
-            The smart contract in cashscript syntax
-          example: "contract TransferWithTimeout(pubkey sender, pubkey recipient,\
-            \ int timeout) {\n    function transfer(sig recipientSig) {\n        require(checkSig(recipientSig,\
-            \ recipient));\n    }\n\n    function timeout(sig senderSig) {\n     \
-            \   require(checkSig(senderSig, sender));\n        require(tx.time >=\
-            \ timeout);\n    }\n}            \n"
+            The escrow contract in cashscript syntax
+          example: "pragma cashscript ^0.6.1;\ncontract escrow(bytes20 sellerPkh,\
+            \ bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce)\
+            \ {\n\n    function spend(pubkey signingPk, sig s, int amount, int nonce)\
+            \ {\n        require(hash160(signingPk) == arbiterPkh || hash160(signingPk)\
+            \ == buyerPkh);\n        require(checkSig(s, signingPk));\n        require(amount\
+            \ >= contractAmount);\n        require(nonce == contractNonce);\n    \
+            \    bytes34 output = new OutputP2PKH(bytes8(amount), sellerPkh);\n  \
+            \      require(hash256(output) == tx.hashOutputs);\n    }\n\n    function\
+            \ refund(pubkey signingPk, sig s, int amount, int nonce) {\n        require(hash160(signingPk)\
+            \ == arbiterPkh||hash160(signingPk) == sellerPkh);\n        require(checkSig(s,\
+            \ signingPk));\n        require(amount >= contractAmount);\n        require(nonce\
+            \ == contractNonce);\n        bytes34 output = new OutputP2PKH(bytes8(amount),\
+            \ buyerPkh);\n        require(hash256(output) == tx.hashOutputs);\n  \
+            \  }\n}            \n"
           type: string
         parameters:
           description: Parameters passed when the contract was created
           example:
-          - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
-          - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
-          - 215
+          - 9ef0d8bf4c1f62a68c4c647beb404ec1d458f3c5
+          - e7fe7119a6bb73409a087e0ac46cefada815b69f
+          - a01c11c6deea905d25b487698f1140e0c53396c8
+          - 10000
+          - 1996128042
           items:
             description: Parameters passed as an array, where binary values are passed
               as hex
             type: string
           type: array
         cashaddr:
-          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+          example: bchtest:prxla49zwqm8m2nzgn82qza3ssrqnpt8vgv60hlwm2
           type: string
         buyerAddr:
           description: The cashaddress of the buyer
@@ -1535,6 +1559,10 @@ components:
           description: Numeric amount to be transferred by the contract in satoshi,
             amount must be less than 21 BCH.
           example: 10000
+          type: number
+        nonce:
+          description: A unique number used once for each instance of a contract.
+          example: 1996128042
           type: number
     EscrowInfoRequest:
       example:
