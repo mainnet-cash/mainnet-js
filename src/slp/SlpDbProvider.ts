@@ -134,8 +134,8 @@ export class SlpDbProvider implements SlpProvider {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
         async (tx: SlpTxI) => {
-          await cancelFn();
-          await resolve(tx);
+          cancelFn();
+          resolve(tx);
         },
         slpaddr,
         tokenId
@@ -171,7 +171,7 @@ export class SlpDbProvider implements SlpProvider {
     const cancelFn = this.SlpWatchTransactions(
       async () => {
         const balance = await this.SlpTokenBalance(slpaddr, tokenId);
-        await callback(balance);
+        callback(balance);
       },
       slpaddr,
       tokenId
@@ -202,7 +202,7 @@ export class SlpDbProvider implements SlpProvider {
             height: 0,
             details: data.data[0] as SlpDbTx,
           };
-          await callback(tx);
+          callback(tx);
         }
       },
       false
