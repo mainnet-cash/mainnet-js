@@ -991,19 +991,29 @@ export class Wallet extends BaseWallet {
     );
 
     const awaitTransactionPropagation =
-      !options || options.awaitTransactionPropagation === undefined || options.awaitTransactionPropagation;
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
 
-
-    return await this._submitTransaction(encodedTransaction, awaitTransactionPropagation);
+    return await this._submitTransaction(
+      encodedTransaction,
+      awaitTransactionPropagation
+    );
   }
 
   // Submit a raw transaction
-  private async _submitTransaction(transaction: Uint8Array, awaitPropagation: boolean = true): Promise<string> {
+  private async _submitTransaction(
+    transaction: Uint8Array,
+    awaitPropagation: boolean = true
+  ): Promise<string> {
     if (!this.provider) {
       throw Error("Wallet network provider was not initialized");
     }
     let rawTransaction = binToHex(transaction);
-    return await this.provider.sendRawTransaction(rawTransaction, awaitPropagation);
+    return await this.provider.sendRawTransaction(
+      rawTransaction,
+      awaitPropagation
+    );
   }
 
   // Convenience wrapper to sign interface

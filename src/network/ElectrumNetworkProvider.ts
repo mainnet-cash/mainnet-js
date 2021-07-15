@@ -117,7 +117,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     )) as unknown as ElectrumRawTransaction;
   }
 
-  async sendRawTransaction(txHex: string, awaitPropagation: boolean = true): Promise<string> {
+  async sendRawTransaction(
+    txHex: string,
+    awaitPropagation: boolean = true
+  ): Promise<string> {
     return new Promise(async (resolve) => {
       let txHash = await Util.getTransactionHash(txHex);
       if (!awaitPropagation) {

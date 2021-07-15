@@ -9,11 +9,7 @@ import {
   WatchWallet,
   WifWallet,
 } from "../wallet/Wif";
-import {
-  binToHex,
-  hexToBin,
-  instantiateSha256
-} from "@bitauth/libauth";
+import { binToHex, hexToBin, instantiateSha256 } from "@bitauth/libauth";
 import { ElectrumRawTransaction } from "../network/interface";
 
 let sha256;
