@@ -331,84 +331,20 @@ describe(`Wallet subscriptions`, () => {
       0
     );
 
-    console.time("slow");
     let tx = await bobWallet.waitForTransaction();
-    console.timeEnd("slow");
     expect(tx!.hash).not.toBe("");
 
-    console.time("sendMaxSlow");
     await bobWallet.sendMax(aliceWallet.cashaddr!);
-    console.timeEnd("sendMaxSlow");
   });
 
-  test("Should wait for transaction fast", async () => {
-    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-    const aliceWallet = await RegTestWallet.fromId(aliceWif);
-    const bobWallet = await RegTestWallet.newRandom();
 
-    setTimeout(
-      () =>
-        aliceWallet.send(
-          [
-            {
-              cashaddr: bobWallet.cashaddr!,
-              value: 1000,
-              unit: "satoshis",
-            },
-          ],
-          { queryBalance: false }
-        ),
-      0
-    );
-
-    console.time("Fast");
-    let tx = await bobWallet.waitForTransaction(false);
-    console.timeEnd("Fast");
-    console.log(tx);
-    // expect(tx.hash).toBe.toBe("");
-
-    console.time("sendMaxFast");
-    await bobWallet.sendMax(aliceWallet.cashaddr!);
-    console.timeEnd("sendMaxFast");
-  });
-
-  // test("Profile Should wait for transaction fast", async () => {
-  //   const aliceWif = `wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6`;
-  //   const aliceWallet = await RegTestWallet.fromId(aliceWif);
-  //   const bobWallet = await RegTestWallet.newRandom();
-
-  //   setTimeout(
-  //     () =>
-  //       aliceWallet.send([
-  //         {
-  //           cashaddr: bobWallet.cashaddr,
-  //           value: 1000,
-  //           unit: "satoshis",
-  //         },
-  //       ], { queryBalance: false }),
-  //     0
-  //   );
-
-  //   // console.time("Fast");
-  //   let tx = await bobWallet.waitForTransaction();
-  //   // console.timeEnd("Fast");
-  //   // console.log(tx);
-  //   // expect(tx.hash).toBe.toBe("");
-
-  //   // console.time("sendMaxFast");
-  //   await bobWallet.sendMax(aliceWallet.cashaddr);
-  //   // console.timeEnd("sendMaxFast");
-  // });
-
-  test("Create two wallets concurrently", async () => {
-    await (
-      await Wallet.newRandom()
-    ).provider!.getRawTransaction(
-      "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251"
-    );
-
-    // const w2 = await Wallet.newRandom();
-    // w1.getBalance(); w2.getBalance();
+  test("Create two wallets, get balances concurrently", async () => {
+    let balance1 = 999, balance2 = 666;
+    Wallet.newRandom().then(wallet => wallet.getBalance("sat").then((balance) => balance1 = balance as number));
+    Wallet.newRandom().then(wallet => wallet.getBalance("sat").then((balance) => balance2 = balance as number));
+    await delay(5000);
+    expect(balance1).toBe(0);
+    expect(balance2).toBe(0);
   });
 
   test("Should watch then wait", async () => {

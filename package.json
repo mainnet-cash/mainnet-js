@@ -78,6 +78,7 @@
   "optionalDependencies": {
     "@bitauth/libauth": "^1.18.0",
     "assert": "^2.0.0",
+    "async-mutex": "^0.3.1",
     "axios": "^0.21.1",
     "bchaddrjs-slp": "^0.2.12",
     "bigint-polyfill": "^0.1.0",
@@ -110,8 +111,5 @@
     "bch",
     "bitcoin cash"
   ],
-  "author": "readcash",
-  "dependencies": {
-    "async-mutex": "^0.3.1"
-  }
+  "author": "readcash"
 }

@@ -27,12 +27,12 @@ describe("Test faucet endpoints", () => {
       return;
     }
 
-    // let resp = await request(app).post("/faucet/get_testnet_bch/").send({
-    //   cashaddr: ""
-    // });
+    let resp = await request(app).post("/faucet/get_testnet_bch/").send({
+      cashaddr: ""
+    });
 
-    // expect(resp.statusCode).toEqual(405);
-    // expect(resp.body.message).toBe("Incorrect cashaddr");
+    expect(resp.statusCode).toEqual(405);
+    expect(resp.body.message).toBe("Incorrect cashaddr");
 
     const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_WIF);
     const bobwallet = await mainnet.TestNetWallet.newRandom();
