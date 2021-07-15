@@ -11,13 +11,13 @@ import { delay } from "../util/delay";
 import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 
 import { Mutex } from "async-mutex";
+import { Util } from "../wallet/Util";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
   public subscriptions: number = 0;
   private connectPromise;
   private mutex = new Mutex();
-  private random = Math.random();
 
   constructor(
     electrum: ElectrumCluster | ElectrumClient,
@@ -117,43 +117,22 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     )) as unknown as ElectrumRawTransaction;
   }
 
-  async sendRawTransaction(txHex: string): Promise<string> {
-    let result = (await this.performRequest(
-      "blockchain.transaction.broadcast",
-      txHex
-    )) as string;
-
-    // This assumes the fulcrum server is configured with a 0.5s delay
-    await delay(1050);
-    return result;
-  }
-
-  async sendRawTransactionFast(
-    txHex: string,
-    cashaddr: string
-  ): Promise<string> {
+  async sendRawTransaction(txHex: string, awaitPropagation: boolean = true): Promise<string> {
     return new Promise(async (resolve) => {
-      let txHash;
-
-      const waitForTransactionCallback = async (data) => {
-        if (data instanceof Array) {
-          let addr = data[0] as string;
-          if (addr !== cashaddr) {
-            return;
+      let txHash = await Util.getTransactionHash(txHex);
+      if (!awaitPropagation) {
+        resolve(txHash);
+      } else {
+        const waitForTransactionCallback = async (data) => {
+          if (data && data[0] === txHash) {
+            this.unsubscribeFromTransaction(txHash, waitForTransactionCallback);
+            resolve(txHash);
           }
+        };
+        this.subscribeToTransaction(txHash, waitForTransactionCallback);
 
-          this.unsubscribeFromAddress(cashaddr, waitForTransactionCallback);
-
-          resolve(txHash);
-        }
-      };
-      this.subscribeToAddress(cashaddr, waitForTransactionCallback);
-
-      this.performRequest("blockchain.transaction.broadcast", txHex).then(
-        (result) => {
-          txHash = result as string;
-        }
-      );
+        this.performRequest("blockchain.transaction.broadcast", txHex);
+      }
     });
   }
 
@@ -226,6 +205,28 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       "blockchain.address.subscribe",
       callback,
       cashaddr
+    );
+  }
+
+  async subscribeToTransaction(
+    txHash: string,
+    callback: (data: any) => void
+  ): Promise<void> {
+    await this.subscribeRequest(
+      "blockchain.transaction.subscribe",
+      callback,
+      txHash
+    );
+  }
+
+  async unsubscribeFromTransaction(
+    txHash: string,
+    callback: (data: any) => void
+  ): Promise<void> {
+    await this.unsubscribeRequest(
+      "blockchain.transaction.subscribe",
+      callback,
+      txHash
     );
   }
 

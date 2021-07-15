@@ -39,6 +39,7 @@ export interface SendRequestOptionsI {
   changeAddress?: string;
   slpAware?: boolean;
   queryBalance?: boolean;
+  awaitTransactionPropagation?: boolean;
 }
 
 export interface MnemonicI {

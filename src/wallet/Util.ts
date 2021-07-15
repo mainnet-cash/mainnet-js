@@ -12,11 +12,11 @@ import {
 import {
   binToHex,
   hexToBin,
-  instantiateSha256,
-  instantiateSha256Bytes,
-  Sha256,
+  instantiateSha256
 } from "@bitauth/libauth";
 import { ElectrumRawTransaction } from "../network/interface";
+
+let sha256;
 
 /**
  * Class with various wallet utilities.
@@ -39,7 +39,9 @@ export class Util {
   public async getTransactionHash(rawTransactionHex: string): Promise<string> {
     const transactionBin = hexToBin(rawTransactionHex);
 
-    const sha256 = await instantiateSha256();
+    if (!sha256) {
+      sha256 = await instantiateSha256();
+    }
     // transaction hash is a double sha256 of a raw transaction data, reversed byte order
     return binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
   }
