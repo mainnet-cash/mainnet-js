@@ -53,7 +53,7 @@ export interface SlpProvider {
   // sets up a callback to be executed each time a new transaction associated with this wallet's address is entering the mempool
   SlpWatchTransactions(
     callback: SlpWatchTransactionCallback,
-    slpaddr: string,
+    slpaddr?: string,
     tokenId?: string
   ): SlpCancelWatchFn;
 }

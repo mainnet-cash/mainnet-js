@@ -706,15 +706,14 @@ export class Slp {
     const slpPromise = new Promise(async (resolve) => {
       const txHash = await Util.getTransactionHash(rawTransaction);
 
-      const cancelWatchFn = this.watchTransactions(async (tx: SlpTxI) => {
-        cancelWatchFn();
-
+      const cancelWatchFn = this.provider.SlpWatchTransactions(async (tx: SlpTxI) => {
         if (tx.tx_hash === txHash) {
-          // await delay(250);
+          cancelWatchFn();
           resolve(txHash);
         }
-      }, tokenId || txHash);
+      }, undefined, tokenId || txHash);
     });
+
     const bchPromise = this.wallet.provider!.sendRawTransaction(
       rawTransaction,
       true

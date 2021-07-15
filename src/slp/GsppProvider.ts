@@ -136,8 +136,8 @@ export class GsppProvider implements SlpProvider {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
         async (tx: SlpTxI) => {
-          await cancelFn();
-          await resolve(tx);
+          cancelFn();
+          resolve(tx);
         },
         slpaddr,
         tokenId
@@ -176,7 +176,7 @@ export class GsppProvider implements SlpProvider {
     const cancelFn = this.SlpWatchTransactions(
       async () => {
         const balance = await this.SlpTokenBalance(slpaddr, tokenId);
-        await callback(balance);
+        callback(balance);
       },
       slpaddr,
       tokenId
@@ -187,7 +187,7 @@ export class GsppProvider implements SlpProvider {
   // sets up a callback to be executed each time a new transaction associated with this wallet's address is entering the mempool
   SlpWatchTransactions(
     callback: SlpWatchTransactionCallback,
-    slpaddr: string,
+    slpaddr?: string,
     tokenId?: string
   ): SlpCancelWatchFn {
     const eventSource: EventSource = this.SlpSocketEventSource({
@@ -208,7 +208,7 @@ export class GsppProvider implements SlpProvider {
             details: data.data as GsppTx,
           };
 
-          await callback(tx);
+          callback(tx);
         }
       },
       false
