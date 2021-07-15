@@ -134,10 +134,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         };
         this.subscribeToTransaction(txHash, waitForTransactionCallback);
 
-        this.performRequest("blockchain.transaction.broadcast", txHex).catch((error) => {
-          this.unsubscribeFromTransaction(txHash, waitForTransactionCallback);
-          reject(error);
-        });
+        this.performRequest("blockchain.transaction.broadcast", txHex).catch(
+          (error) => {
+            this.unsubscribeFromTransaction(txHash, waitForTransactionCallback);
+            reject(error);
+          }
+        );
       }
     });
   }
