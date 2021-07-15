@@ -534,7 +534,11 @@ export class Slp {
     const actualTokenId = slpUtxos[0].tokenId;
     return [
       actualTokenId,
-      await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult, actualTokenId),
+      await this.processSlpTransaction(
+        fundingBchUtxos,
+        slpOutputsResult,
+        actualTokenId
+      ),
     ];
   }
 
@@ -599,7 +603,11 @@ export class Slp {
 
     return [
       options.tokenId,
-      await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult, options.tokenId),
+      await this.processSlpTransaction(
+        fundingBchUtxos,
+        slpOutputsResult,
+        options.tokenId
+      ),
     ];
   }
 
@@ -689,7 +697,10 @@ export class Slp {
    *
    * @returns the transaction id of the broadcasted transaction
    */
-  private async _submitTransaction(transaction: Uint8Array, tokenId?: string): Promise<string> {
+  private async _submitTransaction(
+    transaction: Uint8Array,
+    tokenId?: string
+  ): Promise<string> {
     let rawTransaction = binToHex(transaction);
 
     const slpPromise = new Promise(async (resolve) => {
@@ -701,10 +712,13 @@ export class Slp {
         if (tx.tx_hash === txHash) {
           // await delay(250);
           resolve(txHash);
-        };
+        }
       }, tokenId || txHash);
     });
-    const bchPromise = this.wallet.provider!.sendRawTransaction(rawTransaction, true);
+    const bchPromise = this.wallet.provider!.sendRawTransaction(
+      rawTransaction,
+      true
+    );
 
     const [_, txHash] = await Promise.all([slpPromise, bchPromise]);
     return txHash;
