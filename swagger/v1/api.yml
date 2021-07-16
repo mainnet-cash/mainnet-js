@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.25
+  version: 0.3.27
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -2260,7 +2260,7 @@ components:
           type: string
         blocktime:
           type: number
-        configrmations:
+        confirmations:
           type: number
         hash:
           type: string
