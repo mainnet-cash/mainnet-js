@@ -403,7 +403,6 @@ describe(`Test Escrow Contracts`, () => {
       amount: 5000,
     });
 
-    console.log(contractResp.escrowContractId);
     expect(contractResp.escrowContractId.length).toBeGreaterThan(30);
     expect(contractResp.escrowContractId).toBe(
       EscrowContract.fromId(contractResp.escrowContractId).toString()
