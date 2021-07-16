@@ -50,6 +50,8 @@ import {
 } from "../slp/SlpProvider";
 import { toCashAddress, toSlpAddress } from "../util/bchaddr";
 import { GsppProvider } from "../slp/GsppProvider";
+import { delay } from "../util/delay";
+import { Util } from "./Util";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -532,7 +534,11 @@ export class Slp {
     const actualTokenId = slpUtxos[0].tokenId;
     return [
       actualTokenId,
-      await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult),
+      await this.processSlpTransaction(
+        fundingBchUtxos,
+        slpOutputsResult,
+        actualTokenId
+      ),
     ];
   }
 
@@ -597,7 +603,11 @@ export class Slp {
 
     return [
       options.tokenId,
-      await this.processSlpTransaction(fundingBchUtxos, slpOutputsResult),
+      await this.processSlpTransaction(
+        fundingBchUtxos,
+        slpOutputsResult,
+        options.tokenId
+      ),
     ];
   }
 
@@ -615,7 +625,8 @@ export class Slp {
       SlpOutputs: { lockingBytecode: Uint8Array; satoshis: Uint8Array }[];
       FundingSlpUtxos: SlpUtxoI[];
       BchSendRequests: SendRequest[];
-    }
+    },
+    tokenId?: string
   ): Promise<string> {
     if (!this.wallet.privateKey) {
       throw new Error(
@@ -673,7 +684,8 @@ export class Slp {
       false,
       slpOutputsResult.SlpOutputs
     );
-    return this._submitTransaction(encodedTransaction);
+
+    return this._submitTransaction(encodedTransaction, tokenId);
   }
 
   /**
@@ -685,9 +697,39 @@ export class Slp {
    *
    * @returns the transaction id of the broadcasted transaction
    */
-  private async _submitTransaction(transaction: Uint8Array): Promise<string> {
+  private async _submitTransaction(
+    transaction: Uint8Array,
+    tokenId?: string
+  ): Promise<string> {
     let rawTransaction = binToHex(transaction);
-    return this.wallet.provider!.sendRawTransaction(rawTransaction);
+
+    const slpPromise = new Promise(async (resolve) => {
+      const txHash = await Util.getTransactionHash(rawTransaction);
+
+      const cancelWatchFn = this.provider.SlpWatchTransactions(
+        async (tx: SlpTxI) => {
+          if (tx.tx_hash === txHash) {
+            cancelWatchFn();
+            resolve(txHash);
+          }
+        },
+        undefined,
+        tokenId || txHash
+      );
+    });
+
+    const bchPromise = this.wallet.provider!.sendRawTransaction(
+      rawTransaction,
+      true
+    );
+
+    const [_, txHash] = await Promise.all([slpPromise, bchPromise]);
+    return txHash;
+
+    // let rawTransaction = binToHex(transaction);
+    // const result = await this.wallet.provider!.sendRawTransaction(rawTransaction, true);
+    // delay(1000);
+    // return result;
   }
 
   /**

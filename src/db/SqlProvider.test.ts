@@ -6,7 +6,7 @@ import { WebhookRecurrence, WebhookType } from "../webhook";
  * @jest-environment jsdom
  */
 test("Store and retrieve a Regtest wallet", async () => {
-  let db = new SqlProvider("regtest2");
+  let db = new SqlProvider(`regtest2 ${Math.random()}`);
   await db.init();
   let w1 = await RegTestWallet.newRandom();
   w1.name = "dave";
@@ -18,8 +18,7 @@ test("Store and retrieve a Regtest wallet", async () => {
 });
 
 test("Store and replace a Regtest wallet", async () => {
-  const dbPrefix = `regtest2 ${Math.random()}`;
-  let db = new SqlProvider(dbPrefix);
+  let db = new SqlProvider(`regtest2 ${Math.random()}`);
   await db.init();
 
   expect(await db.walletExists("storereplace")).toBe(false);
@@ -44,7 +43,7 @@ test("Store and replace a Regtest wallet", async () => {
 });
 
 test("Store and retrieve a Testnet wallet", async () => {
-  let db = new SqlProvider("testnet");
+  let db = new SqlProvider(`testnet ${Math.random()}`);
   await db.init();
   let w1 = await TestNetWallet.newRandom();
   w1.name = "dave";
@@ -56,7 +55,7 @@ test("Store and retrieve a Testnet wallet", async () => {
 });
 
 test("Store and retrieve a Wif wallet", async () => {
-  let db = new SqlProvider("mainnet");
+  let db = new SqlProvider(`mainnet ${Math.random()}`);
   await db.init();
   let w1 = await Wallet.newRandom();
   w1.name = "dave";
@@ -68,12 +67,12 @@ test("Store and retrieve a Wif wallet", async () => {
 });
 
 test("Should handle basic sql injection", async () => {
-  let sh = new SqlProvider("still_here");
+  let sh = new SqlProvider(`still_here ${Math.random()}`);
   await sh.init();
   let w1 = await Wallet.newRandom();
   await sh.addWallet("okay", w1.toString());
 
-  let db = new SqlProvider(";DELETE table still_here");
+  let db = new SqlProvider(`;DELETE table still_here; ${Math.random()}`);
   await db.init();
   let alice = await RegTestWallet.newRandom();
   let bob = await RegTestWallet.newRandom();
@@ -104,7 +103,7 @@ test("Should handle basic sql injection", async () => {
 });
 
 test("Should fail registering SLP webhook without tokenId", async () => {
-  let db = new SqlProvider("regtest");
+  let db = new SqlProvider(`regtest ${Math.random()}`);
   await db.init();
   await expect(
     db.addWebhook({

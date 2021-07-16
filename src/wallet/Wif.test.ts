@@ -328,12 +328,27 @@ describe(`Wallet subscriptions`, () => {
             unit: "satoshis",
           },
         ]),
-      1
+      0
     );
 
     let tx = await bobWallet.waitForTransaction();
-    expect(tx.hash).not.toBe("");
+    expect(tx!.hash).not.toBe("");
+
     await bobWallet.sendMax(aliceWallet.cashaddr!);
+  });
+
+  test("Create two wallets, get balances concurrently", async () => {
+    let balance1 = 999,
+      balance2 = 666;
+    Wallet.newRandom().then((wallet) =>
+      wallet.getBalance("sat").then((balance) => (balance1 = balance as number))
+    );
+    Wallet.newRandom().then((wallet) =>
+      wallet.getBalance("sat").then((balance) => (balance2 = balance as number))
+    );
+    await delay(5000);
+    expect(balance1).toBe(0);
+    expect(balance2).toBe(0);
   });
 
   test("Should watch then wait", async () => {
@@ -442,7 +457,7 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     let bobTx = await bob.waitForTransaction();
-    expect(bobTx.version).toBe(2);
+    expect(bobTx!.version).toBe(2);
     setTimeout(
       () =>
         alice.send([
@@ -455,7 +470,7 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     bobTx = await bob.waitForTransaction();
-    expect(bobTx.version).toBe(2);
+    expect(bobTx!.version).toBe(2);
     setTimeout(
       () =>
         alice.send([
@@ -468,7 +483,7 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     bobTx = await bob.waitForTransaction();
-    expect(bobTx.version).toBe(2);
+    expect(bobTx!.version).toBe(2);
     expect(await bob.getBalance("sat")).toBe(4000);
   });
 
