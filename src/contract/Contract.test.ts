@@ -65,7 +65,7 @@ describe(`Create Contract Tests`, () => {
   }`;
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
-    const bob = await RegTestWallet.newRandom();
+    const bob = await RegTestWallet.fromSeed("rubber amateur across squirrel deposit above dish toddler visa cherry clerk egg");
 
     const alicePkh = alice.getPublicKeyHash();
     const bobPkh = bob.getPublicKeyHash();
@@ -90,7 +90,7 @@ describe(`Create Contract Tests`, () => {
 
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString()).toBe(
-      "contract:regtest:T0RZc01UZ3lMREUzT0N3ek1pdzJOaXd4T0RVc01UTXNNakUwTERFeU15d3lORElzTWpVeExESTFNU3d4TlRRc01qVTFMREV5TlN3MU5Td3lOVEVzTWpNNExERTNMRE0yOk1Ua3lMREU0TERJMUxEWXdMREU0Tml3M05Td3lOVEFzTXpjc09UVXNNVFk1TERFNE5Dd3hOak1zTVRFNExEUTVMREl5TkN3eE5qSXNNakF6TERVeExESTFNaXd4TkRFPTpNVEF3:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CgogICAgICBmdW5jdGlvbiB0aW1lb3V0KHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBzZW5kZXJQa2gpOwogICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgIHJlcXVpcmUodHgudGltZSA+PSB0aW1lb3V0KTsKICAgICAgfQogIH0=:1"
+      "contract:regtest:T0RZc01UZ3lMREUzT0N3ek1pdzJOaXd4T0RVc01UTXNNakUwTERFeU15d3lORElzTWpVeExESTFNU3d4TlRRc01qVTFMREV5TlN3MU5Td3lOVEVzTWpNNExERTNMRE0yOk15d3hNVE1zTmpBc01UZzRMREl4Tnl3eE5qQXNOaXd4TnpFc01qUTBMREUwTml3eU5UQXNNVEE0TERFNE9TdzRNeXd6TXl3eE56QXNNVEUyTERFME1Td3hNallzTlRjPTpNVEF3:Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CgogICAgICBmdW5jdGlvbiB0aW1lb3V0KHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBzZW5kZXJQa2gpOwogICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgIHJlcXVpcmUodHgudGltZSA+PSB0aW1lb3V0KTsKICAgICAgfQogIH0=:1"
     );
     expect(contract.toString().slice(0, 17)).toBe("contract:regtest:");
 
