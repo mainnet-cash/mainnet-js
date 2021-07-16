@@ -4,17 +4,17 @@ export function btoa(data: string) {
   if (getRuntimePlatform() !== "node") {
     return globalThis.btoa(data);
   } else {
-    const btoa = (str: any) =>  {
+    const btoa = (str: any) => {
       var buffer;
-  
+
       if (str instanceof Buffer) {
         buffer = str;
       } else {
-        buffer = Buffer.from(str.toString(), 'binary');
+        buffer = Buffer.from(str.toString(), "binary");
       }
-  
-      return buffer.toString('base64');
-    }
+
+      return buffer.toString("base64");
+    };
     return btoa(data);
   }
 }
