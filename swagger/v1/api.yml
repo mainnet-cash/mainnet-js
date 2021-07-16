@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.24
+  version: 0.3.25
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -1671,9 +1671,25 @@ components:
         slpAware:
           type: boolean
           example: true
+          default: false
           description:
             If you have any SLP tokens on the address, you should set `slpAware` to `true` to prevent accidental token burning
             So far this option is not switched on by default
+        queryBalance:
+          type: boolean
+          example: false
+          default: true
+          description:
+            A boolean flag to include the wallet balance after the successful `send` operation to the returned result
+            If set to false, the balance will not be queried and returned, making the `send` call faster
+        awaitTransactionPropagation:
+          type: boolean
+          example: false
+          default: true
+          description:
+            A boolean flag to wait for transaction to propagate through the network and be registered in the bitcoind and indexer.
+            If set to false, the `send` call will be very fast, but the wallet UTXO state might be invalid for some 500ms.
+
     SlpSendRequestOptions:
       type: object
       properties:
@@ -2126,8 +2142,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SlpSendRequestItem"
-        options:
-          $ref: "#/components/schemas/SlpSendRequestOptions"
+        # options:
+        #   $ref: "#/components/schemas/SlpSendRequestOptions"
       type: object
       required:
         - walletId

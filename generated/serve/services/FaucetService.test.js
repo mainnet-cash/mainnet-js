@@ -40,6 +40,7 @@ describe("Test faucet endpoints", () => {
       cashaddr: bobwallet.cashaddr
     });
 
+    if (resp.statusCode !== 200) console.log(resp.body);
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.txId.length).toBe(64);
 
@@ -81,6 +82,7 @@ describe("Test faucet endpoints", () => {
       tokenId: tokenId
     });
 
+    if (resp.statusCode !== 200) console.log(resp.body);
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.txId.length).toBe(64);
 

@@ -329,7 +329,11 @@ export class Wallet extends BaseWallet {
     );
     let resp = new SendResponse({});
     resp.txId = result;
-    resp.balance = (await this.getBalance()) as BalanceResponse;
+    const queryBalance =
+      !options || options.queryBalance === undefined || options.queryBalance;
+    if (queryBalance) {
+      resp.balance = (await this.getBalance()) as BalanceResponse;
+    }
     resp.explorerUrl = this.explorerUrl(resp.txId);
     return resp;
   }
@@ -531,10 +535,14 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let txId = await this.sendMaxRaw(cashaddr, options);
+    const txId = await this.sendMaxRaw(cashaddr, options);
+    const queryBalance =
+      !options || options.queryBalance === undefined || options.queryBalance;
     return {
       txId: txId,
-      balance: (await this.getBalance()) as BalanceResponse,
+      balance: queryBalance
+        ? ((await this.getBalance()) as BalanceResponse)
+        : undefined,
       explorerUrl: this.explorerUrl(txId),
     };
   }
@@ -685,7 +693,9 @@ export class Wallet extends BaseWallet {
   }
 
   // waits for next transaction, program execution is halted
-  public async waitForTransaction(): Promise<ElectrumRawTransaction> {
+  public async waitForTransaction(
+    returnTransactionInfo: boolean = true
+  ): Promise<ElectrumRawTransaction | undefined> {
     return new Promise(async (resolve) => {
       const waitForTransactionCallback = async (data) => {
         if (data instanceof Array) {
@@ -693,15 +703,21 @@ export class Wallet extends BaseWallet {
           if (addr !== this.cashaddr!) {
             return;
           }
-          let lastTx = await this.getLastTransaction();
-          await this.provider!.unsubscribeFromAddress(
+
+          this.provider!.unsubscribeFromAddress(
             this.cashaddr!,
             waitForTransactionCallback
           );
+
+          let lastTx;
+          if (returnTransactionInfo) {
+            lastTx = await this.getLastTransaction();
+          }
+
           resolve(lastTx);
         }
       };
-      await this.provider!.subscribeToAddress(
+      this.provider!.subscribeToAddress(
         this.cashaddr!,
         waitForTransactionCallback
       );
@@ -973,16 +989,31 @@ export class Wallet extends BaseWallet {
       fee,
       discardChange
     );
-    return await this._submitTransaction(encodedTransaction);
+
+    const awaitTransactionPropagation =
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
+
+    return await this._submitTransaction(
+      encodedTransaction,
+      awaitTransactionPropagation
+    );
   }
 
   // Submit a raw transaction
-  private async _submitTransaction(transaction: Uint8Array): Promise<string> {
+  private async _submitTransaction(
+    transaction: Uint8Array,
+    awaitPropagation: boolean = true
+  ): Promise<string> {
     if (!this.provider) {
       throw Error("Wallet network provider was not initialized");
     }
     let rawTransaction = binToHex(transaction);
-    return await this.provider.sendRawTransaction(rawTransaction);
+    return await this.provider.sendRawTransaction(
+      rawTransaction,
+      awaitPropagation
+    );
   }
 
   // Convenience wrapper to sign interface

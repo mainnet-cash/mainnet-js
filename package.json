@@ -8,10 +8,10 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.3.24.js",
-  "browser": "dist/mainnet-0.3.24.js",
+  "main": "dist/mainnet-node-0.3.25.js",
+  "browser": "dist/mainnet-0.3.25.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*.js",
@@ -78,6 +78,7 @@
   "optionalDependencies": {
     "@bitauth/libauth": "^1.18.0",
     "assert": "^2.0.0",
+    "async-mutex": "^0.3.1",
     "axios": "^0.21.1",
     "bchaddrjs-slp": "^0.2.12",
     "bigint-polyfill": "^0.1.0",
