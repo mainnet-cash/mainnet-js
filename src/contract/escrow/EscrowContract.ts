@@ -130,7 +130,6 @@ export class EscrowContract extends Contract {
    * @returns A serialized contract
    */
   public toString() {
-
     return [
       "escrowContract",
       this.network,
@@ -148,8 +147,8 @@ export class EscrowContract extends Contract {
    *
    * @returns A list of serialized arguments
    */
-   private getSerializedArguments() {
-     let args = [this.sellerAddr, this.buyerAddr, this.arbiterAddr, this.amount]
+  private getSerializedArguments() {
+    let args = [this.sellerAddr, this.buyerAddr, this.arbiterAddr, this.amount];
     return btoa(args.map((a) => btoa(a.toString())).join(DELIMITER));
   }
 
@@ -161,11 +160,15 @@ export class EscrowContract extends Contract {
    * @returns A new escrow contract
    */
   public static fromId(escrowContractId: string) {
-
-    
-    let [type, network, serializedArgs, serializedParams, serializedScript, nonce] =
-      escrowContractId.split(DELIMITER);
-      let [sellerAddr, buyerAddr, arbiterAddr, amount] = atob(serializedArgs)
+    let [
+      type,
+      network,
+      serializedArgs,
+      serializedParams,
+      serializedScript,
+      nonce,
+    ] = escrowContractId.split(DELIMITER);
+    let [sellerAddr, buyerAddr, arbiterAddr, amount] = atob(serializedArgs)
       .split(DELIMITER)
       .map((s) => atob(s));
 
@@ -189,7 +192,9 @@ export class EscrowContract extends Contract {
    * @param request A escrow contract request object
    * @returns A new escrow contract object
    */
-  public static escrowContractFromJsonRequest(request: any): EscrowContractResponseI {
+  public static escrowContractFromJsonRequest(
+    request: any
+  ): EscrowContractResponseI {
     let contract = EscrowContract.create(request);
     if (contract) {
       return {

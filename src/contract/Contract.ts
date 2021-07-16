@@ -91,7 +91,7 @@ export class Contract implements ContractI {
    *
    * @returns The serialized parameters
    */
-   public getSerializedParameters() {
+  public getSerializedParameters() {
     return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
   }
 

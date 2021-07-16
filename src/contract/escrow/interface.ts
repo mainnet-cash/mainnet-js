@@ -16,7 +16,7 @@ export interface EscrowInfoResponseI extends ContractInfoResponseI {
   amount: number;
 }
 
-export interface EscrowContractResponseI  {
+export interface EscrowContractResponseI {
   escrowContractId: string;
   cashaddr: string;
 }
