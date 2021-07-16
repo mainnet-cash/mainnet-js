@@ -7,6 +7,7 @@ import {
   EscrowContractResponseI,
   EscrowInfoResponseI,
 } from "./interface";
+import { atob, btoa } from "../../util/base64";
 import { getRandomInt } from "../../util/randomInt";
 import { Network } from "../..";
 import { DELIMITER } from "../../constant";
@@ -129,17 +130,27 @@ export class EscrowContract extends Contract {
    * @returns A serialized contract
    */
   public toString() {
-    // Take the cashaddrs, disgarding the network, rejoin with delimiter
-    let addressArgs = [this.sellerAddr, this.buyerAddr, this.arbiterAddr]
-      .map((x) => x.split(":")[1])
-      .join(DELIMITER);
+
     return [
       "escrowContract",
       this.network,
-      addressArgs,
-      this.amount,
+      this.getSerializedArguments(),
+      this.getSerializedParameters(),
+      this.getSerializedScript(),
       this.getNonce(),
     ].join(DELIMITER);
+  }
+
+  /**
+   * getSerializedArguments - Serialize the constructor arguments of an escrow contract
+   *
+   * a low-level function
+   *
+   * @returns A list of serialized arguments
+   */
+   private getSerializedArguments() {
+     let args = [this.sellerAddr, this.buyerAddr, this.arbiterAddr, this.amount]
+    return btoa(args.map((a) => btoa(a.toString())).join(DELIMITER));
   }
 
   /**
@@ -150,9 +161,18 @@ export class EscrowContract extends Contract {
    * @returns A new escrow contract
    */
   public static fromId(escrowContractId: string) {
-    let [type, network, sellerAddr, buyerAddr, arbiterAddr, amount, nonce] =
-      escrowContractId.split(DELIMITER);
 
+    
+    let [type, network, serializedArgs, serializedParams, serializedScript, nonce] =
+      escrowContractId.split(DELIMITER);
+      let [sellerAddr, buyerAddr, arbiterAddr, amount] = atob(serializedArgs)
+      .split(DELIMITER)
+      .map((s) => atob(s));
+
+    let script = atob(serializedScript);
+    let paramStrings = atob(serializedParams)
+      .split(DELIMITER)
+      .map((s) => atob(s));
     let contract = new EscrowContract({
       sellerAddr: sellerAddr,
       buyerAddr: buyerAddr,
@@ -169,11 +189,10 @@ export class EscrowContract extends Contract {
    * @param request A escrow contract request object
    * @returns A new escrow contract object
    */
-  public static fromJsonRequest(request: any): EscrowContractResponseI {
+  public static escrowContractFromJsonRequest(request: any): EscrowContractResponseI {
     let contract = EscrowContract.create(request);
     if (contract) {
       return {
-        contractId: "",
         escrowContractId: contract.toString(),
         cashaddr: contract.getDepositAddress(),
       };

@@ -11,7 +11,7 @@ const mainnet = require("mainnet-js");
 const createContract = ({ contractRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.Contract.fromJsonRequest(contractRequest);
+      let resp = await mainnet.Contract.contractRespFromJsonRequest(contractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(

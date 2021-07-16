@@ -13,7 +13,7 @@ const createEscrow = ({ escrowRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       escrowRequest.type = 'escrow'
-      let resp = await mainnet.EscrowContract.fromJsonRequest(escrowRequest);
+      let resp = await mainnet.EscrowContract.escrowContractFromJsonRequest(escrowRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(

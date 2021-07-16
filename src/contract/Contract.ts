@@ -80,7 +80,7 @@ export class Contract implements ContractI {
    *
    * @returns A serialized script
    */
-  private getSerializedScript() {
+  public getSerializedScript() {
     return btoa(this.script);
   }
 
@@ -89,9 +89,9 @@ export class Contract implements ContractI {
    *
    * a low-level function
    *
-   * @returns A serialized script
+   * @returns The serialized parameters
    */
-  private getSerializedParameters() {
+   public getSerializedParameters() {
     return btoa(this.parameters.map((a) => btoa(a.toString())).join(DELIMITER));
   }
 
@@ -121,7 +121,7 @@ export class Contract implements ContractI {
       this.network,
       this.getSerializedParameters(),
       this.getSerializedScript(),
-      this.nonce,
+      this.getNonce(),
     ].join(DELIMITER);
   }
 
@@ -411,7 +411,7 @@ export class Contract implements ContractI {
    * @param request A contract request object
    * @returns A new contract object
    */
-  public static fromJsonRequest(request: any): ContractResponseI {
+  public static contractRespFromJsonRequest(request: any): ContractResponseI {
     let contract = Contract._create(
       request.script,
       request.parameters,
