@@ -162,4 +162,4 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   }
 }
 
-ExchangeRate.get("usd");
+setTimeout(() => ExchangeRate.get("usd"), 0);
