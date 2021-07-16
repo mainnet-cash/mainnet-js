@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.25
+  version: 0.3.27
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -2570,7 +2570,6 @@ components:
     ElectrumRawTransaction:
       example:
         blockhash: blockhash
-        configrmations: 6.027456183070403
         locktime: 1.4658129805029452
         size: 5.962133916683182
         blocktime: 0.8008281904610115
@@ -2590,6 +2589,7 @@ components:
           txid: txid
           vout: 9.301444243932576
         time: 5.637376656633329
+        confirmations: 6.027456183070403
         version: 2.3021358869347655
         hash: hash
         vout:
@@ -2618,7 +2618,7 @@ components:
           type: string
         blocktime:
           type: number
-        configrmations:
+        confirmations:
           type: number
         hash:
           type: string

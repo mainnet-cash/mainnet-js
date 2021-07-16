@@ -26,8 +26,8 @@ export interface SlpDbTx {
 }
 
 export interface GsppTx {
-  inputs: String[];
-  outputs: String[];
+  inputs: string[];
+  outputs: string[];
   tokenId: string;
   groupId: string;
   type: SlpTokenType;

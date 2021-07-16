@@ -28,7 +28,7 @@ export interface ElectrumUtxo {
 export interface ElectrumRawTransaction {
   blockhash: string;
   blocktime: number;
-  configrmations: number;
+  confirmations: number;
   hash: string;
   hex: string;
   locktime: number;
