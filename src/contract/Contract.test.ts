@@ -65,7 +65,9 @@ describe(`Create Contract Tests`, () => {
   }`;
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
-    const bob = await RegTestWallet.fromSeed("rubber amateur across squirrel deposit above dish toddler visa cherry clerk egg");
+    const bob = await RegTestWallet.fromSeed(
+      "rubber amateur across squirrel deposit above dish toddler visa cherry clerk egg"
+    );
 
     const alicePkh = alice.getPublicKeyHash();
     const bobPkh = bob.getPublicKeyHash();
