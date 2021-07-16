@@ -102,7 +102,9 @@ class ExpressServer {
             errors: err.errors || '',
           });
         });
-        await mainnet.initProviders()
+        setTimeout(async () => {
+          await mainnet.initProviders();
+        }, 0);
         const server = this.app.listen(this.port);
         const wsServer = makeWsServer(server);
         server.on('upgrade', (request, socket, head) => {
@@ -117,6 +119,8 @@ class ExpressServer {
         server.app = this.app;
         this.server = server;
         return server;
+      }).catch(error => {
+        console.warn(error)
       });
   }
 
