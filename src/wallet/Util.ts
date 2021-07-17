@@ -9,8 +9,23 @@ import {
   WatchWallet,
   WifWallet,
 } from "../wallet/Wif";
-import { binToBigIntUint64LE, binToHex, decodeTransaction, hexToBin, instantiateSha256, lockingBytecodeToCashAddress, Transaction as LibAuthTransaction, TransactionDecodingError } from "@bitauth/libauth";
-import { ElectrumRawTransaction, ElectrumRawTransactionVin, ElectrumRawTransactionVinScriptSig, ElectrumRawTransactionVout, ElectrumRawTransactionVoutScriptPubKey } from "../network/interface";
+import {
+  binToBigIntUint64LE,
+  binToHex,
+  decodeTransaction,
+  hexToBin,
+  instantiateSha256,
+  lockingBytecodeToCashAddress,
+  Transaction as LibAuthTransaction,
+  TransactionDecodingError,
+} from "@bitauth/libauth";
+import {
+  ElectrumRawTransaction,
+  ElectrumRawTransactionVin,
+  ElectrumRawTransactionVinScriptSig,
+  ElectrumRawTransactionVout,
+  ElectrumRawTransactionVoutScriptPubKey,
+} from "../network/interface";
 import { bchParam } from "../chain";
 
 let sha256;
@@ -51,7 +66,10 @@ export class Util {
     return new this.walletType().util.getTransactionHash(rawTransactionHex);
   }
 
-  public async decodeTransaction(transactionHashOrHex: string, loadInputValues: boolean = false): Promise<ElectrumRawTransaction> {
+  public async decodeTransaction(
+    transactionHashOrHex: string,
+    loadInputValues: boolean = false
+  ): Promise<ElectrumRawTransaction> {
     let transactionHex: string;
     let transactionBin: Uint8Array;
     let txHash: string;
@@ -70,20 +88,28 @@ export class Util {
 
     const result = decodeTransaction(transactionBin);
     if (result === TransactionDecodingError.invalidFormat) {
-      throw Error(TransactionDecodingError.invalidFormat)
+      throw Error(TransactionDecodingError.invalidFormat);
     }
 
-    const transaction = this.mapToElectrumRawTransaction(result, txHash, transactionHex);
+    const transaction = this.mapToElectrumRawTransaction(
+      result,
+      txHash,
+      transactionHex
+    );
 
     if (loadInputValues) {
       // get unique transaction hashes
-      const hashes = [...new Set(transaction.vin.map(val => val.txid))];
-      const transactions = await Promise.all(hashes.map(hash => this.decodeTransaction(hash, false)));
+      const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
+      const transactions = await Promise.all(
+        hashes.map((hash) => this.decodeTransaction(hash, false))
+      );
       const transactionMap = new Map<string, ElectrumRawTransaction>();
-      transactions.forEach(val => transactionMap.set(val.hash, val));
+      transactions.forEach((val) => transactionMap.set(val.hash, val));
 
-      transaction.vin.forEach(input => {
-        const output = transactionMap.get(input.txid)!.vout.find(val => val.n === input.vout)!;
+      transaction.vin.forEach((input) => {
+        const output = transactionMap
+          .get(input.txid)!
+          .vout.find((val) => val.n === input.vout)!;
         input.address = output.scriptPubKey.addresses[0];
         input.value = output.value;
       });
@@ -92,39 +118,61 @@ export class Util {
     return transaction;
   }
 
-  public mapToElectrumRawTransaction(transaction: LibAuthTransaction, txHash: string, txHex: string): ElectrumRawTransaction {
+  public mapToElectrumRawTransaction(
+    transaction: LibAuthTransaction,
+    txHash: string,
+    txHex: string
+  ): ElectrumRawTransaction {
     let result: ElectrumRawTransaction = {} as any;
 
-    result.vin = transaction.inputs.map((input) : ElectrumRawTransactionVin => { return {
-      scriptSig: { hex: binToHex(input.unlockingBytecode) } as ElectrumRawTransactionVinScriptSig,
-      sequence: input.sequenceNumber,
-      txid: binToHex(input.outpointTransactionHash),
-      vout: input.outpointIndex,
-    } });
-
-    result.vout = transaction.outputs.map((output, index) : ElectrumRawTransactionVout => {
+    result.vin = transaction.inputs.map((input): ElectrumRawTransactionVin => {
       return {
-        n: index,
-        scriptPubKey: {
-          addresses: [ lockingBytecodeToCashAddress(output.lockingBytecode, this.wallet.networkPrefix).toString() ],
-          hex: binToHex(output.lockingBytecode),
-        } as ElectrumRawTransactionVoutScriptPubKey,
-        value: Number(binToBigIntUint64LE(output.satoshis)) / bchParam.subUnits,
-      }
+        scriptSig: {
+          hex: binToHex(input.unlockingBytecode),
+        } as ElectrumRawTransactionVinScriptSig,
+        sequence: input.sequenceNumber,
+        txid: binToHex(input.outpointTransactionHash),
+        vout: input.outpointIndex,
+      };
     });
+
+    result.vout = transaction.outputs.map(
+      (output, index): ElectrumRawTransactionVout => {
+        return {
+          n: index,
+          scriptPubKey: {
+            addresses: [
+              lockingBytecodeToCashAddress(
+                output.lockingBytecode,
+                this.wallet.networkPrefix
+              ).toString(),
+            ],
+            hex: binToHex(output.lockingBytecode),
+          } as ElectrumRawTransactionVoutScriptPubKey,
+          value:
+            Number(binToBigIntUint64LE(output.satoshis)) / bchParam.subUnits,
+        };
+      }
+    );
 
     result.locktime = transaction.locktime;
     result.version = transaction.version;
     result.hash = txHash;
     result.hex = txHex;
     result.txid = txHash;
-    result.size = txHex.length/2;
+    result.size = txHex.length / 2;
 
     return result;
   }
 
-  public static async decodeTransaction(transactionHashOrHex: string, loadInputValues: boolean = false): Promise<ElectrumRawTransaction> {
-    return new this.walletType().util.decodeTransaction(transactionHashOrHex, loadInputValues);
+  public static async decodeTransaction(
+    transactionHashOrHex: string,
+    loadInputValues: boolean = false
+  ): Promise<ElectrumRawTransaction> {
+    return new this.walletType().util.decodeTransaction(
+      transactionHashOrHex,
+      loadInputValues
+    );
   }
 }
 
