@@ -63,7 +63,8 @@ test("Should decode a transaction from fist block", async () => {
 });
 
 test("Should decode a transaction and fetch input values and addresses", async () => {
-  const txHash = "dc8f059900807c36941313f10b43ec049e23dfede4e09f8fbccc3871ed359fbe";
+  const txHash =
+    "dc8f059900807c36941313f10b43ec049e23dfede4e09f8fbccc3871ed359fbe";
   const decoded = await Wallet.util.decodeTransaction(txHash, true);
   expect(decoded.vin[0].address).toBeDefined();
   expect(decoded.vin[0].value).toBeDefined();
