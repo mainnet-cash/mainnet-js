@@ -9,8 +9,8 @@ import {
   WatchWallet,
   WifWallet,
 } from "../wallet/Wif";
-import { binToBigIntUint64LE, binToHex, decodeTransaction, hexToBin, Input, instantiateSha256, lockingBytecodeToCashAddress, Output, Transaction as LibAuthTransaction, TransactionDecodingError } from "@bitauth/libauth";
-import { ElectrumRawTransaction, ElectrumRawTransactionVin, ElectrumRawTransactionVinScriptSig, ElectrumRawTransactionVout, ElectrumRawTransactionVoutScriptPubKey, Transaction } from "../network/interface";
+import { binToBigIntUint64LE, binToHex, decodeTransaction, hexToBin, instantiateSha256, lockingBytecodeToCashAddress, Transaction as LibAuthTransaction, TransactionDecodingError } from "@bitauth/libauth";
+import { ElectrumRawTransaction, ElectrumRawTransactionVin, ElectrumRawTransactionVinScriptSig, ElectrumRawTransactionVout, ElectrumRawTransactionVoutScriptPubKey } from "../network/interface";
 import { bchParam } from "../chain";
 
 let sha256;

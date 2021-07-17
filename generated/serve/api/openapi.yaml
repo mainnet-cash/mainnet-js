@@ -2753,13 +2753,17 @@ components:
           scriptSig:
             asm: asm
             hex: hex
+          address: address
           txid: txid
+          value: 3.616076749251911
           vout: 9.301444243932576
         - sequence: 7.061401241503109
           scriptSig:
             asm: asm
             hex: hex
+          address: address
           txid: txid
+          value: 3.616076749251911
           vout: 9.301444243932576
         time: 5.637376656633329
         confirmations: 6.027456183070403
@@ -2773,9 +2777,9 @@ components:
             asm: asm
             hex: hex
             type: type
-            reqSigs: 2.027123023002322
-          value: 4.145608029883936
-          n: 3.616076749251911
+            reqSigs: 4.145608029883936
+          value: 7.386281948385884
+          n: 2.027123023002322
         - scriptPubKey:
             addresses:
             - addresses
@@ -2783,9 +2787,9 @@ components:
             asm: asm
             hex: hex
             type: type
-            reqSigs: 2.027123023002322
-          value: 4.145608029883936
-          n: 3.616076749251911
+            reqSigs: 4.145608029883936
+          value: 7.386281948385884
+          n: 2.027123023002322
       properties:
         blockhash:
           type: string
@@ -2890,7 +2894,9 @@ components:
         scriptSig:
           asm: asm
           hex: hex
+        address: address
         txid: txid
+        value: 3.616076749251911
         vout: 9.301444243932576
       properties:
         scriptSig:
@@ -2901,6 +2907,12 @@ components:
           type: string
         vout:
           type: number
+        value:
+          description: optional extention by mainnet.cash
+          type: number
+        address:
+          description: optional extention by mainnet.cash
+          type: string
       type: object
     ElectrumRawTransaction_scriptPubKey:
       example:
@@ -2910,7 +2922,7 @@ components:
         asm: asm
         hex: hex
         type: type
-        reqSigs: 2.027123023002322
+        reqSigs: 4.145608029883936
       properties:
         addresses:
           items:
@@ -2934,9 +2946,9 @@ components:
           asm: asm
           hex: hex
           type: type
-          reqSigs: 2.027123023002322
-        value: 4.145608029883936
-        n: 3.616076749251911
+          reqSigs: 4.145608029883936
+        value: 7.386281948385884
+        n: 2.027123023002322
       properties:
         n:
           type: number
