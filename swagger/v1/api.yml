@@ -2294,6 +2294,12 @@ components:
                 type: string
               vout:
                 type: number
+              value:
+                type: number
+                description: optional extention by mainnet.cash
+              address:
+                type: string
+                description: optional extention by mainnet.cash
         vout:
           type: array
           items:

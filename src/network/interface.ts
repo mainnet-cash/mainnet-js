@@ -25,28 +25,6 @@ export interface ElectrumUtxo {
   height: number;
 }
 
-export interface Transaction {
-  hash: string;
-  inputs: Input[],
-  outputs: Output[],
-  locktime: number,
-  version: number,
-}
-
-export interface Input {
-  vout: number,
-  prevoutHash: string,
-  sequence: number,
-  cashaddr?: string,
-  value?: number
-}
-
-export interface Output {
-  index: number,
-  cashaddr: string,
-  value: number
-}
-
 export interface ElectrumRawTransaction {
   blockhash: string;
   blocktime: number;
