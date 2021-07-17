@@ -9,10 +9,12 @@ import {
   WatchWallet,
   WifWallet,
 } from "../wallet/Wif";
-import { binToHex, hexToBin, instantiateSha256 } from "@bitauth/libauth";
-import { ElectrumRawTransaction } from "../network/interface";
+import { binToBigIntUint64LE, binToHex, decodeTransaction, hexToBin, Input, instantiateSha256, lockingBytecodeToCashAddress, Output, Transaction as LibAuthTransaction, TransactionDecodingError } from "@bitauth/libauth";
+import { ElectrumRawTransaction, Transaction } from "../network/interface";
 
 let sha256;
+
+// declare type Transaction = LibAuthTransaction<Input<Uint8Array, Uint8Array>, Output<Uint8Array, Uint8Array>>;
 
 /**
  * Class with various wallet utilities.
@@ -32,8 +34,8 @@ export class Util {
     this.wallet = wallet;
   }
 
-  public async getTransactionHash(rawTransactionHex: string): Promise<string> {
-    const transactionBin = hexToBin(rawTransactionHex);
+  public async getTransactionHash(transactionHashOrHex: string | Uint8Array): Promise<string> {
+    const transactionBin = typeof transactionHashOrHex === 'string' ? hexToBin(transactionHashOrHex as string) : transactionHashOrHex as Uint8Array;
 
     if (!sha256) {
       sha256 = await instantiateSha256();
@@ -43,9 +45,9 @@ export class Util {
   }
 
   public static async getTransactionHash(
-    rawTransactionHex: string
+    transactionHashOrHex: string | Uint8Array
   ): Promise<string> {
-    return new this.walletType().util.getTransactionHash(rawTransactionHex);
+    return new this.walletType().util.getTransactionHash(transactionHashOrHex);
   }
 
   public async decodeTransaction(
@@ -66,6 +68,74 @@ export class Util {
     transactionHashOrHex: string
   ): Promise<ElectrumRawTransaction> {
     return new this.walletType().util.decodeTransaction(transactionHashOrHex);
+  }
+
+  public async decodeTransactionLibAuth(transactionHashOrHex: string | Uint8Array, loadInputValues: boolean = false): Promise<Transaction> {
+    let transactionBin: Uint8Array;
+    let txHash: string;
+
+    // raw transaction
+    if (transactionHashOrHex.length > 64) {
+      txHash = await this.getTransactionHash(typeof transactionHashOrHex === 'string' ? transactionHashOrHex as string : binToHex(transactionHashOrHex as Uint8Array));
+      transactionBin = typeof transactionHashOrHex === 'string' ? hexToBin(transactionHashOrHex as string) : transactionHashOrHex as Uint8Array;
+    } else {
+      // tx hash, look up the raw transaction
+      txHash = typeof transactionHashOrHex === 'string' ? transactionHashOrHex as string : binToHex(transactionHashOrHex as Uint8Array);
+      const transactionHex = await this.wallet.provider!.getRawTransaction(txHash);
+      transactionBin = hexToBin(transactionHex);
+    }
+
+    const result = decodeTransaction(transactionBin);
+    if (result === TransactionDecodingError.invalidFormat) {
+      throw Error(TransactionDecodingError.invalidFormat)
+    }
+
+    const transaction = this.mapLibAuthTransaction(result);
+    transaction.hash = txHash;
+
+    if (loadInputValues) {
+      // get unique transaction hashes
+      const hashes = [...new Set(transaction.inputs.map(val => val.prevoutHash))];
+      const transactions = await Promise.all(hashes.map(hash => this.decodeTransactionLibAuth(hash, false)));
+      const transactionMap = new Map<string, Transaction>();
+      transactions.forEach(val => transactionMap.set(val.hash, val));
+
+      transaction.inputs.forEach(input => {
+        const output = transactionMap.get(input.prevoutHash)!.outputs.find(val => val.index === input.vout)!;
+        input.cashaddr = output.cashaddr;
+        input.value = output.value;
+      });
+    }
+
+    return transaction;
+  }
+
+  public mapLibAuthTransaction(transaction: LibAuthTransaction): Transaction {
+    let result: Transaction = {} as any;
+
+    result.inputs = transaction.inputs.map(input => { return {
+      vout: input.outpointIndex,
+      prevoutHash: binToHex(input.outpointTransactionHash),
+      sequence: input.sequenceNumber
+    } });
+
+    result.outputs = transaction.outputs.map((output, index) => {
+      return {
+        index: index,
+        cashaddr: lockingBytecodeToCashAddress(output.lockingBytecode, this.wallet.networkPrefix).toString(),
+        value: Number(binToBigIntUint64LE(output.satoshis)),
+      }
+    });
+
+    result.locktime = transaction.locktime;
+    result.version = transaction.version;
+
+
+    return result;
+  }
+
+  public static async decodeTransactionLibAuth(transactionHashOrHex: string | Uint8Array, loadInputValues: boolean = false): Promise<Transaction> {
+    return new this.walletType().util.decodeTransactionLibAuth(transactionHashOrHex, loadInputValues);
   }
 }
 
