@@ -101,7 +101,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         ) > -1
       )
         throw Error(
-          `Could not decode transaction. It might not exist on the current blockchain (${this.network}).`
+          `Could not decode transaction ${txHash}. It might not exist on the current blockchain (${this.network}).`
         );
       else throw error;
     }
