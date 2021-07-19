@@ -319,7 +319,7 @@ export class Contract implements ContractI {
     return await func[request.action]();
   }
 
-  public getFunctionByName(funcName){
+  public getFunctionByName(funcName) {
     if (typeof this.contract.functions[funcName] === "function") {
       return this.contract.functions[funcName];
     } else {
@@ -343,10 +343,8 @@ export class Contract implements ContractI {
       ["build"]()) as string;
 
     // Use the feePerByte to get the fee for the transaction length
-    return Math.round(estimatedTxHex.length / 2 * feePerByte);
+    return Math.round((estimatedTxHex.length / 2) * feePerByte);
   }
-
-  
 
   /**
    * Create a new contract, but respond with a json object

@@ -384,5 +384,4 @@ describe(`Test Wallet library`, () => {
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
   });
-
 });

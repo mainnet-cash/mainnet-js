@@ -1,7 +1,5 @@
 import { instantiateSecp256k1 } from "@bitauth/libauth";
-import {
-  SignatureTemplate,
-} from "cashscript";
+import { SignatureTemplate } from "cashscript";
 import { Contract } from "../Contract";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
@@ -272,15 +270,14 @@ export class EscrowContract extends Contract {
     let publicKey = sig.getPublicKey(secp256k1);
     let func = this.getFunctionByName(funcName);
 
-
     // If getHexOnly is true, just return the tx hex, otherwise submit to the network
     const method = getHexOnly ? "build" : "send";
 
     // If no utxos were provided, automatically get them
     let utxos;
     if (typeof utxoIds === "undefined") {
-      utxos = (await this.getUtxos()).utxos.map((u)=> {
-        return u.asElectrum()
+      utxos = (await this.getUtxos()).utxos.map((u) => {
+        return u.asElectrum();
       });
     } else {
       utxos = utxoIds.map((u) => {
