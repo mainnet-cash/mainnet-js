@@ -50,7 +50,7 @@ describe("Test Wallet Slp Endpoints", () => {
     const fail2 = await request(app)
       .post("/wallet/util/decode_transaction")
       .send({
-        transactionHashOrHex: resp.body.hex
+        transactionHashOrHex: resp.body.txid
       });
 
     expect(fail2.status).toBe(405);
