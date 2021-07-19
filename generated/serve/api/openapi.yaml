@@ -2651,9 +2651,14 @@ components:
       - $ref: '#/components/schemas/NetworkEnum'
       example:
         transactionHashOrHex: transactionHashOrHex
+        loadInputValues: true
       properties:
         transactionHashOrHex:
           type: string
+        loadInputValues:
+          description: A flag whether to load or not extra information about transaction
+            inputs (cashaddress and value)
+          type: boolean
       required:
       - transactionHashOrHex
     UtilDecodeTransactionResponse:

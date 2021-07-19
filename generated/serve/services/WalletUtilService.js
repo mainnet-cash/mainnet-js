@@ -12,7 +12,7 @@ const utilDecodeTransaction = ({ utilDecodeTransactionRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.createWallet({ network: utilDecodeTransactionRequest.network });
-      const resp = await wallet.util.decodeTransaction(utilDecodeTransactionRequest.transactionHashOrHex);
+      const resp = await wallet.util.decodeTransaction(utilDecodeTransactionRequest.transactionHashOrHex, utilDecodeTransactionRequest.loadInputValues);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
