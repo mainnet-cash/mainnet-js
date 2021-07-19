@@ -33,7 +33,6 @@ describe("Test Wallet Slp Endpoints", () => {
         loadInputValues: true
       });
 
-    console.log(JSON.stringify(resp.body, null, 2));
     expect(resp.status).toBe(200);
     expect(resp.body.txid).toBe("36a3692a41a8ac60b73f7f41ee23f5c917413e5b2fad9e44b34865bd0d601a3d");
 
