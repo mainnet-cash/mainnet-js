@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.28
+  version: 0.3.29
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -2294,6 +2294,12 @@ components:
                 type: string
               vout:
                 type: number
+              value:
+                type: number
+                description: optional extention by mainnet.cash
+              address:
+                type: string
+                description: optional extention by mainnet.cash
         vout:
           type: array
           items:
@@ -2324,6 +2330,10 @@ components:
         transactionHashOrHex:
           type:
             string
+        loadInputValues:
+          type:
+            boolean
+          description: A flag whether to load or not extra information about transaction inputs (cashaddress and value)
       allOf:
         - $ref: "#/components/schemas/NetworkEnum"
       required:

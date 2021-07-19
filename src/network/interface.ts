@@ -50,6 +50,8 @@ export interface ElectrumRawTransactionVin {
   sequence: number;
   txid: string;
   vout: number;
+  value?: number; // optional extention by mainnet.cash
+  address?: string; // optional extension by mainnet.cash
 }
 
 export interface ElectrumRawTransactionVout {

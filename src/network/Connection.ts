@@ -11,7 +11,6 @@ import { prefixFromNetworkMap } from "../enum";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
 async function initProvider(network: Network) {
-  const ticker = networkTickerMap[network];
   if (!getGlobalProvider(network)) {
     try {
       const conn = new Connection(network);
@@ -22,9 +21,9 @@ async function initProvider(network: Network) {
       throw `${network} ${e}`;
     }
   } else {
-    console.warn(
-      `Ignoring attempt to reinitialize non-existent ${network} provider`
-    );
+    // console.warn(
+    //   `Ignoring attempt to reinitialize non-existent ${network} provider`
+    // );
     return true;
   }
 }
