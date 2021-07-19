@@ -12,7 +12,7 @@ import {
 import {
   binToBigIntUint64LE,
   binToHex,
-  decodeTransaction,
+  decodeTransaction as decodeTransactionLibAuth,
   hexToBin,
   instantiateSha256,
   lockingBytecodeToCashAddress,
@@ -29,8 +29,6 @@ import {
 import { bchParam } from "../chain";
 
 let sha256;
-
-// declare type Transaction = LibAuthTransaction<Input<Uint8Array, Uint8Array>, Output<Uint8Array, Uint8Array>>;
 
 /**
  * Class with various wallet utilities.
@@ -86,7 +84,7 @@ export class Util {
       transactionBin = hexToBin(transactionHex);
     }
 
-    const result = decodeTransaction(transactionBin);
+    const result = decodeTransactionLibAuth(transactionBin);
     if (result === TransactionDecodingError.invalidFormat) {
       throw Error(TransactionDecodingError.invalidFormat);
     }

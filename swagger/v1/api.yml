@@ -2330,6 +2330,10 @@ components:
         transactionHashOrHex:
           type:
             string
+        loadInputValues:
+          type:
+            boolean
+          description: A flag whether to load or not extra information about transaction inputs (cashaddress and value)
       allOf:
         - $ref: "#/components/schemas/NetworkEnum"
       required:
