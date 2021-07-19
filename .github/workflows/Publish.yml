@@ -20,7 +20,8 @@ jobs:
 
   # Update mainnet-docs repository with the latest release version and integrity hash
   publish-docs:
-    needs: build
+    # we need `publish-bunny` first to have the newest version at cdn.mainnet.cash
+    needs: publish-bunny
     runs-on: ubuntu-latest
     steps:
       # Setup environment
