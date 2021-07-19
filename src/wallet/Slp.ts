@@ -724,12 +724,11 @@ export class Slp {
     );
 
     const [_, txHash] = await Promise.all([slpPromise, bchPromise]);
-    return txHash;
 
-    // let rawTransaction = binToHex(transaction);
-    // const result = await this.wallet.provider!.sendRawTransaction(rawTransaction, true);
-    // delay(1000);
-    // return result;
+    // allow for indexer processing, delay value is a bit arbitrary
+    await delay(100);
+
+    return txHash;
   }
 
   /**
