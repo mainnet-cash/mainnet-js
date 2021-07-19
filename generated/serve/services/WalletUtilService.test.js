@@ -28,12 +28,14 @@ describe("Test Wallet Slp Endpoints", () => {
     const resp = await request(app)
       .post("/wallet/util/decode_transaction")
       .send({
-        network: "regtest",
-        transactionHashOrHex: utxo.txId
+        network: "mainnet",
+        transactionHashOrHex: "36a3692a41a8ac60b73f7f41ee23f5c917413e5b2fad9e44b34865bd0d601a3d",
+        loadInputValues: true
       });
 
+    console.log(JSON.stringify(resp.body, null, 2));
     expect(resp.status).toBe(200);
-    expect(resp.body.txid).toBe(utxo.txId);
+    expect(resp.body.txid).toBe("36a3692a41a8ac60b73f7f41ee23f5c917413e5b2fad9e44b34865bd0d601a3d");
 
     // should fail on non-existent transaction
     const fail1 = await request(app)
@@ -50,7 +52,7 @@ describe("Test Wallet Slp Endpoints", () => {
     const fail2 = await request(app)
       .post("/wallet/util/decode_transaction")
       .send({
-        transactionHashOrHex: resp.body.txid
+        transactionHashOrHex: utxo.txId
       });
 
     expect(fail2.status).toBe(405);
