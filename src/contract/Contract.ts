@@ -1,4 +1,4 @@
-import { binToHex, instantiateSecp256k1 } from "@bitauth/libauth";
+import { binToHex } from "@bitauth/libauth";
 import {
   Argument,
   Artifact,
@@ -22,7 +22,6 @@ import {
   castStringArgumentsFromArtifact,
   transformContractToRequests,
 } from "./util";
-import { sumUtxoValue } from "../util/sumUtxoValue";
 import { DELIMITER } from "../constant";
 import { ContractFunction } from "cashscript/dist/module/Contract";
 import { UtxoItem } from "../wallet/model";
@@ -320,7 +319,14 @@ export class Contract implements ContractI {
     return await func[request.action]();
   }
 
-  private async estimateFee(
+  public getFunctionByName(funcName){
+    if (typeof this.contract.functions[funcName] === "function") {
+      return this.contract.functions[funcName];
+    } else {
+      throw Error(`${funcName} is not a contract method`);
+    }
+  }
+  public async estimateFee(
     func: ContractFunction,
     publicKey: Uint8Array,
     sig: SignatureTemplate,
@@ -333,78 +339,14 @@ export class Contract implements ContractI {
       .to([{ to: outputAddress, amount: 1000 }])
       .from(utxos);
     const estimatedTxHex = (await estimatorTransaction
-      .withHardcodedFee(1000)
+      .withHardcodedFee(500)
       ["build"]()) as string;
 
     // Use the feePerByte to get the fee for the transaction length
-    return Math.round(estimatedTxHex.length * 2 * feePerByte);
+    return Math.round(estimatedTxHex.length / 2 * feePerByte);
   }
 
-  // TODO, should this move to escrow?
-  public async _sendMax(
-    wif: string,
-    funcName: string,
-    outputAddress: string,
-    getHexOnly = false,
-    utxoIds?: string[]
-  ) {
-    const sig = new SignatureTemplate(wif);
-    const secp256k1 = await instantiateSecp256k1();
-    let publicKey = sig.getPublicKey(secp256k1);
-    let func;
-    if (typeof this.contract.functions[funcName] === "function") {
-      func = this.contract.functions[funcName];
-    } else {
-      throw Error(`${funcName} is not a contract method`);
-    }
-
-    // If getHexOnly is true, just return the tx hex, otherwise submit to the network
-    const method = getHexOnly ? "build" : "send";
-
-    // If no utxos were provided, automatically get them
-    let utxos;
-    if (typeof utxoIds === "undefined") {
-      utxos = await this.contract.getUtxos();
-    } else {
-      utxos = utxoIds.map((u) => {
-        return UtxoItem.fromId(u).asElectrum();
-      });
-    }
-    if (utxos.length > 0) {
-      try {
-        const fee = await this.estimateFee(
-          func,
-          publicKey,
-          sig,
-          outputAddress,
-          utxos
-        );
-        const balance = await sumUtxoValue(utxos);
-
-        const amount = balance - fee;
-        if (balance - fee < 0) {
-          throw Error(
-            "The contract transaction requires a greater fee then available with contract balance"
-          );
-        }
-        let transaction = func(publicKey, sig, amount, this.nonce)
-          .withHardcodedFee(fee)
-          .from(utxos)
-          .to(outputAddress, amount);
-        let txResult = await transaction[method]();
-
-        if (getHexOnly) {
-          return { hex: txResult };
-        } else {
-          return txResult;
-        }
-      } catch (e: any) {
-        throw Error(e);
-      }
-    } else {
-      throw Error("There were no UTXOs provided or available on the contract");
-    }
-  }
+  
 
   /**
    * Create a new contract, but respond with a json object

@@ -2,6 +2,7 @@ import { EscrowContract } from "./EscrowContract";
 import { RegTestWallet } from "../../wallet/Wif";
 
 import { initProviders, disconnectProviders } from "../../network/Connection";
+import { TransactionDetails } from "cashscript/dist/module/interfaces";
 
 beforeAll(async () => {
   await initProviders();
@@ -308,7 +309,7 @@ describe(`Test Escrow Contracts`, () => {
       true
     );
     // Assure the hex is long enough.
-    expect(hexOnly.hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
+    expect((hexOnly as TransactionDetails).hex).toMatch(/020000000[0-9a-f]{1600}[0-9a-f]+/);
     // Assure the contract funds are still there
     expect(await escrow.getBalance()).toBe(450000);
   });
@@ -350,6 +351,48 @@ describe(`Test Escrow Contracts`, () => {
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
         "Error: Transaction failed with reason: the transaction was rejected by network rules."
+      );
+    }
+  });
+
+
+  test("Should throw error on insuffecent funds", async () => {
+    expect.assertions(1);
+    try {
+      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+
+      let arbiter = await RegTestWallet.newRandom();
+      let buyer = await RegTestWallet.newRandom();
+      let seller = await RegTestWallet.newRandom();
+
+      await funder.send([
+        {
+          cashaddr: buyer.getDepositAddress()!,
+          value: 42000,
+          unit: "satoshis",
+        },
+      ]);
+      let escrow = new EscrowContract({
+        arbiterAddr: arbiter.getDepositAddress()!,
+        buyerAddr: buyer.getDepositAddress()!,
+        sellerAddr: seller.getDepositAddress()!,
+        amount: 40000,
+      });
+
+      // fund the escrow contract
+      await buyer.send([
+        {
+          cashaddr: escrow.getDepositAddress()!,
+          value: 40000,
+          unit: "satoshis",
+        },
+      ]);
+
+      // refund the escrow contract
+      await escrow.call(buyer.privateKeyWif!, "spend");
+    } catch (e) {
+      expect(e.message.split("\n")[0]).toBe(
+        "Error: The contract amount (40000) could not be submitted for a tx fee (838) with the available with contract balance (40000)"
       );
     }
   });

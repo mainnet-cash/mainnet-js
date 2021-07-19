@@ -1,3 +1,7 @@
+import { instantiateSecp256k1 } from "@bitauth/libauth";
+import {
+  SignatureTemplate,
+} from "cashscript";
 import { Contract } from "../Contract";
 import { derivedNetwork } from "../../util/deriveNetwork";
 import { derivePublicKeyHash } from "../../util/derivePublicKeyHash";
@@ -9,8 +13,10 @@ import {
 } from "./interface";
 import { atob, btoa } from "../../util/base64";
 import { getRandomInt } from "../../util/randomInt";
+import { sumUtxoValue } from "../../util/sumUtxoValue";
 import { Network } from "../..";
 import { DELIMITER } from "../../constant";
+import { UtxoItem } from "../../wallet/model";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
@@ -252,5 +258,69 @@ export class EscrowContract extends Contract {
       arbiterAddr: this.arbiterAddr,
       amount: this.amount,
     };
+  }
+
+  public async _sendMax(
+    wif: string,
+    funcName: string,
+    outputAddress: string,
+    getHexOnly = false,
+    utxoIds?: string[]
+  ) {
+    const sig = new SignatureTemplate(wif);
+    const secp256k1 = await instantiateSecp256k1();
+    let publicKey = sig.getPublicKey(secp256k1);
+    let func = this.getFunctionByName(funcName);
+
+
+    // If getHexOnly is true, just return the tx hex, otherwise submit to the network
+    const method = getHexOnly ? "build" : "send";
+
+    // If no utxos were provided, automatically get them
+    let utxos;
+    if (typeof utxoIds === "undefined") {
+      utxos = (await this.getUtxos()).utxos.map((u)=> {
+        return u.asElectrum()
+      });
+    } else {
+      utxos = utxoIds.map((u) => {
+        return UtxoItem.fromId(u).asElectrum();
+      });
+    }
+    if (utxos.length > 0) {
+      try {
+        const fee = await this.estimateFee(
+          func,
+          publicKey,
+          sig,
+          outputAddress,
+          utxos
+        );
+
+        const balance = await sumUtxoValue(utxos);
+
+        const amount = balance - fee;
+        if (this.amount > amount) {
+          throw Error(
+            `The contract amount (${this.amount}) could not be submitted for a tx fee (${fee}) with the available with contract balance (${balance})`
+          );
+        }
+        let transaction = func(publicKey, sig, amount, this.getNonce())
+          .withHardcodedFee(fee)
+          .from(utxos)
+          .to(outputAddress, amount);
+        let txResult = await transaction[method]();
+
+        if (getHexOnly) {
+          return { hex: txResult };
+        } else {
+          return txResult;
+        }
+      } catch (e: any) {
+        throw Error(e);
+      }
+    } else {
+      throw Error("There were no UTXOs provided or available on the contract");
+    }
   }
 }
