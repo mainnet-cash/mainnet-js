@@ -1,12 +1,11 @@
 var server = require("../")
 import { RegTestWallet } from "../../../src/wallet/Wif";
-import { UtxoItem } from "../../../src/wallet/model";
 var request = require("supertest");
 
 
 var app;
 
-describe("Test Contract Services", () => {
+describe("Test Escrow Contract Services", () => {
 
   beforeAll(async function () {
     app = await server.getServer().launch();  
@@ -34,10 +33,10 @@ describe("Test Contract Services", () => {
     
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
-    let contractId = contractResp.body.contractId
+    let escrowContractId = contractResp.body.escrowContractId
     let contractAddress = contractResp.body.cashaddr
 
 
@@ -55,9 +54,9 @@ describe("Test Contract Services", () => {
         });
 
     const respSpend = await request(app).post("/contract/escrow/call").send({
-      contractId: contractId,
+      escrowContractId: escrowContractId,
       walletId: buyerId,
-      method: "spend",
+      function: "spend",
       to: seller.getDepositAddress()
     });
 
@@ -95,10 +94,10 @@ describe("Test Contract Services", () => {
     
 
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
-    let contractId = contractResp.body.contractId
+    let escrowContractId = contractResp.body.escrowContractId
     let contractAddress = contractResp.body.cashaddr
 
 
@@ -116,9 +115,9 @@ describe("Test Contract Services", () => {
         });
 
     const respHex = await request(app).post("/contract/escrow/call").send({
-      contractId: contractId,
+      escrowContractId: escrowContractId,
       walletId: buyerId,
-      method: "spend",
+      function: "spend",
       getHexOnly: true,
       to: seller.getDepositAddress()
     });
@@ -152,10 +151,10 @@ describe("Test Contract Services", () => {
       amount: 16000
     });
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
-    let contractId = contractResp.body.contractId
+    let escrowContractId = contractResp.body.escrowContractId
     let contractAddress = contractResp.body.cashaddr
 
 
@@ -172,8 +171,8 @@ describe("Test Contract Services", () => {
           ],
         });
 
-    const utxoResp = await request(app).post("/contract/utxos").send({
-      contractId: contractId,
+    const utxoResp = await request(app).post("/contract/escrow/utxos").send({
+      escrowContractId: escrowContractId,
     });
     expect(utxoResp.statusCode).toEqual(200);
     expect(utxoResp.body.utxos[0].txId.length).toEqual(64);
@@ -198,12 +197,12 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
-    let contractId = contractResp.body.contractId
+    let escrowContractId = contractResp.body.escrowContractId
     let contractAddress = contractResp.body.cashaddr
-
+  
 
     await request(app)
         .post("/wallet/send")
@@ -223,8 +222,8 @@ describe("Test Contract Services", () => {
           ],
         });
 
-    const utxoResp = await request(app).post("/contract/utxos").send({
-      contractId: contractId,
+    const utxoResp = await request(app).post("/contract/escrow/utxos").send({
+      escrowContractId: escrowContractId,
     });
 
     expect(utxoResp.statusCode).toEqual(200);
@@ -234,9 +233,9 @@ describe("Test Contract Services", () => {
     let utxos = [utxoResp.body.utxos[0].utxoId]
 
     const respSpend = await request(app).post("/contract/escrow/call").send({
-      contractId: contractId,
+      escrowContractId: escrowContractId,
       walletId: buyerId,
-      method: "spend",
+      function: "spend",
       to: seller.getDepositAddress(),
       utxoIds: utxos
     });
@@ -253,8 +252,8 @@ describe("Test Contract Services", () => {
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.sat).toBeGreaterThan(16700);
-    const utxo2Resp = await request(app).post("/contract/utxos").send({
-      contractId: contractId,
+    const utxo2Resp = await request(app).post("/contract/escrow/utxos").send({
+      escrowContractId: escrowContractId,
     });
     
     expect(utxo2Resp.statusCode).toEqual(200);
@@ -293,7 +292,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
     let contractId = contractResp.body.contractId
@@ -370,7 +369,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
     let contractId = contractResp.body.contractId
@@ -501,7 +500,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
     const contractInfoResp = await request(app).post("/contract/info").send({
@@ -544,7 +543,7 @@ describe("Test Contract Services", () => {
     });
     
     expect(contractResp.statusCode).toEqual(200);
-    expect(contractResp.body.contractId).toMatch(/regtest:\w+/);
+    expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     
     let contractId = contractResp.body.contractId
