@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.30
+  version: 0.3.31
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -1496,7 +1496,7 @@ components:
       required:
         - escrowContractId
         - walletId
-        - method        
+        - function        
     ContractFnResponse:
       properties:
         contractId:

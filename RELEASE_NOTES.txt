@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+0.3.31
+
+- Fix bug with contract fee estimation
+- Fix rest nomenclature of function call
+- 
+
 0.3.23
 
 - Add Contract.info() and /contract/info for parsing contractIds 

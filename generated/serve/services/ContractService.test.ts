@@ -56,7 +56,7 @@ describe("Test Escrow Contract Services", () => {
     const respSpend = await request(app).post("/contract/escrow/call").send({
       escrowContractId: escrowContractId,
       walletId: buyerId,
-      method: "spend",
+      function: "spend",
       to: seller.getDepositAddress()
     });
 
@@ -117,7 +117,7 @@ describe("Test Escrow Contract Services", () => {
     const respHex = await request(app).post("/contract/escrow/call").send({
       escrowContractId: escrowContractId,
       walletId: buyerId,
-      method: "spend",
+      function: "spend",
       getHexOnly: true,
       to: seller.getDepositAddress()
     });
@@ -235,7 +235,7 @@ describe("Test Escrow Contract Services", () => {
     const respSpend = await request(app).post("/contract/escrow/call").send({
       escrowContractId: escrowContractId,
       walletId: buyerId,
-      method: "spend",
+      function: "spend",
       to: seller.getDepositAddress(),
       utxoIds: utxos
     });

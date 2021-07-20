@@ -60,7 +60,7 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
       let wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
       let resp = await contract._sendMax(
         wallet.privateKeyWif,
-        escrowFnRequest.method, 
+        escrowFnRequest.function, 
         escrowFnRequest.to,
         escrowFnRequest.getHexOnly, 
         escrowFnRequest.utxoIds
