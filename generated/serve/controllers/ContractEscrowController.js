@@ -16,8 +16,18 @@ const escrowFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowFn);
 };
 
+const escrowInfo = async (request, response) => {
+  await Controller.handleRequest(request, response, service.escrowInfo);
+};
+
+const escrowUtxos = async (request, response) => {
+  await Controller.handleRequest(request, response, service.escrowUtxos);
+};
+
 
 module.exports = {
   createEscrow,
   escrowFn,
+  escrowInfo,
+  escrowUtxos,
 };
