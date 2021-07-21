@@ -797,10 +797,10 @@ describe("Slp wallet tests", () => {
     ).rejects.toThrow();
 
     // bug in the SLPDB, the parent burn check is not triggered until new block arrives
-    if (aliceWallet.slp.provider! instanceof SlpDbProvider) {
-      await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
-      await delay(1000);
-    }
+    // if (aliceWallet.slp.provider! instanceof SlpDbProvider) {
+    //   await mine({ cashaddr: aliceWallet.cashaddr!, blocks: 1 });
+    //   await delay(1000);
+    // }
 
     // spend last token
     const genesis1 = { ...nftChildGenesis };
@@ -825,7 +825,7 @@ describe("Slp wallet tests", () => {
     await expect(aliceWallet.slp.nftChildGenesis(genesis2)).rejects.toThrow();
   });
 
-  test.skip("Test SLPDB NFT bug", async () => {
+  test("Test SLPDB NFT bug", async () => {
     const aliceWallet = await getAliceWallet();
 
     const nftParentGenesis = { ...genesisOptions };
