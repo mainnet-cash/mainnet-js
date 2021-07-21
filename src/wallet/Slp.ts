@@ -365,7 +365,9 @@ export class Slp {
       options.parentTokenId
     );
 
-    parentUtxos = parentUtxos.filter(val => this.spentParentUtxos.indexOf(`${val.txid}:${val.vout}`) === -1);
+    parentUtxos = parentUtxos.filter(
+      (val) => this.spentParentUtxos.indexOf(`${val.txid}:${val.vout}`) === -1
+    );
     parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
     if (!parentUtxos.length) {
@@ -399,8 +401,12 @@ export class Slp {
     options.decimals = 0;
     let result = await this._processGenesis(options, [parentUtxos[0]]);
 
-    const tx = await this.wallet.provider!.getRawTransactionObject(result) as ElectrumRawTransaction;
-    tx.vin.forEach(val => this.spentParentUtxos.push(`${val.txid}:${val.vout}`));
+    const tx = (await this.wallet.provider!.getRawTransactionObject(
+      result
+    )) as ElectrumRawTransaction;
+    tx.vin.forEach((val) =>
+      this.spentParentUtxos.push(`${val.txid}:${val.vout}`)
+    );
 
     return {
       tokenId: result,
