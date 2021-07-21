@@ -60,6 +60,9 @@ export class Slp {
   slpaddr: string;
   readonly wallet: Wallet;
   public provider: SlpProvider;
+  // a loookup table of spent inputs to keep track of NFT parent token consumption. related to a bug in SLPDB
+  private spentParentUtxos: string[] = [];
+
   static get walletType() {
     return Wallet;
   }
@@ -361,6 +364,8 @@ export class Slp {
       this.slpaddr,
       options.parentTokenId
     );
+
+    parentUtxos = parentUtxos.filter(val => this.spentParentUtxos.indexOf(`${val.txid}:${val.vout}`) === -1);
     parentUtxos = parentUtxos.sort((a, b) => a.value.comparedTo(b.value));
 
     if (!parentUtxos.length) {
@@ -393,6 +398,10 @@ export class Slp {
     options.initialAmount = 1;
     options.decimals = 0;
     let result = await this._processGenesis(options, [parentUtxos[0]]);
+
+    const tx = await this.wallet.provider!.getRawTransactionObject(result) as ElectrumRawTransaction;
+    tx.vin.forEach(val => this.spentParentUtxos.push(`${val.txid}:${val.vout}`));
+
     return {
       tokenId: result,
       balance: await this.getBalance(result),
