@@ -9,8 +9,8 @@ let alice;
 let aliceWif;
 let tokenId;
 
-const serversSlpDb = { ...{}, ...SlpDbProvider.servers };
-const serversGspp = { ...{}, ...GsppProvider.servers };
+const serversSlpDb = { ...{}, ...SlpDbProvider.defaultServers };
+const serversGspp = { ...{}, ...GsppProvider.defaultServers };
 
 /**
  * @jest-environment jsdom
@@ -42,8 +42,9 @@ describe("Webhook worker tests", () => {
       const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
       tokenId = genesisResult.tokenId;
 
-      SlpDbProvider.servers.testnet = SlpDbProvider.servers.regtest;
-      GsppProvider.servers.testnet = GsppProvider.servers.regtest;
+      SlpDbProvider.defaultServers.testnet =
+        SlpDbProvider.defaultServers.regtest;
+      GsppProvider.defaultServers.testnet = GsppProvider.defaultServers.regtest;
     } catch (e) {
       throw e;
     }
@@ -61,8 +62,8 @@ describe("Webhook worker tests", () => {
     await worker.destroy();
     await worker.db.close();
 
-    SlpDbProvider.servers = serversSlpDb;
-    GsppProvider.servers = serversGspp;
+    SlpDbProvider.defaultServers = serversSlpDb;
+    GsppProvider.defaultServers = serversGspp;
   });
 
   test("Test non-recurrent hook to be deleted after successful call", async () => {

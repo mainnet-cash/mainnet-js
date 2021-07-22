@@ -5,8 +5,8 @@ var request = require("supertest");
 var app;
 let tokenId;
 
-const serversSlpDb = { ...{}, ...mainnet.SlpDbProvider.servers };
-const serversGspp = { ...{}, ...mainnet.GsppProvider.servers };
+const serversSlpDb = { ...{}, ...mainnet.SlpDbProvider.defaultServers };
+const serversGspp = { ...{}, ...mainnet.GsppProvider.defaultServers };
 
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
@@ -24,8 +24,8 @@ describe("Test Webhook Endpoints", () => {
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     };
 
-    mainnet.SlpDbProvider.servers.testnet = mainnet.SlpDbProvider.servers.regtest;
-    mainnet.GsppProvider.servers.testnet = mainnet.GsppProvider.servers.regtest;
+    mainnet.SlpDbProvider.defaultServers.testnet = mainnet.SlpDbProvider.defaultServers.regtest;
+    mainnet.GsppProvider.defaultServers.testnet = mainnet.GsppProvider.defaultServers.regtest;
 
     const aliceWallet = await mainnet.RegTestWallet.slp.fromId(`wif:regtest:${process.env.PRIVATE_WIF!}`);
     const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
@@ -40,8 +40,8 @@ describe("Test Webhook Endpoints", () => {
     await server.killElectrum()
     app.close();
 
-    mainnet.SlpDbProvider.servers = serversSlpDb;
-    mainnet.GsppProvider.servers = serversGspp;
+    mainnet.SlpDbProvider.defaultServers = serversSlpDb;
+    mainnet.GsppProvider.defaultServers = serversGspp;
   });
 
   /**
