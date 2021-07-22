@@ -36,18 +36,24 @@ export class GsppProvider implements SlpProvider {
     },
   };
 
-  public servers = {...GsppProvider.defaultServers};
+  public servers = { ...GsppProvider.defaultServers };
 
   public caching: boolean = false;
 
   constructor(public network: Network = Network.MAINNET) {
     if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node) {
-      if (process.env.GSPP_MAINNET_DATA) this.servers.mainnet.dataSource = process.env.GSPP_MAINNET_DATA;
-      if (process.env.GSPP_MAINNET_EVENTS) this.servers.mainnet.eventSource = process.env.GSPP_MAINNET_EVENTS;
-      if (process.env.GSPP_TESTNET_DATA) this.servers.testnet.dataSource = process.env.GSPP_TESTNET_DATA;
-      if (process.env.GSPP_TESTNET_EVENTS) this.servers.testnet.eventSource = process.env.GSPP_TESTNET_EVENTS;
-      if (process.env.GSPP_REGTEST_DATA) this.servers.regtest.dataSource = process.env.GSPP_REGTEST_DATA;
-      if (process.env.GSPP_REGTEST_EVENTS) this.servers.regtest.eventSource = process.env.GSPP_REGTEST_EVENTS;
+      if (process.env.GSPP_MAINNET_DATA)
+        this.servers.mainnet.dataSource = process.env.GSPP_MAINNET_DATA;
+      if (process.env.GSPP_MAINNET_EVENTS)
+        this.servers.mainnet.eventSource = process.env.GSPP_MAINNET_EVENTS;
+      if (process.env.GSPP_TESTNET_DATA)
+        this.servers.testnet.dataSource = process.env.GSPP_TESTNET_DATA;
+      if (process.env.GSPP_TESTNET_EVENTS)
+        this.servers.testnet.eventSource = process.env.GSPP_TESTNET_EVENTS;
+      if (process.env.GSPP_REGTEST_DATA)
+        this.servers.regtest.dataSource = process.env.GSPP_REGTEST_DATA;
+      if (process.env.GSPP_REGTEST_EVENTS)
+        this.servers.regtest.eventSource = process.env.GSPP_REGTEST_EVENTS;
     }
   }
 
@@ -240,9 +246,7 @@ export class GsppProvider implements SlpProvider {
     // console.log(queryObject, endpoint);
 
     return new Promise((resolve, reject) => {
-      const url = `${
-        this.servers[this.network].dataSource
-      }/${endpoint}`;
+      const url = `${this.servers[this.network].dataSource}/${endpoint}`;
       fetch_retry(url, queryObject)
         .then((response: any) => {
           resolve(response.data);
@@ -259,9 +263,9 @@ export class GsppProvider implements SlpProvider {
   }
 
   public SlpSocketEventSource(queryObject: any): EventSource {
-    const url = `${
-      this.servers[this.network].eventSource
-    }/s/${B64QueryString(queryObject)}`;
+    const url = `${this.servers[this.network].eventSource}/s/${B64QueryString(
+      queryObject
+    )}`;
     return new EventSource(url);
   }
 }

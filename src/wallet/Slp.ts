@@ -80,7 +80,11 @@ export class Slp {
     this.wallet = wallet;
 
     let provider = Slp.defaultProvider;
-    if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node && process.env.SLP_PROVIDER) provider = process.env.SLP_PROVIDER!;
+    if (
+      Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node &&
+      process.env.SLP_PROVIDER
+    )
+      provider = process.env.SLP_PROVIDER!;
 
     if (provider === "gspp") {
       this.provider = new GsppProvider(this.wallet.networkType);

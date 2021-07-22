@@ -42,7 +42,8 @@ describe("Webhook worker tests", () => {
       const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
       tokenId = genesisResult.tokenId;
 
-      SlpDbProvider.defaultServers.testnet = SlpDbProvider.defaultServers.regtest;
+      SlpDbProvider.defaultServers.testnet =
+        SlpDbProvider.defaultServers.regtest;
       GsppProvider.defaultServers.testnet = GsppProvider.defaultServers.regtest;
     } catch (e) {
       throw e;
