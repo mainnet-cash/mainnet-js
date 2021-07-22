@@ -52,6 +52,7 @@ import { toCashAddress, toSlpAddress } from "../util/bchaddr";
 import { GsppProvider } from "../slp/GsppProvider";
 import { delay } from "../util/delay";
 import { Util } from "./Util";
+import { Mainnet } from "../index";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -79,7 +80,7 @@ export class Slp {
     this.wallet = wallet;
 
     let provider = Slp.defaultProvider;
-    if (process.env.SLP_PROVIDER) provider = process.env.SLP_PROVIDER!;
+    if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node && process.env.SLP_PROVIDER) provider = process.env.SLP_PROVIDER!;
 
     if (provider === "gspp") {
       this.provider = new GsppProvider(this.wallet.networkType);

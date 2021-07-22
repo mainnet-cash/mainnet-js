@@ -18,6 +18,7 @@ import axios from "axios";
 import { btoa } from "../util/base64";
 
 import EventSource from "../../polyfill/eventsource";
+import { Mainnet } from "../index";
 
 export class GsppProvider implements SlpProvider {
   public static defaultServers = {
@@ -40,12 +41,14 @@ export class GsppProvider implements SlpProvider {
   public caching: boolean = false;
 
   constructor(public network: Network = Network.MAINNET) {
-    if (process.env.GSPP_MAINNET_DATA) this.servers.mainnet.dataSource = process.env.GSPP_MAINNET_DATA;
-    if (process.env.GSPP_MAINNET_EVENTS) this.servers.mainnet.eventSource = process.env.GSPP_MAINNET_EVENTS;
-    if (process.env.GSPP_TESTNET_DATA) this.servers.testnet.dataSource = process.env.GSPP_TESTNET_DATA;
-    if (process.env.GSPP_TESTNET_EVENTS) this.servers.testnet.eventSource = process.env.GSPP_TESTNET_EVENTS;
-    if (process.env.GSPP_REGTEST_DATA) this.servers.regtest.dataSource = process.env.GSPP_REGTEST_DATA;
-    if (process.env.GSPP_REGTEST_EVENTS) this.servers.regtest.eventSource = process.env.GSPP_REGTEST_EVENTS;
+    if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node) {
+      if (process.env.GSPP_MAINNET_DATA) this.servers.mainnet.dataSource = process.env.GSPP_MAINNET_DATA;
+      if (process.env.GSPP_MAINNET_EVENTS) this.servers.mainnet.eventSource = process.env.GSPP_MAINNET_EVENTS;
+      if (process.env.GSPP_TESTNET_DATA) this.servers.testnet.dataSource = process.env.GSPP_TESTNET_DATA;
+      if (process.env.GSPP_TESTNET_EVENTS) this.servers.testnet.eventSource = process.env.GSPP_TESTNET_EVENTS;
+      if (process.env.GSPP_REGTEST_DATA) this.servers.regtest.dataSource = process.env.GSPP_REGTEST_DATA;
+      if (process.env.GSPP_REGTEST_EVENTS) this.servers.regtest.eventSource = process.env.GSPP_REGTEST_EVENTS;
+    }
   }
 
   // all oupoints, including mint batons
