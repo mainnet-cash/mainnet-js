@@ -35,7 +35,7 @@ import { btoa } from "../util/base64";
 import EventSource from "../../polyfill/eventsource";
 
 export class SlpDbProvider implements SlpProvider {
-  public static servers = {
+  public static defaultServers = {
     mainnet: {
       dataSource: "https://slpdb.fountainhead.cash",
       eventSource: "https://slpsocket.fountainhead.cash",
@@ -50,8 +50,18 @@ export class SlpDbProvider implements SlpProvider {
     },
   };
 
+  public servers = {...SlpDbProvider.defaultServers};
+
   public caching: boolean = false;
-  constructor(public network: Network = Network.MAINNET) {}
+
+  constructor(public network: Network = Network.MAINNET) {
+    if (process.env.SLPDB_MAINNET_DATA) this.servers.mainnet.dataSource = process.env.SLPDB_MAINNET_DATA;
+    if (process.env.SLPDB_MAINNET_EVENTS) this.servers.mainnet.eventSource = process.env.SLPDB_MAINNET_EVENTS;
+    if (process.env.SLPDB_TESTNET_DATA) this.servers.testnet.dataSource = process.env.SLPDB_TESTNET_DATA;
+    if (process.env.SLPDB_TESTNET_EVENTS) this.servers.testnet.eventSource = process.env.SLPDB_TESTNET_EVENTS;
+    if (process.env.SLPDB_REGTEST_DATA) this.servers.regtest.dataSource = process.env.SLPDB_REGTEST_DATA;
+    if (process.env.SLPDB_REGTEST_EVENTS) this.servers.regtest.eventSource = process.env.SLPDB_REGTEST_EVENTS;
+  }
 
   // all oupoints, including mint batons
   async SlpOutpoints(slpaddr: string): Promise<String[]> {
@@ -220,7 +230,7 @@ export class SlpDbProvider implements SlpProvider {
 
     return new Promise((resolve, reject) => {
       const url = `${
-        SlpDbProvider.servers[this.network].dataSource
+        this.servers[this.network].dataSource
       }/q/${B64QueryString(queryObject)}`;
       fetch_retry(url).then((response: any) => {
         if (response.hasOwnProperty("error")) {
@@ -233,7 +243,7 @@ export class SlpDbProvider implements SlpProvider {
 
   public SlpSocketEventSource(queryObject: any): EventSource {
     const url = `${
-      SlpDbProvider.servers[this.network].eventSource
+      this.servers[this.network].eventSource
     }/s/${B64QueryString(queryObject)}`;
     return new EventSource(url);
   }

@@ -67,6 +67,8 @@ export class Slp {
     return Wallet;
   }
 
+  public static defaultProvider = "slpdb";
+
   /**
    * Initializes an Slp Wallet.
    *
@@ -75,8 +77,16 @@ export class Slp {
   constructor(wallet: Wallet) {
     this.slpaddr = toSlpAddress(wallet.cashaddr!);
     this.wallet = wallet;
-    this.provider = new SlpDbProvider(this.wallet.networkType);
-    // this.provider = new GsppProvider(this.wallet.networkType);
+
+    let provider = Slp.defaultProvider;
+    if (process.env.SLP_PROVIDER) provider = process.env.SLP_PROVIDER!;
+
+    if (provider === "gspp") {
+      this.provider = new GsppProvider(this.wallet.networkType);
+    } else {
+      // provider === "slpdb"
+      this.provider = new SlpDbProvider(this.wallet.networkType);
+    }
   }
 
   /**

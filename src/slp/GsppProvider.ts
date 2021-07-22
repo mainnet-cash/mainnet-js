@@ -14,29 +14,39 @@ import {
   SlpWatchTransactionCallback,
   _emptyTokenBalance,
 } from "./SlpProvider";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { btoa } from "../util/base64";
 
 import EventSource from "../../polyfill/eventsource";
 
 export class GsppProvider implements SlpProvider {
-  public static servers = {
+  public static defaultServers = {
     mainnet: {
       dataSource: "https://gs.fountainhead.cash",
-      eventsource: "https://slpsocket.fountainhead.cash",
+      eventSource: "https://slpsocket.fountainhead.cash",
     },
     testnet: {
       dataSource: "https://gs-testnet.fountainhead.cash",
-      eventsource: "https://slpsocket-testnet.fountainhead.cash",
+      eventSource: "https://slpsocket-testnet.fountainhead.cash",
     },
     regtest: {
       dataSource: "http://localhost:12400",
-      eventsource: "http://localhost:12401",
+      eventSource: "http://localhost:12401",
     },
   };
 
+  public servers = {...GsppProvider.defaultServers};
+
   public caching: boolean = false;
-  constructor(public network: Network = Network.MAINNET) {}
+
+  constructor(public network: Network = Network.MAINNET) {
+    if (process.env.GSPP_MAINNET_DATA) this.servers.mainnet.dataSource = process.env.GSPP_MAINNET_DATA;
+    if (process.env.GSPP_MAINNET_EVENTS) this.servers.mainnet.eventSource = process.env.GSPP_MAINNET_EVENTS;
+    if (process.env.GSPP_TESTNET_DATA) this.servers.testnet.dataSource = process.env.GSPP_TESTNET_DATA;
+    if (process.env.GSPP_TESTNET_EVENTS) this.servers.testnet.eventSource = process.env.GSPP_TESTNET_EVENTS;
+    if (process.env.GSPP_REGTEST_DATA) this.servers.regtest.dataSource = process.env.GSPP_REGTEST_DATA;
+    if (process.env.GSPP_REGTEST_EVENTS) this.servers.regtest.eventSource = process.env.GSPP_REGTEST_EVENTS;
+  }
 
   // all oupoints, including mint batons
   async SlpOutpoints(slpaddr: string): Promise<String[]> {
@@ -228,7 +238,7 @@ export class GsppProvider implements SlpProvider {
 
     return new Promise((resolve, reject) => {
       const url = `${
-        GsppProvider.servers[this.network].dataSource
+        this.servers[this.network].dataSource
       }/${endpoint}`;
       fetch_retry(url, queryObject)
         .then((response: any) => {
@@ -247,7 +257,7 @@ export class GsppProvider implements SlpProvider {
 
   public SlpSocketEventSource(queryObject: any): EventSource {
     const url = `${
-      GsppProvider.servers[this.network].eventsource
+      this.servers[this.network].eventSource
     }/s/${B64QueryString(queryObject)}`;
     return new EventSource(url);
   }
