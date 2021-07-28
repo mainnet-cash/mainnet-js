@@ -34,10 +34,6 @@ export class OpReturnData {
   buffer: Buffer;
 
   private constructor(buffer: Buffer) {
-    if (buffer.length > 223) {
-      throw new Error("OP_RETURN data size is limited to 223 bytes");
-    }
-
     this.buffer = Buffer.from(buffer);
   }
 

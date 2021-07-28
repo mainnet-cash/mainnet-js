@@ -1,3 +1,4 @@
+import { base64ToBin } from "@bitauth/libauth";
 import { UnitEnum } from "../enum";
 import { OpReturnData, SendRequest, SendRequestArray } from "../wallet/model";
 
@@ -18,6 +19,8 @@ export function asSendRequestObject(
           resp.push(
             OpReturnData.from(r[1] as string | Buffer)
           );
+        } else if (r[0] === 'OP_RETURNB64') {
+          resp.push(OpReturnData.fromBuffer(Buffer.from(base64ToBin(r[1] as string))));
         } else {
           // ['cashaddr', 120, 'sats'],
           resp.push(
@@ -45,6 +48,12 @@ function convertToClass(object: SendRequest | OpReturnData) {
     return new SendRequest(object as SendRequest);
   } else if (object.hasOwnProperty("buffer")) {
     return OpReturnData.fromBuffer((object as OpReturnData).buffer);
+  }
+  // endcoding in REST
+  else if (object.hasOwnProperty("dataString")) {
+    return OpReturnData.fromString((object as any).dataString);
+  } else if (object.hasOwnProperty("dataBuffer")) {
+    return OpReturnData.fromBuffer(Buffer.from(base64ToBin((object as any).dataBuffer)));
   }
 
   throw new Error("Unsupported send object");
