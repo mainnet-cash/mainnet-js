@@ -29,6 +29,7 @@ import { WalletTypeEnum } from "./enum";
 import { SendRequestOptionsI, MnemonicI, WalletInfoI } from "./interface";
 
 import {
+  OpReturnData,
   SendRequest,
   SendRequestArray,
   SendResponse,
@@ -318,7 +319,11 @@ export class Wallet extends BaseWallet {
    *
    */
   public async send(
-    requests: SendRequest | SendRequest[] | SendRequestArray[],
+    requests:
+      | SendRequest
+      | OpReturnData
+      | Array<SendRequest | OpReturnData>
+      | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     let sendRequests = asSendRequestObject(requests);
@@ -919,7 +924,7 @@ export class Wallet extends BaseWallet {
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
   private async _processSendRequests(
-    sendRequests: SendRequest[],
+    sendRequests: Array<SendRequest | OpReturnData>,
     discardChange = false,
     options?: SendRequestOptionsI
   ) {

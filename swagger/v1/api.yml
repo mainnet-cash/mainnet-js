@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.3.33
+  version: 0.3.34
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -1778,30 +1778,68 @@ components:
           anyOf:
           - $ref: "#/components/schemas/SendRequestItem"
           - $ref: "#/components/schemas/SendRequestArray"
+          - $ref: "#/components/schemas/OpReturnData"
         options:
           $ref: "#/components/schemas/SendRequestOptions"
       example:
         walletId: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-        to:  
+        to:
           unit: "sat"
           cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
           value: 1000
       type: object
     SendRequestItem:
-      properties:
-        cashaddr:
-           type: string
-           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-        value:
-          type: number
-          example: 100
-      allOf:
-        - $ref: "#/components/schemas/UnitType"
-      required:
-        - cashaddr
-        - value
-        - unit
-      type: object
+      anyOf:
+        - description: Send request in array form ['cashadr', 100, 'sats']
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: number
+        - description: Send request in object notation
+          properties:
+            cashaddr:
+              type: string
+              example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+            value:
+              type: number
+              example: 100
+          allOf:
+            - $ref: "#/components/schemas/UnitType"
+          required:
+            - cashaddr
+            - value
+            - unit
+          type: object
+    OpReturnData:
+      anyOf:
+        - type: array
+          items:
+            anyOf:
+              - type: string
+              - type: string
+                format: byte
+          description: OP_RETURN message in format ['OP_RETURN', 'MEMO\x10LÖL😅'] or ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']
+
+        - oneOf:
+          - properties:
+              dataString:
+                type: string
+                example: "MEMO\x10LÖL😅"
+            required:
+              - dataString
+            type: object
+          - properties:
+              dataBuffer:
+                type: string
+                format: byte
+                example: TUVNTxBMw5ZM8J+YhQ==
+            required:
+              - dataBuffer
+            type: object
+          description:
+            OP_RETURN message in object notation, either in plain text or as a base64 encoded byte buffer
+            If buffer lacks the OP_RETURN and OP_PUSHDATA opcodes, they will be prepended.
     SendRequestOptions:
       type: object
       properties:
@@ -1876,7 +1914,9 @@ components:
     SendRequestArray:
       type: array
       items:
-        $ref: "#/components/schemas/SendRequestItem"
+        anyOf:
+          - $ref: "#/components/schemas/SendRequestItem"
+          - $ref: "#/components/schemas/OpReturnData"
     CashscriptReceiptArray:
       type: array
       items:

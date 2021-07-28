@@ -1,8 +1,9 @@
-
+import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 import { bchParam } from "../../../src/chain";
 
 var server = require("../")
 var request = require("supertest");
+const mainnet = require("mainnet-js");
 
 var app;
 
@@ -615,5 +616,68 @@ describe("Test Wallet Endpoints", () => {
       });
     expect(resp.statusCode).toBe(200);
     expect(resp.body.result).toBe(true);
+  });
+
+  /**
+   * send, OP_RETURN
+   */
+   it("Should send funds and OP_RETURN data", async () => {
+    const provider = mainnet.getNetworkProvider('regtest');
+    let result, transaction;
+    console.log(binToBase64(utf8ToBin("MEMO\x10LÖL😅")));
+    result = await request(app).post("/wallet/send").send({
+      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      to: [
+        {
+          dataString: "MEMO\x10LÖL😅"
+        },
+        {
+          dataBuffer: binToBase64(utf8ToBin("MEMO\x10LÖL😅"))
+        },
+        {
+          cashaddr: process.env.ADDRESS!,
+          unit: 'sat',
+          value: 546
+        }
+      ]
+    });
+
+    expect(result.statusCode).toBe(200);
+    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    console.log(JSON.stringify(transaction, null, 2));
+    expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
+    expect(transaction.vout[0].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+    expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
+    expect(transaction.vout[1].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+
+
+    result = await request(app).post("/wallet/send").send({
+      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      to: [
+        [process.env.ADDRESS!, 546, 'sats'],
+        ['OP_RETURNB64', binToBase64(Uint8Array.from([0x00, 0x01, 0x02]))],
+      ]
+    });
+
+    expect(result.statusCode).toBe(200);
+    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(6))]).toStrictEqual([0x00, 0x01, 0x02]);
+
+
+    result = await request(app).post("/wallet/send").send({
+      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+      to: [
+        ['OP_RETURN', ''],
+        ['OP_RETURNB64', binToBase64(Uint8Array.from([]))],
+      ]
+    });
+
+    expect(result.statusCode).toBe(200);
+    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
+    expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
+    expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
   });
 });

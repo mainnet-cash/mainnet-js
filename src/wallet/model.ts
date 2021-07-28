@@ -3,6 +3,7 @@ import { sanitizeUnit } from "../util/sanitizeUnit";
 import { UnitEnum } from "../enum";
 import { UtxoI } from "../interface";
 import { DELIMITER } from "../constant";
+import { utf8ToBin } from "@bitauth/libauth";
 
 // These are the minimal models used to provide types for the express server
 //
@@ -29,7 +30,61 @@ export class SendRequest {
   }
 }
 
-export type SendRequestArray = Array<string | number | UnitEnum>;
+export class OpReturnData {
+  buffer: Buffer;
+
+  private constructor(buffer: Buffer) {
+    this.buffer = Buffer.from(buffer);
+  }
+
+  /**
+   * from - Construct OP_RETURN data from arbitrary data type
+   *
+   * @param string   UTF-8 encoded string message to be converted to OP_RETURN data
+   *
+   * @returns class instance
+   */
+  public static from(data: string | Buffer) {
+    if (data instanceof Buffer) {
+      return this.fromBuffer(data as Buffer);
+    } else if (typeof data === "string") {
+      return this.fromString(data as string);
+    }
+
+    throw new Error(`Unsupported data type ${typeof data}`);
+  }
+
+  /**
+   * fromString - Accept data as a simple UTF-8 string message and append an OP_RETURN and PUSH_DATA1 opcodes to it
+   *
+   * @param string   UTF-8 encoded string message to be converted to OP_RETURN data
+   *
+   * @returns class instance
+   */
+  public static fromString(string: string) {
+    const length = new TextEncoder().encode(string).length;
+    return new this(
+      Buffer.from([...[0x6a, 0x4c, length], ...utf8ToBin(string)])
+    );
+  }
+
+  /**
+   * buffer - Accept OP_RETURN data as a binary buffer.
+   * If buffer lacks the OP_RETURN and OP_PUSHDATA opcodes, they will be prepended.
+   *
+   * @param buffer   Data buffer to be assigned to the OP_RETURN outpit
+   *
+   * @returns class instance
+   */
+  public static fromBuffer(buffer: Buffer) {
+    if (buffer[0] !== 0x6a) {
+      return new this(Buffer.from([...[0x6a, 0x4c, buffer.length], ...buffer]));
+    }
+    return new this(buffer);
+  }
+}
+
+export type SendRequestArray = Array<string | number | UnitEnum | Buffer>;
 
 export class UtxoItem {
   index: number;

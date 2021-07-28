@@ -1,12 +1,16 @@
-import { SendRequest } from "../wallet/model";
+import { OpReturnData, SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "./amountInSatoshi";
 
 // This function sums a list of send request objects
-export async function sumSendRequestAmounts(requests: SendRequest[]) {
+export async function sumSendRequestAmounts(
+  requests: Array<SendRequest | OpReturnData>
+) {
   if (requests) {
     const balanceArray: (BigInt | Error)[] = await Promise.all(
-      requests.map(async (r: SendRequest) => {
-        return BigInt(await amountInSatoshi(r.value, r.unit));
+      requests.map(async (r: SendRequest | OpReturnData) => {
+        if (r instanceof SendRequest) {
+          return BigInt(await amountInSatoshi(r.value, r.unit));
+        } else return BigInt(0);
       })
     );
     const balance = balanceArray.reduce(sumBalance, BigInt(0));
