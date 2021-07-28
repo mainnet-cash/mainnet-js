@@ -48,7 +48,7 @@ export class OpReturnData {
     if (data instanceof Buffer) {
       return this.fromBuffer(data as Buffer);
     } else if (typeof data === "string") {
-      return this.fromString(data as string)
+      return this.fromString(data as string);
     }
 
     throw new Error(`Unsupported data type ${typeof data}`);
