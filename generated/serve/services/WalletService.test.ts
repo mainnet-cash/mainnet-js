@@ -624,7 +624,6 @@ describe("Test Wallet Endpoints", () => {
    it("Should send funds and OP_RETURN data", async () => {
     const provider = mainnet.getNetworkProvider('regtest');
     let result, transaction;
-    console.log(binToBase64(utf8ToBin("MEMO\x10LÖL😅")));
     result = await request(app).post("/wallet/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       to: [
@@ -644,7 +643,6 @@ describe("Test Wallet Endpoints", () => {
 
     expect(result.statusCode).toBe(200);
     transaction = await provider.getRawTransactionObject(result.body.txId!);
-    console.log(JSON.stringify(transaction, null, 2));
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect(transaction.vout[0].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");

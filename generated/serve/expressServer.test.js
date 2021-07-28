@@ -58,7 +58,7 @@ describe("Test express server", () => {
         }
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       let resp;
       resp = await request("http://localhost:3000")
         .get("/ready");
