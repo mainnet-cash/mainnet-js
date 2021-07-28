@@ -1,6 +1,6 @@
 try {
-const app = require("./index")
-app.startServer()
+  const app = require("./index");
+  app.startServer();
 } catch (error) {
-  console.log(error);
+  console.warn(error);
 }
