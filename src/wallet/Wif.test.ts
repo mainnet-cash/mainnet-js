@@ -5,6 +5,9 @@ import { UnitEnum } from "../enum";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import { DUST_UTXO_THRESHOLD as DUST } from "../constant";
 import { delay } from "../util/delay";
+import { OpReturnData, SendResponse } from "./model";
+import { ElectrumRawTransaction } from "../network/interface";
+import { binToHex, binToUtf8, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 beforeAll(async () => {
   await initProviders();
@@ -662,5 +665,36 @@ describe(`Wallet extrema behavior regression testing`, () => {
     let w5 = await RegTestWallet.replaceNamed(`${name}_nonexistent`, seedId);
     let w6 = await RegTestWallet.named(`${name}_nonexistent`);
     expect(w6.toDbString()).toBe(w5.toDbString());
+  });
+
+  test("Send op_return data", async () => {
+    let wallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    let result: SendResponse, transaction: ElectrumRawTransaction;
+
+    result = await wallet.send([
+      OpReturnData.from("MEMO\x10LÖL😅"),
+      { cashaddr: wallet.cashaddr!, value: 546, unit: 'sats' }
+    ]);
+    transaction = await wallet.provider!.getRawTransactionObject(result.txId!) as ElectrumRawTransaction;
+    expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
+    expect(transaction.vout[0].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+
+    result = await wallet.send([
+      [wallet.cashaddr!, 546, 'sats'],
+      ['OP_RETURN', Buffer.from([0x00, 0x01, 0x02])],
+    ]);
+    transaction = await wallet.provider!.getRawTransactionObject(result.txId!) as ElectrumRawTransaction;
+    expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(6))]).toStrictEqual([0x00, 0x01, 0x02]);
+
+    result = await wallet.send([
+      OpReturnData.from(""),
+      OpReturnData.from(Buffer.from([]))
+    ]);
+    transaction = await wallet.provider!.getRawTransactionObject(result.txId!) as ElectrumRawTransaction;
+    expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
+    expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
+    expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
   });
 });

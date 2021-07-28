@@ -15,7 +15,7 @@ import {
 import { UtxoI } from "../interface";
 
 import { DUST_UTXO_THRESHOLD } from "../constant";
-import { SendRequest } from "../wallet/model";
+import { OpReturnData, SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
@@ -23,7 +23,7 @@ import { sumUtxoValue } from "../util/sumUtxoValue";
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
   inputs: UtxoI[],
-  outputs: SendRequest[],
+  outputs: Array<SendRequest | OpReturnData>,
   signingKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
@@ -74,7 +74,7 @@ export async function buildP2pkhNonHdTransaction(
       version: 2,
     });
     return result;
-  } catch (error) {
+  } catch (error: any) {
     throw Error(error.toString());
   }
 }
@@ -126,9 +126,16 @@ export function prepareInputs(
  *
  * @returns A promise to a list of unspent outputs
  */
-export async function prepareOutputs(outputs: SendRequest[]) {
+export async function prepareOutputs(
+  outputs: Array<SendRequest | OpReturnData>
+) {
   let lockedOutputs: any[] = [];
   for (const output of outputs) {
+    if (output instanceof OpReturnData) {
+      lockedOutputs.push(prepareOpReturnOutput(output));
+      continue;
+    }
+
     let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
     if (
       !outputLockingBytecode.hasOwnProperty("bytecode") ||
@@ -155,6 +162,18 @@ export async function prepareOutputs(outputs: SendRequest[]) {
     lockedOutputs.push(lockedOutput);
   }
   return lockedOutputs;
+}
+
+/**
+ * prepareOpReturnOutput - create an output for OP_RETURN data
+ *
+ * @returns A promise to a list of unspent outputs
+ */
+export function prepareOpReturnOutput(request: OpReturnData) {
+  return {
+    lockingBytecode: request.buffer,
+    satoshis: bigIntToBinUint64LEClamped(BigInt(0)),
+  };
 }
 
 /**
@@ -215,7 +234,7 @@ export async function getFeeAmount({
   slpOutputs,
 }: {
   utxos: UtxoI[];
-  sendRequests: SendRequest[];
+  sendRequests: Array<SendRequest | OpReturnData>;
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
   slpOutputs: any[];
@@ -243,7 +262,7 @@ export async function getFeeAmount({
 // Build encoded transaction
 export async function buildEncodedTransaction(
   fundingUtxos: UtxoI[],
-  sendRequests: SendRequest[],
+  sendRequests: Array<SendRequest | OpReturnData>,
   privateKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
