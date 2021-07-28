@@ -2,7 +2,6 @@
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
 const { base64ToBin } = require('@bitauth/libauth');
-const { OpReturnData } = require('../../../src/wallet/model');
 
 /**
 * Get total balance for wallet
