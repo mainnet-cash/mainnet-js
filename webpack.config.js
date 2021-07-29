@@ -34,8 +34,8 @@ const prodConfig = {
     new CompressionWebpackPlugin({
       algorithm: "gzip",
       test: /\.(js)$/,
-    })
-  ]
+    }),
+  ],
 };
 
 const nodeConfig = {
