@@ -53,6 +53,7 @@
     "@types/node": "^15.12.2",
     "@types/pg": "^8.6.0",
     "@types/pg-format": "^1.0.1",
+    "compression-webpack-plugin": "^8.0.1",
     "events": "^3.2.0",
     "fake-indexeddb": "^3.1.2",
     "jest": "^27.0.4",
