@@ -1265,3 +1265,5 @@ export class RegTestWatchWallet extends Wallet {
     return RegTestWatchUtil;
   }
 }
+
+export * from "../smartbch/SmartBchWallet"

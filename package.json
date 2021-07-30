@@ -36,7 +36,7 @@
     "cover:api": "nyc --silent --no-clean yarn run test:api",
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "docs": "npx typedoc",
-    "test": "node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --logHeapUsage --forceExit",
+    "test": "node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --logHeapUsage",
     "test:sign": "npx jest src/message/signed.test.ts --runInBand --detectOpenHandles --forceExit",
     "test:api": "yarn build && yarn api:serve:test",
     "test:browser": "yarn build && npx jest --config jest.config.browser.js --detectOpenHandles",
@@ -111,5 +111,8 @@
     "bch",
     "bitcoin cash"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "dependencies": {
+    "ethers": "^5.4.2"
+  }
 }

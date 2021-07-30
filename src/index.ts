@@ -11,3 +11,4 @@ export * from "./util/bchaddr";
 export { Network } from "./interface";
 export * from "./slp";
 export * from "./webhook/index";
+export * from "./smartbch/SmartBchWallet";
