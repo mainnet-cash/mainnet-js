@@ -26,7 +26,13 @@ import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
-import { SendRequestOptionsI, MnemonicI, WalletInfoI } from "./interface";
+import {
+  SendRequestOptionsI,
+  MnemonicI,
+  WalletInfoI,
+  WaitForTransactionOptions,
+  WaitForTransactionResponse,
+} from "./interface";
 
 import {
   OpReturnData,
@@ -699,10 +705,57 @@ export class Wallet extends BaseWallet {
 
   // waits for next transaction, program execution is halted
   public async waitForTransaction(
-    returnTransactionInfo: boolean = true
-  ): Promise<ElectrumRawTransaction | undefined> {
+    options: WaitForTransactionOptions = {
+      getTransactionInfo: true,
+      getBalance: false,
+      txHash: undefined,
+    }
+  ): Promise<WaitForTransactionResponse> {
     return new Promise(async (resolve) => {
-      const waitForTransactionCallback = async (data) => {
+      let txHashSeen = false;
+
+      const makeResponse = async () => {
+        const response = <WaitForTransactionResponse>{};
+        const promises: any[] = [];
+
+        if (options.getBalance === true) {
+          promises.push(this.getBalance());
+        }
+
+        if (options.getTransactionInfo === true) {
+          promises.push(this.getLastTransaction());
+        }
+
+        const result = await Promise.all(promises);
+        response.balance = result[0];
+        response.transactionInfo = result[1];
+
+        return response;
+      };
+
+      // waiting for a specific transaction to propagate
+      if (options.txHash) {
+        const waitForTransactionCallback = async (data) => {
+          if (data && data[0] === options.txHash!) {
+            txHashSeen = true;
+            this.provider!.unsubscribeFromTransaction(
+              options.txHash!,
+              waitForTransactionCallback
+            );
+
+            resolve(await makeResponse());
+          }
+        };
+
+        this.provider!.subscribeToTransaction(
+          options.txHash,
+          waitForTransactionCallback
+        );
+        return;
+      }
+
+      // waiting for any address transaction
+      const watchAddressCallback = async (data) => {
         if (data instanceof Array) {
           let addr = data[0] as string;
           if (addr !== this.cashaddr!) {
@@ -711,21 +764,14 @@ export class Wallet extends BaseWallet {
 
           this.provider!.unsubscribeFromAddress(
             this.cashaddr!,
-            waitForTransactionCallback
+            watchAddressCallback
           );
 
-          let lastTx;
-          if (returnTransactionInfo) {
-            lastTx = await this.getLastTransaction();
-          }
-
-          resolve(lastTx);
+          resolve(await makeResponse());
         }
       };
-      this.provider!.subscribeToAddress(
-        this.cashaddr!,
-        waitForTransactionCallback
-      );
+
+      this.provider!.subscribeToAddress(this.cashaddr!, watchAddressCallback);
     });
   }
 
