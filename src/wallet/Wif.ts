@@ -711,6 +711,10 @@ export class Wallet extends BaseWallet {
       txHash: undefined,
     }
   ): Promise<WaitForTransactionResponse> {
+    if (options.getTransactionInfo === undefined) {
+      options.getTransactionInfo = true;
+    }
+
     return new Promise(async (resolve) => {
       let txHashSeen = false;
 
