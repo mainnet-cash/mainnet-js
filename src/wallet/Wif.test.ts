@@ -334,7 +334,10 @@ describe(`Wallet subscriptions`, () => {
       0
     );
 
-    const response = await bobWallet.waitForTransaction({ getTransactionInfo: true, getBalance: true });
+    const response = await bobWallet.waitForTransaction({
+      getTransactionInfo: true,
+      getBalance: true,
+    });
     expect(response.balance!.sat).toBeGreaterThan(0);
     expect(response.transactionInfo!.hash).not.toBe("");
 
