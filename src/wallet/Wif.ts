@@ -716,14 +716,14 @@ export class Wallet extends BaseWallet {
 
       const makeResponse = async () => {
         const response = <WaitForTransactionResponse>{};
-        const promises: any[] = [];
+        const promises: any[] = [undefined, undefined];
 
         if (options.getBalance === true) {
-          promises.push(this.getBalance());
+          promises[0] = this.getBalance();
         }
 
         if (options.getTransactionInfo === true) {
-          promises.push(this.getLastTransaction());
+          promises[1] = this.getLastTransaction();
         }
 
         const result = await Promise.all(promises);
