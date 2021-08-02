@@ -334,8 +334,12 @@ describe(`Wallet subscriptions`, () => {
       0
     );
 
-    let tx = await bobWallet.waitForTransaction();
-    expect(tx!.hash).not.toBe("");
+    const response = await bobWallet.waitForTransaction({
+      getTransactionInfo: true,
+      getBalance: true,
+    });
+    expect(response.balance!.sat).toBeGreaterThan(0);
+    expect(response.transactionInfo!.hash).not.toBe("");
 
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
@@ -459,8 +463,8 @@ describe(`Wallet subscriptions`, () => {
         ]),
       600
     );
-    let bobTx = await bob.waitForTransaction();
-    expect(bobTx!.version).toBe(2);
+    let bobResponse = await bob.waitForTransaction();
+    expect(bobResponse.transactionInfo!.version).toBe(2);
     setTimeout(
       () =>
         alice.send([
@@ -472,8 +476,8 @@ describe(`Wallet subscriptions`, () => {
         ]),
       600
     );
-    bobTx = await bob.waitForTransaction();
-    expect(bobTx!.version).toBe(2);
+    bobResponse = await bob.waitForTransaction();
+    expect(bobResponse.transactionInfo!.version).toBe(2);
     setTimeout(
       () =>
         alice.send([
@@ -485,8 +489,8 @@ describe(`Wallet subscriptions`, () => {
         ]),
       600
     );
-    bobTx = await bob.waitForTransaction();
-    expect(bobTx!.version).toBe(2);
+    bobResponse = await bob.waitForTransaction();
+    expect(bobResponse.transactionInfo!.version).toBe(2);
     expect(await bob.getBalance("sat")).toBe(4000);
   });
 

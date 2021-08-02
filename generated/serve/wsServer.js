@@ -31,8 +31,9 @@ makeWsServer = (server) => {
 
         } else if (data.method === "waitForTransaction") {
           const addr = data.data.cashaddr;
+          const options = data.data.options;
           const w = await mainnet.Wallet.fromCashaddr(addr);
-          const rawTx = await w.waitForTransaction();
+          const rawTx = await w.waitForTransaction(options);
           socket.send(JSON.stringify(rawTx));
 
         } else if (data.method === "waitForBlock") {
@@ -66,7 +67,6 @@ makeWsServer = (server) => {
           const tokenId = data.data.tokenId;
           const rawTx = await w.slp.waitForTransaction(tokenId);
           socket.send(JSON.stringify(rawTx));
-
         }
 
         // error

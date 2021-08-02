@@ -1,6 +1,8 @@
 import { WalletTypeEnum } from "./enum";
 import { NetworkEnum } from "../enum";
 import { UtxoItem } from "./model";
+import { ElectrumRawTransaction } from "../network/interface";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 
 export interface WalletRequestI {
   name?: string;
@@ -59,4 +61,15 @@ export interface WalletI {
    * @returns returns a serialized representation of the wallet
    */
   toString(): string;
+}
+
+export interface WaitForTransactionOptions {
+  getTransactionInfo?: boolean;
+  getBalance?: boolean;
+  txHash?: string;
+}
+
+export interface WaitForTransactionResponse {
+  transactionInfo?: ElectrumRawTransaction | any;
+  balance?: BalanceResponse;
 }
