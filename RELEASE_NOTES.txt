@@ -1,6 +1,14 @@
 Newest changes
 --------------
 
+0.3.38
+
+- Revert library compression compression
+
+0.3.37
+
+- Support library compression in production builds
+
 0.3.36
 
 - Add options to query balance and transaction info from waitForTransaction call
