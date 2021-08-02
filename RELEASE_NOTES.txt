@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.38
+
+- Revert library compression compression
+
 0.3.37
 
 - Support library compression in production builds
