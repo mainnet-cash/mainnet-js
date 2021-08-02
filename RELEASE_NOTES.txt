@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.36
+
+- Add options to query balance and transaction info from waitForTransaction call
+
 0.3.35
 
 - Fix wrong import in wallet service
