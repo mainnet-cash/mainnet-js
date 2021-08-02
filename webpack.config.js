@@ -1,6 +1,7 @@
 const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
 const NpmDtsPlugin = require("npm-dts-webpack-plugin");
+const CompressionWebpackPlugin = require("compression-webpack-plugin");
 
 const baseConfig = {
   entry: "./src/index.ts",
@@ -22,6 +23,12 @@ const baseConfig = {
     mangleWasmImports: true,
     usedExports: true,
   },
+  plugins: [
+    new CompressionWebpackPlugin({
+      algorithm: "gzip",
+      test: /\.(js)$/,
+    }),
+  ],
 };
 
 const prodConfig = {
