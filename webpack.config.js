@@ -27,8 +27,8 @@ const baseConfig = {
     new CompressionWebpackPlugin({
       algorithm: "gzip",
       test: /\.(js)$/,
-    })
-  ]
+    }),
+  ],
 };
 
 const prodConfig = {
