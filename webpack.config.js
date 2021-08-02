@@ -23,19 +23,19 @@ const baseConfig = {
     mangleWasmImports: true,
     usedExports: true,
   },
-};
-
-const prodConfig = {
-  mode: "production",
-  optimization: {
-    minimize: true,
-  },
   plugins: [
     new CompressionWebpackPlugin({
       algorithm: "gzip",
       test: /\.(js)$/,
     })
   ]
+};
+
+const prodConfig = {
+  mode: "production",
+  optimization: {
+    minimize: true,
+  }
 };
 
 const nodeConfig = {
