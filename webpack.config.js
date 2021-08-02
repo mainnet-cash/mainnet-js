@@ -35,7 +35,7 @@ const prodConfig = {
   mode: "production",
   optimization: {
     minimize: true,
-  }
+  },
 };
 
 const nodeConfig = {
