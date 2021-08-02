@@ -82,8 +82,8 @@ describe("Test websocket server methods", () => {
 
     await request(app)
       .ws('/wallet')
-      .sendJson({ method: "waitForTransaction", data: { cashaddr: alice }})
-      .expectJson((actual) => (actual !== undefined && actual.hash !== undefined))
+      .sendJson({ method: "waitForTransaction", data: { cashaddr: alice, options: undefined }})
+      .expectJson((actual) => (actual !== undefined && actual.transactionInfo.hash !== undefined))
       .close()
       .expectClosed();
   });

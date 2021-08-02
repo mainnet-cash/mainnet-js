@@ -1,6 +1,81 @@
 var request = require("supertest");
+const { spawn } = require("child_process");
+var readline = require('readline');
 
 describe("Test express server", () => {
+  it("Should spawn a server and get a ready response", async () => {
+    const proc = spawn(`node`, ['serve.js'], {
+      shell: false,
+      cwd: process.cwd(),
+    });
+
+    try {
+      let stack = "";
+      readline.createInterface({
+        input: proc.stdout,
+        terminal: false
+      }).on('line', line => {
+        stack += line + "\n";
+        if (line.indexOf('MODULE_NOT_FOUND') >= 0) {
+          throw new Error("Failed to start up server\n" + stack);
+        }
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      let resp;
+      resp = await request("http://localhost:3000")
+        .get("/ready");
+      expect(resp.body).toStrictEqual({status:"okay"});
+
+      resp = await request("http://localhost:3000")
+        .post("/util/convert").send({
+          "value": 1,
+          "from": "bch",
+          "to": "bch"
+        });
+      expect(resp.text).toStrictEqual("1");
+    } finally {
+      process.kill(proc.pid);
+    }
+  });
+
+  it("Should spawn a cluster and get a ready response", async () => {
+    const proc = spawn(`node`, ['cluster.js'], {
+      shell: false,
+      cwd: process.cwd(),
+      env: { ...process.env, WORKERS: '2' }
+    });
+
+    try {
+      let stack = "";
+      readline.createInterface({
+        input: proc.stdout,
+        terminal: false
+      }).on('line', line => {
+        stack += line + "\n";
+        if (line.indexOf('MODULE_NOT_FOUND') >= 0) {
+          throw new Error("Failed to start up cluster\n" + stack);
+        }
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      let resp;
+      resp = await request("http://localhost:3000")
+        .get("/ready");
+      expect(resp.body).toStrictEqual({status:"okay"});
+
+      resp = await request("http://localhost:3000")
+        .post("/util/convert").send({
+          "value": 1,
+          "from": "bch",
+          "to": "bch"
+        });
+      expect(resp.text).toStrictEqual("1");
+    } finally {
+      process.kill(proc.pid);
+    }
+  });
+
   it("Should return 401 and require authorization header if API_KEY env var is set", async () => {
     process.env['API_KEY'] = "test";
     const config = require("./config");

@@ -1,15 +1,91 @@
 Newest changes
 --------------
 
+0.3.36
+
+- Add options to query balance and transaction info from waitForTransaction call
+
+0.3.35
+
+- Fix wrong import in wallet service
+
+0.3.34
+
+- Add OP_RETURN support in send() method
+
+0.3.33
+
+- Add SLP provider and endpoints configuration
+
+0.3.32
+
+- Fix SLPDB bug counting the spent outputs in child geneses
+
 0.3.31
 
-- Fix bug with contract fee estimation
-- Fix rest nomenclature of function call
-- 
+- Fixes bug with contract fee estimation
+- Add contract/escrow/info and EscrowContract.info() interfaces
+- Fix inconsistencies in contracts between docs, swagger and API
+
+0.3.30
+
+- Fix publishing workflow
+
+0.3.29
+
+- Decode transactions using libauth instead of fulcrum
+- Allows for debugging transactions not yet existing on blockchain
+
+0.3.28
+
+- Address rest server hanging upon cluster start
+
+0.3.26
+
+- Fix getting exchange rates upon library load
+
+0.3.25
+
+- Rework electrum cash connection management
+- New speed-up options for sending funds and transaction propagation
+- Other performance improvements
+
+0.3.24
+
+- Add explorerUrl to sendResponse and slpSendResponse in node and rest #118
 
 0.3.23
 
-- Add Contract.info() and /contract/info for parsing contractIds 
+- Add Contract.info() and /contract/info for parsing contractIds
+
+0.3.22
+
+- Add static accessors for wallet util functions
+
+0.3.21
+
+- Add decodeTransaction method, tests, rest api and api tests
+- Method is based on fulcrums `blockchain.transaction.get` and transaction must exist on the blockchain
+
+0.3.20
+
+- Add API_KEY environment variable to REST server
+
+0.3.19
+
+- Fix mainnet-doc publishing
+
+0.3.18
+
+- New wallet methods namedExists and replaceNamed
+
+0.3.16
+
+- Update package dependencies
+
+0.3.15
+
+- Removes support for SharedArrayBuffer types
 
 0.3.14
 

@@ -97,6 +97,28 @@ export default interface NetworkProvider {
   ): Promise<void>;
 
   /**
+   * Subscribe to a transaction in order to receive future notifications if its confirmation status changes.
+   * @param txHash The transaction hash as a hexadecimal string.
+   * @throws {Error} If the subscription failed.
+   * @returns nothing.
+   */
+  subscribeToTransaction(
+    txHash: string,
+    callback: (data: any) => void
+  ): Promise<void>;
+
+  /**
+   * Unsubscribe from a transaction, preventing future notifications if its confirmation status changes.
+   * @param txHash The transaction hash as a hexadecimal string.
+   * @throws {Error} If the subscription failed.
+   * @returns nothing.
+   */
+  unsubscribeFromTransaction(
+    txHash: string,
+    callback: (data: any) => void
+  ): Promise<void>;
+
+  /**
    * Function to wait for connection to be ready
    * @param timeout number of milliseconds to wait before throwing error
    * @returns true when ready, or an error
