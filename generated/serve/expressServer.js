@@ -37,6 +37,12 @@ class ExpressServer {
     this.app.use(cors());
     const latest = fs.readdirSync(__dirname + '/node_modules/mainnet-js/dist/').filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
     this.app.use('/scripts/mainnet.js', express.static(__dirname + `/node_modules/mainnet-js/dist/${latest}`));
+    this.app.use('/scripts/mainnet.js.gz', express.static(__dirname + `/node_modules/mainnet-js/dist/${latest}.gz`, {
+      setHeaders: (res, path) => {
+        res.set('Content-Encoding', 'gzip');
+        res.set('Content-Type', 'text/javascript');
+      }
+    }));
     this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
