@@ -435,3 +435,12 @@ export class SmartBchWallet extends BaseWallet {
     super(name, CashAddressNetworkPrefix.testnet);
   }
 }
+
+/**
+ * Class to manage a regtest wallet.
+ */
+ export class RegTestSmartBchWallet extends SmartBchWallet {
+  constructor(name = "") {
+    super(name, CashAddressNetworkPrefix.regtest);
+  }
+}

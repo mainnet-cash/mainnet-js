@@ -1,25 +1,25 @@
 // import { ethers, utils } from "ethers";
-import { SmartBchWallet, TestNetSmartBchWallet } from "../wallet/Wif";
+import { RegTestSmartBchWallet, SmartBchWallet, TestNetSmartBchWallet } from "../wallet/Wif";
 
 describe(`Test Ethereum functions`, () => {
   test("Query ethernet with class", async () => {
-    // const wallet = await TestNetSmartBchWallet.fromWIF("0x22115f8d163cbc95cd8d4fc63de7198f42c4057feca5d4e8726ae2f42cca939d");
+    const wallet = await RegTestSmartBchWallet.fromWIF("89b83ea27318a8c46c229f5b85c34975115ebc3b62e5e662e3cb6f96b77c8160");
 
     // // const wallet = new ethers.Wallet("0x22115f8d163cbc95cd8d4fc63de7198f42c4057feca5d4e8726ae2f42cca939d").connect(provider);
-    // const balance = await wallet.getBalance();
-    // console.log(balance);
+    const balance = await wallet.getBalance();
+    console.log(balance);
 
     // const result = await wallet.send({ cashaddr: "0xA2263c06da00Ea7A7fBD5407ff8B8613F33369E6", value: 0.1, unit: 'bch' });
     // console.log(result);
 
-    const seedWallet = await SmartBchWallet.fromSeed("indoor dish desk flag debris potato excuse depart ticket judge file exit");
-    console.log(seedWallet.toString());
+    // const seedWallet = await SmartBchWallet.fromSeed("indoor dish desk flag debris potato excuse depart ticket judge file exit");
+    // console.log(seedWallet.toString());
 
     // const namedWallet = await SmartBchWallet.named("kek");
     // console.log(namedWallet.toString());
 
-    const watchWallet = await SmartBchWallet.watchOnly("0x682D38CF37A4fAa1A2Db51C2cca626A7Cc801ECD");
-    console.log(await watchWallet.erc20.getBalance("0xdac17f958d2ee523a2206206994597c13d831ec7"));
+    // const watchWallet = await SmartBchWallet.watchOnly("0x682D38CF37A4fAa1A2Db51C2cca626A7Cc801ECD");
+    // console.log(await watchWallet.erc20.getBalance("0xdac17f958d2ee523a2206206994597c13d831ec7"));
   });
 
 

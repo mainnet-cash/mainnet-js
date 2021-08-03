@@ -1,4 +1,6 @@
-FROM --platform=$BUILDPLATFORM node:14-buster-slim
+FROM node:14-buster-slim
+
+ARG TARGETPLATFORM
 
 # Get g++ for compiling, wget to download Boost, git to clone source code repo,
 # and make to automate program compilation with Makefile provided
@@ -55,9 +57,9 @@ RUN cd /home \
   && make -j1 \
   && echo 1
 
-ARG BUILDPLATFORM
+ARG TARGETPLATFORM
 
-RUN export GOPLATFORM=$(echo ${BUILDPLATFORM} | tr "/" "-") && echo ${GOPLATFORM} \
+RUN export GOPLATFORM=$(echo ${TARGETPLATFORM} | tr "/" "-") && echo ${GOPLATFORM} \
   && wget -q https://golang.org/dl/go1.13.8.${GOPLATFORM}.tar.gz \
   && rm -rf /usr/local/go && tar -C /usr/local -xzf go1.13.8.${GOPLATFORM}.tar.gz \
   && tar -C /usr/local -xzf go1.13.8.${GOPLATFORM}.tar.gz
