@@ -1,16 +1,8 @@
 version: "3.7"
 
 services:
-  # smartbch:
-  #   image: zquestz/smartbch
-  #   command: start
-  #   ports:
-  #     - "8545:8545"
-  #   restart: always
-  #   volumes:
-  #     - smartbch_data:/root/.smartbchd
-  smartbch:
-    image: smartbch
+  smartbch-regtest:
+    image: mainnet/smartbch
     entrypoint: init_regtest.sh
     ports:
       - "8545:8545"
