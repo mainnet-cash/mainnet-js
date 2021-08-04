@@ -1,9 +1,11 @@
 #!/bin/sh
 
 if [ ! -f regtest.init ]; then
+  echo "init_regtest.sh: Initializing local single-node testnet"
   touch regtest.init
-  if [ ! -f test-keys.txt ]; then
-    smartbchd gen-test-keys -n 10 > test-keys.txt
+  if [ ! -s test-keys.txt ]; then
+    echo "init_regtest.sh: Generating private keys..."
+    smartbchd gen-test-keys -n 10 >> test-keys.txt
   fi;
 
   rm -rf /root/.smartbchd/*
