@@ -1,13 +1,21 @@
 // import { ethers, utils } from "ethers";
-import { RegTestSmartBchWallet, SmartBchWallet, TestNetSmartBchWallet } from "../wallet/Wif";
+// import { Wallet } from "ethers";
+import { RegTestSmartBchWallet, SmartBchWallet, TestNetSmartBchWallet, Wallet } from "../wallet/Wif";
 
 describe(`Test Ethereum functions`, () => {
   test("Query ethernet with class", async () => {
-    const wallet = await RegTestSmartBchWallet.fromWIF("89b83ea27318a8c46c229f5b85c34975115ebc3b62e5e662e3cb6f96b77c8160");
+    const wallet = await new Wallet().generate();
+    console.log(wallet.privateKey);
+    console.log(wallet);
+    console.log(JSON.stringify(wallet, null, 2));
 
-    // // const wallet = new ethers.Wallet("0x22115f8d163cbc95cd8d4fc63de7198f42c4057feca5d4e8726ae2f42cca939d").connect(provider);
-    const balance = await wallet.getBalance();
-    console.log(balance);
+    const b = await Wallet.watchOnly("adsf")
+
+    // const wallet = await RegTestSmartBchWallet.fromWIF("89b83ea27318a8c46c229f5b85c34975115ebc3b62e5e662e3cb6f96b77c8160");
+
+    // // // const wallet = new ethers.Wallet("0x22115f8d163cbc95cd8d4fc63de7198f42c4057feca5d4e8726ae2f42cca939d").connect(provider);
+    // const balance = await wallet.getBalance();
+    // console.log(balance);
 
     // const result = await wallet.send({ cashaddr: "0xA2263c06da00Ea7A7fBD5407ff8B8613F33369E6", value: 0.1, unit: 'bch' });
     // console.log(result);

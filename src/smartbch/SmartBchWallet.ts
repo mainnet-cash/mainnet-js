@@ -13,36 +13,16 @@ import { BaseWallet } from "../wallet/Base";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { Erc20 } from "./Erc20";
 
-function getNetworkProvider(
-  network: Network = Network.MAINNET,
-  _servers?: string[] | string,
-  // manualConnectionManagement?: boolean,
-  // options?: ElectrumClusterParams
-): any {
-  switch (network) {
-    case Network.MAINNET: {
-      return new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
-    }
-    case Network.TESTNET: {
-      return new ethers.providers.JsonRpcProvider("http://35.220.203.194:8545", { name: "smartbch", chainId: 10001 });
-    }
-    default: {
-      return new ethers.providers.JsonRpcProvider("http://localhost:8545");
-    }
-  }
-}
-
 export class SmartBchWallet extends BaseWallet {
-  provider?: ethers.providers.BaseProvider | any;
+  provider?: ethers.providers.BaseProvider;
   ethersWallet?: ethers.Wallet;
   privateKey?: string;
   privateKeyWif?: string;
-  walletType?: WalletTypeEnum;
   publicKey?: string;
   cashaddr?: string;
   address?: string;
   mnemonic?: string;
-  derivationPath?: string = "m/44'/60'/0'/0/0";
+  derivationPath: string = "m/44'/60'/0'/0/0";
   _erc20?: Erc20;
 
   /**
@@ -62,20 +42,34 @@ export class SmartBchWallet extends BaseWallet {
       case CashAddressNetworkPrefix.regtest:
         this.network = NetworkEnum.Regtest;
         this.networkType = NetworkType.Regtest;
-        this.provider = getNetworkProvider("regtest");
+        this.provider = this.getNetworkProvider("regtest");
         break;
       case CashAddressNetworkPrefix.testnet:
         this.network = NetworkEnum.Testnet;
         this.networkType = NetworkType.Testnet;
-        this.provider = getNetworkProvider("testnet");
+        this.provider = this.getNetworkProvider("testnet");
         break;
       default:
         this.network = NetworkEnum.Mainnet;
         this.networkType = NetworkType.Mainnet;
-        this.provider = getNetworkProvider();
+        this.provider = this.getNetworkProvider();
     }
 
     this.isTestnet = this.networkType === "mainnet" ? false : true;
+  }
+
+  public getNetworkProvider(network: Network = Network.MAINNET): ethers.providers.BaseProvider {
+    switch (network) {
+      case Network.MAINNET: {
+        return new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
+      }
+      case Network.TESTNET: {
+        return new ethers.providers.JsonRpcProvider("http://35.220.203.194:8545", { name: "smartbch", chainId: 10001 });
+      }
+      default: {
+        return new ethers.providers.JsonRpcProvider("http://localhost:8545");
+      }
+    }
   }
 
   // interface to slp functions. see Erc20.ts
@@ -128,7 +122,7 @@ export class SmartBchWallet extends BaseWallet {
   }
 
   // Initialize a watch only wallet from a cash addr
-  public async watchOnly(address: string) {
+  public async watchOnly(address: string): Promise<this> {
     this.cashaddr = address;
     this.address = address;
 

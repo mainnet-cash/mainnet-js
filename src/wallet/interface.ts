@@ -59,4 +59,6 @@ export interface WalletI {
    * @returns returns a serialized representation of the wallet
    */
   toString(): string;
+
+  getMaxAmountToSend(params?: any): Promise<any>;
 }

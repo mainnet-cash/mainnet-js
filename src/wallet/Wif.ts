@@ -85,6 +85,7 @@ import {
   WatchUtil,
   WifUtil,
 } from "./Util";
+import { getNetworkProvider } from "../network";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -97,13 +98,11 @@ type WatchBalanceCancel = () => void;
 export class Wallet extends BaseWallet {
   cashaddr?: string;
   derivationPath: string = "m/44'/0'/0'/0/0";
-  mnemonic?: string;
   privateKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
   privateKeyWif?: string;
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
-  walletType?: WalletTypeEnum;
   _slp?: Slp;
   _slpAware: boolean = false;
   _util?: Util;
@@ -113,9 +112,11 @@ export class Wallet extends BaseWallet {
     networkType = NetworkType.Mainnet,
     walletType = WalletTypeEnum.Seed
   ) {
-    super(name, networkType);
-    this.name = name;
-    this.walletType = walletType;
+    super(name, networkType, walletType);
+  }
+
+  public getNetworkProvider(network: Network = Network.MAINNET) {
+    return getNetworkProvider(network);
   }
 
   // interface to slp functions. see Slp.ts
@@ -227,7 +228,7 @@ export class Wallet extends BaseWallet {
     return this;
   }
   // Initialize a watch only wallet from a cash addr
-  public async watchOnly(address: string) {
+  public async watchOnly(address: string): Promise<this> {
     let addressComponents = address.split(":");
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
@@ -489,19 +490,19 @@ export class Wallet extends BaseWallet {
     return new this().fromWIF(wif);
   }
 
-  /**
-   * watchOnly - create a watch-only wallet
-   *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
-   *
-   * @param address   cashaddress or slpaddress of a wallet
-   *
-   * @returns instantiated wallet
-   */
-  public static watchOnly(address: string): Promise<Wallet> {
-    return new this().watchOnly(address);
-  }
+  // /**
+  //  * watchOnly - create a watch-only wallet
+  //  *
+  //  * such kind of wallet does not have a private key and is unable to spend any funds
+  //  * however it still allows to use many utility functions such as getting and watching balance, etc.
+  //  *
+  //  * @param address   cashaddress or slpaddress of a wallet
+  //  *
+  //  * @returns instantiated wallet
+  //  */
+  // public static watchOnly(address: string): Promise<Wallet> {
+  //   return new this().watchOnly(address);
+  // }
 
   /**
    * fromCashaddr - create a watch-only wallet in the network derived from the address
@@ -801,12 +802,12 @@ export class Wallet extends BaseWallet {
     }
   }
 
-  public async getMaxAmountToSend({
-    outputCount = 1,
-    options,
-  }: {
+  public async getMaxAmountToSend(params: {
     outputCount?: number;
     options?: SendRequestOptionsI;
+  } = {
+    outputCount: 1,
+    options: {},
   }): Promise<BalanceResponse> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
@@ -815,14 +816,14 @@ export class Wallet extends BaseWallet {
       throw Error("attempted to send without a cashaddr");
     }
 
-    if (options && options.slpAware) {
+    if (params.options && params.options.slpAware) {
       this._slpAware = true;
     }
 
     // get inputs
     let utxos: UtxoI[];
-    if (options && options.utxoIds) {
-      utxos = options.utxoIds.map((utxoId) =>
+    if (params.options && params.options.utxoIds) {
+      utxos = params.options.utxoIds.map((utxoId) =>
         UtxoItem.fromId(utxoId).asElectrum()
       );
     } else {
@@ -841,7 +842,7 @@ export class Wallet extends BaseWallet {
       value: 100,
       unit: "sat",
     });
-    const sendRequests = Array(outputCount)
+    const sendRequests = Array(params.outputCount)
       .fill(0)
       .map(() => sendRequest);
 

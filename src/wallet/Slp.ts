@@ -886,7 +886,7 @@ export class Slp {
    * @returns instantiated wallet
    */
   public static async watchOnly(address: string): Promise<Wallet> {
-    const wallet = await this.walletType.watchOnly(toCashAddress(address));
+    const wallet = await this.walletType.watchOnly(toCashAddress(address)) as Wallet;
     wallet.derivationPath = "m/44'/245'/0'/0/0";
     wallet._slpAware = true;
     return wallet;

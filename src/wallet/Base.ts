@@ -1,25 +1,33 @@
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-import { getNetworkProvider } from "../network/default";
-import { default as NetworkProvider } from "../network/NetworkProvider";
 import { getStorageProvider } from "../db/util";
-import { WalletI } from "./interface";
+import { MnemonicI, WalletI } from "./interface";
 import { SignedMessage, SignedMessageI } from "../message";
 import { NetworkEnum, NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
+import { qrAddress } from "../qr/Qr";
+import { ImageI } from "../qr/interface";
+import { WalletTypeEnum } from "./enum";
+import { Network } from "../interface";
 
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
  */
 export class BaseWallet implements WalletI {
-  provider?: NetworkProvider;
+  provider?: any;
+  derivationPath: string = "m/44'/0'/0'/0/0";
+  mnemonic?: string;
+  address?: string;
+  privateKey?: any;
+  publicKey?: any;
   storage?: StorageProvider;
-  isTestnet?: boolean;
+  isTestnet: boolean;
   name: string;
   networkPrefix: CashAddressNetworkPrefix;
   networkType: NetworkType;
   network: NetworkEnum;
+  walletType: WalletTypeEnum;
 
   static signedMessage: SignedMessageI = new SignedMessage();
 
@@ -30,27 +38,34 @@ export class BaseWallet implements WalletI {
    *
    * @throws {Error} if called on BaseWallet
    */
-  constructor(name = "", networkType = NetworkType.Mainnet) {
+  constructor(name = "", networkType = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed  ) {
     this.name = name;
     this.networkType = networkType;
+    this.walletType = walletType;
+
     switch (this.networkType) {
       case NetworkType.Regtest:
         this.network = NetworkEnum.Regtest;
         this.networkPrefix = CashAddressNetworkPrefix.regtest;
-        this.provider = getNetworkProvider("regtest");
+        this.provider = this.getNetworkProvider("regtest");
         break;
       case NetworkType.Testnet:
         this.network = NetworkEnum.Testnet;
         this.networkPrefix = CashAddressNetworkPrefix.testnet;
-        this.provider = getNetworkProvider("testnet");
+        this.provider = this.getNetworkProvider("testnet");
         break;
       default:
         this.network = NetworkEnum.Mainnet;
         this.networkPrefix = CashAddressNetworkPrefix.mainnet;
-        this.provider = getNetworkProvider();
+        this.provider = this.getNetworkProvider();
     }
 
     this.isTestnet = this.networkType === NetworkType.Mainnet ? false : true;
+  }
+
+  // @ts-ignore
+  public getNetworkProvider(network: Network = Network.MAINNET) {
+    throw Error("getNetworkProvider called on base wallet");
   }
 
   /**
@@ -202,7 +217,25 @@ export class BaseWallet implements WalletI {
    * @throws {Error} if called on BaseWallet
    */
   public toDbString(): string {
-    throw Error("toDbString called on base wallet, which is not serializable");
+    if (this.mnemonic) {
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    }
+
+    throw Error("toDbString unsupported wallet type");
+  }
+
+  // Returns the serialized wallet as a string
+  // If storing in a database, set asNamed to false to store secrets
+  // In all other cases, the a named wallet is deserialized from the database
+  //  by the name key
+  public toString() {
+    if (this.name) {
+      return `named:${this.network}:${this.name}`;
+    } else if (this.mnemonic) {
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    }
+
+    throw Error("toDbString unsupported wallet type");
   }
 
   /**
@@ -218,6 +251,165 @@ export class BaseWallet implements WalletI {
       return this.generate();
     }
   };
+
+  // Initialize wallet from a mnemonic phrase
+  // @ts-ignore
+  public async fromSeed(mnemonic: string, derivationPath?: string): Promise<this> {
+    throw Error("fromSeed called on base wallet");
+  }
+
+  // @ts-ignore
+  public async watchOnly(address: string): Promise<this> {
+    throw Error("fromSeed called on base wallet");
+  }
+
+  // @ts-ignore
+  public async send(requests: any, options?: any): Promise<any> {
+    throw Error("send called on base wallet");
+  }
+
+  // @ts-ignore
+  public async sendMax(address: string, options?: any): Promise<any> {
+    throw Error("sendMax called on base wallet");
+  }
+
+  public getDepositAddress(): string {
+    throw Error("getDepositAddress called on base wallet");
+  }
+
+  public getDepositQr(): ImageI {
+    return qrAddress(this.getDepositAddress() as string);
+  }
+
+  // @ts-ignore
+  public async getBalance(rawUnit?: any): Promise<any> {
+    throw Error("sendMax called on base wallet");
+  }
+
+  /**
+   * fromId - create a wallet from encoded walletId string
+   *
+   * @param walletId   walletId options to steer the creation process
+   *
+   * @returns wallet instantiated accordingly to the walletId rules
+   */
+   public static async fromId(walletId: string) {
+    return await new this()._fromId(walletId);
+  }
+
+  /**
+   * named - create a named wallet
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   * @param force  force recreate wallet in the database if a record already exist
+   *
+   * @returns instantiated wallet
+   */
+   public static named(
+    name: string,
+    dbName?: string,
+    force?: boolean
+  ) {
+    return new this()._named(name, dbName, force);
+  }
+
+  /**
+   * replaceNamed - replace (recover) named wallet with a new walletId
+   *
+   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+   * If wallet exists it will be overwritten without exception
+   *
+   * @param name   user friendly wallet alias
+   * @param walletId walletId options to steer the creation process
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns instantiated wallet
+   */
+   public static replaceNamed(
+    name: string,
+    walletId: string,
+    dbName?: string
+  ) {
+    return new this()._replaceNamed(name, walletId, dbName);
+  }
+
+  /**
+   * namedExists - check if a named wallet already exists
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns boolean
+   */
+   public static namedExists(name: string, dbName?: string): Promise<boolean> {
+    return new this()._namedExists(name, dbName);
+  }
+
+  /**
+   * fromSeed - create a wallet using the seed phrase and derivation path
+   *
+   * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
+   * this derivation path is standard for Electron Cash SLP and other SLP enabled wallets
+   *
+   * @param seed   BIP39 12 word seed phrase
+   * @param derivationPath BIP44 HD wallet derivation path to get a single the private key from hierarchy
+   *
+   * @returns instantiated wallet
+   */
+   public static fromSeed(
+    seed: string,
+    derivationPath?: string
+  ) {
+    return new this().fromSeed(seed, derivationPath);
+  }
+
+  /**
+   * newRandom - create a random wallet
+   *
+   * if `name` parameter is specified, the wallet will also be persisted to DB
+   *
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
+   *
+   * @returns instantiated wallet
+   */
+   public static newRandom(name: string = "", dbName?: string) {
+    return new this()._newRandom(name, dbName);
+  }
+
+  /**
+   * watchOnly - create a watch-only wallet
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   cashaddress or slpaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+   public static watchOnly(address: string) {
+    return new this().watchOnly(address);
+  }
+
+  // Get mnemonic and derivation path for wallet
+  public getSeed(): MnemonicI {
+    if (!this.mnemonic) {
+      throw Error("Wallet mnemonic seed phrase not set");
+    }
+    if (!this.derivationPath) {
+      throw Error("Wallet derivation path not set");
+    }
+    return {
+      seed: this.mnemonic,
+      derivationPath: this.derivationPath,
+    };
+  }
+
+  // @ts-ignore
+  public async getMaxAmountToSend(params?: any): Promise<any> {
+    throw Error("getMaxAmountToSend called on base wallet");
+  }
 }
 
 /**
