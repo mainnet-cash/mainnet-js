@@ -3,7 +3,7 @@ version: "3.8"
 services:
   smartbch:
     build: .
-    image: mainnet/smartbch
+    image: smartbch/smartbch
     command: start
     ports:
       - "8545:8545"
@@ -13,7 +13,7 @@ services:
 
   smartbch-regtest:
     build: .
-    image: mainnet/smartbch
+    image: smartbch/smartbch
     entrypoint: init_regtest.sh
     ports:
       - "8545:8545"

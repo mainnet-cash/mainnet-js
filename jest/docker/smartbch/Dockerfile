@@ -26,7 +26,7 @@ WORKDIR /build
 # Install Go
 RUN export GOPLATFORM=$(echo ${TARGETPLATFORM} | tr "/" "-") && echo ${GOPLATFORM} && \
   wget -q https://dl.google.com/go/go${GO_VERSION}.${GOPLATFORM}.tar.gz && \
-  tar zxvf go${GO_VERSION}.${GOPLATFORM}.tar.gz && \
+  tar zxf go${GO_VERSION}.${GOPLATFORM}.tar.gz && \
   rm -rf go${GO_VERSION}.${GOPLATFORM}.tar.gz && \
   mv go /usr/local && \
   mkdir -p /go/bin
@@ -37,14 +37,14 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # Patch Go for larger cgo stack size
 RUN wget -q https://github.com/smartbch/patch-cgo-for-golang/archive/refs/tags/v${CGO_PATCH_VERSION}.tar.gz && \
-  tar zxvf v${CGO_PATCH_VERSION}.tar.gz && \
+  tar zxf v${CGO_PATCH_VERSION}.tar.gz && \
   rm v${CGO_PATCH_VERSION}.tar.gz && \
   cd patch-cgo-for-golang-${CGO_PATCH_VERSION} && cp *.c $GOROOT/src/runtime/cgo/ && \
   cd /build && rm -rf patch-cgo-for-golang-${CGO_PATCH_VERSION}
 
 # Build libsnappy
 RUN wget -q https://github.com/google/snappy/archive/refs/tags/${SNAPPY_VERSION}.tar.gz && \
-  tar zxvf ${SNAPPY_VERSION}.tar.gz && \
+  tar zxf ${SNAPPY_VERSION}.tar.gz && \
   rm ${SNAPPY_VERSION}.tar.gz && \
   cd snappy-${SNAPPY_VERSION} && mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=On ../ && make -j`nproc` && make install && \
   cd /build && rm -rf snappy-${SNAPPY_VERSION}
@@ -52,7 +52,7 @@ RUN wget -q https://github.com/google/snappy/archive/refs/tags/${SNAPPY_VERSION}
 
 # Build rocksdb
 RUN wget -q https://github.com/facebook/rocksdb/archive/refs/tags/v${ROCKSDB_VERSION}.tar.gz && \
-  tar zxvf v${ROCKSDB_VERSION}.tar.gz && \
+  tar zxf v${ROCKSDB_VERSION}.tar.gz && \
   rm v${ROCKSDB_VERSION}.tar.gz && \
   cd rocksdb-${ROCKSDB_VERSION} && make CC=gcc-8 CXX=g++-8 install-shared -j`nproc` && \
   strip --strip-debug /usr/local/lib/librocksdb.so.${ROCKSDB_VERSION} && \
@@ -81,7 +81,7 @@ RUN git clone -b v${GIT_TAG} --depth 1 https://github.com/smartbch/smartbch && \
 WORKDIR /root
 RUN /build/smartbchd init mynode --chain-id 0x2710 && \
   wget -q https://github.com/smartbch/artifacts/releases/download/v${CONFIG_TAG}/dot.smartbchd.tgz && \
-  tar zxvf dot.smartbchd.tgz && \
+  tar zxf dot.smartbchd.tgz && \
   rm dot.smartbchd.tgz && \
   cp -rf dot.smartbchd/* .smartbchd/
 
