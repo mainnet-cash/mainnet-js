@@ -30,27 +30,27 @@ export class BaseWallet implements WalletI {
    *
    * @throws {Error} if called on BaseWallet
    */
-  constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet) {
+  constructor(name = "", networkType = NetworkType.Mainnet) {
     this.name = name;
-    this.networkPrefix = networkPrefix;
-    switch (this.networkPrefix) {
-      case CashAddressNetworkPrefix.regtest:
+    this.networkType = networkType;
+    switch (this.networkType) {
+      case NetworkType.Regtest:
         this.network = NetworkEnum.Regtest;
-        this.networkType = NetworkType.Regtest;
+        this.networkPrefix = CashAddressNetworkPrefix.regtest;
         this.provider = getNetworkProvider("regtest");
         break;
-      case CashAddressNetworkPrefix.testnet:
+      case NetworkType.Testnet:
         this.network = NetworkEnum.Testnet;
-        this.networkType = NetworkType.Testnet;
+        this.networkPrefix = CashAddressNetworkPrefix.testnet;
         this.provider = getNetworkProvider("testnet");
         break;
       default:
         this.network = NetworkEnum.Mainnet;
-        this.networkType = NetworkType.Mainnet;
+        this.networkPrefix = CashAddressNetworkPrefix.mainnet;
         this.provider = getNetworkProvider();
     }
 
-    this.isTestnet = this.networkType === "mainnet" ? false : true;
+    this.isTestnet = this.networkType === NetworkType.Mainnet ? false : true;
   }
 
   /**

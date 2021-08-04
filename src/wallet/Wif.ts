@@ -14,7 +14,7 @@ import {
   instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
-import { SignatureTemplate } from "cashscript";
+import { Network, SignatureTemplate } from "cashscript";
 
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
 import { NetworkType, UnitEnum } from "../enum";
@@ -110,10 +110,10 @@ export class Wallet extends BaseWallet {
 
   constructor(
     name = "",
-    networkPrefix = CashAddressNetworkPrefix.mainnet,
+    networkType = NetworkType.Mainnet,
     walletType = WalletTypeEnum.Seed
   ) {
-    super(name, networkPrefix);
+    super(name, networkType);
     this.name = name;
     this.walletType = walletType;
   }
@@ -515,9 +515,10 @@ export class Wallet extends BaseWallet {
    */
   public static fromCashaddr(address: string): Promise<Wallet> {
     const prefix = derivePrefix(address);
+    const networkType = networkPrefixMap[prefix] as NetworkType;
     return new this(
       "",
-      prefix as CashAddressNetworkPrefix,
+      networkType,
       WalletTypeEnum.Watch
     ).watchOnly(address);
   }
@@ -1044,7 +1045,7 @@ export class TestNetWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static faucetServer = "https://rest-unstable.mainnet.cash";
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.testnet);
+    super(name, NetworkType.Testnet);
   }
 
   // will receive 10000 testnet satoshi, rate limits apply
@@ -1126,7 +1127,7 @@ export class TestNetWallet extends Wallet {
 export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.regtest);
+    super(name, NetworkType.Regtest);
   }
 
   // interface to static slp functions. see Slp.ts
@@ -1147,7 +1148,7 @@ export class WifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Wif);
+    super(name, NetworkType.Mainnet, WalletTypeEnum.Wif);
   }
 
   // interface to static slp functions. see Slp.ts
@@ -1168,7 +1169,7 @@ export class TestNetWifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Wif);
+    super(name, NetworkType.Testnet, WalletTypeEnum.Wif);
   }
 
   // interface to static slp functions. see Slp.ts
@@ -1189,7 +1190,7 @@ export class RegTestWifWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Wif);
+    super(name, NetworkType.Regtest, WalletTypeEnum.Wif);
   }
 
   // interface to static slp functions. see Slp.ts
@@ -1210,7 +1211,7 @@ export class WatchWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
   static walletType = WalletTypeEnum.Watch;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.mainnet, WalletTypeEnum.Watch);
+    super(name, NetworkType.Mainnet, WalletTypeEnum.Watch);
   }
 
   // interface to static slp functions. see Slp.ts
@@ -1231,7 +1232,7 @@ export class TestNetWatchWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.testnet;
   static walletType = WalletTypeEnum.Watch;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.testnet, WalletTypeEnum.Watch);
+    super(name, NetworkType.Testnet, WalletTypeEnum.Watch);
   }
 
   // interface to static slp functions. see Slp.ts
@@ -1252,7 +1253,7 @@ export class RegTestWatchWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   static walletType = WalletTypeEnum.Watch;
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.regtest, WalletTypeEnum.Watch);
+    super(name, NetworkType.Regtest, WalletTypeEnum.Watch);
   }
 
   // interface to static slp functions. see Slp.ts

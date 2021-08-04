@@ -52,11 +52,10 @@ export class SmartBchWallet extends BaseWallet {
    *
    * @throws {Error} if called on BaseWallet
    */
-   constructor(name = "", networkPrefix = CashAddressNetworkPrefix.mainnet, walletType = WalletTypeEnum.Seed
+   constructor(name = "", networkType = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed
    ) {
-    super(name, networkPrefix);
+    super(name, networkType);
     this.name = name;
-    this.networkPrefix = networkPrefix;
     this.walletType = walletType;
 
     switch (this.networkPrefix) {
@@ -330,9 +329,10 @@ export class SmartBchWallet extends BaseWallet {
    */
   public static fromCashaddr(address: string): Promise<SmartBchWallet> {
     const prefix = derivePrefix(address);
+    const networkType = networkPrefixMap[prefix] as NetworkType;
     return new this(
       "",
-      prefix as CashAddressNetworkPrefix,
+      networkType,
       WalletTypeEnum.Watch
     ).watchOnly(address);
   }
@@ -432,7 +432,7 @@ export class SmartBchWallet extends BaseWallet {
  */
  export class TestNetSmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.testnet);
+    super(name, NetworkType.Testnet);
   }
 }
 
@@ -441,6 +441,6 @@ export class SmartBchWallet extends BaseWallet {
  */
  export class RegTestSmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
-    super(name, CashAddressNetworkPrefix.regtest);
+    super(name, NetworkType.Regtest);
   }
 }

@@ -3,4 +3,5 @@ export enum WalletTypeEnum {
   Seed = "seed",
   Hd = "hd",
   Watch = "watch",
+  PrivateKey = "pk"
 }
