@@ -1,3 +1,18 @@
+if (
+  "undefined" !== typeof global &&
+  ("[object global]" === toString.call(global) ||
+    "[object Object]" === toString.call(global))
+) {
+  // node
+  globalThis.randomBytes = require("crypto").randomBytes;
+} else {
+  // browser
+  if ("undefined" !== typeof navigator && "undefined" !== typeof document) {
+    globalThis.randomBytes = (len) => window.crypto.getRandomValues(new Uint8Array(len));
+  }
+}
+
+
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { NetworkType } from "../enum";
 import { ethers, utils } from "ethers";
@@ -162,20 +177,26 @@ export class SmartBchWallet extends BaseWallet {
   // In all other cases, the a named wallet is deserialized from the database
   //  by the name key
   public toString() {
+    const result = super.toString();
+    if (result) return result;
+
     if (this.walletType === WalletTypeEnum.PrivateKey) {
       return `${this.walletType}:${this.networkType}:${this.privateKey}`;
     }
 
-    return super.toString();
+    throw Error("toString unsupported wallet type");
   }
 
   //
   public toDbString() {
+    const result = super.toDbString();
+    if (result) return result;
+
     if (this.walletType === WalletTypeEnum.PrivateKey) {
       return `${this.walletType}:${this.networkType}:${this.privateKey}`;
     }
 
-    return super.toString();
+    throw Error("toDbString unsupported wallet type");
   }
 
   /**

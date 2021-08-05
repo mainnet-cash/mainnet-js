@@ -235,7 +235,7 @@ export class BaseWallet implements WalletI {
       return `${this.walletType}:${this.networkType}:${this.mnemonic}:${this.derivationPath}`;
     }
 
-    throw Error("toDbString unsupported wallet type");
+    return "";
   }
 
   // Returns the serialized wallet as a string
@@ -249,7 +249,7 @@ export class BaseWallet implements WalletI {
       return `${this.walletType}:${this.networkType}:${this.mnemonic}:${this.derivationPath}`;
     }
 
-    throw Error("toDbString unsupported wallet type");
+    return "";
   }
 
   /**

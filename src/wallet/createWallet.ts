@@ -163,7 +163,7 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
     wallet = await walletClassMap[walletType][networkType]().slp.named(
       body.name
     );
-    if (wallet.network != networkType) {
+    if (wallet.networkType != networkType) {
       throw Error(
         `A wallet already exists with name ${body.name}, but with network ${wallet.networkType} not ${body.network}, per request`
       );

@@ -115,7 +115,7 @@ describe(`Test creation of wallet from walletId`, () => {
         );
       } catch (e) {
         expect(e.message).toBe(
-          "Wallet type hd was passed to single address wallet"
+          "Unknown wallet type 'hd'"
         );
       }
     });
@@ -128,7 +128,7 @@ describe(`Test creation of wallet from walletId`, () => {
         );
       } catch (e) {
         expect(e.message).toBe(
-          "Wallet type q2k was passed to single address wallet"
+          "Unknown wallet type 'q2k'"
         );
       }
     });

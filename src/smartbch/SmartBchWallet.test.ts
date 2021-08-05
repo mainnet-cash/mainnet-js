@@ -5,9 +5,9 @@ import { RegTestSmartBchWallet, SmartBchWallet, TestNetSmartBchWallet, Wallet } 
 describe(`Test Ethereum functions`, () => {
   test("Query ethernet with class", async () => {
     const wallet = await new RegTestSmartBchWallet().generate();
-    console.log(wallet.privateKey);
-    console.log(wallet);
-    console.log(JSON.stringify(wallet, null, 2));
+    // console.log(wallet.privateKey);
+    // console.log(wallet);
+    // console.log(JSON.stringify(wallet, null, 2));
 
     // const b = await Wallet.fromId("adsf")
 

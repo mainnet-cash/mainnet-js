@@ -84,6 +84,7 @@ import {
   WifUtil,
 } from "./Util";
 import { getNetworkProvider } from "../network";
+import { generateRandomBytes } from "../util/randomBytes";
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -235,8 +236,7 @@ export class Wallet extends BaseWallet {
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
       addressBase = addressComponents.shift() as string;
-      this.cashaddr = addressBase;
-      this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
+      addressPrefix = derivePrefix(addressBase);
     } else {
       addressPrefix = addressComponents.shift() as string;
       addressBase = addressComponents.shift() as string;
@@ -247,9 +247,11 @@ export class Wallet extends BaseWallet {
           );
         }
       }
-      this.cashaddr = `${addressPrefix}:${addressBase}`;
-      this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     }
+
+    this.cashaddr = `${addressPrefix}:${addressBase}`;
+    this.address = this.cashaddr;
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
 
     return this;
   }
@@ -263,18 +265,8 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateWif() {
-    // node
     if (!this.privateKey) {
-      if (getRuntimePlatform() === "node") {
-        let crypto = require("crypto");
-        this.privateKey = generatePrivateKey(() => crypto.randomBytes(32));
-      }
-      // window, webworkers, service workers
-      else {
-        this.privateKey = generatePrivateKey(() =>
-          window.crypto.getRandomValues(new Uint8Array(32))
-        );
-      }
+      this.privateKey = generatePrivateKey(() => generateRandomBytes(32));
     }
     return this.deriveInfo();
   }
@@ -621,20 +613,26 @@ export class Wallet extends BaseWallet {
   // In all other cases, the a named wallet is deserialized from the database
   //  by the name key
   public toString() {
+    const result = super.toString();
+    if (result) return result;
+
     if (this.walletType === WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
     }
 
-    return super.toString();
+    throw Error("toString unsupported wallet type");
   }
 
   //
   public toDbString() {
+    const result = super.toDbString();
+    if (result) return result;
+
     if (this.walletType === WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
     }
 
-    return super.toString();
+    throw Error("toDbString unsupported wallet type");
   }
 
   public async getMaxAmountToSend(params: {
