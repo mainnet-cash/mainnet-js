@@ -1,17 +1,4 @@
-if (
-  "undefined" !== typeof global &&
-  ("[object global]" === toString.call(global) ||
-    "[object Object]" === toString.call(global))
-) {
-  // node
-  globalThis.randomBytes = require("crypto").randomBytes;
-} else {
-  // browser
-  if ("undefined" !== typeof navigator && "undefined" !== typeof document) {
-    globalThis.randomBytes = (len) => window.crypto.getRandomValues(new Uint8Array(len));
-  }
-}
-
+import "../util/randomValues";
 
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { NetworkType } from "../enum";
