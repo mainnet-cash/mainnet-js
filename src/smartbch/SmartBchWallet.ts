@@ -1,10 +1,7 @@
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { CashAddressNetworkPrefix } from "@bitauth/libauth";
-import { NetworkEnum, networkPrefixMap, NetworkType } from "../enum";
-import { Network } from "../interface";
+import { NetworkType } from "../enum";
 import { ethers, utils } from "ethers";
 import { WalletTypeEnum } from "../wallet/enum";
-import { derivePrefix } from "../util/derivePublicKeyHash";
 import { SendRequest, SendRequestArray, SendResponse } from "../wallet/model";
 import { SendRequestOptionsI } from "../wallet/interface";
 import { balanceFromSatoshi, BalanceResponse, balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
@@ -17,10 +14,7 @@ export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.BaseProvider;
   ethersWallet?: ethers.Wallet;
   privateKey?: string;
-  privateKeyWif?: string;
   publicKey?: string;
-  cashaddr?: string;
-  address?: string;
   mnemonic?: string;
   derivationPath: string = "m/44'/60'/0'/0/0";
   _erc20?: Erc20;
@@ -34,36 +28,15 @@ export class SmartBchWallet extends BaseWallet {
    */
    constructor(name = "", networkType = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed
    ) {
-    super(name, networkType);
-    this.name = name;
-    this.walletType = walletType;
-
-    switch (this.networkPrefix) {
-      case CashAddressNetworkPrefix.regtest:
-        this.network = NetworkEnum.Regtest;
-        this.networkType = NetworkType.Regtest;
-        this.provider = this.getNetworkProvider("regtest");
-        break;
-      case CashAddressNetworkPrefix.testnet:
-        this.network = NetworkEnum.Testnet;
-        this.networkType = NetworkType.Testnet;
-        this.provider = this.getNetworkProvider("testnet");
-        break;
-      default:
-        this.network = NetworkEnum.Mainnet;
-        this.networkType = NetworkType.Mainnet;
-        this.provider = this.getNetworkProvider();
-    }
-
-    this.isTestnet = this.networkType === "mainnet" ? false : true;
+    super(name, networkType, walletType);
   }
 
-  public getNetworkProvider(network: Network = Network.MAINNET): ethers.providers.BaseProvider {
+  public getNetworkProvider(network: NetworkType = NetworkType.Mainnet): ethers.providers.BaseProvider {
     switch (network) {
-      case Network.MAINNET: {
+      case NetworkType.Mainnet: {
         return new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
       }
-      case Network.TESTNET: {
+      case NetworkType.Testnet: {
         return new ethers.providers.JsonRpcProvider("http://35.220.203.194:8545", { name: "smartbch", chainId: 10001 });
       }
       default: {
@@ -86,11 +59,9 @@ export class SmartBchWallet extends BaseWallet {
     return Erc20;
   }
 
-  public async fromWIF(secret: string): Promise<this> {
+  public async fromPrivateKey(secret: string): Promise<this> {
     this.ethersWallet = new ethers.Wallet(secret).connect(this.provider!);
-    this.privateKey = this.ethersWallet.privateKey;
-    this.privateKeyWif = secret;
-    this.walletType = WalletTypeEnum.Wif;
+    this.walletType = WalletTypeEnum.PrivateKey;
     await this.deriveInfo();
     return this;
   }
@@ -107,7 +78,6 @@ export class SmartBchWallet extends BaseWallet {
     }
 
     this.ethersWallet = ethers.Wallet.fromMnemonic(this.mnemonic, this.derivationPath).connect(this.provider!);
-    this.privateKey = this.ethersWallet.privateKey;
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
@@ -115,35 +85,34 @@ export class SmartBchWallet extends BaseWallet {
 
   private async deriveInfo() {
     this.publicKey = this.ethersWallet!.publicKey;
-    this.privateKeyWif = this.ethersWallet!.privateKey;
-    this.cashaddr = this.ethersWallet!.address;
+    this.privateKey = this.ethersWallet!.privateKey;
     this.address = this.ethersWallet!.address;
     return this;
   }
 
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string): Promise<this> {
-    this.cashaddr = address;
     this.address = address;
-
+    this.ethersWallet = undefined;
+    this.privateKey = undefined;
     this.walletType = WalletTypeEnum.Watch;
 
     return this;
   }
 
   public async generate(): Promise<this> {
-    if (this.walletType === WalletTypeEnum.Wif) {
-      return await this._generateWif();
+    if (this.walletType === WalletTypeEnum.PrivateKey) {
+      return await this._generatePrivateKey();
     } else {
       return await this._generateMnemonic();
     }
   }
 
-  private async _generateWif() {
+  private async _generatePrivateKey() {
     if (!this.privateKey) {
       this.ethersWallet = ethers.Wallet.createRandom().connect(this.provider!);
     }
-    this.walletType = WalletTypeEnum.Wif;
+    this.walletType = WalletTypeEnum.PrivateKey;
     return this.deriveInfo();
   }
 
@@ -157,178 +126,35 @@ export class SmartBchWallet extends BaseWallet {
     return await this.deriveInfo();
   }
 
-  /**
-   * fromId - create a wallet from encoded walletId string
-   *
-   * @param walletId   walletId options to steer the creation process
-   *
-   * @returns wallet instantiated accordingly to the walletId rules
-   */
-   public static async fromId(walletId: string) {
-    return await new this()._fromId(walletId);
-  }
-
   public _fromId = async (walletId: string): Promise<this> => {
-    let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
-    if (!["named", "seed", "watch", "wif"].includes(walletType)) {
-      throw Error(
-        `Wallet type ${walletType} was passed to single address wallet`
-      );
-    }
-    if (networkPrefixMap[this.networkPrefix] != networkGiven) {
+    let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
+
+    if (this.networkType != networkGiven) {
       throw Error(
         `Network prefix ${networkGiven} to a ${
-          networkPrefixMap[this.networkPrefix]
+          this.networkType
         } wallet`
       );
     }
-    switch (walletType) {
-      case "wif":
-        return this.fromWIF(arg1);
-      case "watch":
-        return this.watchOnly(arg1);
-      case "named":
-        if (arg2) {
-          return this._named(arg1, arg2);
-        } else {
-          return this._named(arg1);
-        }
 
-      case "seed":
-        if (arg2) {
-          return this.fromSeed(arg1, arg2);
-        } else {
-          return this.fromSeed(arg1);
-        }
-      default:
-        return this.fromWIF(arg1);
+    // "privkey:regtest:0x89b83ea27318a8c46c229f5b85c34975115ebc3b62e5e662e3cb6f96b77c8100"
+    if (walletType === "privkey") {
+      return this.fromPrivateKey(arg1);
     }
+
+    return super._fromId(walletId);
   };
 
+
   /**
-   * named - create a named wallet
+   * fromPrivateKey - create a wallet using the private key supplied in `Wallet Import Format`
    *
-   * @param name   user friendly wallet alias
-   * @param dbName name under which the wallet will be stored in the database
-   * @param force  force recreate wallet in the database if a record already exist
+   * @param privateKey   encoded private key string
    *
    * @returns instantiated wallet
    */
-   public static named(
-    name: string,
-    dbName?: string,
-    force?: boolean
-  ): Promise<SmartBchWallet> {
-    return new this()._named(name, dbName, force);
-  }
-
-  /**
-   * replaceNamed - replace (recover) named wallet with a new walletId
-   *
-   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
-   * If wallet exists it will be overwritten without exception
-   *
-   * @param name   user friendly wallet alias
-   * @param walletId walletId options to steer the creation process
-   * @param dbName name under which the wallet will be stored in the database
-   *
-   * @returns instantiated wallet
-   */
-  public static replaceNamed(
-    name: string,
-    walletId: string,
-    dbName?: string
-  ): Promise<SmartBchWallet> {
-    return new this()._replaceNamed(name, walletId, dbName);
-  }
-
-  /**
-   * namedExists - check if a named wallet already exists
-   *
-   * @param name   user friendly wallet alias
-   * @param dbName name under which the wallet will be stored in the database
-   *
-   * @returns boolean
-   */
-  public static namedExists(name: string, dbName?: string): Promise<boolean> {
-    return new this()._namedExists(name, dbName);
-  }
-
-  /**
-   * fromSeed - create a wallet using the seed phrase and derivation path
-   *
-   * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
-   * this derivation path is standard for Electron Cash SLP and other SLP enabled wallets
-   *
-   * @param seed   BIP39 12 word seed phrase
-   * @param derivationPath BIP44 HD wallet derivation path to get a single the private key from hierarchy
-   *
-   * @returns instantiated wallet
-   */
-   public static fromSeed(
-    seed: string,
-    derivationPath?: string
-  ): Promise<SmartBchWallet> {
-    return new this().fromSeed(seed, derivationPath);
-  }
-
-  /**
-   * newRandom - create a random wallet
-   *
-   * if `name` parameter is specified, the wallet will also be persisted to DB
-   *
-   * @param name   user friendly wallet alias
-   * @param dbName name under which the wallet will be stored in the database
-   *
-   * @returns instantiated wallet
-   */
-  public static newRandom(name: string = "", dbName?: string): Promise<SmartBchWallet> {
-    return new this()._newRandom(name, dbName);
-  }
-
-  /**
-   * fromWIF - create a wallet using the private key supplied in `Wallet Import Format`
-   *
-   * @param wif   WIF encoded private key string
-   *
-   * @returns instantiated wallet
-   */
-  public static fromWIF(wif: string): Promise<SmartBchWallet> {
-    return new this().fromWIF(wif);
-  }
-
-  /**
-   * watchOnly - create a watch-only wallet
-   *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
-   *
-   * @param address   cashaddress or slpaddress of a wallet
-   *
-   * @returns instantiated wallet
-   */
-  public static watchOnly(address: string): Promise<SmartBchWallet> {
-    return new this().watchOnly(address);
-  }
-
-  /**
-   * fromCashaddr - create a watch-only wallet in the network derived from the address
-   *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
-   *
-   * @param address   cashaddress of a wallet
-   *
-   * @returns instantiated wallet
-   */
-  public static fromCashaddr(address: string): Promise<SmartBchWallet> {
-    const prefix = derivePrefix(address);
-    const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this(
-      "",
-      networkType,
-      WalletTypeEnum.Watch
-    ).watchOnly(address);
+  public static async fromPrivateKey(privateKey: string): Promise<SmartBchWallet> {
+    return new this().fromPrivateKey(privateKey);
   }
 
   // Returns the serialized wallet as a string
@@ -336,22 +162,20 @@ export class SmartBchWallet extends BaseWallet {
   // In all other cases, the a named wallet is deserialized from the database
   //  by the name key
   public toString() {
-    if (this.name) {
-      return `named:${this.network}:${this.name}`;
-    } else if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
-    } else {
-      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    if (this.walletType === WalletTypeEnum.PrivateKey) {
+      return `${this.walletType}:${this.networkType}:${this.privateKey}`;
     }
+
+    return super.toString();
   }
 
   //
   public toDbString() {
-    if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
-    } else {
-      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    if (this.walletType === WalletTypeEnum.PrivateKey) {
+      return `${this.walletType}:${this.networkType}:${this.privateKey}`;
     }
+
+    return super.toString();
   }
 
   /**
@@ -398,7 +222,7 @@ export class SmartBchWallet extends BaseWallet {
       regtest: "",
     };
 
-    return explorerUrlMap[this.network] + txId;
+    return explorerUrlMap[this.networkType] + txId;
   }
 
   // gets wallet balance in sats, bch and usd
@@ -417,7 +241,7 @@ export class SmartBchWallet extends BaseWallet {
   }
 
   public async getBalanceFromProvider(): Promise<number> {
-    return (await (this.provider! as ethers.providers.BaseProvider).getBalance(this.cashaddr!)).div(10**10).toNumber();
+    return (await (this.provider! as ethers.providers.BaseProvider).getBalance(this.address!)).div(10**10).toNumber();
   }
 }
 

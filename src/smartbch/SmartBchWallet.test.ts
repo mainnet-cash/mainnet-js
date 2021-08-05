@@ -4,12 +4,12 @@ import { RegTestSmartBchWallet, SmartBchWallet, TestNetSmartBchWallet, Wallet } 
 
 describe(`Test Ethereum functions`, () => {
   test("Query ethernet with class", async () => {
-    const wallet = await new Wallet().generate();
+    const wallet = await new RegTestSmartBchWallet().generate();
     console.log(wallet.privateKey);
     console.log(wallet);
     console.log(JSON.stringify(wallet, null, 2));
 
-    const b = await Wallet.watchOnly("adsf")
+    // const b = await Wallet.fromId("adsf")
 
     // const wallet = await RegTestSmartBchWallet.fromWIF("89b83ea27318a8c46c229f5b85c34975115ebc3b62e5e662e3cb6f96b77c8160");
 

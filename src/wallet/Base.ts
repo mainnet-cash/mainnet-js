@@ -1,14 +1,12 @@
-import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 import { getStorageProvider } from "../db/util";
 import { MnemonicI, WalletI } from "./interface";
 import { SignedMessage, SignedMessageI } from "../message";
-import { NetworkEnum, NetworkType } from "../enum";
+import { NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
 import { qrAddress } from "../qr/Qr";
 import { ImageI } from "../qr/interface";
 import { WalletTypeEnum } from "./enum";
-import { Network } from "../interface";
 
 /**
  * A class to hold features used by all wallets
@@ -24,9 +22,7 @@ export class BaseWallet implements WalletI {
   storage?: StorageProvider;
   isTestnet: boolean;
   name: string;
-  networkPrefix: CashAddressNetworkPrefix;
   networkType: NetworkType;
-  network: NetworkEnum;
   walletType: WalletTypeEnum;
 
   static signedMessage: SignedMessageI = new SignedMessage();
@@ -42,29 +38,12 @@ export class BaseWallet implements WalletI {
     this.name = name;
     this.networkType = networkType;
     this.walletType = walletType;
-
-    switch (this.networkType) {
-      case NetworkType.Regtest:
-        this.network = NetworkEnum.Regtest;
-        this.networkPrefix = CashAddressNetworkPrefix.regtest;
-        this.provider = this.getNetworkProvider("regtest");
-        break;
-      case NetworkType.Testnet:
-        this.network = NetworkEnum.Testnet;
-        this.networkPrefix = CashAddressNetworkPrefix.testnet;
-        this.provider = this.getNetworkProvider("testnet");
-        break;
-      default:
-        this.network = NetworkEnum.Mainnet;
-        this.networkPrefix = CashAddressNetworkPrefix.mainnet;
-        this.provider = this.getNetworkProvider();
-    }
-
+    this.provider = this.getNetworkProvider(this.networkType);
     this.isTestnet = this.networkType === NetworkType.Mainnet ? false : true;
   }
 
   // @ts-ignore
-  public getNetworkProvider(network: Network = Network.MAINNET) {
+  public getNetworkProvider(network: NetworkType = NetworkType.Mainnet) {
     throw Error("getNetworkProvider called on base wallet");
   }
 
@@ -97,7 +76,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : (this.networkPrefix as string);
+    dbName = dbName ? dbName : (this.networkType as string);
     let db = getStorageProvider(dbName);
 
     // If there is a database, force saving or error
@@ -149,7 +128,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : (this.networkPrefix as string);
+    dbName = dbName ? dbName : (this.networkType as string);
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -184,7 +163,7 @@ export class BaseWallet implements WalletI {
       throw Error("Named wallets must have a non-empty name");
     }
     _checkContextSafety(this);
-    dbName = dbName ? dbName : (this.networkPrefix as string);
+    dbName = dbName ? dbName : (this.networkType as string);
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -206,9 +185,44 @@ export class BaseWallet implements WalletI {
    *
    * @throws {Error} if called on BaseWallet
    */
-  public _fromId(secret?: string): Promise<this> {
-    secret;
-    throw Error("Cannot parse id on BaseWallet class");
+  public _fromId(walletId: string): Promise<this> {
+    let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
+
+    if (this.networkType != networkGiven) {
+      throw Error(
+        `Network prefix ${networkGiven} to a ${
+          this.networkType
+        } wallet`
+      );
+    }
+    switch (walletType) {
+      case "watch":
+        if (arg2) {
+          // watch:testnet:bchtest:qq1234567
+          return this.watchOnly(`${arg1}:${arg2}`);
+        }
+        // watch:testnet:qq1234567
+        return this.watchOnly(`${arg1}`);
+
+      case "named":
+        if (arg2) {
+          // named:testnet:wallet_1:my_database
+          return this._named(arg1, arg2);
+        } else {
+          // named:testnet:wallet_1
+          return this._named(arg1);
+        }
+
+      case "seed":
+        if (arg2) {
+          // seed:testnet:table later ... stove kitten pluck:m/44'/0'/0'/0/0
+          return this.fromSeed(arg1, arg2);
+        }
+        // seed:testnet:table later ... stove kitten pluck
+        return this.fromSeed(arg1);
+      default:
+        throw Error(`Unknown wallet type ${walletType}`);
+    }
   }
 
   /**
@@ -218,7 +232,7 @@ export class BaseWallet implements WalletI {
    */
   public toDbString(): string {
     if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+      return `${this.walletType}:${this.networkType}:${this.mnemonic}:${this.derivationPath}`;
     }
 
     throw Error("toDbString unsupported wallet type");
@@ -230,9 +244,9 @@ export class BaseWallet implements WalletI {
   //  by the name key
   public toString() {
     if (this.name) {
-      return `named:${this.network}:${this.name}`;
+      return `named:${this.networkType}:${this.name}`;
     } else if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+      return `${this.walletType}:${this.networkType}:${this.mnemonic}:${this.derivationPath}`;
     }
 
     throw Error("toDbString unsupported wallet type");
@@ -273,10 +287,28 @@ export class BaseWallet implements WalletI {
     throw Error("sendMax called on base wallet");
   }
 
+  /**
+   * getDepositAddress - get a wallet deposit address
+   *
+   * a high-level function,
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositAddress|/wallet/deposit_address} for REST endpoint
+   *
+   * @returns The deposit address as a string
+   */
   public getDepositAddress(): string {
-    throw Error("getDepositAddress called on base wallet");
+    return this.address!;
   }
 
+  /**
+   * getDepositQr - get an address qrcode, encoded for display on the web
+   *
+   * a high-level function
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositQr|/wallet/deposit_qr} for REST endpoint
+   *
+   * @returns The qrcode for the slp address
+   */
   public getDepositQr(): ImageI {
     return qrAddress(this.getDepositAddress() as string);
   }
@@ -293,8 +325,8 @@ export class BaseWallet implements WalletI {
    *
    * @returns wallet instantiated accordingly to the walletId rules
    */
-   public static async fromId(walletId: string) {
-    return await new this()._fromId(walletId);
+  public static async fromId<T extends typeof BaseWallet>(this: T, walletId: string): Promise<InstanceType<T>> {
+    return new this()._fromId(walletId) as InstanceType<T>;
   }
 
   /**
@@ -306,12 +338,12 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-   public static named(
+   public static async named<T extends typeof BaseWallet>(this: T,
     name: string,
     dbName?: string,
     force?: boolean
-  ) {
-    return new this()._named(name, dbName, force);
+  ): Promise<InstanceType<T>> {
+    return new this()._named(name, dbName, force) as InstanceType<T>;
   }
 
   /**
@@ -326,12 +358,12 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-   public static replaceNamed(
+   public static async replaceNamed<T extends typeof BaseWallet>(this: T,
     name: string,
     walletId: string,
     dbName?: string
-  ) {
-    return new this()._replaceNamed(name, walletId, dbName);
+  ): Promise<InstanceType<T>> {
+    return new this()._replaceNamed(name, walletId, dbName) as InstanceType<T>;
   }
 
   /**
@@ -342,7 +374,7 @@ export class BaseWallet implements WalletI {
    *
    * @returns boolean
    */
-   public static namedExists(name: string, dbName?: string): Promise<boolean> {
+   public static async namedExists(name: string, dbName?: string): Promise<boolean> {
     return new this()._namedExists(name, dbName);
   }
 
@@ -357,11 +389,11 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-   public static fromSeed(
+   public static async fromSeed<T extends typeof BaseWallet>(this: T,
     seed: string,
     derivationPath?: string
-  ) {
-    return new this().fromSeed(seed, derivationPath);
+  ): Promise<InstanceType<T>> {
+    return new this().fromSeed(seed, derivationPath) as InstanceType<T>;
   }
 
   /**
@@ -374,8 +406,8 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-   public static newRandom(name: string = "", dbName?: string) {
-    return new this()._newRandom(name, dbName);
+   public static async newRandom<T extends typeof BaseWallet>(this: T, name: string = "", dbName?: string): Promise<InstanceType<T>> {
+    return new this()._newRandom(name, dbName) as InstanceType<T>;
   }
 
   /**
@@ -388,8 +420,8 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-   public static watchOnly(address: string) {
-    return new this().watchOnly(address);
+   public static async watchOnly<T extends typeof BaseWallet>(this: T, address: string) {
+    return new this().watchOnly(address) as InstanceType<T>;
   }
 
   // Get mnemonic and derivation path for wallet

@@ -492,7 +492,7 @@ export class Slp {
       regtest: "",
     };
 
-    return explorerUrlMap[this.wallet.network] + txId;
+    return explorerUrlMap[this.wallet.networkType] + txId;
   }
 
   /**
@@ -886,7 +886,7 @@ export class Slp {
    * @returns instantiated wallet
    */
   public static async watchOnly(address: string): Promise<Wallet> {
-    const wallet = await this.walletType.watchOnly(toCashAddress(address)) as Wallet;
+    const wallet = await this.walletType.watchOnly(toCashAddress(address));
     wallet.derivationPath = "m/44'/245'/0'/0/0";
     wallet._slpAware = true;
     return wallet;

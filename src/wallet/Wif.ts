@@ -17,7 +17,7 @@ import {
 import { Network, SignatureTemplate } from "cashscript";
 
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
-import { NetworkType, UnitEnum } from "../enum";
+import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum";
 
 import { TxI } from "../interface";
 
@@ -26,7 +26,7 @@ import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
-import { SendRequestOptionsI, MnemonicI, WalletInfoI } from "./interface";
+import { SendRequestOptionsI, WalletInfoI } from "./interface";
 
 import {
   OpReturnData,
@@ -43,8 +43,6 @@ import {
   getFeeAmount,
 } from "../transaction/Wif";
 
-import { qrAddress } from "../qr/Qr";
-import { ImageI } from "../qr/interface";
 import { asSendRequestObject } from "../util/asSendRequestObject";
 import {
   balanceFromSatoshi,
@@ -103,6 +101,7 @@ export class Wallet extends BaseWallet {
   privateKeyWif?: string;
   publicKey?: Uint8Array;
   publicKeyHash?: Uint8Array;
+  networkPrefix: CashAddressNetworkPrefix;
   _slp?: Slp;
   _slpAware: boolean = false;
   _util?: Util;
@@ -113,6 +112,7 @@ export class Wallet extends BaseWallet {
     walletType = WalletTypeEnum.Seed
   ) {
     super(name, networkType, walletType);
+    this.networkPrefix = prefixFromNetworkMap[this.networkType];
   }
 
   public getNetworkProvider(network: Network = Network.MAINNET) {
@@ -224,9 +224,11 @@ export class Wallet extends BaseWallet {
       this.privateKey!,
       this.networkPrefix
     )) as string;
+    this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     return this;
   }
+
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string): Promise<this> {
     let addressComponents = address.split(":");
@@ -239,9 +241,9 @@ export class Wallet extends BaseWallet {
       addressPrefix = addressComponents.shift() as string;
       addressBase = addressComponents.shift() as string;
       if (addressPrefix in networkPrefixMap) {
-        if (networkPrefixMap[addressPrefix] != this.network) {
+        if (networkPrefixMap[addressPrefix] != this.networkType) {
           throw Error(
-            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
+            `a ${addressPrefix} address cannot be watched from a ${this.networkType} Wallet`
           );
         }
       }
@@ -261,7 +263,7 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateWif() {
-    //
+    // node
     if (!this.privateKey) {
       if (getRuntimePlatform() === "node") {
         let crypto = require("crypto");
@@ -310,7 +312,7 @@ export class Wallet extends BaseWallet {
       regtest: "",
     };
 
-    return explorerUrlMap[this.network] + txId;
+    return explorerUrlMap[this.networkType] + txId;
   }
 
   /**
@@ -344,140 +346,24 @@ export class Wallet extends BaseWallet {
     return resp;
   }
 
-  /**
-   * fromId - create a wallet from encoded walletId string
-   *
-   * @param walletId   walletId options to steer the creation process
-   *
-   * @returns wallet instantiated accordingly to the walletId rules
-   */
-  public static async fromId(walletId: string) {
-    return await new this()._fromId(walletId);
-  }
-
   public _fromId = async (walletId: string): Promise<this> => {
-    let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
-    if (!["named", "seed", "watch", "wif"].includes(walletType)) {
-      throw Error(
-        `Wallet type ${walletType} was passed to single address wallet`
-      );
-    }
-    if (networkPrefixMap[this.networkPrefix] != networkGiven) {
+    let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
+
+    if (this.networkType != networkGiven) {
       throw Error(
         `Network prefix ${networkGiven} to a ${
-          networkPrefixMap[this.networkPrefix]
+          this.networkType
         } wallet`
       );
     }
-    switch (walletType) {
-      case "wif":
-        return this.fromWIF(arg1);
-      case "watch":
-        let sanitizedAddress;
-        if (arg2) {
-          sanitizedAddress = `${arg1}:${arg2}`;
-        } else {
-          sanitizedAddress = `${derivePrefix(arg1)}:${arg1}`;
-        }
-        return this.watchOnly(sanitizedAddress);
-      case "named":
-        if (arg2) {
-          return this._named(arg1, arg2);
-        } else {
-          return this._named(arg1);
-        }
 
-      case "seed":
-        if (arg2) {
-          return this.fromSeed(arg1, arg2);
-        } else {
-          return this.fromSeed(arg1);
-        }
-      default:
-        return this.fromWIF(arg1);
+    // "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    if (walletType === "wif") {
+      return this.fromWIF(arg1);
     }
+
+    return super._fromId(walletId);
   };
-
-  /**
-   * named - create a named wallet
-   *
-   * @param name   user friendly wallet alias
-   * @param dbName name under which the wallet will be stored in the database
-   * @param force  force recreate wallet in the database if a record already exist
-   *
-   * @returns instantiated wallet
-   */
-  public static named(
-    name: string,
-    dbName?: string,
-    force?: boolean
-  ): Promise<Wallet> {
-    return new this()._named(name, dbName, force);
-  }
-
-  /**
-   * replaceNamed - replace (recover) named wallet with a new walletId
-   *
-   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
-   * If wallet exists it will be overwritten without exception
-   *
-   * @param name   user friendly wallet alias
-   * @param walletId walletId options to steer the creation process
-   * @param dbName name under which the wallet will be stored in the database
-   *
-   * @returns instantiated wallet
-   */
-  public static replaceNamed(
-    name: string,
-    walletId: string,
-    dbName?: string
-  ): Promise<Wallet> {
-    return new this()._replaceNamed(name, walletId, dbName);
-  }
-
-  /**
-   * namedExists - check if a named wallet already exists
-   *
-   * @param name   user friendly wallet alias
-   * @param dbName name under which the wallet will be stored in the database
-   *
-   * @returns boolean
-   */
-  public static namedExists(name: string, dbName?: string): Promise<boolean> {
-    return new this()._namedExists(name, dbName);
-  }
-
-  /**
-   * fromSeed - create a wallet using the seed phrase and derivation path
-   *
-   * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
-   * this derivation path is standard for Electron Cash SLP and other SLP enabled wallets
-   *
-   * @param seed   BIP39 12 word seed phrase
-   * @param derivationPath BIP44 HD wallet derivation path to get a single the private key from hierarchy
-   *
-   * @returns instantiated wallet
-   */
-  public static fromSeed(
-    seed: string,
-    derivationPath?: string
-  ): Promise<Wallet> {
-    return new this().fromSeed(seed, derivationPath);
-  }
-
-  /**
-   * newRandom - create a random wallet
-   *
-   * if `name` parameter is specified, the wallet will also be persisted to DB
-   *
-   * @param name   user friendly wallet alias
-   * @param dbName name under which the wallet will be stored in the database
-   *
-   * @returns instantiated wallet
-   */
-  public static newRandom(name: string = "", dbName?: string): Promise<Wallet> {
-    return new this()._newRandom(name, dbName);
-  }
 
   /**
    * fromWIF - create a wallet using the private key supplied in `Wallet Import Format`
@@ -490,20 +376,6 @@ export class Wallet extends BaseWallet {
     return new this().fromWIF(wif);
   }
 
-  // /**
-  //  * watchOnly - create a watch-only wallet
-  //  *
-  //  * such kind of wallet does not have a private key and is unable to spend any funds
-  //  * however it still allows to use many utility functions such as getting and watching balance, etc.
-  //  *
-  //  * @param address   cashaddress or slpaddress of a wallet
-  //  *
-  //  * @returns instantiated wallet
-  //  */
-  // public static watchOnly(address: string): Promise<Wallet> {
-  //   return new this().watchOnly(address);
-  // }
-
   /**
    * fromCashaddr - create a watch-only wallet in the network derived from the address
    *
@@ -514,7 +386,7 @@ export class Wallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-  public static fromCashaddr(address: string): Promise<Wallet> {
+  public static async fromCashaddr(address: string): Promise<Wallet> {
     const prefix = derivePrefix(address);
     const networkType = networkPrefixMap[prefix] as NetworkType;
     return new this(
@@ -568,27 +440,6 @@ export class Wallet extends BaseWallet {
       unit: "sat",
     });
     return await this._processSendRequests([sendRequest], true, options);
-  }
-
-  /**
-   * getDepositAddress - get a wallet deposit address
-   *
-   * a high-level function,
-   *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositAddress|/wallet/deposit_address} for REST endpoint
-   *
-   * @returns The deposit address as a string
-   */
-  public getDepositAddress(): string {
-    if (this.cashaddr) {
-      return this.cashaddr;
-    } else {
-      throw Error("cashaddr was not set on wallet");
-    }
-  }
-
-  public getDepositQr(): ImageI {
-    return qrAddress(this.cashaddr as string);
   }
 
   //
@@ -747,27 +598,13 @@ export class Wallet extends BaseWallet {
     }
   }
 
-  // Get mnemonic and derivation path for wallet
-  public getSeed(): MnemonicI {
-    if (!this.mnemonic) {
-      throw Error("Wallet mnemonic seed phrase not set");
-    }
-    if (!this.derivationPath) {
-      throw Error("Wallet derivation path not set");
-    }
-    return {
-      seed: this.mnemonic,
-      derivationPath: this.derivationPath,
-    };
-  }
-
   // Return wallet info
   public getInfo(): WalletInfoI {
     return {
       cashaddr: this.cashaddr,
       isTestnet: this.isTestnet,
       name: this.name,
-      network: this.network,
+      network: this.networkType as any,
       seed: this.mnemonic ? this.getSeed().seed : undefined,
       derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
       publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
@@ -784,22 +621,20 @@ export class Wallet extends BaseWallet {
   // In all other cases, the a named wallet is deserialized from the database
   //  by the name key
   public toString() {
-    if (this.name) {
-      return `named:${this.network}:${this.name}`;
-    } else if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
-    } else {
-      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    if (this.walletType === WalletTypeEnum.Wif) {
+      return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
     }
+
+    return super.toString();
   }
 
   //
   public toDbString() {
-    if (this.mnemonic) {
-      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
-    } else {
-      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    if (this.walletType === WalletTypeEnum.Wif) {
+      return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
     }
+
+    return super.toString();
   }
 
   public async getMaxAmountToSend(params: {
