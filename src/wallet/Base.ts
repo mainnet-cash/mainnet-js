@@ -221,7 +221,7 @@ export class BaseWallet implements WalletI {
         // seed:testnet:table later ... stove kitten pluck
         return this.fromSeed(arg1);
       default:
-        throw Error(`Unknown wallet type ${walletType}`);
+        throw Error(`Unknown wallet type '${walletType}'`);
     }
   }
 

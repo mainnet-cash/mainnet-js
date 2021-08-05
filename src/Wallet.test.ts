@@ -81,7 +81,7 @@ describe(`Test Wallet library`, () => {
       await RegTestWallet.fromId(`hd:regtest:${process.env.PRIVATE_WIF}`);
     } catch (e) {
       expect(e.message.slice(0, 97)).toBe(
-        "Wallet type hd was passed to single address wallet"
+        "Unknown wallet type 'hd'"
       );
     }
   });
