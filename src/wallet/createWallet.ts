@@ -53,9 +53,9 @@ export const walletClassMap = {
  * Check wallet type and network of a requested wallet for mismatches against retrieved from DB
  */
 function checkWalletTypeAndNetwork(wallet: Wallet, walletType, networkType) {
-  if (wallet.networkType != networkType) {
+  if (wallet.network != networkType) {
     throw Error(
-      `A wallet already exists with name ${wallet.name}, but with network ${wallet.networkType} not ${networkType}, per request`
+      `A wallet already exists with name ${wallet.name}, but with network ${wallet.network} not ${networkType}, per request`
     );
   }
   if (wallet.walletType != walletType) {
@@ -163,9 +163,9 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
     wallet = await walletClassMap[walletType][networkType]().slp.named(
       body.name
     );
-    if (wallet.networkType != networkType) {
+    if (wallet.network != networkType) {
       throw Error(
-        `A wallet already exists with name ${body.name}, but with network ${wallet.networkType} not ${body.network}, per request`
+        `A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`
       );
     }
     if (wallet.walletType != walletType) {
@@ -228,7 +228,7 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
       slpaddr: wallet.slp.slpaddr,
       walletId: wallet.toString(),
       ...wallet.getSeed(),
-      network: wallet.networkType as any,
+      network: wallet.network as any,
     };
   } else {
     return {
@@ -237,7 +237,7 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
       slpaddr: wallet.slp.slpaddr,
       walletId: wallet.toString(),
       wif: wallet.privateKeyWif,
-      network: wallet.networkType as any,
+      network: wallet.network as any,
     };
   }
 }

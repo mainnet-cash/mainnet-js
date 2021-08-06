@@ -113,7 +113,7 @@ export class Wallet extends BaseWallet {
     walletType = WalletTypeEnum.Seed
   ) {
     super(name, networkType, walletType);
-    this.networkPrefix = prefixFromNetworkMap[this.networkType];
+    this.networkPrefix = prefixFromNetworkMap[this.network];
   }
 
   public getNetworkProvider(network: Network = Network.MAINNET) {
@@ -156,7 +156,7 @@ export class Wallet extends BaseWallet {
 
   // Initialize wallet from Wallet Import Format
   public async fromWIF(secret: string): Promise<this> {
-    checkWifNetwork(secret, this.networkType);
+    checkWifNetwork(secret, this.network);
 
     const sha256 = await sha256Promise;
     let wifResult = decodePrivateKeyWif(sha256, secret);
@@ -211,15 +211,15 @@ export class Wallet extends BaseWallet {
       this.privateKey!
     );
     const networkType =
-      this.networkType === NetworkType.Regtest
+      this.network === NetworkType.Regtest
         ? NetworkType.Testnet
-        : this.networkType;
+        : this.network;
     this.privateKeyWif = encodePrivateKeyWif(
       sha256,
       this.privateKey!,
       networkType
     );
-    checkWifNetwork(this.privateKeyWif, this.networkType);
+    checkWifNetwork(this.privateKeyWif, this.network);
 
     this.cashaddr = (await deriveCashaddr(
       this.privateKey!,
@@ -241,9 +241,9 @@ export class Wallet extends BaseWallet {
       addressPrefix = addressComponents.shift() as string;
       addressBase = addressComponents.shift() as string;
       if (addressPrefix in networkPrefixMap) {
-        if (networkPrefixMap[addressPrefix] != this.networkType) {
+        if (networkPrefixMap[addressPrefix] != this.network) {
           throw Error(
-            `a ${addressPrefix} address cannot be watched from a ${this.networkType} Wallet`
+            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
           );
         }
       }
@@ -304,7 +304,7 @@ export class Wallet extends BaseWallet {
       regtest: "",
     };
 
-    return explorerUrlMap[this.networkType] + txId;
+    return explorerUrlMap[this.network] + txId;
   }
 
   /**
@@ -341,10 +341,10 @@ export class Wallet extends BaseWallet {
   public _fromId = async (walletId: string): Promise<this> => {
     let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
-    if (this.networkType != networkGiven) {
+    if (this.network != networkGiven) {
       throw Error(
         `Network prefix ${networkGiven} to a ${
-          this.networkType
+          this.network
         } wallet`
       );
     }
@@ -596,7 +596,7 @@ export class Wallet extends BaseWallet {
       cashaddr: this.cashaddr,
       isTestnet: this.isTestnet,
       name: this.name,
-      network: this.networkType as any,
+      network: this.network as any,
       seed: this.mnemonic ? this.getSeed().seed : undefined,
       derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
       publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
@@ -617,7 +617,7 @@ export class Wallet extends BaseWallet {
     if (result) return result;
 
     if (this.walletType === WalletTypeEnum.Wif) {
-      return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     }
 
     throw Error("toString unsupported wallet type");
@@ -629,7 +629,7 @@ export class Wallet extends BaseWallet {
     if (result) return result;
 
     if (this.walletType === WalletTypeEnum.Wif) {
-      return `${this.walletType}:${this.networkType}:${this.privateKeyWif}`;
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     }
 
     throw Error("toDbString unsupported wallet type");

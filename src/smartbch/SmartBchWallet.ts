@@ -131,10 +131,10 @@ export class SmartBchWallet extends BaseWallet {
   public _fromId = async (walletId: string): Promise<this> => {
     let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
-    if (this.networkType != networkGiven) {
+    if (this.network != networkGiven) {
       throw Error(
         `Network prefix ${networkGiven} to a ${
-          this.networkType
+          this.network
         } wallet`
       );
     }
@@ -168,7 +168,7 @@ export class SmartBchWallet extends BaseWallet {
     if (result) return result;
 
     if (this.walletType === WalletTypeEnum.PrivateKey) {
-      return `${this.walletType}:${this.networkType}:${this.privateKey}`;
+      return `${this.walletType}:${this.network}:${this.privateKey}`;
     }
 
     throw Error("toString unsupported wallet type");
@@ -180,7 +180,7 @@ export class SmartBchWallet extends BaseWallet {
     if (result) return result;
 
     if (this.walletType === WalletTypeEnum.PrivateKey) {
-      return `${this.walletType}:${this.networkType}:${this.privateKey}`;
+      return `${this.walletType}:${this.network}:${this.privateKey}`;
     }
 
     throw Error("toDbString unsupported wallet type");
@@ -230,7 +230,7 @@ export class SmartBchWallet extends BaseWallet {
       regtest: "",
     };
 
-    return explorerUrlMap[this.networkType] + txId;
+    return explorerUrlMap[this.network] + txId;
   }
 
   // gets wallet balance in sats, bch and usd

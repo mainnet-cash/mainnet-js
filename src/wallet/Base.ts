@@ -22,7 +22,7 @@ export class BaseWallet implements WalletI {
   storage?: StorageProvider;
   isTestnet: boolean;
   name: string;
-  networkType: NetworkType;
+  network: NetworkType;
   walletType: WalletTypeEnum;
 
   static signedMessage: SignedMessageI = new SignedMessage();
@@ -36,14 +36,14 @@ export class BaseWallet implements WalletI {
    */
   constructor(name = "", networkType = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed  ) {
     this.name = name;
-    this.networkType = networkType;
+    this.network = networkType;
     this.walletType = walletType;
-    this.provider = this.getNetworkProvider(this.networkType);
-    this.isTestnet = this.networkType === NetworkType.Mainnet ? false : true;
+    this.provider = this.getNetworkProvider(this.network);
+    this.isTestnet = this.network === NetworkType.Mainnet ? false : true;
   }
 
   // @ts-ignore
-  public getNetworkProvider(network: NetworkType = NetworkType.Mainnet) {
+  public getNetworkProvider(network: NetworkType = NetworkType.Mainnet): any {
     throw Error("getNetworkProvider called on base wallet");
   }
 
@@ -76,7 +76,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : (this.networkType as string);
+    dbName = dbName ? dbName : (this.network as string);
     let db = getStorageProvider(dbName);
 
     // If there is a database, force saving or error
@@ -128,7 +128,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : (this.networkType as string);
+    dbName = dbName ? dbName : (this.network as string);
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -163,7 +163,7 @@ export class BaseWallet implements WalletI {
       throw Error("Named wallets must have a non-empty name");
     }
     _checkContextSafety(this);
-    dbName = dbName ? dbName : (this.networkType as string);
+    dbName = dbName ? dbName : (this.network as string);
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -188,10 +188,10 @@ export class BaseWallet implements WalletI {
   public _fromId(walletId: string): Promise<this> {
     let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
 
-    if (this.networkType != networkGiven) {
+    if (this.network != networkGiven) {
       throw Error(
         `Network prefix ${networkGiven} to a ${
-          this.networkType
+          this.network
         } wallet`
       );
     }
@@ -232,7 +232,7 @@ export class BaseWallet implements WalletI {
    */
   public toDbString(): string {
     if (this.mnemonic) {
-      return `${this.walletType}:${this.networkType}:${this.mnemonic}:${this.derivationPath}`;
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     }
 
     return "";
@@ -244,9 +244,9 @@ export class BaseWallet implements WalletI {
   //  by the name key
   public toString() {
     if (this.name) {
-      return `named:${this.networkType}:${this.name}`;
+      return `named:${this.network}:${this.name}`;
     } else if (this.mnemonic) {
-      return `${this.walletType}:${this.networkType}:${this.mnemonic}:${this.derivationPath}`;
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     }
 
     return "";
@@ -452,7 +452,7 @@ export class BaseWallet implements WalletI {
 const _checkContextSafety = function (wallet: BaseWallet) {
   if (getRuntimePlatform() === "node") {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
-      if (wallet.networkType === NetworkType.Mainnet) {
+      if (wallet.network === NetworkType.Mainnet) {
         throw Error(
           `Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private`
         );

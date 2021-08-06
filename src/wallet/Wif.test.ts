@@ -233,7 +233,7 @@ describe(`Watch only Wallets`, () => {
     let w = await TestNetWallet.fromId(
       "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
     );
-    expect(w.networkType).toBe("testnet");
+    expect(w.network).toBe("testnet");
     expect(w.networkPrefix).toBe("bchtest");
     expect(w.cashaddr).toBe(
       "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
@@ -251,7 +251,7 @@ describe(`Watch only Wallets`, () => {
     // the balance unit may also be empty
     let unit;
     expect(((await w.getBalance(unit)) as BalanceResponse).sat).toBe(0);
-    expect(w.networkType).toBe("regtest");
+    expect(w.network).toBe("regtest");
     expect(w.networkPrefix).toBe("bchreg");
     expect(w.cashaddr).toBe(
       "bchreg:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt"
@@ -262,7 +262,7 @@ describe(`Watch only Wallets`, () => {
     let w = await Wallet.fromId(
       "watch:mainnet:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"
     );
-    expect(w.networkType).toBe("mainnet");
+    expect(w.network).toBe("mainnet");
     expect(w.networkPrefix).toBe("bitcoincash");
     expect(w.cashaddr).toBe(
       "bitcoincash:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"

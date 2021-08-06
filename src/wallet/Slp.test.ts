@@ -893,19 +893,19 @@ describe("Slp wallet tests", () => {
   test("Slp wallet creation", async () => {
     const m = await Wallet.slp.named("wallet");
     expect(m.name).toBe("wallet");
-    expect(m.networkType).toBe(Network.MAINNET);
+    expect(m.network).toBe(Network.MAINNET);
     expect(m.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(m.derivationPath).toBe("m/44'/245'/0'/0/0");
 
     const t = await TestNetWallet.slp.named("testnetwallet");
     expect(t.name).toBe("testnetwallet");
-    expect(t.networkType).toBe(Network.TESTNET);
+    expect(t.network).toBe(Network.TESTNET);
     expect(t.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(t.derivationPath).toBe("m/44'/245'/0'/0/0");
 
     const r = await RegTestWallet.slp.named("regwallet");
     expect(r.name).toBe("regwallet");
-    expect(r.networkType).toBe(Network.REGTEST);
+    expect(r.network).toBe(Network.REGTEST);
     expect(r.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(r.derivationPath).toBe("m/44'/245'/0'/0/0");
 
@@ -913,7 +913,7 @@ describe("Slp wallet tests", () => {
     wallet = await Wallet.slp.fromSeed(new Array(12).join("abandon "));
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.MAINNET);
+    expect(wallet.network).toBe(Network.MAINNET);
 
     wallet = await TestNetWallet.slp.fromSeed(
       new Array(12).join("abandon "),
@@ -921,17 +921,17 @@ describe("Slp wallet tests", () => {
     );
     expect(wallet.derivationPath).toBe("m/44'/200'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/200'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.TESTNET);
+    expect(wallet.network).toBe(Network.TESTNET);
 
     wallet = await Wallet.slp.newRandom();
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.MAINNET);
+    expect(wallet.network).toBe(Network.MAINNET);
 
     wallet = await Wallet.slp.newRandom("name", "name");
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.MAINNET);
+    expect(wallet.network).toBe(Network.MAINNET);
 
     wallet = await createSlpWallet({
       name: "test",
@@ -940,7 +940,7 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.MAINNET);
+    expect(wallet.network).toBe(Network.MAINNET);
 
     wallet = await createSlpWallet({
       name: "test2",
@@ -949,7 +949,7 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.TESTNET);
+    expect(wallet.network).toBe(Network.TESTNET);
 
     wallet = await createSlpWallet({
       name: "test3",
@@ -958,7 +958,7 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.REGTEST);
+    expect(wallet.network).toBe(Network.REGTEST);
 
     wallet = await createSlpWallet({
       network: "mainnet",
@@ -966,7 +966,7 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.MAINNET);
+    expect(wallet.network).toBe(Network.MAINNET);
 
     wallet = await createSlpWallet({
       network: "testnet",
@@ -974,7 +974,7 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.TESTNET);
+    expect(wallet.network).toBe(Network.TESTNET);
 
     wallet = await createSlpWallet({
       network: "regtest",
@@ -982,6 +982,6 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.networkType).toBe(Network.REGTEST);
+    expect(wallet.network).toBe(Network.REGTEST);
   });
 });
