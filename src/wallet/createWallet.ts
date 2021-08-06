@@ -15,21 +15,25 @@ import { WalletRequestI, WalletResponseI } from "./interface";
 // Convenience map to access classes by types and network
 export const walletClassMap = {
   wif: {
-    mainnet: WifWallet,
-    testnet: TestNetWifWallet,
-    regtest: RegTestWifWallet,
+    mainnet: () => WifWallet,
+    testnet: () => TestNetWifWallet,
+    regtest: () => RegTestWifWallet,
   },
   seed: {
-    mainnet: Wallet,
-    testnet: TestNetWallet,
-    regtest: RegTestWallet,
+    mainnet: () => Wallet,
+    testnet: () => TestNetWallet,
+    regtest: () => RegTestWallet,
   },
   watch: {
-    mainnet: WatchWallet,
-    testnet: TestNetWatchWallet,
-    regtest: RegTestWatchWallet,
+    mainnet: () => WatchWallet,
+    testnet: () => TestNetWatchWallet,
+    regtest: () => RegTestWatchWallet,
   },
 };
+
+function getWalletClass(walletType: string, networkType: string) {
+  return walletClassMap[walletType][networkType]();
+}
 
 /**
  * Check wallet type and network of a requested wallet for mismatches against retrieved from DB
@@ -57,7 +61,7 @@ export async function namedWalletExists(body): Promise<boolean> {
   const networkType = body.network ? body.network : "mainnet";
   const name = body.name;
 
-  return walletClassMap[walletType][networkType].namedExists(name);
+  return getWalletClass(walletType, networkType).namedExists(name);
 }
 
 /**
@@ -77,7 +81,7 @@ export async function namedWallet(
     throw Error(`Wallet name is required for this operation`);
   }
 
-  const wallet = await walletClassMap[walletType][networkType].named(name);
+  const wallet = await getWalletClass(walletType, networkType).named(name);
   checkWalletTypeAndNetwork(wallet, walletType, networkType);
   return wallet;
 }
@@ -99,7 +103,7 @@ export async function replaceNamedWallet(body): Promise<Wallet> {
     throw Error(`Wallet name and walletId are required for this operation`);
   }
 
-  wallet = await walletClassMap[walletType][networkType].replaceNamed(
+  wallet = await getWalletClass(walletType, networkType).replaceNamed(
     name,
     walletId
   );
@@ -123,8 +127,8 @@ export async function createWallet(body: WalletRequestI): Promise<Wallet> {
   }
   // This handles unsaved/unnamed wallets
   else {
-    let walletClass = walletClassMap[walletType][networkType];
-    wallet = await new walletClass();
+    let walletClass = getWalletClass(walletType, networkType);
+    wallet = new walletClass();
     wallet.walletType = walletType;
     return wallet.generate();
   }
@@ -142,7 +146,7 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
 
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
-    wallet = await walletClassMap[walletType][networkType].slp.named(
+    wallet = await getWalletClass(walletType, networkType).slp.named(
       body.name
     );
     if (wallet.network != networkType) {
@@ -159,7 +163,7 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   }
   // This handles unsaved/unnamed wallets
   else {
-    wallet = await walletClassMap[walletType][networkType].slp.newRandom();
+    wallet = await getWalletClass(walletType, networkType).slp.newRandom();
     wallet.walletType = walletType;
     return wallet;
   }
@@ -232,7 +236,7 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
 export async function walletFromId(walletId: string): Promise<any> {
   let [walletType, network]: string[] = walletId.split(":");
 
-  const wallet = await walletClassMap[WalletTypeEnum[walletType]][network].fromId(walletId);
+  const wallet = await getWalletClass(walletType, network).fromId(walletId);
   checkWalletTypeAndNetwork(wallet, walletType, network);
   return wallet;
 }
