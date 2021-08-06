@@ -234,7 +234,13 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
  * @returns A wallet
  */
 export async function walletFromId(walletId: string): Promise<any> {
-  let [walletType, network]: string[] = walletId.split(":");
+  let [walletType, network, name]: string[] = walletId.split(":");
+
+  if (walletType === "named") {
+    const wallet = await namedWallet(name, "seed", network);
+    checkWalletTypeAndNetwork(wallet, "seed", network);
+    return wallet;
+  }
 
   const wallet = await getWalletClass(walletType, network).fromId(walletId);
   checkWalletTypeAndNetwork(wallet, walletType, network);
