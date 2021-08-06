@@ -11,6 +11,8 @@ import { sanitizeUnit } from "../util/sanitizeUnit";
 import { BaseWallet } from "../wallet/Base";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { Erc20 } from "./Erc20";
+import { verifyMessage } from "ethers/lib/utils";
+import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.BaseProvider;
@@ -270,6 +272,21 @@ export class SmartBchWallet extends BaseWallet {
     return this;
   }
   //#endregion Private implementation details
+
+  //#region Signing
+  // Convenience wrapper to sign interface
+  public async sign(message: string): Promise<SignedMessageResponseI> {
+    return { signature: await this.ethersWallet!.signMessage(message) } as SignedMessageResponseI;
+  }
+
+  // Convenience wrapper to verify interface
+  public async verify(message: string, sig: string): Promise<VerifyMessageResponseI> {
+    const result = verifyMessage(message, sig);
+    return {
+      valid: result === this.ethersWallet!.address
+    } as VerifyMessageResponseI;
+  }
+  //#endregion Signing
 }
 
 /**
