@@ -1,3 +1,4 @@
+//#region Imports
 // Stable
 import { instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
 
@@ -52,7 +53,6 @@ import {
 import { checkWifNetwork } from "../util/checkWifNetwork";
 import { deriveCashaddr } from "../util/deriveCashaddr";
 import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash";
-import { getRuntimePlatform } from "../util/getRuntimePlatform";
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { sumUtxoValue } from "../util/sumUtxoValue";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
@@ -85,6 +85,9 @@ import {
 } from "./Util";
 import { getNetworkProvider } from "../network";
 import { generateRandomBytes } from "../util/randomBytes";
+import { SignedMessageI, SignedMessage } from "../message";
+
+//#endregion Imports
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
@@ -106,20 +109,9 @@ export class Wallet extends BaseWallet {
   _slp?: Slp;
   _slpAware: boolean = false;
   _util?: Util;
+  static signedMessage: SignedMessageI = new SignedMessage();
 
-  constructor(
-    name = "",
-    networkType = NetworkType.Mainnet,
-    walletType = WalletTypeEnum.Seed
-  ) {
-    super(name, networkType, walletType);
-    this.networkPrefix = prefixFromNetworkMap[this.network];
-  }
-
-  public getNetworkProvider(network: Network = Network.MAINNET) {
-    return getNetworkProvider(network);
-  }
-
+//#region Accessors
   // interface to slp functions. see Slp.ts
   public get slp() {
     if (!this._slp) {
@@ -154,109 +146,143 @@ export class Wallet extends BaseWallet {
     return this;
   }
 
-  // Initialize wallet from Wallet Import Format
-  public async fromWIF(secret: string): Promise<this> {
-    checkWifNetwork(secret, this.network);
-
-    const sha256 = await sha256Promise;
-    let wifResult = decodePrivateKeyWif(sha256, secret);
-
-    const hasError = typeof wifResult === "string";
-    if (hasError) {
-      throw Error(wifResult as string);
-    }
-    let resultData: PrivateKeyI = wifResult as PrivateKeyI;
-    this.privateKey = resultData.privateKey;
-    this.privateKeyWif = secret;
-    this.walletType = WalletTypeEnum.Wif;
-    await this.deriveInfo();
-    return this;
+  public getNetworkProvider(network: Network = Network.MAINNET) {
+    return getNetworkProvider(network);
   }
 
-  // Initialize wallet from a mnemonic phrase
-  public async fromSeed(
-    mnemonic: string,
-    derivationPath?: string
-  ): Promise<this> {
-    this.mnemonic = mnemonic;
+  /**
+   *  explorerUrl   Web url to a transaction on a block explorer
+   *
+   * @param txId   transaction Id
+   * @returns   Url string
+   */
+   public explorerUrl(txId: string) {
+    const explorerUrlMap = {
+      mainnet: "https://explorer.bitcoin.com/bch/tx/",
+      testnet: "https://explorer.bitcoin.com/tbch/tx/",
+      regtest: "",
+    };
 
-    const crypto = await instantiateBIP32Crypto();
-    let seed = mnemonicToSeedSync(this.mnemonic);
-
-    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
-    if (!hdNode.valid) {
-      throw Error("Invalid private key derived from mnemonic seed");
-    }
-    if (derivationPath) {
-      this.derivationPath = derivationPath;
-    }
-
-    let zerothChild = deriveHdPath(
-      crypto,
-      hdNode,
-      this.derivationPath
-    ) as HdPrivateNodeValid;
-    this.privateKey = zerothChild.privateKey;
-
-    this.walletType = WalletTypeEnum.Seed;
-    await this.deriveInfo();
-    return this;
+    return explorerUrlMap[this.network] + txId;
   }
 
-  private async deriveInfo() {
-    const sha256 = await sha256Promise;
-    const secp256k1 = await secp256k1Promise;
-    this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
-    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
-      this.privateKey!
-    );
-    const networkType =
-      this.network === NetworkType.Regtest
-        ? NetworkType.Testnet
-        : this.network;
-    this.privateKeyWif = encodePrivateKeyWif(
-      sha256,
-      this.privateKey!,
-      networkType
-    );
-    checkWifNetwork(this.privateKeyWif, this.network);
-
-    this.cashaddr = (await deriveCashaddr(
-      this.privateKey!,
-      this.networkPrefix
-    )) as string;
-    this.address = this.cashaddr;
-    this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
-    return this;
+  // Return wallet info
+  public getInfo(): WalletInfoI {
+    return {
+      cashaddr: this.cashaddr,
+      isTestnet: this.isTestnet,
+      name: this.name,
+      network: this.network as any,
+      seed: this.mnemonic ? this.getSeed().seed : undefined,
+      derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
+      publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
+      publicKeyHash: binToHex(this.publicKeyHash!),
+      privateKey: this.privateKey ? binToHex(this.privateKey!) : undefined,
+      privateKeyWif: this.privateKeyWif,
+      walletId: this.toString(),
+      walletDbEntry: this.toDbString(),
+    };
   }
 
-  // Initialize a watch only wallet from a cash addr
-  public async watchOnly(address: string): Promise<this> {
-    let addressComponents = address.split(":");
-    let addressPrefix, addressBase;
-    if (addressComponents.length === 1) {
-      addressBase = addressComponents.shift() as string;
-      addressPrefix = derivePrefix(addressBase);
+  // returns the public key hash for an address
+  public getPublicKey(hex = false): string | Uint8Array {
+    if (this.publicKey) {
+      return hex ? binToHex(this.publicKey!) : this.publicKey;
     } else {
-      addressPrefix = addressComponents.shift() as string;
-      addressBase = addressComponents.shift() as string;
-      if (addressPrefix in networkPrefixMap) {
-        if (networkPrefixMap[addressPrefix] != this.network) {
-          throw Error(
-            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
-          );
-        }
-      }
+      throw Error(
+        "The public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
+      );
     }
-
-    this.cashaddr = `${addressPrefix}:${addressBase}`;
-    this.address = this.cashaddr;
-    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
-
-    return this;
   }
 
-  public async generate(): Promise<this> {
+  // returns the public key hash for an address
+  public getPublicKeyCompressed(hex = false): string | Uint8Array {
+    if (this.publicKeyCompressed) {
+      return hex
+        ? binToHex(this.publicKeyCompressed!)
+        : this.publicKeyCompressed;
+    } else {
+      throw Error(
+        "The compressed public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
+      );
+    }
+  }
+
+  // returns the public key hash for an address
+  public getPublicKeyHash(hex = false): string | Uint8Array {
+    if (this.publicKeyHash) {
+      return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
+    } else {
+      throw Error(
+        "The public key hash for this wallet is not known. If this wallet was created from the constructor directly, calling the deriveInfo() function may help. "
+      );
+    }
+  }
+
+  // get a cashscript signature
+  public getSignatureTemplate() {
+    return new SignatureTemplate(this.privateKeyWif as string);
+  }
+//#endregion
+
+//#region Constructors and Statics
+  constructor(
+    name = "",
+    network = NetworkType.Mainnet,
+    walletType = WalletTypeEnum.Seed
+  ) {
+    super(name, network, walletType);
+    this.networkPrefix = prefixFromNetworkMap[this.network];
+  }
+
+  /**
+   * fromWIF - create a wallet using the private key supplied in `Wallet Import Format`
+   *
+   * @param wif   WIF encoded private key string
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromWIF<T extends typeof Wallet>(this: T, wif: string): Promise<InstanceType<T>> {
+    return new this().fromWIF(wif) as InstanceType<T>;
+  }
+
+  /**
+   * fromCashaddr - create a watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   cashaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromCashaddr<T extends typeof Wallet>(this: T, address: string): Promise<InstanceType<T>> {
+    const prefix = derivePrefix(address);
+    const networkType = networkPrefixMap[prefix] as NetworkType;
+    return new this(
+      "",
+      networkType,
+      WalletTypeEnum.Watch
+    ).watchOnly(address) as InstanceType<T>;
+  }
+
+  /**
+   * fromSlpaddr - create an SLP aware watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   slpaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromSlpaddr<T extends typeof Wallet>(this: T, address: string): Promise<InstanceType<T>> {
+    return this.fromCashaddr(toCashAddress(address)) as InstanceType<T>;
+  }
+//#endregion Constructors and Statics
+
+//#region Protected implementations
+  protected async generate(): Promise<this> {
     if (this.walletType === WalletTypeEnum.Wif) {
       return await this._generateWif();
     } else {
@@ -291,54 +317,7 @@ export class Wallet extends BaseWallet {
     return await this.deriveInfo();
   }
 
-  /**
-   *  explorerUrl   Web url to a transaction on a block explorer
-   *
-   * @param txId   transaction Id
-   * @returns   Url string
-   */
-  public explorerUrl(txId: string) {
-    const explorerUrlMap = {
-      mainnet: "https://explorer.bitcoin.com/bch/tx/",
-      testnet: "https://explorer.bitcoin.com/tbch/tx/",
-      regtest: "",
-    };
-
-    return explorerUrlMap[this.network] + txId;
-  }
-
-  /**
-   * send Send some amount to an address
-   *
-   * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
-   *
-   */
-  public async send(
-    requests:
-      | SendRequest
-      | OpReturnData
-      | Array<SendRequest | OpReturnData>
-      | SendRequestArray[],
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    let sendRequests = asSendRequestObject(requests);
-    let result = await this._processSendRequests(
-      sendRequests,
-      undefined,
-      options
-    );
-    let resp = new SendResponse({});
-    resp.txId = result;
-    const queryBalance =
-      !options || options.queryBalance === undefined || options.queryBalance;
-    if (queryBalance) {
-      resp.balance = (await this.getBalance()) as BalanceResponse;
-    }
-    resp.explorerUrl = this.explorerUrl(resp.txId);
-    return resp;
-  }
-
-  public _fromId = async (walletId: string): Promise<this> => {
+  protected fromId = async (walletId: string): Promise<this> => {
     let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
     if (this.network != networkGiven) {
@@ -354,86 +333,115 @@ export class Wallet extends BaseWallet {
       return this.fromWIF(arg1);
     }
 
-    return super._fromId(walletId);
+    return super.fromId(walletId);
   };
 
-  /**
-   * fromWIF - create a wallet using the private key supplied in `Wallet Import Format`
-   *
-   * @param wif   WIF encoded private key string
-   *
-   * @returns instantiated wallet
-   */
-  public static fromWIF(wif: string): Promise<Wallet> {
-    return new this().fromWIF(wif);
-  }
+  // Initialize wallet from a mnemonic phrase
+  protected async fromSeed(
+    mnemonic: string,
+    derivationPath?: string
+  ): Promise<this> {
+    this.mnemonic = mnemonic;
 
-  /**
-   * fromCashaddr - create a watch-only wallet in the network derived from the address
-   *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
-   *
-   * @param address   cashaddress of a wallet
-   *
-   * @returns instantiated wallet
-   */
-  public static async fromCashaddr(address: string): Promise<Wallet> {
-    const prefix = derivePrefix(address);
-    const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this(
-      "",
-      networkType,
-      WalletTypeEnum.Watch
-    ).watchOnly(address);
-  }
+    const crypto = await instantiateBIP32Crypto();
+    let seed = mnemonicToSeedSync(this.mnemonic);
 
-  /**
-   * fromSlpaddr - create an SLP aware watch-only wallet in the network derived from the address
-   *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
-   *
-   * @param address   slpaddress of a wallet
-   *
-   * @returns instantiated wallet
-   */
-  public static fromSlpaddr(address: string): Promise<Wallet> {
-    return this.fromCashaddr(toCashAddress(address));
-  }
-
-  public async sendMax(
-    cashaddr: string,
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    const txId = await this.sendMaxRaw(cashaddr, options);
-    const queryBalance =
-      !options || options.queryBalance === undefined || options.queryBalance;
-    return {
-      txId: txId,
-      balance: queryBalance
-        ? ((await this.getBalance()) as BalanceResponse)
-        : undefined,
-      explorerUrl: this.explorerUrl(txId),
-    };
-  }
-
-  public async sendMaxRaw(cashaddr: string, options?: SendRequestOptionsI) {
-    let maxSpendableAmount = await this.getMaxAmountToSend({
-      outputCount: 1,
-      options: options,
-    });
-    if (maxSpendableAmount.sat === undefined) {
-      throw Error("no Max amount to send");
+    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    if (!hdNode.valid) {
+      throw Error("Invalid private key derived from mnemonic seed");
     }
-    let sendRequest = new SendRequest({
-      cashaddr: cashaddr,
-      value: maxSpendableAmount.sat,
-      unit: "sat",
-    });
-    return await this._processSendRequests([sendRequest], true, options);
+    if (derivationPath) {
+      this.derivationPath = derivationPath;
+    }
+
+    let zerothChild = deriveHdPath(
+      crypto,
+      hdNode,
+      this.derivationPath
+    ) as HdPrivateNodeValid;
+    this.privateKey = zerothChild.privateKey;
+
+    this.walletType = WalletTypeEnum.Seed;
+    await this.deriveInfo();
+    return this;
   }
 
+  // Initialize a watch only wallet from a cash addr
+  protected async watchOnly(address: string): Promise<this> {
+    let addressComponents = address.split(":");
+    let addressPrefix, addressBase;
+    if (addressComponents.length === 1) {
+      addressBase = addressComponents.shift() as string;
+      addressPrefix = derivePrefix(addressBase);
+    } else {
+      addressPrefix = addressComponents.shift() as string;
+      addressBase = addressComponents.shift() as string;
+      if (addressPrefix in networkPrefixMap) {
+        if (networkPrefixMap[addressPrefix] != this.network) {
+          throw Error(
+            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
+          );
+        }
+      }
+    }
+
+    this.cashaddr = `${addressPrefix}:${addressBase}`;
+    this.address = this.cashaddr;
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
+
+    return this;
+  }
+
+  // Initialize wallet from Wallet Import Format
+  protected async fromWIF(secret: string): Promise<this> {
+    checkWifNetwork(secret, this.network);
+
+    const sha256 = await sha256Promise;
+    let wifResult = decodePrivateKeyWif(sha256, secret);
+
+    const hasError = typeof wifResult === "string";
+    if (hasError) {
+      throw Error(wifResult as string);
+    }
+    let resultData: PrivateKeyI = wifResult as PrivateKeyI;
+    this.privateKey = resultData.privateKey;
+    this.privateKeyWif = secret;
+    this.walletType = WalletTypeEnum.Wif;
+    await this.deriveInfo();
+    return this;
+  }
+//#endregion Protected Implementations
+
+//#region Serialization
+  // Returns the serialized wallet as a string
+  // If storing in a database, set asNamed to false to store secrets
+  // In all other cases, the a named wallet is deserialized from the database
+  //  by the name key
+  public toString() {
+    const result = super.toString();
+    if (result) return result;
+
+    if (this.walletType === WalletTypeEnum.Wif) {
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    }
+
+    throw Error("toString unsupported wallet type");
+  }
+
+  //
+  public toDbString() {
+    const result = super.toDbString();
+    if (result) return result;
+
+    if (this.walletType === WalletTypeEnum.Wif) {
+      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    }
+
+    throw Error("toDbString unsupported wallet type");
+  }
+//#endregion Serialization
+
+//#region Funds
   //
   public async getAddressUtxos(address: string): Promise<UtxoI[]> {
     if (!this.provider) {
@@ -456,21 +464,22 @@ export class Wallet extends BaseWallet {
     }
   }
 
-  // gets transaction history of this wallet
-  public async getHistory(): Promise<TxI[]> {
-    return await this.provider!.getHistory(this.cashaddr!);
-  }
-
-  // gets last transaction of this wallet
-  public async getLastTransaction(
-    confirmedOnly: boolean = false
-  ): Promise<ElectrumRawTransaction> {
-    let history: TxI[] = await this.getHistory();
-    if (confirmedOnly) {
-      history = history.filter((val) => val.height > 0);
+  /**
+   * utxos Get unspent outputs for the wallet
+   *
+   */
+   public async getUtxos() {
+    if (!this.cashaddr) {
+      throw Error("Attempted to get utxos without an address");
     }
-    const [lastTx] = history.slice(-1);
-    return this.provider!.getRawTransactionObject(lastTx.tx_hash);
+    let utxos = await this.getAddressUtxos(this.cashaddr);
+    let resp = new UtxoResponse();
+    resp.utxos = await Promise.all(
+      utxos.map(async (o: UtxoI) => {
+        return UtxoItem.fromElectrum(o);
+      })
+    );
+    return resp;
   }
 
   // gets wallet balance in sats, bch and usd
@@ -485,6 +494,22 @@ export class Wallet extends BaseWallet {
       return await balanceResponseFromSatoshi(
         await this.getBalanceFromProvider()
       );
+    }
+  }
+
+  // Gets balance by summing value in all utxos in stats
+  public async getBalanceFromUtxos(): Promise<number> {
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    return await sumUtxoValue(utxos);
+  }
+
+  // Gets balance from fulcrum
+  public async getBalanceFromProvider(): Promise<number> {
+    // TODO not sure why getting the balance from a provider doesn't work
+    if (this._slpAware) {
+      return await this.getBalanceFromUtxos();
+    } else {
+      return await this.provider!.getBalance(this.cashaddr!);
     }
   }
 
@@ -540,99 +565,6 @@ export class Wallet extends BaseWallet {
         waitForBalanceCallback
       );
     });
-  }
-
-  // waits for next transaction, program execution is halted
-  public async waitForTransaction(
-    returnTransactionInfo: boolean = true
-  ): Promise<ElectrumRawTransaction | undefined> {
-    return new Promise(async (resolve) => {
-      const waitForTransactionCallback = async (data) => {
-        if (data instanceof Array) {
-          let addr = data[0] as string;
-          if (addr !== this.cashaddr!) {
-            return;
-          }
-
-          this.provider!.unsubscribeFromAddress(
-            this.cashaddr!,
-            waitForTransactionCallback
-          );
-
-          let lastTx;
-          if (returnTransactionInfo) {
-            lastTx = await this.getLastTransaction();
-          }
-
-          resolve(lastTx);
-        }
-      };
-      this.provider!.subscribeToAddress(
-        this.cashaddr!,
-        waitForTransactionCallback
-      );
-    });
-  }
-
-  // Gets balance by summing value in all utxos in stats
-  public async getBalanceFromUtxos(): Promise<number> {
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    return await sumUtxoValue(utxos);
-  }
-
-  // Gets balance from fulcrum
-  public async getBalanceFromProvider(): Promise<number> {
-    // TODO not sure why getting the balance from a provider doesn't work
-    if (this._slpAware) {
-      return await this.getBalanceFromUtxos();
-    } else {
-      return await this.provider!.getBalance(this.cashaddr!);
-    }
-  }
-
-  // Return wallet info
-  public getInfo(): WalletInfoI {
-    return {
-      cashaddr: this.cashaddr,
-      isTestnet: this.isTestnet,
-      name: this.name,
-      network: this.network as any,
-      seed: this.mnemonic ? this.getSeed().seed : undefined,
-      derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
-      publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
-      publicKeyHash: binToHex(this.publicKeyHash!),
-      privateKey: this.privateKey ? binToHex(this.privateKey!) : undefined,
-      privateKeyWif: this.privateKeyWif,
-      walletId: this.toString(),
-      walletDbEntry: this.toDbString(),
-    };
-  }
-
-  // Returns the serialized wallet as a string
-  // If storing in a database, set asNamed to false to store secrets
-  // In all other cases, the a named wallet is deserialized from the database
-  //  by the name key
-  public toString() {
-    const result = super.toString();
-    if (result) return result;
-
-    if (this.walletType === WalletTypeEnum.Wif) {
-      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
-    }
-
-    throw Error("toString unsupported wallet type");
-  }
-
-  //
-  public toDbString() {
-    const result = super.toDbString();
-    if (result) return result;
-
-    if (this.walletType === WalletTypeEnum.Wif) {
-      return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
-    }
-
-    throw Error("toDbString unsupported wallet type");
   }
 
   public async getMaxAmountToSend(params: {
@@ -694,61 +626,144 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * utxos Get unspent outputs for the wallet
+   * send Send some amount to an address
+   *
+   * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
    *
    */
-  public async getUtxos() {
-    if (!this.cashaddr) {
-      throw Error("Attempted to get utxos without an address");
-    }
-    let utxos = await this.getAddressUtxos(this.cashaddr);
-    let resp = new UtxoResponse();
-    resp.utxos = await Promise.all(
-      utxos.map(async (o: UtxoI) => {
-        return UtxoItem.fromElectrum(o);
-      })
+   public async send(
+    requests:
+      | SendRequest
+      | OpReturnData
+      | Array<SendRequest | OpReturnData>
+      | SendRequestArray[],
+    options?: SendRequestOptionsI
+  ): Promise<SendResponse> {
+    let sendRequests = asSendRequestObject(requests);
+    let result = await this._processSendRequests(
+      sendRequests,
+      undefined,
+      options
     );
+    let resp = new SendResponse({});
+    resp.txId = result;
+    const queryBalance =
+      !options || options.queryBalance === undefined || options.queryBalance;
+    if (queryBalance) {
+      resp.balance = (await this.getBalance()) as BalanceResponse;
+    }
+    resp.explorerUrl = this.explorerUrl(resp.txId);
     return resp;
   }
 
-  // returns the public key hash for an address
-  public getPublicKey(hex = false): string | Uint8Array {
-    if (this.publicKey) {
-      return hex ? binToHex(this.publicKey!) : this.publicKey;
-    } else {
-      throw Error(
-        "The public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
-      );
-    }
+  public async sendMax(
+    cashaddr: string,
+    options?: SendRequestOptionsI
+  ): Promise<SendResponse> {
+    const txId = await this.sendMaxRaw(cashaddr, options);
+    const queryBalance =
+      !options || options.queryBalance === undefined || options.queryBalance;
+    return {
+      txId: txId,
+      balance: queryBalance
+        ? ((await this.getBalance()) as BalanceResponse)
+        : undefined,
+      explorerUrl: this.explorerUrl(txId),
+    };
   }
 
-  // returns the public key hash for an address
-  public getPublicKeyCompressed(hex = false): string | Uint8Array {
-    if (this.publicKeyCompressed) {
-      return hex
-        ? binToHex(this.publicKeyCompressed!)
-        : this.publicKeyCompressed;
-    } else {
-      throw Error(
-        "The compressed public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
-      );
+  private async sendMaxRaw(cashaddr: string, options?: SendRequestOptionsI) {
+    let maxSpendableAmount = await this.getMaxAmountToSend({
+      outputCount: 1,
+      options: options,
+    });
+    if (maxSpendableAmount.sat === undefined) {
+      throw Error("no Max amount to send");
     }
+    let sendRequest = new SendRequest({
+      cashaddr: cashaddr,
+      value: maxSpendableAmount.sat,
+      unit: "sat",
+    });
+    return await this._processSendRequests([sendRequest], true, options);
   }
 
-  // returns the public key hash for an address
-  public getPublicKeyHash(hex = false): string | Uint8Array {
-    if (this.publicKeyHash) {
-      return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
-    } else {
-      throw Error(
-        "The public key hash for this wallet is not known. If this wallet was created from the constructor directly, calling the deriveInfo() function may help. "
-      );
-    }
+  // gets transaction history of this wallet
+  public async getHistory(): Promise<TxI[]> {
+    return await this.provider!.getHistory(this.cashaddr!);
   }
 
-  // get a cashscript signature
-  public getSignatureTemplate() {
-    return new SignatureTemplate(this.privateKeyWif as string);
+  // gets last transaction of this wallet
+  public async getLastTransaction(
+    confirmedOnly: boolean = false
+  ): Promise<ElectrumRawTransaction> {
+    let history: TxI[] = await this.getHistory();
+    if (confirmedOnly) {
+      history = history.filter((val) => val.height > 0);
+    }
+    const [lastTx] = history.slice(-1);
+    return this.provider!.getRawTransactionObject(lastTx.tx_hash);
+  }
+
+  // waits for next transaction, program execution is halted
+  public async waitForTransaction(
+    returnTransactionInfo: boolean = true
+  ): Promise<ElectrumRawTransaction | undefined> {
+    return new Promise(async (resolve) => {
+      const waitForTransactionCallback = async (data) => {
+        if (data instanceof Array) {
+          let addr = data[0] as string;
+          if (addr !== this.cashaddr!) {
+            return;
+          }
+
+          this.provider!.unsubscribeFromAddress(
+            this.cashaddr!,
+            waitForTransactionCallback
+          );
+
+          let lastTx;
+          if (returnTransactionInfo) {
+            lastTx = await this.getLastTransaction();
+          }
+
+          resolve(lastTx);
+        }
+      };
+      this.provider!.subscribeToAddress(
+        this.cashaddr!,
+        waitForTransactionCallback
+      );
+    });
+  }
+//#endregion Funds
+
+//#region Private implementation details
+  private async deriveInfo() {
+    const sha256 = await sha256Promise;
+    const secp256k1 = await secp256k1Promise;
+    this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
+    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
+      this.privateKey!
+    );
+    const networkType =
+      this.network === NetworkType.Regtest
+        ? NetworkType.Testnet
+        : this.network;
+    this.privateKeyWif = encodePrivateKeyWif(
+      sha256,
+      this.privateKey!,
+      networkType
+    );
+    checkWifNetwork(this.privateKeyWif, this.network);
+
+    this.cashaddr = (await deriveCashaddr(
+      this.privateKey!,
+      this.networkPrefix
+    )) as string;
+    this.address = this.cashaddr;
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
+    return this;
   }
 
   /**
@@ -855,21 +870,24 @@ export class Wallet extends BaseWallet {
       awaitPropagation
     );
   }
+//#endregion Private implementation details
 
+//#region Signing
   // Convenience wrapper to sign interface
   public async sign(message: string) {
-    return await BaseWallet.signedMessage.sign(message, this.privateKey!);
+    return await Wallet.signedMessage.sign(message, this.privateKey!);
   }
 
   // Convenience wrapper to verify interface
   public async verify(message: string, sig: string, publicKey?: Uint8Array) {
-    return await BaseWallet.signedMessage.verify(
+    return await Wallet.signedMessage.verify(
       message,
       sig,
       this.cashaddr!,
       publicKey
     );
   }
+//#endregion Signing
 }
 
 /**

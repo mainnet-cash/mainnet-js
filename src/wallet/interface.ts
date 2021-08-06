@@ -1,6 +1,7 @@
 import { WalletTypeEnum } from "./enum";
-import { NetworkEnum } from "../enum";
+import { NetworkEnum, NetworkType } from "../enum";
 import { UtxoItem } from "./model";
+import { ImageI } from "../qr/interface";
 
 export interface WalletRequestI {
   name?: string;
@@ -48,17 +49,28 @@ export interface MnemonicI {
 }
 
 export interface WalletI {
-  /**
-   * generate should randomly create a new wallet
-   * @returns A randomly generated instance.
-   */
-  generate(): Promise<any>;
+  // Accessors
+  getDepositAddress(): string;
+  getDepositQr(): ImageI;
+  getSeed(): MnemonicI;
+  // getNetworkProvider(network: NetworkType): any;
+  // generate(): Promise<this>;
 
-  /**
-   * toString should return a serialized representation of the Wallet
-   * @returns returns a serialized representation of the wallet
-   */
+  // Serialization
   toString(): string;
+  toDbString(): string;
 
+  // Static constructors
+  // fromId(walletId: string): Promise<this>;
+  // fromSeed(mnemonic: string, derivationPath?: string): Promise<this>;
+  // newRandom(name: string, dbName?: string): Promise<this>;
+  // watchOnly(address: string): Promise<this>;
+  // named(name: string, dbName?: string, forceNew?: boolean): Promise<this>;
+  // namedExists(name: string, dbName?: string): Promise<boolean>;
+
+  // Funds
+  getBalance(rawUnit?: any): Promise<any>;
   getMaxAmountToSend(params?: any): Promise<any>;
+  send(requests: any, options?: any): Promise<any>;
+  sendMax(address: string, options?: any): Promise<any>;
 }

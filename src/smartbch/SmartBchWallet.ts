@@ -1,7 +1,7 @@
 import "../util/randomValues";
 
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { NetworkType } from "../enum";
+import { NetworkType, UnitEnum } from "../enum";
 import { ethers, utils } from "ethers";
 import { WalletTypeEnum } from "../wallet/enum";
 import { SendRequest, SendRequestArray, SendResponse } from "../wallet/model";
@@ -21,32 +21,7 @@ export class SmartBchWallet extends BaseWallet {
   derivationPath: string = "m/44'/60'/0'/0/0";
   _erc20?: Erc20;
 
-  /**
-   * constructor for a new wallet
-   * @param {string} name              name of the wallet
-   * @param networkPrefix              network for wallet
-   *
-   * @throws {Error} if called on BaseWallet
-   */
-   constructor(name = "", networkType = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed
-   ) {
-    super(name, networkType, walletType);
-  }
-
-  public getNetworkProvider(network: NetworkType = NetworkType.Mainnet): ethers.providers.BaseProvider {
-    switch (network) {
-      case NetworkType.Mainnet: {
-        return new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
-      }
-      case NetworkType.Testnet: {
-        return new ethers.providers.JsonRpcProvider("http://35.220.203.194:8545", { name: "smartbch", chainId: 10001 });
-      }
-      default: {
-        return new ethers.providers.JsonRpcProvider("http://localhost:8545");
-      }
-    }
-  }
-
+  //#region Accessors
   // interface to slp functions. see Erc20.ts
   public get erc20() {
     if (!this._erc20) {
@@ -61,48 +36,63 @@ export class SmartBchWallet extends BaseWallet {
     return Erc20;
   }
 
-  public async fromPrivateKey(secret: string): Promise<this> {
-    this.ethersWallet = new ethers.Wallet(secret).connect(this.provider!);
-    this.walletType = WalletTypeEnum.PrivateKey;
-    await this.deriveInfo();
-    return this;
-  }
-
-  // Initialize wallet from a mnemonic phrase
-  public async fromSeed(
-    mnemonic: string,
-    derivationPath?: string
-  ): Promise<this> {
-    this.mnemonic = mnemonic;
-
-    if (derivationPath) {
-      this.derivationPath = derivationPath;
+  protected getNetworkProvider(network: NetworkType = NetworkType.Mainnet): ethers.providers.BaseProvider {
+    switch (network) {
+      case NetworkType.Mainnet: {
+        return new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
+      }
+      case NetworkType.Testnet: {
+        return new ethers.providers.JsonRpcProvider("http://35.220.203.194:8545", { name: "smartbch", chainId: 10001 });
+      }
+      default: {
+        return new ethers.providers.JsonRpcProvider("http://localhost:8545");
+      }
     }
-
-    this.ethersWallet = ethers.Wallet.fromMnemonic(this.mnemonic, this.derivationPath).connect(this.provider!);
-    this.walletType = WalletTypeEnum.Seed;
-    await this.deriveInfo();
-    return this;
   }
 
-  private async deriveInfo() {
-    this.publicKey = this.ethersWallet!.publicKey;
-    this.privateKey = this.ethersWallet!.privateKey;
-    this.address = this.ethersWallet!.address;
-    return this;
+  /**
+   *  explorerUrl   Web url to a transaction on a block explorer
+   *
+   * @param txId   transaction Id
+   * @returns   Url string
+   */
+   public explorerUrl(txId: string) {
+    const explorerUrlMap = {
+      mainnet: "",
+      testnet: "",
+      regtest: "",
+    };
+
+    return explorerUrlMap[this.network] + txId;
   }
+  //#endregion Accessors
 
-  // Initialize a watch only wallet from a cash addr
-  public async watchOnly(address: string): Promise<this> {
-    this.address = address;
-    this.ethersWallet = undefined;
-    this.privateKey = undefined;
-    this.walletType = WalletTypeEnum.Watch;
-
-    return this;
+  //#region Constructors and Statics
+  /**
+   * constructor for a new wallet
+   * @param {string} name              name of the wallet
+   * @param network              network for wallet
+   *
+   * @throws {Error} if called on BaseWallet
+   */
+  constructor(name = "", network = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed
+   ) {
+    super(name, network, walletType);
   }
+  /**
+   * fromPrivateKey - create a wallet using the private key supplied in `Wallet Import Format`
+   *
+   * @param privateKey   encoded private key string
+   *
+   * @returns instantiated wallet
+   */
+   public static async fromPrivateKey<T extends typeof SmartBchWallet>(this: T, privateKey: string): Promise<InstanceType<T>> {
+    return new this().fromPrivateKey(privateKey) as InstanceType<T>;
+  }
+  //#endregion Constructors and Statics
 
-  public async generate(): Promise<this> {
+  //#region Protected implementations
+  protected async generate(): Promise<this> {
     if (this.walletType === WalletTypeEnum.PrivateKey) {
       return await this._generatePrivateKey();
     } else {
@@ -128,7 +118,7 @@ export class SmartBchWallet extends BaseWallet {
     return await this.deriveInfo();
   }
 
-  public _fromId = async (walletId: string): Promise<this> => {
+  protected fromId = async (walletId: string): Promise<this> => {
     let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
     if (this.network != networkGiven) {
@@ -144,21 +134,45 @@ export class SmartBchWallet extends BaseWallet {
       return this.fromPrivateKey(arg1);
     }
 
-    return super._fromId(walletId);
+    return super.fromId(walletId);
   };
 
+  // Initialize wallet from a mnemonic phrase
+  protected async fromSeed(
+    mnemonic: string,
+    derivationPath?: string
+  ): Promise<this> {
+    this.mnemonic = mnemonic;
 
-  /**
-   * fromPrivateKey - create a wallet using the private key supplied in `Wallet Import Format`
-   *
-   * @param privateKey   encoded private key string
-   *
-   * @returns instantiated wallet
-   */
-  public static async fromPrivateKey(privateKey: string): Promise<SmartBchWallet> {
-    return new this().fromPrivateKey(privateKey);
+    if (derivationPath) {
+      this.derivationPath = derivationPath;
+    }
+
+    this.ethersWallet = ethers.Wallet.fromMnemonic(this.mnemonic, this.derivationPath).connect(this.provider!);
+    this.walletType = WalletTypeEnum.Seed;
+    await this.deriveInfo();
+    return this;
   }
 
+  // Initialize a watch only wallet from a cash addr
+  protected async watchOnly(address: string): Promise<this> {
+    this.address = address;
+    this.ethersWallet = undefined;
+    this.privateKey = undefined;
+    this.walletType = WalletTypeEnum.Watch;
+
+    return this;
+  }
+
+  public async fromPrivateKey(secret: string): Promise<this> {
+    this.ethersWallet = new ethers.Wallet(secret).connect(this.provider!);
+    this.walletType = WalletTypeEnum.PrivateKey;
+    await this.deriveInfo();
+    return this;
+  }
+  //#endregion Protected implementations
+
+  //#region Serialization
   // Returns the serialized wallet as a string
   // If storing in a database, set asNamed to false to store secrets
   // In all other cases, the a named wallet is deserialized from the database
@@ -185,6 +199,31 @@ export class SmartBchWallet extends BaseWallet {
 
     throw Error("toDbString unsupported wallet type");
   }
+  //#endregion Serialization
+
+  //#region Funds
+  // gets wallet balance in sats, bch and usd
+  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+    if (rawUnit) {
+      const unit = sanitizeUnit(rawUnit);
+      return await balanceFromSatoshi(
+        await this.getBalanceFromProvider(),
+        unit
+      );
+    } else {
+      return await balanceResponseFromSatoshi(
+        await this.getBalanceFromProvider()
+      );
+    }
+  }
+
+  public async getBalanceFromProvider(): Promise<number> {
+    return (await (this.provider! as ethers.providers.BaseProvider).getBalance(this.address!)).div(10**10).toNumber();
+  }
+
+  public async getMaxAmountToSend(_params?: any): Promise<BalanceResponse> {
+    return this.getBalance() as BalanceResponse;
+  }
 
   /**
    * send Send some amount to an address
@@ -192,7 +231,7 @@ export class SmartBchWallet extends BaseWallet {
    * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
    *
    */
-   public async send(
+  public async send(
     requests:
       | SendRequest
       | Array<SendRequest>
@@ -217,40 +256,20 @@ export class SmartBchWallet extends BaseWallet {
     return resp;
   }
 
-  /**
-   *  explorerUrl   Web url to a transaction on a block explorer
-   *
-   * @param txId   transaction Id
-   * @returns   Url string
-   */
-   public explorerUrl(txId: string) {
-    const explorerUrlMap = {
-      mainnet: "",
-      testnet: "",
-      regtest: "",
-    };
-
-    return explorerUrlMap[this.network] + txId;
+  public async sendMax(address: string, options?: any): Promise<SendResponse> {
+    const maxAmount = await this.getMaxAmountToSend();
+    return this.send({ cashaddr: address, value: maxAmount.sat!, unit: UnitEnum.SAT }, options);
   }
+  //#endregion Funds
 
-  // gets wallet balance in sats, bch and usd
-  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
-    if (rawUnit) {
-      const unit = sanitizeUnit(rawUnit);
-      return await balanceFromSatoshi(
-        await this.getBalanceFromProvider(),
-        unit
-      );
-    } else {
-      return await balanceResponseFromSatoshi(
-        await this.getBalanceFromProvider()
-      );
-    }
+  //#region Private implementation details
+  private async deriveInfo() {
+    this.publicKey = this.ethersWallet!.publicKey;
+    this.privateKey = this.ethersWallet!.privateKey;
+    this.address = this.ethersWallet!.address;
+    return this;
   }
-
-  public async getBalanceFromProvider(): Promise<number> {
-    return (await (this.provider! as ethers.providers.BaseProvider).getBalance(this.address!)).div(10**10).toNumber();
-  }
+  //#endregion Private implementation details
 }
 
 /**
