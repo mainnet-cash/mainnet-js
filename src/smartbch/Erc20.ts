@@ -158,10 +158,6 @@ export class Erc20 {
     }
 
     this.contract.setAddress(tokenId);
-    console.log(
-      this.contract.getDepositAddress(),
-      this.contract.contract.address
-    );
 
     let [name, ticker, decimals, value] = await Promise.all([
       this.getName(tokenId),
@@ -223,7 +219,8 @@ export class Erc20 {
    */
   public async sendMax(
     address: string,
-    tokenId: string
+    tokenId: string,
+    overrides: ethers.CallOverrides = {}
   ): Promise<SlpSendResponse> {
     const balance = await this.getBalance(tokenId);
     const requests: SlpSendRequest[] = [balance].map((val) => ({
@@ -232,7 +229,7 @@ export class Erc20 {
       ticker: val.ticker,
       tokenId: val.tokenId,
     }));
-    return this.send(requests);
+    return this.send(requests, overrides);
   }
 
   /**

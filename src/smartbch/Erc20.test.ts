@@ -39,7 +39,7 @@ describe(`Test Ethereum functions`, () => {
       gasPrice: 10 ** 10,
     });
 
-    expect(result.balance.value.isEqualTo(10));
+    expect(result.balance.value.isEqualTo(10)).toBe(true);
     expect(result.balance.name).toBe(options.name);
     expect(result.balance.ticker).toBe(options.ticker);
     expect(result.balance.decimals).toBe(options.decimals);
@@ -58,19 +58,12 @@ describe(`Test Ethereum functions`, () => {
       ],
       { gasPrice: 10 ** 10 }
     );
-    console.log(await pkWallet.erc20.getBalance(result.tokenId));
-    console.log(
-      await pkWallet.erc20.contract.contract.balanceOf(pkWallet.address!)
-    );
-    console.log(
-      await pkWallet.erc20.contract.contract.balanceOf(receiverWallet.address!)
-    );
+    expect(sendResult.balance.value.isEqualTo(7)).toBe(true);
+    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value.isEqualTo(3)).toBe(true);
 
-    console.log(
-      await receiverWallet.erc20.contract.getDepositAddress(),
-      result.tokenId
-    );
-    console.log(await receiverWallet.erc20.getBalance(result.tokenId));
-    expect(sendResult.balance.value.isEqualTo(7));
+    const sendMaxResult = await receiverWallet.erc20.sendMax(pkWallet.getDepositAddress(), result.tokenId, { gasPrice: 10 ** 10 });
+    expect(sendMaxResult.balance.value.isEqualTo(0)).toBe(true);
+    expect((await pkWallet.erc20.getBalance(result.tokenId)).value.isEqualTo(10)).toBe(true);
+    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value.isEqualTo(0)).toBe(true);
   });
 });
