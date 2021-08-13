@@ -1,0 +1,3 @@
+export function zeroAddress() {
+  return "0x0000000000000000000000000000000000000000";
+}

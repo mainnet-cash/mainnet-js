@@ -13,9 +13,10 @@ import { amountInSatoshi } from "../util/amountInSatoshi";
 import { Erc20 } from "./Erc20";
 import { verifyMessage } from "ethers/lib/utils";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
+import { getNetworkProvider } from "./Network";
 
 export class SmartBchWallet extends BaseWallet {
-  provider?: ethers.providers.BaseProvider;
+  provider?: ethers.providers.Provider;
   ethersWallet?: ethers.Wallet;
   privateKey?: string;
   publicKey?: string;
@@ -39,17 +40,7 @@ export class SmartBchWallet extends BaseWallet {
   }
 
   protected getNetworkProvider(network: NetworkType = NetworkType.Mainnet): ethers.providers.BaseProvider {
-    switch (network) {
-      case NetworkType.Mainnet: {
-        return new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
-      }
-      case NetworkType.Testnet: {
-        return new ethers.providers.JsonRpcProvider("http://35.220.203.194:8545", { name: "smartbch", chainId: 10001 });
-      }
-      default: {
-        return new ethers.providers.JsonRpcProvider("http://localhost:8545");
-      }
-    }
+    return getNetworkProvider(network);
   }
 
   /**

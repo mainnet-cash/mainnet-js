@@ -1,27 +1,128 @@
-import { SlpTokenBalance, SlpTokenType } from "../slp/interface";
+import { SlpGenesisOptions, SlpGenesisResult, SlpSendRequest, SlpSendResponse, SlpTokenBalance, SlpTokenType } from "../slp/interface";
 import {
   SmartBchWallet
 } from "../wallet/Wif";
 import { ethers, utils } from "ethers";
+// import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { Contract } from "./Contract";
+import { ImageI } from "../qr/interface";
+import { isAddress } from "ethers/lib/utils";
+import BigNumber from "bignumber.js";
+import { zeroAddress } from "./Utils";
 
+const _cache = {};
+
+export type GenesisOptions = {
+  name: string;
+  ticker: string;
+  initialAmount: BigNumber.Value;
+  decimals: number;
+  endBaton?: boolean;
+  tokenReceiverAddress?: string;
+  batonReceiverAddress?: string;
+}
 
 /**
  * Class to manage an Erc20 tokens.
  */
 export class Erc20 {
   readonly wallet: SmartBchWallet;
-
-  static get walletType() {
-    return SmartBchWallet;
-  }
+  contract: Contract;
 
   /**
    * Initializes an Slp Wallet.
    *
    * @param wallet     A non-slp wallet object
    */
-  constructor(wallet: SmartBchWallet) {
+   constructor(wallet: SmartBchWallet) {
     this.wallet = wallet;
+    this.contract = new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", Erc20.abi, [], this.wallet.network);
+    this.contract.setSigner(this.wallet);
+  }
+
+  static get walletType() {
+    return SmartBchWallet;
+  }
+
+  public async getName(tokenId: string): Promise<any> {
+    return this.getProp(tokenId, "name", async (tokenId) => {
+      return await this.contract.setAddress(tokenId).name();
+    });
+  }
+
+  public async getSymbol(tokenId: string): Promise<any> {
+    return this.getProp(tokenId, "symbol", async (tokenId) => {
+      return await this.contract.setAddress(tokenId).symbol();
+    });
+  }
+
+  public async getDecimals(tokenId: string): Promise<any> {
+    return this.getProp(tokenId, "decimals", async (tokenId) => {
+      return await this.contract.setAddress(tokenId).decimals();
+    });
+  }
+
+  public async getTotalSupply(tokenId: string): Promise<any> {
+    return this.getProp(tokenId, "totalSupply", async (tokenId) => {
+      return await this.contract.setAddress(tokenId).totalSupply();
+    });
+  }
+
+  public async getProp(tokenId: string, prop: string, func: (tokenId: string) => Promise<any>): Promise<any> {
+    if (_cache[tokenId] && _cache[tokenId][prop]) {
+      return _cache[tokenId][prop]
+    }
+
+    if (!_cache[tokenId]) {
+      _cache[tokenId] = {};
+    }
+
+    _cache[tokenId][prop] = await func(tokenId);
+    return _cache[tokenId][prop];
+  }
+
+  /**
+   * getDepositAddress - get the SmartBch deposit address
+   *
+   * a high-level function,
+   *
+   * @returns The SmartBch address as a string
+   */
+  public getDepositAddress(): string {
+    return this.wallet.getDepositAddress();
+  }
+
+  /**
+   * getDepositQr - get the SmartBch address qrcode, encoded for display on the web
+   *
+   * a high-level function
+   *
+   * @returns The qrcode for the SmartBch address
+   */
+  public getDepositQr(): ImageI {
+    return this.wallet.getDepositQr();
+  }
+
+  /**
+   * getTokenInfo - get data associated with a token
+   *
+   * a high-level function
+   *
+   * @param tokenId  The tokenId to request information about
+   *
+   * @returns Promise to the SmartBch token info or undefined.
+   */
+   public async getTokenInfo(tokenId: string) {
+    let [name, ticker, decimals, totalSupply] = await Promise.all([this.getName(tokenId), this.getSymbol(tokenId), this.getDecimals(tokenId),
+      this.getTotalSupply(tokenId)]);
+
+    return {
+      name,
+      ticker,
+      decimals,
+      totalSupply,
+      tokenId
+    }
   }
 
   /**
@@ -38,28 +139,174 @@ export class Erc20 {
       throw new Error(`Invalid tokenId ${tokenId}`);
     }
 
-    const daiContract = new ethers.Contract(tokenId, Erc20Abi, this.wallet.provider);
-    const result = await Promise.all([daiContract.name(), daiContract.symbol(), daiContract.decimals(),
-          daiContract.balanceOf(this.wallet.address!)]);
-    result[3] = ethers.utils.formatUnits(result[3], result[2]);
+    this.contract.setAddress(tokenId);
+    console.log(this.contract.getDepositAddress(), this.contract.contract.address);
 
-    return <SlpTokenBalance>{name: result[0], ticker: result[1], decimals: result[2], value: result[3], tokenId: tokenId};
+    let [name, ticker, decimals, value] = await Promise.all([this.getName(tokenId), this.getSymbol(tokenId), this.getDecimals(tokenId),
+          this.contract.balanceOf(this.getDepositAddress())]);
+
+    value = new BigNumber(value.toString()).shiftedBy(-decimals);
+
+    return <SlpTokenBalance>{name, ticker, decimals, value, tokenId};
   }
 
+  /**
+   * genesis - create a new SmartBch ERC20 token
+   *
+   * @param options    Token creation options @see SlpGenesisOptions
+   *
+   * @returns Token Id and new token balance
+   */
+   public async genesis(options: GenesisOptions, overrides: ethers.CallOverrides = {}): Promise<SlpGenesisResult> {
+    const baseInitialAmount = ethers.BigNumber.from(new BigNumber(options.initialAmount).shiftedBy(options.decimals).toString());
+    const contract = await Contract.deploy(this.wallet, Erc20.script, options.name, options.ticker, options.decimals, baseInitialAmount, options.tokenReceiverAddress || zeroAddress(), options.batonReceiverAddress || zeroAddress(), options.endBaton === true, overrides);
+    this.contract = contract;
+
+    return {
+      tokenId: contract.getDepositAddress(),
+      balance: await this.getBalance(contract.getDepositAddress())
+    };
+  }
+
+  /**
+   * sendMax - send the maximum spendable amount for a token to a smartbch address.
+   *
+   * a high-level function, see also /wallet/slp/send_max REST endpoint
+   *
+   * @param address   destination smartbch address
+   * @param tokenId   the id of the token to be spent
+   *
+   * @returns transaction id and token balance
+   */
+   public async sendMax(
+    address: string,
+    tokenId: string
+  ): Promise<SlpSendResponse> {
+    const balance = await this.getBalance(tokenId);
+    const requests: SlpSendRequest[] = [balance].map((val) => ({
+      slpaddr: address,
+      value: val.value,
+      ticker: val.ticker,
+      tokenId: val.tokenId,
+    }));
+    return this.send(requests);
+  }
+
+  /**
+   * send - attempt to process a list of slp send requests.
+   *
+   * a high-level function, see also /wallet/slp/send REST endpoint
+   *
+   * @param [requests]   list of send requests
+   *
+   * @returns transaction id and token balance
+   */
+  public async send(requests: SlpSendRequest[], overrides: ethers.CallOverrides = {}): Promise<SlpSendResponse> {
+    let [actualTokenId, result] = await this._processSendRequests(requests, overrides);
+    return {
+      txId: result,
+      balance: await this.getBalance(actualTokenId),
+      explorerUrl: result,
+    };
+  }
+
+  /**
+   * _processSendRequests - given a list of sendRequests, estimate fees, build the transaction and submit it.
+   *
+   * A private utility wrapper to pre-process transactions
+   *
+   * Unstable - behavior may change without notice.
+   *
+   * @param  {SlpSendRequest[]} sendRequests
+   */
+   private async _processSendRequests(sendRequests: SlpSendRequest[], overrides: ethers.CallOverrides = {}) {
+    if (!sendRequests.length) {
+      throw Error("Empty send requests");
+    }
+
+    const uniqueTokenIds = new Set(sendRequests.map((val) => val.tokenId));
+    if (uniqueTokenIds.size > 1) {
+      throw Error(
+        "You have two different token types with the same ticker. Pass tokenId parameter"
+      );
+    }
+
+    const tokenId = sendRequests[0].tokenId;
+    const to = sendRequests[0].slpaddr;
+    const decimals = await this.getDecimals(tokenId);
+    const value = ethers.BigNumber.from(new BigNumber(sendRequests[0].value).shiftedBy(decimals).toString());
+
+    if (!isAddress(tokenId)) {
+      throw new Error(
+        "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
+      );
+    }
+
+    const response: ethers.providers.TransactionResponse = await this.contract.setAddress(tokenId).contract.transfer(to, value, overrides);
+    const receipt = await response.wait();
+
+    return [
+      tokenId,
+      receipt.transactionHash
+    ];
+  }
+
+  static abi = [
+    "function name() view returns (string)",
+    "function symbol() view returns (string)",
+    "function decimals() view returns (uint8)",
+    "function totalSupply() external view returns (uint256)",
+    "function balanceOf(address) view returns (uint)",
+    "function transfer(address to, uint amount)",
+    "function transferFrom(address sender, address recipient, uint256 amount) external returns (bool)",
+    "event Transfer(address indexed from, address indexed to, uint amount)",
+    "event Approval(address indexed owner, address indexed spender, uint256 value)",
+  ]
+
+  static script = `
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.2;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
+  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+  uint8 private _decimals;
+
+  constructor(string memory name_, string memory symbol_, uint8 decimals_, uint256 initialAmount_, address tokenReceiver_, address batonReceiver_, bool endBaton_) ERC20(name_, symbol_) {
+    require(decimals_ >= 0, "decimals must be greater than or equal 0");
+    require(decimals_ <= 18, "decimals must be less than or equal 18");
+    _decimals = decimals_;
+
+    // denominated in base units
+    if (initialAmount_ > 0) {
+      if (tokenReceiver_ == address(0)) {
+        _mint(msg.sender, initialAmount_);
+      } else {
+        _mint(tokenReceiver_, initialAmount_);
+      }
+    }
+
+    if (!endBaton_) {
+      _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+      if (batonReceiver_ == address(0)) {
+        _setupRole(MINTER_ROLE, msg.sender);
+      } else {
+        _setupRole(MINTER_ROLE, batonReceiver_);
+      }
+    }
+  }
+
+  function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+    _mint(to, amount);
+  }
+
+  function decimals() public view virtual override returns (uint8) {
+    return _decimals;
+  }
+}`;
+
 }
-
-const Erc20Abi = [
-  // Some details about the token
-  "function name() view returns (string)",
-  "function symbol() view returns (string)",
-  "function decimals() view returns (uint8)",
-
-  // Get the account balance
-  "function balanceOf(address) view returns (uint)",
-
-  // Send some of your tokens to someone else
-  "function transfer(address to, uint amount)",
-
-  // An event triggered whenever anyone transfers to someone else
-  "event Transfer(address indexed from, address indexed to, uint amount)"
-];
