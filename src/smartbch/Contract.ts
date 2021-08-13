@@ -12,17 +12,26 @@ import { atob, btoa } from "../util/base64";
 import { DELIMITER } from "../constant";
 import { ContractFunction } from "cashscript/dist/module/Contract";
 import { UtxoItem } from "../wallet/model";
-import { CashscriptTransactionI, ContractI, ContractInfoResponseI, ContractResponseI } from "../contract/interface";
+import {
+  CashscriptTransactionI,
+  ContractI,
+  ContractInfoResponseI,
+  ContractResponseI,
+} from "../contract/interface";
 import { ContractFactory, ContractInterface, ethers, Wallet } from "ethers";
 import { NetworkType } from "../enum";
-import { castConstructorParametersFromArtifact, castStringArgumentsFromArtifact, transformContractToRequests } from "../contract/util";
+import {
+  castConstructorParametersFromArtifact,
+  castStringArgumentsFromArtifact,
+  transformContractToRequests,
+} from "../contract/util";
 import { defineReadOnly } from "ethers/lib/utils";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import solc from 'solc';
+import solc from "solc";
 import { XMLHttpRequest } from "xmlhttprequest-ssl";
 import { SmartBchWallet } from "./SmartBchWallet";
 import { WalletTypeEnum } from "../wallet/enum";
-import fs from 'fs';
+import fs from "fs";
 
 export type Argument = number | boolean | string | Uint8Array;
 
@@ -98,8 +107,18 @@ export class Contract implements ContractI {
     return this;
   }
 
-  public static fromEthersContract(contract: ethers.Contract, parameters: any[] = [], network: Network = NetworkType.Mainnet, signer?: SmartBchWallet) {
-    const result = new Contract(contract.address, contract.interface, parameters, network);
+  public static fromEthersContract(
+    contract: ethers.Contract,
+    parameters: any[] = [],
+    network: Network = NetworkType.Mainnet,
+    signer?: SmartBchWallet
+  ) {
+    const result = new Contract(
+      contract.address,
+      contract.interface,
+      parameters,
+      network
+    );
     if (signer) {
       result.setSigner(signer);
     }
@@ -107,7 +126,7 @@ export class Contract implements ContractI {
     return result;
   }
 
-  readonly [ key: string ]: ContractFunction | any;
+  readonly [key: string]: ContractFunction | any;
 
   private defineContractProperties() {
     Object.keys(this.contract.interface.functions).forEach((signature) => {
@@ -115,7 +134,7 @@ export class Contract implements ContractI {
 
       const fn = async (...args: Array<any>): Promise<any> => {
         return this.contract[signature](...args);
-      }
+      };
 
       defineReadOnly(this, fragment.name, fn as any);
     });
@@ -197,7 +216,13 @@ export class Contract implements ContractI {
     let paramStrings = JSON.parse(atob(serializedParams));
     // let params = castConstructorParametersFromArtifact(paramStrings, artifact);
 
-    return new Contract(address, abi, paramStrings, network as Network, parseInt(nonce));
+    return new Contract(
+      address,
+      abi,
+      paramStrings,
+      network as Network,
+      parseInt(nonce)
+    );
   }
 
   /**
@@ -299,7 +324,7 @@ export class Contract implements ContractI {
   public async runFunctionFromStrings(request: {
     function: string;
     arguments: Array<any>;
-    overrides?: ethers.CallOverrides
+    overrides?: ethers.CallOverrides;
   }) {
     if (request.overrides === undefined) {
       request.overrides = {};
@@ -320,10 +345,7 @@ export class Contract implements ContractI {
     }
   }
 
-  public async estimateFee(
-    func: ContractFunction,
-    ...args
-  ) {
+  public async estimateFee(func: ContractFunction, ...args) {
     const fn = this.getContractFunction(func.name);
     return this.contract.estimateGas[fn.name](...args);
   }
@@ -353,49 +375,66 @@ export class Contract implements ContractI {
     return this.contract.deployed();
   }
 
-  public static async deploy(signer: SmartBchWallet, solidityScript: string, ...args: Array<any>): Promise<Contract> {
+  public static async deploy(
+    signer: SmartBchWallet,
+    solidityScript: string,
+    ...args: Array<any>
+  ): Promise<Contract> {
     if (signer.walletType === WalletTypeEnum.Watch) {
       throw Error("Cannot deploy contracts with Watch-Only wallets");
     }
 
     const input = {
-      language: 'Solidity',
+      language: "Solidity",
       sources: {
         main: {
-          content: solidityScript
-        }
+          content: solidityScript,
+        },
       },
       settings: {
         outputSelection: {
-          '*': {
-            '*': ['abi', 'evm']
-          }
-        }
-      }
-    }
+          "*": {
+            "*": ["abi", "evm"],
+          },
+        },
+      },
+    };
 
-    const compiled = JSON.parse(solc.compile(JSON.stringify(input), { import: Contract.findImports }));
-    const errors = (compiled.errors || []).filter(error => error.severity === 'error');
+    const compiled = JSON.parse(
+      solc.compile(JSON.stringify(input), { import: Contract.findImports })
+    );
+    const errors = (compiled.errors || []).filter(
+      (error) => error.severity === "error"
+    );
     if (errors.length) {
       throw new Error(JSON.stringify(errors, null, 2));
     }
 
-    const artifact = compiled.contracts.main[Object.keys(compiled.contracts.main)[0]];
-    const factory = ContractFactory.fromSolidity(artifact, signer.ethersWallet!);
+    const artifact =
+      compiled.contracts.main[Object.keys(compiled.contracts.main)[0]];
+    const factory = ContractFactory.fromSolidity(
+      artifact,
+      signer.ethersWallet!
+    );
 
-    let overrides: ethers.CallOverrides = { };
+    let overrides: ethers.CallOverrides = {};
 
     // If 1 extra parameter was passed in, it contains overrides
     if (args.length === factory.interface.deploy.inputs.length + 1) {
-        overrides = args.pop();
+      overrides = args.pop();
     }
 
     const contract = await factory.deploy(...args, overrides);
-    contract.deployTransaction.data = '';
+    contract.deployTransaction.data = "";
     const receipt = await contract.deployTransaction.wait();
     (contract as any).deployReceipt = receipt;
 
-    const result = Contract.fromEthersContract(contract, args, signer.network, signer);
+    const result = Contract.fromEthersContract(
+      contract,
+      args,
+      signer.network,
+      signer
+    );
     result.contract = contract;
 
     return result;
@@ -407,23 +446,26 @@ export class Contract implements ContractI {
       const nodePath = `${process.cwd()}/node_modules/${path}`;
       if (fs.existsSync(nodePath)) {
         return {
-          contents: fs.readFileSync(nodePath, "utf8")
-        }
+          contents: fs.readFileSync(nodePath, "utf8"),
+        };
       }
 
-      url = path.replace("@openzeppelin", "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master");
+      url = path.replace(
+        "@openzeppelin",
+        "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master"
+      );
     } else if (path.indexOf("https://") === 0) {
       url = path;
     }
 
     if (url) {
       var request = new XMLHttpRequest();
-      request.open('GET', url, false);
+      request.open("GET", url, false);
       request.send(null);
 
       return {
-        contents: request.responseText
-      }
+        contents: request.responseText,
+      };
     }
 
     return { error: `Can not resolve import ${path}.` };

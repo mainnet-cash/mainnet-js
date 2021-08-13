@@ -6,7 +6,11 @@ import { ethers, utils } from "ethers";
 import { WalletTypeEnum } from "../wallet/enum";
 import { SendRequest, SendRequestArray, SendResponse } from "../wallet/model";
 import { SendRequestOptionsI } from "../wallet/interface";
-import { balanceFromSatoshi, BalanceResponse, balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
+import {
+  balanceFromSatoshi,
+  BalanceResponse,
+  balanceResponseFromSatoshi,
+} from "../util/balanceObjectFromSatoshi";
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { BaseWallet } from "../wallet/Base";
 import { amountInSatoshi } from "../util/amountInSatoshi";
@@ -39,7 +43,9 @@ export class SmartBchWallet extends BaseWallet {
     return Erc20;
   }
 
-  protected getNetworkProvider(network: NetworkType = NetworkType.Mainnet): ethers.providers.BaseProvider {
+  protected getNetworkProvider(
+    network: NetworkType = NetworkType.Mainnet
+  ): ethers.providers.BaseProvider {
     return getNetworkProvider(network);
   }
 
@@ -49,7 +55,7 @@ export class SmartBchWallet extends BaseWallet {
    * @param txId   transaction Id
    * @returns   Url string
    */
-   public explorerUrl(txId: string) {
+  public explorerUrl(txId: string) {
     const explorerUrlMap = {
       mainnet: "",
       testnet: "",
@@ -68,8 +74,11 @@ export class SmartBchWallet extends BaseWallet {
    *
    * @throws {Error} if called on BaseWallet
    */
-  constructor(name = "", network = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed
-   ) {
+  constructor(
+    name = "",
+    network = NetworkType.Mainnet,
+    walletType = WalletTypeEnum.Seed
+  ) {
     super(name, network, walletType);
   }
   /**
@@ -79,7 +88,10 @@ export class SmartBchWallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-   public static async fromPrivateKey<T extends typeof SmartBchWallet>(this: T, privateKey: string): Promise<InstanceType<T>> {
+  public static async fromPrivateKey<T extends typeof SmartBchWallet>(
+    this: T,
+    privateKey: string
+  ): Promise<InstanceType<T>> {
     return new this().fromPrivateKey(privateKey) as InstanceType<T>;
   }
   //#endregion Constructors and Statics
@@ -115,11 +127,7 @@ export class SmartBchWallet extends BaseWallet {
     let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
     if (this.network != networkGiven) {
-      throw Error(
-        `Network prefix ${networkGiven} to a ${
-          this.network
-        } wallet`
-      );
+      throw Error(`Network prefix ${networkGiven} to a ${this.network} wallet`);
     }
 
     // "privkey:regtest:0x89b83ea27318a8c46c229f5b85c34975115ebc3b62e5e662e3cb6f96b77c8100"
@@ -141,7 +149,10 @@ export class SmartBchWallet extends BaseWallet {
       this.derivationPath = derivationPath;
     }
 
-    this.ethersWallet = ethers.Wallet.fromMnemonic(this.mnemonic, this.derivationPath).connect(this.provider!);
+    this.ethersWallet = ethers.Wallet.fromMnemonic(
+      this.mnemonic,
+      this.derivationPath
+    ).connect(this.provider!);
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
@@ -211,7 +222,13 @@ export class SmartBchWallet extends BaseWallet {
   }
 
   public async getBalanceFromProvider(): Promise<number> {
-    return (await (this.provider! as ethers.providers.BaseProvider).getBalance(this.address!)).div(10**10).toNumber();
+    return (
+      await (this.provider! as ethers.providers.BaseProvider).getBalance(
+        this.address!
+      )
+    )
+      .div(10 ** 10)
+      .toNumber();
   }
 
   public async getMaxAmountToSend(_params?: any): Promise<BalanceResponse> {
@@ -225,19 +242,21 @@ export class SmartBchWallet extends BaseWallet {
    *
    */
   public async send(
-    requests:
-      | SendRequest
-      | Array<SendRequest>
-      // | SendRequestArray[],
-      ,
+    requests: SendRequest | Array<SendRequest>,
+    // | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     // only one recepient for now
     const request = Array.isArray(requests) ? requests[0] : requests;
 
-    const weiValue = BigNumber.from(await amountInSatoshi(request.value, request.unit)).mul(10**10);
+    const weiValue = BigNumber.from(
+      await amountInSatoshi(request.value, request.unit)
+    ).mul(10 ** 10);
 
-    const result = await this.ethersWallet!.sendTransaction({ to: request.cashaddr, value: weiValue });
+    const result = await this.ethersWallet!.sendTransaction({
+      to: request.cashaddr,
+      value: weiValue,
+    });
     const resp = <SendResponse>{ txId: result.hash };
     const queryBalance =
       !options || options.queryBalance === undefined || options.queryBalance;
@@ -251,7 +270,10 @@ export class SmartBchWallet extends BaseWallet {
 
   public async sendMax(address: string, options?: any): Promise<SendResponse> {
     const maxAmount = await this.getMaxAmountToSend();
-    return this.send({ cashaddr: address, value: maxAmount.sat!, unit: UnitEnum.SAT }, options);
+    return this.send(
+      { cashaddr: address, value: maxAmount.sat!, unit: UnitEnum.SAT },
+      options
+    );
   }
   //#endregion Funds
 
@@ -267,14 +289,19 @@ export class SmartBchWallet extends BaseWallet {
   //#region Signing
   // Convenience wrapper to sign interface
   public async sign(message: string): Promise<SignedMessageResponseI> {
-    return { signature: await this.ethersWallet!.signMessage(message) } as SignedMessageResponseI;
+    return {
+      signature: await this.ethersWallet!.signMessage(message),
+    } as SignedMessageResponseI;
   }
 
   // Convenience wrapper to verify interface
-  public async verify(message: string, sig: string): Promise<VerifyMessageResponseI> {
+  public async verify(
+    message: string,
+    sig: string
+  ): Promise<VerifyMessageResponseI> {
     const result = verifyMessage(message, sig);
     return {
-      valid: result === this.ethersWallet!.address
+      valid: result === this.ethersWallet!.address,
     } as VerifyMessageResponseI;
   }
   //#endregion Signing
@@ -283,7 +310,7 @@ export class SmartBchWallet extends BaseWallet {
 /**
  * Class to manage a testnet wallet.
  */
- export class TestNetSmartBchWallet extends SmartBchWallet {
+export class TestNetSmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
     super(name, NetworkType.Testnet);
   }
@@ -292,7 +319,7 @@ export class SmartBchWallet extends BaseWallet {
 /**
  * Class to manage a regtest wallet.
  */
- export class RegTestSmartBchWallet extends SmartBchWallet {
+export class RegTestSmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
     super(name, NetworkType.Regtest);
   }

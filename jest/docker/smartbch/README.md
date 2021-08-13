@@ -5,8 +5,9 @@ This directory contains the necessary files and scripts to produce and run smart
 `Dockerfile` describes the building of the docker image itself. It can be used both to produce debug and minified release (default) images ready to be used for smartbch mainnet. If you need to build and experiment with debug image, comment everything after `# produce clean image` comment.
 
 `docker-compose.yml` contains two configurations:
-  * `smartbch` to join mainnet as validator
-  * `smartbch-regtest` to start smartbch in a regtest mode (single-node testnet) for local development
+
+- `smartbch` to join mainnet as validator
+- `smartbch-regtest` to start smartbch in a regtest mode (single-node testnet) for local development
 
 `test-keys.txt` the file containing private keys to be mounted into regtest container. If file does not exist ot is empty, it will be populated. These private keys persist after `docker-compose down -v`.
 
@@ -14,11 +15,9 @@ This directory contains the necessary files and scripts to produce and run smart
 
 Also the repository contains a GitHub actions workflow `.github/workflows/release.yml` which is triggered upon creation of a new release tag. It requires your repository to contain a secret named `DOCKERHUB_PASSWORD` containing the password to login to dockerhub under the account name corresponding to the repository name.
 
-
 To start the mainnet validator node simply invoke `docker-compose up smartbch`.
 
 To start the regtest local development node use `docker-compose up smartbch-regtest`.
-
 
 ## Manual setup
 

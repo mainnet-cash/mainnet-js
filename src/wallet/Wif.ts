@@ -111,7 +111,7 @@ export class Wallet extends BaseWallet {
   _util?: Util;
   static signedMessage: SignedMessageI = new SignedMessage();
 
-//#region Accessors
+  //#region Accessors
   // interface to slp functions. see Slp.ts
   public get slp() {
     if (!this._slp) {
@@ -156,7 +156,7 @@ export class Wallet extends BaseWallet {
    * @param txId   transaction Id
    * @returns   Url string
    */
-   public explorerUrl(txId: string) {
+  public explorerUrl(txId: string) {
     const explorerUrlMap = {
       mainnet: "https://explorer.bitcoin.com/bch/tx/",
       testnet: "https://explorer.bitcoin.com/tbch/tx/",
@@ -223,9 +223,9 @@ export class Wallet extends BaseWallet {
   public getSignatureTemplate() {
     return new SignatureTemplate(this.privateKeyWif as string);
   }
-//#endregion
+  //#endregion
 
-//#region Constructors and Statics
+  //#region Constructors and Statics
   constructor(
     name = "",
     network = NetworkType.Mainnet,
@@ -242,7 +242,10 @@ export class Wallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-  public static async fromWIF<T extends typeof Wallet>(this: T, wif: string): Promise<InstanceType<T>> {
+  public static async fromWIF<T extends typeof Wallet>(
+    this: T,
+    wif: string
+  ): Promise<InstanceType<T>> {
     return new this().fromWIF(wif) as InstanceType<T>;
   }
 
@@ -256,14 +259,15 @@ export class Wallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-  public static async fromCashaddr<T extends typeof Wallet>(this: T, address: string): Promise<InstanceType<T>> {
+  public static async fromCashaddr<T extends typeof Wallet>(
+    this: T,
+    address: string
+  ): Promise<InstanceType<T>> {
     const prefix = derivePrefix(address);
     const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this(
-      "",
-      networkType,
-      WalletTypeEnum.Watch
-    ).watchOnly(address) as InstanceType<T>;
+    return new this("", networkType, WalletTypeEnum.Watch).watchOnly(
+      address
+    ) as InstanceType<T>;
   }
 
   /**
@@ -276,12 +280,15 @@ export class Wallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-  public static async fromSlpaddr<T extends typeof Wallet>(this: T, address: string): Promise<InstanceType<T>> {
+  public static async fromSlpaddr<T extends typeof Wallet>(
+    this: T,
+    address: string
+  ): Promise<InstanceType<T>> {
     return this.fromCashaddr(toCashAddress(address)) as InstanceType<T>;
   }
-//#endregion Constructors and Statics
+  //#endregion Constructors and Statics
 
-//#region Protected implementations
+  //#region Protected implementations
   protected async generate(): Promise<this> {
     if (this.walletType === WalletTypeEnum.Wif) {
       return await this._generateWif();
@@ -321,11 +328,7 @@ export class Wallet extends BaseWallet {
     let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
     if (this.network != networkGiven) {
-      throw Error(
-        `Network prefix ${networkGiven} to a ${
-          this.network
-        } wallet`
-      );
+      throw Error(`Network prefix ${networkGiven} to a ${this.network} wallet`);
     }
 
     // "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
@@ -410,9 +413,9 @@ export class Wallet extends BaseWallet {
     await this.deriveInfo();
     return this;
   }
-//#endregion Protected Implementations
+  //#endregion Protected Implementations
 
-//#region Serialization
+  //#region Serialization
   // Returns the serialized wallet as a string
   // If storing in a database, set asNamed to false to store secrets
   // In all other cases, the a named wallet is deserialized from the database
@@ -439,9 +442,9 @@ export class Wallet extends BaseWallet {
 
     throw Error("toDbString unsupported wallet type");
   }
-//#endregion Serialization
+  //#endregion Serialization
 
-//#region Funds
+  //#region Funds
   //
   public async getAddressUtxos(address: string): Promise<UtxoI[]> {
     if (!this.provider) {
@@ -468,7 +471,7 @@ export class Wallet extends BaseWallet {
    * utxos Get unspent outputs for the wallet
    *
    */
-   public async getUtxos() {
+  public async getUtxos() {
     if (!this.cashaddr) {
       throw Error("Attempted to get utxos without an address");
     }
@@ -567,13 +570,15 @@ export class Wallet extends BaseWallet {
     });
   }
 
-  public async getMaxAmountToSend(params: {
-    outputCount?: number;
-    options?: SendRequestOptionsI;
-  } = {
-    outputCount: 1,
-    options: {},
-  }): Promise<BalanceResponse> {
+  public async getMaxAmountToSend(
+    params: {
+      outputCount?: number;
+      options?: SendRequestOptionsI;
+    } = {
+      outputCount: 1,
+      options: {},
+    }
+  ): Promise<BalanceResponse> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
@@ -631,7 +636,7 @@ export class Wallet extends BaseWallet {
    * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
    *
    */
-   public async send(
+  public async send(
     requests:
       | SendRequest
       | OpReturnData
@@ -736,9 +741,9 @@ export class Wallet extends BaseWallet {
       );
     });
   }
-//#endregion Funds
+  //#endregion Funds
 
-//#region Private implementation details
+  //#region Private implementation details
   private async deriveInfo() {
     const sha256 = await sha256Promise;
     const secp256k1 = await secp256k1Promise;
@@ -747,9 +752,7 @@ export class Wallet extends BaseWallet {
       this.privateKey!
     );
     const networkType =
-      this.network === NetworkType.Regtest
-        ? NetworkType.Testnet
-        : this.network;
+      this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
     this.privateKeyWif = encodePrivateKeyWif(
       sha256,
       this.privateKey!,
@@ -870,9 +873,9 @@ export class Wallet extends BaseWallet {
       awaitPropagation
     );
   }
-//#endregion Private implementation details
+  //#endregion Private implementation details
 
-//#region Signing
+  //#region Signing
   // Convenience wrapper to sign interface
   public async sign(message: string) {
     return await Wallet.signedMessage.sign(message, this.privateKey!);
@@ -887,7 +890,7 @@ export class Wallet extends BaseWallet {
       publicKey
     );
   }
-//#endregion Signing
+  //#endregion Signing
 }
 
 /**
@@ -1119,4 +1122,4 @@ export class RegTestWatchWallet extends Wallet {
   }
 }
 
-export * from "../smartbch/SmartBchWallet"
+export * from "../smartbch/SmartBchWallet";

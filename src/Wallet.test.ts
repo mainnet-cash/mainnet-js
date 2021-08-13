@@ -80,9 +80,7 @@ describe(`Test Wallet library`, () => {
     try {
       await RegTestWallet.fromId(`hd:regtest:${process.env.PRIVATE_WIF}`);
     } catch (e) {
-      expect(e.message.slice(0, 97)).toBe(
-        "Unknown wallet type 'hd'"
-      );
+      expect(e.message.slice(0, 97)).toBe("Unknown wallet type 'hd'");
     }
   });
 

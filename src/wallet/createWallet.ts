@@ -146,9 +146,7 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
 
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
-    wallet = await getWalletClass(walletType, networkType).slp.named(
-      body.name
-    );
+    wallet = await getWalletClass(walletType, networkType).slp.named(body.name);
     if (wallet.network != networkType) {
       throw Error(
         `A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`

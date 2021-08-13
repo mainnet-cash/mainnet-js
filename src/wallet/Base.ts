@@ -24,9 +24,11 @@ export class BaseWallet implements WalletI {
   network: NetworkType;
   walletType: WalletTypeEnum;
 
-//#region Accessors
+  //#region Accessors
   // @ts-ignore
-  protected getNetworkProvider(network: NetworkType = NetworkType.Mainnet): any {
+  protected getNetworkProvider(
+    network: NetworkType = NetworkType.Mainnet
+  ): any {
     throw Error("getNetworkProvider called on base wallet");
   }
 
@@ -39,7 +41,7 @@ export class BaseWallet implements WalletI {
    *
    * @returns The deposit address as a string
    */
-   public getDepositAddress(): string {
+  public getDepositAddress(): string {
     return this.address!;
   }
 
@@ -69,9 +71,9 @@ export class BaseWallet implements WalletI {
       derivationPath: this.derivationPath,
     };
   }
-//#endregion Accessors
+  //#endregion Accessors
 
-//#region Constructors and Statics
+  //#region Constructors and Statics
   /**
    * constructor for a new wallet
    * @param {string} name              name of the wallet
@@ -79,7 +81,11 @@ export class BaseWallet implements WalletI {
    *
    * @throws {Error} if called on BaseWallet
    */
-  constructor(name = "", network = NetworkType.Mainnet, walletType = WalletTypeEnum.Seed  ) {
+  constructor(
+    name = "",
+    network = NetworkType.Mainnet,
+    walletType = WalletTypeEnum.Seed
+  ) {
     this.name = name;
     this.network = network;
     this.walletType = walletType;
@@ -94,7 +100,10 @@ export class BaseWallet implements WalletI {
    *
    * @returns wallet instantiated accordingly to the walletId rules
    */
-   public static async fromId<T extends typeof BaseWallet>(this: T, walletId: string): Promise<InstanceType<T>> {
+  public static async fromId<T extends typeof BaseWallet>(
+    this: T,
+    walletId: string
+  ): Promise<InstanceType<T>> {
     return new this().fromId(walletId) as InstanceType<T>;
   }
 
@@ -109,7 +118,8 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-  public static async fromSeed<T extends typeof BaseWallet>(this: T,
+  public static async fromSeed<T extends typeof BaseWallet>(
+    this: T,
     seed: string,
     derivationPath?: string
   ): Promise<InstanceType<T>> {
@@ -126,7 +136,11 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-  public static async newRandom<T extends typeof BaseWallet>(this: T, name: string = "", dbName?: string): Promise<InstanceType<T>> {
+  public static async newRandom<T extends typeof BaseWallet>(
+    this: T,
+    name: string = "",
+    dbName?: string
+  ): Promise<InstanceType<T>> {
     return new this().newRandom(name, dbName) as InstanceType<T>;
   }
 
@@ -140,7 +154,10 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-  public static async watchOnly<T extends typeof BaseWallet>(this: T, address: string) {
+  public static async watchOnly<T extends typeof BaseWallet>(
+    this: T,
+    address: string
+  ) {
     return new this().watchOnly(address) as InstanceType<T>;
   }
 
@@ -153,7 +170,8 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-   public static async named<T extends typeof BaseWallet>(this: T,
+  public static async named<T extends typeof BaseWallet>(
+    this: T,
     name: string,
     dbName?: string,
     force?: boolean
@@ -173,7 +191,8 @@ export class BaseWallet implements WalletI {
    *
    * @returns instantiated wallet
    */
-  public static async replaceNamed<T extends typeof BaseWallet>(this: T,
+  public static async replaceNamed<T extends typeof BaseWallet>(
+    this: T,
     name: string,
     walletId: string,
     dbName?: string
@@ -189,12 +208,15 @@ export class BaseWallet implements WalletI {
    *
    * @returns boolean
    */
-  public static async namedExists(name: string, dbName?: string): Promise<boolean> {
+  public static async namedExists(
+    name: string,
+    dbName?: string
+  ): Promise<boolean> {
     return new this().namedExists(name, dbName);
   }
-//#endregion Constructors
+  //#endregion Constructors
 
-//#region Protected implementations
+  //#region Protected implementations
   /**
    * generate creates a new wallet
    * @throws {Error} if called on BaseWallet
@@ -208,15 +230,11 @@ export class BaseWallet implements WalletI {
    *
    * @throws {Error} if called on BaseWallet
    */
-   protected fromId(walletId: string): Promise<this> {
+  protected fromId(walletId: string): Promise<this> {
     let [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
 
     if (this.network != networkGiven) {
-      throw Error(
-        `Network prefix ${networkGiven} to a ${
-          this.network
-        } wallet`
-      );
+      throw Error(`Network prefix ${networkGiven} to a ${this.network} wallet`);
     }
     switch (walletType) {
       case "watch":
@@ -250,7 +268,10 @@ export class BaseWallet implements WalletI {
 
   // Initialize wallet from a mnemonic phrase
   // @ts-ignore
-  protected async fromSeed(mnemonic: string, derivationPath?: string): Promise<this> {
+  protected async fromSeed(
+    mnemonic: string,
+    derivationPath?: string
+  ): Promise<this> {
     throw Error("fromSeed called on base wallet");
   }
 
@@ -260,7 +281,10 @@ export class BaseWallet implements WalletI {
    * @param {string} name              name of the wallet
    * @param {string} dbName            database name the wallet is stored in
    */
-   protected newRandom = async (name: string, dbName?: string): Promise<this> => {
+  protected newRandom = async (
+    name: string,
+    dbName?: string
+  ): Promise<this> => {
     if (name.length > 0) {
       return this.named(name, dbName);
     } else {
@@ -272,7 +296,6 @@ export class BaseWallet implements WalletI {
   protected async watchOnly(address: string): Promise<this> {
     throw Error("fromSeed called on base wallet");
   }
-
 
   /**
    * named (internal) get a named wallet from the database or create a new one.
@@ -396,9 +419,9 @@ export class BaseWallet implements WalletI {
       );
     }
   }
-//#endregion Protected implementations
+  //#endregion Protected implementations
 
-//#region Serialization
+  //#region Serialization
   /**
    * toDbString - store the serialized version of the wallet in the database, not just the name
    *
@@ -425,9 +448,9 @@ export class BaseWallet implements WalletI {
 
     return "";
   }
-//#endregion Serialization
+  //#endregion Serialization
 
-//#region Funds
+  //#region Funds
   // @ts-ignore
   public async getBalance(rawUnit?: any): Promise<any> {
     throw Error("sendMax called on base wallet");
@@ -447,7 +470,7 @@ export class BaseWallet implements WalletI {
   public async sendMax(address: string, options?: any): Promise<any> {
     throw Error("sendMax called on base wallet");
   }
-//#endregion Funds
+  //#endregion Funds
 }
 
 /**

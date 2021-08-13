@@ -1,7 +1,12 @@
-import { SlpGenesisOptions, SlpGenesisResult, SlpSendRequest, SlpSendResponse, SlpTokenBalance, SlpTokenType } from "../slp/interface";
 import {
-  SmartBchWallet
-} from "../wallet/Wif";
+  SlpGenesisOptions,
+  SlpGenesisResult,
+  SlpSendRequest,
+  SlpSendResponse,
+  SlpTokenBalance,
+  SlpTokenType,
+} from "../slp/interface";
+import { SmartBchWallet } from "../wallet/Wif";
 import { ethers, utils } from "ethers";
 // import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { Contract } from "./Contract";
@@ -20,7 +25,7 @@ export type GenesisOptions = {
   endBaton?: boolean;
   tokenReceiverAddress?: string;
   batonReceiverAddress?: string;
-}
+};
 
 /**
  * Class to manage an Erc20 tokens.
@@ -34,9 +39,14 @@ export class Erc20 {
    *
    * @param wallet     A non-slp wallet object
    */
-   constructor(wallet: SmartBchWallet) {
+  constructor(wallet: SmartBchWallet) {
     this.wallet = wallet;
-    this.contract = new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", Erc20.abi, [], this.wallet.network);
+    this.contract = new Contract(
+      "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      Erc20.abi,
+      [],
+      this.wallet.network
+    );
     this.contract.setSigner(this.wallet);
   }
 
@@ -68,9 +78,13 @@ export class Erc20 {
     });
   }
 
-  public async getProp(tokenId: string, prop: string, func: (tokenId: string) => Promise<any>): Promise<any> {
+  public async getProp(
+    tokenId: string,
+    prop: string,
+    func: (tokenId: string) => Promise<any>
+  ): Promise<any> {
     if (_cache[tokenId] && _cache[tokenId][prop]) {
-      return _cache[tokenId][prop]
+      return _cache[tokenId][prop];
     }
 
     if (!_cache[tokenId]) {
@@ -112,17 +126,21 @@ export class Erc20 {
    *
    * @returns Promise to the SmartBch token info or undefined.
    */
-   public async getTokenInfo(tokenId: string) {
-    let [name, ticker, decimals, totalSupply] = await Promise.all([this.getName(tokenId), this.getSymbol(tokenId), this.getDecimals(tokenId),
-      this.getTotalSupply(tokenId)]);
+  public async getTokenInfo(tokenId: string) {
+    let [name, ticker, decimals, totalSupply] = await Promise.all([
+      this.getName(tokenId),
+      this.getSymbol(tokenId),
+      this.getDecimals(tokenId),
+      this.getTotalSupply(tokenId),
+    ]);
 
     return {
       name,
       ticker,
       decimals,
       totalSupply,
-      tokenId
-    }
+      tokenId,
+    };
   }
 
   /**
@@ -134,20 +152,27 @@ export class Erc20 {
    *
    * @returns Promise to an SlpTokenBalance
    */
-   public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
+  public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
     if (!tokenId) {
       throw new Error(`Invalid tokenId ${tokenId}`);
     }
 
     this.contract.setAddress(tokenId);
-    console.log(this.contract.getDepositAddress(), this.contract.contract.address);
+    console.log(
+      this.contract.getDepositAddress(),
+      this.contract.contract.address
+    );
 
-    let [name, ticker, decimals, value] = await Promise.all([this.getName(tokenId), this.getSymbol(tokenId), this.getDecimals(tokenId),
-          this.contract.balanceOf(this.getDepositAddress())]);
+    let [name, ticker, decimals, value] = await Promise.all([
+      this.getName(tokenId),
+      this.getSymbol(tokenId),
+      this.getDecimals(tokenId),
+      this.contract.balanceOf(this.getDepositAddress()),
+    ]);
 
     value = new BigNumber(value.toString()).shiftedBy(-decimals);
 
-    return <SlpTokenBalance>{name, ticker, decimals, value, tokenId};
+    return <SlpTokenBalance>{ name, ticker, decimals, value, tokenId };
   }
 
   /**
@@ -157,14 +182,32 @@ export class Erc20 {
    *
    * @returns Token Id and new token balance
    */
-   public async genesis(options: GenesisOptions, overrides: ethers.CallOverrides = {}): Promise<SlpGenesisResult> {
-    const baseInitialAmount = ethers.BigNumber.from(new BigNumber(options.initialAmount).shiftedBy(options.decimals).toString());
-    const contract = await Contract.deploy(this.wallet, Erc20.script, options.name, options.ticker, options.decimals, baseInitialAmount, options.tokenReceiverAddress || zeroAddress(), options.batonReceiverAddress || zeroAddress(), options.endBaton === true, overrides);
+  public async genesis(
+    options: GenesisOptions,
+    overrides: ethers.CallOverrides = {}
+  ): Promise<SlpGenesisResult> {
+    const baseInitialAmount = ethers.BigNumber.from(
+      new BigNumber(options.initialAmount)
+        .shiftedBy(options.decimals)
+        .toString()
+    );
+    const contract = await Contract.deploy(
+      this.wallet,
+      Erc20.script,
+      options.name,
+      options.ticker,
+      options.decimals,
+      baseInitialAmount,
+      options.tokenReceiverAddress || zeroAddress(),
+      options.batonReceiverAddress || zeroAddress(),
+      options.endBaton === true,
+      overrides
+    );
     this.contract = contract;
 
     return {
       tokenId: contract.getDepositAddress(),
-      balance: await this.getBalance(contract.getDepositAddress())
+      balance: await this.getBalance(contract.getDepositAddress()),
     };
   }
 
@@ -178,7 +221,7 @@ export class Erc20 {
    *
    * @returns transaction id and token balance
    */
-   public async sendMax(
+  public async sendMax(
     address: string,
     tokenId: string
   ): Promise<SlpSendResponse> {
@@ -201,8 +244,14 @@ export class Erc20 {
    *
    * @returns transaction id and token balance
    */
-  public async send(requests: SlpSendRequest[], overrides: ethers.CallOverrides = {}): Promise<SlpSendResponse> {
-    let [actualTokenId, result] = await this._processSendRequests(requests, overrides);
+  public async send(
+    requests: SlpSendRequest[],
+    overrides: ethers.CallOverrides = {}
+  ): Promise<SlpSendResponse> {
+    let [actualTokenId, result] = await this._processSendRequests(
+      requests,
+      overrides
+    );
     return {
       txId: result,
       balance: await this.getBalance(actualTokenId),
@@ -219,7 +268,10 @@ export class Erc20 {
    *
    * @param  {SlpSendRequest[]} sendRequests
    */
-   private async _processSendRequests(sendRequests: SlpSendRequest[], overrides: ethers.CallOverrides = {}) {
+  private async _processSendRequests(
+    sendRequests: SlpSendRequest[],
+    overrides: ethers.CallOverrides = {}
+  ) {
     if (!sendRequests.length) {
       throw Error("Empty send requests");
     }
@@ -234,7 +286,9 @@ export class Erc20 {
     const tokenId = sendRequests[0].tokenId;
     const to = sendRequests[0].slpaddr;
     const decimals = await this.getDecimals(tokenId);
-    const value = ethers.BigNumber.from(new BigNumber(sendRequests[0].value).shiftedBy(decimals).toString());
+    const value = ethers.BigNumber.from(
+      new BigNumber(sendRequests[0].value).shiftedBy(decimals).toString()
+    );
 
     if (!isAddress(tokenId)) {
       throw new Error(
@@ -242,13 +296,12 @@ export class Erc20 {
       );
     }
 
-    const response: ethers.providers.TransactionResponse = await this.contract.setAddress(tokenId).contract.transfer(to, value, overrides);
+    const response: ethers.providers.TransactionResponse = await this.contract
+      .setAddress(tokenId)
+      .contract.transfer(to, value, overrides);
     const receipt = await response.wait();
 
-    return [
-      tokenId,
-      receipt.transactionHash
-    ];
+    return [tokenId, receipt.transactionHash];
   }
 
   static abi = [
@@ -261,7 +314,7 @@ export class Erc20 {
     "function transferFrom(address sender, address recipient, uint256 amount) external returns (bool)",
     "event Transfer(address indexed from, address indexed to, uint amount)",
     "event Approval(address indexed owner, address indexed spender, uint256 value)",
-  ]
+  ];
 
   static script = `
 // SPDX-License-Identifier: MIT
@@ -308,5 +361,4 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
     return _decimals;
   }
 }`;
-
 }
