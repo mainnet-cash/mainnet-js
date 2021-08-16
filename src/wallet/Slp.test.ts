@@ -12,8 +12,9 @@ import { delay } from "../util/delay";
 import BigNumber from "bignumber.js";
 import { SlpDbProvider } from "../slp/SlpDbProvider";
 import { GsppProvider } from "../slp/GsppProvider";
-import { createSlpWallet } from "./createWallet";
+import { createSlpWallet, walletFromId } from "./createWallet";
 import { WalletTypeEnum } from "./enum";
+import { slpCreateWallet } from "../../generated/serve/services/WalletSlpService";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
@@ -983,5 +984,19 @@ describe("Slp wallet tests", () => {
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.network).toBe(Network.REGTEST);
+  });
+
+  test("Slp wallet retrieval", async() =>{
+    let wallet: Wallet;
+    wallet = await createSlpWallet({
+      name: "test",
+      network: "testnet",
+      type: WalletTypeEnum.Seed,
+    });
+    expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
+    expect(wallet.network).toBe(Network.TESTNET); 
+    expect(wallet.name).toBe("test"); 
+
   });
 });

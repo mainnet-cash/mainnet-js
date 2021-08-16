@@ -10,6 +10,7 @@ import {
   TestNetWatchWallet,
   RegTestWatchWallet,
 } from "./Wif";
+import { getNamedWalletId } from "./Base"
 import { WalletRequestI, WalletResponseI } from "./interface";
 
 // Convenience map to access classes by types and network
@@ -95,8 +96,20 @@ export async function namedWallet(
     throw Error(`Wallet name is required for this operation`);
   }
 
-  const wallet = await walletClassMap[walletType][networkType]().named(name);
-  checkWalletTypeAndNetwork(wallet, walletType, networkType);
+  let wallet
+  if(walletClassMap[walletType] !== undefined){
+    wallet = await walletClassMap[walletType][networkType]().named(name,networkType)
+    checkWalletTypeAndNetwork(wallet, walletType, networkType);
+  }else{
+    let walletId = await getNamedWalletId(name, networkType)
+    if(walletId !== undefined){
+      wallet = await walletFromId(walletId)
+      wallet.name = name
+    }else{
+      throw Error("A named wallet, without wallet type, was passed but there was no corresponding record for the named wallet in the database.")
+    }
+  }
+
   return wallet;
 }
 
@@ -161,7 +174,8 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
     wallet = await walletClassMap[walletType][networkType]().slp.named(
-      body.name
+      body.name,
+      body.network
     );
     if (wallet.network != networkType) {
       throw Error(
@@ -248,12 +262,15 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
  * @returns A wallet
  */
 export async function walletFromId(walletId: string): Promise<any> {
-  let [walletType, network]: string[] = walletId.split(":");
+  let [walletType, network, name]: string[] = walletId.split(":");
 
+  if(walletType === 'named'){
+    return await namedWallet(name, walletType, network)
+  }
   let walletRequest = {
     name: "",
     network: network,
-    type: WalletTypeEnum[walletType],
+    type: walletType,
   } as WalletRequestI;
   let wallet = await createWallet(walletRequest);
   await wallet._fromId(walletId);

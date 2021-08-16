@@ -238,6 +238,22 @@ describe(`Watch only Wallets`, () => {
     expect(w.cashaddr).toBe(
       "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
     );
+    expect(w.getInfo()).toStrictEqual(
+       {
+           "cashaddr": "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+           "derivationPath": undefined,
+           "isTestnet": true,
+           "name": "",
+           "network": "testnet",
+           "privateKey": undefined,
+           "privateKeyWif": undefined,
+           "publicKey": undefined,
+           "publicKeyHash": "4232dfceb98a117308072d75fe47fb10c97d038a",
+           "seed": undefined,
+           "walletDbEntry": "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+           "walletId": "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+        }
+    );
   });
 
   test("Create a watch only regtest wallet from string id", async () => {

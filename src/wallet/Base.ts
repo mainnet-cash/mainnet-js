@@ -97,7 +97,7 @@ export class BaseWallet implements WalletI {
           );
         }
         let recoveredWallet = await this._fromId(savedWalletRecord.wallet);
-        recoveredWallet.name = savedWalletRecord.name;
+        recoveredWallet.name = name;
         return recoveredWallet;
       } else {
         let wallet = await this.generate();
@@ -115,7 +115,7 @@ export class BaseWallet implements WalletI {
   /**
    * replaceNamed - Replace (recover) named wallet with a new walletId
    *
-   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+   * If wallet with a provided name does not exist yet, it will be created with a `walletId` supplied
    * If wallet exists it will be overwritten without exception
    *
    * @param name   user friendly wallet alias
@@ -236,3 +236,38 @@ const _checkContextSafety = function (wallet: BaseWallet) {
     }
   }
 };
+
+
+/**
+ * getNamedWalletId - get the full wallet id from the database
+ *
+ * @param name   user friendly wallet alias
+ * @param dbName name under which the wallet will be stored in the database
+ *
+ * @returns boolean
+ */
+export async function getNamedWalletId(name: string, dbName?: string): Promise<string|undefined> {
+  if (name.length === 0) {
+    throw Error("Named wallets must have a non-empty name");
+  }
+
+  dbName = dbName ? dbName : (dbName as string);
+  let db = getStorageProvider(dbName);
+
+  if (db) {
+    await db.init();
+    let savedWalletRecord = await db.getWallet(name);
+    await db.close();
+    if(savedWalletRecord !== undefined){
+      return savedWalletRecord.wallet
+    } else{
+      throw Error(
+        `No record was found for ${name} in db: ${dbName}`
+        )
+    }
+  } else {
+    throw Error(
+      "No database was available or configured to store the named wallet."
+    );
+  }
+}
