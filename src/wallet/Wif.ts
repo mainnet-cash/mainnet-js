@@ -234,7 +234,7 @@ export class Wallet extends BaseWallet {
   }
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
-    this.walletType = WalletTypeEnum.Watch
+    this.walletType = WalletTypeEnum.Watch;
     let addressComponents = address.split(":");
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
@@ -267,8 +267,8 @@ export class Wallet extends BaseWallet {
       throw Error("Not implemented");
     } else if (this.walletType === WalletTypeEnum.Seed) {
       return await this._generateMnemonic();
-    }else {
-      console.log(this.walletType)
+    } else {
+      console.log(this.walletType);
       throw Error(`Could not determine walletType: ${this.walletType}`);
     }
   }
@@ -377,7 +377,8 @@ export class Wallet extends BaseWallet {
     }
     if (networkPrefixMap[this.networkPrefix] != networkGiven) {
       throw Error(
-        `Network prefix ${networkGiven} to a ${networkPrefixMap[this.networkPrefix]
+        `Network prefix ${networkGiven} to a ${
+          networkPrefixMap[this.networkPrefix]
         } wallet`
       );
     }
@@ -848,7 +849,7 @@ export class Wallet extends BaseWallet {
     } else if (this.walletType == WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     } else {
-      throw Error("Attempted to serialize unsupported wallet type")
+      throw Error("Attempted to serialize unsupported wallet type");
     }
   }
 
@@ -861,7 +862,9 @@ export class Wallet extends BaseWallet {
     } else if (this.walletType == WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     } else {
-      throw Error(`Serialization function to database not implemented for ${this.walletType}`)
+      throw Error(
+        `Serialization function to database not implemented for ${this.walletType}`
+      );
     }
   }
 

@@ -4,7 +4,6 @@ import { initProviders, disconnectProviders } from "../network/Connection";
 import { delay } from "../util/delay";
 import { WalletTypeEnum } from "./enum";
 
-
 beforeAll(async () => {
   await initProviders();
 });
@@ -13,7 +12,6 @@ afterAll(async () => {
 });
 
 describe(`Named Wallets`, () => {
-
   test("Retrieve a named regtest wallet", async () => {
     const req = {
       network: "regtest",
@@ -24,25 +22,25 @@ describe(`Named Wallets`, () => {
     expect(w.name).toBe("test");
     expect(w.toString()).toBe("named:regtest:test");
 
-    let w2 = await walletFromId(w.toString())
-    expect(w2.getInfo()).toMatchObject(w.getInfo())
-    expect(w2.name).toBe(w.name)
+    let w2 = await walletFromId(w.toString());
+    expect(w2.getInfo()).toMatchObject(w.getInfo());
+    expect(w2.name).toBe(w.name);
   });
 
   test("Retrieve a named regtest wif wallet", async () => {
     const req = {
       network: "regtest",
       name: "test.wif",
-      type: WalletTypeEnum.Wif
+      type: WalletTypeEnum.Wif,
     };
     let w = await createWallet(req);
     expect(w.cashaddr).toMatch(/bchreg:/);
     expect(w.name).toBe("test.wif");
     expect(w.toString()).toBe("named:regtest:test.wif");
 
-    let w2 = await walletFromId(w.toString())
-    expect(w2.getInfo()).toMatchObject(w.getInfo())
-    expect(w2.name).toBe(w.name)
+    let w2 = await walletFromId(w.toString());
+    expect(w2.getInfo()).toMatchObject(w.getInfo());
+    expect(w2.name).toBe(w.name);
   });
 
   test("Get create a regtest wallet", async () => {
@@ -53,25 +51,27 @@ describe(`Named Wallets`, () => {
   });
 
   test("Watch wallet from Id", async () => {
-    const w = await walletFromId("watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22")
-    expect(w.getInfo()).toStrictEqual(
-      {
-          "cashaddr": "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
-          "derivationPath": undefined,
-          "isTestnet": true,
-          "name": "",
-          "network": "testnet",
-          "privateKey": undefined,
-          "privateKeyWif": undefined,
-          "publicKey": undefined,
-          "publicKeyHash": "4232dfceb98a117308072d75fe47fb10c97d038a",
-          "seed": undefined,
-          "walletDbEntry": "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
-          "walletId": "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
-       }
-   );
+    const w = await walletFromId(
+      "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
+    );
+    expect(w.getInfo()).toStrictEqual({
+      cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      derivationPath: undefined,
+      isTestnet: true,
+      name: "",
+      network: "testnet",
+      privateKey: undefined,
+      privateKeyWif: undefined,
+      publicKey: undefined,
+      publicKeyHash: "4232dfceb98a117308072d75fe47fb10c97d038a",
+      seed: undefined,
+      walletDbEntry:
+        "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      walletId:
+        "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+    });
   });
-  
+
   test("Get create a regtest wif wallet", async () => {
     const req = {
       network: "regtest",
@@ -121,11 +121,9 @@ describe(`Named Wallets`, () => {
     let w = await createWallet(req);
     expect(w.cashaddr).toMatch(/bchtest:q/);
     expect(w.walletType).toBe("wif");
-    delay(1000)
-    let w2 = await walletFromId(w.toString())
-    expect(w2.cashaddr).toBe(w.cashaddr)
-    expect(w2.name).toBe(w.name)
+    delay(1000);
+    let w2 = await walletFromId(w.toString());
+    expect(w2.cashaddr).toBe(w.cashaddr);
+    expect(w2.name).toBe(w.name);
   });
-
-
 });

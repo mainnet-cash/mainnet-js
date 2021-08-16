@@ -237,7 +237,6 @@ const _checkContextSafety = function (wallet: BaseWallet) {
   }
 };
 
-
 /**
  * getNamedWalletId - get the full wallet id from the database
  *
@@ -246,7 +245,10 @@ const _checkContextSafety = function (wallet: BaseWallet) {
  *
  * @returns boolean
  */
-export async function getNamedWalletId(name: string, dbName?: string): Promise<string|undefined> {
+export async function getNamedWalletId(
+  name: string,
+  dbName?: string
+): Promise<string | undefined> {
   if (name.length === 0) {
     throw Error("Named wallets must have a non-empty name");
   }
@@ -258,12 +260,10 @@ export async function getNamedWalletId(name: string, dbName?: string): Promise<s
     await db.init();
     let savedWalletRecord = await db.getWallet(name);
     await db.close();
-    if(savedWalletRecord !== undefined){
-      return savedWalletRecord.wallet
-    } else{
-      throw Error(
-        `No record was found for ${name} in db: ${dbName}`
-        )
+    if (savedWalletRecord !== undefined) {
+      return savedWalletRecord.wallet;
+    } else {
+      throw Error(`No record was found for ${name} in db: ${dbName}`);
     }
   } else {
     throw Error(

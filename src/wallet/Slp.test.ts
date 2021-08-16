@@ -986,7 +986,7 @@ describe("Slp wallet tests", () => {
     expect(wallet.network).toBe(Network.REGTEST);
   });
 
-  test("Slp wallet retrieval", async() =>{
+  test("Slp wallet retrieval", async () => {
     let wallet: Wallet;
     wallet = await createSlpWallet({
       name: "test",
@@ -995,8 +995,7 @@ describe("Slp wallet tests", () => {
     });
     expect(wallet.derivationPath).toBe("m/44'/245'/0'/0/0");
     expect(wallet.getSeed().derivationPath).toBe("m/44'/245'/0'/0/0");
-    expect(wallet.network).toBe(Network.TESTNET); 
-    expect(wallet.name).toBe("test"); 
-
+    expect(wallet.network).toBe(Network.TESTNET);
+    expect(wallet.name).toBe("test");
   });
 });

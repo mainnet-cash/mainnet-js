@@ -10,7 +10,7 @@ import {
   TestNetWatchWallet,
   RegTestWatchWallet,
 } from "./Wif";
-import { getNamedWalletId } from "./Base"
+import { getNamedWalletId } from "./Base";
 import { WalletRequestI, WalletResponseI } from "./interface";
 
 // Convenience map to access classes by types and network
@@ -96,17 +96,22 @@ export async function namedWallet(
     throw Error(`Wallet name is required for this operation`);
   }
 
-  let wallet
-  if(walletClassMap[walletType] !== undefined){
-    wallet = await walletClassMap[walletType][networkType]().named(name,networkType)
+  let wallet;
+  if (walletClassMap[walletType] !== undefined) {
+    wallet = await walletClassMap[walletType][networkType]().named(
+      name,
+      networkType
+    );
     checkWalletTypeAndNetwork(wallet, walletType, networkType);
-  }else{
-    let walletId = await getNamedWalletId(name, networkType)
-    if(walletId !== undefined){
-      wallet = await walletFromId(walletId)
-      wallet.name = name
-    }else{
-      throw Error("A named wallet, without wallet type, was passed but there was no corresponding record for the named wallet in the database.")
+  } else {
+    let walletId = await getNamedWalletId(name, networkType);
+    if (walletId !== undefined) {
+      wallet = await walletFromId(walletId);
+      wallet.name = name;
+    } else {
+      throw Error(
+        "A named wallet, without wallet type, was passed but there was no corresponding record for the named wallet in the database."
+      );
     }
   }
 
@@ -264,8 +269,8 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
 export async function walletFromId(walletId: string): Promise<any> {
   let [walletType, network, name]: string[] = walletId.split(":");
 
-  if(walletType === 'named'){
-    return await namedWallet(name, walletType, network)
+  if (walletType === "named") {
+    return await namedWallet(name, walletType, network);
   }
   let walletRequest = {
     name: "",
