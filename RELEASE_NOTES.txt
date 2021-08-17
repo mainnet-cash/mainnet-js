@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.3.41
+
+- Fix bug with watchOnly and retrieving some named wallets.
+
 0.3.38
 
 - Revert library compression compression

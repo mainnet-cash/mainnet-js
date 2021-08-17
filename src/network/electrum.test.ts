@@ -15,7 +15,6 @@ test("Should get a transaction with bare electrum", async () => {
     "blockchain.transaction.get",
     transactionID
   );
-  console.log(transactionHex);
   await electrum.disconnect();
 });
 
@@ -24,6 +23,6 @@ test("Should get a transaction with provider", async () => {
   const transactionID =
     "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
   const transactionHex = await provider.getRawTransaction(transactionID);
-  console.log(transactionHex);
+  //console.log(transactionHex);
   await provider.disconnect();
 });

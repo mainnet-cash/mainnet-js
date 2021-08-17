@@ -234,6 +234,7 @@ export class Wallet extends BaseWallet {
   }
   // Initialize a watch only wallet from a cash addr
   public async watchOnly(address: string) {
+    this.walletType = WalletTypeEnum.Watch;
     let addressComponents = address.split(":");
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
@@ -260,8 +261,14 @@ export class Wallet extends BaseWallet {
   public async generate(): Promise<this> {
     if (this.walletType === WalletTypeEnum.Wif) {
       return await this._generateWif();
-    } else {
+    } else if (this.walletType === WalletTypeEnum.Watch) {
+      return this;
+    } else if (this.walletType === WalletTypeEnum.Hd) {
+      throw Error("Not implemented");
+    } else if (this.walletType === WalletTypeEnum.Seed) {
       return await this._generateMnemonic();
+    } else {
+      throw Error(`Could not determine walletType: ${this.walletType}`);
     }
   }
 
@@ -423,7 +430,7 @@ export class Wallet extends BaseWallet {
   /**
    * replaceNamed - replace (recover) named wallet with a new walletId
    *
-   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+   * If wallet with a provided name does not exist yet, it will be created with a `walletId` supplied
    * If wallet exists it will be overwritten without exception
    *
    * @param name   user friendly wallet alias
@@ -834,19 +841,29 @@ export class Wallet extends BaseWallet {
   public toString() {
     if (this.name) {
       return `named:${this.network}:${this.name}`;
-    } else if (this.mnemonic) {
+    } else if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
-    } else {
+    } else if (this.walletType == WalletTypeEnum.Watch) {
+      return `${this.walletType}:${this.network}:${this.cashaddr}`;
+    } else if (this.walletType == WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    } else {
+      throw Error("Attempted to serialize unsupported wallet type");
     }
   }
 
   //
   public toDbString() {
-    if (this.mnemonic) {
+    if (this.walletType == WalletTypeEnum.Watch) {
+      return `${this.walletType}:${this.network}:${this.cashaddr}`;
+    } else if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
-    } else {
+    } else if (this.walletType == WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    } else {
+      throw Error(
+        `Serialization function to database not implemented for ${this.walletType}`
+      );
     }
   }
 
