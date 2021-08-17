@@ -267,8 +267,7 @@ export class Wallet extends BaseWallet {
       throw Error("Not implemented");
     } else if (this.walletType === WalletTypeEnum.Seed) {
       return await this._generateMnemonic();
-    } else {
-      console.log(this.walletType);
+    }else { 
       throw Error(`Could not determine walletType: ${this.walletType}`);
     }
   }

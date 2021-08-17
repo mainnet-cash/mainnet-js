@@ -319,7 +319,6 @@ describe("Test Wallet Slp Endpoints", () => {
         tokenId: tokenId
       });
     const slpBody = slpResp.body;
-    console.log(JSON.stringify(slpResp))
     if (slpResp.statusCode !== 200) {
       console.log(slpResp.error.text);
     }

@@ -22,9 +22,14 @@ describe(`Named Wallets`, () => {
     expect(w.name).toBe("test");
     expect(w.toString()).toBe("named:regtest:test");
 
-    let w2 = await walletFromId(w.toString());
-    expect(w2.getInfo()).toMatchObject(w.getInfo());
-    expect(w2.name).toBe(w.name);
+    // recover it from the id
+    let w2 = await walletFromId(w.toString())
+    expect(w2.getInfo()).toMatchObject(w.getInfo())
+    expect(w2.name).toBe(w.name)
+
+    let w3 = await createWallet(req);
+    expect(w3.getInfo()).toMatchObject(w.getInfo())
+    expect(w3.name).toBe(w.name)
   });
 
   test("Retrieve a named regtest wif wallet", async () => {
@@ -38,12 +43,13 @@ describe(`Named Wallets`, () => {
     expect(w.name).toBe("test.wif");
     expect(w.toString()).toBe("named:regtest:test.wif");
 
-    let w2 = await walletFromId(w.toString());
-    expect(w2.getInfo()).toMatchObject(w.getInfo());
-    expect(w2.name).toBe(w.name);
+    // recover it from id
+    let w2 = await walletFromId(w.toString())
+    expect(w2.getInfo()).toMatchObject(w.getInfo())
+    expect(w2.name).toBe(w.name)
   });
 
-  test("Get create a regtest wallet", async () => {
+  test("Get create an unnamed regtest seed wallet", async () => {
     const req = { network: "regtest" } as WalletRequestI;
     let w = await createWallet(req);
     expect(w.cashaddr).toMatch(/bchreg:/);
@@ -76,10 +82,26 @@ describe(`Named Wallets`, () => {
     const req = {
       network: "regtest",
       type: "wif",
+      name: "wif2"
     } as WalletRequestI;
     let w = await createWallet(req);
     expect(w.cashaddr).toMatch(/bchreg:/);
     expect(w.walletType).toBe("wif");
+
+    // recover it from the id
+    let w2 = await walletFromId(w.toString())
+    expect(w2.getInfo()).toMatchObject(w.getInfo())
+    expect(w2.name).toBe(w.name)
+
+    // recover it from the database
+    const req2 = {
+      network: "regtest",
+      type: "wif",
+      name: "wif2"
+    } as WalletRequestI;
+    let w3 = await createWallet(req2);
+    expect(w3.getInfo()).toMatchObject(w.getInfo())
+    expect(w3.name).toBe(w.name)
   });
 
   test("Get create a named regtest seed wallet", async () => {

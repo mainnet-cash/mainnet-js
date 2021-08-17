@@ -14,7 +14,6 @@ import { SlpDbProvider } from "../slp/SlpDbProvider";
 import { GsppProvider } from "../slp/GsppProvider";
 import { createSlpWallet, walletFromId } from "./createWallet";
 import { WalletTypeEnum } from "./enum";
-import { slpCreateWallet } from "../../generated/serve/services/WalletSlpService";
 
 describe("Slp wallet tests", () => {
   beforeAll(async () => {
