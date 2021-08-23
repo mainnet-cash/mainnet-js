@@ -99,9 +99,9 @@ export class Contract implements ContractI {
 
   public setAddress(address: string) {
     if (address !== this.address) {
+      console.trace(address, this.address)
       this.address = address;
-      this.contract = this.contract.attach(address);
-      this.contract.connect(this.signer || this.provider);
+      this.contract = this.contract.attach(address).connect(this.signer || this.provider);
     }
 
     return this;
@@ -133,7 +133,7 @@ export class Contract implements ContractI {
       const fragment = this.contract.interface.functions[signature];
 
       const fn = async (...args: Array<any>): Promise<any> => {
-        return this.contract[signature](...args);
+        return this.getContractFunction(fragment.name)(...args); //this.contract[signature](...args);
       };
 
       defineReadOnly(this, fragment.name, fn as any);

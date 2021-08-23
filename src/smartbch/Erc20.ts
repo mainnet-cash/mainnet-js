@@ -1,6 +1,8 @@
 import {
   SlpGenesisOptions,
   SlpGenesisResult,
+  SlpMintOptions,
+  SlpMintResult,
   SlpSendRequest,
   SlpSendResponse,
   SlpTokenBalance,
@@ -17,7 +19,7 @@ import { zeroAddress } from "./Utils";
 
 const _cache = {};
 
-export type GenesisOptions = {
+export interface GenesisOptions {
   name: string;
   ticker: string;
   initialAmount: BigNumber.Value;
@@ -26,6 +28,14 @@ export type GenesisOptions = {
   tokenReceiverAddress?: string;
   batonReceiverAddress?: string;
 };
+
+export interface TokenInfo {
+  name: string;
+  ticker: string;
+  tokenId: string;
+  decimals: number;
+  totalSupply: BigNumber;
+}
 
 /**
  * Class to manage an Erc20 tokens.
@@ -46,35 +56,37 @@ export class Erc20 {
       Erc20.abi,
       [],
       this.wallet.network
-    );
-    this.contract.setSigner(this.wallet);
+    ).setSigner(this.wallet);
   }
 
   static get walletType() {
     return SmartBchWallet;
   }
 
-  public async getName(tokenId: string): Promise<any> {
+  public async getName(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "name", async (tokenId) => {
       return await this.contract.setAddress(tokenId).name();
     });
   }
 
-  public async getSymbol(tokenId: string): Promise<any> {
+  public async getSymbol(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "symbol", async (tokenId) => {
       return await this.contract.setAddress(tokenId).symbol();
     });
   }
 
-  public async getDecimals(tokenId: string): Promise<any> {
+  public async getDecimals(tokenId: string): Promise<number> {
     return this.getProp(tokenId, "decimals", async (tokenId) => {
       return await this.contract.setAddress(tokenId).decimals();
     });
   }
 
-  public async getTotalSupply(tokenId: string): Promise<any> {
+  public async getTotalSupply(tokenId: string): Promise<BigNumber> {
     return this.getProp(tokenId, "totalSupply", async (tokenId) => {
-      return await this.contract.setAddress(tokenId).totalSupply();
+      // this.contract.setAddress(tokenId);
+      const totalSupply = await this.contract.setAddress(tokenId).totalSupply();
+      const decimals = await this.getDecimals(tokenId);
+      return new BigNumber(totalSupply.toString()).shiftedBy(-decimals);
     });
   }
 
@@ -126,7 +138,7 @@ export class Erc20 {
    *
    * @returns Promise to the SmartBch token info or undefined.
    */
-  public async getTokenInfo(tokenId: string) {
+  public async getTokenInfo(tokenId: string): Promise<TokenInfo> {
     let [name, ticker, decimals, totalSupply] = await Promise.all([
       this.getName(tokenId),
       this.getSymbol(tokenId),
@@ -301,21 +313,137 @@ export class Erc20 {
     return [tokenId, receipt.transactionHash];
   }
 
+  /**
+   * mint - create new tokens to increase the circulation supply.
+   *
+   * a high-level function, see also /wallet/slp/mint endpoint
+   *
+   * @param value   amount to mint
+   * @param tokenId   the tokenId of the slp being minted
+   * @param endBaton   boolean indicating whether the token should continue to be "mintable"
+   *
+   * @returns transaction id and token balance
+   */
+   public async mint(options: SlpMintOptions, overrides: ethers.CallOverrides = {}): Promise<SlpMintResult> {
+    let [actualTokenId, result] = await this._processMint(options, overrides);
+    return {
+      txId: result,
+      balance: await this.getBalance(actualTokenId),
+    };
+  }
+
+  /**
+   * _processMint - given mint parameters, prepare the transaction
+   *
+   * a private utility wrapper to pre-process transactions
+   *
+   * @param value   amount to mint
+   * @param tokenId   the tokenId of the slp being minted
+   * @param endBaton   boolean indicating whether the token should continue to be "mintable"
+   *
+   * @returns the tokenId and minting transaction id
+   */
+  private async _processMint(options: SlpMintOptions, overrides: ethers.CallOverrides = {}) {
+    options = this.substituteOptionals(options);
+
+    options.value = new BigNumber(options.value);
+    if (
+      options.value.isLessThanOrEqualTo(0) &&
+      options.batonReceiverSlpAddr === this.getDepositAddress()
+    ) {
+      throw Error("Mint amount should be greater than zero");
+    }
+
+    const tokenId = options.tokenId;
+    const to = options.tokenReceiverSlpAddr!;
+    const decimals = await this.getDecimals(tokenId);
+    const value = ethers.BigNumber.from(
+      new BigNumber(options.value).shiftedBy(decimals).toString()
+    );
+
+    if (!isAddress(tokenId)) {
+      throw new Error(
+        "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
+      );
+    }
+
+    if (!this.contract
+      .setAddress(tokenId)
+      .contract.mint) {
+      throw new Error(
+        `Token contract ${tokenId} does not support minting`
+      );
+    }
+
+    try {
+      if (overrides.gasLimit === -1) {
+        const copyOverrides = {...overrides};
+        delete copyOverrides.gasLimit;
+        overrides.gasLimit = await this.contract
+          .setAddress(tokenId)
+          .contract.estimateGas.mint(to, value, copyOverrides);
+      }
+
+      const response: ethers.providers.TransactionResponse = await this.contract
+        .setAddress(tokenId)
+        .contract.mint(to, value, overrides);
+      const receipt: ethers.providers.TransactionReceipt = await response.wait();
+
+      return [
+        options.tokenId,
+        receipt.transactionHash
+      ];
+    } catch (error: any) {
+      const message: string = ((error.error || {}).error || {}).message || "";
+      if (message.match(/execution reverted: AccessControl: account \w+ is missing role \w+/)) {
+        throw Error(`Address ${this.getDepositAddress()} is not allowed to mint or minting is not supported by the contract ${this.contract.getDepositAddress()}`);
+      }
+
+      throw console.error();
+    }
+  }
+
+  /**
+   * substituteOptionals - substitute optional fields with default values
+   *
+   * will ensure that baton and token receiver are intialized as SLP address of this wallet if absent
+   * will ensure that baton will not be ended if endBaton is undefined
+   * a private utility wrapper substitute optionals
+   *
+   * @param options   genesis or mint options to substitute values int
+   *
+   * @returns options with relevant values substituted/initialized
+   */
+   private substituteOptionals(options: SlpMintOptions): any {
+    if (!options.batonReceiverSlpAddr) {
+      options.batonReceiverSlpAddr = this.getDepositAddress();
+    }
+    if (!options.tokenReceiverSlpAddr) {
+      options.tokenReceiverSlpAddr = this.getDepositAddress();
+    }
+    if (options.endBaton === undefined) {
+      options.endBaton = false;
+    }
+
+    return options;
+  }
+
   static abi = [
     "function name() view returns (string)",
     "function symbol() view returns (string)",
     "function decimals() view returns (uint8)",
-    "function totalSupply() external view returns (uint256)",
+    "function totalSupply() view returns (uint256)",
     "function balanceOf(address) view returns (uint)",
     "function transfer(address to, uint amount)",
     "function transferFrom(address sender, address recipient, uint256 amount) external returns (bool)",
+    "function mint(address to, uint256 amount)",
     "event Transfer(address indexed from, address indexed to, uint amount)",
     "event Approval(address indexed owner, address indexed spender, uint256 value)",
   ];
 
   static script = `
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";

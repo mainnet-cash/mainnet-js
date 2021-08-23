@@ -1,22 +1,43 @@
-import { BigNumber, BigNumberish } from "ethers";
-import { GenesisOptions } from "./Erc20";
+// import { BigNumber, BigNumberish } from "ethers";
+import BigNumber from "bignumber.js";
+import exp from "constants";
+import { ethers } from "ethers";
+import { Erc20, GenesisOptions } from "./Erc20";
 import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
-  test.skip("Test ERC20", async () => {
+  test("Test querying eth mainnet", async () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
-    // console.log(await wallet.erc20.getDecimals("0xE6C035C693806d14C80754d81537d023C8bcaE65"));
+    await wallet.erc20.getBalance(
+      "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    );
+
     console.log(
-      await wallet.erc20.getBalance(
-        "0xdac17f958d2ee523a2206206994597c13d831ec7"
-      )
+    await (await wallet.erc20.getTokenInfo("0xdac17f958d2ee523a2206206994597c13d831ec7")).totalSupply.toString()
     );
   });
 
-  test("Test ERC20 deploy", async () => {
+  test("Should fail to make a paid transaction from watch-only wallet", async () => {
     const wallet = await SmartBchWallet.watchOnly(
+      "0x227F0226499E308769478669669CbdCf4E7dA002"
+    );
+
+    await expect(wallet.erc20.send(
+      [
+        {
+          slpaddr: wallet.getDepositAddress(),
+          tokenId: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          value: 3,
+        },
+      ],
+      { gasPrice: 10 ** 10 }
+    )).rejects.toThrow("sending a transaction requires a signer");
+  });
+
+  test("ERC20 genesis and info", async () => {
+    const watchWallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
 
@@ -25,30 +46,41 @@ describe(`Test Ethereum functions`, () => {
       ticker: "MNC",
       decimals: 8,
       initialAmount: 10,
-      endBaton: true,
     };
 
-    await expect(wallet.erc20.genesis(options)).rejects.toThrow(
+    await expect(watchWallet.erc20.genesis(options)).rejects.toThrow(
       "Cannot deploy contracts with Watch-Only wallets"
     );
 
-    const pkWallet = await RegTestSmartBchWallet.fromPrivateKey(
+    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
       "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
     );
-    const result = await pkWallet.erc20.genesis(options, {
+    console.log(wallet.getDepositAddress());
+
+    const result = await wallet.erc20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
-    expect(result.balance.value.isEqualTo(10)).toBe(true);
+    expect(result.balance.value).toStrictEqual(new BigNumber(10));
     expect(result.balance.name).toBe(options.name);
     expect(result.balance.ticker).toBe(options.ticker);
     expect(result.balance.decimals).toBe(options.decimals);
     expect(result.tokenId).toBe(result.balance.tokenId);
 
+    // get token info
+    const tokenInfo = await watchWallet.erc20.getTokenInfo(result.tokenId);
+    expect(tokenInfo.name).toBe(options.name);
+    expect(tokenInfo.ticker).toBe(options.ticker);
+    expect(tokenInfo.decimals).toBe(options.decimals);
+    expect(tokenInfo.tokenId).toBe(result.tokenId);
+    expect(tokenInfo.totalSupply).toStrictEqual(new BigNumber(10));
+    return;
+
+    // send
     const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(
       "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
     );
-    const sendResult = await pkWallet.erc20.send(
+    const sendResult = await wallet.erc20.send(
       [
         {
           slpaddr: receiverWallet.getDepositAddress(),
@@ -58,12 +90,78 @@ describe(`Test Ethereum functions`, () => {
       ],
       { gasPrice: 10 ** 10 }
     );
-    expect(sendResult.balance.value.isEqualTo(7)).toBe(true);
-    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value.isEqualTo(3)).toBe(true);
+    expect(sendResult.balance.value).toStrictEqual(new BigNumber(7));
+    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(3));
 
-    const sendMaxResult = await receiverWallet.erc20.sendMax(pkWallet.getDepositAddress(), result.tokenId, { gasPrice: 10 ** 10 });
-    expect(sendMaxResult.balance.value.isEqualTo(0)).toBe(true);
-    expect((await pkWallet.erc20.getBalance(result.tokenId)).value.isEqualTo(10)).toBe(true);
-    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value.isEqualTo(0)).toBe(true);
+    // sendMax
+    const sendMaxResult = await receiverWallet.erc20.sendMax(wallet.getDepositAddress(), result.tokenId, { gasPrice: 10 ** 10 });
+    expect(sendMaxResult.balance.value).toStrictEqual(new BigNumber(0));
+    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(10));
+    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(0));
+  });
+
+  test("ERC20 genesis with token receiver and baton receiver", async () => {
+    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
+      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    );
+
+    const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(
+      "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
+    );
+
+    const options = <GenesisOptions>{
+      name: "Mainnet Coin",
+      ticker: "MNC",
+      decimals: 8,
+      initialAmount: 10,
+      tokenReceiverAddress: receiverWallet.getDepositAddress(),
+      batonReceiverAddress: receiverWallet.getDepositAddress()
+    };
+
+    const result = await wallet.erc20.genesis(options, {
+      gasPrice: 10 ** 10,
+    });
+
+    expect(result.balance.value).toStrictEqual(new BigNumber(0));
+    expect(result.balance.name).toBe(options.name);
+    expect(result.balance.ticker).toBe(options.ticker);
+    expect(result.balance.decimals).toBe(options.decimals);
+    expect(result.tokenId).toBe(result.balance.tokenId);
+    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(0));
+    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(10));
+
+    // mint
+    const mintResult = await receiverWallet.erc20.mint({ tokenId: result.tokenId, value: 5, tokenReceiverSlpAddr: receiverWallet.getDepositAddress() }, { gasPrice: 10 ** 10, gasLimit: -1 });
+    expect(mintResult.balance.value).toStrictEqual(new BigNumber(15));
+
+    // mint fail, no role
+    await expect(wallet.erc20.mint({ tokenId: result.tokenId, value: 5, tokenReceiverSlpAddr: wallet.getDepositAddress() }, { gasPrice: 10 ** 10, gasLimit: -1 })).rejects.toThrow("is not allowed to mint or minting is not supported by the contract");
+  });
+
+  test("ERC20 mint disabled (baton ended)", async () => {
+    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
+      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    );
+
+    const options = <GenesisOptions>{
+      name: "Mainnet Coin",
+      ticker: "MNC",
+      decimals: 8,
+      initialAmount: 10,
+      endBaton: true
+    };
+
+    const result = await wallet.erc20.genesis(options, {
+      gasPrice: 10 ** 10,
+    });
+
+    expect(result.balance.value).toStrictEqual(new BigNumber(10));
+    expect(result.balance.name).toBe(options.name);
+    expect(result.balance.ticker).toBe(options.ticker);
+    expect(result.balance.decimals).toBe(options.decimals);
+    expect(result.tokenId).toBe(result.balance.tokenId);
+
+    // mint fail, mint was disabled by genesis options
+    await expect(wallet.erc20.mint({ tokenId: result.tokenId, value: 5, tokenReceiverSlpAddr: wallet.getDepositAddress() }, { gasPrice: 10 ** 10, gasLimit: -1 })).rejects.toThrow("is not allowed to mint or minting is not supported by the contract");
   });
 });

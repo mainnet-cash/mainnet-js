@@ -29,7 +29,7 @@ export class SmartBchWallet extends BaseWallet {
   _erc20?: Erc20;
 
   //#region Accessors
-  // interface to slp functions. see Erc20.ts
+  // interface to erc20 functions. see Erc20.ts
   public get erc20() {
     if (!this._erc20) {
       this._erc20 = new Erc20(this);
@@ -38,7 +38,7 @@ export class SmartBchWallet extends BaseWallet {
     return this._erc20;
   }
 
-  // interface to slp functions. see Erc20.ts
+  // interface to erc20 functions. see Erc20.ts
   public static get erc20() {
     return Erc20;
   }
