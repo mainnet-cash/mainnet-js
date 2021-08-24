@@ -74,12 +74,14 @@ const browserConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      stream: false,
       tls: false,
       util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },
+    fallback: {
+      stream: require.resolve("stream-browserify"),
+    }
   },
 };
 
@@ -110,12 +112,14 @@ const webWorkerConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      stream: false,
       tls: false,
       util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },
+    fallback: {
+      stream: require.resolve("stream-browserify"),
+    }
   },
 };
 
