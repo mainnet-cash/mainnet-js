@@ -5,7 +5,16 @@ import { ImageI } from "../qr/interface";
 import { isAddress } from "ethers/lib/utils";
 import BigNumber from "bignumber.js";
 import { zeroAddress } from "./Utils";
-import { Erc20GenesisOptions, Erc20GenesisResult, Erc20MintOptions, Erc20MintResult, Erc20SendRequest, Erc20SendResponse, Erc20TokenBalance, Erc20TokenInfo } from "./interface";
+import {
+  Erc20GenesisOptions,
+  Erc20GenesisResult,
+  Erc20MintOptions,
+  Erc20MintResult,
+  Erc20SendRequest,
+  Erc20SendResponse,
+  Erc20TokenBalance,
+  Erc20TokenInfo,
+} from "./interface";
 
 const _cache = {};
 
@@ -147,7 +156,7 @@ export class Erc20 {
    * @param txId   transaction Id
    * @returns   Url string
    */
-   public explorerUrl(txId: string) {
+  public explorerUrl(txId: string) {
     const explorerUrlMap = {
       mainnet: "",
       testnet: "",
@@ -221,12 +230,12 @@ export class Erc20 {
     options: Erc20GenesisOptions,
     overrides: ethers.CallOverrides = {}
   ): Promise<Erc20GenesisResult> {
-    const opts = this.substituteOptionals({ ...options }) as Erc20GenesisOptions;
+    const opts = this.substituteOptionals({
+      ...options,
+    }) as Erc20GenesisOptions;
 
     const initialAmount = ethers.BigNumber.from(
-      new BigNumber(opts.initialAmount)
-        .shiftedBy(opts.decimals)
-        .toString()
+      new BigNumber(opts.initialAmount).shiftedBy(opts.decimals).toString()
     );
 
     const contract = await Contract.deploy(
@@ -272,7 +281,7 @@ export class Erc20 {
       ticker: val.ticker,
       tokenId: val.tokenId,
     }));
-    const responses = await this.send(requests, overrides)
+    const responses = await this.send(requests, overrides);
     return responses[0];
   }
 
@@ -290,10 +299,7 @@ export class Erc20 {
     requests: Erc20SendRequest[],
     overrides: ethers.CallOverrides = {}
   ): Promise<Erc20SendResponse[]> {
-    return this._processSendRequests(
-      requests,
-      overrides
-    );
+    return this._processSendRequests(requests, overrides);
   }
 
   /**
@@ -310,30 +316,32 @@ export class Erc20 {
     sendRequests: Erc20SendRequest[],
     overrides: ethers.CallOverrides = {}
   ): Promise<Erc20SendResponse[]> {
-    return Promise.all(sendRequests.map(async (sendRequest) => {
-      const tokenId = sendRequest.tokenId;
-      const to = sendRequest.address;
-      const decimals = await this.getDecimals(tokenId);
-      const value = ethers.BigNumber.from(
-        new BigNumber(sendRequest.value).shiftedBy(decimals).toString()
-      );
-
-      if (!isAddress(tokenId)) {
-        throw new Error(
-          "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
+    return Promise.all(
+      sendRequests.map(async (sendRequest) => {
+        const tokenId = sendRequest.tokenId;
+        const to = sendRequest.address;
+        const decimals = await this.getDecimals(tokenId);
+        const value = ethers.BigNumber.from(
+          new BigNumber(sendRequest.value).shiftedBy(decimals).toString()
         );
-      }
 
-      const response: ethers.providers.TransactionResponse = await this.contract(
-        tokenId
-      ).transfer(to, value, overrides);
-      const receipt = await response.wait();
+        if (!isAddress(tokenId)) {
+          throw new Error(
+            "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
+          );
+        }
 
-      return {   txId: receipt.transactionHash,
-        balance: await this.getBalance(tokenId),
-        explorerUrl: this.explorerUrl(receipt.transactionHash),
-       }
-    }));
+        const response: ethers.providers.TransactionResponse =
+          await this.contract(tokenId).transfer(to, value, overrides);
+        const receipt = await response.wait();
+
+        return {
+          txId: receipt.transactionHash,
+          balance: await this.getBalance(tokenId),
+          explorerUrl: this.explorerUrl(receipt.transactionHash),
+        };
+      })
+    );
   }
 
   /**
@@ -374,9 +382,7 @@ export class Erc20 {
     const opts = this.substituteOptionals({ ...options }) as Erc20MintOptions;
 
     opts.value = new BigNumber(opts.value);
-    if (
-      opts.value.isLessThanOrEqualTo(0)
-    ) {
+    if (opts.value.isLessThanOrEqualTo(0)) {
       throw Error("Mint amount should be greater than zero");
     }
 
