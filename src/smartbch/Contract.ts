@@ -89,7 +89,9 @@ export class Contract implements ContractI {
   public setAddress(address: string) {
     if (address !== this.address) {
       this.address = address;
-      this.contract = this.contract.attach(address).connect(this.signer || this.provider);
+      this.contract = this.contract
+        .attach(address)
+        .connect(this.signer || this.provider);
     }
 
     return this;

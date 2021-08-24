@@ -26,7 +26,7 @@ export class BaseWallet implements WalletI {
 
   //#region Accessors
   protected getNetworkProvider(
-  // @ts-ignore
+    // @ts-ignore
     network: NetworkType = NetworkType.Mainnet
   ): any {
     throw Error("getNetworkProvider called on base wallet");
@@ -268,9 +268,9 @@ export class BaseWallet implements WalletI {
 
   // Initialize wallet from a mnemonic phrase
   protected async fromSeed(
-  // @ts-ignore
+    // @ts-ignore
     mnemonic: string,
-  // @ts-ignore
+    // @ts-ignore
     derivationPath?: string
   ): Promise<this> {
     throw Error("fromSeed called on base wallet");

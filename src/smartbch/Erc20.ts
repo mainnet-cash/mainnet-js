@@ -27,7 +27,7 @@ export interface GenesisOptions {
   endBaton?: boolean;
   tokenReceiverAddress?: string;
   batonReceiverAddress?: string;
-};
+}
 
 export interface TokenInfo {
   name: string;
@@ -60,7 +60,12 @@ export class Erc20 {
   public contract(tokenId: string): Contract {
     let contract = this.contracts.get(tokenId);
     if (!contract) {
-      contract = new Contract(tokenId, Erc20.abi, [], this.wallet.network).setSigner(this.wallet);
+      contract = new Contract(
+        tokenId,
+        Erc20.abi,
+        [],
+        this.wallet.network
+      ).setSigner(this.wallet);
       this.contracts.set(tokenId, contract);
     }
 
@@ -306,8 +311,9 @@ export class Erc20 {
       );
     }
 
-    const response: ethers.providers.TransactionResponse = await this.contract(tokenId)
-      .transfer(to, value, overrides);
+    const response: ethers.providers.TransactionResponse = await this.contract(
+      tokenId
+    ).transfer(to, value, overrides);
     const receipt = await response.wait();
 
     return [tokenId, receipt.transactionHash];
@@ -324,7 +330,10 @@ export class Erc20 {
    *
    * @returns transaction id and token balance
    */
-   public async mint(options: SlpMintOptions, overrides: ethers.CallOverrides = {}): Promise<SlpMintResult> {
+  public async mint(
+    options: SlpMintOptions,
+    overrides: ethers.CallOverrides = {}
+  ): Promise<SlpMintResult> {
     let [actualTokenId, result] = await this._processMint(options, overrides);
     return {
       txId: result,
@@ -343,7 +352,10 @@ export class Erc20 {
    *
    * @returns the tokenId and minting transaction id
    */
-  private async _processMint(options: SlpMintOptions, overrides: ethers.CallOverrides = {}) {
+  private async _processMint(
+    options: SlpMintOptions,
+    overrides: ethers.CallOverrides = {}
+  ) {
     options = this.substituteOptionals(options);
 
     options.value = new BigNumber(options.value);
@@ -369,29 +381,37 @@ export class Erc20 {
     }
 
     if (!contract.mint) {
-      throw new Error(
-        `Token contract ${tokenId} does not support minting`
-      );
+      throw new Error(`Token contract ${tokenId} does not support minting`);
     }
 
     try {
       if (overrides.gasLimit === -1) {
-        const copyOverrides = {...overrides};
+        const copyOverrides = { ...overrides };
         delete copyOverrides.gasLimit;
-        overrides.gasLimit = await contract.estimateFee("mint", to, value, copyOverrides);
+        overrides.gasLimit = await contract.estimateFee(
+          "mint",
+          to,
+          value,
+          copyOverrides
+        );
       }
 
-      const response: ethers.providers.TransactionResponse = await contract.mint(to, value, overrides);
-      const receipt: ethers.providers.TransactionReceipt = await response.wait();
+      const response: ethers.providers.TransactionResponse =
+        await contract.mint(to, value, overrides);
+      const receipt: ethers.providers.TransactionReceipt =
+        await response.wait();
 
-      return [
-        options.tokenId,
-        receipt.transactionHash
-      ];
+      return [options.tokenId, receipt.transactionHash];
     } catch (error: any) {
       const message: string = ((error.error || {}).error || {}).message || "";
-      if (message.match(/execution reverted: AccessControl: account \w+ is missing role \w+/)) {
-        throw Error(`Address ${this.getDepositAddress()} is not allowed to mint or minting is not supported by the contract ${contract.getDepositAddress()}`);
+      if (
+        message.match(
+          /execution reverted: AccessControl: account \w+ is missing role \w+/
+        )
+      ) {
+        throw Error(
+          `Address ${this.getDepositAddress()} is not allowed to mint or minting is not supported by the contract ${contract.getDepositAddress()}`
+        );
       }
 
       throw error;
@@ -409,7 +429,7 @@ export class Erc20 {
    *
    * @returns options with relevant values substituted/initialized
    */
-   private substituteOptionals(options: SlpMintOptions): any {
+  private substituteOptionals(options: SlpMintOptions): any {
     if (!options.batonReceiverSlpAddr) {
       options.batonReceiverSlpAddr = this.getDepositAddress();
     }

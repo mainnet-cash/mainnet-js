@@ -50,7 +50,7 @@ describe(`Test Ethereum functions`, () => {
       "function mint(address to, uint256 amount)",
       "event Transfer(address indexed from, address indexed to, uint amount)",
       "event Approval(address indexed owner, address indexed spender, uint256 value)",
-      ];
+    ];
 
     const script = `
 // SPDX-License-Identifier: MIT
@@ -96,13 +96,15 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
   function decimals() public view virtual override returns (uint8) {
     return _decimals;
   }
-}`
+}`;
 
     const wallet = await RegTestSmartBchWallet.fromPrivateKey(
       "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
     );
 
-    const contract = await Contract.deploy(wallet, script,
+    const contract = await Contract.deploy(
+      wallet,
+      script,
       "Mainnet Coin",
       "MNC",
       8,
@@ -111,10 +113,9 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
       wallet.getDepositAddress(),
       undefined === true,
       {
-      gasPrice: 10 ** 10,
-    });
-    console.log(
-      await contract.totalSupply()
+        gasPrice: 10 ** 10,
+      }
     );
+    console.log(await contract.totalSupply());
   });
 });

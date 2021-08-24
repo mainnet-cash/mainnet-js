@@ -10,11 +10,13 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
-    await wallet.erc20.getBalance(
-      "0xdac17f958d2ee523a2206206994597c13d831ec7"
-    );
+    await wallet.erc20.getBalance("0xdac17f958d2ee523a2206206994597c13d831ec7");
 
-    (await wallet.erc20.getTokenInfo("0xdac17f958d2ee523a2206206994597c13d831ec7")).totalSupply.toString()
+    (
+      await wallet.erc20.getTokenInfo(
+        "0xdac17f958d2ee523a2206206994597c13d831ec7"
+      )
+    ).totalSupply.toString();
   });
 
   test("Should fail to make a paid transaction from watch-only wallet", async () => {
@@ -22,16 +24,18 @@ describe(`Test Ethereum functions`, () => {
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
 
-    await expect(wallet.erc20.send(
-      [
-        {
-          slpaddr: wallet.getDepositAddress(),
-          tokenId: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-          value: 3,
-        },
-      ],
-      { gasPrice: 10 ** 10 }
-    )).rejects.toThrow("sending a transaction requires a signer");
+    await expect(
+      wallet.erc20.send(
+        [
+          {
+            slpaddr: wallet.getDepositAddress(),
+            tokenId: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            value: 3,
+          },
+        ],
+        { gasPrice: 10 ** 10 }
+      )
+    ).rejects.toThrow("sending a transaction requires a signer");
   });
 
   test("ERC20 genesis and info", async () => {
@@ -87,13 +91,23 @@ describe(`Test Ethereum functions`, () => {
       { gasPrice: 10 ** 10 }
     );
     expect(sendResult.balance.value).toStrictEqual(new BigNumber(7));
-    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(3));
+    expect(
+      (await receiverWallet.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(3));
 
     // sendMax
-    const sendMaxResult = await receiverWallet.erc20.sendMax(wallet.getDepositAddress(), result.tokenId, { gasPrice: 10 ** 10 });
+    const sendMaxResult = await receiverWallet.erc20.sendMax(
+      wallet.getDepositAddress(),
+      result.tokenId,
+      { gasPrice: 10 ** 10 }
+    );
     expect(sendMaxResult.balance.value).toStrictEqual(new BigNumber(0));
-    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(10));
-    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(0));
+    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(10)
+    );
+    expect(
+      (await receiverWallet.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(0));
   });
 
   test("ERC20 genesis with token receiver and baton receiver", async () => {
@@ -111,7 +125,7 @@ describe(`Test Ethereum functions`, () => {
       decimals: 8,
       initialAmount: 10,
       tokenReceiverAddress: receiverWallet.getDepositAddress(),
-      batonReceiverAddress: receiverWallet.getDepositAddress()
+      batonReceiverAddress: receiverWallet.getDepositAddress(),
     };
 
     const result = await wallet.erc20.genesis(options, {
@@ -123,15 +137,37 @@ describe(`Test Ethereum functions`, () => {
     expect(result.balance.ticker).toBe(options.ticker);
     expect(result.balance.decimals).toBe(options.decimals);
     expect(result.tokenId).toBe(result.balance.tokenId);
-    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(0));
-    expect((await receiverWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(new BigNumber(10));
+    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(0)
+    );
+    expect(
+      (await receiverWallet.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(10));
 
     // mint
-    const mintResult = await receiverWallet.erc20.mint({ tokenId: result.tokenId, value: 5, tokenReceiverSlpAddr: receiverWallet.getDepositAddress() }, { gasPrice: 10 ** 10, gasLimit: -1 });
+    const mintResult = await receiverWallet.erc20.mint(
+      {
+        tokenId: result.tokenId,
+        value: 5,
+        tokenReceiverSlpAddr: receiverWallet.getDepositAddress(),
+      },
+      { gasPrice: 10 ** 10, gasLimit: -1 }
+    );
     expect(mintResult.balance.value).toStrictEqual(new BigNumber(15));
 
     // mint fail, no role
-    await expect(wallet.erc20.mint({ tokenId: result.tokenId, value: 5, tokenReceiverSlpAddr: wallet.getDepositAddress() }, { gasPrice: 10 ** 10, gasLimit: -1 })).rejects.toThrow("is not allowed to mint or minting is not supported by the contract");
+    await expect(
+      wallet.erc20.mint(
+        {
+          tokenId: result.tokenId,
+          value: 5,
+          tokenReceiverSlpAddr: wallet.getDepositAddress(),
+        },
+        { gasPrice: 10 ** 10, gasLimit: -1 }
+      )
+    ).rejects.toThrow(
+      "is not allowed to mint or minting is not supported by the contract"
+    );
   });
 
   test("ERC20 mint disabled (baton ended)", async () => {
@@ -144,7 +180,7 @@ describe(`Test Ethereum functions`, () => {
       ticker: "MNC",
       decimals: 8,
       initialAmount: 10,
-      endBaton: true
+      endBaton: true,
     };
 
     const result = await wallet.erc20.genesis(options, {
@@ -158,6 +194,17 @@ describe(`Test Ethereum functions`, () => {
     expect(result.tokenId).toBe(result.balance.tokenId);
 
     // mint fail, mint was disabled by genesis options
-    await expect(wallet.erc20.mint({ tokenId: result.tokenId, value: 5, tokenReceiverSlpAddr: wallet.getDepositAddress() }, { gasPrice: 10 ** 10, gasLimit: -1 })).rejects.toThrow("is not allowed to mint or minting is not supported by the contract");
+    await expect(
+      wallet.erc20.mint(
+        {
+          tokenId: result.tokenId,
+          value: 5,
+          tokenReceiverSlpAddr: wallet.getDepositAddress(),
+        },
+        { gasPrice: 10 ** 10, gasLimit: -1 }
+      )
+    ).rejects.toThrow(
+      "is not allowed to mint or minting is not supported by the contract"
+    );
   });
 });

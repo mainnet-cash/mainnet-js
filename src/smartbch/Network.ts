@@ -17,10 +17,10 @@ export function getNetworkProvider(
       );
     }
     default: {
-      return new ethers.providers.JsonRpcProvider(
-        "http://localhost:8545",
-        { name: "smartbch", chainId: 10001 }
-      );
+      return new ethers.providers.JsonRpcProvider("http://localhost:8545", {
+        name: "smartbch",
+        chainId: 10001,
+      });
     }
   }
 }
