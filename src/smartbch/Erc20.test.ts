@@ -95,8 +95,9 @@ describe(`Test Ethereum functions`, () => {
         },
       ],
       { gasPrice: 10 ** 10 }
-    )[0];
-    expect(sendResult.balance.value).toStrictEqual(new BigNumber(7));
+    );
+
+    expect(sendResult[0].balance.value).toStrictEqual(new BigNumber(7));
     expect(
       (await receiverWallet.erc20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(3));

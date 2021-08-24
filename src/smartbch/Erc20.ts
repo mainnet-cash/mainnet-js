@@ -228,7 +228,7 @@ export class Erc20 {
         .shiftedBy(opts.decimals)
         .toString()
     );
-    console.trace(opts, this.getDepositAddress());
+
     const contract = await Contract.deploy(
       this.wallet,
       Erc20.script,
