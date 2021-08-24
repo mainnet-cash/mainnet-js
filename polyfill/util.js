@@ -244,6 +244,6 @@ function formatError(value) {
   return "[" + Error.prototype.toString.call(value) + "]";
 }
 
-exports.inherits = require('inherits');
+exports.inherits = require("inherits");
 
 exports.types = require("./support/types");

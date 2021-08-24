@@ -81,7 +81,7 @@ const browserConfig = {
     },
     fallback: {
       stream: require.resolve("stream-browserify"),
-    }
+    },
   },
 };
 
@@ -119,7 +119,7 @@ const webWorkerConfig = {
     },
     fallback: {
       stream: require.resolve("stream-browserify"),
-    }
+    },
   },
 };
 

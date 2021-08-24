@@ -20,9 +20,15 @@ describe(`Test Ethereum functions`, () => {
       "event Transfer(address indexed from, address indexed to, uint amount)",
     ];
 
-    const contract = new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", abi, []);
+    const contract = new Contract(
+      "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      abi,
+      []
+    );
 
-    const balance: ethers.BigNumber = await contract.balanceOf("0x227F0226499E308769478669669CbdCf4E7dA002");
+    const balance: ethers.BigNumber = await contract.balanceOf(
+      "0x227F0226499E308769478669669CbdCf4E7dA002"
+    );
     expect(balance.toNumber()).toBeGreaterThanOrEqual(0);
 
     const contractId = contract.toString();
