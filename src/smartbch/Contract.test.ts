@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { Contract } from "../smartbch/Contract";
 import { RegTestSmartBchWallet } from "./SmartBchWallet";
 
@@ -19,22 +20,19 @@ describe(`Test Ethereum functions`, () => {
       "event Transfer(address indexed from, address indexed to, uint amount)",
     ];
 
-    const a = new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", abi, [
-      1,
-      "a",
-    ]);
-    console.log(
-      await a.getBalance("0x227F0226499E308769478669669CbdCf4E7dA002")
-    );
+    const contract = new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", abi, []);
 
-    const contractId = a.toString();
+    const balance: ethers.BigNumber = await contract.balanceOf("0x227F0226499E308769478669669CbdCf4E7dA002");
+    expect(balance.toNumber()).toBeGreaterThanOrEqual(0);
+
+    const contractId = contract.toString();
 
     const cont = Contract.fromId(contractId);
     delete (cont as any).provider;
     delete (cont as any).contract;
-    delete (a as any).provider;
-    delete (a as any).contract;
-    expect(JSON.stringify(cont)).toEqual(JSON.stringify(a));
+    delete (contract as any).provider;
+    delete (contract as any).contract;
+    expect(JSON.stringify(cont)).toEqual(JSON.stringify(contract));
   });
 
   test("Test deploying contract", async () => {
@@ -116,6 +114,8 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
         gasPrice: 10 ** 10,
       }
     );
-    console.log(await contract.totalSupply());
+
+    const totalSupply: ethers.BigNumber = await contract.totalSupply();
+    expect(totalSupply.toNumber()).toBeGreaterThanOrEqual(0);
   });
 });

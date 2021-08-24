@@ -16,11 +16,11 @@ import {
   transformContractToRequests,
 } from "../contract/util";
 import { defineReadOnly } from "ethers/lib/utils";
-import solc from "solc";
 import { XMLHttpRequest } from "xmlhttprequest-ssl";
 import { SmartBchWallet } from "./SmartBchWallet";
 import { WalletTypeEnum } from "../wallet/enum";
 import fs from "fs";
+import solc from "../../polyfill/solc";
 
 export type Argument = number | boolean | string | Uint8Array;
 

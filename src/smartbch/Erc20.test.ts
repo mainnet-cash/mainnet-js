@@ -10,13 +10,13 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
-    await wallet.erc20.getBalance("0xdac17f958d2ee523a2206206994597c13d831ec7");
+    expect((await wallet.erc20.getBalance("0xdac17f958d2ee523a2206206994597c13d831ec7")).value.toNumber()).toBeGreaterThanOrEqual(0);
 
-    (
+    expect((
       await wallet.erc20.getTokenInfo(
         "0xdac17f958d2ee523a2206206994597c13d831ec7"
       )
-    ).totalSupply.toString();
+    ).totalSupply.toNumber()).toBeGreaterThanOrEqual(0);
   });
 
   test("Should fail to make a paid transaction from watch-only wallet", async () => {
