@@ -14,9 +14,7 @@ describe(`Test Ethereum functions`, () => {
       "0xdac17f958d2ee523a2206206994597c13d831ec7"
     );
 
-    console.log(
-    await (await wallet.erc20.getTokenInfo("0xdac17f958d2ee523a2206206994597c13d831ec7")).totalSupply.toString()
-    );
+    (await wallet.erc20.getTokenInfo("0xdac17f958d2ee523a2206206994597c13d831ec7")).totalSupply.toString()
   });
 
   test("Should fail to make a paid transaction from watch-only wallet", async () => {
@@ -55,7 +53,6 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await RegTestSmartBchWallet.fromPrivateKey(
       "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
     );
-    console.log(wallet.getDepositAddress());
 
     const result = await wallet.erc20.genesis(options, {
       gasPrice: 10 ** 10,
@@ -68,13 +65,12 @@ describe(`Test Ethereum functions`, () => {
     expect(result.tokenId).toBe(result.balance.tokenId);
 
     // get token info
-    const tokenInfo = await watchWallet.erc20.getTokenInfo(result.tokenId);
+    const tokenInfo = await wallet.erc20.getTokenInfo(result.tokenId);
     expect(tokenInfo.name).toBe(options.name);
     expect(tokenInfo.ticker).toBe(options.ticker);
     expect(tokenInfo.decimals).toBe(options.decimals);
     expect(tokenInfo.tokenId).toBe(result.tokenId);
     expect(tokenInfo.totalSupply).toStrictEqual(new BigNumber(10));
-    return;
 
     // send
     const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(

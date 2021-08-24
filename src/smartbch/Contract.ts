@@ -1,19 +1,9 @@
 import { binToHex } from "@bitauth/libauth";
-import {
-  Artifact,
-  Contract as CashScriptContract,
-  SignatureTemplate,
-  NetworkProvider,
-} from "cashscript";
-import { compileString, compileFile } from "cashc";
 import { getNetworkProvider } from "./Network";
 import { Network, UtxoI } from "../interface";
 import { atob, btoa } from "../util/base64";
 import { DELIMITER } from "../constant";
-import { ContractFunction } from "cashscript/dist/module/Contract";
-import { UtxoItem } from "../wallet/model";
 import {
-  CashscriptTransactionI,
   ContractI,
   ContractInfoResponseI,
   ContractResponseI,
@@ -26,7 +16,6 @@ import {
   transformContractToRequests,
 } from "../contract/util";
 import { defineReadOnly } from "ethers/lib/utils";
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import solc from "solc";
 import { XMLHttpRequest } from "xmlhttprequest-ssl";
 import { SmartBchWallet } from "./SmartBchWallet";
@@ -99,7 +88,6 @@ export class Contract implements ContractI {
 
   public setAddress(address: string) {
     if (address !== this.address) {
-      console.trace(address, this.address)
       this.address = address;
       this.contract = this.contract.attach(address).connect(this.signer || this.provider);
     }
@@ -126,14 +114,14 @@ export class Contract implements ContractI {
     return result;
   }
 
-  readonly [key: string]: ContractFunction | any;
+  readonly [key: string]: ethers.ContractFunction | any;
 
   private defineContractProperties() {
     Object.keys(this.contract.interface.functions).forEach((signature) => {
       const fragment = this.contract.interface.functions[signature];
 
       const fn = async (...args: Array<any>): Promise<any> => {
-        return this.getContractFunction(fragment.name)(...args); //this.contract[signature](...args);
+        return this.getFunctionByName(fragment.name)(...args);
       };
 
       defineReadOnly(this, fragment.name, fn as any);
@@ -225,24 +213,24 @@ export class Contract implements ContractI {
     );
   }
 
-  /**
-   * _create - Static convenience method for the constructor
-   *
-   * an intermediate function similar to the constructor for rest
-   *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
-   * @returns A new contract
-   */
-  static _create(
-    script: string,
-    parameters: string[],
-    network: Network,
-    nonce?
-  ) {
-    let artifact = compileString(script);
-    let params = castConstructorParametersFromArtifact(parameters, artifact);
-    return new this("", script, params, network, nonce);
-  }
+  // /**
+  //  * _create - Static convenience method for the constructor
+  //  *
+  //  * an intermediate function similar to the constructor for rest
+  //  *
+  //  * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
+  //  * @returns A new contract
+  //  */
+  // static _create(
+  //   script: string,
+  //   parameters: string[],
+  //   network: Network,
+  //   nonce?
+  // ) {
+  //   let artifact = compileString(script);
+  //   let params = castConstructorParametersFromArtifact(parameters, artifact);
+  //   return new this("", script, params, network, nonce);
+  // }
 
   /**
    * Get the unspent transaction outputs of the contract
@@ -299,20 +287,6 @@ export class Contract implements ContractI {
   }
 
   /**
-   * getContractFunction - Get a function object from a contract
-   *
-   * @param funcName The string identifying the function in the cashscript contract
-   * @returns A cashscript Transaction
-   */
-  public getContractFunction(funcName: string) {
-    return this.contract[funcName];
-  }
-
-  public fn(funcName: string) {
-    return this.contract[funcName];
-  }
-
-  /**
    * runFunctionFromStrings -  Call a cashscript contract function using an interface object of strings.
    *
    * This is a helper function for the REST or serialized interfaces and not intended
@@ -337,7 +311,7 @@ export class Contract implements ContractI {
     return this.contract[request.function](...arguments, request.overrides);
   }
 
-  public getFunctionByName(funcName) {
+  public getFunctionByName(funcName: string) {
     if (typeof this.contract.functions[funcName] === "function") {
       return this.contract[funcName];
     } else {
@@ -345,31 +319,30 @@ export class Contract implements ContractI {
     }
   }
 
-  public async estimateFee(func: ContractFunction, ...args) {
-    const fn = this.getContractFunction(func.name);
-    return this.contract.estimateGas[fn.name](...args);
+  public async estimateFee(funcName: string, ...args) {
+    return this.contract.estimateGas[funcName](...args);
   }
 
-  /**
-   * Create a new contract, but respond with a json object
-   * @param request A contract request object
-   * @returns A new contract object
-   */
-  public static contractRespFromJsonRequest(request: any): ContractResponseI {
-    let contract = Contract._create(
-      request.script,
-      request.parameters,
-      request.network
-    );
-    if (contract) {
-      return {
-        contractId: contract.toString(),
-        cashaddr: contract.getDepositAddress(),
-      };
-    } else {
-      throw Error("Error creating contract");
-    }
-  }
+  // /**
+  //  * Create a new contract, but respond with a json object
+  //  * @param request A contract request object
+  //  * @returns A new contract object
+  //  */
+  // public static contractRespFromJsonRequest(request: any): ContractResponseI {
+  //   let contract = Contract._create(
+  //     request.script,
+  //     request.parameters,
+  //     request.network
+  //   );
+  //   if (contract) {
+  //     return {
+  //       contractId: contract.toString(),
+  //       cashaddr: contract.getDepositAddress(),
+  //     };
+  //   } else {
+  //     throw Error("Error creating contract");
+  //   }
+  // }
 
   public async isDeployed() {
     return this.contract.deployed();

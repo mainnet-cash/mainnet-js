@@ -42,7 +42,7 @@ export interface TokenInfo {
  */
 export class Erc20 {
   readonly wallet: SmartBchWallet;
-  contract: Contract;
+  contracts: Map<string, Contract> = new Map<string, Contract>();
 
   /**
    * Initializes an Slp Wallet.
@@ -51,40 +51,43 @@ export class Erc20 {
    */
   constructor(wallet: SmartBchWallet) {
     this.wallet = wallet;
-    this.contract = new Contract(
-      "0xdac17f958d2ee523a2206206994597c13d831ec7",
-      Erc20.abi,
-      [],
-      this.wallet.network
-    ).setSigner(this.wallet);
   }
 
   static get walletType() {
     return SmartBchWallet;
   }
 
+  public contract(tokenId: string): Contract {
+    let contract = this.contracts.get(tokenId);
+    if (!contract) {
+      contract = new Contract(tokenId, Erc20.abi, [], this.wallet.network).setSigner(this.wallet);
+      this.contracts.set(tokenId, contract);
+    }
+
+    return contract;
+  }
+
   public async getName(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "name", async (tokenId) => {
-      return await this.contract.setAddress(tokenId).name();
+      return await this.contract(tokenId).name();
     });
   }
 
   public async getSymbol(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "symbol", async (tokenId) => {
-      return await this.contract.setAddress(tokenId).symbol();
+      return await this.contract(tokenId).symbol();
     });
   }
 
   public async getDecimals(tokenId: string): Promise<number> {
     return this.getProp(tokenId, "decimals", async (tokenId) => {
-      return await this.contract.setAddress(tokenId).decimals();
+      return await this.contract(tokenId).decimals();
     });
   }
 
   public async getTotalSupply(tokenId: string): Promise<BigNumber> {
     return this.getProp(tokenId, "totalSupply", async (tokenId) => {
-      // this.contract.setAddress(tokenId);
-      const totalSupply = await this.contract.setAddress(tokenId).totalSupply();
+      const totalSupply = await this.contract(tokenId).totalSupply();
       const decimals = await this.getDecimals(tokenId);
       return new BigNumber(totalSupply.toString()).shiftedBy(-decimals);
     });
@@ -169,13 +172,11 @@ export class Erc20 {
       throw new Error(`Invalid tokenId ${tokenId}`);
     }
 
-    this.contract.setAddress(tokenId);
-
     let [name, ticker, decimals, value] = await Promise.all([
       this.getName(tokenId),
       this.getSymbol(tokenId),
       this.getDecimals(tokenId),
-      this.contract.balanceOf(this.getDepositAddress()),
+      this.contract(tokenId).balanceOf(this.getDepositAddress()),
     ]);
 
     value = new BigNumber(value.toString()).shiftedBy(-decimals);
@@ -211,7 +212,7 @@ export class Erc20 {
       options.endBaton === true,
       overrides
     );
-    this.contract = contract;
+    this.contracts.set(contract.getDepositAddress(), contract);
 
     return {
       tokenId: contract.getDepositAddress(),
@@ -305,9 +306,8 @@ export class Erc20 {
       );
     }
 
-    const response: ethers.providers.TransactionResponse = await this.contract
-      .setAddress(tokenId)
-      .contract.transfer(to, value, overrides);
+    const response: ethers.providers.TransactionResponse = await this.contract(tokenId)
+      .transfer(to, value, overrides);
     const receipt = await response.wait();
 
     return [tokenId, receipt.transactionHash];
@@ -360,6 +360,7 @@ export class Erc20 {
     const value = ethers.BigNumber.from(
       new BigNumber(options.value).shiftedBy(decimals).toString()
     );
+    const contract = this.contract(tokenId);
 
     if (!isAddress(tokenId)) {
       throw new Error(
@@ -367,9 +368,7 @@ export class Erc20 {
       );
     }
 
-    if (!this.contract
-      .setAddress(tokenId)
-      .contract.mint) {
+    if (!contract.mint) {
       throw new Error(
         `Token contract ${tokenId} does not support minting`
       );
@@ -379,14 +378,10 @@ export class Erc20 {
       if (overrides.gasLimit === -1) {
         const copyOverrides = {...overrides};
         delete copyOverrides.gasLimit;
-        overrides.gasLimit = await this.contract
-          .setAddress(tokenId)
-          .contract.estimateGas.mint(to, value, copyOverrides);
+        overrides.gasLimit = await contract.estimateFee("mint", to, value, copyOverrides);
       }
 
-      const response: ethers.providers.TransactionResponse = await this.contract
-        .setAddress(tokenId)
-        .contract.mint(to, value, overrides);
+      const response: ethers.providers.TransactionResponse = await contract.mint(to, value, overrides);
       const receipt: ethers.providers.TransactionReceipt = await response.wait();
 
       return [
@@ -396,10 +391,10 @@ export class Erc20 {
     } catch (error: any) {
       const message: string = ((error.error || {}).error || {}).message || "";
       if (message.match(/execution reverted: AccessControl: account \w+ is missing role \w+/)) {
-        throw Error(`Address ${this.getDepositAddress()} is not allowed to mint or minting is not supported by the contract ${this.contract.getDepositAddress()}`);
+        throw Error(`Address ${this.getDepositAddress()} is not allowed to mint or minting is not supported by the contract ${contract.getDepositAddress()}`);
       }
 
-      throw console.error();
+      throw error;
     }
   }
 
