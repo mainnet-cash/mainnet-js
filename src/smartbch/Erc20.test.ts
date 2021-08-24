@@ -1,8 +1,6 @@
 // import { BigNumber, BigNumberish } from "ethers";
 import BigNumber from "bignumber.js";
-import exp from "constants";
-import { ethers } from "ethers";
-import { Erc20, GenesisOptions } from "./Erc20";
+import { Erc20GenesisOptions } from "./interface";
 import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
@@ -36,7 +34,7 @@ describe(`Test Ethereum functions`, () => {
       wallet.erc20.send(
         [
           {
-            slpaddr: wallet.getDepositAddress(),
+            address: wallet.getDepositAddress(),
             tokenId: "0xdac17f958d2ee523a2206206994597c13d831ec7",
             value: 3,
           },
@@ -51,7 +49,7 @@ describe(`Test Ethereum functions`, () => {
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
 
-    const options = <GenesisOptions>{
+    const options = <Erc20GenesisOptions>{
       name: "Mainnet Coin",
       ticker: "MNC",
       decimals: 8,
@@ -91,13 +89,13 @@ describe(`Test Ethereum functions`, () => {
     const sendResult = await wallet.erc20.send(
       [
         {
-          slpaddr: receiverWallet.getDepositAddress(),
+          address: receiverWallet.getDepositAddress(),
           tokenId: result.tokenId,
           value: 3,
         },
       ],
       { gasPrice: 10 ** 10 }
-    );
+    )[0];
     expect(sendResult.balance.value).toStrictEqual(new BigNumber(7));
     expect(
       (await receiverWallet.erc20.getBalance(result.tokenId)).value
@@ -127,7 +125,7 @@ describe(`Test Ethereum functions`, () => {
       "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
     );
 
-    const options = <GenesisOptions>{
+    const options = <Erc20GenesisOptions>{
       name: "Mainnet Coin",
       ticker: "MNC",
       decimals: 8,
@@ -157,7 +155,7 @@ describe(`Test Ethereum functions`, () => {
       {
         tokenId: result.tokenId,
         value: 5,
-        tokenReceiverSlpAddr: receiverWallet.getDepositAddress(),
+        tokenReceiverAddress: receiverWallet.getDepositAddress(),
       },
       { gasPrice: 10 ** 10, gasLimit: -1 }
     );
@@ -169,7 +167,7 @@ describe(`Test Ethereum functions`, () => {
         {
           tokenId: result.tokenId,
           value: 5,
-          tokenReceiverSlpAddr: wallet.getDepositAddress(),
+          tokenReceiverAddress: wallet.getDepositAddress(),
         },
         { gasPrice: 10 ** 10, gasLimit: -1 }
       )
@@ -183,7 +181,7 @@ describe(`Test Ethereum functions`, () => {
       "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
     );
 
-    const options = <GenesisOptions>{
+    const options = <Erc20GenesisOptions>{
       name: "Mainnet Coin",
       ticker: "MNC",
       decimals: 8,
@@ -207,7 +205,7 @@ describe(`Test Ethereum functions`, () => {
         {
           tokenId: result.tokenId,
           value: 5,
-          tokenReceiverSlpAddr: wallet.getDepositAddress(),
+          tokenReceiverAddress: wallet.getDepositAddress(),
         },
         { gasPrice: 10 ** 10, gasLimit: -1 }
       )

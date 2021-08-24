@@ -1,53 +1,25 @@
-import {
-  SlpGenesisOptions,
-  SlpGenesisResult,
-  SlpMintOptions,
-  SlpMintResult,
-  SlpSendRequest,
-  SlpSendResponse,
-  SlpTokenBalance,
-  SlpTokenType,
-} from "../slp/interface";
-import { SmartBchWallet } from "../wallet/Wif";
-import { ethers, utils } from "ethers";
-// import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { SmartBchWallet } from "../smartbch/SmartBchWallet";
+import { ethers } from "ethers";
 import { Contract } from "./Contract";
 import { ImageI } from "../qr/interface";
 import { isAddress } from "ethers/lib/utils";
 import BigNumber from "bignumber.js";
 import { zeroAddress } from "./Utils";
+import { Erc20GenesisOptions, Erc20GenesisResult, Erc20MintOptions, Erc20MintResult, Erc20SendRequest, Erc20SendResponse, Erc20TokenBalance, Erc20TokenInfo } from "./interface";
 
 const _cache = {};
 
-export interface GenesisOptions {
-  name: string;
-  ticker: string;
-  initialAmount: BigNumber.Value;
-  decimals: number;
-  endBaton?: boolean;
-  tokenReceiverAddress?: string;
-  batonReceiverAddress?: string;
-}
-
-export interface TokenInfo {
-  name: string;
-  ticker: string;
-  tokenId: string;
-  decimals: number;
-  totalSupply: BigNumber;
-}
-
 /**
- * Class to manage an Erc20 tokens.
+ * Class to manage Erc20 tokens.
  */
 export class Erc20 {
   readonly wallet: SmartBchWallet;
   contracts: Map<string, Contract> = new Map<string, Contract>();
 
   /**
-   * Initializes an Slp Wallet.
+   * Initializes an Erc20 Wallet.
    *
-   * @param wallet     A non-slp wallet object
+   * @param wallet     A SmartBch wallet object
    */
   constructor(wallet: SmartBchWallet) {
     this.wallet = wallet;
@@ -57,6 +29,11 @@ export class Erc20 {
     return SmartBchWallet;
   }
 
+  /**
+   * Accessor to a contract cache.
+   *
+   * @param tokenId     Erc20 Token Id (contract address)
+   */
   public contract(tokenId: string): Contract {
     let contract = this.contracts.get(tokenId);
     if (!contract) {
@@ -72,24 +49,44 @@ export class Erc20 {
     return contract;
   }
 
+  /**
+   * Get cached token name.
+   *
+   * @param tokenId     Erc20 Token Id (contract address)
+   */
   public async getName(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "name", async (tokenId) => {
       return await this.contract(tokenId).name();
     });
   }
 
+  /**
+   * Get cached token symbol (ticker).
+   *
+   * @param tokenId     Erc20 Token Id (contract address)
+   */
   public async getSymbol(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "symbol", async (tokenId) => {
       return await this.contract(tokenId).symbol();
     });
   }
 
+  /**
+   * Get cached token decimals.
+   *
+   * @param tokenId     Erc20 Token Id (contract address)
+   */
   public async getDecimals(tokenId: string): Promise<number> {
     return this.getProp(tokenId, "decimals", async (tokenId) => {
       return await this.contract(tokenId).decimals();
     });
   }
 
+  /**
+   * Get cached token total supply value.
+   *
+   * @param tokenId     Erc20 Token Id (contract address)
+   */
   public async getTotalSupply(tokenId: string): Promise<BigNumber> {
     return this.getProp(tokenId, "totalSupply", async (tokenId) => {
       const totalSupply = await this.contract(tokenId).totalSupply();
@@ -98,6 +95,13 @@ export class Erc20 {
     });
   }
 
+  /**
+   * Get arbitrary cached value.
+   *
+   * @param tokenId     Erc20 Token Id (contract address)
+   * @param prop        Property name (cache key)
+   * @param func        Callback to be executed upon cache miss
+   */
   public async getProp(
     tokenId: string,
     prop: string,
@@ -138,15 +142,31 @@ export class Erc20 {
   }
 
   /**
+   *  explorerUrl   Web url to a transaction on a block explorer
+   *
+   * @param txId   transaction Id
+   * @returns   Url string
+   */
+   public explorerUrl(txId: string) {
+    const explorerUrlMap = {
+      mainnet: "",
+      testnet: "",
+      regtest: "",
+    };
+
+    return explorerUrlMap[this.wallet.network] + txId;
+  }
+
+  /**
    * getTokenInfo - get data associated with a token
    *
    * a high-level function
    *
-   * @param tokenId  The tokenId to request information about
+   * @param tokenId  Erc20 Token Id (contract address)
    *
-   * @returns Promise to the SmartBch token info or undefined.
+   * @returns Promise to the SmartBch token info.
    */
-  public async getTokenInfo(tokenId: string): Promise<TokenInfo> {
+  public async getTokenInfo(tokenId: string): Promise<Erc20TokenInfo> {
     let [name, ticker, decimals, totalSupply] = await Promise.all([
       this.getName(tokenId),
       this.getSymbol(tokenId),
@@ -166,13 +186,13 @@ export class Erc20 {
   /**
    * getBalance - get a token balance for a particular address
    *
-   * a high-level function, see also /wallet/slp/balance REST endpoint
+   * a high-level function, see also /smartbchwallet/erc20/balance REST endpoint
    *
-   * @param tokenId   The id of the slp token
+   * @param tokenId   Erc20 Token Id (contract address)
    *
-   * @returns Promise to an SlpTokenBalance
+   * @returns Promise to Erc20TokenBalance
    */
-  public async getBalance(tokenId: string): Promise<SlpTokenBalance> {
+  public async getBalance(tokenId: string): Promise<Erc20TokenBalance> {
     if (!tokenId) {
       throw new Error(`Invalid tokenId ${tokenId}`);
     }
@@ -186,35 +206,39 @@ export class Erc20 {
 
     value = new BigNumber(value.toString()).shiftedBy(-decimals);
 
-    return <SlpTokenBalance>{ name, ticker, decimals, value, tokenId };
+    return { name, ticker, decimals, value, tokenId };
   }
 
   /**
    * genesis - create a new SmartBch ERC20 token
    *
-   * @param options    Token creation options @see SlpGenesisOptions
+   * @param options    Token creation options @see Erc20GenesisOptions
+   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
    * @returns Token Id and new token balance
    */
   public async genesis(
-    options: GenesisOptions,
+    options: Erc20GenesisOptions,
     overrides: ethers.CallOverrides = {}
-  ): Promise<SlpGenesisResult> {
-    const baseInitialAmount = ethers.BigNumber.from(
-      new BigNumber(options.initialAmount)
-        .shiftedBy(options.decimals)
+  ): Promise<Erc20GenesisResult> {
+    const opts = this.substituteOptionals({ ...options }) as Erc20GenesisOptions;
+
+    const initialAmount = ethers.BigNumber.from(
+      new BigNumber(opts.initialAmount)
+        .shiftedBy(opts.decimals)
         .toString()
     );
+    console.trace(opts, this.getDepositAddress());
     const contract = await Contract.deploy(
       this.wallet,
       Erc20.script,
-      options.name,
-      options.ticker,
-      options.decimals,
-      baseInitialAmount,
-      options.tokenReceiverAddress || zeroAddress(),
-      options.batonReceiverAddress || zeroAddress(),
-      options.endBaton === true,
+      opts.name,
+      opts.ticker,
+      opts.decimals,
+      initialAmount,
+      opts.tokenReceiverAddress,
+      opts.batonReceiverAddress,
+      opts.endBaton,
       overrides
     );
     this.contracts.set(contract.getDepositAddress(), contract);
@@ -231,7 +255,8 @@ export class Erc20 {
    * a high-level function, see also /wallet/slp/send_max REST endpoint
    *
    * @param address   destination smartbch address
-   * @param tokenId   the id of the token to be spent
+   * @param tokenId   Erc20 Token Id (contract address) to be spent
+   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
    * @returns transaction id and token balance
    */
@@ -239,39 +264,36 @@ export class Erc20 {
     address: string,
     tokenId: string,
     overrides: ethers.CallOverrides = {}
-  ): Promise<SlpSendResponse> {
+  ): Promise<Erc20SendResponse> {
     const balance = await this.getBalance(tokenId);
-    const requests: SlpSendRequest[] = [balance].map((val) => ({
-      slpaddr: address,
+    const requests: Erc20SendRequest[] = [balance].map((val) => ({
+      address: address,
       value: val.value,
       ticker: val.ticker,
       tokenId: val.tokenId,
     }));
-    return this.send(requests, overrides);
+    const responses = await this.send(requests, overrides)
+    return responses[0];
   }
 
   /**
-   * send - attempt to process a list of slp send requests.
+   * send - process a list of Erc20 send requests.
    *
-   * a high-level function, see also /wallet/slp/send REST endpoint
+   * a high-level function, see also /smartbchwallet/erc20/send REST endpoint
    *
    * @param [requests]   list of send requests
+   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
    * @returns transaction id and token balance
    */
   public async send(
-    requests: SlpSendRequest[],
+    requests: Erc20SendRequest[],
     overrides: ethers.CallOverrides = {}
-  ): Promise<SlpSendResponse> {
-    let [actualTokenId, result] = await this._processSendRequests(
+  ): Promise<Erc20SendResponse[]> {
+    return this._processSendRequests(
       requests,
       overrides
     );
-    return {
-      txId: result,
-      balance: await this.getBalance(actualTokenId),
-      explorerUrl: result,
-    };
   }
 
   /**
@@ -279,61 +301,55 @@ export class Erc20 {
    *
    * A private utility wrapper to pre-process transactions
    *
-   * Unstable - behavior may change without notice.
+   * @param  {Erc20SendRequest[]} sendRequests
+   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @param  {SlpSendRequest[]} sendRequests
+   * @returns any[] array of responses
    */
   private async _processSendRequests(
-    sendRequests: SlpSendRequest[],
+    sendRequests: Erc20SendRequest[],
     overrides: ethers.CallOverrides = {}
-  ) {
-    if (!sendRequests.length) {
-      throw Error("Empty send requests");
-    }
-
-    const uniqueTokenIds = new Set(sendRequests.map((val) => val.tokenId));
-    if (uniqueTokenIds.size > 1) {
-      throw Error(
-        "You have two different token types with the same ticker. Pass tokenId parameter"
+  ): Promise<Erc20SendResponse[]> {
+    return Promise.all(sendRequests.map(async (sendRequest) => {
+      const tokenId = sendRequest.tokenId;
+      const to = sendRequest.address;
+      const decimals = await this.getDecimals(tokenId);
+      const value = ethers.BigNumber.from(
+        new BigNumber(sendRequest.value).shiftedBy(decimals).toString()
       );
-    }
 
-    const tokenId = sendRequests[0].tokenId;
-    const to = sendRequests[0].slpaddr;
-    const decimals = await this.getDecimals(tokenId);
-    const value = ethers.BigNumber.from(
-      new BigNumber(sendRequests[0].value).shiftedBy(decimals).toString()
-    );
+      if (!isAddress(tokenId)) {
+        throw new Error(
+          "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
+        );
+      }
 
-    if (!isAddress(tokenId)) {
-      throw new Error(
-        "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
-      );
-    }
+      const response: ethers.providers.TransactionResponse = await this.contract(
+        tokenId
+      ).transfer(to, value, overrides);
+      const receipt = await response.wait();
 
-    const response: ethers.providers.TransactionResponse = await this.contract(
-      tokenId
-    ).transfer(to, value, overrides);
-    const receipt = await response.wait();
-
-    return [tokenId, receipt.transactionHash];
+      return {   txId: receipt.transactionHash,
+        balance: await this.getBalance(tokenId),
+        explorerUrl: this.explorerUrl(receipt.transactionHash),
+       }
+    }));
   }
 
   /**
    * mint - create new tokens to increase the circulation supply.
    *
-   * a high-level function, see also /wallet/slp/mint endpoint
+   * a high-level function, see also /smartbchwallet/erc20/mint endpoint
    *
-   * @param value   amount to mint
-   * @param tokenId   the tokenId of the slp being minted
-   * @param endBaton   boolean indicating whether the token should continue to be "mintable"
+   * @param options    Mint options to steer the process
+   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
    * @returns transaction id and token balance
    */
   public async mint(
-    options: SlpMintOptions,
+    options: Erc20MintOptions,
     overrides: ethers.CallOverrides = {}
-  ): Promise<SlpMintResult> {
+  ): Promise<Erc20MintResult> {
     let [actualTokenId, result] = await this._processMint(options, overrides);
     return {
       txId: result,
@@ -346,31 +362,29 @@ export class Erc20 {
    *
    * a private utility wrapper to pre-process transactions
    *
-   * @param value   amount to mint
-   * @param tokenId   the tokenId of the slp being minted
-   * @param endBaton   boolean indicating whether the token should continue to be "mintable"
+   * @param options    Mint options to steer the process
+   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
    * @returns the tokenId and minting transaction id
    */
   private async _processMint(
-    options: SlpMintOptions,
+    options: Erc20MintOptions,
     overrides: ethers.CallOverrides = {}
   ) {
-    options = this.substituteOptionals(options);
+    const opts = this.substituteOptionals({ ...options }) as Erc20MintOptions;
 
-    options.value = new BigNumber(options.value);
+    opts.value = new BigNumber(opts.value);
     if (
-      options.value.isLessThanOrEqualTo(0) &&
-      options.batonReceiverSlpAddr === this.getDepositAddress()
+      opts.value.isLessThanOrEqualTo(0)
     ) {
       throw Error("Mint amount should be greater than zero");
     }
 
-    const tokenId = options.tokenId;
-    const to = options.tokenReceiverSlpAddr!;
+    const tokenId = opts.tokenId;
+    const to = opts.tokenReceiverAddress!;
     const decimals = await this.getDecimals(tokenId);
     const value = ethers.BigNumber.from(
-      new BigNumber(options.value).shiftedBy(decimals).toString()
+      new BigNumber(opts.value).shiftedBy(decimals).toString()
     );
     const contract = this.contract(tokenId);
 
@@ -401,7 +415,7 @@ export class Erc20 {
       const receipt: ethers.providers.TransactionReceipt =
         await response.wait();
 
-      return [options.tokenId, receipt.transactionHash];
+      return [opts.tokenId, receipt.transactionHash];
     } catch (error: any) {
       const message: string = ((error.error || {}).error || {}).message || "";
       if (
@@ -421,23 +435,29 @@ export class Erc20 {
   /**
    * substituteOptionals - substitute optional fields with default values
    *
-   * will ensure that baton and token receiver are intialized as SLP address of this wallet if absent
+   * will ensure that baton and token receiver are intialized as Erc20 address of this wallet if absent
    * will ensure that baton will not be ended if endBaton is undefined
    * a private utility wrapper substitute optionals
    *
-   * @param options   genesis or mint options to substitute values int
+   * @param options   genesis or mint options to substitute values
    *
    * @returns options with relevant values substituted/initialized
    */
-  private substituteOptionals(options: SlpMintOptions): any {
-    if (!options.batonReceiverSlpAddr) {
-      options.batonReceiverSlpAddr = this.getDepositAddress();
-    }
-    if (!options.tokenReceiverSlpAddr) {
-      options.tokenReceiverSlpAddr = this.getDepositAddress();
-    }
+  private substituteOptionals(options: any): any {
     if (options.endBaton === undefined) {
       options.endBaton = false;
+    }
+
+    if (!options.batonReceiverAddress) {
+      if (options.endBaton === true) {
+        options.batonReceiverAddress = zeroAddress();
+      } else {
+        options.batonReceiverAddress = this.getDepositAddress();
+      }
+    }
+
+    if (!options.tokenReceiverAddress) {
+      options.tokenReceiverAddress = this.getDepositAddress();
     }
 
     return options;

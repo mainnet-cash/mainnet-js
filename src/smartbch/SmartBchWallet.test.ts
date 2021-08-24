@@ -1,15 +1,10 @@
-// import { ethers, utils } from "ethers";
-// import { Wallet } from "ethers";
-import { Network } from "cashscript";
 import { ethers } from "ethers";
-import { hexZeroPad, id } from "ethers/lib/utils";
+import { hexZeroPad } from "ethers/lib/utils";
 import { Contract } from "../smartbch/Contract";
 import {
   RegTestSmartBchWallet,
   SmartBchWallet,
-  TestNetSmartBchWallet,
-  Wallet,
-} from "../wallet/Wif";
+} from "../smartbch/SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
   test.skip("Filter logs", async () => {
