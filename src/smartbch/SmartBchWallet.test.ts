@@ -65,24 +65,40 @@ describe(`Test Ethereum functions`, () => {
   test("Test SmartBch sending", async () => {
     const feeDelta = 0.0003; // bch
 
-    const alice = await RegTestSmartBchWallet.fromPrivateKey("0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45");
-    const balance = await alice.getBalance() as BalanceResponse;
+    const alice = await RegTestSmartBchWallet.fromPrivateKey(
+      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    );
+    const balance = (await alice.getBalance()) as BalanceResponse;
 
     const bob = await RegTestSmartBchWallet.newRandom();
-    const sendResult = await alice.send({ address: bob.getDepositAddress(), value: 0.1, unit: 'bch' }, {}, { gasPrice: 10**10 });
-    expect(sendResult[0].balance!.bch!).toBeGreaterThan(balance.bch! - (0.1 + feeDelta));
-    expect((await bob.getBalance() as BalanceResponse)!.bch!).toBe(0.1);
+    const sendResult = await alice.send(
+      { address: bob.getDepositAddress(), value: 0.1, unit: "bch" },
+      {},
+      { gasPrice: 10 ** 10 }
+    );
+    expect(sendResult[0].balance!.bch!).toBeGreaterThan(
+      balance.bch! - (0.1 + feeDelta)
+    );
+    expect(((await bob.getBalance()) as BalanceResponse)!.bch!).toBe(0.1);
 
     const charlie = await RegTestSmartBchWallet.newRandom();
-    const sendManyResult = await alice.send([
-      { address: bob.getDepositAddress(), value: 0.1, unit: 'bch' },
-      { address: charlie.getDepositAddress(), value: 0.1, unit: 'bch' },
-    ], {}, { gasPrice: 10**10 });
+    const sendManyResult = await alice.send(
+      [
+        { address: bob.getDepositAddress(), value: 0.1, unit: "bch" },
+        { address: charlie.getDepositAddress(), value: 0.1, unit: "bch" },
+      ],
+      {},
+      { gasPrice: 10 ** 10 }
+    );
 
-    expect(sendManyResult[0].balance!.bch!).toBeGreaterThan(balance.bch! - 3*(0.1 + feeDelta));
-    expect(sendManyResult[1].balance!.bch!).toBeGreaterThan(balance.bch! - 3*(0.1 + feeDelta));
+    expect(sendManyResult[0].balance!.bch!).toBeGreaterThan(
+      balance.bch! - 3 * (0.1 + feeDelta)
+    );
+    expect(sendManyResult[1].balance!.bch!).toBeGreaterThan(
+      balance.bch! - 3 * (0.1 + feeDelta)
+    );
 
-    expect((await bob.getBalance() as BalanceResponse)!.bch!).toBe(0.2);
-    expect((await charlie.getBalance() as BalanceResponse)!.bch!).toBe(0.1);
+    expect(((await bob.getBalance()) as BalanceResponse)!.bch!).toBe(0.2);
+    expect(((await charlie.getBalance()) as BalanceResponse)!.bch!).toBe(0.1);
   });
 });

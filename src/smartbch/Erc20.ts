@@ -316,8 +316,9 @@ export class Erc20 {
     sendRequests: Erc20SendRequest[],
     overrides: ethers.CallOverrides = {}
   ): Promise<Erc20SendResponse[]> {
-
-    let nonce = await this.wallet.provider!.getTransactionCount(this.getDepositAddress());
+    let nonce = await this.wallet.provider!.getTransactionCount(
+      this.getDepositAddress()
+    );
 
     return Promise.all(
       sendRequests.map(async (sendRequest) => {
@@ -335,7 +336,10 @@ export class Erc20 {
         }
 
         const response: ethers.providers.TransactionResponse =
-          await this.contract(tokenId).transfer(to, value, { ...overrides, ...{ nonce: nonce++} });
+          await this.contract(tokenId).transfer(to, value, {
+            ...overrides,
+            ...{ nonce: nonce++ },
+          });
         const receipt = await response.wait();
 
         return {

@@ -4,7 +4,12 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { NetworkType, UnitEnum } from "../enum";
 import { ethers } from "ethers";
 import { WalletTypeEnum } from "../wallet/enum";
-import { SendRequest, SendRequestArray, SendResponse, BalanceResponse } from "./interface";
+import {
+  SendRequest,
+  SendRequestArray,
+  SendResponse,
+  BalanceResponse,
+} from "./interface";
 import { SendRequestOptionsI } from "./interface";
 import {
   balanceFromSatoshi,
@@ -242,51 +247,57 @@ export class SmartBchWallet extends BaseWallet {
    *
    */
   public async send(
-    requests: SendRequest | Array<SendRequest>
-    | SendRequestArray[],
+    requests: SendRequest | Array<SendRequest> | SendRequestArray[],
     options?: SendRequestOptionsI,
     overrides: ethers.CallOverrides = {}
   ): Promise<SendResponse[]> {
     let sendRequests = asSendRequestObject(requests);
 
-    let nonce = await this.provider!.getTransactionCount(this.getDepositAddress());
+    let nonce = await this.provider!.getTransactionCount(
+      this.getDepositAddress()
+    );
 
-    return Promise.all(sendRequests.map(async request => {
-      const weiValue = BigNumber.from(
-        await amountInSatoshi(request.value, request.unit)
-      ).mul(10 ** 10);
+    return Promise.all(
+      sendRequests.map(async (request) => {
+        const weiValue = BigNumber.from(
+          await amountInSatoshi(request.value, request.unit)
+        ).mul(10 ** 10);
 
-      const result = await this.ethersWallet!.sendTransaction({
-        to: request.address,
-        value: weiValue,
-        ...overrides,
-        ...{ nonce: nonce++ }
-      });
+        const result = await this.ethersWallet!.sendTransaction({
+          to: request.address,
+          value: weiValue,
+          ...overrides,
+          ...{ nonce: nonce++ },
+        });
 
-      const awaitTransactionPropagation =
-      !options ||
-      options.awaitTransactionPropagation === undefined ||
-      options.awaitTransactionPropagation;
+        const awaitTransactionPropagation =
+          !options ||
+          options.awaitTransactionPropagation === undefined ||
+          options.awaitTransactionPropagation;
 
-      if (awaitTransactionPropagation) {
-        await result.wait();
-      }
+        if (awaitTransactionPropagation) {
+          await result.wait();
+        }
 
-      const resp = <SendResponse>{ txId: result.hash };
-      const queryBalance =
-        !options || options.queryBalance === undefined || options.queryBalance;
-      if (queryBalance) {
-        resp.balance = (await this.getBalance()) as BalanceResponse;
-      }
+        const resp = <SendResponse>{ txId: result.hash };
+        const queryBalance =
+          !options ||
+          options.queryBalance === undefined ||
+          options.queryBalance;
+        if (queryBalance) {
+          resp.balance = (await this.getBalance()) as BalanceResponse;
+        }
 
-      resp.explorerUrl = this.explorerUrl(resp.txId!);
-      return resp;
-    }));
+        resp.explorerUrl = this.explorerUrl(resp.txId!);
+        return resp;
+      })
+    );
   }
 
   public async sendMax(address: string, options?: any): Promise<SendResponse> {
     const maxAmount = await this.getMaxAmountToSend();
-    return this.send([{ address: address, value: maxAmount.sat!, unit: UnitEnum.SAT }],
+    return this.send(
+      [{ address: address, value: maxAmount.sat!, unit: UnitEnum.SAT }],
       options
     )[0];
   }

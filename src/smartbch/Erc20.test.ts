@@ -98,9 +98,9 @@ describe(`Test Ethereum functions`, () => {
     );
 
     expect(sendResult[0].balance.value).toStrictEqual(new BigNumber(7));
-    expect(
-      (await bob.erc20.getBalance(result.tokenId)).value
-    ).toStrictEqual(new BigNumber(3));
+    expect((await bob.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(3)
+    );
 
     const charlie = await RegTestSmartBchWallet.newRandom();
     const dave = await RegTestSmartBchWallet.newRandom();
@@ -120,15 +120,15 @@ describe(`Test Ethereum functions`, () => {
       { gasPrice: 10 ** 10 }
     );
 
-    expect(
-      (await alice.erc20.getBalance(result.tokenId)).value
-    ).toStrictEqual(new BigNumber(4));
+    expect((await alice.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(4)
+    );
     expect(
       (await charlie.erc20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(1));
-    expect(
-      (await dave.erc20.getBalance(result.tokenId)).value
-    ).toStrictEqual(new BigNumber(2));
+    expect((await dave.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(2)
+    );
 
     // sendMax
     const sendMaxResult = await bob.erc20.sendMax(
@@ -140,9 +140,9 @@ describe(`Test Ethereum functions`, () => {
     expect((await alice.erc20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(7)
     );
-    expect(
-      (await bob.erc20.getBalance(result.tokenId)).value
-    ).toStrictEqual(new BigNumber(0));
+    expect((await bob.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(0)
+    );
   });
 
   test("ERC20 genesis with token receiver and baton receiver", async () => {

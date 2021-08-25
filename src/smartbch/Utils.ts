@@ -5,20 +5,20 @@ export function zeroAddress() {
   return "0x0000000000000000000000000000000000000000";
 }
 
-export function asSendRequestObject(requests: SendRequest | SendRequest[] | SendRequestArray[]) {
+export function asSendRequestObject(
+  requests: SendRequest | SendRequest[] | SendRequestArray[]
+) {
   let resp: Array<SendRequest> = [];
   if (Array.isArray(requests)) {
     requests.forEach((r: SendRequest | SendRequestArray) => {
       // the SendRequestArray[] case
       if (Array.isArray(r)) {
         // ['address', 120, 'sats'],
-        resp.push(
-          {
-            address: r[0] as string,
-            value: r[1] as number,
-            unit: r[2] as UnitEnum,
-          }
-        );
+        resp.push({
+          address: r[0] as string,
+          value: r[1] as number,
+          unit: r[2] as UnitEnum,
+        });
       } else {
         // SendRequest case
         resp.push(convertToClass(r));
