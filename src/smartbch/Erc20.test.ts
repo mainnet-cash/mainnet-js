@@ -60,11 +60,11 @@ describe(`Test Ethereum functions`, () => {
       "Cannot deploy contracts with Watch-Only wallets"
     );
 
-    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
+    const alice = await RegTestSmartBchWallet.fromPrivateKey(
       "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
     );
 
-    const result = await wallet.erc20.genesis(options, {
+    const result = await alice.erc20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
@@ -75,7 +75,7 @@ describe(`Test Ethereum functions`, () => {
     expect(result.tokenId).toBe(result.balance.tokenId);
 
     // get token info
-    const tokenInfo = await wallet.erc20.getTokenInfo(result.tokenId);
+    const tokenInfo = await alice.erc20.getTokenInfo(result.tokenId);
     expect(tokenInfo.name).toBe(options.name);
     expect(tokenInfo.ticker).toBe(options.ticker);
     expect(tokenInfo.decimals).toBe(options.decimals);
@@ -83,13 +83,13 @@ describe(`Test Ethereum functions`, () => {
     expect(tokenInfo.totalSupply).toStrictEqual(new BigNumber(10));
 
     // send
-    const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(
+    const bob = await RegTestSmartBchWallet.fromPrivateKey(
       "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
     );
-    const sendResult = await wallet.erc20.send(
+    const sendResult = await alice.erc20.send(
       [
         {
-          address: receiverWallet.getDepositAddress(),
+          address: bob.getDepositAddress(),
           tokenId: result.tokenId,
           value: 3,
         },
@@ -99,21 +99,49 @@ describe(`Test Ethereum functions`, () => {
 
     expect(sendResult[0].balance.value).toStrictEqual(new BigNumber(7));
     expect(
-      (await receiverWallet.erc20.getBalance(result.tokenId)).value
+      (await bob.erc20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(3));
 
+    const charlie = await RegTestSmartBchWallet.newRandom();
+    const dave = await RegTestSmartBchWallet.newRandom();
+    const sendManyResult = await alice.erc20.send(
+      [
+        {
+          address: charlie.getDepositAddress(),
+          tokenId: result.tokenId,
+          value: 1,
+        },
+        {
+          address: dave.getDepositAddress(),
+          tokenId: result.tokenId,
+          value: 2,
+        },
+      ],
+      { gasPrice: 10 ** 10 }
+    );
+
+    expect(
+      (await alice.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(4));
+    expect(
+      (await charlie.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(1));
+    expect(
+      (await dave.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(2));
+
     // sendMax
-    const sendMaxResult = await receiverWallet.erc20.sendMax(
-      wallet.getDepositAddress(),
+    const sendMaxResult = await bob.erc20.sendMax(
+      alice.getDepositAddress(),
       result.tokenId,
       { gasPrice: 10 ** 10 }
     );
     expect(sendMaxResult.balance.value).toStrictEqual(new BigNumber(0));
-    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(
-      new BigNumber(10)
+    expect((await alice.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+      new BigNumber(7)
     );
     expect(
-      (await receiverWallet.erc20.getBalance(result.tokenId)).value
+      (await bob.erc20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(0));
   });
 
