@@ -1,14 +1,13 @@
 import "../util/randomValues";
 
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { BigNumber } from "@ethersproject/bignumber";
 import { NetworkType, UnitEnum } from "../enum";
-import { ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import { WalletTypeEnum } from "../wallet/enum";
-import { SendRequest, SendRequestArray, SendResponse } from "../wallet/model";
-import { SendRequestOptionsI } from "../wallet/interface";
+import { SendRequest, SendRequestArray, SendResponse, BalanceResponse } from "./interface";
+import { SendRequestOptionsI } from "./interface";
 import {
   balanceFromSatoshi,
-  BalanceResponse,
   balanceResponseFromSatoshi,
 } from "../util/balanceObjectFromSatoshi";
 import { sanitizeUnit } from "../util/sanitizeUnit";
@@ -18,6 +17,7 @@ import { Erc20 } from "./Erc20";
 import { verifyMessage } from "ethers/lib/utils";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
+import { asSendRequestObject } from "./Utils";
 
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.Provider;
@@ -242,38 +242,53 @@ export class SmartBchWallet extends BaseWallet {
    *
    */
   public async send(
-    requests: SendRequest | Array<SendRequest>,
-    // | SendRequestArray[],
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    // only one recepient for now
-    const request = Array.isArray(requests) ? requests[0] : requests;
+    requests: SendRequest | Array<SendRequest>
+    | SendRequestArray[],
+    options?: SendRequestOptionsI,
+    overrides: ethers.CallOverrides = {}
+  ): Promise<SendResponse[]> {
+    let sendRequests = asSendRequestObject(requests);
 
-    const weiValue = BigNumber.from(
-      await amountInSatoshi(request.value, request.unit)
-    ).mul(10 ** 10);
+    let nonce = await this.provider!.getTransactionCount(this.getDepositAddress());
 
-    const result = await this.ethersWallet!.sendTransaction({
-      to: request.cashaddr,
-      value: weiValue,
-    });
-    const resp = <SendResponse>{ txId: result.hash };
-    const queryBalance =
-      !options || options.queryBalance === undefined || options.queryBalance;
-    if (queryBalance) {
-      resp.balance = (await this.getBalance()) as BalanceResponse;
-    }
+    return Promise.all(sendRequests.map(async request => {
+      const weiValue = BigNumber.from(
+        await amountInSatoshi(request.value, request.unit)
+      ).mul(10 ** 10);
 
-    resp.explorerUrl = this.explorerUrl(resp.txId!);
-    return resp;
+      const result = await this.ethersWallet!.sendTransaction({
+        to: request.address,
+        value: weiValue,
+        ...overrides,
+        ...{ nonce: nonce++ }
+      });
+
+      const awaitTransactionPropagation =
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
+
+      if (awaitTransactionPropagation) {
+        await result.wait();
+      }
+
+      const resp = <SendResponse>{ txId: result.hash };
+      const queryBalance =
+        !options || options.queryBalance === undefined || options.queryBalance;
+      if (queryBalance) {
+        resp.balance = (await this.getBalance()) as BalanceResponse;
+      }
+
+      resp.explorerUrl = this.explorerUrl(resp.txId!);
+      return resp;
+    }));
   }
 
   public async sendMax(address: string, options?: any): Promise<SendResponse> {
     const maxAmount = await this.getMaxAmountToSend();
-    return this.send(
-      { cashaddr: address, value: maxAmount.sat!, unit: UnitEnum.SAT },
+    return this.send([{ address: address, value: maxAmount.sat!, unit: UnitEnum.SAT }],
       options
-    );
+    )[0];
   }
   //#endregion Funds
 

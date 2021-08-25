@@ -1,4 +1,31 @@
 import BigNumber from "bignumber.js";
+import { UnitEnum } from "../enum";
+
+export interface SendRequest {
+  address: string;
+  value: number;
+  unit: UnitEnum;
+}
+
+export type SendRequestArray = Array<string | number | UnitEnum>;
+
+export interface SendRequestOptionsI {
+  queryBalance?: boolean;
+  awaitTransactionPropagation?: boolean;
+}
+
+export interface SendResponse {
+  txId: string;
+  balance?: BalanceResponse;
+  explorerUrl?: string;
+}
+
+export interface BalanceResponse {
+  bch?: number;
+  sat?: number;
+  wei?: number;
+  usd?: number;
+}
 
 export interface Erc20GenesisOptions {
   name: string;
