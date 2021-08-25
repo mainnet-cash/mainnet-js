@@ -2,6 +2,44 @@ var request = require("supertest");
 const { spawn } = require("child_process");
 var readline = require('readline');
 
+async function healthCheck() {
+  let timeout, interval;
+
+  return await Promise.race([
+    new Promise((resolve) => {
+      interval = setInterval(async () => {
+        try {
+          let resp;
+          resp = await request("http://localhost:3000")
+            .get("/ready");
+          const check1 = resp.status === 200 && resp.body.status === "okay";
+
+          resp = await request("http://localhost:3000")
+            .post("/util/convert").send({
+              "value": 1,
+              "from": "bch",
+              "to": "bch"
+            });
+          const check2 = resp.text === "1";
+
+          if (check1 && check2) {
+            clearInterval(interval);
+            clearTimeout(timeout);
+            resolve();
+          }
+        } catch {}
+      }, 1000);
+    }),
+    new Promise((_resolve, reject) => {
+      timeout = setTimeout(() => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        reject();
+      }, 30000);
+    })
+  ]);
+}
+
 describe("Test express server", () => {
   it("Should spawn a server and get a ready response", async () => {
     const proc = spawn(`node`, ['serve.js'], {
@@ -9,9 +47,11 @@ describe("Test express server", () => {
       cwd: process.cwd(),
     });
 
+    let interface;
+
     try {
       let stack = "";
-      readline.createInterface({
+      interface = readline.createInterface({
         input: proc.stdout,
         terminal: false
       }).on('line', line => {
@@ -21,20 +61,10 @@ describe("Test express server", () => {
         }
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      let resp;
-      resp = await request("http://localhost:3000")
-        .get("/ready");
-      expect(resp.body).toStrictEqual({status:"okay"});
+      await healthCheck();
 
-      resp = await request("http://localhost:3000")
-        .post("/util/convert").send({
-          "value": 1,
-          "from": "bch",
-          "to": "bch"
-        });
-      expect(resp.text).toStrictEqual("1");
     } finally {
+      interface.close();
       process.kill(proc.pid);
     }
   });
@@ -46,9 +76,11 @@ describe("Test express server", () => {
       env: { ...process.env, WORKERS: '2' }
     });
 
+    let interface;
+
     try {
       let stack = "";
-      readline.createInterface({
+      interface = readline.createInterface({
         input: proc.stdout,
         terminal: false
       }).on('line', line => {
@@ -58,21 +90,11 @@ describe("Test express server", () => {
         }
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      let resp;
-      resp = await request("http://localhost:3000")
-        .get("/ready");
-      expect(resp.body).toStrictEqual({status:"okay"});
+      await healthCheck();
 
-      resp = await request("http://localhost:3000")
-        .post("/util/convert").send({
-          "value": 1,
-          "from": "bch",
-          "to": "bch"
-        });
-      expect(resp.text).toStrictEqual("1");
     } finally {
-      process.kill(proc.pid);
+      interface.close();
+      proc.kill();
     }
   });
 
