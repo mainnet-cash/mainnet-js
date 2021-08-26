@@ -4,10 +4,16 @@ import { NetworkType } from "../enum";
 export function getNetworkProvider(
   network: NetworkType = NetworkType.Mainnet
 ): ethers.providers.BaseProvider {
-  switch (network) {
-    case NetworkType.Mainnet: {
+  switch (network as any) {
+    case "EthMainnet": {
       return new ethers.providers.JsonRpcProvider(
         "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+      );
+    }
+    case NetworkType.Mainnet: {
+      return new ethers.providers.WebSocketProvider(
+        "wss://smartbch-wss.greyh.at",
+        { name: "smartbch", chainId: 10000 }
       );
     }
     case NetworkType.Testnet: {

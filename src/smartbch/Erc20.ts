@@ -316,39 +316,36 @@ export class Erc20 {
     sendRequests: Erc20SendRequest[],
     overrides: ethers.CallOverrides = {}
   ): Promise<Erc20SendResponse[]> {
-    let nonce = await this.wallet.provider!.getTransactionCount(
-      this.getDepositAddress()
-    );
+    const responses: Erc20SendResponse[] = [];
 
-    return Promise.all(
-      sendRequests.map(async (sendRequest) => {
-        const tokenId = sendRequest.tokenId;
-        const to = sendRequest.address;
-        const decimals = await this.getDecimals(tokenId);
-        const value = ethers.BigNumber.from(
-          new BigNumber(sendRequest.value).shiftedBy(decimals).toString()
+    for (const sendRequest of sendRequests) {
+      const tokenId = sendRequest.tokenId;
+      const to = sendRequest.address;
+      const decimals = await this.getDecimals(tokenId);
+      const value = ethers.BigNumber.from(
+        new BigNumber(sendRequest.value).shiftedBy(decimals).toString()
+      );
+
+      if (!isAddress(tokenId)) {
+        throw new Error(
+          "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
         );
+      }
 
-        if (!isAddress(tokenId)) {
-          throw new Error(
-            "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
-          );
-        }
+      const response: ethers.providers.TransactionResponse =
+        await this.contract(tokenId).transfer(to, value, {
+          ...overrides
+        });
+      const receipt = await response.wait();
 
-        const response: ethers.providers.TransactionResponse =
-          await this.contract(tokenId).transfer(to, value, {
-            ...overrides,
-            ...{ nonce: nonce++ },
-          });
-        const receipt = await response.wait();
+      responses.push({
+        txId: receipt.transactionHash,
+        balance: await this.getBalance(tokenId),
+        explorerUrl: this.explorerUrl(receipt.transactionHash),
+      });
+    }
 
-        return {
-          txId: receipt.transactionHash,
-          balance: await this.getBalance(tokenId),
-          explorerUrl: this.explorerUrl(receipt.transactionHash),
-        };
-      })
-    );
+    return responses;
   }
 
   /**

@@ -3,7 +3,7 @@ import { Contract } from "../smartbch/Contract";
 import { RegTestSmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
-  test("Test contract", async () => {
+  test("Test eth mainnet contract", async () => {
     const abi = [
       // Some details about the token
       "function name() view returns (string)",
@@ -23,7 +23,8 @@ describe(`Test Ethereum functions`, () => {
     const contract = new Contract(
       "0xdac17f958d2ee523a2206206994597c13d831ec7",
       abi,
-      []
+      [],
+      "EthMainnet" as any
     );
 
     const balance: ethers.BigNumber = await contract.balanceOf(

@@ -1,6 +1,7 @@
 // import { BigNumber, BigNumberish } from "ethers";
 import BigNumber from "bignumber.js";
 import { Erc20GenesisOptions } from "./interface";
+import { getNetworkProvider } from "./Network";
 import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
@@ -8,6 +9,7 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
+    wallet.setNetworkProvider(getNetworkProvider("EthMainnet" as any))
     expect(
       (
         await wallet.erc20.getBalance(

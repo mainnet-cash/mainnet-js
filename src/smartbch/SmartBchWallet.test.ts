@@ -55,13 +55,6 @@ describe(`Test Ethereum functions`, () => {
     expect(signResult.valid).toBe(true);
   });
 
-  test("Test SmartBch signing", async () => {
-    const wallet = await SmartBchWallet.newRandom();
-    const sig = await wallet.sign("test");
-    const signResult = await wallet.verify("test", sig.signature);
-    expect(signResult.valid).toBe(true);
-  });
-
   test("Test SmartBch sending", async () => {
     const feeDelta = 0.0003; // bch
 
