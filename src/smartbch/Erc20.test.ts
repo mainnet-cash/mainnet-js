@@ -1,7 +1,6 @@
 // import { BigNumber, BigNumberish } from "ethers";
 import BigNumber from "bignumber.js";
 import { Erc20GenesisOptions } from "./interface";
-import { getNetworkProvider } from "./Network";
 import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
@@ -9,7 +8,7 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
-    wallet.setNetworkProvider(getNetworkProvider("EthMainnet" as any));
+    wallet.setNetwork("EthMainnet" as any);
     expect(
       (
         await wallet.erc20.getBalance(
@@ -31,6 +30,7 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
+    wallet.setNetwork("EthMainnet" as any);
 
     await expect(
       wallet.erc20.send(
@@ -51,7 +51,7 @@ describe(`Test Ethereum functions`, () => {
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
 
-    const options = <Erc20GenesisOptions>{
+    const options = {
       name: "Mainnet Coin",
       ticker: "MNC",
       decimals: 8,
@@ -156,7 +156,7 @@ describe(`Test Ethereum functions`, () => {
       "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
     );
 
-    const options = <Erc20GenesisOptions>{
+    const options = {
       name: "Mainnet Coin",
       ticker: "MNC",
       decimals: 8,
@@ -212,7 +212,7 @@ describe(`Test Ethereum functions`, () => {
       "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
     );
 
-    const options = <Erc20GenesisOptions>{
+    const options = {
       name: "Mainnet Coin",
       ticker: "MNC",
       decimals: 8,
