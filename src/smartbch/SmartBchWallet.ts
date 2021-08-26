@@ -61,6 +61,11 @@ export class SmartBchWallet extends BaseWallet {
     }
   }
 
+  public setNetwork(network: NetworkType = NetworkType.Mainnet) {
+    this.network = network;
+    this.setNetworkProvider(getNetworkProvider(network));
+  }
+
   /**
    *  explorerUrl   Web url to a transaction on a block explorer
    *
