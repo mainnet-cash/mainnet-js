@@ -376,7 +376,7 @@ export class Contract implements ContractI {
     };
 
     const compiled = JSON.parse(
-      solc.compile(JSON.stringify(input), { import: Contract.findImports })
+      await solc.compile(JSON.stringify(input), { import: Contract.findImports })
     );
     const errors = (compiled.errors || []).filter(
       (error) => error.severity === "error"
