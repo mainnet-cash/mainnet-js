@@ -62,8 +62,8 @@ describe(`Test Ethereum functions`, () => {
       "Cannot deploy contracts with Watch-Only wallets"
     );
 
-    const alice = await RegTestSmartBchWallet.fromPrivateKey(
-      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    const alice = await RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID!
     );
 
     const result = await alice.erc20.genesis(options, {
@@ -148,8 +148,8 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("ERC20 genesis with token receiver and baton receiver", async () => {
-    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
-      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    const wallet = await RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID!
     );
 
     const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(
@@ -208,8 +208,8 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("ERC20 mint disabled (baton ended)", async () => {
-    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
-      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    const wallet = await RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID!
     );
 
     const options = {

@@ -58,8 +58,8 @@ describe(`Test Ethereum functions`, () => {
   test("Test SmartBch sending", async () => {
     const feeDelta = 0.0003; // bch
 
-    const alice = await RegTestSmartBchWallet.fromPrivateKey(
-      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    const alice = await RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID!
     );
     const balance = (await alice.getBalance()) as BalanceResponse;
 

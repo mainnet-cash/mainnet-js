@@ -86,7 +86,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
   test("ERC20 genesis and info", async () => {
     await expect(
-      page.evaluate(async () => {
+      page.evaluate(async (SBCH_ALICE_ID) => {
         const options = {
           name: "Mainnet Coin",
           ticker: "MNC",
@@ -94,9 +94,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
           initialAmount: 10,
         };
 
-        const alice = await RegTestSmartBchWallet.fromPrivateKey(
-          "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-        );
+        const alice = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
 
         const result = await alice.erc20.genesis(options, {
           gasPrice: 10 ** 10,
@@ -177,16 +175,14 @@ describe(`SmartBchWallet should function in the browser`, () => {
         expect(
           (await bob.erc20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(0));
-      })
+      }, process.env.SBCH_ALICE_ID)
     ).rejects.toThrow("Contract deployment is not yet supported in browser");
   });
 
   test("ERC20 genesis with token receiver and baton receiver", async () => {
     await expect(
-      page.evaluate(async () => {
-        const wallet = await RegTestSmartBchWallet.fromPrivateKey(
-          "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-        );
+      page.evaluate(async (SBCH_ALICE_ID) => {
+        const wallet = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
 
         const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(
           "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
@@ -241,16 +237,14 @@ describe(`SmartBchWallet should function in the browser`, () => {
         ).rejects.toThrow(
           "is not allowed to mint or minting is not supported by the contract"
         );
-      })
+      }, process.env.SBCH_ALICE_ID)
     ).rejects.toThrow("Contract deployment is not yet supported in browser");
   });
 
   test("ERC20 mint disabled (baton ended)", async () => {
     await expect(
-      page.evaluate(async () => {
-        const wallet = await RegTestSmartBchWallet.fromPrivateKey(
-          "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-        );
+      page.evaluate(async (SBCH_ALICE_ID) => {
+        const wallet = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
 
         const options = {
           name: "Mainnet Coin",
@@ -283,7 +277,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
         ).rejects.toThrow(
           "is not allowed to mint or minting is not supported by the contract"
         );
-      })
+      }, process.env.SBCH_ALICE_ID)
     ).rejects.toThrow("Contract deployment is not yet supported in browser");
   });
 });

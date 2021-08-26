@@ -103,8 +103,8 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
   }
 }`;
 
-    const wallet = await RegTestSmartBchWallet.fromPrivateKey(
-      "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+    const wallet = await RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID!
     );
 
     const contract = await Contract.deploy(

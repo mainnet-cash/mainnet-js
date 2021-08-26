@@ -37,12 +37,10 @@ describe(`SmartBchWallet should function in the browser`, () => {
   });
 
   test("Test SmartBch sending", async () => {
-    await page.evaluate(async () => {
+    await page.evaluate(async (SBCH_ALICE_ID) => {
       const feeDelta = 0.0003; // bch
 
-      const alice = await RegTestSmartBchWallet.fromPrivateKey(
-        "0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-      );
+      const alice = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
       const balance = await alice.getBalance();
 
       const bob = await RegTestSmartBchWallet.newRandom();
@@ -75,6 +73,6 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
       expect((await bob.getBalance()).bch).toBe(0.2);
       expect((await charlie.getBalance()).bch).toBe(0.1);
-    });
+    }, process.env.SBCH_ALICE_ID);
   });
 });
