@@ -57,7 +57,7 @@ export class SmartBchWallet extends BaseWallet {
   public setNetworkProvider(provider: ethers.providers.BaseProvider) {
     this.provider = provider;
     if (this.ethersWallet) {
-      this.ethersWallet.connect(this.provider)
+      this.ethersWallet.connect(this.provider);
     }
   }
 
@@ -261,7 +261,7 @@ export class SmartBchWallet extends BaseWallet {
     let sendRequests = asSendRequestObject(requests);
 
     const responses: SendResponse[] = [];
-    for (const request of sendRequests)  {
+    for (const request of sendRequests) {
       const weiValue = BigNumber.from(
         await amountInSatoshi(request.value, request.unit)
       ).mul(10 ** 10);
@@ -272,7 +272,8 @@ export class SmartBchWallet extends BaseWallet {
         ...overrides,
       });
 
-      const awaitTransactionPropagation = !options ||
+      const awaitTransactionPropagation =
+        !options ||
         options.awaitTransactionPropagation === undefined ||
         options.awaitTransactionPropagation;
 
@@ -281,9 +282,8 @@ export class SmartBchWallet extends BaseWallet {
       }
 
       const resp = <SendResponse>{ txId: result.hash };
-      const queryBalance = !options ||
-        options.queryBalance === undefined ||
-        options.queryBalance;
+      const queryBalance =
+        !options || options.queryBalance === undefined || options.queryBalance;
       if (queryBalance) {
         resp.balance = (await this.getBalance()) as BalanceResponse;
       }

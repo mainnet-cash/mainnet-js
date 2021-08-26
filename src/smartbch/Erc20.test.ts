@@ -9,7 +9,7 @@ describe(`Test Ethereum functions`, () => {
     const wallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
-    wallet.setNetworkProvider(getNetworkProvider("EthMainnet" as any))
+    wallet.setNetworkProvider(getNetworkProvider("EthMainnet" as any));
     expect(
       (
         await wallet.erc20.getBalance(

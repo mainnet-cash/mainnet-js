@@ -334,7 +334,7 @@ export class Erc20 {
 
       const response: ethers.providers.TransactionResponse =
         await this.contract(tokenId).transfer(to, value, {
-          ...overrides
+          ...overrides,
         });
       const receipt = await response.wait();
 

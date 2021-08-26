@@ -53,8 +53,12 @@ describe(`SmartBchWallet should function in the browser`, () => {
         {},
         { gasPrice: 10 ** 10 }
       );
-      expects.push([sendResult[0].balance.bch, "toBeGreaterThan", balance.bch - (0.1 + feeDelta)]);
-      expects.push([(await bob.getBalance()).bch, "toBe", (0.1)]);
+      expects.push([
+        sendResult[0].balance.bch,
+        "toBeGreaterThan",
+        balance.bch - (0.1 + feeDelta),
+      ]);
+      expects.push([(await bob.getBalance()).bch, "toBe", 0.1]);
 
       const charlie = await RegTestSmartBchWallet.newRandom();
       const sendManyResult = await alice.send(
@@ -66,20 +70,24 @@ describe(`SmartBchWallet should function in the browser`, () => {
         { gasPrice: 10 ** 10 }
       );
 
-      expects.push([sendManyResult[0].balance.bch, "toBeGreaterThan", (
-        balance.bch - 3 * (0.1 + feeDelta)
-      )]);
-      expects.push([sendManyResult[1].balance.bch, "toBeGreaterThan", (
-        balance.bch - 3 * (0.1 + feeDelta)
-      )]);
+      expects.push([
+        sendManyResult[0].balance.bch,
+        "toBeGreaterThan",
+        balance.bch - 3 * (0.1 + feeDelta),
+      ]);
+      expects.push([
+        sendManyResult[1].balance.bch,
+        "toBeGreaterThan",
+        balance.bch - 3 * (0.1 + feeDelta),
+      ]);
 
-      expects.push([((await bob.getBalance()).bch), "toBe", (0.2)]);
-      expects.push([((await charlie.getBalance()).bch), "toBe", (0.1)]);
+      expects.push([(await bob.getBalance()).bch, "toBe", 0.2]);
+      expects.push([(await charlie.getBalance()).bch, "toBe", 0.1]);
 
       return expects;
     });
 
-    result.forEach(val => {
+    result.forEach((val) => {
       expect(val[0])[val[1]](val[2]);
     });
   });
