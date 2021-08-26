@@ -1,24 +1,32 @@
 export function expect(expected) {
   return {
-    toBe: function(received) {
+    toBe: function (received) {
       if (!(expected === received)) {
-        throw new Error(`assertion failed: expected ${expected} is not equal to received ${received}`);
+        throw new Error(
+          `assertion failed: expected ${expected} is not equal to received ${received}`
+        );
       }
     },
-    toBeGreaterThan: function(received) {
+    toBeGreaterThan: function (received) {
       if (!(expected > received)) {
-        throw new Error(`assertion failed: expected ${expected} is not GreaterThan received ${received}`);
+        throw new Error(
+          `assertion failed: expected ${expected} is not GreaterThan received ${received}`
+        );
       }
     },
-    toBeGreaterThanOrEqual: function(received) {
+    toBeGreaterThanOrEqual: function (received) {
       if (!(expected >= received)) {
-        throw new Error(`assertion failed: expected ${expected} is not GreaterThanOrEqual received ${received}`);
+        throw new Error(
+          `assertion failed: expected ${expected} is not GreaterThanOrEqual received ${received}`
+        );
       }
     },
-    toStrictEqual: function(received) {
+    toStrictEqual: function (received) {
       if (!(JSON.stringify(expected) === JSON.stringify(received))) {
-        throw new Error(`assertion failed: expected ${expected} is not StrictEqual to received ${received}`);
+        throw new Error(
+          `assertion failed: expected ${expected} is not StrictEqual to received ${received}`
+        );
       }
-    }
-  }
+    },
+  };
 }

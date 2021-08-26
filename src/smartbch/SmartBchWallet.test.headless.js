@@ -73,8 +73,8 @@ describe(`SmartBchWallet should function in the browser`, () => {
         balance.bch - 3 * (0.1 + feeDelta)
       );
 
-      expect(((await bob.getBalance())).bch).toBe(0.2);
-      expect(((await charlie.getBalance())).bch).toBe(0.1);
+      expect((await bob.getBalance()).bch).toBe(0.2);
+      expect((await charlie.getBalance()).bch).toBe(0.1);
     });
   });
 });
