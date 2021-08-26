@@ -7,6 +7,8 @@ if (typeof window === "object") {
   };
 
   const compile = async function (input, options) {
+    throw Error("Contract deployment is not yet supported in browser");
+
     return new Promise(async (resolve) => {
       if (!compiler) {
         delete window["Module"];
