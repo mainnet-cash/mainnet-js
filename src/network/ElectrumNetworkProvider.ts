@@ -47,7 +47,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
           resolve(await this.connectClient());
         }
       }),
-      new Promise((_resolve, reject) => timeoutHandle = setTimeout(() => { reject(new Error(`Could not connect to electrum network ${this.network}`)); }, timeout))
+      new Promise(
+        (_resolve, reject) =>
+          (timeoutHandle = setTimeout(() => {
+            reject(
+              new Error(`Could not connect to electrum network ${this.network}`)
+            );
+          }, timeout))
+      ),
     ]);
     clearTimeout(timeoutHandle);
   }

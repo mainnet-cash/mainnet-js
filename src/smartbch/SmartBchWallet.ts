@@ -18,7 +18,16 @@ import {
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { BaseWallet } from "../wallet/Base";
 import { amountInSatoshi } from "../util/amountInSatoshi";
-import { Erc20, RegTestErc20, RegTestPrivKeyErc20, RegTestWatchErc20, TestNetErc20, TestNetPrivKeyErc20, TestNetWatchErc20, WatchErc20 } from "./Erc20";
+import {
+  Erc20,
+  RegTestErc20,
+  RegTestPrivKeyErc20,
+  RegTestWatchErc20,
+  TestNetErc20,
+  TestNetPrivKeyErc20,
+  TestNetWatchErc20,
+  WatchErc20,
+} from "./Erc20";
 import { verifyMessage } from "ethers/lib/utils";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
@@ -370,7 +379,7 @@ export class RegTestSmartBchWallet extends SmartBchWallet {
 /**
  * Class to manage a mainnet privkey wallet.
  */
- export class PrivKeySmartBchWallet extends SmartBchWallet {
+export class PrivKeySmartBchWallet extends SmartBchWallet {
   static walletType = WalletTypeEnum.PrivateKey;
   constructor(name = "") {
     super(name, NetworkType.Mainnet, WalletTypeEnum.PrivateKey);

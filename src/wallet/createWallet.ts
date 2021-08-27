@@ -11,7 +11,17 @@ import {
   RegTestWatchWallet,
 } from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
-import { PrivKeySmartBchWallet, RegTestPrivKeySmartBchWallet, RegTestSmartBchWallet, RegTestWatchSmartBchWallet, SmartBchWallet, TestNetPrivKeySmartBchWallet, TestNetSmartBchWallet, TestNetWatchSmartBchWallet, WatchSmartBchWallet } from "../smartbch/SmartBchWallet";
+import {
+  PrivKeySmartBchWallet,
+  RegTestPrivKeySmartBchWallet,
+  RegTestSmartBchWallet,
+  RegTestWatchSmartBchWallet,
+  SmartBchWallet,
+  TestNetPrivKeySmartBchWallet,
+  TestNetSmartBchWallet,
+  TestNetWatchSmartBchWallet,
+  WatchSmartBchWallet,
+} from "../smartbch/SmartBchWallet";
 
 type platform = "bch" | "smartbch";
 
@@ -50,7 +60,7 @@ export const walletClassMap = {
       testnet: () => TestNetWatchSmartBchWallet,
       regtest: () => RegTestWatchSmartBchWallet,
     },
-  }
+  },
 };
 
 function getWalletClass(body: WalletRequestI) {
@@ -95,9 +105,7 @@ export async function namedWalletExists(body): Promise<boolean> {
  * @param networkType wallet network type
  * @returns A promise to a new wallet object
  */
-export async function namedWallet(
-  body: WalletRequestI
-): Promise<Wallet> {
+export async function namedWallet(body: WalletRequestI): Promise<Wallet> {
   const name = body.name;
 
   // Named wallets are saved in the database
@@ -115,7 +123,9 @@ export async function namedWallet(
  * @param body A wallet request object
  * @returns A promise to a new wallet object
  */
-export async function replaceNamedWallet(body: WalletRequestI): Promise<Wallet> {
+export async function replaceNamedWallet(
+  body: WalletRequestI
+): Promise<Wallet> {
   let wallet;
   const name = body.name;
   const walletId = body.walletId;
@@ -125,10 +135,7 @@ export async function replaceNamedWallet(body: WalletRequestI): Promise<Wallet> 
     throw Error(`Wallet name and walletId are required for this operation`);
   }
 
-  wallet = await getWalletClass(body).replaceNamed(
-    name,
-    walletId
-  );
+  wallet = await getWalletClass(body).replaceNamed(name, walletId);
   return wallet;
 }
 
@@ -249,13 +256,24 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
  * @param {string} walletId A serialized wallet object
  * @returns A wallet
  */
-export async function walletFromId(walletId: string, platform: platform = "bch"): Promise<any> {
+export async function walletFromId(
+  walletId: string,
+  platform: platform = "bch"
+): Promise<any> {
   let [walletType, network, name]: string[] = walletId.split(":");
 
-  const body: WalletRequestI = { platform, name, type: walletType as WalletTypeEnum, network };
+  const body: WalletRequestI = {
+    platform,
+    name,
+    type: walletType as WalletTypeEnum,
+    network,
+  };
 
   if (walletType === "named") {
-    const wallet = await namedWallet({ ...body, ...{type: "seed" as WalletTypeEnum }});
+    const wallet = await namedWallet({
+      ...body,
+      ...{ type: "seed" as WalletTypeEnum },
+    });
     checkWalletTypeAndNetwork(wallet, "seed", network);
     return wallet;
   }

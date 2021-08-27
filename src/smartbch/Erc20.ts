@@ -1,4 +1,14 @@
-import { PrivKeySmartBchWallet, RegTestPrivKeySmartBchWallet, RegTestSmartBchWallet, RegTestWatchSmartBchWallet, SmartBchWallet, TestNetPrivKeySmartBchWallet, TestNetSmartBchWallet, TestNetWatchSmartBchWallet, WatchSmartBchWallet } from "../smartbch/SmartBchWallet";
+import {
+  PrivKeySmartBchWallet,
+  RegTestPrivKeySmartBchWallet,
+  RegTestSmartBchWallet,
+  RegTestWatchSmartBchWallet,
+  SmartBchWallet,
+  TestNetPrivKeySmartBchWallet,
+  TestNetSmartBchWallet,
+  TestNetWatchSmartBchWallet,
+  WatchSmartBchWallet,
+} from "../smartbch/SmartBchWallet";
 import { ethers } from "ethers";
 import { Contract } from "./Contract";
 import { ImageI } from "../qr/interface";
@@ -537,7 +547,7 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
 /**
  * Class to manage an slp enabled testnet wallet.
  */
- export class TestNetErc20 extends Erc20 {
+export class TestNetErc20 extends Erc20 {
   static get walletType() {
     return TestNetSmartBchWallet;
   }

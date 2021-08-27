@@ -69,7 +69,7 @@ describe(`Named Wallets`, () => {
     const req = {
       type: "privkey",
       network: "mainnet",
-      platform: "smartbch"
+      platform: "smartbch",
     } as WalletRequestI;
     let w = await createWallet(req);
     expect(w.getDepositAddress()).toMatch(/0x/);
