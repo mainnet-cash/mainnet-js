@@ -7,6 +7,8 @@ export interface WalletRequestI {
   name?: string;
   network?: string;
   type?: WalletTypeEnum;
+  platform?: string;
+  walletId?: string;
 }
 
 export interface WalletResponseI {

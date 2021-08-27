@@ -64,4 +64,15 @@ describe(`Named Wallets`, () => {
     expect(w.cashaddr).toMatch(/bitcoincash:q/);
     expect(w.walletType).toBe("wif");
   });
+
+  test("Create smartbch wallet", async () => {
+    const req = {
+      type: "privkey",
+      network: "mainnet",
+      platform: "smartbch"
+    } as WalletRequestI;
+    let w = await createWallet(req);
+    expect(w.getDepositAddress()).toMatch(/0x/);
+    expect(w.walletType).toBe("privkey");
+  });
 });

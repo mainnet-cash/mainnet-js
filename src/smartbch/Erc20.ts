@@ -1,4 +1,4 @@
-import { SmartBchWallet } from "../smartbch/SmartBchWallet";
+import { PrivKeySmartBchWallet, RegTestPrivKeySmartBchWallet, RegTestSmartBchWallet, RegTestWatchSmartBchWallet, SmartBchWallet, TestNetPrivKeySmartBchWallet, TestNetSmartBchWallet, TestNetWatchSmartBchWallet, WatchSmartBchWallet } from "../smartbch/SmartBchWallet";
 import { ethers } from "ethers";
 import { Contract } from "./Contract";
 import { ImageI } from "../qr/interface";
@@ -532,3 +532,77 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
   }
 }`;
 }
+
+//#region Specific Erc20 wallet classes
+/**
+ * Class to manage an slp enabled testnet wallet.
+ */
+ export class TestNetErc20 extends Erc20 {
+  static get walletType() {
+    return TestNetSmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage an slp enabled regtest wallet.
+ */
+export class RegTestErc20 extends Erc20 {
+  static get walletType() {
+    return RegTestSmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash PrivKey wallet.
+ */
+export class PrivKeyErc20 extends Erc20 {
+  static get walletType() {
+    return PrivKeySmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage a testnet PrivKey wallet.
+ */
+export class TestNetPrivKeyErc20 extends Erc20 {
+  static get walletType() {
+    return TestNetPrivKeySmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage a regtest PrivKey wallet.
+ */
+export class RegTestPrivKeyErc20 extends Erc20 {
+  static get walletType() {
+    return RegTestPrivKeySmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash watch wallet.
+ */
+export class WatchErc20 extends Erc20 {
+  static get walletType() {
+    return WatchSmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage a testnet watch wallet.
+ */
+export class TestNetWatchErc20 extends Erc20 {
+  static get walletType() {
+    return TestNetWatchSmartBchWallet;
+  }
+}
+
+/**
+ * Class to manage a regtest watch wallet.
+ */
+export class RegTestWatchErc20 extends Erc20 {
+  static get walletType() {
+    return RegTestWatchSmartBchWallet;
+  }
+}
+//#endregion

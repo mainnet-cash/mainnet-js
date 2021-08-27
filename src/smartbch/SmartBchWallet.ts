@@ -18,7 +18,7 @@ import {
 import { sanitizeUnit } from "../util/sanitizeUnit";
 import { BaseWallet } from "../wallet/Base";
 import { amountInSatoshi } from "../util/amountInSatoshi";
-import { Erc20 } from "./Erc20";
+import { Erc20, RegTestErc20, RegTestPrivKeyErc20, RegTestWatchErc20, TestNetErc20, TestNetPrivKeyErc20, TestNetWatchErc20, WatchErc20 } from "./Erc20";
 import { verifyMessage } from "ethers/lib/utils";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
@@ -346,6 +346,11 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
     super(name, NetworkType.Testnet);
   }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return TestNetErc20;
+  }
 }
 
 /**
@@ -354,5 +359,100 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
 export class RegTestSmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
     super(name, NetworkType.Regtest);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return RegTestErc20;
+  }
+}
+
+/**
+ * Class to manage a mainnet privkey wallet.
+ */
+ export class PrivKeySmartBchWallet extends SmartBchWallet {
+  static walletType = WalletTypeEnum.PrivateKey;
+  constructor(name = "") {
+    super(name, NetworkType.Mainnet, WalletTypeEnum.PrivateKey);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return TestNetPrivKeyErc20;
+  }
+}
+
+/**
+ * Class to manage a testnet privkey wallet.
+ */
+export class TestNetPrivKeySmartBchWallet extends SmartBchWallet {
+  static walletType = WalletTypeEnum.PrivateKey;
+  constructor(name = "") {
+    super(name, NetworkType.Testnet, WalletTypeEnum.PrivateKey);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return TestNetPrivKeyErc20;
+  }
+}
+
+/**
+ * Class to manage a regtest privkey wallet.
+ */
+export class RegTestPrivKeySmartBchWallet extends SmartBchWallet {
+  static walletType = WalletTypeEnum.PrivateKey;
+  constructor(name = "") {
+    super(name, NetworkType.Regtest, WalletTypeEnum.PrivateKey);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return RegTestPrivKeyErc20;
+  }
+}
+
+/**
+ * Class to manage a bitcoin cash watch wallet.
+ */
+export class WatchSmartBchWallet extends SmartBchWallet {
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, NetworkType.Mainnet, WalletTypeEnum.Watch);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return WatchErc20;
+  }
+}
+
+/**
+ * Class to manage a testnet watch wallet.
+ */
+export class TestNetWatchSmartBchWallet extends SmartBchWallet {
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, NetworkType.Testnet, WalletTypeEnum.Watch);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return TestNetWatchErc20;
+  }
+}
+
+/**
+ * Class to manage a regtest watch wallet.
+ */
+export class RegTestWatchSmartBchWallet extends SmartBchWallet {
+  static walletType = WalletTypeEnum.Watch;
+  constructor(name = "") {
+    super(name, NetworkType.Regtest, WalletTypeEnum.Watch);
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return RegTestWatchErc20;
   }
 }

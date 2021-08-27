@@ -11,28 +11,54 @@ import {
   RegTestWatchWallet,
 } from "./Wif";
 import { WalletRequestI, WalletResponseI } from "./interface";
+import { PrivKeySmartBchWallet, RegTestPrivKeySmartBchWallet, RegTestSmartBchWallet, RegTestWatchSmartBchWallet, SmartBchWallet, TestNetPrivKeySmartBchWallet, TestNetSmartBchWallet, TestNetWatchSmartBchWallet, WatchSmartBchWallet } from "../smartbch/SmartBchWallet";
+
+type platform = "bch" | "smartbch";
 
 // Convenience map to access classes by types and network
 export const walletClassMap = {
-  wif: {
-    mainnet: () => WifWallet,
-    testnet: () => TestNetWifWallet,
-    regtest: () => RegTestWifWallet,
+  bch: {
+    wif: {
+      mainnet: () => WifWallet,
+      testnet: () => TestNetWifWallet,
+      regtest: () => RegTestWifWallet,
+    },
+    seed: {
+      mainnet: () => Wallet,
+      testnet: () => TestNetWallet,
+      regtest: () => RegTestWallet,
+    },
+    watch: {
+      mainnet: () => WatchWallet,
+      testnet: () => TestNetWatchWallet,
+      regtest: () => RegTestWatchWallet,
+    },
   },
-  seed: {
-    mainnet: () => Wallet,
-    testnet: () => TestNetWallet,
-    regtest: () => RegTestWallet,
-  },
-  watch: {
-    mainnet: () => WatchWallet,
-    testnet: () => TestNetWatchWallet,
-    regtest: () => RegTestWatchWallet,
-  },
+  smartbch: {
+    privkey: {
+      mainnet: () => PrivKeySmartBchWallet,
+      testnet: () => TestNetPrivKeySmartBchWallet,
+      regtest: () => RegTestPrivKeySmartBchWallet,
+    },
+    seed: {
+      mainnet: () => SmartBchWallet,
+      testnet: () => TestNetSmartBchWallet,
+      regtest: () => RegTestSmartBchWallet,
+    },
+    watch: {
+      mainnet: () => WatchSmartBchWallet,
+      testnet: () => TestNetWatchSmartBchWallet,
+      regtest: () => RegTestWatchSmartBchWallet,
+    },
+  }
 };
 
-function getWalletClass(walletType: string, networkType: string) {
-  return walletClassMap[walletType][networkType]();
+function getWalletClass(body: WalletRequestI) {
+  body.platform = body.platform ? body.platform : "bch";
+  body.type = (body.type ? body.type : "seed") as WalletTypeEnum;
+  body.network = body.network ? body.network : "mainnet";
+
+  return walletClassMap[body.platform][body.type][body.network]();
 }
 
 /**
@@ -57,11 +83,9 @@ function checkWalletTypeAndNetwork(wallet: Wallet, walletType, networkType) {
  * @returns A promise to the check result
  */
 export async function namedWalletExists(body): Promise<boolean> {
-  const walletType = body.type ? body.type : "seed";
-  const networkType = body.network ? body.network : "mainnet";
   const name = body.name;
 
-  return getWalletClass(walletType, networkType).namedExists(name);
+  return getWalletClass(body).namedExists(name);
 }
 
 /**
@@ -72,17 +96,17 @@ export async function namedWalletExists(body): Promise<boolean> {
  * @returns A promise to a new wallet object
  */
 export async function namedWallet(
-  name,
-  walletType,
-  networkType
+  body: WalletRequestI
 ): Promise<Wallet> {
+  const name = body.name;
+
   // Named wallets are saved in the database
   if (!name) {
     throw Error(`Wallet name is required for this operation`);
   }
 
-  const wallet = await getWalletClass(walletType, networkType).named(name);
-  checkWalletTypeAndNetwork(wallet, walletType, networkType);
+  const wallet = await getWalletClass(body).named(name);
+  checkWalletTypeAndNetwork(wallet, body.type, body.network);
   return wallet;
 }
 
@@ -91,10 +115,8 @@ export async function namedWallet(
  * @param body A wallet request object
  * @returns A promise to a new wallet object
  */
-export async function replaceNamedWallet(body): Promise<Wallet> {
+export async function replaceNamedWallet(body: WalletRequestI): Promise<Wallet> {
   let wallet;
-  const walletType = body.type ? body.type : "seed";
-  const networkType = body.network ? body.network : "mainnet";
   const name = body.name;
   const walletId = body.walletId;
 
@@ -103,7 +125,7 @@ export async function replaceNamedWallet(body): Promise<Wallet> {
     throw Error(`Wallet name and walletId are required for this operation`);
   }
 
-  wallet = await getWalletClass(walletType, networkType).replaceNamed(
+  wallet = await getWalletClass(body).replaceNamed(
     name,
     walletId
   );
@@ -117,19 +139,17 @@ export async function replaceNamedWallet(body): Promise<Wallet> {
  */
 export async function createWallet(body: WalletRequestI): Promise<Wallet> {
   let wallet;
-  let walletType = body.type ? body.type : "seed";
-  let networkType = body.network ? body.network : "mainnet";
 
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
-    wallet = await namedWallet(body.name, walletType, networkType);
+    wallet = await namedWallet(body);
     return wallet;
   }
   // This handles unsaved/unnamed wallets
   else {
-    let walletClass = getWalletClass(walletType, networkType);
+    let walletClass = getWalletClass(body);
     wallet = new walletClass();
-    wallet.walletType = walletType;
+    wallet.walletType = body.type;
     return wallet.generate();
   }
 }
@@ -141,18 +161,16 @@ export async function createWallet(body: WalletRequestI): Promise<Wallet> {
  */
 export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   let wallet;
-  let walletType = body.type ? body.type : "seed";
-  let networkType = body.network ? body.network : "mainnet";
 
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
-    wallet = await getWalletClass(walletType, networkType).slp.named(body.name);
-    if (wallet.network != networkType) {
+    wallet = await getWalletClass(body).slp.named(body.name);
+    if (wallet.network != body.network) {
       throw Error(
         `A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`
       );
     }
-    if (wallet.walletType != walletType) {
+    if (wallet.walletType != body.type) {
       throw Error(
         `A wallet already exists with name ${body.name}, but with type ${wallet.walletType} not ${body.type}, per request`
       );
@@ -161,8 +179,8 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   }
   // This handles unsaved/unnamed wallets
   else {
-    wallet = await getWalletClass(walletType, networkType).slp.newRandom();
-    wallet.walletType = walletType;
+    wallet = await getWalletClass(body).slp.newRandom();
+    wallet.walletType = body.type;
     return wallet;
   }
 }
@@ -231,16 +249,18 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
  * @param {string} walletId A serialized wallet object
  * @returns A wallet
  */
-export async function walletFromId(walletId: string): Promise<any> {
+export async function walletFromId(walletId: string, platform: platform = "bch"): Promise<any> {
   let [walletType, network, name]: string[] = walletId.split(":");
 
+  const body: WalletRequestI = { platform, name, type: walletType as WalletTypeEnum, network };
+
   if (walletType === "named") {
-    const wallet = await namedWallet(name, "seed", network);
+    const wallet = await namedWallet({ ...body, ...{type: "seed" as WalletTypeEnum }});
     checkWalletTypeAndNetwork(wallet, "seed", network);
     return wallet;
   }
 
-  const wallet = await getWalletClass(walletType, network).fromId(walletId);
+  const wallet = await getWalletClass(body).fromId(walletId);
   checkWalletTypeAndNetwork(wallet, walletType, network);
   return wallet;
 }
