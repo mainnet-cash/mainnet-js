@@ -7,7 +7,9 @@ import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 
 describe(`Test Ethereum functions`, () => {
   test.skip("Filter logs", async () => {
-    expect(ethers.utils.hexZeroPad("0x8486c538dcbd6a707c5b3f730b6413286fe8c854", 32)).toBe(
+    expect(
+      ethers.utils.hexZeroPad("0x8486c538dcbd6a707c5b3f730b6413286fe8c854", 32)
+    ).toBe(
       "0x0000000000000000000000008486c538dcbd6a707c5b3f730b6413286fe8c854"
     );
     const filter = {
@@ -93,7 +95,13 @@ describe(`Test Ethereum functions`, () => {
     expect(((await bob.getBalance()) as BalanceResponse)!.bch!).toBe(0.2);
     expect(((await charlie.getBalance()) as BalanceResponse)!.bch!).toBe(0.1);
 
-    await charlie.sendMax(alice.getDepositAddress(), {}, { gasPrice: 10 ** 10 });
-    expect(((await charlie.getBalance()) as BalanceResponse)!.sat!).toBeLessThan(50000);
+    await charlie.sendMax(
+      alice.getDepositAddress(),
+      {},
+      { gasPrice: 10 ** 10 }
+    );
+    expect(
+      ((await charlie.getBalance()) as BalanceResponse)!.sat!
+    ).toBeLessThan(50000);
   });
 });

@@ -11,7 +11,9 @@ export function satToWei(value: number): ethers.BigNumber {
 }
 
 export function weiToSat(value: ethers.BigNumberish): number {
-  return ethers.BigNumber.from(value).div(ethers.BigNumber.from(10 ** 10)).toNumber();
+  return ethers.BigNumber.from(value)
+    .div(ethers.BigNumber.from(10 ** 10))
+    .toNumber();
 }
 
 export function asSendRequestObject(

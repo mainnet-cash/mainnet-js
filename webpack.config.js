@@ -47,14 +47,14 @@ const nodeConfig = {
   ],
   resolve: {
     alias: {
-      "ethers$": require.resolve("ethers/lib/index.js"),
+      ethers$: require.resolve("ethers/lib/index.js"),
       "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
       // "@ethersproject/wallet$": require.resolve("@ethersproject/wallet/lib/index.js"),
       // "@ethersproject/bytes$": require.resolve("@ethersproject/bytes/lib/index.js"),
       // "@ethersproject/transactions$": require.resolve("@ethersproject/transactions/lib/index.js"),
       // "@ethersproject/logger$": require.resolve("@ethersproject/logger/lib/index.js"),
-    }
-  }
+    },
+  },
 };
 
 const browserConfig = {

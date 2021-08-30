@@ -246,16 +246,15 @@ export class SmartBchWallet extends BaseWallet {
   }
 
   public async getBalanceFromProvider(): Promise<number> {
-    return (
-      await this.provider!.getBalance(
-        this.address!
-      )
-    )
+    return (await this.provider!.getBalance(this.address!))
       .div(10 ** 10)
       .toNumber();
   }
 
-  public async getMaxAmountToSend(_params?: any, overrides: ethers.CallOverrides = {}): Promise<BalanceResponse> {
+  public async getMaxAmountToSend(
+    _params?: any,
+    overrides: ethers.CallOverrides = {}
+  ): Promise<BalanceResponse> {
     const gas = await this.provider!.estimateGas({
       from: this.getDepositAddress(),
       to: zeroAddress(),
@@ -263,10 +262,14 @@ export class SmartBchWallet extends BaseWallet {
       ...overrides,
     });
 
-    const gasPrice = ethers.BigNumber.from(overrides.gasPrice! || await this.provider!.getGasPrice());
+    const gasPrice = ethers.BigNumber.from(
+      overrides.gasPrice! || (await this.provider!.getGasPrice())
+    );
     const balance = await this.provider!.getBalance(this.address!);
 
-    return await balanceResponseFromSatoshi(weiToSat(balance.sub(gas.mul(gasPrice))));
+    return await balanceResponseFromSatoshi(
+      weiToSat(balance.sub(gas.mul(gasPrice)))
+    );
   }
 
   /**
@@ -317,14 +320,19 @@ export class SmartBchWallet extends BaseWallet {
     return responses;
   }
 
-  public async sendMax(address: string, options?: any, overrides: ethers.CallOverrides = {}
-    ): Promise<SendResponse> {
+  public async sendMax(
+    address: string,
+    options?: any,
+    overrides: ethers.CallOverrides = {}
+  ): Promise<SendResponse> {
     const maxAmount = await this.getMaxAmountToSend({}, overrides);
-    return (await this.send(
-      [{ address: address, value: maxAmount.sat!, unit: UnitEnum.SAT }],
-      options,
-      overrides
-    ))[0];
+    return (
+      await this.send(
+        [{ address: address, value: maxAmount.sat!, unit: UnitEnum.SAT }],
+        options,
+        overrides
+      )
+    )[0];
   }
   //#endregion Funds
 
