@@ -233,8 +233,9 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
   if (wallet.mnemonic) {
     return {
       name: wallet.name,
-      cashaddr: wallet.cashaddr as string,
-      slpaddr: wallet.slp.slpaddr,
+      cashaddr: wallet.cashaddr,
+      slpaddr: (wallet.slp || {}).slpaddr,
+      address: wallet.address,
       walletId: wallet.toString(),
       ...wallet.getSeed(),
       network: wallet.network as any,
@@ -242,8 +243,9 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
   } else {
     return {
       name: wallet.name,
-      cashaddr: wallet.cashaddr as string,
-      slpaddr: wallet.slp.slpaddr,
+      cashaddr: wallet.cashaddr,
+      slpaddr: (wallet.slp || {}).slpaddr,
+      address: wallet.address,
       walletId: wallet.toString(),
       wif: wallet.privateKeyWif,
       network: wallet.network as any,

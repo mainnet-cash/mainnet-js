@@ -8,6 +8,7 @@ controllers/MineController.js
 controllers/UtilController.js
 controllers/WalletController.js
 controllers/WalletSlpController.js
+controllers/WalletSmartbchController.js
 controllers/WalletUtilController.js
 controllers/WebhookController.js
 controllers/index.js

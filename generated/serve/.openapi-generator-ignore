@@ -28,6 +28,7 @@ services/*.test.ts
 #!services/WalletSlpService.js
 #!services/WalletUtilService.js
 #!services/WebhookService.js
+#!services/WalletSmartbchService.js
 controllers/Controller.js
 package.json
 index.js

@@ -13,8 +13,9 @@ export interface WalletRequestI {
 
 export interface WalletResponseI {
   name: string;
-  cashaddr: string;
-  slpaddr: string;
+  cashaddr?: string;
+  slpaddr?: string;
+  address?: string;
   walletId: string;
   network?: NetworkEnum;
   wif?: string;

@@ -23,7 +23,6 @@ export interface SendResponse {
 export interface BalanceResponse {
   bch?: number;
   sat?: number;
-  wei?: number;
   usd?: number;
 }
 

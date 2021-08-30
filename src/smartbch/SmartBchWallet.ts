@@ -1,8 +1,7 @@
 import "../util/randomValues";
 
-import { BigNumber } from "@ethersproject/bignumber";
 import { NetworkType, UnitEnum } from "../enum";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import { WalletTypeEnum } from "../wallet/enum";
 import {
   SendRequest,
@@ -28,10 +27,9 @@ import {
   TestNetWatchErc20,
   WatchErc20,
 } from "./Erc20";
-import { verifyMessage } from "ethers/lib/utils";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
-import { asSendRequestObject } from "./Utils";
+import { asSendRequestObject, satToWei, weiToSat, zeroAddress } from "./Utils";
 
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.Provider;
@@ -83,7 +81,7 @@ export class SmartBchWallet extends BaseWallet {
    */
   public explorerUrl(txId: string) {
     const explorerUrlMap = {
-      mainnet: "",
+      mainnet: "https://www.smartscan.cash/transaction/",
       testnet: "",
       regtest: "",
     };
@@ -249,7 +247,7 @@ export class SmartBchWallet extends BaseWallet {
 
   public async getBalanceFromProvider(): Promise<number> {
     return (
-      await (this.provider! as ethers.providers.BaseProvider).getBalance(
+      await this.provider!.getBalance(
         this.address!
       )
     )
@@ -257,8 +255,18 @@ export class SmartBchWallet extends BaseWallet {
       .toNumber();
   }
 
-  public async getMaxAmountToSend(_params?: any): Promise<BalanceResponse> {
-    return this.getBalance() as BalanceResponse;
+  public async getMaxAmountToSend(_params?: any, overrides: ethers.CallOverrides = {}): Promise<BalanceResponse> {
+    const gas = await this.provider!.estimateGas({
+      from: this.getDepositAddress(),
+      to: zeroAddress(),
+      value: 0,
+      ...overrides,
+    });
+
+    const gasPrice = ethers.BigNumber.from(overrides.gasPrice! || await this.provider!.getGasPrice());
+    const balance = await this.provider!.getBalance(this.address!);
+
+    return await balanceResponseFromSatoshi(weiToSat(balance.sub(gas.mul(gasPrice))));
   }
 
   /**
@@ -276,7 +284,7 @@ export class SmartBchWallet extends BaseWallet {
 
     const responses: SendResponse[] = [];
     for (const request of sendRequests) {
-      const weiValue = BigNumber.from(
+      const weiValue = ethers.BigNumber.from(
         await amountInSatoshi(request.value, request.unit)
       ).mul(10 ** 10);
 
@@ -309,12 +317,14 @@ export class SmartBchWallet extends BaseWallet {
     return responses;
   }
 
-  public async sendMax(address: string, options?: any): Promise<SendResponse> {
-    const maxAmount = await this.getMaxAmountToSend();
-    return this.send(
+  public async sendMax(address: string, options?: any, overrides: ethers.CallOverrides = {}
+    ): Promise<SendResponse> {
+    const maxAmount = await this.getMaxAmountToSend({}, overrides);
+    return (await this.send(
       [{ address: address, value: maxAmount.sat!, unit: UnitEnum.SAT }],
-      options
-    )[0];
+      options,
+      overrides
+    ))[0];
   }
   //#endregion Funds
 
@@ -340,9 +350,9 @@ export class SmartBchWallet extends BaseWallet {
     message: string,
     sig: string
   ): Promise<VerifyMessageResponseI> {
-    const result = verifyMessage(message, sig);
+    const result = ethers.utils.verifyMessage(message, sig);
     return {
-      valid: result === this.ethersWallet!.address,
+      valid: result === this.address!,
     } as VerifyMessageResponseI;
   }
   //#endregion Signing

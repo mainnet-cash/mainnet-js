@@ -5,6 +5,7 @@ const MineController = require('./MineController');
 const UtilController = require('./UtilController');
 const WalletController = require('./WalletController');
 const WalletSlpController = require('./WalletSlpController');
+const WalletSmartbchController = require('./WalletSmartbchController');
 const WalletUtilController = require('./WalletUtilController');
 const WebhookController = require('./WebhookController');
 
@@ -16,6 +17,7 @@ module.exports = {
   UtilController,
   WalletController,
   WalletSlpController,
+  WalletSmartbchController,
   WalletUtilController,
   WebhookController,
 };

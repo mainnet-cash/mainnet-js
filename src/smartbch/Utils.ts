@@ -1,8 +1,17 @@
+import { ethers } from "ethers";
 import { UnitEnum } from "../enum";
 import { SendRequest, SendRequestArray } from "./interface";
 
 export function zeroAddress() {
   return "0x0000000000000000000000000000000000000000";
+}
+
+export function satToWei(value: number): ethers.BigNumber {
+  return ethers.BigNumber.from(value).mul(ethers.BigNumber.from(10 ** 10));
+}
+
+export function weiToSat(value: ethers.BigNumberish): number {
+  return ethers.BigNumber.from(value).div(ethers.BigNumber.from(10 ** 10)).toNumber();
 }
 
 export function asSendRequestObject(

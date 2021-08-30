@@ -58,6 +58,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/slp
+  - name: wallet/smartbch
+    description: Interact with SmartBch wallets
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch
   - name: wallet/util
     description: Invoke wallet utility functions
     externalDocs:
@@ -404,6 +409,216 @@ paths:
       summary: convert between units
       tags:
         - util
+
+  /wallet/smartbch/create:
+    post:
+      operationId: smartbchCreateWallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletRequest"
+        description: Request a new random wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new wallet
+      tags:
+        - wallet/smartbch
+
+  /wallet/smartbch/balance:
+    post:
+      operationId: smartbchBalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BalanceRequest"
+        description: |
+          Request for a wallet balance
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+            text/plain:
+              schema:
+                type: number
+                description: If a unit of account is passed, a plain number is returned.
+          description: successful operation
+      summary: Get total balance for wallet
+      tags:
+        - wallet/smartbch
+  /wallet/smartbch/max_amount_to_send:
+    post:
+      operationId: smartbchMaxAmountToSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchMaxAmountToSendRequest"
+        description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Get maximum spendable amount
+      tags:
+        - wallet/smartbch
+  /wallet/smartbch/deposit_address:
+    post:
+      operationId: smartbchDepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositAddressResponse"
+          description: successful operation
+      summary: Get a deposit address in cash address format
+      tags:
+        - wallet/smartbch
+  /wallet/smartbch/deposit_qr:
+    post:
+      operationId: smartbchDepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScalableVectorGraphic"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get receiving cash address as a qrcode
+      tags:
+        - wallet/smartbch
+  /wallet/smartbch/send:
+    post:
+      operationId: smartbchSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchSendRequest"
+        description: place a send request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchSendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Send some amount to a given address
+      tags:
+        - wallet/smartbch
+  /wallet/smartbch/send_max:
+    post:
+      operationId: smartbchSendMax
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchSendMaxRequest"
+        description: Request to send all available funds to a given address
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchSendResponseItem"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Send all available funds to a given address
+      tags:
+        - wallet/smartbch
+
+  /wallet/smartbch/signed/sign:
+    post:
+      operationId: smartbchSignedMessageSign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSignedMessageRequest"
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedMessageResponse"
+          description: successful operation
+      summary: Returns the message signature
+      tags:
+        - wallet/smartbch
+  /wallet/smartbch/signed/verify:
+    post:
+      operationId: smartbchSignedMessageVerify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifySignedMessageRequest"
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifySignedMessageResponse"
+          description: successful operation
+      summary: Returns a boolean indicating whether message was valid for a given address
+      tags:
+        - wallet/smartbch
 
   /wallet/create:
     post:
@@ -1788,6 +2003,7 @@ components:
           cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
           value: 1000
       type: object
+
     SendRequestItem:
       anyOf:
         - description: Send request in array form ['cashadr', 100, 'sats']
@@ -1978,6 +2194,7 @@ components:
               - hd
               - seed
               - watch
+              - privkey
             example: seed
             type: string
       discriminator:
@@ -2574,6 +2791,169 @@ components:
       example:
         bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
         slptest: "slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866"
+
+
+    SmartBchSendRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: |
+            The walletId of the source of funds to spend from.
+        to:
+          anyOf:
+            - $ref: "#/components/schemas/SmartBchSendRequestItem"
+            - $ref: "#/components/schemas/SmartBchSendRequestArray"
+        options:
+          $ref: "#/components/schemas/SmartBchSendRequestOptions"
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      required:
+        - walletId
+        - to
+      example:
+        walletId: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+        to:
+          address: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+          value: 1000
+          unit: "sat"
+        options:
+          queryBalance: false
+        overrides:
+          gasPrice: "0x13370000"
+      type: object
+
+    SmartBchSendRequestItem:
+      anyOf:
+        - description: Send request in array form ['address', 100, 'sats']
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: number
+        - description: Send request in object notation
+          properties:
+            address:
+              type: string
+              example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+            value:
+              type: number
+              example: 100
+          allOf:
+            - $ref: "#/components/schemas/UnitType"
+          required:
+            - address
+            - value
+            - unit
+          type: object
+
+    SmartBchSendRequestArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/SmartBchSendRequestItem"
+
+    SmartBchSendRequestOptions:
+      type: object
+      properties:
+        queryBalance:
+          type: boolean
+          example: false
+          default: true
+          description:
+            A boolean flag to include the wallet balance after the successful `send` operation to the returned result
+            If set to false, the balance will not be queried and returned, making the `send` call faster
+        awaitTransactionPropagation:
+          type: boolean
+          example: false
+          default: true
+          description:
+            A boolean flag to wait for transaction to propagate through the network.
+            If set to false, the `send` call will be faster, but other subsequent operations might fail due to nonce number mismatch.
+
+    SmartBchOverrides:
+      properties:
+        gasLimit:
+          anyOf:
+            - type: number
+            - type: string
+        gasPrice:
+          anyOf:
+            - type: number
+            - type: string
+        maxFeePerGas:
+          anyOf:
+            - type: number
+            - type: string
+        maxPriorityFeePerGas:
+          anyOf:
+            - type: number
+            - type: string
+        nonce:
+          anyOf:
+            - type: number
+            - type: string
+        value:
+          anyOf:
+            - type: number
+            - type: string
+        blockTag:
+          anyOf:
+            - type: number
+            - type: string
+        from:
+          type: string
+
+    SmartBchSendResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/SmartBchSendResponseItem"
+
+    # identical to convenient BCH one
+    SmartBchSendResponseItem:
+      properties:
+        txId:
+          type: string
+          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+          description: The hash of a transaction
+        balance:
+          # identical to convenient BCH one
+          $ref: "#/components/schemas/BalanceResponse"
+        explorerUrl:
+          type: string
+          example: "https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+          description: Web url to a transaction on a block explorer
+      type: object
+
+    SmartBchSendMaxRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: |
+            The walletId of the sender
+        address:
+           type: string
+           example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        options:
+          $ref: "#/components/schemas/SmartBchSendRequestOptions"
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      example:
+          walletId: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          address: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+      required:
+        - walletId
+        - address
+
+    SmartBchMaxAmountToSendRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+      required:
+        - walletId
 
 # global security requirement. for per-endpoint configuration see https://swagger.io/docs/specification/authentication/bearer-authentication/
 security:

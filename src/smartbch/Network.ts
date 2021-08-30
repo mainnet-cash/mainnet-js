@@ -24,12 +24,19 @@ export function getNetworkProvider(
     }
     default: {
       return new ethers.providers.StaticJsonRpcProvider(
-        "http://localhost:8545",
+        "http://127.0.0.1:8545",
         {
           name: "smartbch",
           chainId: 10001,
         }
       );
+      // return new ethers.providers.WebSocketProvider(
+      //   "ws://127.0.0.1:8546",
+      //   {
+      //     name: "smartbch",
+      //     chainId: 10001,
+      //   }
+      // );
     }
   }
 }

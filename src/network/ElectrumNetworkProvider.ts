@@ -32,7 +32,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  private async getConnectPromise(timeout: number = 3000) {
+  private async getConnectPromise(_timeout: number = 3000) {
     // connects to the electrum cash and waits until the connection is ready to accept requests
     let timeoutHandle;
 
@@ -47,14 +47,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
           resolve(await this.connectClient());
         }
       }),
-      new Promise(
-        (_resolve, reject) =>
-          (timeoutHandle = setTimeout(() => {
-            reject(
-              new Error(`Could not connect to electrum network ${this.network}`)
-            );
-          }, timeout))
-      ),
+      // new Promise(
+      //   (_resolve, reject) =>
+      //     (timeoutHandle = setTimeout(() => {
+      //       reject(
+      //         new Error(`Could not connect to electrum network ${this.network}`)
+      //       );
+      //     }, timeout))
+      // ),
     ]);
     clearTimeout(timeoutHandle);
   }

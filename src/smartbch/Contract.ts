@@ -15,7 +15,6 @@ import {
   castStringArgumentsFromArtifact,
   transformContractToRequests,
 } from "../contract/util";
-import { defineReadOnly } from "ethers/lib/utils";
 import { XMLHttpRequest } from "xmlhttprequest-ssl";
 import { SmartBchWallet } from "./SmartBchWallet";
 import { WalletTypeEnum } from "../wallet/enum";
@@ -126,7 +125,7 @@ export class Contract implements ContractI {
         return this.getFunctionByName(fragment.name)(...args);
       };
 
-      defineReadOnly(this, fragment.name, fn as any);
+      ethers.utils.defineReadOnly(this, fragment.name, fn as any);
     });
   }
 

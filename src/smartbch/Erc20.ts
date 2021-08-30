@@ -12,7 +12,6 @@ import {
 import { ethers } from "ethers";
 import { Contract } from "./Contract";
 import { ImageI } from "../qr/interface";
-import { isAddress } from "ethers/lib/utils";
 import BigNumber from "bignumber.js";
 import { zeroAddress } from "./Utils";
 import {
@@ -336,7 +335,7 @@ export class Erc20 {
         new BigNumber(sendRequest.value).shiftedBy(decimals).toString()
       );
 
-      if (!isAddress(tokenId)) {
+      if (!ethers.utils.isAddress(tokenId)) {
         throw new Error(
           "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
         );
@@ -408,7 +407,7 @@ export class Erc20 {
     );
     const contract = this.contract(tokenId);
 
-    if (!isAddress(tokenId)) {
+    if (!ethers.utils.isAddress(tokenId)) {
       throw new Error(
         "Invalid tokenId, must be valid SmartBch contract address - 40 character long hexadecimal string"
       );

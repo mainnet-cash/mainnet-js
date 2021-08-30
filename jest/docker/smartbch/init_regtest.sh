@@ -19,7 +19,7 @@ if [ ! -f regtest.init ]; then
   K1=$(head -1 test-keys.txt)
   VAL=$(smartbchd generate-genesis-validator $K1 \
     --consensus-pubkey $CPK \
-    --staking-coin 10000000000000000000000 \
+    --staking-coin 100000000000000000000000 \
     --voting-power 1 \
     --introduction "tester" \
     --home /root/.smartbchd
