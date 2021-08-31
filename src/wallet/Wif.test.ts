@@ -234,6 +234,22 @@ describe(`Watch only Wallets`, () => {
     expect(w.cashaddr).toBe(
       "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
     );
+    expect(w.getInfo()).toStrictEqual({
+      cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      derivationPath: undefined,
+      isTestnet: true,
+      name: "",
+      network: "testnet",
+      privateKey: undefined,
+      privateKeyWif: undefined,
+      publicKey: undefined,
+      publicKeyHash: "4232dfceb98a117308072d75fe47fb10c97d038a",
+      seed: undefined,
+      walletDbEntry:
+        "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      walletId:
+        "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+    });
   });
 
   test("Create a watch only regtest wallet from string id", async () => {
@@ -330,8 +346,12 @@ describe(`Wallet subscriptions`, () => {
       0
     );
 
-    let tx = await bobWallet.waitForTransaction();
-    expect(tx!.hash).not.toBe("");
+    const response = await bobWallet.waitForTransaction({
+      getTransactionInfo: true,
+      getBalance: true,
+    });
+    expect(response.balance!.sat).toBeGreaterThan(0);
+    expect(response.transactionInfo!.hash).not.toBe("");
 
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
@@ -455,8 +475,8 @@ describe(`Wallet subscriptions`, () => {
         ]),
       600
     );
-    let bobTx = await bob.waitForTransaction();
-    expect(bobTx!.version).toBe(2);
+    let bobResponse = await bob.waitForTransaction();
+    expect(bobResponse.transactionInfo!.version).toBe(2);
     setTimeout(
       () =>
         alice.send([
@@ -468,8 +488,8 @@ describe(`Wallet subscriptions`, () => {
         ]),
       600
     );
-    bobTx = await bob.waitForTransaction();
-    expect(bobTx!.version).toBe(2);
+    bobResponse = await bob.waitForTransaction();
+    expect(bobResponse.transactionInfo!.version).toBe(2);
     setTimeout(
       () =>
         alice.send([
@@ -481,8 +501,8 @@ describe(`Wallet subscriptions`, () => {
         ]),
       600
     );
-    bobTx = await bob.waitForTransaction();
-    expect(bobTx!.version).toBe(2);
+    bobResponse = await bob.waitForTransaction();
+    expect(bobResponse.transactionInfo!.version).toBe(2);
     expect(await bob.getBalance("sat")).toBe(4000);
   });
 

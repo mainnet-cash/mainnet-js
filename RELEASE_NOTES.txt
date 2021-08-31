@@ -1,6 +1,22 @@
 Newest changes
 --------------
 
+0.3.41
+
+- Fix bug with watchOnly and retrieving some named wallets.
+
+0.3.38
+
+- Revert library compression compression
+
+0.3.37
+
+- Support library compression in production builds
+
+0.3.36
+
+- Add options to query balance and transaction info from waitForTransaction call
+
 0.3.35
 
 - Fix wrong import in wallet service

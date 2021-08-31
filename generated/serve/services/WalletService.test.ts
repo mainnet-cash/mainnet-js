@@ -579,6 +579,28 @@ describe("Test Wallet Endpoints", () => {
   });
 
   /**
+   * info (Watch)
+   */
+  it("Should return information about a watch wallet", async () => {
+    const resp = await request(app)
+      .post("/wallet/info")
+      .send({
+        walletId: `watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22`,
+      });
+      expect(resp.statusCode).toBe(200);
+      let expectedResult = {
+        "cashaddr": "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+        "isTestnet": true,
+        "name": "",
+        "network": "testnet",
+        "publicKeyHash": "4232dfceb98a117308072d75fe47fb10c97d038a",
+        "walletDbEntry": "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+        "walletId": "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+     }
+      expect(resp.body).toMatchObject(expectedResult);
+  });
+
+  /**
    * replaceNamed, namedExists
    */
    it("Should Store and replace a Regtest wallet, check wallet existence", async () => {

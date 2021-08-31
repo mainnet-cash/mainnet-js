@@ -10,6 +10,7 @@ import {
   TestNetWatchWallet,
   RegTestWatchWallet,
 } from "./Wif";
+import { getNamedWalletId } from "./Base";
 import { WalletRequestI, WalletResponseI } from "./interface";
 import {
   PrivKeySmartBchWallet,

@@ -128,7 +128,7 @@ const namedExists = ({ walletNamedExistsRequest }) => new Promise(
   },
 );
 /**
-* Replace (recover) named wallet with a new walletId. If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied If wallet exists it will be overwritten without exception 
+* Replace (recover) named wallet with a new walletId. If wallet with a provided name does not exist yet, it will be created with a `walletId` supplied If wallet exists it will be overwritten without exception 
 *
 * walletReplaceNamedRequest WalletReplaceNamedRequest Request parameters
 * returns Boolean

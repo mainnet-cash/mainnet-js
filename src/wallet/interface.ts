@@ -1,7 +1,12 @@
 import { WalletTypeEnum } from "./enum";
 import { NetworkEnum, NetworkType } from "../enum";
 import { UtxoItem } from "./model";
+<<<<<<< HEAD
 import { ImageI } from "../qr/interface";
+=======
+import { ElectrumRawTransaction } from "../network/interface";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
+>>>>>>> master
 
 export interface WalletRequestI {
   name?: string;
@@ -76,4 +81,15 @@ export interface WalletI {
   getMaxAmountToSend(params?: any): Promise<any>;
   send(requests: any, options?: any): Promise<any>;
   sendMax(address: string, options?: any): Promise<any>;
+}
+
+export interface WaitForTransactionOptions {
+  getTransactionInfo?: boolean;
+  getBalance?: boolean;
+  txHash?: string;
+}
+
+export interface WaitForTransactionResponse {
+  transactionInfo?: ElectrumRawTransaction | any;
+  balance?: BalanceResponse;
 }
