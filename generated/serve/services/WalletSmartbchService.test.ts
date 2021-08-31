@@ -1,6 +1,5 @@
 var server = require("../")
 var request = require("supertest");
-const mainnet = require("mainnet-js");
 
 var app;
 
@@ -68,7 +67,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should create a Regtest wallet form the API", async () => {
     let req = {
-      name:"A simple Testnet Wallet",
+      name:"sbch A simple Testnet Wallet",
       type : "privkey",
       network: "regtest"
   }
@@ -78,7 +77,7 @@ describe("Test Wallet Endpoints", () => {
     expect(body!.name).toBe(req.name);
     expect(body!.network).toBe(req.network);
     expect(body!.address!.startsWith("0x")).toBeTruthy();
-    expect(body!.walletId).toBe("named:regtest:A simple Testnet Wallet");
+    expect(body!.walletId).toBe("named:regtest:sbch A simple Testnet Wallet");
   });
 
   /**
@@ -115,11 +114,11 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should accept a max amount to send request for a regtest wallet", async () => {
     const bobsWalletResp = await request(app).post("/wallet/smartbch/create").send({
-      name: "bobs wallet",
+      name: "sbch bobs wallet",
       network: "regtest",
     });
 
-    expect(bobsWalletResp.body.walletId).toBe("named:regtest:bobs wallet");
+    expect(bobsWalletResp.body.walletId).toBe("named:regtest:sbch bobs wallet");
     const bobsAddress = bobsWalletResp.body.address;
 
     await request(app)
@@ -187,7 +186,7 @@ describe("Test Wallet Endpoints", () => {
 
   it("Should send all available funds", async () => {
     let bobWalletReq = {
-      name:"Bob's Regtest Wallet",
+      name:"sbch Bob's Regtest Wallet",
       type:"seed",
       network:"regtest"
     };
