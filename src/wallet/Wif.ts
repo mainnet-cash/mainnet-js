@@ -27,7 +27,12 @@ import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
-import { SendRequestOptionsI, WaitForTransactionOptions, WaitForTransactionResponse, WalletInfoI } from "./interface";
+import {
+  SendRequestOptionsI,
+  WaitForTransactionOptions,
+  WaitForTransactionResponse,
+  WalletInfoI,
+} from "./interface";
 
 import {
   OpReturnData,
@@ -298,8 +303,8 @@ export class Wallet extends BaseWallet {
       throw Error("Not implemented");
     } else if (this.walletType === WalletTypeEnum.Seed) {
       return await this._generateMnemonic();
-    }else {
-      console.log(this.walletType)
+    } else {
+      console.log(this.walletType);
       throw Error(`Could not determine walletType: ${this.walletType}`);
     }
   }

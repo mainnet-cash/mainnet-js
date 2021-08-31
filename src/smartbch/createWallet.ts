@@ -46,7 +46,11 @@ function getWalletClass(body: WalletRequestI) {
 /**
  * Check wallet type and network of a requested wallet for mismatches against retrieved from DB
  */
-function checkWalletTypeAndNetwork(wallet: SmartBchWallet, walletType, networkType) {
+function checkWalletTypeAndNetwork(
+  wallet: SmartBchWallet,
+  walletType,
+  networkType
+) {
   if (wallet.network != networkType) {
     throw Error(
       `A wallet already exists with name ${wallet.name}, but with network ${wallet.network} not ${networkType}, per request`
@@ -77,7 +81,9 @@ export async function namedWalletExists(body): Promise<boolean> {
  * @param networkType wallet network type
  * @returns A promise to a new wallet object
  */
-export async function namedWallet(body: WalletRequestI): Promise<SmartBchWallet> {
+export async function namedWallet(
+  body: WalletRequestI
+): Promise<SmartBchWallet> {
   const name = body.name;
 
   // Named wallets are saved in the database
@@ -116,7 +122,9 @@ export async function replaceNamedWallet(
  * @param body A wallet request object
  * @returns A promise to a new wallet object
  */
-export async function createWallet(body: WalletRequestI): Promise<SmartBchWallet> {
+export async function createWallet(
+  body: WalletRequestI
+): Promise<SmartBchWallet> {
   let wallet;
 
   // Named wallets are saved in the database
