@@ -429,8 +429,10 @@ export class BaseWallet implements WalletI {
    * @throws {Error} if called on BaseWallet
    */
   public toDbString(): string {
-    if (this.mnemonic) {
+    if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else if (this.walletType == WalletTypeEnum.Watch) {
+      return `${this.walletType}:${this.network}:${this.getDepositAddress()}`;
     }
 
     return "";
@@ -443,8 +445,10 @@ export class BaseWallet implements WalletI {
   public toString() {
     if (this.name) {
       return `named:${this.network}:${this.name}`;
-    } else if (this.mnemonic) {
+    } else if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else if (this.walletType == WalletTypeEnum.Watch) {
+      return `${this.walletType}:${this.network}:${this.getDepositAddress()}`;
     }
 
     return "";

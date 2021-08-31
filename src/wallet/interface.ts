@@ -1,12 +1,8 @@
 import { WalletTypeEnum } from "./enum";
-import { NetworkEnum, NetworkType } from "../enum";
-import { UtxoItem } from "./model";
-<<<<<<< HEAD
+import { NetworkEnum } from "../enum";
 import { ImageI } from "../qr/interface";
-=======
 import { ElectrumRawTransaction } from "../network/interface";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
->>>>>>> master
 
 export interface WalletRequestI {
   name?: string;
@@ -24,6 +20,7 @@ export interface WalletResponseI {
   walletId: string;
   network?: NetworkEnum;
   wif?: string;
+  privkey?: string;
   seed?: string;
   derivationPath?: string;
 }

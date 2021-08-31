@@ -27,7 +27,7 @@ import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
-import { SendRequestOptionsI, WalletInfoI } from "./interface";
+import { SendRequestOptionsI, WaitForTransactionOptions, WaitForTransactionResponse, WalletInfoI } from "./interface";
 
 import {
   OpReturnData,
@@ -292,8 +292,15 @@ export class Wallet extends BaseWallet {
   protected async generate(): Promise<this> {
     if (this.walletType === WalletTypeEnum.Wif) {
       return await this._generateWif();
-    } else {
+    } else if (this.walletType === WalletTypeEnum.Watch) {
+      return this;
+    } else if (this.walletType === WalletTypeEnum.Hd) {
+      throw Error("Not implemented");
+    } else if (this.walletType === WalletTypeEnum.Seed) {
       return await this._generateMnemonic();
+    }else {
+      console.log(this.walletType)
+      throw Error(`Could not determine walletType: ${this.walletType}`);
     }
   }
 
@@ -371,6 +378,7 @@ export class Wallet extends BaseWallet {
 
   // Initialize a watch only wallet from a cash addr
   protected async watchOnly(address: string): Promise<this> {
+    this.walletType = WalletTypeEnum.Watch;
     let addressComponents = address.split(":");
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
@@ -712,10 +720,61 @@ export class Wallet extends BaseWallet {
 
   // waits for next transaction, program execution is halted
   public async waitForTransaction(
-    returnTransactionInfo: boolean = true
-  ): Promise<ElectrumRawTransaction | undefined> {
+    options: WaitForTransactionOptions = {
+      getTransactionInfo: true,
+      getBalance: false,
+      txHash: undefined,
+    }
+  ): Promise<WaitForTransactionResponse> {
+    if (options.getTransactionInfo === undefined) {
+      options.getTransactionInfo = true;
+    }
+
     return new Promise(async (resolve) => {
-      const waitForTransactionCallback = async (data) => {
+      let txHashSeen = false;
+
+      const makeResponse = async () => {
+        const response = <WaitForTransactionResponse>{};
+        const promises: any[] = [undefined, undefined];
+
+        if (options.getBalance === true) {
+          promises[0] = this.getBalance();
+        }
+
+        if (options.getTransactionInfo === true) {
+          promises[1] = this.getLastTransaction();
+        }
+
+        const result = await Promise.all(promises);
+        response.balance = result[0];
+        response.transactionInfo = result[1];
+
+        return response;
+      };
+
+      // waiting for a specific transaction to propagate
+      if (options.txHash) {
+        const waitForTransactionCallback = async (data) => {
+          if (data && data[0] === options.txHash!) {
+            txHashSeen = true;
+            this.provider!.unsubscribeFromTransaction(
+              options.txHash!,
+              waitForTransactionCallback
+            );
+
+            resolve(await makeResponse());
+          }
+        };
+
+        this.provider!.subscribeToTransaction(
+          options.txHash,
+          waitForTransactionCallback
+        );
+        return;
+      }
+
+      // waiting for any address transaction
+      const watchAddressCallback = async (data) => {
         if (data instanceof Array) {
           let addr = data[0] as string;
           if (addr !== this.cashaddr!) {
@@ -724,21 +783,14 @@ export class Wallet extends BaseWallet {
 
           this.provider!.unsubscribeFromAddress(
             this.cashaddr!,
-            waitForTransactionCallback
+            watchAddressCallback
           );
 
-          let lastTx;
-          if (returnTransactionInfo) {
-            lastTx = await this.getLastTransaction();
-          }
-
-          resolve(lastTx);
+          resolve(await makeResponse());
         }
       };
-      this.provider!.subscribeToAddress(
-        this.cashaddr!,
-        waitForTransactionCallback
-      );
+
+      this.provider!.subscribeToAddress(this.cashaddr!, watchAddressCallback);
     });
   }
   //#endregion Funds

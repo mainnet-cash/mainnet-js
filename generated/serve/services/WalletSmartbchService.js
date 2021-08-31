@@ -11,7 +11,7 @@ const mainnet = require("mainnet-js");
 const smartbchBalance = ({ balanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(balanceRequest.walletId, "smartbch");
+      const wallet = await mainnet.SmartBch.walletFromId(balanceRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -40,7 +40,7 @@ const smartbchBalance = ({ balanceRequest }) => new Promise(
 const smartbchCreateWallet = ({ walletRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const resp = await mainnet.createWalletResponse({...walletRequest, ...{platform: "smartbch"}});
+      const resp = await mainnet.SmartBch.createWalletResponse({ ...walletRequest });
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.trace(e);
@@ -60,7 +60,7 @@ const smartbchCreateWallet = ({ walletRequest }) => new Promise(
 const smartbchDepositAddress = ({ serializedWallet }) =>
   new Promise(async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(serializedWallet.walletId, "smartbch");
+      const wallet = await mainnet.SmartBch.walletFromId(serializedWallet.walletId);
       const args = serializedWallet;
       delete args.walletId;
       const resp = await wallet.getDepositAddress(args);
@@ -81,7 +81,7 @@ const smartbchDepositAddress = ({ serializedWallet }) =>
 const smartbchDepositQr = ({ serializedWallet }) =>
   new Promise(async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(serializedWallet.walletId, "smartbch");
+      const wallet = await mainnet.SmartBch.walletFromId(serializedWallet.walletId);
       const args = serializedWallet;
       delete args.walletId;
       const resp = await wallet.getDepositQr(args);
@@ -103,7 +103,7 @@ const smartbchDepositQr = ({ serializedWallet }) =>
 const smartbchMaxAmountToSend = ({ smartBchMaxAmountToSendRequest }) =>
   new Promise(async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(smartBchMaxAmountToSendRequest.walletId, "smartbch");
+      const wallet = await mainnet.SmartBch.walletFromId(smartBchMaxAmountToSendRequest.walletId);
       const args = smartBchMaxAmountToSendRequest;
       delete args.walletId;
       const resp = await wallet.getMaxAmountToSend(args);
@@ -124,7 +124,7 @@ const smartbchMaxAmountToSend = ({ smartBchMaxAmountToSendRequest }) =>
 const smartbchSend = ({ smartBchSendRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(smartBchSendRequest.walletId, "smartbch");
+      const wallet = await mainnet.SmartBch.walletFromId(smartBchSendRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -148,7 +148,7 @@ const smartbchSend = ({ smartBchSendRequest }) => new Promise(
 const smartbchSendMax = ({ smartBchSendMaxRequest }) =>
   new Promise(async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(smartBchSendMaxRequest.walletId, "smartbch");
+      const wallet = await mainnet.SmartBch.walletFromId(smartBchSendMaxRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -172,7 +172,7 @@ const smartbchSendMax = ({ smartBchSendMaxRequest }) =>
 const smartbchSignedMessageSign = ({ createSignedMessageRequest }) => 
   new Promise(async (resolve, reject) => {
     try {
-      let wallet = await mainnet.walletFromId(createSignedMessageRequest.walletId, "smartbch");
+      let wallet = await mainnet.SmartBch.walletFromId(createSignedMessageRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
@@ -199,7 +199,7 @@ const smartbchSignedMessageVerify = ({ verifySignedMessageRequest }) =>
     try {
       let args = verifySignedMessageRequest
       let resp, wallet
-      wallet = await mainnet.walletFromId(args.walletId, "smartbch");
+      wallet = await mainnet.SmartBch.walletFromId(args.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
