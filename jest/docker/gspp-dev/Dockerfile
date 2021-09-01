@@ -38,7 +38,7 @@ RUN git clone -b v1.38.1 --depth 1 --recursive --shallow-submodules https://gith
            -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
            -DBUILD_SHARED_LIBS=ON \
       ../.. \
-  && make \
+  && make -j`nproc` \
   && make install
 
 # Add python for gs++ make process
@@ -54,7 +54,7 @@ RUN cd /home \
   && cmake \
       -DCMAKE_BUILD_TYPE=Release \
       .. \
-  && make -j1 \
+  && make -j`nproc` \
   && echo 1
 
 ARG TARGETPLATFORM

@@ -9,7 +9,7 @@ ARG CGO_PATCH_VERSION=0.1.1
 ARG SNAPPY_VERSION=1.1.8
 ARG ROCKSDB_VERSION=5.18.4
 ARG CONFIG_TAG=0.0.3
-ARG GIT_TAG=0.3.0
+ARG GIT_TAG=main
 
 # Update file limit
 RUN sed -i -e '$a* soft nofile 65536\n* hard nofile 65536' /etc/security/limits.conf
@@ -67,13 +67,13 @@ ENV ROCKSDB_PATH="/usr/local" \
 WORKDIR /smart_bch
 
 # Build libevmwrap.so
-RUN git clone -b v${GIT_TAG} --depth 1 https://github.com/smartbch/moeingevm && \
+RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/smartbch/moeingevm && \
   cd moeingevm/evmwrap && make -j`nproc`
 
 ENV EVMWRAP=/smart_bch/moeingevm/evmwrap/host_bridge/libevmwrap.so
 
 # Build and setup smartbchd
-RUN git clone -b v${GIT_TAG} --depth 1 https://github.com/smartbch/smartbch && \
+RUN git clone -b ${GIT_TAG} --depth 1 https://github.com/smartbch/smartbch && \
   cd smartbch && go build -tags cppbtree github.com/smartbch/smartbch/cmd/smartbchd && \
   cp /smart_bch/smartbch/smartbchd /build/smartbchd && \
   rm -rf /smart_bch/smartbch
