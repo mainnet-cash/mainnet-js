@@ -58,7 +58,6 @@ export class Erc20 {
       contract = new Contract(
         tokenId,
         Erc20.abi,
-        [],
         this.wallet.network
       ).setSigner(this.wallet);
       this.contracts.set(tokenId, contract);

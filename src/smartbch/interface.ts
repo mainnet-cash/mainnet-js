@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
-import { UnitEnum } from "../enum";
+import { ethers } from "ethers";
+import { NetworkType, UnitEnum } from "../enum";
 
 export interface SendRequest {
   address: string;
@@ -80,3 +81,26 @@ export interface Erc20SendRequest {
   value: BigNumber.Value;
   tokenId: string;
 }
+
+//#region Contract
+export type Argument = number | boolean | string | Uint8Array | ethers.BigNumberish;
+
+export interface ContractRequestI {
+  address: string;
+  abi: ethers.ContractInterface;
+  network: NetworkType;
+}
+
+export interface ContractResponseI {
+  contractId: string;
+  address: string;
+}
+
+export interface ContractInfoResponseI {
+  contractId: string;
+  address: string;
+  abi: ethers.ContractInterface;
+  script: string;
+  parameters: Argument[];
+}
+//#endregion Contract

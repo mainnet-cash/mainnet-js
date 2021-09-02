@@ -5,10 +5,8 @@ import { atob, btoa } from "../util/base64";
 import { DELIMITER } from "../constant";
 import {
   ContractI,
-  ContractInfoResponseI,
-  ContractResponseI,
 } from "../contract/interface";
-import { ContractFactory, ContractInterface, ethers, Wallet } from "ethers";
+import { ContractFactory, ethers } from "ethers";
 import { NetworkType } from "../enum";
 import {
   castConstructorParametersFromArtifact,
@@ -20,41 +18,40 @@ import { SmartBchWallet } from "./SmartBchWallet";
 import { WalletTypeEnum } from "../wallet/enum";
 import fs from "fs";
 import solc from "../../polyfill/solc";
-
-export type Argument = number | boolean | string | Uint8Array;
+import { Argument, ContractInfoResponseI, ContractRequestI, ContractResponseI } from "./interface";
 
 /**
- * Class that manages the Contract source, network, parameters, CashScript artifact and calls
+ * Class that manages the SmartBch Contract source, network, parameters and calls
  */
-export class Contract implements ContractI {
+export class Contract /*implements ContractI*/ {
   private address: string;
-  public abi: ContractInterface;
-  public parameters: Argument[];
+  public abi: ethers.ContractInterface;
+  public script: string = "";
+  public parameters: Argument[] = [];
   public contract: ethers.Contract;
   private provider: ethers.providers.Provider;
   public network: Network = NetworkType.Mainnet;
-  private nonce: number;
   private signer?: ethers.Signer;
+  public deployReceipt?: ethers.providers.TransactionReceipt;
 
   /**
-   * Initializes a Contract
+   * Initializes a Contract with its address and ABI
+   * @see deploy static method to deploy new contract to the network, check out
    *
-   * @param script The contract in CashScript syntax
-   * @param parameters Stored values of a contract passed to the CashScript constructor
-   * @param network Network for the contract
-   * @param nonce A unique number to differentiate the contract
+   * @note The created contract instance allows for read-only interactions unless bound to a `signer` - a SmartBchWallet instance @see setSigner
    *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
+   * @param address Address of an already deployed contract
+   * @param abi Contract ABI (Application Binary Interface), which describes the contract interaction
+   * @param network Network on which the contract is deployed
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch/createContract} REST endpoint
    * @returns A new contract
    */
   constructor(
     address: string,
-    abi: ContractInterface,
-    parameters: Argument[] = [],
+    abi: ethers.ContractInterface,
     network: Network = Network.MAINNET,
-    nonce?: number
   ) {
-    this.parameters = parameters;
     this.address = address;
     this.abi = abi;
     this.network = network ? network : "mainnet";
@@ -62,10 +59,18 @@ export class Contract implements ContractI {
 
     this.contract = new ethers.Contract(this.address, this.abi, this.provider);
     this.defineContractProperties();
-
-    this.nonce = nonce ? nonce : 0;
   }
 
+ /**
+   * Binds the contract to a `signer` - a SmartBchWallet instance
+   * which is able to sign transactions with a private key and thus spend the gas for contract interaction
+   *
+   * @note the network and network provider will be changed to those of the `signer`
+   *
+   * @param signer a SmartBchWallet instance
+   *
+   * @returns this contract
+   */
   public setSigner(signer: SmartBchWallet) {
     this.network = signer.network;
     this.provider = signer.provider!;
@@ -75,16 +80,13 @@ export class Contract implements ContractI {
     return this;
   }
 
-  public setContract(contract: ethers.Contract) {
-    this.address = contract.address;
-    this.abi = contract.interface;
-    this.contract = contract;
-    this.contract.connect(this.signer || this.provider);
-    this.defineContractProperties();
-
-    return this;
-  }
-
+ /**
+   * Binds this contract to another address, preserving the ABI
+   *
+   * @param address Address of an already deployed contract
+   *
+   * @returns this contract
+   */
   public setAddress(address: string) {
     if (address !== this.address) {
       this.address = address;
@@ -96,18 +98,33 @@ export class Contract implements ContractI {
     return this;
   }
 
+ /**
+   * Instantiates a new Contract class with an ethers.Contract class,
+   * optionally preserving the solidity source code and contract constructor parameters
+   *
+   * @param contract ethers.Contract instance created elsewhere
+   * @param script (optional) solidity source code used to create this contract instance
+   * @param parameters (optional) constructor parameters used to create this contract instance
+   * @param network (optional) network on which the contract to be interacted with
+   * @param signer (optional) a SmartBchWallet instance which allows for spending gas for non read-only interactions with this contract
+   *
+   * @returns {Contract} new Contract
+   */
   public static fromEthersContract(
     contract: ethers.Contract,
+    script: string = "",
     parameters: any[] = [],
     network: Network = NetworkType.Mainnet,
     signer?: SmartBchWallet
-  ) {
+  ): Contract {
     const result = new Contract(
       contract.address,
-      contract.interface,
-      parameters,
+      contract.interface.format(ethers.utils.FormatTypes.full),
       network
     );
+    result.parameters = parameters;
+    result.script = script;
+
     if (signer) {
       result.setSigner(signer);
     }
@@ -115,8 +132,16 @@ export class Contract implements ContractI {
     return result;
   }
 
+  /**
+   * convenience contract function accessors as object properties
+   */
   readonly [key: string]: ethers.ContractFunction | any;
 
+  /**
+   * defineContractProperties - Set up the convenience contract function accessors as object properties
+   * @example you can use contract.mint(to, value) instead of contract.getFunctionByName('mint')(to, value)
+   *
+   */
   private defineContractProperties() {
     Object.keys(this.contract.interface.functions).forEach((signature) => {
       const fragment = this.contract.interface.functions[signature];
@@ -129,29 +154,44 @@ export class Contract implements ContractI {
     });
   }
 
+  /**
+   * getContractText - get the source code of a contract
+   *
+   * @returns Contract source code
+   */
   public getContractText(): string {
-    return JSON.stringify(this.abi);
-  }
-
-  public getNonce() {
-    return this.nonce;
+    return this.script;
   }
 
   /**
-   * getSerializedAbi - Serialize just the script component of a contract
+   * getSerializedAbi - Serialize just the source code component of a contract
    *
-   * a low-level function
-   *
-   * @returns A serialized script
+   * @returns A serialized source code
    */
-  public getSerializedAbi() {
+  public getSerializedText(): string {
     return btoa(this.getContractText());
   }
 
   /**
-   * getSerializedParameters - Serialize just the parameters of a contract
+   * getContractText - get the ABI of a contract
    *
-   * a low-level function
+   * @returns Contract ABI
+   */
+   public getContractAbi(): ethers.ContractInterface {
+    return this.abi;
+  }
+
+  /**
+   * getSerializedAbi - Serialize just the ABI component of a contract
+   *
+   * @returns A serialized ABI
+   */
+  public getSerializedAbi() {
+    return btoa(JSON.stringify(this.getContractAbi()));
+  }
+
+  /**
+   * getSerializedParameters - Serialize just the parameters of a contract
    *
    * @returns The serialized parameters
    */
@@ -161,8 +201,6 @@ export class Contract implements ContractI {
 
   /**
    * getParameterList - Get the parameters as a list
-   *
-   * a low-level function
    *
    * @returns A list of parameters as strings
    */
@@ -175,116 +213,68 @@ export class Contract implements ContractI {
   /**
    * toString - Serialize a contract as a string
    *
-   * an intermediate function
-   *
    * @returns A serialized contract
    */
   public toString() {
     return [
-      "contract",
+      "smartbchcontract",
       this.network,
       this.getDepositAddress(),
-      this.getSerializedParameters(),
       this.getSerializedAbi(),
-      this.getNonce(),
+      this.getSerializedText(),
+      this.getSerializedParameters(),
     ].join(DELIMITER);
   }
 
   /**
    * fromId - Deserialize a contract from a string
    *
-   * an intermediate function
-   *
    * @returns A new contract
    */
   public static fromId(contractId: string) {
-    let [_, network, address, serializedParams, serializedScript, nonce] =
+    const [_, network, address, serializedAbi, serializedScript, serializedParams] =
       contractId.split(DELIMITER);
-    let abi = JSON.parse(atob(serializedScript));
-    // let artifact = compileString(script);
-    let paramStrings = JSON.parse(atob(serializedParams));
-    // let params = castConstructorParametersFromArtifact(paramStrings, artifact);
+    const abi = JSON.parse(atob(serializedAbi));
+    const script = atob(serializedScript);
+    const parameters = JSON.parse(atob(serializedParams));
 
-    return new Contract(
+    const contract = new Contract(
       address,
       abi,
-      paramStrings,
       network as Network,
-      parseInt(nonce)
     );
+
+    contract.parameters = parameters;
+    contract.script = script;
+
+    return contract;
   }
 
-  // /**
-  //  * _create - Static convenience method for the constructor
-  //  *
-  //  * an intermediate function similar to the constructor for rest
-  //  *
-  //  * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/createContract|/contract/create} REST endpoint
-  //  * @returns A new contract
-  //  */
-  // static _create(
-  //   script: string,
-  //   parameters: string[],
-  //   network: Network,
-  //   nonce?
-  // ) {
-  //   let artifact = compileString(script);
-  //   let params = castConstructorParametersFromArtifact(parameters, artifact);
-  //   return new this("", script, params, network, nonce);
-  // }
-
   /**
-   * Get the unspent transaction outputs of the contract
+   * getDepositAddress Get the contract address
    *
-   * an intermediate function
-   *
-   * @note For REST, the address is automatically returned from the create interface
    * @returns The address for a contract
    */
   public getDepositAddress() {
     return this.contract.address;
   }
 
-  // /**
-  //  * Get the address balance of the contract
-  //  *
-  //  * @param address address to query balance of
-  //  *
-  //  * @returns The balance in satoshi
-  //  */
-  // public async getBalance(address: string): Promise<number> {
-  //   return (await this.contract.balanceOf(address)).div(10**10).toNumber();
-  // }
-
   /**
    * Get the information about the contract
    *
    * a high-level function
    *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/info} REST endpoint
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch/info} REST endpoint
    * @returns The contract info
    */
   public info(): ContractInfoResponseI {
     return {
       contractId: this.toString(),
-      cashaddr: this.contract.address,
+      address: this.getDepositAddress(),
+      abi: this.getContractAbi(),
       script: this.getContractText(),
       parameters: this.getParameterList(),
-      nonce: this.nonce,
     };
-  }
-
-  public _info(): ContractInfoResponseI {
-    return this.info();
-  }
-
-  /**
-   * fromScript - initialize the artifact and cashscript object from existing script
-   * @returns A cashscript Contract
-   */
-  public fromScript() {
-    this.contract = new ethers.Contract(this.address, this.abi, this.provider);
-    return this;
   }
 
   /**
@@ -305,14 +295,16 @@ export class Contract implements ContractI {
       request.overrides = {};
     }
 
-    if (request.overrides.nonce === undefined) {
-      request.overrides.nonce = this.nonce;
-    }
-
     return this.contract[request.function](...arguments, request.overrides);
   }
 
-  public getFunctionByName(funcName: string) {
+  /**
+   * getFunctionByName -  get a contract function to evaluate by its name
+   *
+   * @param funcName function name
+   * @returns {ethers.ContractFunction} A contract function ready to be evaluated
+   */
+  public getFunctionByName(funcName: string): ethers.ContractFunction {
     if (typeof this.contract.functions[funcName] === "function") {
       return this.contract[funcName];
     } else {
@@ -320,39 +312,62 @@ export class Contract implements ContractI {
     }
   }
 
-  public async estimateFee(funcName: string, ...args) {
+  /**
+   * estimateFee - estimate the gas amount to be payed for executing a state-changing function
+   *
+   * @param funcName function name
+   * @param args function arguments
+   * @returns {ethers.BigNumber} gas amount the function will consume given the arguments in base units (wei)
+   */
+  public async estimateFee(funcName: string, ...args): Promise<ethers.BigNumber> {
     return this.contract.estimateGas[funcName](...args);
   }
 
-  // /**
-  //  * Create a new contract, but respond with a json object
-  //  * @param request A contract request object
-  //  * @returns A new contract object
-  //  */
-  // public static contractRespFromJsonRequest(request: any): ContractResponseI {
-  //   let contract = Contract._create(
-  //     request.script,
-  //     request.parameters,
-  //     request.network
-  //   );
-  //   if (contract) {
-  //     return {
-  //       contractId: contract.toString(),
-  //       cashaddr: contract.getDepositAddress(),
-  //     };
-  //   } else {
-  //     throw Error("Error creating contract");
-  //   }
-  // }
+  /**
+   * Create a new contract, but respond with a json object
+   * @param request A contract request object
+   * @returns A new contract object
+   */
+  public static contractRespFromJsonRequest(request: ContractRequestI): ContractResponseI {
+    let contract = new Contract(
+      request.address,
+      request.abi,
+      request.network
+    );
 
-  public async isDeployed() {
-    return this.contract.deployed();
+    return {
+      contractId: contract.toString(),
+      address: contract.getDepositAddress(),
+    };
   }
 
+  /**
+   * isDeployed - check if the contract is deployed to the network and is ready for interactions
+   *
+   * @returns {boolean} true if deployed
+   */
+  public async isDeployed(): Promise<boolean> {
+    try {
+      await this.contract.deployed();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * deploy - deploy contract from solidity source code
+   *
+   * @param {SmartBchWallet} signer a SmartBchWallet which pays gas fees on contract deployment
+   * @param solidityScript the contract source code written in solidity language
+   * @param parameters contract constructor parameters
+   *
+   * @returns {Contrac} newly created contract
+   */
   public static async deploy(
     signer: SmartBchWallet,
     solidityScript: string,
-    ...args: Array<any>
+    ...parameters: Array<any>
   ): Promise<Contract> {
     if (signer.walletType === WalletTypeEnum.Watch) {
       throw Error("Cannot deploy contracts with Watch-Only wallets");
@@ -380,7 +395,7 @@ export class Contract implements ContractI {
       })
     );
     const errors = (compiled.errors || []).filter(
-      (error) => error.severity === "error"
+      (error: any) => error.severity === "error"
     );
     if (errors.length) {
       throw new Error(JSON.stringify(errors, null, 2));
@@ -396,29 +411,43 @@ export class Contract implements ContractI {
     let overrides: ethers.CallOverrides = {};
 
     // If 1 extra parameter was passed in, it contains overrides
-    if (args.length === factory.interface.deploy.inputs.length + 1) {
-      overrides = args.pop();
+    if (parameters.length === factory.interface.deploy.inputs.length + 1) {
+      overrides = parameters.pop();
     }
 
-    const contract = await factory.deploy(...args, overrides);
+    const contract = await factory.deploy(...parameters, overrides);
     contract.deployTransaction.data = "";
     const receipt = await contract.deployTransaction.wait();
-    (contract as any).deployReceipt = receipt;
 
     const result = Contract.fromEthersContract(
       contract,
-      args,
+      solidityScript,
+      parameters,
       signer.network,
       signer
     );
     result.contract = contract;
+    result.deployReceipt = receipt;
 
     return result;
   }
 
-  public static findImports(path: string) {
-    let url;
+  /**
+   * findImports - utility function for the solidity import resolution
+   *
+   * @note this handler resolves the popular openzeppelin packages.
+   * If ran in node, the imports are read from disk, otherwise from github
+   *
+   * @note this handler resolves any external dependencies from web, recognized by https:// prefix
+   *
+   * @param path import path as encountered in the solidity source code
+   *
+   * @returns resolved solidity module or error
+   */
+  public static findImports(path: string): { contents?: any; error?: any; } {
+    let url: string = "";
     if (path.indexOf("@openzeppelin") === 0) {
+      // lookup node_modules
       const nodePath = `${process.cwd()}/node_modules/${path}`;
       if (fs.existsSync(nodePath)) {
         return {
@@ -426,11 +455,13 @@ export class Contract implements ContractI {
         };
       }
 
+      // otherwise download from openzeppelin github
       url = path.replace(
         "@openzeppelin",
         "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master"
       );
     } else if (path.indexOf("https://") === 0) {
+      // any other external web resources
       url = path;
     }
 
