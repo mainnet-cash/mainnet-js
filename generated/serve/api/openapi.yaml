@@ -34,6 +34,11 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/
   name: contract/escrow
+- description: Use SmartBch contracts
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch
+  name: contract/smartbch
 - description: Testnet faucet
   externalDocs:
     description: Find out more
@@ -637,6 +642,140 @@ paths:
       tags:
       - wallet/smartbch
       x-eov-operation-handler: controllers/WalletSmartbchController
+  /contract/smartbch/create:
+    post:
+      operationId: smartBchContractCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartBchContractRequest'
+        description: Create a SmartBch contractId
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchContractResponse'
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Create a SmartBch contractId
+      tags:
+      - contract/smartbch
+      x-eov-operation-handler: controllers/ContractSmartbchController
+  /contract/smartbch/call:
+    post:
+      operationId: smartBchContractCall
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartBchContractFnCallRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchContractFnCallResponse'
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Call a SmartBch contract function
+      tags:
+      - contract/smartbch
+      x-eov-operation-handler: controllers/ContractSmartbchController
+  /contract/smartbch/estimate_gas:
+    post:
+      operationId: smartBchContractEstimateGas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartBchContractEstimateGasRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchContractEstimateGasResponse'
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Estimate the gas for a contract interaction function given the arguments
+      tags:
+      - contract/smartbch
+      x-eov-operation-handler: controllers/ContractSmartbchController
+  /contract/smartbch/info:
+    post:
+      operationId: smartBchContractInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartBchContractInfoRequest'
+        description: Request parsed information regarding a SmartBch contract from
+          the smartBchContractId
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchContractInfoResponse'
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Get information about a SmartBch contract from the contractId
+      tags:
+      - contract/smartbch
+      x-eov-operation-handler: controllers/ContractSmartbchController
+  /contract/smartbch/deploy:
+    post:
+      operationId: smartBchContractDeploy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartBchContractDeployRequest'
+        description: Request to deploy a SmartBch contract
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchContractDeployResponse'
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error
+      summary: Request to deploy a SmartBch contract
+      tags:
+      - contract/smartbch
+      x-eov-operation-handler: controllers/ContractSmartbchController
   /wallet/create:
     post:
       operationId: createWallet
@@ -3192,6 +3331,15 @@ components:
           type: boolean
       type: object
     SmartBchOverrides:
+      example:
+        gasLimit: ""
+        maxPriorityFeePerGas: ""
+        from: from
+        maxFeePerGas: ""
+        nonce: ""
+        value: ""
+        blockTag: ""
+        gasPrice: ""
       properties:
         gasLimit:
           anyOf:
@@ -3278,6 +3426,419 @@ components:
           type: string
       required:
       - walletId
+    SmartBchTransactionReceipt:
+      example:
+        logsBloom: logsBloom
+        blockHash: blockHash
+        contractAddress: contractAddress
+        transactionIndex: 0.8008281904610115
+        confirmations: 1.4658129805029452
+        type: 5.962133916683182
+        transactionHash: transactionHash
+        gasUsed: gasUsed
+        root: root
+        blockNumber: 6.027456183070403
+        cumulativeGasUsed: cumulativeGasUsed
+        from: from
+        to: to
+        effectiveGasPrice: effectiveGasPrice
+        logs:
+        - ""
+        - ""
+        byzantium: true
+        status: 5.637376656633329
+      properties:
+        to:
+          type: string
+        from:
+          type: string
+        contractAddress:
+          type: string
+        transactionIndex:
+          type: number
+        root:
+          type: string
+        gasUsed:
+          type: string
+        logsBloom:
+          type: string
+        blockHash:
+          type: string
+        transactionHash:
+          type: string
+        logs:
+          items: {}
+          type: array
+        blockNumber:
+          type: number
+        confirmations:
+          type: number
+        cumulativeGasUsed:
+          type: string
+        effectiveGasPrice:
+          type: string
+        byzantium:
+          type: boolean
+        type:
+          type: number
+        status:
+          type: number
+      required:
+      - blockHash
+      - blockNumber
+      - byzantium
+      - confirmations
+      - contractAddress
+      - cumulativeGasUsed
+      - effectiveGasPrice
+      - from
+      - gasUsed
+      - logs
+      - logsBloom
+      - to
+      - transactionHash
+      - transactionIndex
+      - type
+    SmartBchContractRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        address: 0xdac17f958d2ee523a2206206994597c13d831ec7
+        abi: |
+          - "function name() view returns (string)"
+          - "function symbol() view returns (string)"
+      properties:
+        address:
+          description: Address of an already deployed contract
+          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
+          type: string
+        abi:
+          description: Contract ABI (Application Binary Interface), which describes
+            the contract interaction
+          example: |
+            - "function name() view returns (string)"
+            - "function symbol() view returns (string)"
+          items:
+            type: string
+          type: array
+      required:
+      - abi
+      - address
+      - network
+    SmartBchContractResponse:
+      example:
+        address: 0xdac17f958d2ee523a2206206994597c13d831ec7
+        contractId: smartbchcontract:mainnet:0xdac17f958d2ee523a2206206994597c13d831ec7:WyJmdW5jdGlvbiBuYW1lKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gc3ltYm9sKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gZGVjaW1hbHMoKSB2aWV3IHJldHVybnMgKHVpbnQ4KSIsImZ1bmN0aW9uIHRvdGFsU3VwcGx5KCkgdmlldyByZXR1cm5zICh1aW50MjU2KSIsImZ1bmN0aW9uIGJhbGFuY2VPZihhZGRyZXNzKSB2aWV3IHJldHVybnMgKHVpbnQpIiwiZnVuY3Rpb24gdHJhbnNmZXIoYWRkcmVzcyB0bywgdWludCBhbW91bnQpIiwiZnVuY3Rpb24gdHJhbnNmZXJGcm9tKGFkZHJlc3Mgc2VuZGVyLCBhZGRyZXNzIHJlY2lwaWVudCwgdWludDI1NiBhbW91bnQpIGV4dGVybmFsIHJldHVybnMgKGJvb2wpIiwiZnVuY3Rpb24gbWludChhZGRyZXNzIHRvLCB1aW50MjU2IGFtb3VudCkiLCJldmVudCBUcmFuc2ZlcihhZGRyZXNzIGluZGV4ZWQgZnJvbSwgYWRkcmVzcyBpbmRleGVkIHRvLCB1aW50IGFtb3VudCkiLCJldmVudCBBcHByb3ZhbChhZGRyZXNzIGluZGV4ZWQgb3duZXIsIGFkZHJlc3MgaW5kZXhlZCBzcGVuZGVyLCB1aW50MjU2IHZhbHVlKSJd::W10=
+      properties:
+        contractId:
+          description: serialized contract
+          example: smartbchcontract:mainnet:0xdac17f958d2ee523a2206206994597c13d831ec7:WyJmdW5jdGlvbiBuYW1lKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gc3ltYm9sKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gZGVjaW1hbHMoKSB2aWV3IHJldHVybnMgKHVpbnQ4KSIsImZ1bmN0aW9uIHRvdGFsU3VwcGx5KCkgdmlldyByZXR1cm5zICh1aW50MjU2KSIsImZ1bmN0aW9uIGJhbGFuY2VPZihhZGRyZXNzKSB2aWV3IHJldHVybnMgKHVpbnQpIiwiZnVuY3Rpb24gdHJhbnNmZXIoYWRkcmVzcyB0bywgdWludCBhbW91bnQpIiwiZnVuY3Rpb24gdHJhbnNmZXJGcm9tKGFkZHJlc3Mgc2VuZGVyLCBhZGRyZXNzIHJlY2lwaWVudCwgdWludDI1NiBhbW91bnQpIGV4dGVybmFsIHJldHVybnMgKGJvb2wpIiwiZnVuY3Rpb24gbWludChhZGRyZXNzIHRvLCB1aW50MjU2IGFtb3VudCkiLCJldmVudCBUcmFuc2ZlcihhZGRyZXNzIGluZGV4ZWQgZnJvbSwgYWRkcmVzcyBpbmRleGVkIHRvLCB1aW50IGFtb3VudCkiLCJldmVudCBBcHByb3ZhbChhZGRyZXNzIGluZGV4ZWQgb3duZXIsIGFkZHJlc3MgaW5kZXhlZCBzcGVuZGVyLCB1aW50MjU2IHZhbHVlKSJd::W10=
+          type: string
+        address:
+          description: Contract address
+          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
+    SmartBchContractFnCallRequest:
+      description: |
+        Contract function evaluation request.
+        A constant function (non state changing, also does not cost gas) does not require a signer (walletId)
+        A state changing function will generate a transaction and does require a signer (walletId)
+      example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+        function: function
+        contractId: contractId
+        arguments:
+        - ""
+        - ""
+        overrides:
+          gasLimit: ""
+          maxPriorityFeePerGas: ""
+          from: from
+          maxFeePerGas: ""
+          nonce: ""
+          value: ""
+          blockTag: ""
+          gasPrice: ""
+      properties:
+        walletId:
+          description: Serialized wallet
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+          type: string
+        contractId:
+          description: serialized contract
+          type: string
+        function:
+          description: Function to call on the SmartBch contract.
+          type: string
+        arguments:
+          description: |
+            Arguments for the contract function call. Binary and BigNumber data should be passed as hexadecimal.
+          items: {}
+          type: array
+        overrides:
+          $ref: '#/components/schemas/SmartBchOverrides'
+      required:
+      - contractId
+      - function
+    SmartBchContractFnCallResponse:
+      description: |
+        Contract function evaluation response.
+        A constant function (non state changing, also does not cost gas) evaluates to a `result` field
+        A state changing function will generate a transaction and `txId` and `receipt` fields will be filled
+      example:
+        result: ""
+        contractId: contractId
+        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+        receipt:
+          logsBloom: logsBloom
+          blockHash: blockHash
+          contractAddress: contractAddress
+          transactionIndex: 0.8008281904610115
+          confirmations: 1.4658129805029452
+          type: 5.962133916683182
+          transactionHash: transactionHash
+          gasUsed: gasUsed
+          root: root
+          blockNumber: 6.027456183070403
+          cumulativeGasUsed: cumulativeGasUsed
+          from: from
+          to: to
+          effectiveGasPrice: effectiveGasPrice
+          logs:
+          - ""
+          - ""
+          byzantium: true
+          status: 5.637376656633329
+      properties:
+        contractId:
+          description: serialized contract
+          type: string
+        result:
+          description: contract function evaluation result. Can be of any type.
+        txId:
+          description: The hash of a transaction
+          example: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+          type: string
+        receipt:
+          $ref: '#/components/schemas/SmartBchTransactionReceipt'
+    SmartBchContractEstimateGasRequest:
+      example:
+        function: function
+        contractId: contractId
+        arguments:
+        - ""
+        - ""
+        overrides:
+          gasLimit: ""
+          maxPriorityFeePerGas: ""
+          from: from
+          maxFeePerGas: ""
+          nonce: ""
+          value: ""
+          blockTag: ""
+          gasPrice: ""
+      properties:
+        contractId:
+          description: serialized contract
+          type: string
+        function:
+          description: Function to call on the SmartBch contract.
+          type: string
+        arguments:
+          description: |
+            Arguments for the contract function call. Binary and BigNumber data should be passed as hexadecimal.
+          items: {}
+          type: array
+        overrides:
+          $ref: '#/components/schemas/SmartBchOverrides'
+      required:
+      - contractId
+      - function
+    SmartBchContractEstimateGasResponse:
+      description: |
+        Contract function evaluation response.
+        A constant function (non state changing, also does not cost gas) evaluates to a `result` field
+        A state changing function will generate a transaction and `txId` and `receipt` fields will be filled
+      example:
+        result: ""
+        contractId: contractId
+        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+        receipt:
+          logsBloom: logsBloom
+          blockHash: blockHash
+          contractAddress: contractAddress
+          transactionIndex: 0.8008281904610115
+          confirmations: 1.4658129805029452
+          type: 5.962133916683182
+          transactionHash: transactionHash
+          gasUsed: gasUsed
+          root: root
+          blockNumber: 6.027456183070403
+          cumulativeGasUsed: cumulativeGasUsed
+          from: from
+          to: to
+          effectiveGasPrice: effectiveGasPrice
+          logs:
+          - ""
+          - ""
+          byzantium: true
+          status: 5.637376656633329
+      properties:
+        contractId:
+          description: serialized contract
+          type: string
+        result:
+          description: contract function evaluation result. Can be of any type.
+        txId:
+          description: The hash of a transaction
+          example: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+          type: string
+        receipt:
+          $ref: '#/components/schemas/SmartBchTransactionReceipt'
+    SmartBchContractInfoRequest:
+      example:
+        contractId: contractId
+      properties:
+        contractId:
+          description: serialized contract
+          type: string
+    SmartBchContractInfoResponse:
+      example:
+        address: address
+        contractId: contractId
+        abi: |
+          - "function name() view returns (string)"
+          - "function symbol() view returns (string)"
+        parameters:
+        - MyToken
+        - MTK
+        script: |
+          // SPDX-License-Identifier: MIT
+          pragma solidity ^0.8.2;
+
+          import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+          contract MyToken is ERC20 {
+            constructor() ERC20("MyToken", "MTK") {}
+          }
+      properties:
+        contractId:
+          description: serialized contract
+          type: string
+        address:
+          description: Address of an already deployed contract
+          type: string
+        abi:
+          description: Contract ABI (Application Binary Interface), which describes
+            the contract interaction
+          example: |
+            - "function name() view returns (string)"
+            - "function symbol() view returns (string)"
+          items:
+            type: string
+          type: array
+        script:
+          description: solidity source code used to create this contract instance
+          example: |
+            // SPDX-License-Identifier: MIT
+            pragma solidity ^0.8.2;
+
+            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+            contract MyToken is ERC20 {
+              constructor() ERC20("MyToken", "MTK") {}
+            }
+          type: string
+        parameters:
+          description: constructor parameters used to create this contract instance
+          example:
+          - MyToken
+          - MTK
+          items: {}
+          type: array
+    SmartBchContractDeployRequest:
+      example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+        overrides:
+          gasLimit: ""
+          maxPriorityFeePerGas: ""
+          from: from
+          maxFeePerGas: ""
+          nonce: ""
+          value: ""
+          blockTag: ""
+          gasPrice: ""
+        parameters:
+        - MyToken
+        - MTK
+        script: |
+          // SPDX-License-Identifier: MIT
+          pragma solidity ^0.8.2;
+
+          import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+          contract MyToken is ERC20 {
+            constructor() ERC20("MyToken", "MTK") {}
+          }
+      properties:
+        walletId:
+          description: Serialized wallet
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+          type: string
+        script:
+          description: solidity source code used to create this contract instance
+          example: |
+            // SPDX-License-Identifier: MIT
+            pragma solidity ^0.8.2;
+
+            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+            contract MyToken is ERC20 {
+              constructor() ERC20("MyToken", "MTK") {}
+            }
+          type: string
+        parameters:
+          description: constructor parameters used to create this contract instance
+          example:
+          - MyToken
+          - MTK
+          items: {}
+          type: array
+        overrides:
+          $ref: '#/components/schemas/SmartBchOverrides'
+    SmartBchContractDeployResponse:
+      example:
+        contractId: contractId
+        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+        receipt:
+          logsBloom: logsBloom
+          blockHash: blockHash
+          contractAddress: contractAddress
+          transactionIndex: 0.8008281904610115
+          confirmations: 1.4658129805029452
+          type: 5.962133916683182
+          transactionHash: transactionHash
+          gasUsed: gasUsed
+          root: root
+          blockNumber: 6.027456183070403
+          cumulativeGasUsed: cumulativeGasUsed
+          from: from
+          to: to
+          effectiveGasPrice: effectiveGasPrice
+          logs:
+          - ""
+          - ""
+          byzantium: true
+          status: 5.637376656633329
+      properties:
+        contractId:
+          description: serialized contract
+          type: string
+        txId:
+          description: The hash of a transaction
+          example: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+          type: string
+        receipt:
+          $ref: '#/components/schemas/SmartBchTransactionReceipt'
     SendRequestItem_anyOf:
       description: Send request in object notation
       properties:

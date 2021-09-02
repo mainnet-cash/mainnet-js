@@ -108,4 +108,16 @@ export interface ContractInfoResponseI {
   script: string;
   parameters: Argument[];
 }
+
+export interface ContractFnRequestI {
+  function: string;
+  arguments: Argument[];
+  overrides?: ethers.CallOverrides;
+}
+
+export interface ContractFnResponseI {
+  result?: any;
+  txId?: string;
+  receipt?: ethers.providers.TransactionReceipt;
+}
 //#endregion Contract

@@ -420,7 +420,7 @@ export class Erc20 {
       if (overrides.gasLimit === -1) {
         const copyOverrides = { ...overrides };
         delete copyOverrides.gasLimit;
-        overrides.gasLimit = await contract.estimateFee(
+        overrides.gasLimit = await contract.estimateGas(
           "mint",
           to,
           value,

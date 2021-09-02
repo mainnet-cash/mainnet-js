@@ -18,6 +18,8 @@ import fs from "fs";
 import solc from "../../polyfill/solc";
 import {
   Argument,
+  ContractFnRequestI,
+  ContractFnResponseI,
   ContractInfoResponseI,
   ContractRequestI,
   ContractResponseI,
@@ -283,24 +285,31 @@ export class Contract /*implements ContractI*/ {
   }
 
   /**
-   * runFunctionFromStrings -  Call a cashscript contract function using an interface object of strings.
+   * runFunctionFromStrings -  Call a SmartBch contract function using an interface object of strings.
    *
    * This is a helper function for the REST or serialized interfaces and not intended
    * for native use within the library, although it may be useful for running stored transactions.
    *
    * @param request Parameters for the transaction call, serialized as strings.
-   * @returns A CashScript Transaction result
+   * @returns A contract interaction result
    */
-  public async runFunctionFromStrings(request: {
-    function: string;
-    arguments: Array<any>;
-    overrides?: ethers.CallOverrides;
-  }) {
+  public async runFunctionFromStrings(request: ContractFnRequestI): Promise<ContractFnResponseI> {
     if (request.overrides === undefined) {
       request.overrides = {};
     }
 
-    return this.contract[request.function](...arguments, request.overrides);
+    const result: ethers.providers.TransactionReceipt | any = await this.contract[request.function](...request.arguments, request.overrides);
+
+    if (typeof result === "object" && result.hasOwnProperty("cumulativeGasUsed")) {
+      return {
+        txId: result.transactionHash,
+        receipt: result
+      };
+    }
+
+    return {
+      result: result
+    };
   }
 
   /**
@@ -318,13 +327,16 @@ export class Contract /*implements ContractI*/ {
   }
 
   /**
-   * estimateFee - estimate the gas amount to be payed for executing a state-changing function
+   * estimateGas - estimate the gas amount to be payed for executing a state-changing function
    *
    * @param funcName function name
    * @param args function arguments
+   *
+   * @note args may contain overrides as last element
+   *
    * @returns {ethers.BigNumber} gas amount the function will consume given the arguments in base units (wei)
    */
-  public async estimateFee(
+  public async estimateGas(
     funcName: string,
     ...args
   ): Promise<ethers.BigNumber> {

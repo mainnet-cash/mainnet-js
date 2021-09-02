@@ -3,6 +3,7 @@ README.md
 api/openapi.yaml
 controllers/ContractController.js
 controllers/ContractEscrowController.js
+controllers/ContractSmartbchController.js
 controllers/FaucetController.js
 controllers/MineController.js
 controllers/UtilController.js
@@ -13,4 +14,5 @@ controllers/WalletUtilController.js
 controllers/WebhookController.js
 controllers/index.js
 logger.js
+services/ContractSmartbchService.js
 utils/openapiRouter.js
