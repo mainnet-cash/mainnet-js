@@ -14,5 +14,4 @@ controllers/WalletUtilController.js
 controllers/WebhookController.js
 controllers/index.js
 logger.js
-services/ContractSmartbchService.js
 utils/openapiRouter.js
