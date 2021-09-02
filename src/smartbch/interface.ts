@@ -83,7 +83,12 @@ export interface Erc20SendRequest {
 }
 
 //#region Contract
-export type Argument = number | boolean | string | Uint8Array | ethers.BigNumberish;
+export type Argument =
+  | number
+  | boolean
+  | string
+  | Uint8Array
+  | ethers.BigNumberish;
 
 export interface ContractRequestI {
   address: string;

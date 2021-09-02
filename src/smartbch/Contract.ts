@@ -3,9 +3,7 @@ import { getNetworkProvider } from "./Network";
 import { Network, UtxoI } from "../interface";
 import { atob, btoa } from "../util/base64";
 import { DELIMITER } from "../constant";
-import {
-  ContractI,
-} from "../contract/interface";
+import { ContractI } from "../contract/interface";
 import { ContractFactory, ethers } from "ethers";
 import { NetworkType } from "../enum";
 import {
@@ -18,7 +16,12 @@ import { SmartBchWallet } from "./SmartBchWallet";
 import { WalletTypeEnum } from "../wallet/enum";
 import fs from "fs";
 import solc from "../../polyfill/solc";
-import { Argument, ContractInfoResponseI, ContractRequestI, ContractResponseI } from "./interface";
+import {
+  Argument,
+  ContractInfoResponseI,
+  ContractRequestI,
+  ContractResponseI,
+} from "./interface";
 
 /**
  * Class that manages the SmartBch Contract source, network, parameters and calls
@@ -50,7 +53,7 @@ export class Contract /*implements ContractI*/ {
   constructor(
     address: string,
     abi: ethers.ContractInterface,
-    network: Network = Network.MAINNET,
+    network: Network = Network.MAINNET
   ) {
     this.address = address;
     this.abi = abi;
@@ -61,7 +64,7 @@ export class Contract /*implements ContractI*/ {
     this.defineContractProperties();
   }
 
- /**
+  /**
    * Binds the contract to a `signer` - a SmartBchWallet instance
    * which is able to sign transactions with a private key and thus spend the gas for contract interaction
    *
@@ -80,7 +83,7 @@ export class Contract /*implements ContractI*/ {
     return this;
   }
 
- /**
+  /**
    * Binds this contract to another address, preserving the ABI
    *
    * @param address Address of an already deployed contract
@@ -98,7 +101,7 @@ export class Contract /*implements ContractI*/ {
     return this;
   }
 
- /**
+  /**
    * Instantiates a new Contract class with an ethers.Contract class,
    * optionally preserving the solidity source code and contract constructor parameters
    *
@@ -177,7 +180,7 @@ export class Contract /*implements ContractI*/ {
    *
    * @returns Contract ABI
    */
-   public getContractAbi(): ethers.ContractInterface {
+  public getContractAbi(): ethers.ContractInterface {
     return this.abi;
   }
 
@@ -232,17 +235,19 @@ export class Contract /*implements ContractI*/ {
    * @returns A new contract
    */
   public static fromId(contractId: string) {
-    const [_, network, address, serializedAbi, serializedScript, serializedParams] =
-      contractId.split(DELIMITER);
+    const [
+      _,
+      network,
+      address,
+      serializedAbi,
+      serializedScript,
+      serializedParams,
+    ] = contractId.split(DELIMITER);
     const abi = JSON.parse(atob(serializedAbi));
     const script = atob(serializedScript);
     const parameters = JSON.parse(atob(serializedParams));
 
-    const contract = new Contract(
-      address,
-      abi,
-      network as Network,
-    );
+    const contract = new Contract(address, abi, network as Network);
 
     contract.parameters = parameters;
     contract.script = script;
@@ -319,7 +324,10 @@ export class Contract /*implements ContractI*/ {
    * @param args function arguments
    * @returns {ethers.BigNumber} gas amount the function will consume given the arguments in base units (wei)
    */
-  public async estimateFee(funcName: string, ...args): Promise<ethers.BigNumber> {
+  public async estimateFee(
+    funcName: string,
+    ...args
+  ): Promise<ethers.BigNumber> {
     return this.contract.estimateGas[funcName](...args);
   }
 
@@ -328,12 +336,10 @@ export class Contract /*implements ContractI*/ {
    * @param request A contract request object
    * @returns A new contract object
    */
-  public static contractRespFromJsonRequest(request: ContractRequestI): ContractResponseI {
-    let contract = new Contract(
-      request.address,
-      request.abi,
-      request.network
-    );
+  public static contractRespFromJsonRequest(
+    request: ContractRequestI
+  ): ContractResponseI {
+    let contract = new Contract(request.address, request.abi, request.network);
 
     return {
       contractId: contract.toString(),
@@ -444,7 +450,7 @@ export class Contract /*implements ContractI*/ {
    *
    * @returns resolved solidity module or error
    */
-  public static findImports(path: string): { contents?: any; error?: any; } {
+  public static findImports(path: string): { contents?: any; error?: any } {
     let url: string = "";
     if (path.indexOf("@openzeppelin") === 0) {
       // lookup node_modules
