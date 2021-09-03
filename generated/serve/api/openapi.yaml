@@ -3621,8 +3621,10 @@ components:
         receipt:
           $ref: '#/components/schemas/SmartBchTransactionReceipt'
     SmartBchContractEstimateGasRequest:
-      description: Estimate the gas for a contract function interaction.
+      description: Estimate the gas for a contract function interaction. For a state-changing
+        methods `walletId` is required.
       example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
         function: function
         contractId: contractId
         arguments:
@@ -3638,6 +3640,10 @@ components:
           blockTag: ""
           gasPrice: ""
       properties:
+        walletId:
+          description: Serialized wallet
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+          type: string
         contractId:
           description: serialized contract
           type: string
@@ -3656,41 +3662,12 @@ components:
       - function
     SmartBchContractEstimateGasResponse:
       example:
-        result: ""
-        contractId: contractId
-        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
-        receipt:
-          logsBloom: logsBloom
-          blockHash: blockHash
-          contractAddress: contractAddress
-          transactionIndex: 0.8008281904610115
-          confirmations: 1.4658129805029452
-          type: 5.962133916683182
-          transactionHash: transactionHash
-          gasUsed: gasUsed
-          root: root
-          blockNumber: 6.027456183070403
-          cumulativeGasUsed: cumulativeGasUsed
-          from: from
-          to: to
-          effectiveGasPrice: effectiveGasPrice
-          logs:
-          - ""
-          - ""
-          byzantium: true
-          status: 5.637376656633329
+        gas: ""
       properties:
-        contractId:
-          description: serialized contract
-          type: string
-        result:
-          description: contract function evaluation result. Can be of any type.
-        txId:
-          description: The hash of a transaction
-          example: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
-          type: string
-        receipt:
-          $ref: '#/components/schemas/SmartBchTransactionReceipt'
+        gas:
+          anyOf:
+          - type: number
+          - type: string
     SmartBchContractInfoRequest:
       example:
         contractId: contractId
@@ -3774,7 +3751,7 @@ components:
           import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
           contract MyToken is ERC20 {
-            constructor() ERC20("MyToken", "MTK") {}
+            constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
           }
       properties:
         walletId:
@@ -3790,7 +3767,7 @@ components:
             import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
             contract MyToken is ERC20 {
-              constructor() ERC20("MyToken", "MTK") {}
+              constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
             }
           type: string
         parameters:
@@ -3807,6 +3784,7 @@ components:
       - walletId
     SmartBchContractDeployResponse:
       example:
+        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
         contractId: contractId
         txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
         receipt:
@@ -3832,6 +3810,10 @@ components:
       properties:
         contractId:
           description: serialized contract
+          type: string
+        address:
+          description: contract address
+          example: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
           type: string
         txId:
           description: The hash of a transaction

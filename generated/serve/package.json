@@ -16,6 +16,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@ethersproject/bignumber": "^5.4.1",
     "bchaddrjs-slp": "^0.2.11",
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",

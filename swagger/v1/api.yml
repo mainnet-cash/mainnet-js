@@ -3222,7 +3222,12 @@ components:
     SmartBchContractEstimateGasRequest:
       description:
         Estimate the gas for a contract function interaction.
+        For a state-changing methods `walletId` is required.
       properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: Serialized wallet
         contractId:
           type: string
           description: serialized contract
@@ -3242,17 +3247,10 @@ components:
 
     SmartBchContractEstimateGasResponse:
       properties:
-        contractId:
-          type: string
-          description: serialized contract
-        result:
-          description: contract function evaluation result. Can be of any type.
-        txId:
-          type: string
-          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
-          description: The hash of a transaction
-        receipt:
-          $ref: "#/components/schemas/SmartBchTransactionReceipt"
+        gas:
+          anyOf:
+            - type: number
+            - type: string
 
     SmartBchContractInfoRequest:
       properties:
@@ -3312,7 +3310,7 @@ components:
             import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
             contract MyToken is ERC20 {
-              constructor() ERC20("MyToken", "MTK") {}
+              constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
             }
         parameters:
           description: constructor parameters used to create this contract instance
@@ -3332,6 +3330,10 @@ components:
         contractId:
           type: string
           description: serialized contract
+        address:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+          description: contract address
         txId:
           type: string
           example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"

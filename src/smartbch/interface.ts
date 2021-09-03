@@ -111,7 +111,7 @@ export interface ContractInfoResponseI {
 
 export interface ContractFnRequestI {
   function: string;
-  arguments: Argument[];
+  arguments?: Argument[];
   overrides?: ethers.CallOverrides;
 }
 

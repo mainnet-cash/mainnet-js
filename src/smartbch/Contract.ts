@@ -1,16 +1,10 @@
 import { binToHex } from "@bitauth/libauth";
 import { getNetworkProvider } from "./Network";
-import { Network, UtxoI } from "../interface";
+import { Network } from "../interface";
 import { atob, btoa } from "../util/base64";
 import { DELIMITER } from "../constant";
-import { ContractI } from "../contract/interface";
 import { ContractFactory, ethers } from "ethers";
 import { NetworkType } from "../enum";
-import {
-  castConstructorParametersFromArtifact,
-  castStringArgumentsFromArtifact,
-  transformContractToRequests,
-} from "../contract/util";
 import { XMLHttpRequest } from "xmlhttprequest-ssl";
 import { SmartBchWallet } from "./SmartBchWallet";
 import { WalletTypeEnum } from "../wallet/enum";
@@ -28,7 +22,7 @@ import {
 /**
  * Class that manages the SmartBch Contract source, network, parameters and calls
  */
-export class Contract /*implements ContractI*/ {
+export class Contract {
   private address: string;
   public abi: ethers.ContractInterface;
   public script: string = "";
@@ -296,11 +290,15 @@ export class Contract /*implements ContractI*/ {
   public async runFunctionFromStrings(
     request: ContractFnRequestI
   ): Promise<ContractFnResponseI> {
+    if (request.arguments === undefined) {
+      request.arguments = [];
+    }
+
     if (request.overrides === undefined) {
       request.overrides = {};
     }
 
-    const result: ethers.providers.TransactionReceipt | any =
+    const result: ethers.providers.TransactionResponse | any =
       await this.contract[request.function](
         ...request.arguments,
         request.overrides
@@ -308,11 +306,12 @@ export class Contract /*implements ContractI*/ {
 
     if (
       typeof result === "object" &&
-      result.hasOwnProperty("cumulativeGasUsed")
+      result.hasOwnProperty("confirmations")
     ) {
+      const receipt = await (result as ethers.providers.TransactionResponse).wait()
       return {
-        txId: result.transactionHash,
-        receipt: result,
+        txId: receipt.transactionHash,
+        receipt: receipt,
       };
     }
 
@@ -349,6 +348,12 @@ export class Contract /*implements ContractI*/ {
     funcName: string,
     ...args
   ): Promise<ethers.BigNumber> {
+    console.warn(funcName, args);
+    const fragment = this.contract.interface.getFunction(funcName);
+    if (fragment.constant) {
+      return ethers.BigNumber.from(0);
+    }
+
     return this.contract.estimateGas[funcName](...args);
   }
 
@@ -394,7 +399,7 @@ export class Contract /*implements ContractI*/ {
   public static async deploy(
     signer: SmartBchWallet,
     solidityScript: string,
-    ...parameters: Array<any>
+    ...parameters: any[]
   ): Promise<Contract> {
     if (signer.walletType === WalletTypeEnum.Watch) {
       throw Error("Cannot deploy contracts with Watch-Only wallets");

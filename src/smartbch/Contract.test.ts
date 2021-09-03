@@ -28,7 +28,7 @@ describe(`Test Ethereum functions`, () => {
     expect(JSON.stringify(cont)).toEqual(JSON.stringify(contract));
   });
 
-  test("Test deploying contract", async () => {
+  test("Test deploying contract, getting gas estimates and invoking methods", async () => {
     const script = Erc20.script;
 
     const wallet = await RegTestSmartBchWallet.fromId(
@@ -52,5 +52,30 @@ describe(`Test Ethereum functions`, () => {
 
     const totalSupply: ethers.BigNumber = await contract.totalSupply();
     expect(totalSupply.toNumber()).toBeGreaterThanOrEqual(0);
+
+    const constGas = await contract.estimateGas("decimals");
+    expect(constGas).toStrictEqual(ethers.BigNumber.from(0));
+
+    let constReply = await contract.runFunctionFromStrings({ function: "decimals" });
+    expect(constReply.result).toBe(8);
+    let constReply2 = await contract.decimals();
+    expect(constReply2).toBeDefined();
+    expect(constReply.result).toStrictEqual(constReply2);
+
+    const to = contract.getDepositAddress();
+    const value = 10000;
+    const overrides = { gasPrice: 10 ** 10 };
+
+    const txGas = await contract.estimateGas("transfer", to, value, overrides);
+    expect(txGas.toNumber()).toBeGreaterThan(0);
+
+    const txReply = await contract.runFunctionFromStrings({
+      function: "transfer",
+      arguments: [to, value],
+      overrides: overrides
+    });
+
+    expect(txReply.txId!.length).toBe(66);
+    expect(txReply.receipt!.transactionHash.length).toBe(66);
   });
 });

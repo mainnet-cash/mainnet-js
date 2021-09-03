@@ -20,13 +20,14 @@ const smartBchContractCall = ({ smartBchContractFnCallRequest }) => new Promise(
       }
 
       if (walletId) {
-        const signer = mainnet.SmartBch.walletFromId(walletId);
+        const signer = await mainnet.SmartBch.walletFromId(walletId);
         contract.setSigner(signer);
       }
 
-      const response = contract.runFunctionFromStrings(smartBchContractFnCallRequest);
-      resolve(Service.successResponse({ response }));
+      const response = await contract.runFunctionFromStrings(smartBchContractFnCallRequest);
+      resolve(Service.successResponse({ ...response }));
     } catch (e) {
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -46,6 +47,7 @@ const smartBchContractCreate = ({ smartBchContractRequest }) => new Promise(
       let resp = await mainnet.SmartBch.Contract.contractRespFromJsonRequest(smartBchContractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -67,15 +69,17 @@ const smartBchContractDeploy = ({ smartBchContractDeployRequest }) => new Promis
       const parameters = smartBchContractDeployRequest.parameters || [];
       const overrides = smartBchContractDeployRequest.overrides || {};
 
-      const signer = mainnet.SmartBch.walletFromId(walletId);
+      const signer = await mainnet.SmartBch.walletFromId(walletId);
 
       const contract = await mainnet.SmartBch.Contract.deploy(signer, script, ...parameters, overrides);
       resolve(Service.successResponse({
         contractId: contract.toString(),
-        txId: contract.receipt.transactionHash,
-        receipt: contract.receipt
+        address: contract.getDepositAddress(),
+        txId: contract.deployReceipt.transactionHash,
+        receipt: contract.deployReceipt
       }));
     } catch (e) {
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -92,6 +96,7 @@ const smartBchContractDeploy = ({ smartBchContractDeployRequest }) => new Promis
 const smartBchContractEstimateGas = ({ smartBchContractEstimateGasRequest }) => new Promise(
   async (resolve, reject) => {
     try {
+      const walletId = smartBchContractEstimateGasRequest.walletId;
       const contractId = smartBchContractEstimateGasRequest.contractId;
       const functionName = smartBchContractEstimateGasRequest.function;
       const arguments = smartBchContractEstimateGasRequest.arguments || [];
@@ -99,9 +104,17 @@ const smartBchContractEstimateGas = ({ smartBchContractEstimateGasRequest }) => 
 
       const contract = mainnet.SmartBch.Contract.fromId(contractId);
 
-      const response = contract.estimateGas(functionName, ...arguments, overrides);
-      resolve(Service.successResponse({ response }));
+      console.log(walletId);
+      if (walletId) {
+        const signer = await mainnet.SmartBch.walletFromId(walletId);
+        console.log(signer);
+        contract.setSigner(signer);
+      }
+
+      const response = await contract.estimateGas(functionName, ...arguments, overrides);
+      resolve(Service.successResponse({ gas: response }));
     } catch (e) {
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -125,6 +138,7 @@ const smartBchContractInfo = ({ smartBchContractInfoRequest }) => new Promise(
 
       resolve(Service.successResponse({ ...response }));
     } catch (e) {
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
