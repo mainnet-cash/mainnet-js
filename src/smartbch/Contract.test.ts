@@ -56,7 +56,9 @@ describe(`Test Ethereum functions`, () => {
     const constGas = await contract.estimateGas("decimals");
     expect(constGas).toStrictEqual(ethers.BigNumber.from(0));
 
-    let constReply = await contract.runFunctionFromStrings({ function: "decimals" });
+    let constReply = await contract.runFunctionFromStrings({
+      function: "decimals",
+    });
     expect(constReply.result).toBe(8);
     let constReply2 = await contract.decimals();
     expect(constReply2).toBeDefined();
@@ -72,7 +74,7 @@ describe(`Test Ethereum functions`, () => {
     const txReply = await contract.runFunctionFromStrings({
       function: "transfer",
       arguments: [to, value],
-      overrides: overrides
+      overrides: overrides,
     });
 
     expect(txReply.txId!.length).toBe(66);

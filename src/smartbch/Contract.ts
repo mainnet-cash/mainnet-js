@@ -304,11 +304,10 @@ export class Contract {
         request.overrides
       );
 
-    if (
-      typeof result === "object" &&
-      result.hasOwnProperty("confirmations")
-    ) {
-      const receipt = await (result as ethers.providers.TransactionResponse).wait()
+    if (typeof result === "object" && result.hasOwnProperty("confirmations")) {
+      const receipt = await (
+        result as ethers.providers.TransactionResponse
+      ).wait();
       return {
         txId: receipt.transactionHash,
         receipt: receipt,
