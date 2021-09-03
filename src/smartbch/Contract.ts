@@ -293,22 +293,31 @@ export class Contract /*implements ContractI*/ {
    * @param request Parameters for the transaction call, serialized as strings.
    * @returns A contract interaction result
    */
-  public async runFunctionFromStrings(request: ContractFnRequestI): Promise<ContractFnResponseI> {
+  public async runFunctionFromStrings(
+    request: ContractFnRequestI
+  ): Promise<ContractFnResponseI> {
     if (request.overrides === undefined) {
       request.overrides = {};
     }
 
-    const result: ethers.providers.TransactionReceipt | any = await this.contract[request.function](...request.arguments, request.overrides);
+    const result: ethers.providers.TransactionReceipt | any =
+      await this.contract[request.function](
+        ...request.arguments,
+        request.overrides
+      );
 
-    if (typeof result === "object" && result.hasOwnProperty("cumulativeGasUsed")) {
+    if (
+      typeof result === "object" &&
+      result.hasOwnProperty("cumulativeGasUsed")
+    ) {
       return {
         txId: result.transactionHash,
-        receipt: result
+        receipt: result,
       };
     }
 
     return {
-      result: result
+      result: result,
     };
   }
 
