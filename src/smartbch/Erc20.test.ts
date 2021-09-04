@@ -174,9 +174,9 @@ describe(`Test Ethereum functions`, () => {
     expect(result.balance.ticker).toBe(options.ticker);
     expect(result.balance.decimals).toBe(options.decimals);
     expect(result.tokenId).toBe(result.balance.tokenId);
-    expect((await aliceWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(
-      new BigNumber(0)
-    );
+    expect(
+      (await aliceWallet.erc20.getBalance(result.tokenId)).value
+    ).toStrictEqual(new BigNumber(0));
     expect(
       (await bobWallet.erc20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(10));
