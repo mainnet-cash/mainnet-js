@@ -18,6 +18,7 @@
   "dependencies": {
     "@ethersproject/bignumber": "^5.4.1",
     "bchaddrjs-slp": "^0.2.11",
+    "bignumber.js": "^9.0.1",
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",
     "connect-timeout": "^1.9.0",

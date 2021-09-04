@@ -70,7 +70,7 @@ describe("Test Wallet Endpoints", () => {
       name:"sbch A simple Testnet Wallet",
       type : "privkey",
       network: "regtest"
-  }
+    }
     let resp = await request(app).post("/wallet/smartbch/create").send(req);
     const body = resp.body;
     checkStatus(resp);

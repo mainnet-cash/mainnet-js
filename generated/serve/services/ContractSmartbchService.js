@@ -27,7 +27,6 @@ const smartBchContractCall = ({ smartBchContractFnCallRequest }) => new Promise(
       const response = await contract.runFunctionFromStrings(smartBchContractFnCallRequest);
       resolve(Service.successResponse({ ...response }));
     } catch (e) {
-      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -47,7 +46,6 @@ const smartBchContractCreate = ({ smartBchContractRequest }) => new Promise(
       let resp = await mainnet.SmartBch.Contract.contractRespFromJsonRequest(smartBchContractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -79,7 +77,6 @@ const smartBchContractDeploy = ({ smartBchContractDeployRequest }) => new Promis
         receipt: contract.deployReceipt
       }));
     } catch (e) {
-      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -104,17 +101,14 @@ const smartBchContractEstimateGas = ({ smartBchContractEstimateGasRequest }) => 
 
       const contract = mainnet.SmartBch.Contract.fromId(contractId);
 
-      console.log(walletId);
       if (walletId) {
         const signer = await mainnet.SmartBch.walletFromId(walletId);
-        console.log(signer);
         contract.setSigner(signer);
       }
 
       const response = await contract.estimateGas(functionName, ...arguments, overrides);
       resolve(Service.successResponse({ gas: response }));
     } catch (e) {
-      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -138,7 +132,6 @@ const smartBchContractInfo = ({ smartBchContractInfoRequest }) => new Promise(
 
       resolve(Service.successResponse({ ...response }));
     } catch (e) {
-      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,

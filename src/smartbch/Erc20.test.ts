@@ -148,11 +148,11 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("ERC20 genesis with token receiver and baton receiver", async () => {
-    const wallet = await RegTestSmartBchWallet.fromId(
+    const aliceWallet = await RegTestSmartBchWallet.fromId(
       process.env.SBCH_ALICE_ID!
     );
 
-    const receiverWallet = await RegTestSmartBchWallet.fromPrivateKey(
+    const bobWallet = await RegTestSmartBchWallet.fromPrivateKey(
       "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
     );
 
@@ -161,11 +161,11 @@ describe(`Test Ethereum functions`, () => {
       ticker: "MNC",
       decimals: 8,
       initialAmount: 10,
-      tokenReceiverAddress: receiverWallet.getDepositAddress(),
-      batonReceiverAddress: receiverWallet.getDepositAddress(),
+      tokenReceiverAddress: bobWallet.getDepositAddress(),
+      batonReceiverAddress: bobWallet.getDepositAddress(),
     };
 
-    const result = await wallet.erc20.genesis(options, {
+    const result = await aliceWallet.erc20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
@@ -174,19 +174,19 @@ describe(`Test Ethereum functions`, () => {
     expect(result.balance.ticker).toBe(options.ticker);
     expect(result.balance.decimals).toBe(options.decimals);
     expect(result.tokenId).toBe(result.balance.tokenId);
-    expect((await wallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+    expect((await aliceWallet.erc20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(0)
     );
     expect(
-      (await receiverWallet.erc20.getBalance(result.tokenId)).value
+      (await bobWallet.erc20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(10));
 
     // mint
-    const mintResult = await receiverWallet.erc20.mint(
+    const mintResult = await bobWallet.erc20.mint(
       {
         tokenId: result.tokenId,
         value: 5,
-        tokenReceiverAddress: receiverWallet.getDepositAddress(),
+        tokenReceiverAddress: bobWallet.getDepositAddress(),
       },
       { gasPrice: 10 ** 10, gasLimit: -1 }
     );
@@ -194,11 +194,11 @@ describe(`Test Ethereum functions`, () => {
 
     // mint fail, no role
     await expect(
-      wallet.erc20.mint(
+      aliceWallet.erc20.mint(
         {
           tokenId: result.tokenId,
           value: 5,
-          tokenReceiverAddress: wallet.getDepositAddress(),
+          tokenReceiverAddress: aliceWallet.getDepositAddress(),
         },
         { gasPrice: 10 ** 10, gasLimit: -1 }
       )
@@ -208,7 +208,7 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("ERC20 mint disabled (baton ended)", async () => {
-    const wallet = await RegTestSmartBchWallet.fromId(
+    const aliceWallet = await RegTestSmartBchWallet.fromId(
       process.env.SBCH_ALICE_ID!
     );
 
@@ -220,7 +220,7 @@ describe(`Test Ethereum functions`, () => {
       endBaton: true,
     };
 
-    const result = await wallet.erc20.genesis(options, {
+    const result = await aliceWallet.erc20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
@@ -232,11 +232,11 @@ describe(`Test Ethereum functions`, () => {
 
     // mint fail, mint was disabled by genesis options
     await expect(
-      wallet.erc20.mint(
+      aliceWallet.erc20.mint(
         {
           tokenId: result.tokenId,
           value: 5,
-          tokenReceiverAddress: wallet.getDepositAddress(),
+          tokenReceiverAddress: aliceWallet.getDepositAddress(),
         },
         { gasPrice: 10 ** 10, gasLimit: -1 }
       )

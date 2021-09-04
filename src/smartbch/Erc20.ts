@@ -166,7 +166,7 @@ export class Erc20 {
    */
   public explorerUrl(txId: string) {
     const explorerUrlMap = {
-      mainnet: "",
+      mainnet: "https://www.smartscan.cash/transaction/",
       testnet: "",
       regtest: "",
     };

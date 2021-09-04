@@ -24,7 +24,6 @@ const smartbchBalance = ({ balanceRequest }) => new Promise(
         resolve(Service.successResponse(resp));
       }
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -43,7 +42,6 @@ const smartbchCreateWallet = ({ walletRequest }) => new Promise(
       const resp = await mainnet.SmartBch.createWalletResponse({ ...walletRequest });
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -64,9 +62,8 @@ const smartbchDepositAddress = ({ serializedWallet }) =>
       const args = serializedWallet;
       delete args.walletId;
       const resp = await wallet.getDepositAddress(args);
-      resolve(Service.successResponse( {address:resp} ));
+      resolve(Service.successResponse( { address: resp } ));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -87,7 +84,6 @@ const smartbchDepositQr = ({ serializedWallet }) =>
       const resp = await wallet.getDepositQr(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -109,7 +105,6 @@ const smartbchMaxAmountToSend = ({ smartBchMaxAmountToSendRequest }) =>
       const resp = await wallet.getMaxAmountToSend(args);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -132,7 +127,6 @@ const smartbchSend = ({ smartBchSendRequest }) => new Promise(
       const resp = await wallet.send(smartBchSendRequest.to, smartBchSendRequest.options, smartBchSendRequest.overrides);
       resolve(Service.successResponse( resp ));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -156,7 +150,6 @@ const smartbchSendMax = ({ smartBchSendMaxRequest }) =>
       const resp = await wallet.sendMax(smartBchSendMaxRequest.address, smartBchSendMaxRequest.options, smartBchSendMaxRequest.overrides);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -182,7 +175,6 @@ const smartbchSignedMessageSign = ({ createSignedMessageRequest }) =>
       let resp = await wallet.sign(msg);
       resolve(Service.successResponse({ ... resp }));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );
@@ -206,7 +198,6 @@ const smartbchSignedMessageVerify = ({ verifySignedMessageRequest }) =>
       resp = await wallet.verify(args.message, args.signature);
       resolve(Service.successResponse({... resp}));
     } catch (e) {
-      console.trace(e);
       reject(
         Service.rejectResponse(e, e.status || 500)
       );

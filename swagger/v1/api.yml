@@ -68,6 +68,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch
+  - name: wallet/smartbch/erc20
+    description: Interact with SmartBch ERC20 contract tokens
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch/erc20
   - name: wallet/util
     description: Invoke wallet utility functions
     externalDocs:
@@ -506,9 +511,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DepositAddressResponse"
+                $ref: "#/components/schemas/SmartBchDepositAddressResponse"
           description: successful operation
-      summary: Get a deposit address in cash address format
+      summary: Get a deposit address
       tags:
         - wallet/smartbch
   /wallet/smartbch/deposit_qr:
@@ -753,6 +758,191 @@ paths:
       summary: Request to deploy a SmartBch contract
       tags:
         - contract/smartbch
+
+  /wallet/smartbch/erc20/genesis:
+    post:
+      operationId: smartBchErc20Genesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20GenesisRequest"
+        description: |
+          Request to create a new SmartBch ERC20 token (genesis)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20GenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/mint:
+    post:
+      operationId: smartBchErc20Mint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20MintRequest"
+        description: |
+          Request to mint more of SmartBch ERC20 tokens
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20MintResponse'
+          description: successful operation
+      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/token_info:
+    post:
+      operationId: smartBchErc20TokenInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20TokenInfoRequest"
+        description: |
+          Request to get information about the SmartBch ERC20 token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20TokenInfoResponse'
+          description: successful operation
+      summary: Get information about the SmartBch ERC20 token
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/balance:
+    post:
+      operationId: smartBchErc20Balance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20BalanceRequest"
+        description: |
+          Request for a wallet SmartBch ERC20 token balance
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20BalanceResponse'
+          description: successful operation
+      summary: Get total SmartBch ERC20 token balance of the wallet
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/deposit_address:
+    post:
+      operationId: smartBchErc20DepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for an SmartBch ERC20 deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchDepositAddressResponse"
+          description: successful operation
+      summary: Get an SmartBch ERC20 deposit address
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/deposit_qr:
+    post:
+      operationId: smartBchErc20DepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a SmartBch ERC20 deposit address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScalableVectorGraphic"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get an SmartBch ERC20 receiving address as a qrcode
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/send:
+    post:
+      operationId: smartBchErc20Send
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20SendRequest"
+        description: place a SmartBch ERC20 token send request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchErc20SendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Send some SmartBch ERC20 token amount to a given address
+      tags:
+        - wallet/smartbch/erc20
+
+  /wallet/smartbch/erc20/send_max:
+    post:
+      operationId: smartBchErc20SendMax
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20SendMaxRequest"
+        description: Request to send all available SmartBch ERC20 token funds to a given address
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchErc20SendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Send all available SmartBch ERC20 token funds to a given address
+      tags:
+        - wallet/smartbch/erc20
 
   /wallet/create:
     post:
@@ -1971,8 +2161,8 @@ components:
     DepositAddressResponse:
       properties:
         cashaddr:
-           type: string
-           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
     UtxoResponse:
       properties:
         utxos:
@@ -2477,11 +2667,12 @@ components:
             ID that is returned in `wallet` field of /wallet call
         name:
           type: string
+          description: Token name
           example: Mainnet coin
         ticker:
           type: string
-          example: MNC
           description: Token ticker
+          example: MNC
         initialAmount:
           type: string
           example: "10000"
@@ -2557,11 +2748,12 @@ components:
       properties:
         name:
           type: string
+          description: Token name
           example: Mainnet coin
         ticker:
           type: string
-          example: MNC
           description: Token ticker
+          example: MNC
         tokenId:
           type: string
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
@@ -2926,7 +3118,11 @@ components:
         bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
         slptest: "slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866"
 
-
+    SmartBchDepositAddressResponse:
+      properties:
+        address:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
     SmartBchSendRequest:
       properties:
         walletId:
@@ -3340,6 +3536,229 @@ components:
           description: The hash of a transaction
         receipt:
           $ref: "#/components/schemas/SmartBchTransactionReceipt"
+
+    SmartBchErc20GenesisRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        name:
+          type: string
+          description: Token name
+          example: Mainnet coin
+        ticker:
+          type: string
+          description: Token ticker
+          example: MNC
+        initialAmount:
+          anyOf:
+            - type: number
+            - type: string
+          example: 10000
+          description: Value is represented as number or string to avoid precision loss
+        decimals:
+          type: number
+          description: Indicates that 1 token is divisible into 10^decimals base units
+        endBaton:
+          type: boolean
+          example: false
+          description: Indicates if token should not be 'mintable', e.g. total circulation amount increased
+        tokenReceiverAddress:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        batonReceiverAddress:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      required:
+        - walletId
+        - name
+        - ticker
+        - initialAmount
+        - decimals
+
+    SmartBchErc20GenesisResponse:
+      properties:
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Full token identifier freshly created
+        balance:
+          $ref: "#/components/schemas/SmartBchErc20BalanceResponse"
+
+    SmartBchErc20TokenInfoRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Token unique hexadecimal identifier
+      required:
+        - walletId
+        - tokenId
+
+    SmartBchErc20TokenInfoResponse:
+      properties:
+        name:
+          type: string
+          description: Token name
+          example: Mainnet coin
+        ticker:
+          type: string
+          description: Token ticker
+          example: MNC
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+        decimals:
+          type: number
+          description: Indicates that 1 token is divisible into 10^decimals base units
+          example: 2
+        totalSupply:
+          type: string
+          description: Total amount of tokens in circulation
+
+    SmartBchErc20MintRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        value:
+          anyOf:
+            - type: number
+            - type: string
+          example: 10000
+          description: Value is represented as number or string to avoid precision loss
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+        tokenReceiverAddress:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      required:
+        - walletId
+        - value
+        - tokenId
+
+    SmartBchErc20MintResponse:
+      properties:
+        txId:
+          type: string
+          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+          description: The hash of a transaction
+        balance:
+          $ref: "#/components/schemas/SmartBchErc20BalanceResponse"
+
+    SmartBchErc20BalanceRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Token unique hexadecimal identifier
+      required:
+        - walletId
+        - tokenId
+
+    SmartBchErc20BalanceResponse:
+      properties:
+        value:
+          type: string
+          format: float
+          example: "10000"
+          description: A big number represented as a string to avoid precision loss
+        ticker:
+          type: string
+          example: "MNC"
+          description: Token ticker
+        name:
+          type: string
+          description: Token name
+          example: Mainnet coin
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Token unique hexadecimal identifier
+
+    SmartBchErc20SendRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        to:
+          type: array
+          items:
+            $ref: "#/components/schemas/SmartBchErc20SendRequestItem"
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      type: object
+      required:
+        - walletId
+        - to
+
+    SmartBchErc20SendRequestItem:
+      properties:
+        address:
+           type: string
+           example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        value:
+          anyOf:
+            - type: number
+            - type: string
+          example: 100
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Token unique hexadecimal identifier
+      required:
+        - address
+        - value
+        - tokenId
+
+    SmartBchErc20SendResponse:
+      type: array
+      items:
+        properties:
+          txId:
+            type: string
+            example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+            description: The hash of a transaction
+          balance:
+            $ref: "#/components/schemas/SmartBchErc20BalanceResponse"
+          explorerUrl:
+            type: string
+            example: "https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+            description: Web url to a transaction on a block explorer
+
+    SmartBchErc20SendMaxRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        address:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        tokenId:
+          type: string
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Token unique hexadecimal identifier
+      required:
+        - walletId
+        - address
+        - tokenId
 
 # global security requirement. for per-endpoint configuration see https://swagger.io/docs/specification/authentication/bearer-authentication/
 security:

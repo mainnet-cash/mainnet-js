@@ -27,6 +27,7 @@ export interface BalanceResponse {
   usd?: number;
 }
 
+//#region Erc20
 export interface Erc20GenesisOptions {
   name: string;
   ticker: string;
@@ -67,7 +68,6 @@ export interface Erc20SendResponse {
 export interface Erc20MintOptions {
   value: BigNumber.Value;
   tokenId: string;
-  endBaton?: boolean;
   tokenReceiverAddress?: string;
 }
 
@@ -81,6 +81,7 @@ export interface Erc20SendRequest {
   value: BigNumber.Value;
   tokenId: string;
 }
+//#endregion Erc20
 
 //#region Contract
 export type Argument =

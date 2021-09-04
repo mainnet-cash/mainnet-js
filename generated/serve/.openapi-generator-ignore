@@ -30,6 +30,7 @@ services/*.test.ts
 #!services/WebhookService.js
 #!services/WalletSmartbchService.js
 #!services/ContractSmartbchService.js
+#!services/WalletSmartbchErc20Service.js
 controllers/Controller.js
 package.json
 index.js

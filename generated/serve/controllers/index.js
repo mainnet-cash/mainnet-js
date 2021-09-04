@@ -7,6 +7,7 @@ const UtilController = require('./UtilController');
 const WalletController = require('./WalletController');
 const WalletSlpController = require('./WalletSlpController');
 const WalletSmartbchController = require('./WalletSmartbchController');
+const WalletSmartbchErc20Controller = require('./WalletSmartbchErc20Controller');
 const WalletUtilController = require('./WalletUtilController');
 const WebhookController = require('./WebhookController');
 
@@ -20,6 +21,7 @@ module.exports = {
   WalletController,
   WalletSlpController,
   WalletSmartbchController,
+  WalletSmartbchErc20Controller,
   WalletUtilController,
   WebhookController,
 };
