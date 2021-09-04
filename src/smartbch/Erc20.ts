@@ -139,7 +139,7 @@ export class Erc20 {
   /**
    * getDepositAddress - get the SmartBch deposit address
    *
-   * a high-level function,
+   * a high-level function, see also /wallet/smartbch/erc20/deposit_address REST endpoint
    *
    * @returns The SmartBch address as a string
    */
@@ -150,7 +150,7 @@ export class Erc20 {
   /**
    * getDepositQr - get the SmartBch address qrcode, encoded for display on the web
    *
-   * a high-level function
+   * a high-level function, see also /wallet/smartbch/erc20/deposit_qr REST endpoint
    *
    * @returns The qrcode for the SmartBch address
    */
@@ -177,11 +177,11 @@ export class Erc20 {
   /**
    * getTokenInfo - get data associated with a token
    *
-   * a high-level function
+   * a high-level function, see also /wallet/smartbch/erc20/token_info REST endpoint
    *
    * @param tokenId  Erc20 Token Id (contract address)
    *
-   * @returns Promise to the SmartBch token info.
+   * @returns {Erc20TokenInfo} SmartBch token info.
    */
   public async getTokenInfo(tokenId: string): Promise<Erc20TokenInfo> {
     let [name, ticker, decimals, totalSupply] = await Promise.all([
@@ -203,11 +203,11 @@ export class Erc20 {
   /**
    * getBalance - get a token balance for a particular address
    *
-   * a high-level function, see also /smartbchwallet/erc20/balance REST endpoint
+   * a high-level function, see also /wallet/smartbch/erc20/balance REST endpoint
    *
    * @param tokenId   Erc20 Token Id (contract address)
    *
-   * @returns Promise to Erc20TokenBalance
+   * @returns {Erc20TokenBalance} token balance
    */
   public async getBalance(tokenId: string): Promise<Erc20TokenBalance> {
     if (!tokenId) {
@@ -229,10 +229,12 @@ export class Erc20 {
   /**
    * genesis - create a new SmartBch ERC20 token
    *
-   * @param options    Token creation options @see Erc20GenesisOptions
-   * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
+   * @param {Erc20GenesisOptions} options    Token creation options
+   * @param {ethers.CallOverrides} overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns Token Id and new token balance
+   * a high-level function, see also /wallet/smartbch/erc20/genesis REST endpoint
+   *
+   * @returns {Erc20GenesisResult} Token Id and new token balance
    */
   public async genesis(
     options: Erc20GenesisOptions,
@@ -269,13 +271,13 @@ export class Erc20 {
   /**
    * sendMax - send the maximum spendable amount for a token to a smartbch address.
    *
-   * a high-level function, see also /wallet/slp/send_max REST endpoint
+   * a high-level function, see also /wallet/smartbch/erc20/send_max REST endpoint
    *
    * @param address   destination smartbch address
    * @param tokenId   Erc20 Token Id (contract address) to be spent
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns transaction id and token balance
+   * @returns {Erc20SendResponse} transaction id and token balance
    */
   public async sendMax(
     address: string,
@@ -296,12 +298,12 @@ export class Erc20 {
   /**
    * send - process a list of Erc20 send requests.
    *
-   * a high-level function, see also /smartbchwallet/erc20/send REST endpoint
+   * a high-level function, see also /wallet/smartbch/erc20/send REST endpoint
    *
    * @param [requests]   list of send requests
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns transaction id and token balance
+   * @returns {Erc20SendResponse[]} array of responses
    */
   public async send(
     requests: Erc20SendRequest[],
@@ -318,7 +320,7 @@ export class Erc20 {
    * @param  {Erc20SendRequest[]} sendRequests
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns any[] array of responses
+   * @returns {Erc20SendResponse[]} array of responses
    */
   private async _processSendRequests(
     sendRequests: Erc20SendRequest[],
@@ -359,12 +361,12 @@ export class Erc20 {
   /**
    * mint - create new tokens to increase the circulation supply.
    *
-   * a high-level function, see also /smartbchwallet/erc20/mint endpoint
+   * a high-level function, see also /wallet/smartbch/erc20/mint endpoint
    *
    * @param options    Mint options to steer the process
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns transaction id and token balance
+   * @returns {Erc20MintResult} transaction id and token balance
    */
   public async mint(
     options: Erc20MintOptions,
