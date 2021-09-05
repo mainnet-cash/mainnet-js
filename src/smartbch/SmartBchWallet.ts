@@ -26,6 +26,7 @@ import {
   TestNetPrivKeyErc20,
   TestNetWatchErc20,
   WatchErc20,
+  Web3Erc20,
 } from "./Erc20";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
@@ -34,6 +35,7 @@ import { asSendRequestObject, satToWei, weiToSat, zeroAddress } from "./Utils";
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.Provider;
   ethersWallet?: ethers.Wallet;
+  ethersSigner?: ethers.Signer;
   privateKey?: string;
   publicKey?: string;
   mnemonic?: string;
@@ -55,22 +57,57 @@ export class SmartBchWallet extends BaseWallet {
     return Erc20;
   }
 
+  /**
+   *  getNetworkProvider   get a default network provider for a given network
+   *
+   * @param network provider's network
+   */
   protected getNetworkProvider(
     network: NetworkType = NetworkType.Mainnet
   ): ethers.providers.BaseProvider {
     return getNetworkProvider(network);
   }
 
+  /**
+   *  setNetworkProvider   Change wallet's provider
+   *
+   * @param provider network provider initialized elsewhere
+   */
   public setNetworkProvider(provider: ethers.providers.BaseProvider) {
     this.provider = provider;
     if (this.ethersWallet) {
       this.ethersWallet.connect(this.provider);
     }
+    if (this.ethersSigner) {
+      this.ethersSigner.connect(this.provider);
+    }
   }
 
+  /**
+   *  setNetwork   Change wallet's and provider's network
+   */
   public setNetwork(network: NetworkType = NetworkType.Mainnet) {
     this.network = network;
     this.setNetworkProvider(getNetworkProvider(network));
+  }
+
+  /**
+   *  useBrowserWeb3Provider   Modifies the wallet behaviour to function with a Web3 provider such as Metamask
+   *
+   * @param addressOrIndex   Account address or account index to use
+   */
+  public async useBrowserWeb3Provider(addressOrIndex: number | string | undefined) {
+    const ethereum = (window as any || {}).ethereum;
+    if (ethereum) {
+      await ethereum.enable();
+      const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+      this.ethersWallet = undefined;
+      this.privateKey = undefined;
+      this.publicKey = undefined;
+      this.ethersSigner = provider.getSigner(addressOrIndex);
+      this.address = await this.ethersSigner!.getAddress();
+      this.provider = provider;
+    }
   }
 
   /**
@@ -132,6 +169,7 @@ export class SmartBchWallet extends BaseWallet {
   private async _generatePrivateKey() {
     if (!this.privateKey) {
       this.ethersWallet = ethers.Wallet.createRandom().connect(this.provider!);
+      this.ethersSigner = this.ethersWallet;
     }
     this.walletType = WalletTypeEnum.PrivateKey;
     return this.deriveInfo();
@@ -140,6 +178,7 @@ export class SmartBchWallet extends BaseWallet {
   private async _generateMnemonic() {
     if (!this.mnemonic) {
       this.ethersWallet = ethers.Wallet.createRandom().connect(this.provider!);
+      this.ethersSigner = this.ethersWallet;
       this.mnemonic = this.ethersWallet.mnemonic.phrase;
       this.derivationPath = this.ethersWallet.mnemonic.path;
     }
@@ -177,6 +216,7 @@ export class SmartBchWallet extends BaseWallet {
       this.mnemonic,
       this.derivationPath
     ).connect(this.provider!);
+    this.ethersSigner = this.ethersWallet;
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
@@ -186,6 +226,7 @@ export class SmartBchWallet extends BaseWallet {
   protected async watchOnly(address: string): Promise<this> {
     this.address = address;
     this.ethersWallet = undefined;
+    this.ethersSigner = undefined;
     this.privateKey = undefined;
     this.walletType = WalletTypeEnum.Watch;
 
@@ -194,6 +235,7 @@ export class SmartBchWallet extends BaseWallet {
 
   public async fromPrivateKey(secret: string): Promise<this> {
     this.ethersWallet = new ethers.Wallet(secret).connect(this.provider!);
+    this.ethersSigner = this.ethersWallet;
     this.walletType = WalletTypeEnum.PrivateKey;
     await this.deriveInfo();
     return this;
@@ -291,7 +333,7 @@ export class SmartBchWallet extends BaseWallet {
         await amountInSatoshi(request.value, request.unit)
       ).mul(10 ** 10);
 
-      const result = await this.ethersWallet!.sendTransaction({
+      const result = await this.ethersSigner!.sendTransaction({
         to: request.address,
         value: weiValue,
         ...overrides,
@@ -349,7 +391,7 @@ export class SmartBchWallet extends BaseWallet {
   // Convenience wrapper to sign interface
   public async sign(message: string): Promise<SignedMessageResponseI> {
     return {
-      signature: await this.ethersWallet!.signMessage(message),
+      signature: await this.ethersSigner!.signMessage(message),
     } as SignedMessageResponseI;
   }
 
@@ -364,6 +406,26 @@ export class SmartBchWallet extends BaseWallet {
     } as VerifyMessageResponseI;
   }
   //#endregion Signing
+}
+
+/**
+ * Class to manage a testnet wallet.
+ */
+ export class Web3SmartBchWallet extends SmartBchWallet {
+  public static async init(addressOrIndex: number | string | undefined) {
+    const wallet = new Web3SmartBchWallet();
+    await wallet.useBrowserWeb3Provider(addressOrIndex);
+    return wallet;
+  }
+
+  public explorerUrl(txId: string) {
+    return txId;
+  }
+
+  // interface to static erc20 functions. see Erc20.ts
+  public static get erc20() {
+    return Web3Erc20;
+  }
 }
 
 /**

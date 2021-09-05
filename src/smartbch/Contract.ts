@@ -73,7 +73,7 @@ export class Contract {
   public setSigner(signer: SmartBchWallet) {
     this.network = signer.network;
     this.provider = signer.provider!;
-    this.signer = signer.ethersWallet!;
+    this.signer = signer.ethersSigner!;
     this.contract = this.contract.connect(this.signer || this.provider);
 
     return this;
@@ -440,7 +440,7 @@ export class Contract {
       compiled.contracts.main[Object.keys(compiled.contracts.main)[0]];
     const factory = ContractFactory.fromSolidity(
       artifact,
-      signer.ethersWallet!
+      signer.ethersSigner!
     );
 
     let overrides: ethers.CallOverrides = {};
