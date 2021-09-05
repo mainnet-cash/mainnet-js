@@ -43,9 +43,9 @@ async function disconnectProvider(network: Network) {
     removeGlobalProvider(network);
     return;
   } else {
-    console.warn(
-      `Ignoring attempt to disconnect non-existent ${network} provider`
-    );
+    // console.warn(
+    //   `Ignoring attempt to disconnect non-existent ${network} provider`
+    // );
     return true;
   }
 }
