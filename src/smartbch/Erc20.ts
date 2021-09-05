@@ -548,7 +548,7 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
 /**
  * Class to manage an slp enabled testnet wallet.
  */
- export class Web3Erc20 extends Erc20 {
+export class Web3Erc20 extends Erc20 {
   static get walletType() {
     return Web3SmartBchWallet;
   }

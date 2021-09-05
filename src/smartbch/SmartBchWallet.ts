@@ -96,11 +96,15 @@ export class SmartBchWallet extends BaseWallet {
    *
    * @param addressOrIndex   Account address or account index to use
    */
-  public async useBrowserWeb3Provider(addressOrIndex: number | string | undefined) {
-    const ethereum = (window as any || {}).ethereum;
+  public async useBrowserWeb3Provider(
+    addressOrIndex: number | string | undefined
+  ) {
+    const ethereum = ((window as any) || {}).ethereum;
     if (ethereum) {
       await ethereum.enable();
-      const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+      const provider = new ethers.providers.Web3Provider(
+        (window as any).ethereum
+      );
       this.ethersWallet = undefined;
       this.privateKey = undefined;
       this.publicKey = undefined;
@@ -411,7 +415,7 @@ export class SmartBchWallet extends BaseWallet {
 /**
  * Class to manage a testnet wallet.
  */
- export class Web3SmartBchWallet extends SmartBchWallet {
+export class Web3SmartBchWallet extends SmartBchWallet {
   public static async init(addressOrIndex: number | string | undefined) {
     const wallet = new Web3SmartBchWallet();
     await wallet.useBrowserWeb3Provider(addressOrIndex);
