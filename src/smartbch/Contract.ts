@@ -350,7 +350,6 @@ export class Contract {
     funcName: string,
     ...args
   ): Promise<ethers.BigNumber> {
-    console.warn(funcName, args);
     const fragment = this.contract.interface.getFunction(funcName);
     if (fragment.constant) {
       return ethers.BigNumber.from(0);
