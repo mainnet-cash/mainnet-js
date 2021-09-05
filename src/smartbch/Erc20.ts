@@ -139,7 +139,7 @@ export class Erc20 {
   /**
    * getDepositAddress - get the SmartBch deposit address
    *
-   * a high-level function, see also /wallet/smartbch/erc20/deposit_address REST endpoint
+   * a high-level function, see also /smartbch/erc20/deposit_address REST endpoint
    *
    * @returns The SmartBch address as a string
    */
@@ -150,7 +150,7 @@ export class Erc20 {
   /**
    * getDepositQr - get the SmartBch address qrcode, encoded for display on the web
    *
-   * a high-level function, see also /wallet/smartbch/erc20/deposit_qr REST endpoint
+   * a high-level function, see also /smartbch/erc20/deposit_qr REST endpoint
    *
    * @returns The qrcode for the SmartBch address
    */
@@ -177,7 +177,7 @@ export class Erc20 {
   /**
    * getTokenInfo - get data associated with a token
    *
-   * a high-level function, see also /wallet/smartbch/erc20/token_info REST endpoint
+   * a high-level function, see also /smartbch/erc20/token_info REST endpoint
    *
    * @param tokenId  Erc20 Token Id (contract address)
    *
@@ -203,7 +203,7 @@ export class Erc20 {
   /**
    * getBalance - get a token balance for a particular address
    *
-   * a high-level function, see also /wallet/smartbch/erc20/balance REST endpoint
+   * a high-level function, see also /smartbch/erc20/balance REST endpoint
    *
    * @param tokenId   Erc20 Token Id (contract address)
    *
@@ -232,7 +232,7 @@ export class Erc20 {
    * @param {Erc20GenesisOptions} options    Token creation options
    * @param {ethers.CallOverrides} overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * a high-level function, see also /wallet/smartbch/erc20/genesis REST endpoint
+   * a high-level function, see also /smartbch/erc20/genesis REST endpoint
    *
    * @returns {Erc20GenesisResult} Token Id and new token balance
    */
@@ -271,7 +271,7 @@ export class Erc20 {
   /**
    * sendMax - send the maximum spendable amount for a token to a smartbch address.
    *
-   * a high-level function, see also /wallet/smartbch/erc20/send_max REST endpoint
+   * a high-level function, see also /smartbch/erc20/send_max REST endpoint
    *
    * @param address   destination smartbch address
    * @param tokenId   Erc20 Token Id (contract address) to be spent
@@ -298,7 +298,7 @@ export class Erc20 {
   /**
    * send - process a list of Erc20 send requests.
    *
-   * a high-level function, see also /wallet/smartbch/erc20/send REST endpoint
+   * a high-level function, see also /smartbch/erc20/send REST endpoint
    *
    * @param [requests]   list of send requests
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
@@ -361,7 +361,7 @@ export class Erc20 {
   /**
    * mint - create new tokens to increase the circulation supply.
    *
-   * a high-level function, see also /wallet/smartbch/erc20/mint endpoint
+   * a high-level function, see also /smartbch/erc20/mint endpoint
    *
    * @param options    Mint options to steer the process
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)

@@ -33,11 +33,6 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/
-  - name: contract/smartbch
-    description: Use SmartBch contracts
-    externalDocs:
-      description: Find out more
-      url: https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch
   - name: faucet
     description: Testnet faucet
     externalDocs:
@@ -63,16 +58,6 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/slp
-  - name: wallet/smartbch
-    description: Interact with SmartBch wallets
-    externalDocs:
-      description: Find out more
-      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch
-  - name: wallet/smartbch/erc20
-    description: Interact with SmartBch ERC20 contract tokens
-    externalDocs:
-      description: Find out more
-      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch/erc20
   - name: wallet/util
     description: Invoke wallet utility functions
     externalDocs:
@@ -83,6 +68,21 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/webhook/
+  - name: smartbch/wallet
+    description: Interact with SmartBch wallets
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch
+  - name: smartbch/erc20
+    description: Interact with SmartBch ERC20 contract tokens
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch/erc20
+  - name: smartbch/contract
+    description: Interact with SmartBch contracts
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch
 paths:
   /contract/call:
     post:
@@ -419,530 +419,6 @@ paths:
       summary: convert between units
       tags:
         - util
-
-  /wallet/smartbch/create:
-    post:
-      operationId: smartbchCreateWallet
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WalletRequest"
-        description: Request a new random wallet
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WalletResponse"
-          description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
-      summary: create a new wallet
-      tags:
-        - wallet/smartbch
-
-  /wallet/smartbch/balance:
-    post:
-      operationId: smartbchBalance
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BalanceRequest"
-        description: |
-          Request for a wallet balance
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BalanceResponse'
-            text/plain:
-              schema:
-                type: number
-                description: If a unit of account is passed, a plain number is returned.
-          description: successful operation
-      summary: Get total balance for wallet
-      tags:
-        - wallet/smartbch
-  /wallet/smartbch/max_amount_to_send:
-    post:
-      operationId: smartbchMaxAmountToSend
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchMaxAmountToSendRequest"
-        description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BalanceResponse"
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-        "418":
-          content: {}
-          description: Invalid network for given address
-      summary: Get maximum spendable amount
-      tags:
-        - wallet/smartbch
-  /wallet/smartbch/deposit_address:
-    post:
-      operationId: smartbchDepositAddress
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SerializedWallet"
-        description: |
-          Request for a deposit address given a wallet
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchDepositAddressResponse"
-          description: successful operation
-      summary: Get a deposit address
-      tags:
-        - wallet/smartbch
-  /wallet/smartbch/deposit_qr:
-    post:
-      operationId: smartbchDepositQr
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SerializedWallet"
-        description: |
-          Request for a deposit cash address as a Quick Response code (qrcode)
-        required: true
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ScalableVectorGraphic"
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
-      summary: Get receiving cash address as a qrcode
-      tags:
-        - wallet/smartbch
-  /wallet/smartbch/send:
-    post:
-      operationId: smartbchSend
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchSendRequest"
-        description: place a send request
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchSendResponse"
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-        "418":
-          content: {}
-          description: Invalid network for given address
-      summary: Send some amount to a given address
-      tags:
-        - wallet/smartbch
-  /wallet/smartbch/send_max:
-    post:
-      operationId: smartbchSendMax
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchSendMaxRequest"
-        description: Request to send all available funds to a given address
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchSendResponseItem"
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-      summary: Send all available funds to a given address
-      tags:
-        - wallet/smartbch
-
-  /wallet/smartbch/signed/sign:
-    post:
-      operationId: smartbchSignedMessageSign
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateSignedMessageRequest"
-        description: |
-          Sign a message
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SignedMessageResponse"
-          description: successful operation
-      summary: Returns the message signature
-      tags:
-        - wallet/smartbch
-  /wallet/smartbch/signed/verify:
-    post:
-      operationId: smartbchSignedMessageVerify
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/VerifySignedMessageRequest"
-        description: |
-          Sign a message
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/VerifySignedMessageResponse"
-          description: successful operation
-      summary: Returns a boolean indicating whether message was valid for a given address
-      tags:
-        - wallet/smartbch
-
-  /contract/smartbch/create:
-    post:
-      operationId: smartBchContractCreate
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchContractRequest"
-        description: Create a SmartBch contractId
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchContractResponse"
-          description: successful operation
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Error
-      summary: Create a SmartBch contractId
-      tags:
-        - contract/smartbch
-  /contract/smartbch/call:
-    post:
-      operationId: smartBchContractCall
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchContractFnCallRequest"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchContractFnCallResponse"
-          description: successful operation
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Error
-      summary: Call a SmartBch contract function
-      tags:
-        - contract/smartbch
-  /contract/smartbch/estimate_gas:
-    post:
-      operationId: smartBchContractEstimateGas
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchContractEstimateGasRequest"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchContractEstimateGasResponse"
-          description: successful operation
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Error
-      summary: Estimate the gas for a contract interaction function given the arguments
-      tags:
-        - contract/smartbch
-  /contract/smartbch/info:
-    post:
-      operationId: smartBchContractInfo
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchContractInfoRequest"
-        description: Request parsed information regarding a SmartBch contract from the smartBchContractId
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchContractInfoResponse"
-          description: successful operation
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Error
-      summary: Get information about a SmartBch contract from the contractId
-      tags:
-        - contract/smartbch
-  /contract/smartbch/deploy:
-    post:
-      operationId: smartBchContractDeploy
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchContractDeployRequest"
-        description: Request to deploy a SmartBch contract
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchContractDeployResponse"
-          description: successful operation
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-          description: Error
-      summary: Request to deploy a SmartBch contract
-      tags:
-        - contract/smartbch
-
-  /wallet/smartbch/erc20/genesis:
-    post:
-      operationId: smartBchErc20Genesis
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchErc20GenesisRequest"
-        description: |
-          Request to create a new SmartBch ERC20 token (genesis)
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SmartBchErc20GenesisResponse'
-          description: successful operation
-      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/mint:
-    post:
-      operationId: smartBchErc20Mint
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchErc20MintRequest"
-        description: |
-          Request to mint more of SmartBch ERC20 tokens
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SmartBchErc20MintResponse'
-          description: successful operation
-      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/token_info:
-    post:
-      operationId: smartBchErc20TokenInfo
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchErc20TokenInfoRequest"
-        description: |
-          Request to get information about the SmartBch ERC20 token
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SmartBchErc20TokenInfoResponse'
-          description: successful operation
-      summary: Get information about the SmartBch ERC20 token
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/balance:
-    post:
-      operationId: smartBchErc20Balance
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchErc20BalanceRequest"
-        description: |
-          Request for a wallet SmartBch ERC20 token balance
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SmartBchErc20BalanceResponse'
-          description: successful operation
-      summary: Get total SmartBch ERC20 token balance of the wallet
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/deposit_address:
-    post:
-      operationId: smartBchErc20DepositAddress
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SerializedWallet"
-        description: |
-          Request for an SmartBch ERC20 deposit address given a wallet
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchDepositAddressResponse"
-          description: successful operation
-      summary: Get an SmartBch ERC20 deposit address
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/deposit_qr:
-    post:
-      operationId: smartBchErc20DepositQr
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SerializedWallet"
-        description: |
-          Request for a SmartBch ERC20 deposit address as a Quick Response code (qrcode)
-        required: true
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ScalableVectorGraphic"
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
-      summary: Get an SmartBch ERC20 receiving address as a qrcode
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/send:
-    post:
-      operationId: smartBchErc20Send
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchErc20SendRequest"
-        description: place a SmartBch ERC20 token send request
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchErc20SendResponse"
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-        "418":
-          content: {}
-          description: Invalid network for given address
-      summary: Send some SmartBch ERC20 token amount to a given address
-      tags:
-        - wallet/smartbch/erc20
-
-  /wallet/smartbch/erc20/send_max:
-    post:
-      operationId: smartBchErc20SendMax
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SmartBchErc20SendMaxRequest"
-        description: Request to send all available SmartBch ERC20 token funds to a given address
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SmartBchErc20SendResponse"
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-      summary: Send all available SmartBch ERC20 token funds to a given address
-      tags:
-        - wallet/smartbch/erc20
 
   /wallet/create:
     post:
@@ -1625,6 +1101,531 @@ paths:
         Create a webhook to watch cashaddress balance and transactions.
       tags:
         - webhook
+
+  /smartbch/wallet/create:
+    post:
+      operationId: smartbchCreateWallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletRequest"
+        description: Request a new random wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: create a new wallet
+      tags:
+        - smartbch/wallet
+
+  /smartbch/wallet/balance:
+    post:
+      operationId: smartbchBalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BalanceRequest"
+        description: |
+          Request for a wallet balance
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+            text/plain:
+              schema:
+                type: number
+                description: If a unit of account is passed, a plain number is returned.
+          description: successful operation
+      summary: Get total balance for wallet
+      tags:
+        - smartbch/wallet
+  /smartbch/wallet/max_amount_to_send:
+    post:
+      operationId: smartbchMaxAmountToSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchMaxAmountToSendRequest"
+        description: get amount that will be spend with a spend max request. If a unit type is specified, a numeric value will be returned.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Get maximum spendable amount
+      tags:
+        - smartbch/wallet
+  /smartbch/wallet/deposit_address:
+    post:
+      operationId: smartbchDepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchDepositAddressResponse"
+          description: successful operation
+      summary: Get a deposit address
+      tags:
+        - smartbch/wallet
+  /smartbch/wallet/deposit_qr:
+    post:
+      operationId: smartbchDepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScalableVectorGraphic"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get receiving cash address as a qrcode
+      tags:
+        - smartbch/wallet
+  /smartbch/wallet/send:
+    post:
+      operationId: smartbchSend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchSendRequest"
+        description: place a send request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchSendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Send some amount to a given address
+      tags:
+        - smartbch/wallet
+  /smartbch/wallet/send_max:
+    post:
+      operationId: smartbchSendMax
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchSendMaxRequest"
+        description: Request to send all available funds to a given address
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchSendResponseItem"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Send all available funds to a given address
+      tags:
+        - smartbch/wallet
+
+  /smartbch/wallet/signed/sign:
+    post:
+      operationId: smartbchSignedMessageSign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSignedMessageRequest"
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedMessageResponse"
+          description: successful operation
+      summary: Returns the message signature
+      tags:
+        - smartbch/wallet
+  /smartbch/wallet/signed/verify:
+    post:
+      operationId: smartbchSignedMessageVerify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifySignedMessageRequest"
+        description: |
+          Sign a message
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifySignedMessageResponse"
+          description: successful operation
+      summary: Returns a boolean indicating whether message was valid for a given address
+      tags:
+        - smartbch/wallet
+
+  /smartbch/erc20/genesis:
+    post:
+      operationId: smartBchErc20Genesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20GenesisRequest"
+        description: |
+          Request to create a new SmartBch ERC20 token (genesis)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20GenesisResponse'
+          description: successful operation
+      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/mint:
+    post:
+      operationId: smartBchErc20Mint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20MintRequest"
+        description: |
+          Request to mint more of SmartBch ERC20 tokens
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20MintResponse'
+          description: successful operation
+      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/token_info:
+    post:
+      operationId: smartBchErc20TokenInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20TokenInfoRequest"
+        description: |
+          Request to get information about the SmartBch ERC20 token
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20TokenInfoResponse'
+          description: successful operation
+      summary: Get information about the SmartBch ERC20 token
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/balance:
+    post:
+      operationId: smartBchErc20Balance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20BalanceRequest"
+        description: |
+          Request for a wallet SmartBch ERC20 token balance
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchErc20BalanceResponse'
+          description: successful operation
+      summary: Get total SmartBch ERC20 token balance of the wallet
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/deposit_address:
+    post:
+      operationId: smartBchErc20DepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for an SmartBch ERC20 deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchDepositAddressResponse"
+          description: successful operation
+      summary: Get an SmartBch ERC20 deposit address
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/deposit_qr:
+    post:
+      operationId: smartBchErc20DepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SerializedWallet"
+        description: |
+          Request for a SmartBch ERC20 deposit address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScalableVectorGraphic"
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get an SmartBch ERC20 receiving address as a qrcode
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/send:
+    post:
+      operationId: smartBchErc20Send
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20SendRequest"
+        description: place a SmartBch ERC20 token send request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchErc20SendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Send some SmartBch ERC20 token amount to a given address
+      tags:
+        - smartbch/erc20
+
+  /smartbch/erc20/send_max:
+    post:
+      operationId: smartBchErc20SendMax
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchErc20SendMaxRequest"
+        description: Request to send all available SmartBch ERC20 token funds to a given address
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchErc20SendResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+      summary: Send all available SmartBch ERC20 token funds to a given address
+      tags:
+        - smartbch/erc20
+
+  /smartbch/contract/create:
+    post:
+      operationId: smartBchContractCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchContractRequest"
+        description: Create a SmartBch contractId
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchContractResponse"
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
+      summary: Create a SmartBch contractId
+      tags:
+        - smartbch/contract
+  /smartbch/contract/call:
+    post:
+      operationId: smartBchContractCall
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchContractFnCallRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchContractFnCallResponse"
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
+      summary: Call a SmartBch contract function
+      tags:
+        - smartbch/contract
+  /smartbch/contract/estimate_gas:
+    post:
+      operationId: smartBchContractEstimateGas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchContractEstimateGasRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchContractEstimateGasResponse"
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
+      summary: Estimate the gas for a contract interaction function given the arguments
+      tags:
+        - smartbch/contract
+  /smartbch/contract/info:
+    post:
+      operationId: smartBchContractInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchContractInfoRequest"
+        description: Request parsed information regarding a SmartBch contract from the smartBchContractId
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchContractInfoResponse"
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
+      summary: Get information about a SmartBch contract from the contractId
+      tags:
+        - smartbch/contract
+  /smartbch/contract/deploy:
+    post:
+      operationId: smartBchContractDeploy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchContractDeployRequest"
+        description: Request to deploy a SmartBch contract
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmartBchContractDeployResponse"
+          description: successful operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Error
+      summary: Request to deploy a SmartBch contract
+      tags:
+        - smartbch/contract
+
 components:
   securitySchemes:
     bearerAuth:
@@ -3339,204 +3340,6 @@ components:
         - byzantium
         - type
 
-    SmartBchContractRequest:
-      properties:
-        address:
-          type: string
-          description: Address of an already deployed contract
-          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
-        abi:
-          description: Contract ABI (Application Binary Interface), which describes the contract interaction
-          type: array
-          items:
-            type: string
-          example: |
-            - "function name() view returns (string)"
-            - "function symbol() view returns (string)"
-      allOf:
-       - $ref: "#/components/schemas/NetworkEnum"
-      required:
-        - address
-        - abi
-        - network
-
-    SmartBchContractResponse:
-      properties:
-        contractId:
-            type: string
-            description: serialized contract
-            example: "smartbchcontract:mainnet:0xdac17f958d2ee523a2206206994597c13d831ec7:WyJmdW5jdGlvbiBuYW1lKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gc3ltYm9sKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gZGVjaW1hbHMoKSB2aWV3IHJldHVybnMgKHVpbnQ4KSIsImZ1bmN0aW9uIHRvdGFsU3VwcGx5KCkgdmlldyByZXR1cm5zICh1aW50MjU2KSIsImZ1bmN0aW9uIGJhbGFuY2VPZihhZGRyZXNzKSB2aWV3IHJldHVybnMgKHVpbnQpIiwiZnVuY3Rpb24gdHJhbnNmZXIoYWRkcmVzcyB0bywgdWludCBhbW91bnQpIiwiZnVuY3Rpb24gdHJhbnNmZXJGcm9tKGFkZHJlc3Mgc2VuZGVyLCBhZGRyZXNzIHJlY2lwaWVudCwgdWludDI1NiBhbW91bnQpIGV4dGVybmFsIHJldHVybnMgKGJvb2wpIiwiZnVuY3Rpb24gbWludChhZGRyZXNzIHRvLCB1aW50MjU2IGFtb3VudCkiLCJldmVudCBUcmFuc2ZlcihhZGRyZXNzIGluZGV4ZWQgZnJvbSwgYWRkcmVzcyBpbmRleGVkIHRvLCB1aW50IGFtb3VudCkiLCJldmVudCBBcHByb3ZhbChhZGRyZXNzIGluZGV4ZWQgb3duZXIsIGFkZHJlc3MgaW5kZXhlZCBzcGVuZGVyLCB1aW50MjU2IHZhbHVlKSJd::W10="
-        address:
-          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
-          description: Contract address
-
-    SmartBchContractFnCallRequest:
-      description: |
-        Contract function evaluation request.
-        A constant function (non state changing, also does not cost gas) does not require a signer (walletId)
-        A state changing function will generate a transaction and does require a signer (walletId)
-      properties:
-        walletId:
-          type: string
-          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-          description: Serialized wallet
-        contractId:
-          type: string
-          description: serialized contract
-        function:
-          description: Function to call on the SmartBch contract.
-          type: string
-        arguments:
-          type: array
-          description: |
-            Arguments for the contract function call. Binary and BigNumber data should be passed as hexadecimal.
-          items: {}
-        overrides:
-          $ref: "#/components/schemas/SmartBchOverrides"
-      required:
-        - contractId
-        - function
-
-    SmartBchContractFnCallResponse:
-      description: |
-        Contract function evaluation response.
-        A constant function (non state changing, also does not cost gas) evaluates to a `result` field
-        A state changing function will generate a transaction and `txId` and `receipt` fields will be filled
-      properties:
-        contractId:
-          type: string
-          description: serialized contract
-        result:
-          description: contract function evaluation result. Can be of any type.
-        txId:
-          type: string
-          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
-          description: The hash of a transaction
-        receipt:
-          $ref: "#/components/schemas/SmartBchTransactionReceipt"
-
-    SmartBchContractEstimateGasRequest:
-      description:
-        Estimate the gas for a contract function interaction.
-        For a state-changing methods `walletId` is required.
-      properties:
-        walletId:
-          type: string
-          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-          description: Serialized wallet
-        contractId:
-          type: string
-          description: serialized contract
-        function:
-          description: Function to call on the SmartBch contract.
-          type: string
-        arguments:
-          type: array
-          description: |
-            Arguments for the contract function call. Binary and BigNumber data should be passed as hexadecimal.
-          items: {}
-        overrides:
-          $ref: "#/components/schemas/SmartBchOverrides"
-      required:
-        - contractId
-        - function
-
-    SmartBchContractEstimateGasResponse:
-      properties:
-        gas:
-          anyOf:
-            - type: number
-            - type: string
-
-    SmartBchContractInfoRequest:
-      properties:
-        contractId:
-          type: string
-          description: serialized contract
-
-    SmartBchContractInfoResponse:
-      properties:
-        contractId:
-          type: string
-          description: serialized contract
-        address:
-          type: string
-          description: Address of an already deployed contract
-        abi:
-          description: Contract ABI (Application Binary Interface), which describes the contract interaction
-          type: array
-          items:
-            type: string
-          example: |
-            - "function name() view returns (string)"
-            - "function symbol() view returns (string)"
-        script:
-          description: solidity source code used to create this contract instance
-          type: string
-          example: |
-            // SPDX-License-Identifier: MIT
-            pragma solidity ^0.8.2;
-
-            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
-            contract MyToken is ERC20 {
-              constructor() ERC20("MyToken", "MTK") {}
-            }
-        parameters:
-          description: constructor parameters used to create this contract instance
-          type: array
-          items: {}
-          example:
-            - "MyToken"
-            - "MTK"
-
-    SmartBchContractDeployRequest:
-      properties:
-        walletId:
-          type: string
-          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
-          description: Serialized wallet
-        script:
-          description: solidity source code used to create this contract instance
-          type: string
-          example: |
-            // SPDX-License-Identifier: MIT
-            pragma solidity ^0.8.2;
-
-            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
-            contract MyToken is ERC20 {
-              constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
-            }
-        parameters:
-          description: constructor parameters used to create this contract instance
-          type: array
-          items: {}
-          example:
-            - "MyToken"
-            - "MTK"
-        overrides:
-          $ref: "#/components/schemas/SmartBchOverrides"
-      required:
-        - walletId
-        - script
-
-    SmartBchContractDeployResponse:
-      properties:
-        contractId:
-          type: string
-          description: serialized contract
-        address:
-          type: string
-          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
-          description: contract address
-        txId:
-          type: string
-          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
-          description: The hash of a transaction
-        receipt:
-          $ref: "#/components/schemas/SmartBchTransactionReceipt"
-
     SmartBchErc20GenesisRequest:
       properties:
         walletId:
@@ -3759,6 +3562,204 @@ components:
         - walletId
         - address
         - tokenId
+
+    SmartBchContractRequest:
+      properties:
+        address:
+          type: string
+          description: Address of an already deployed contract
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+        abi:
+          description: Contract ABI (Application Binary Interface), which describes the contract interaction
+          type: array
+          items:
+            type: string
+          example: |
+            - "function name() view returns (string)"
+            - "function symbol() view returns (string)"
+      allOf:
+       - $ref: "#/components/schemas/NetworkEnum"
+      required:
+        - address
+        - abi
+        - network
+
+    SmartBchContractResponse:
+      properties:
+        contractId:
+            type: string
+            description: serialized contract
+            example: "smartbchcontract:mainnet:0xdac17f958d2ee523a2206206994597c13d831ec7:WyJmdW5jdGlvbiBuYW1lKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gc3ltYm9sKCkgdmlldyByZXR1cm5zIChzdHJpbmcpIiwiZnVuY3Rpb24gZGVjaW1hbHMoKSB2aWV3IHJldHVybnMgKHVpbnQ4KSIsImZ1bmN0aW9uIHRvdGFsU3VwcGx5KCkgdmlldyByZXR1cm5zICh1aW50MjU2KSIsImZ1bmN0aW9uIGJhbGFuY2VPZihhZGRyZXNzKSB2aWV3IHJldHVybnMgKHVpbnQpIiwiZnVuY3Rpb24gdHJhbnNmZXIoYWRkcmVzcyB0bywgdWludCBhbW91bnQpIiwiZnVuY3Rpb24gdHJhbnNmZXJGcm9tKGFkZHJlc3Mgc2VuZGVyLCBhZGRyZXNzIHJlY2lwaWVudCwgdWludDI1NiBhbW91bnQpIGV4dGVybmFsIHJldHVybnMgKGJvb2wpIiwiZnVuY3Rpb24gbWludChhZGRyZXNzIHRvLCB1aW50MjU2IGFtb3VudCkiLCJldmVudCBUcmFuc2ZlcihhZGRyZXNzIGluZGV4ZWQgZnJvbSwgYWRkcmVzcyBpbmRleGVkIHRvLCB1aW50IGFtb3VudCkiLCJldmVudCBBcHByb3ZhbChhZGRyZXNzIGluZGV4ZWQgb3duZXIsIGFkZHJlc3MgaW5kZXhlZCBzcGVuZGVyLCB1aW50MjU2IHZhbHVlKSJd::W10="
+        address:
+          example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+          description: Contract address
+
+    SmartBchContractFnCallRequest:
+      description: |
+        Contract function evaluation request.
+        A constant function (non state changing, also does not cost gas) does not require a signer (walletId)
+        A state changing function will generate a transaction and does require a signer (walletId)
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: Serialized wallet
+        contractId:
+          type: string
+          description: serialized contract
+        function:
+          description: Function to call on the SmartBch contract.
+          type: string
+        arguments:
+          type: array
+          description: |
+            Arguments for the contract function call. Binary and BigNumber data should be passed as hexadecimal.
+          items: {}
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      required:
+        - contractId
+        - function
+
+    SmartBchContractFnCallResponse:
+      description: |
+        Contract function evaluation response.
+        A constant function (non state changing, also does not cost gas) evaluates to a `result` field
+        A state changing function will generate a transaction and `txId` and `receipt` fields will be filled
+      properties:
+        contractId:
+          type: string
+          description: serialized contract
+        result:
+          description: contract function evaluation result. Can be of any type.
+        txId:
+          type: string
+          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+          description: The hash of a transaction
+        receipt:
+          $ref: "#/components/schemas/SmartBchTransactionReceipt"
+
+    SmartBchContractEstimateGasRequest:
+      description:
+        Estimate the gas for a contract function interaction.
+        For a state-changing methods `walletId` is required.
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: Serialized wallet
+        contractId:
+          type: string
+          description: serialized contract
+        function:
+          description: Function to call on the SmartBch contract.
+          type: string
+        arguments:
+          type: array
+          description: |
+            Arguments for the contract function call. Binary and BigNumber data should be passed as hexadecimal.
+          items: {}
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      required:
+        - contractId
+        - function
+
+    SmartBchContractEstimateGasResponse:
+      properties:
+        gas:
+          anyOf:
+            - type: number
+            - type: string
+
+    SmartBchContractInfoRequest:
+      properties:
+        contractId:
+          type: string
+          description: serialized contract
+
+    SmartBchContractInfoResponse:
+      properties:
+        contractId:
+          type: string
+          description: serialized contract
+        address:
+          type: string
+          description: Address of an already deployed contract
+        abi:
+          description: Contract ABI (Application Binary Interface), which describes the contract interaction
+          type: array
+          items:
+            type: string
+          example: |
+            - "function name() view returns (string)"
+            - "function symbol() view returns (string)"
+        script:
+          description: solidity source code used to create this contract instance
+          type: string
+          example: |
+            // SPDX-License-Identifier: MIT
+            pragma solidity ^0.8.2;
+
+            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+            contract MyToken is ERC20 {
+              constructor() ERC20("MyToken", "MTK") {}
+            }
+        parameters:
+          description: constructor parameters used to create this contract instance
+          type: array
+          items: {}
+          example:
+            - "MyToken"
+            - "MTK"
+
+    SmartBchContractDeployRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: Serialized wallet
+        script:
+          description: solidity source code used to create this contract instance
+          type: string
+          example: |
+            // SPDX-License-Identifier: MIT
+            pragma solidity ^0.8.2;
+
+            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+            contract MyToken is ERC20 {
+              constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+            }
+        parameters:
+          description: constructor parameters used to create this contract instance
+          type: array
+          items: {}
+          example:
+            - "MyToken"
+            - "MTK"
+        overrides:
+          $ref: "#/components/schemas/SmartBchOverrides"
+      required:
+        - walletId
+        - script
+
+    SmartBchContractDeployResponse:
+      properties:
+        contractId:
+          type: string
+          description: serialized contract
+        address:
+          type: string
+          example: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+          description: contract address
+        txId:
+          type: string
+          example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
+          description: The hash of a transaction
+        receipt:
+          $ref: "#/components/schemas/SmartBchTransactionReceipt"
 
 # global security requirement. for per-endpoint configuration see https://swagger.io/docs/specification/authentication/bearer-authentication/
 security:

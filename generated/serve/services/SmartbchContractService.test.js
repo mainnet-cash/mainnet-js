@@ -31,7 +31,7 @@ describe("Test SmartBch Contract Services", () => {
     ];
     const network = "regtest";
 
-    const contractResp = await request(app).post("/contract/smartbch/create").send({
+    const contractResp = await request(app).post("/smartbch/contract/create").send({
       address: address,
       abi: abi,
       network: network
@@ -42,7 +42,7 @@ describe("Test SmartBch Contract Services", () => {
     expect(contractResp.body.contractId).toMatch(/smartbchcontract:regtest:\w+/);
     expect(contractResp.body.address).toMatch(/0x/);
 
-    const contractInfoResp = await request(app).post("/contract/smartbch/info").send({
+    const contractInfoResp = await request(app).post("/smartbch/contract/info").send({
       contractId: contractResp.body.contractId
     });
 
@@ -71,7 +71,7 @@ describe("Test SmartBch Contract Services", () => {
     const parameters = ["MyToken", "MTK"];
     const overrides = { gasPrice: 10 ** 10 };
 
-    const contractResp = await request(app).post("/contract/smartbch/deploy").send({
+    const contractResp = await request(app).post("/smartbch/contract/deploy").send({
       walletId: walletId,
       script: script,
       parameters: parameters,
@@ -85,7 +85,7 @@ describe("Test SmartBch Contract Services", () => {
     expect(contractResp.body.receipt).toBeDefined();
     expect(contractResp.body.receipt.transactionHash).toMatch(/0x/);
 
-    const contractInfoResp = await request(app).post("/contract/smartbch/info").send({
+    const contractInfoResp = await request(app).post("/smartbch/contract/info").send({
       contractId: contractResp.body.contractId
     });
 
@@ -99,7 +99,7 @@ describe("Test SmartBch Contract Services", () => {
     expect(contractInfoResp.body.parameters).toStrictEqual(parameters);
 
     // "estimateGas" on const call
-    const constGasResponse = await request(app).post("/contract/smartbch/estimate_gas").send({
+    const constGasResponse = await request(app).post("/smartbch/contract/estimate_gas").send({
       contractId: contractInfoResp.body.contractId,
       function: "decimals",
       arguments: undefined,
@@ -110,7 +110,7 @@ describe("Test SmartBch Contract Services", () => {
     expect(constGas).toStrictEqual(BigNumber.from(0));
 
     // "decimals" const call
-    let constReplyResponse = await request(app).post("/contract/smartbch/call").send({
+    let constReplyResponse = await request(app).post("/smartbch/contract/call").send({
       walletId: undefined,
       contractId: contractInfoResp.body.contractId,
       function: "decimals",
@@ -127,7 +127,7 @@ describe("Test SmartBch Contract Services", () => {
     // const overrides = { gasPrice: 10 ** 10 };
 
     // "estimateGas" on state-changing call
-    const txGasResponse = await request(app).post("/contract/smartbch/estimate_gas").send({
+    const txGasResponse = await request(app).post("/smartbch/contract/estimate_gas").send({
       walletId: walletId,
       contractId: contractInfoResp.body.contractId,
       function: "transfer",
@@ -139,7 +139,7 @@ describe("Test SmartBch Contract Services", () => {
     expect(txGas.toNumber()).toBeGreaterThan(0);
 
     // "transfer" call
-    let txReplyResponse = await request(app).post("/contract/smartbch/call").send({
+    let txReplyResponse = await request(app).post("/smartbch/contract/call").send({
       walletId: walletId,
       contractId: contractInfoResp.body.contractId,
       function: "transfer",

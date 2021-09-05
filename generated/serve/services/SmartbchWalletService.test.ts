@@ -23,7 +23,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should return the balance from a regtest wallet", async () => {
     const resp = await request(app)
-      .post("/wallet/smartbch/balance")
+      .post("/smartbch/wallet/balance")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
       });
@@ -37,7 +37,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should return the balance from a watch only regtest wallet", async () => {
     const resp = await request(app)
-      .post("/wallet/smartbch/balance")
+      .post("/smartbch/wallet/balance")
       .send({
         walletId: `watch:regtest:${process.env.SBCH_ALICE_ADDRESS}`,
       });
@@ -51,7 +51,7 @@ describe("Test Wallet Endpoints", () => {
    */
   it("Should return the balance from a regtest wallet in satoshi", async () => {
     const resp = await request(app)
-      .post("/wallet/smartbch/balance")
+      .post("/smartbch/wallet/balance")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         unit: "sat",
@@ -71,7 +71,7 @@ describe("Test Wallet Endpoints", () => {
       type : "privkey",
       network: "regtest"
     }
-    let resp = await request(app).post("/wallet/smartbch/create").send(req);
+    let resp = await request(app).post("/smartbch/wallet/create").send(req);
     const body = resp.body;
     checkStatus(resp);
     expect(body!.name).toBe(req.name);
@@ -85,7 +85,7 @@ describe("Test Wallet Endpoints", () => {
    */
 
   it("Should return the deposit address from a regtest wallet", async () => {
-    let resp = await request(app).post("/wallet/smartbch/deposit_address").send({
+    let resp = await request(app).post("/smartbch/wallet/deposit_address").send({
       walletId: `${process.env.SBCH_ALICE_ID}`,
     });
     checkStatus(resp);
@@ -98,7 +98,7 @@ describe("Test Wallet Endpoints", () => {
    * depositQr
    */
   it("Should get the deposit qr from a regtest wallet", async () => {
-    let resp = await request(app).post("/wallet/smartbch/deposit_qr").send({
+    let resp = await request(app).post("/smartbch/wallet/deposit_qr").send({
       walletId: `${process.env.SBCH_ALICE_ID}`,
     });
     const body = resp.body;
@@ -113,7 +113,7 @@ describe("Test Wallet Endpoints", () => {
    * maxAmountToSend
    */
   it("Should accept a max amount to send request for a regtest wallet", async () => {
-    const bobsWalletResp = await request(app).post("/wallet/smartbch/create").send({
+    const bobsWalletResp = await request(app).post("/smartbch/wallet/create").send({
       name: "sbch bobs wallet",
       network: "regtest",
     });
@@ -122,7 +122,7 @@ describe("Test Wallet Endpoints", () => {
     const bobsAddress = bobsWalletResp.body.address;
 
     await request(app)
-      .post("/wallet/smartbch/send")
+      .post("/smartbch/wallet/send")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         to: [
@@ -135,7 +135,7 @@ describe("Test Wallet Endpoints", () => {
         overrides: { gasPrice: 10 ** 10 }
       });
 
-    let resp = await request(app).post("/wallet/smartbch/max_amount_to_send").send({
+    let resp = await request(app).post("/smartbch/wallet/max_amount_to_send").send({
       walletId: bobsWalletResp.body.walletId,
     });
     const body = resp.body;
@@ -148,14 +148,14 @@ describe("Test Wallet Endpoints", () => {
    */
 
   test("Should send from a Regtest wallet with the API", async () => {
-    const bobsWalletResp = await request(app).post("/wallet/smartbch/create").send({
+    const bobsWalletResp = await request(app).post("/smartbch/wallet/create").send({
       type: "privkey",
       network: "regtest",
     });
     const bobsAddress = bobsWalletResp.body.address;
 
     const sendResp = await request(app)
-      .post("/wallet/smartbch/send")
+      .post("/smartbch/wallet/send")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         to: {
@@ -167,7 +167,7 @@ describe("Test Wallet Endpoints", () => {
       });
     checkStatus(sendResp);
 
-    const resp = await request(app).post("/wallet/smartbch/balance").send({
+    const resp = await request(app).post("/smartbch/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
 
@@ -192,13 +192,13 @@ describe("Test Wallet Endpoints", () => {
     };
 
     const bobsWalletResp = await request(app)
-      .post("/wallet/smartbch/create")
+      .post("/smartbch/wallet/create")
       .send(bobWalletReq);
     checkStatus(bobsWalletResp);
     const bobsWallet = bobsWalletResp.body;
     expect(bobsWallet.address).toMatch(/0x/)
 
-    let initialResp = await request(app).post("/wallet/smartbch/send").send({
+    let initialResp = await request(app).post("/smartbch/wallet/send").send({
       walletId: `${process.env.SBCH_ALICE_ID}`,
       to: [
         [bobsWallet.address, 1, 'bch']
@@ -207,7 +207,7 @@ describe("Test Wallet Endpoints", () => {
     });
     checkStatus(initialResp);
     let resp = await request(app)
-      .post("/wallet/smartbch/send_max")
+      .post("/smartbch/wallet/send_max")
       .send({
         walletId: bobsWallet.walletId,
         address: process.env.SBCH_ALICE_ADDRESS as string,
@@ -224,7 +224,7 @@ describe("Test Wallet Endpoints", () => {
    */
  it("Should return a signed message", async () => {
   const resp = await request(app)
-    .post("/wallet/smartbch/signed/sign")
+    .post("/smartbch/wallet/signed/sign")
     .send({
       walletId: `${process.env.SBCH_ALICE_ID}`,
       message: "test"
@@ -238,7 +238,7 @@ describe("Test Wallet Endpoints", () => {
    */
  it("Should verify a signed message", async () => {
   const resp = await request(app)
-    .post("/wallet/smartbch/signed/verify")
+    .post("/smartbch/wallet/signed/verify")
     .send({
       walletId: `watch:regtest:${process.env.SBCH_ALICE_ADDRESS}`,
       message: "test",

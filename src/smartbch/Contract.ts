@@ -43,7 +43,7 @@ export class Contract {
    * @param abi Contract ABI (Application Binary Interface), which describes the contract interaction
    * @param network Network on which the contract is deployed
    *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch/createContract} REST endpoint
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/smartbch/contract/create} REST endpoint
    * @returns A new contract
    */
   constructor(
@@ -265,7 +265,7 @@ export class Contract {
    *
    * a high-level function
    *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/smartbch/info} REST endpoint
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/smartbch/contract/info} REST endpoint
    * @returns The contract info
    */
   public info(): ContractInfoResponseI {
@@ -283,6 +283,7 @@ export class Contract {
    *
    * This is a helper function for the REST or serialized interfaces and not intended
    * for native use within the library, although it may be useful for running stored transactions.
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/smartbch/contract/call} REST endpoint
    *
    * @param request Parameters for the transaction call, serialized as strings.
    * @returns A contract interaction result
@@ -341,6 +342,8 @@ export class Contract {
    *
    * @note args may contain overrides as last element
    *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/smartbch/contract/estimate_gas} REST endpoint
+   *
    * @returns {ethers.BigNumber} gas amount the function will consume given the arguments in base units (wei)
    */
   public async estimateGas(
@@ -388,6 +391,8 @@ export class Contract {
 
   /**
    * deploy - deploy contract from solidity source code
+   *
+   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/smartbch/contract/deploy} REST endpoint
    *
    * @param {SmartBchWallet} signer a SmartBchWallet which pays gas fees on contract deployment
    * @param solidityScript the contract source code written in solidity language
