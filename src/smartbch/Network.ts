@@ -11,8 +11,12 @@ export function getNetworkProvider(
       );
     }
     case NetworkType.Mainnet: {
-      return new ethers.providers.WebSocketProvider(
-        "wss://smartbch-wss.greyh.at",
+      // return new ethers.providers.WebSocketProvider(
+      //   "wss://smartbch-wss.greyh.at",
+      //   { name: "smartbch", chainId: 10000 }
+      // );
+      return new ethers.providers.JsonRpcProvider(
+        "https://smartbch.fountainhead.cash/mainnet",
         { name: "smartbch", chainId: 10000 }
       );
     }
