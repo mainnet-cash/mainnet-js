@@ -20,7 +20,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
     // Open the page
     await page.goto(PAGE_URL, {
       waitUntil: "networkidle",
-      timeout: 90000
+      timeout: 90000,
     });
   });
 
