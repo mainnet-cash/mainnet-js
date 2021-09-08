@@ -84,7 +84,7 @@ describe(`Wallet should function in the browser`, () => {
       }, process.env.PRIVATE_WIF);
     } catch (e) {
       expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Wallet type hd was passed to single address wallet"
+        "page.evaluate: Evaluation failed: Error: Unknown wallet type 'hd'"
       );
     }
   });

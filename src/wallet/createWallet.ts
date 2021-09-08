@@ -1,4 +1,3 @@
-import { WalletTypeEnum } from "./enum";
 import {
   Wallet,
   TestNetWallet,
@@ -247,7 +246,7 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
       slpaddr: wallet.slp.slpaddr,
       walletId: wallet.toString(),
       ...wallet.getSeed(),
-      network: wallet.network,
+      network: wallet.network as any,
     };
   } else {
     return {
@@ -256,7 +255,7 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
       slpaddr: wallet.slp.slpaddr,
       walletId: wallet.toString(),
       wif: wallet.privateKeyWif,
-      network: wallet.network,
+      network: wallet.network as any,
     };
   }
 }
@@ -278,6 +277,6 @@ export async function walletFromId(walletId: string): Promise<any> {
     type: walletType,
   } as WalletRequestI;
   let wallet = await createWallet(walletRequest);
-  await wallet._fromId(walletId);
+  await (wallet as any).fromId(walletId);
   return wallet;
 }

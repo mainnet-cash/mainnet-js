@@ -45,6 +45,20 @@ const nodeConfig = {
       output: "dist/index.d.ts",
     }),
   ],
+  resolve: {
+    alias: {
+      ethers$: require.resolve("ethers/lib/index.js"),
+      "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
+      "@ethersproject/contracts$": require.resolve(
+        "@ethersproject/contracts/lib/index.js"
+      ),
+      // "@ethersproject/providers$": require.resolve("@ethersproject/providers/lib/index.js"),
+      // "@ethersproject/wallet$": require.resolve("@ethersproject/wallet/lib/index.js"),
+      // "@ethersproject/bytes$": require.resolve("@ethersproject/bytes/lib/index.js"),
+      // "@ethersproject/transactions$": require.resolve("@ethersproject/transactions/lib/index.js"),
+      // "@ethersproject/logger$": require.resolve("@ethersproject/logger/lib/index.js"),
+    },
+  },
 };
 
 const browserConfig = {
@@ -66,6 +80,7 @@ const browserConfig = {
       http: false,
       https: false,
       libpq: false,
+      module: false,
       net: false,
       os: false,
       "parse-database-url": false,
@@ -73,11 +88,14 @@ const browserConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      stream: false,
+      solc: false,
       tls: false,
       util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
+    },
+    fallback: {
+      stream: require.resolve("stream-browserify"),
     },
   },
 };
@@ -101,6 +119,7 @@ const webWorkerConfig = {
       http: false,
       https: false,
       libpq: false,
+      module: false,
       net: false,
       os: false,
       "parse-database-url": false,
@@ -108,11 +127,14 @@ const webWorkerConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      stream: false,
+      solc: false,
       tls: false,
       util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
+    },
+    fallback: {
+      stream: require.resolve("stream-browserify"),
     },
   },
 };

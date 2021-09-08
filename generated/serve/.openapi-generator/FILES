@@ -5,6 +5,9 @@ controllers/ContractController.js
 controllers/ContractEscrowController.js
 controllers/FaucetController.js
 controllers/MineController.js
+controllers/SmartbchContractController.js
+controllers/SmartbchSep20Controller.js
+controllers/SmartbchWalletController.js
 controllers/UtilController.js
 controllers/WalletController.js
 controllers/WalletSlpController.js

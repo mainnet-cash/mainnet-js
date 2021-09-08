@@ -1,6 +1,6 @@
 {
   "name": "mainnet-cash",
-  "version": "0.3.41",
+  "version": "0.4.0",
   "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development ",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@ethersproject/bignumber": "^5.4.1",
     "bchaddrjs-slp": "^0.2.11",
+    "bignumber.js": "^9.0.1",
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",
     "connect-timeout": "^1.9.0",

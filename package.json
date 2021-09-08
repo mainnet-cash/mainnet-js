@@ -8,10 +8,10 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.3.41",
+  "version": "0.4.0",
   "homepage": "https://mainnet.cash",
-  "main": "dist/mainnet-node-0.3.41.js",
-  "browser": "dist/mainnet-0.3.41.js",
+  "main": "dist/mainnet-node-0.4.0.js",
+  "browser": "dist/mainnet-0.4.0.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*.js",
@@ -27,6 +27,7 @@
     "api:serve:install": "yarn install --production=true --cwd generated/serve/ --prefix generated/serve/",
     "api:serve:install:dev": "yarn install  --cwd generated/serve/ --prefix generated/serve/",
     "api:serve:test": "yarn --cwd generated/serve/ --prefix generated/serve/ test",
+    "api:serve:test:skip": "SKIP_REGTEST_INIT=1 yarn api:serve:test",
     "api:serve:cluster": "yarn --cwd generated/serve/ --prefix generated/serve/ start",
     "cli": "npx ts-node src/cli.ts",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent yarn run cover",
@@ -37,9 +38,14 @@
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "docs": "npx typedoc",
     "test": "node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --logHeapUsage --forceExit",
+    "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
     "test:sign": "npx jest src/message/signed.test.ts --runInBand --detectOpenHandles --forceExit",
     "test:api": "yarn build && yarn api:serve:test",
+    "test:api:skip": "SKIP_REGTEST_INIT=1 yarn test:api",
     "test:browser": "yarn build && npx jest --config jest.config.browser.js --detectOpenHandles",
+    "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
+    "test:browser:nb": "npx jest --config jest.config.browser.js --detectOpenHandles",
+    "test:browser:nb:skip": "SKIP_REGTEST_INIT=1 yarn test:browser:nb",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "build": "npx webpack",
@@ -72,11 +78,11 @@
     "typedoc-plugin-markdown": "^3.5.0",
     "typescript": "^4.3.2",
     "unzipper": "^0.10.11",
-    "util": "^0.12.3",
     "winston": "3.3.3"
   },
   "optionalDependencies": {
     "@bitauth/libauth": "^1.18.0",
+    "@openzeppelin/contracts": "^4.2.0",
     "assert": "^2.0.0",
     "async-mutex": "^0.3.1",
     "axios": "^0.21.1",
@@ -93,6 +99,7 @@
     "dexie": "^3.0.2",
     "dotenv": "^10.0.0",
     "electrum-cash": "^2.0.8",
+    "ethers": "^5.4.6",
     "eventsource": "^1.0.7",
     "npm-dts-webpack-plugin": "^1.3.7",
     "parse-database-url": "^0.3.0",
@@ -100,10 +107,13 @@
     "pg-format": "^1.0.4",
     "qrcode-svg": "^1.1.0",
     "slp-parser": "^0.0.4",
+    "solc": "^0.8.7-fixed",
+    "stream-browserify": "^3.0.0",
     "ts-loader": "^9.2.3",
     "webpack": "^v5.1.0",
     "webpack-cli": "^4.7.2",
     "webpack-merge": "^5.8.0",
+    "xmlhttprequest-ssl": "^2.0.0",
     "yarn": "^1.22.10"
   },
   "sideEffects": false,
@@ -111,5 +121,6 @@
     "bch",
     "bitcoin cash"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "dependencies": {}
 }

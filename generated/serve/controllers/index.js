@@ -2,6 +2,9 @@ const ContractController = require('./ContractController');
 const ContractEscrowController = require('./ContractEscrowController');
 const FaucetController = require('./FaucetController');
 const MineController = require('./MineController');
+const SmartbchContractController = require('./SmartbchContractController');
+const SmartbchSep20Controller = require('./SmartbchSep20Controller');
+const SmartbchWalletController = require('./SmartbchWalletController');
 const UtilController = require('./UtilController');
 const WalletController = require('./WalletController');
 const WalletSlpController = require('./WalletSlpController');
@@ -13,6 +16,9 @@ module.exports = {
   ContractEscrowController,
   FaucetController,
   MineController,
+  SmartbchContractController,
+  SmartbchSep20Controller,
+  SmartbchWalletController,
   UtilController,
   WalletController,
   WalletSlpController,

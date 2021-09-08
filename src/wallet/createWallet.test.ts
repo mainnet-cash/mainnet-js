@@ -134,6 +134,7 @@ describe(`Named Wallets`, () => {
     expect(w.cashaddr).toMatch(/bitcoincash:q/);
     expect(w.walletType).toBe("wif");
   });
+
   test("Retrieve a mainnet wif wallet", async () => {
     const req = {
       name: "Bob's Testnet Wallet, Again",
