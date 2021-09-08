@@ -178,27 +178,6 @@ const send = ({ sendRequest }) => new Promise(
         throw Error("Could not derive wallet");
       }
 
-      // if (!Array.isArray(sendRequest.to)) {
-      //   sendRequest.to = [sendRequest.to];
-      // }
-
-      // sendRequest.to = sendRequest.to.map(val => {
-      //   if (val.hasOwnProperty("dataString")) {
-      //     return OpReturnData.fromString(val.dataString);
-      //   }
-      //   if (val.hasOwnProperty("dataBuffer")) {
-      //     return OpReturnData.fromBuffer(val.dataBuffer);
-      //   }
-      //   if (Array.isArray(val)) {
-      //     if (val[0] === "OP_RETURNB64") {
-      //       return ['OP_RETURN', Buffer.from(base64ToBin(val[1]))]
-      //     }
-      //   }
-
-      //   return val;
-      // });
-      // console.log(sendRequest);
-
       let resp = await wallet.send(sendRequest.to, sendRequest.options);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {

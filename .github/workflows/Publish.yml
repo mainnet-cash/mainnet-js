@@ -35,9 +35,11 @@ jobs:
         run: |
           git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
           cd mainnet-docs
-          sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/README.md
           HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
+          sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/README.md
           sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/README.md
+          sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/smartbch.md
+          sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/smartbch.md
           git config user.email "hello@mainnet.cash"
           git config user.name "Auto-Generated"
           git add .

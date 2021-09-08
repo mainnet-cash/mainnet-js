@@ -47,8 +47,8 @@ export interface SignedMessageDetailsI {
 }
 
 export interface SignedMessageResponseI {
-  raw: SignedMessageRawI;
-  details: SignedMessageDetailsI;
+  raw?: SignedMessageRawI;
+  details?: SignedMessageDetailsI;
   signature: string;
 }
 
@@ -61,5 +61,5 @@ export interface VerifyMessageDetailsI {
 
 export interface VerifyMessageResponseI {
   valid: boolean;
-  details: VerifyMessageDetailsI;
+  details?: VerifyMessageDetailsI;
 }

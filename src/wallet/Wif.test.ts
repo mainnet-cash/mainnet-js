@@ -114,9 +114,7 @@ describe(`Test creation of wallet from walletId`, () => {
           "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
       } catch (e) {
-        expect(e.message).toBe(
-          "Wallet type hd was passed to single address wallet"
-        );
+        expect(e.message).toBe("Unknown wallet type 'hd'");
       }
     });
 
@@ -127,9 +125,7 @@ describe(`Test creation of wallet from walletId`, () => {
           "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
       } catch (e) {
-        expect(e.message).toBe(
-          "Wallet type q2k was passed to single address wallet"
-        );
+        expect(e.message).toBe("Unknown wallet type 'q2k'");
       }
     });
   });

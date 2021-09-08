@@ -1,4 +1,6 @@
-FROM --platform=$BUILDPLATFORM node:14-buster-slim
+FROM node:14-buster-slim
+
+ARG TARGETPLATFORM
 
 # Get g++ for compiling, wget to download Boost, git to clone source code repo,
 # and make to automate program compilation with Makefile provided
@@ -36,7 +38,7 @@ RUN git clone -b v1.38.1 --depth 1 --recursive --shallow-submodules https://gith
            -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
            -DBUILD_SHARED_LIBS=ON \
       ../.. \
-  && make \
+  && make -j`nproc` \
   && make install
 
 # Add python for gs++ make process
@@ -52,12 +54,12 @@ RUN cd /home \
   && cmake \
       -DCMAKE_BUILD_TYPE=Release \
       .. \
-  && make -j1 \
+  && make -j`nproc` \
   && echo 1
 
-ARG BUILDPLATFORM
+ARG TARGETPLATFORM
 
-RUN export GOPLATFORM=$(echo ${BUILDPLATFORM} | tr "/" "-") && echo ${GOPLATFORM} \
+RUN export GOPLATFORM=$(echo ${TARGETPLATFORM} | tr "/" "-") && echo ${GOPLATFORM} \
   && wget -q https://golang.org/dl/go1.13.8.${GOPLATFORM}.tar.gz \
   && rm -rf /usr/local/go && tar -C /usr/local -xzf go1.13.8.${GOPLATFORM}.tar.gz \
   && tar -C /usr/local -xzf go1.13.8.${GOPLATFORM}.tar.gz

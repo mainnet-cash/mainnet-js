@@ -87,10 +87,10 @@ export class Slp {
       provider = process.env.SLP_PROVIDER!;
 
     if (provider === "gspp") {
-      this.provider = new GsppProvider(this.wallet.networkType);
+      this.provider = new GsppProvider(this.wallet.network);
     } else {
       // provider === "slpdb"
-      this.provider = new SlpDbProvider(this.wallet.networkType);
+      this.provider = new SlpDbProvider(this.wallet.network);
     }
   }
 

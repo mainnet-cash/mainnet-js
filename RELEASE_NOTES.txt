@@ -1,6 +1,17 @@
 Newest changes
 --------------
 
+0.4.0
+
+- SmartBch support!
+- Check out:
+- SmartBchWallet for basic interactions with the network and sending funds
+- SmartBchWallet.sep20 to interact with SEP20 (ERC20) compatible token contracts
+- SmartBch.Contract - a generic interface to SmartBch smart contracts, which supports deploying from Solidity source (currently node.js only)
+- REST support: https://rest-unstable.mainnet.cash/api-docs/
+- Check out our documentation: https://mainnet.cash/tutorial/smartbch.html
+- Join our Telegram group: https://t.me/mainnetcash
+
 0.3.41
 
 - Fix bug with watchOnly and retrieving some named wallets.
