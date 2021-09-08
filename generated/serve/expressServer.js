@@ -17,6 +17,15 @@ const setupRateLimits = require('./rateLimits');
 
 const makeWsServer = require('./wsServer');
 
+for (const handler of process.listeners('unhandledRejection')) {
+  if (handler.name === "abort") {
+    process.removeListener('unhandledRejection', handler);
+    process.addListener('unhandledRejection', (reason, promise) => {
+      console.trace(`[mainnet-js][REST] Unhandled promise rejection:\n${reason}\n${promise}`);
+    });
+  }
+}
+
 class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
     this.port = port;
