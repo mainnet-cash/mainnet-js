@@ -10,7 +10,7 @@ function checkStatus(resp) {;
   }
 }
 
-describe("Test Wallet SmartBch Erc20 Endpoints", () => {
+describe("Test Wallet SmartBch Sep20 Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });
@@ -19,7 +19,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     app.close();
   });
 
-  test("ERC20 genesis and info", async () => {
+  test("SEP20 genesis and info", async () => {
     const options = {
       name: "Mainnet Coin",
       ticker: "MNC",
@@ -30,7 +30,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     const overrides = { gasPrice: 10 ** 10 };
 
     const watchOnlyResponce = await request(app)
-      .post("/smartbch/erc20/genesis")
+      .post("/smartbch/sep20/genesis")
       .send({
         walletId: `watch:regtest:${process.env.SBCH_ALICE_ADDRESS}`,
         ...options,
@@ -40,7 +40,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(watchOnlyResponce.error.text).toMatch("Cannot deploy contracts with Watch-Only wallets");
 
     const resp = await request(app)
-      .post("/smartbch/erc20/genesis")
+      .post("/smartbch/sep20/genesis")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         ...options,
@@ -59,7 +59,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
 
     // get token info
     const tokenInfoResponse = await request(app)
-      .post("/smartbch/erc20/token_info")
+      .post("/smartbch/sep20/token_info")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         tokenId: result.tokenId,
@@ -83,7 +83,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     const bobAddress = bobAddressResponse.body.address;
 
     const sendResultResponse = await request(app)
-      .post("/smartbch/erc20/send")
+      .post("/smartbch/sep20/send")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         to: [
@@ -101,7 +101,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(Number(sendResult[0].balance.value)).toBe(7);
 
     let bobBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: bobWalletId,
         tokenId: result.tokenId,
@@ -124,7 +124,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
       });
 
     const sendManyResultResponse = await request(app)
-      .post("/smartbch/erc20/send")
+      .post("/smartbch/sep20/send")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         to: [
@@ -144,7 +144,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(sendManyResultResponse.status).toBe(200);
 
     let aliceBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         tokenId: result.tokenId,
@@ -153,7 +153,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(Number(aliceBalanceResponse.body.value)).toBe(4);
 
     const charlieBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: charlieResponse.body.walletId,
         tokenId: result.tokenId,
@@ -161,7 +161,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
 
     expect(Number(charlieBalanceResponse.body.value)).toBe(1);
     const daveBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: daveResponse.body.walletId,
         tokenId: result.tokenId,
@@ -171,7 +171,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
 
     // sendMax
     const sendMaxResultResponse = await request(app)
-      .post("/smartbch/erc20/send_max")
+      .post("/smartbch/sep20/send_max")
       .send({
         walletId: bobWalletId,
         address: process.env.SBCH_ALICE_ADDRESS,
@@ -183,7 +183,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(Number(sendMaxResult.balance.value)).toBe(0);
 
     aliceBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         tokenId: result.tokenId,
@@ -192,7 +192,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(Number(aliceBalanceResponse.body.value)).toBe(7);
 
     bobBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: bobWalletId,
         tokenId: result.tokenId,
@@ -201,7 +201,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(Number(bobBalanceResponse.body.value)).toBe(0);
   });
 
-  test("ERC20 genesis with token receiver and baton receiver", async () => {
+  test("SEP20 genesis with token receiver and baton receiver", async () => {
     const bobWalletId = `privkey:regtest:0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff`;
     const bobAddressResponse = await request(app)
       .post("/smartbch/wallet/deposit_address")
@@ -222,7 +222,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     const overrides = { gasPrice: 10 ** 10 };
 
     const resp = await request(app)
-      .post("/smartbch/erc20/genesis")
+      .post("/smartbch/sep20/genesis")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         ...options,
@@ -239,7 +239,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(result.tokenId).toBe(result.balance.tokenId);
 
     let aliceBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         tokenId: result.tokenId,
@@ -248,7 +248,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(Number(aliceBalanceResponse.body.value)).toBe(0);
 
     let bobBalanceResponse = await request(app)
-      .post("/smartbch/erc20/balance")
+      .post("/smartbch/sep20/balance")
       .send({
         walletId: bobWalletId,
         tokenId: result.tokenId,
@@ -258,7 +258,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
 
     // mint
     const mintResultResponse = await request(app)
-      .post("/smartbch/erc20/mint")
+      .post("/smartbch/sep20/mint")
       .send({
         walletId: bobWalletId,
         tokenId: result.tokenId,
@@ -272,7 +272,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
 
     // mint fail, no role
     const mintFailResponse = await request(app)
-      .post("/smartbch/erc20/mint")
+      .post("/smartbch/sep20/mint")
       .send({
         walletId: process.env.SBCH_ALICE_ID,
         tokenId: result.tokenId,
@@ -283,7 +283,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     expect(mintFailResponse.error.text).toMatch("is not allowed to mint or minting is not supported by the contract");
   });
 
-  test("ERC20 mint disabled (baton ended)", async () => {
+  test("SEP20 mint disabled (baton ended)", async () => {
     const options = {
       name: "Mainnet Coin",
       ticker: "MNC",
@@ -295,7 +295,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
     const overrides = { gasPrice: 10 ** 10 };
 
     const resp = await request(app)
-      .post("/smartbch/erc20/genesis")
+      .post("/smartbch/sep20/genesis")
       .send({
         walletId: `${process.env.SBCH_ALICE_ID}`,
         ...options,
@@ -313,7 +313,7 @@ describe("Test Wallet SmartBch Erc20 Endpoints", () => {
 
     // mint fail, mint was disabled by genesis options
     const mintFailResponse = await request(app)
-      .post("/smartbch/erc20/mint")
+      .post("/smartbch/sep20/mint")
       .send({
         walletId: process.env.SBCH_ALICE_ID,
         tokenId: result.tokenId,

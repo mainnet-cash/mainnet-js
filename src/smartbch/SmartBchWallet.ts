@@ -18,16 +18,16 @@ import { sanitizeUnit } from "../util/sanitizeUnit";
 import { BaseWallet } from "../wallet/Base";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import {
-  Erc20,
-  RegTestErc20,
-  RegTestPrivKeyErc20,
-  RegTestWatchErc20,
-  TestNetErc20,
-  TestNetPrivKeyErc20,
-  TestNetWatchErc20,
-  WatchErc20,
-  Web3Erc20,
-} from "./Erc20";
+  Sep20,
+  RegTestSep20,
+  RegTestPrivKeySep20,
+  RegTestWatchSep20,
+  TestNetSep20,
+  TestNetPrivKeySep20,
+  TestNetWatchSep20,
+  WatchSep20,
+  Web3Sep20,
+} from "./Sep20";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
 import { asSendRequestObject, satToWei, weiToSat, zeroAddress } from "./Utils";
@@ -40,21 +40,21 @@ export class SmartBchWallet extends BaseWallet {
   publicKey?: string;
   mnemonic?: string;
   derivationPath: string = "m/44'/60'/0'/0/0";
-  _erc20?: Erc20;
+  _sep20?: Sep20;
 
   //#region Accessors
-  // interface to erc20 functions. see Erc20.ts
-  public get erc20() {
-    if (!this._erc20) {
-      this._erc20 = new Erc20(this);
+  // interface to sep20 functions. see Sep20.ts
+  public get sep20() {
+    if (!this._sep20) {
+      this._sep20 = new Sep20(this);
     }
 
-    return this._erc20;
+    return this._sep20;
   }
 
-  // interface to erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return Erc20;
+  // interface to sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return Sep20;
   }
 
   /**
@@ -426,9 +426,9 @@ export class Web3SmartBchWallet extends SmartBchWallet {
     return txId;
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return Web3Erc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return Web3Sep20;
   }
 }
 
@@ -440,9 +440,9 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Testnet);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return TestNetErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return TestNetSep20;
   }
 }
 
@@ -454,9 +454,9 @@ export class RegTestSmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Regtest);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return RegTestErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return RegTestSep20;
   }
 }
 
@@ -469,9 +469,9 @@ export class PrivKeySmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Mainnet, WalletTypeEnum.PrivateKey);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return TestNetPrivKeyErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return TestNetPrivKeySep20;
   }
 }
 
@@ -484,9 +484,9 @@ export class TestNetPrivKeySmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Testnet, WalletTypeEnum.PrivateKey);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return TestNetPrivKeyErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return TestNetPrivKeySep20;
   }
 }
 
@@ -499,9 +499,9 @@ export class RegTestPrivKeySmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Regtest, WalletTypeEnum.PrivateKey);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return RegTestPrivKeyErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return RegTestPrivKeySep20;
   }
 }
 
@@ -514,9 +514,9 @@ export class WatchSmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Mainnet, WalletTypeEnum.Watch);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return WatchErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return WatchSep20;
   }
 }
 
@@ -529,9 +529,9 @@ export class TestNetWatchSmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Testnet, WalletTypeEnum.Watch);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return TestNetWatchErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return TestNetWatchSep20;
   }
 }
 
@@ -544,8 +544,8 @@ export class RegTestWatchSmartBchWallet extends SmartBchWallet {
     super(name, NetworkType.Regtest, WalletTypeEnum.Watch);
   }
 
-  // interface to static erc20 functions. see Erc20.ts
-  public static get erc20() {
-    return RegTestWatchErc20;
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return RegTestWatchSep20;
   }
 }

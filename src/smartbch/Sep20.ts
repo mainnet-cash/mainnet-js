@@ -9,34 +9,34 @@ import {
   TestNetWatchSmartBchWallet,
   WatchSmartBchWallet,
   Web3SmartBchWallet,
-} from "../smartbch/SmartBchWallet";
+} from "./SmartBchWallet";
 import { ethers } from "ethers";
 import { Contract } from "./Contract";
 import { ImageI } from "../qr/interface";
 import BigNumber from "bignumber.js";
 import { zeroAddress } from "./Utils";
 import {
-  Erc20GenesisOptions,
-  Erc20GenesisResult,
-  Erc20MintOptions,
-  Erc20MintResult,
-  Erc20SendRequest,
-  Erc20SendResponse,
-  Erc20TokenBalance,
-  Erc20TokenInfo,
+  Sep20GenesisOptions,
+  Sep20GenesisResult,
+  Sep20MintOptions,
+  Sep20MintResult,
+  Sep20SendRequest,
+  Sep20SendResponse,
+  Sep20TokenBalance,
+  Sep20TokenInfo,
 } from "./interface";
 
 const _cache = {};
 
 /**
- * Class to manage Erc20 tokens.
+ * Class to manage Sep20 tokens.
  */
-export class Erc20 {
+export class Sep20 {
   readonly wallet: SmartBchWallet;
   contracts: Map<string, Contract> = new Map<string, Contract>();
 
   /**
-   * Initializes an Erc20 Wallet.
+   * Initializes an Sep20 Wallet.
    *
    * @param wallet     A SmartBch wallet object
    */
@@ -51,14 +51,14 @@ export class Erc20 {
   /**
    * Accessor to a contract cache.
    *
-   * @param tokenId     Erc20 Token Id (contract address)
+   * @param tokenId     Sep20 Token Id (contract address)
    */
   public contract(tokenId: string): Contract {
     let contract = this.contracts.get(tokenId);
     if (!contract) {
       contract = new Contract(
         tokenId,
-        Erc20.abi,
+        Sep20.abi,
         this.wallet.network
       ).setSigner(this.wallet);
       this.contracts.set(tokenId, contract);
@@ -70,7 +70,7 @@ export class Erc20 {
   /**
    * Get cached token name.
    *
-   * @param tokenId     Erc20 Token Id (contract address)
+   * @param tokenId     Sep20 Token Id (contract address)
    */
   public async getName(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "name", async (tokenId) => {
@@ -81,7 +81,7 @@ export class Erc20 {
   /**
    * Get cached token symbol (ticker).
    *
-   * @param tokenId     Erc20 Token Id (contract address)
+   * @param tokenId     Sep20 Token Id (contract address)
    */
   public async getSymbol(tokenId: string): Promise<string> {
     return this.getProp(tokenId, "symbol", async (tokenId) => {
@@ -92,7 +92,7 @@ export class Erc20 {
   /**
    * Get cached token decimals.
    *
-   * @param tokenId     Erc20 Token Id (contract address)
+   * @param tokenId     Sep20 Token Id (contract address)
    */
   public async getDecimals(tokenId: string): Promise<number> {
     return this.getProp(tokenId, "decimals", async (tokenId) => {
@@ -103,7 +103,7 @@ export class Erc20 {
   /**
    * Get cached token total supply value.
    *
-   * @param tokenId     Erc20 Token Id (contract address)
+   * @param tokenId     Sep20 Token Id (contract address)
    */
   public async getTotalSupply(tokenId: string): Promise<BigNumber> {
     return this.getProp(tokenId, "totalSupply", async (tokenId) => {
@@ -116,7 +116,7 @@ export class Erc20 {
   /**
    * Get arbitrary cached value.
    *
-   * @param tokenId     Erc20 Token Id (contract address)
+   * @param tokenId     Sep20 Token Id (contract address)
    * @param prop        Property name (cache key)
    * @param func        Callback to be executed upon cache miss
    */
@@ -180,11 +180,11 @@ export class Erc20 {
    *
    * a high-level function, see also /smartbch/erc20/token_info REST endpoint
    *
-   * @param tokenId  Erc20 Token Id (contract address)
+   * @param tokenId  Sep20 Token Id (contract address)
    *
-   * @returns {Erc20TokenInfo} SmartBch token info.
+   * @returns {Sep20TokenInfo} SmartBch token info.
    */
-  public async getTokenInfo(tokenId: string): Promise<Erc20TokenInfo> {
+  public async getTokenInfo(tokenId: string): Promise<Sep20TokenInfo> {
     let [name, ticker, decimals, totalSupply] = await Promise.all([
       this.getName(tokenId),
       this.getSymbol(tokenId),
@@ -206,11 +206,11 @@ export class Erc20 {
    *
    * a high-level function, see also /smartbch/erc20/balance REST endpoint
    *
-   * @param tokenId   Erc20 Token Id (contract address)
+   * @param tokenId   Sep20 Token Id (contract address)
    *
-   * @returns {Erc20TokenBalance} token balance
+   * @returns {Sep20TokenBalance} token balance
    */
-  public async getBalance(tokenId: string): Promise<Erc20TokenBalance> {
+  public async getBalance(tokenId: string): Promise<Sep20TokenBalance> {
     if (!tokenId) {
       throw new Error(`Invalid tokenId ${tokenId}`);
     }
@@ -230,20 +230,20 @@ export class Erc20 {
   /**
    * genesis - create a new SmartBch ERC20 token
    *
-   * @param {Erc20GenesisOptions} options    Token creation options
+   * @param {Sep20GenesisOptions} options    Token creation options
    * @param {ethers.CallOverrides} overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
    * a high-level function, see also /smartbch/erc20/genesis REST endpoint
    *
-   * @returns {Erc20GenesisResult} Token Id and new token balance
+   * @returns {Sep20GenesisResult} Token Id and new token balance
    */
   public async genesis(
-    options: Erc20GenesisOptions,
+    options: Sep20GenesisOptions,
     overrides: ethers.CallOverrides = {}
-  ): Promise<Erc20GenesisResult> {
+  ): Promise<Sep20GenesisResult> {
     const opts = this.substituteOptionals({
       ...options,
-    }) as Erc20GenesisOptions;
+    }) as Sep20GenesisOptions;
 
     const initialAmount = ethers.BigNumber.from(
       new BigNumber(opts.initialAmount).shiftedBy(opts.decimals).toString()
@@ -251,7 +251,7 @@ export class Erc20 {
 
     const contract = await Contract.deploy(
       this.wallet,
-      Erc20.script,
+      Sep20.script,
       opts.name,
       opts.ticker,
       opts.decimals,
@@ -275,18 +275,18 @@ export class Erc20 {
    * a high-level function, see also /smartbch/erc20/send_max REST endpoint
    *
    * @param address   destination smartbch address
-   * @param tokenId   Erc20 Token Id (contract address) to be spent
+   * @param tokenId   Sep20 Token Id (contract address) to be spent
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns {Erc20SendResponse} transaction id and token balance
+   * @returns {Sep20SendResponse} transaction id and token balance
    */
   public async sendMax(
     address: string,
     tokenId: string,
     overrides: ethers.CallOverrides = {}
-  ): Promise<Erc20SendResponse> {
+  ): Promise<Sep20SendResponse> {
     const balance = await this.getBalance(tokenId);
-    const requests: Erc20SendRequest[] = [balance].map((val) => ({
+    const requests: Sep20SendRequest[] = [balance].map((val) => ({
       address: address,
       value: val.value,
       ticker: val.ticker,
@@ -297,19 +297,19 @@ export class Erc20 {
   }
 
   /**
-   * send - process a list of Erc20 send requests.
+   * send - process a list of Sep20 send requests.
    *
    * a high-level function, see also /smartbch/erc20/send REST endpoint
    *
    * @param [requests]   list of send requests
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns {Erc20SendResponse[]} array of responses
+   * @returns {Sep20SendResponse[]} array of responses
    */
   public async send(
-    requests: Erc20SendRequest[],
+    requests: Sep20SendRequest[],
     overrides: ethers.CallOverrides = {}
-  ): Promise<Erc20SendResponse[]> {
+  ): Promise<Sep20SendResponse[]> {
     return this._processSendRequests(requests, overrides);
   }
 
@@ -318,16 +318,16 @@ export class Erc20 {
    *
    * A private utility wrapper to pre-process transactions
    *
-   * @param  {Erc20SendRequest[]} sendRequests
+   * @param  {Sep20SendRequest[]} sendRequests
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns {Erc20SendResponse[]} array of responses
+   * @returns {Sep20SendResponse[]} array of responses
    */
   private async _processSendRequests(
-    sendRequests: Erc20SendRequest[],
+    sendRequests: Sep20SendRequest[],
     overrides: ethers.CallOverrides = {}
-  ): Promise<Erc20SendResponse[]> {
-    const responses: Erc20SendResponse[] = [];
+  ): Promise<Sep20SendResponse[]> {
+    const responses: Sep20SendResponse[] = [];
 
     for (const sendRequest of sendRequests) {
       const tokenId = sendRequest.tokenId;
@@ -367,12 +367,12 @@ export class Erc20 {
    * @param options    Mint options to steer the process
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * @returns {Erc20MintResult} transaction id and token balance
+   * @returns {Sep20MintResult} transaction id and token balance
    */
   public async mint(
-    options: Erc20MintOptions,
+    options: Sep20MintOptions,
     overrides: ethers.CallOverrides = {}
-  ): Promise<Erc20MintResult> {
+  ): Promise<Sep20MintResult> {
     let [actualTokenId, result] = await this._processMint(options, overrides);
     return {
       txId: result,
@@ -391,10 +391,10 @@ export class Erc20 {
    * @returns the tokenId and minting transaction id
    */
   private async _processMint(
-    options: Erc20MintOptions,
+    options: Sep20MintOptions,
     overrides: ethers.CallOverrides = {}
   ) {
-    const opts = this.substituteOptionals({ ...options }) as Erc20MintOptions;
+    const opts = this.substituteOptionals({ ...options }) as Sep20MintOptions;
 
     opts.value = new BigNumber(opts.value);
     if (opts.value.isLessThanOrEqualTo(0)) {
@@ -456,7 +456,7 @@ export class Erc20 {
   /**
    * substituteOptionals - substitute optional fields with default values
    *
-   * will ensure that baton and token receiver are intialized as Erc20 address of this wallet if absent
+   * will ensure that baton and token receiver are intialized as Sep20 address of this wallet if absent
    * will ensure that baton will not be ended if endBaton is undefined
    * a private utility wrapper substitute optionals
    *
@@ -505,7 +505,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
+contract SmartBchSep20 is ERC20, ERC20Burnable, AccessControl {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
   uint8 private _decimals;
@@ -544,11 +544,11 @@ contract SmartBchErc20 is ERC20, ERC20Burnable, AccessControl {
 }`;
 }
 
-//#region Specific Erc20 wallet classes
+//#region Specific Sep20 wallet classes
 /**
  * Class to manage an slp enabled testnet wallet.
  */
-export class Web3Erc20 extends Erc20 {
+export class Web3Sep20 extends Sep20 {
   static get walletType() {
     return Web3SmartBchWallet;
   }
@@ -557,7 +557,7 @@ export class Web3Erc20 extends Erc20 {
 /**
  * Class to manage an slp enabled testnet wallet.
  */
-export class TestNetErc20 extends Erc20 {
+export class TestNetSep20 extends Sep20 {
   static get walletType() {
     return TestNetSmartBchWallet;
   }
@@ -566,7 +566,7 @@ export class TestNetErc20 extends Erc20 {
 /**
  * Class to manage an slp enabled regtest wallet.
  */
-export class RegTestErc20 extends Erc20 {
+export class RegTestSep20 extends Sep20 {
   static get walletType() {
     return RegTestSmartBchWallet;
   }
@@ -575,7 +575,7 @@ export class RegTestErc20 extends Erc20 {
 /**
  * Class to manage a bitcoin cash PrivKey wallet.
  */
-export class PrivKeyErc20 extends Erc20 {
+export class PrivKeySep20 extends Sep20 {
   static get walletType() {
     return PrivKeySmartBchWallet;
   }
@@ -584,7 +584,7 @@ export class PrivKeyErc20 extends Erc20 {
 /**
  * Class to manage a testnet PrivKey wallet.
  */
-export class TestNetPrivKeyErc20 extends Erc20 {
+export class TestNetPrivKeySep20 extends Sep20 {
   static get walletType() {
     return TestNetPrivKeySmartBchWallet;
   }
@@ -593,7 +593,7 @@ export class TestNetPrivKeyErc20 extends Erc20 {
 /**
  * Class to manage a regtest PrivKey wallet.
  */
-export class RegTestPrivKeyErc20 extends Erc20 {
+export class RegTestPrivKeySep20 extends Sep20 {
   static get walletType() {
     return RegTestPrivKeySmartBchWallet;
   }
@@ -602,7 +602,7 @@ export class RegTestPrivKeyErc20 extends Erc20 {
 /**
  * Class to manage a bitcoin cash watch wallet.
  */
-export class WatchErc20 extends Erc20 {
+export class WatchSep20 extends Sep20 {
   static get walletType() {
     return WatchSmartBchWallet;
   }
@@ -611,7 +611,7 @@ export class WatchErc20 extends Erc20 {
 /**
  * Class to manage a testnet watch wallet.
  */
-export class TestNetWatchErc20 extends Erc20 {
+export class TestNetWatchSep20 extends Sep20 {
   static get walletType() {
     return TestNetWatchSmartBchWallet;
   }
@@ -620,7 +620,7 @@ export class TestNetWatchErc20 extends Erc20 {
 /**
  * Class to manage a regtest watch wallet.
  */
-export class RegTestWatchErc20 extends Erc20 {
+export class RegTestWatchSep20 extends Sep20 {
   static get walletType() {
     return RegTestWatchSmartBchWallet;
   }

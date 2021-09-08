@@ -1,6 +1,4 @@
-// import { BigNumber, BigNumberish } from "ethers";
 import BigNumber from "bignumber.js";
-import { Erc20GenesisOptions } from "./interface";
 import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
@@ -11,7 +9,7 @@ describe(`Test Ethereum functions`, () => {
     wallet.setNetwork("EthMainnet" as any);
     expect(
       (
-        await wallet.erc20.getBalance(
+        await wallet.sep20.getBalance(
           "0xdac17f958d2ee523a2206206994597c13d831ec7"
         )
       ).value.toNumber()
@@ -19,7 +17,7 @@ describe(`Test Ethereum functions`, () => {
 
     expect(
       (
-        await wallet.erc20.getTokenInfo(
+        await wallet.sep20.getTokenInfo(
           "0xdac17f958d2ee523a2206206994597c13d831ec7"
         )
       ).totalSupply.toNumber()
@@ -33,7 +31,7 @@ describe(`Test Ethereum functions`, () => {
     wallet.setNetwork("EthMainnet" as any);
 
     await expect(
-      wallet.erc20.send(
+      wallet.sep20.send(
         [
           {
             address: wallet.getDepositAddress(),
@@ -58,7 +56,7 @@ describe(`Test Ethereum functions`, () => {
       initialAmount: 10,
     };
 
-    await expect(watchWallet.erc20.genesis(options)).rejects.toThrow(
+    await expect(watchWallet.sep20.genesis(options)).rejects.toThrow(
       "Cannot deploy contracts with Watch-Only wallets"
     );
 
@@ -66,7 +64,7 @@ describe(`Test Ethereum functions`, () => {
       process.env.SBCH_ALICE_ID!
     );
 
-    const result = await alice.erc20.genesis(options, {
+    const result = await alice.sep20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
@@ -77,7 +75,7 @@ describe(`Test Ethereum functions`, () => {
     expect(result.tokenId).toBe(result.balance.tokenId);
 
     // get token info
-    const tokenInfo = await alice.erc20.getTokenInfo(result.tokenId);
+    const tokenInfo = await alice.sep20.getTokenInfo(result.tokenId);
     expect(tokenInfo.name).toBe(options.name);
     expect(tokenInfo.ticker).toBe(options.ticker);
     expect(tokenInfo.decimals).toBe(options.decimals);
@@ -88,7 +86,7 @@ describe(`Test Ethereum functions`, () => {
     const bob = await RegTestSmartBchWallet.fromPrivateKey(
       "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
     );
-    const sendResult = await alice.erc20.send(
+    const sendResult = await alice.sep20.send(
       [
         {
           address: bob.getDepositAddress(),
@@ -100,13 +98,13 @@ describe(`Test Ethereum functions`, () => {
     );
 
     expect(sendResult[0].balance.value).toStrictEqual(new BigNumber(7));
-    expect((await bob.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+    expect((await bob.sep20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(3)
     );
 
     const charlie = await RegTestSmartBchWallet.newRandom();
     const dave = await RegTestSmartBchWallet.newRandom();
-    const sendManyResult = await alice.erc20.send(
+    const sendManyResult = await alice.sep20.send(
       [
         {
           address: charlie.getDepositAddress(),
@@ -122,27 +120,27 @@ describe(`Test Ethereum functions`, () => {
       { gasPrice: 10 ** 10 }
     );
 
-    expect((await alice.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+    expect((await alice.sep20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(4)
     );
     expect(
-      (await charlie.erc20.getBalance(result.tokenId)).value
+      (await charlie.sep20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(1));
-    expect((await dave.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+    expect((await dave.sep20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(2)
     );
 
     // sendMax
-    const sendMaxResult = await bob.erc20.sendMax(
+    const sendMaxResult = await bob.sep20.sendMax(
       alice.getDepositAddress(),
       result.tokenId,
       { gasPrice: 10 ** 10 }
     );
     expect(sendMaxResult.balance.value).toStrictEqual(new BigNumber(0));
-    expect((await alice.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+    expect((await alice.sep20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(7)
     );
-    expect((await bob.erc20.getBalance(result.tokenId)).value).toStrictEqual(
+    expect((await bob.sep20.getBalance(result.tokenId)).value).toStrictEqual(
       new BigNumber(0)
     );
   });
@@ -165,7 +163,7 @@ describe(`Test Ethereum functions`, () => {
       batonReceiverAddress: bobWallet.getDepositAddress(),
     };
 
-    const result = await aliceWallet.erc20.genesis(options, {
+    const result = await aliceWallet.sep20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
@@ -175,14 +173,14 @@ describe(`Test Ethereum functions`, () => {
     expect(result.balance.decimals).toBe(options.decimals);
     expect(result.tokenId).toBe(result.balance.tokenId);
     expect(
-      (await aliceWallet.erc20.getBalance(result.tokenId)).value
+      (await aliceWallet.sep20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(0));
     expect(
-      (await bobWallet.erc20.getBalance(result.tokenId)).value
+      (await bobWallet.sep20.getBalance(result.tokenId)).value
     ).toStrictEqual(new BigNumber(10));
 
     // mint
-    const mintResult = await bobWallet.erc20.mint(
+    const mintResult = await bobWallet.sep20.mint(
       {
         tokenId: result.tokenId,
         value: 5,
@@ -194,7 +192,7 @@ describe(`Test Ethereum functions`, () => {
 
     // mint fail, no role
     await expect(
-      aliceWallet.erc20.mint(
+      aliceWallet.sep20.mint(
         {
           tokenId: result.tokenId,
           value: 5,
@@ -220,7 +218,7 @@ describe(`Test Ethereum functions`, () => {
       endBaton: true,
     };
 
-    const result = await aliceWallet.erc20.genesis(options, {
+    const result = await aliceWallet.sep20.genesis(options, {
       gasPrice: 10 ** 10,
     });
 
@@ -232,7 +230,7 @@ describe(`Test Ethereum functions`, () => {
 
     // mint fail, mint was disabled by genesis options
     await expect(
-      aliceWallet.erc20.mint(
+      aliceWallet.sep20.mint(
         {
           tokenId: result.tokenId,
           value: 5,

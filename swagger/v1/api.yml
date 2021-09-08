@@ -73,11 +73,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch
-  - name: smartbch/erc20
-    description: Interact with SmartBch ERC20 contract tokens
+  - name: smartbch/sep20
+    description: Interact with SmartBch SEP20 contract tokens
     externalDocs:
       description: Find out more
-      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch/erc20
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/smartbch/sep20
   - name: smartbch/contract
     description: Interact with SmartBch contracts
     externalDocs:
@@ -1312,104 +1312,104 @@ paths:
       tags:
         - smartbch/wallet
 
-  /smartbch/erc20/genesis:
+  /smartbch/sep20/genesis:
     post:
-      operationId: smartBchErc20Genesis
+      operationId: smartBchSep20Genesis
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SmartBchErc20GenesisRequest"
+              $ref: "#/components/schemas/SmartBchSep20GenesisRequest"
         description: |
-          Request to create a new SmartBch ERC20 token (genesis)
+          Request to create a new SmartBch SEP20 token (genesis)
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SmartBchErc20GenesisResponse'
+                $ref: '#/components/schemas/SmartBchSep20GenesisResponse'
           description: successful operation
-      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
+      summary: Get created tokenId back and new SmartBch SEP20 token balance of the wallet
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/mint:
+  /smartbch/sep20/mint:
     post:
-      operationId: smartBchErc20Mint
+      operationId: smartBchSep20Mint
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SmartBchErc20MintRequest"
+              $ref: "#/components/schemas/SmartBchSep20MintRequest"
         description: |
-          Request to mint more of SmartBch ERC20 tokens
+          Request to mint more of SmartBch SEP20 tokens
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SmartBchErc20MintResponse'
+                $ref: '#/components/schemas/SmartBchSep20MintResponse'
           description: successful operation
-      summary: Get created tokenId back and new SmartBch ERC20 token balance of the wallet
+      summary: Get created tokenId back and new SmartBch SEP20 token balance of the wallet
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/token_info:
+  /smartbch/sep20/token_info:
     post:
-      operationId: smartBchErc20TokenInfo
+      operationId: smartBchSep20TokenInfo
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SmartBchErc20TokenInfoRequest"
+              $ref: "#/components/schemas/SmartBchSep20TokenInfoRequest"
         description: |
-          Request to get information about the SmartBch ERC20 token
+          Request to get information about the SmartBch SEP20 token
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SmartBchErc20TokenInfoResponse'
+                $ref: '#/components/schemas/SmartBchSep20TokenInfoResponse'
           description: successful operation
-      summary: Get information about the SmartBch ERC20 token
+      summary: Get information about the SmartBch SEP20 token
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/balance:
+  /smartbch/sep20/balance:
     post:
-      operationId: smartBchErc20Balance
+      operationId: smartBchSep20Balance
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SmartBchErc20BalanceRequest"
+              $ref: "#/components/schemas/SmartBchSep20BalanceRequest"
         description: |
-          Request for a wallet SmartBch ERC20 token balance
+          Request for a wallet SmartBch SEP20 token balance
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SmartBchErc20BalanceResponse'
+                $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
           description: successful operation
-      summary: Get total SmartBch ERC20 token balance of the wallet
+      summary: Get total SmartBch SEP20 token balance of the wallet
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/deposit_address:
+  /smartbch/sep20/deposit_address:
     post:
-      operationId: smartBchErc20DepositAddress
+      operationId: smartBchSep20DepositAddress
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/SerializedWallet"
         description: |
-          Request for an SmartBch ERC20 deposit address given a wallet
+          Request for an SmartBch SEP20 deposit address given a wallet
         required: true
       responses:
         "200":
@@ -1418,20 +1418,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/SmartBchDepositAddressResponse"
           description: successful operation
-      summary: Get an SmartBch ERC20 deposit address
+      summary: Get an SmartBch SEP20 deposit address
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/deposit_qr:
+  /smartbch/sep20/deposit_qr:
     post:
-      operationId: smartBchErc20DepositQr
+      operationId: smartBchSep20DepositQr
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/SerializedWallet"
         description: |
-          Request for a SmartBch ERC20 deposit address as a Quick Response code (qrcode)
+          Request for a SmartBch SEP20 deposit address as a Quick Response code (qrcode)
         required: true
       responses:
         200:
@@ -1442,26 +1442,26 @@ paths:
           description: |
             A Qr code image data encoded string in the src field suitable for inclusion in html using:
                - \<img src\=\"{response.src}"\>
-      summary: Get an SmartBch ERC20 receiving address as a qrcode
+      summary: Get an SmartBch SEP20 receiving address as a qrcode
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/send:
+  /smartbch/sep20/send:
     post:
-      operationId: smartBchErc20Send
+      operationId: smartBchSep20Send
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SmartBchErc20SendRequest"
-        description: place a SmartBch ERC20 token send request
+              $ref: "#/components/schemas/SmartBchSep20SendRequest"
+        description: place a SmartBch SEP20 token send request
         required: true
       responses:
         "202":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SmartBchErc20SendResponse"
+                $ref: "#/components/schemas/SmartBchSep20SendResponse"
           description: transaction accepted
         "400":
           content: {}
@@ -1469,33 +1469,33 @@ paths:
         "418":
           content: {}
           description: Invalid network for given address
-      summary: Send some SmartBch ERC20 token amount to a given address
+      summary: Send some SmartBch SEP20 token amount to a given address
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
-  /smartbch/erc20/send_max:
+  /smartbch/sep20/send_max:
     post:
-      operationId: smartBchErc20SendMax
+      operationId: smartBchSep20SendMax
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SmartBchErc20SendMaxRequest"
-        description: Request to send all available SmartBch ERC20 token funds to a given address
+              $ref: "#/components/schemas/SmartBchSep20SendMaxRequest"
+        description: Request to send all available SmartBch SEP20 token funds to a given address
         required: true
       responses:
         "202":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SmartBchErc20SendResponse"
+                $ref: "#/components/schemas/SmartBchSep20SendResponse"
           description: transaction accepted
         "400":
           content: {}
           description: Invalid Request
-      summary: Send all available SmartBch ERC20 token funds to a given address
+      summary: Send all available SmartBch SEP20 token funds to a given address
       tags:
-        - smartbch/erc20
+        - smartbch/sep20
 
   /smartbch/contract/create:
     post:
@@ -3340,7 +3340,7 @@ components:
         - byzantium
         - type
 
-    SmartBchErc20GenesisRequest:
+    SmartBchSep20GenesisRequest:
       properties:
         walletId:
           type: string
@@ -3382,16 +3382,16 @@ components:
         - initialAmount
         - decimals
 
-    SmartBchErc20GenesisResponse:
+    SmartBchSep20GenesisResponse:
       properties:
         tokenId:
           type: string
           example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
           description: Full token identifier freshly created
         balance:
-          $ref: "#/components/schemas/SmartBchErc20BalanceResponse"
+          $ref: "#/components/schemas/SmartBchSep20BalanceResponse"
 
-    SmartBchErc20TokenInfoRequest:
+    SmartBchSep20TokenInfoRequest:
       properties:
         walletId:
           type: string
@@ -3405,7 +3405,7 @@ components:
         - walletId
         - tokenId
 
-    SmartBchErc20TokenInfoResponse:
+    SmartBchSep20TokenInfoResponse:
       properties:
         name:
           type: string
@@ -3426,7 +3426,7 @@ components:
           type: string
           description: Total amount of tokens in circulation
 
-    SmartBchErc20MintRequest:
+    SmartBchSep20MintRequest:
       properties:
         walletId:
           type: string
@@ -3451,16 +3451,16 @@ components:
         - value
         - tokenId
 
-    SmartBchErc20MintResponse:
+    SmartBchSep20MintResponse:
       properties:
         txId:
           type: string
           example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
           description: The hash of a transaction
         balance:
-          $ref: "#/components/schemas/SmartBchErc20BalanceResponse"
+          $ref: "#/components/schemas/SmartBchSep20BalanceResponse"
 
-    SmartBchErc20BalanceRequest:
+    SmartBchSep20BalanceRequest:
       properties:
         walletId:
           type: string
@@ -3474,7 +3474,7 @@ components:
         - walletId
         - tokenId
 
-    SmartBchErc20BalanceResponse:
+    SmartBchSep20BalanceResponse:
       properties:
         value:
           type: string
@@ -3494,7 +3494,7 @@ components:
           example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
           description: Token unique hexadecimal identifier
 
-    SmartBchErc20SendRequest:
+    SmartBchSep20SendRequest:
       properties:
         walletId:
           type: string
@@ -3503,7 +3503,7 @@ components:
         to:
           type: array
           items:
-            $ref: "#/components/schemas/SmartBchErc20SendRequestItem"
+            $ref: "#/components/schemas/SmartBchSep20SendRequestItem"
         overrides:
           $ref: "#/components/schemas/SmartBchOverrides"
       type: object
@@ -3511,7 +3511,7 @@ components:
         - walletId
         - to
 
-    SmartBchErc20SendRequestItem:
+    SmartBchSep20SendRequestItem:
       properties:
         address:
            type: string
@@ -3530,7 +3530,7 @@ components:
         - value
         - tokenId
 
-    SmartBchErc20SendResponse:
+    SmartBchSep20SendResponse:
       type: array
       items:
         properties:
@@ -3539,13 +3539,13 @@ components:
             example: "0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
             description: The hash of a transaction
           balance:
-            $ref: "#/components/schemas/SmartBchErc20BalanceResponse"
+            $ref: "#/components/schemas/SmartBchSep20BalanceResponse"
           explorerUrl:
             type: string
             example: "https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7"
             description: Web url to a transaction on a block explorer
 
-    SmartBchErc20SendMaxRequest:
+    SmartBchSep20SendMaxRequest:
       properties:
         walletId:
           type: string
@@ -3701,10 +3701,10 @@ components:
             // SPDX-License-Identifier: MIT
             pragma solidity ^0.8.2;
 
-            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+            import "@openzeppelin/contracts/token/SEP20/SEP20.sol";
 
-            contract MyToken is ERC20 {
-              constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+            contract MyToken is SEP20 {
+              constructor(string memory name, string memory symbol) SEP20(name, symbol) {}
             }
         parameters:
           description: constructor parameters used to create this contract instance
@@ -3727,10 +3727,10 @@ components:
             // SPDX-License-Identifier: MIT
             pragma solidity ^0.8.2;
 
-            import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+            import "@openzeppelin/contracts/token/SEP20/SEP20.sol";
 
-            contract MyToken is ERC20 {
-              constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+            contract MyToken is SEP20 {
+              constructor(string memory name, string memory symbol) SEP20(name, symbol) {}
             }
         parameters:
           description: constructor parameters used to create this contract instance

@@ -27,8 +27,8 @@ export interface BalanceResponse {
   usd?: number;
 }
 
-//#region Erc20
-export interface Erc20GenesisOptions {
+//#region Sep20
+export interface Sep20GenesisOptions {
   name: string;
   ticker: string;
   initialAmount: BigNumber.Value;
@@ -38,7 +38,7 @@ export interface Erc20GenesisOptions {
   batonReceiverAddress?: string;
 }
 
-export interface Erc20TokenInfo {
+export interface Sep20TokenInfo {
   name: string;
   ticker: string;
   tokenId: string;
@@ -46,7 +46,7 @@ export interface Erc20TokenInfo {
   totalSupply: BigNumber;
 }
 
-export interface Erc20TokenBalance {
+export interface Sep20TokenBalance {
   value: BigNumber;
   ticker: string;
   name: string;
@@ -54,34 +54,34 @@ export interface Erc20TokenBalance {
   decimals: number;
 }
 
-export interface Erc20GenesisResult {
+export interface Sep20GenesisResult {
   tokenId: string;
-  balance: Erc20TokenBalance;
+  balance: Sep20TokenBalance;
 }
 
-export interface Erc20SendResponse {
+export interface Sep20SendResponse {
   txId: string;
-  balance: Erc20TokenBalance;
+  balance: Sep20TokenBalance;
   explorerUrl: string;
 }
 
-export interface Erc20MintOptions {
+export interface Sep20MintOptions {
   value: BigNumber.Value;
   tokenId: string;
   tokenReceiverAddress?: string;
 }
 
-export interface Erc20MintResult {
+export interface Sep20MintResult {
   txId: string;
-  balance: Erc20TokenBalance;
+  balance: Sep20TokenBalance;
 }
 
-export interface Erc20SendRequest {
+export interface Sep20SendRequest {
   address: string;
   value: BigNumber.Value;
   tokenId: string;
 }
-//#endregion Erc20
+//#endregion Sep20
 
 //#region Contract
 export type Argument =

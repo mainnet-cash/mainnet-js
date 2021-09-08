@@ -35,7 +35,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
       wallet.setNetwork("EthMainnet");
       expect(
         (
-          await wallet.erc20.getBalance(
+          await wallet.sep20.getBalance(
             "0xdac17f958d2ee523a2206206994597c13d831ec7"
           )
         ).value.toNumber()
@@ -43,7 +43,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
       expect(
         (
-          await wallet.erc20.getTokenInfo(
+          await wallet.sep20.getTokenInfo(
             "0xdac17f958d2ee523a2206206994597c13d831ec7"
           )
         ).totalSupply.toNumber()
@@ -59,7 +59,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
         );
         wallet.setNetwork("EthMainnet");
 
-        await wallet.erc20.send(
+        await wallet.sep20.send(
           [
             {
               address: wallet.getDepositAddress(),
@@ -80,7 +80,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
           "0x227F0226499E308769478669669CbdCf4E7dA002"
         );
 
-        await watchWallet.erc20.genesis({ initialAmount: 0, decimals: 0 });
+        await watchWallet.sep20.genesis({ initialAmount: 0, decimals: 0 });
       })
     ).rejects.toThrow("Cannot deploy contracts with Watch-Only wallets");
   });
@@ -97,7 +97,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
         const alice = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
 
-        const result = await alice.erc20.genesis(options, {
+        const result = await alice.sep20.genesis(options, {
           gasPrice: 10 ** 10,
         });
 
@@ -108,7 +108,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
         expect(result.tokenId).toBe(result.balance.tokenId);
 
         // get token info
-        const tokenInfo = await alice.erc20.getTokenInfo(result.tokenId);
+        const tokenInfo = await alice.sep20.getTokenInfo(result.tokenId);
         expect(tokenInfo.name).toBe(options.name);
         expect(tokenInfo.ticker).toBe(options.ticker);
         expect(tokenInfo.decimals).toBe(options.decimals);
@@ -119,7 +119,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
         const bob = await RegTestSmartBchWallet.fromPrivateKey(
           "0x17e40d4ce582a9f601e2a54d27c7268d6b7b4b865e1204bda15778795b017bff"
         );
-        const sendResult = await alice.erc20.send(
+        const sendResult = await alice.sep20.send(
           [
             {
               address: bob.getDepositAddress(),
@@ -132,12 +132,12 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
         expect(sendResult[0].balance.value).toStrictEqual(new BigNumber(7));
         expect(
-          (await bob.erc20.getBalance(result.tokenId)).value
+          (await bob.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(3));
 
         const charlie = await RegTestSmartBchWallet.newRandom();
         const dave = await RegTestSmartBchWallet.newRandom();
-        const sendManyResult = await alice.erc20.send(
+        const sendManyResult = await alice.sep20.send(
           [
             {
               address: charlie.getDepositAddress(),
@@ -154,27 +154,27 @@ describe(`SmartBchWallet should function in the browser`, () => {
         );
 
         expect(
-          (await alice.erc20.getBalance(result.tokenId)).value
+          (await alice.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(4));
         expect(
-          (await charlie.erc20.getBalance(result.tokenId)).value
+          (await charlie.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(1));
         expect(
-          (await dave.erc20.getBalance(result.tokenId)).value
+          (await dave.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(2));
 
         // sendMax
-        const sendMaxResult = await bob.erc20.sendMax(
+        const sendMaxResult = await bob.sep20.sendMax(
           alice.getDepositAddress(),
           result.tokenId,
           { gasPrice: 10 ** 10 }
         );
         expect(sendMaxResult.balance.value).toStrictEqual(new BigNumber(0));
         expect(
-          (await alice.erc20.getBalance(result.tokenId)).value
+          (await alice.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(7));
         expect(
-          (await bob.erc20.getBalance(result.tokenId)).value
+          (await bob.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(0));
       }, process.env.SBCH_ALICE_ID)
     ).rejects.toThrow("Contract deployment is not yet supported in browser");
@@ -198,7 +198,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
           batonReceiverAddress: receiverWallet.getDepositAddress(),
         };
 
-        const result = await wallet.erc20.genesis(options, {
+        const result = await wallet.sep20.genesis(options, {
           gasPrice: 10 ** 10,
         });
 
@@ -208,14 +208,14 @@ describe(`SmartBchWallet should function in the browser`, () => {
         expect(result.balance.decimals).toBe(options.decimals);
         expect(result.tokenId).toBe(result.balance.tokenId);
         expect(
-          (await wallet.erc20.getBalance(result.tokenId)).value
+          (await wallet.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(0));
         expect(
-          (await receiverWallet.erc20.getBalance(result.tokenId)).value
+          (await receiverWallet.sep20.getBalance(result.tokenId)).value
         ).toStrictEqual(new BigNumber(10));
 
         // mint
-        const mintResult = await receiverWallet.erc20.mint(
+        const mintResult = await receiverWallet.sep20.mint(
           {
             tokenId: result.tokenId,
             value: 5,
@@ -227,7 +227,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
         // mint fail, no role
         await expect(
-          wallet.erc20.mint(
+          wallet.sep20.mint(
             {
               tokenId: result.tokenId,
               value: 5,
@@ -255,7 +255,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
           endBaton: true,
         };
 
-        const result = await wallet.erc20.genesis(options, {
+        const result = await wallet.sep20.genesis(options, {
           gasPrice: 10 ** 10,
         });
 
@@ -267,7 +267,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
         // mint fail, mint was disabled by genesis options
         await expect(
-          wallet.erc20.mint(
+          wallet.sep20.mint(
             {
               tokenId: result.tokenId,
               value: 5,
