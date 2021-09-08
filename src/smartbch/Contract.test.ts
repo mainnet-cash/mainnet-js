@@ -1,11 +1,11 @@
 import { ethers } from "ethers";
 import { Contract } from "../smartbch/Contract";
-import { Erc20 } from "./Erc20";
+import { Sep20 } from "./Sep20";
 import { RegTestSmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
   test("Test eth mainnet contract", async () => {
-    const abi = Erc20.abi;
+    const abi = Sep20.abi;
 
     const contract = new Contract(
       "0xdac17f958d2ee523a2206206994597c13d831ec7", // tether usd
@@ -29,7 +29,7 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("Test deploying contract, getting gas estimates and invoking methods", async () => {
-    const script = Erc20.script;
+    const script = Sep20.script;
 
     const wallet = await RegTestSmartBchWallet.fromId(
       process.env.SBCH_ALICE_ID!
