@@ -1,20 +1,11 @@
 module.exports = {
-  rootDir: "./",
+  rootDir: "./src",
   collectCoverage: true,
-  collectCoverageFrom: [
-    "**/*.{js,jsx,ts}",
-    "!**/node_modules/**",
-    "!**/packages/mainnet-cash/**",
-  ],
+  collectCoverageFrom: ["**/*.{js,jsx,ts}", "!**/node_modules/**"],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
     ".*/src/.*\\.test\\.{ts,js}",
     ".*/src/.*\\.test\\.headless\\.js",
-  ],
-  roots: [
-    "<rootDir>/packages/mainnet-js/src",
-    "<rootDir>/packages/contract/src",
-    "<rootDir>/packages/smartbch/src",
   ],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
@@ -24,9 +15,8 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   testEnvironment: "node",
-  setupFiles: ["fake-indexeddb/auto"],
-  globalSetup: "<rootDir>/jest/node.setup.js",
-  globalTeardown: "<rootDir>/jest/node.teardown.js",
+  globalSetup: "../../jest/node.setup.js",
+  globalTeardown: "../../jest/node.teardown.js",
   verbose: true,
   maxConcurrency: 1,
   testTimeout: 125000,
