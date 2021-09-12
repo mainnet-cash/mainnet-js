@@ -45,7 +45,7 @@ describe("Webhook worker tests", () => {
       SlpDbProvider.defaultServers.testnet =
         SlpDbProvider.defaultServers.regtest;
       GsppProvider.defaultServers.testnet = GsppProvider.defaultServers.regtest;
-    } catch (e:any) {
+    } catch (e: any) {
       throw e;
     }
   });
@@ -102,7 +102,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -143,7 +143,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -185,7 +185,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -238,7 +238,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -280,7 +280,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }

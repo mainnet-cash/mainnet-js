@@ -18,7 +18,7 @@ import axios from "axios";
 import { btoa } from "../util/base64";
 
 //import EventSource from "../../polyfill/eventsource";
-import  EventSource from "../util/eventsource";
+import EventSource from "../util/eventsource";
 import { Mainnet } from "../index";
 
 export class GsppProvider implements SlpProvider {

@@ -68,7 +68,7 @@ describe(`Test Wallet library`, () => {
       await TestNetWallet.fromId(
         `wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`
       );
-    } catch (e:any) {
+    } catch (e: any) {
       expect(e.message).toBe(
         "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c"
       );
@@ -79,7 +79,7 @@ describe(`Test Wallet library`, () => {
     expect.assertions(1);
     try {
       await RegTestWallet.fromId(`hd:regtest:${process.env.PRIVATE_WIF}`);
-    } catch (e:any) {
+    } catch (e: any) {
       expect(e.message.slice(0, 97)).toBe("Unknown wallet type 'hd'");
     }
   });
@@ -88,7 +88,7 @@ describe(`Test Wallet library`, () => {
     expect.assertions(1);
     try {
       await TestNetWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`);
-    } catch (e:any) {
+    } catch (e: any) {
       expect(e.message.slice(0, 97)).toBe(
         "Network prefix regtest to a testnet wallet"
       );

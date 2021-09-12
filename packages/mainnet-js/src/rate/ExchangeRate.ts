@@ -53,7 +53,7 @@ export class ExchangeRate {
         function (response) {
           return response;
         },
-        function (error:any) {
+        function (error: any) {
           // resolve response with our mocked data
           if (axios.isCancel(error)) {
             return Promise.resolve(error.message);
@@ -151,7 +151,7 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
             "https://markets.api.bitcoin.com/live/bitcoin"
           );
           return response.data["data"]["BCH"];
-        } catch (e2:any) {
+        } catch (e2: any) {
           return e2;
         }
       }

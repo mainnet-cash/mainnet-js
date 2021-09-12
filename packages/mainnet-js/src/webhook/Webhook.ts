@@ -55,7 +55,7 @@ export class Webhook {
       await axios.post(this.url, data);
       // console.debug("Posted webhook", this.url, data);
       return true;
-    } catch (e:any) {
+    } catch (e: any) {
       if (e.message && e.message.status === 200) {
         return true;
       }

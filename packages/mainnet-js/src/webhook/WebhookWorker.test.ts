@@ -23,7 +23,7 @@ describe("Webhook worker tests", () => {
 
       Webhook.debug.setupAxiosMocks();
       worker = await WebhookWorker.instance();
-    } catch (e:any) {
+    } catch (e: any) {
       throw e;
     }
   });
@@ -64,7 +64,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 0)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -88,7 +88,7 @@ describe("Webhook worker tests", () => {
       expect(worker.activeHooks.size).toBe(0);
       expect((await worker.db.getWebhooks()).length).toBe(0);
       expect(Webhook.debug.responses).toStrictEqual({});
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }

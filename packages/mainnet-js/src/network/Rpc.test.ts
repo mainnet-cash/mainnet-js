@@ -25,7 +25,7 @@ test("subcribe to address", async () => {
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-  } catch (e:any) {
+  } catch (e: any) {
     console.log(e, e.message, e.stack);
   }
 });
@@ -53,7 +53,7 @@ test("subcribe to muliple addresses bug", async () => {
     );
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-  } catch (e:any) {
+  } catch (e: any) {
     console.log(e, e.message, e.stack);
   }
 });

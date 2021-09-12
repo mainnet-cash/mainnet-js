@@ -22,7 +22,7 @@ describe("Webhook worker tests", () => {
 
       Webhook.debug.setupAxiosMocks();
       worker = await WebhookWorker.instance();
-    } catch (e:any) {
+    } catch (e: any) {
       throw e;
     }
   });
@@ -75,7 +75,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -115,7 +115,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -156,7 +156,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -200,7 +200,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -274,7 +274,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 10000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }
@@ -315,7 +315,7 @@ describe("Webhook worker tests", () => {
           resolve(true);
         }, 3000)
       );
-    } catch (e:any) {
+    } catch (e: any) {
       console.log(e, e.stack, e.message);
       throw e;
     }

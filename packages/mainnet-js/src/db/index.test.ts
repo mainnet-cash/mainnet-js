@@ -56,7 +56,7 @@ test("Expect Error passing mainnet wallet to error", async () => {
   try {
     process.env.ALLOW_MAINNET_USER_WALLETS = "false";
     await Wallet.named("Seed Wallet", "db-test");
-  } catch (e:any) {
+  } catch (e: any) {
     expect(e.message).toBe(
       'Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private'
     );

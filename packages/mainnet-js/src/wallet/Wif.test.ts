@@ -87,7 +87,7 @@ describe(`Test creation of wallet from walletId`, () => {
         await TestNetWallet.fromId(
           "wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
         );
-      } catch (e:any) {
+      } catch (e: any) {
         expect(e.message).toBe(
           "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c"
         );
@@ -100,7 +100,7 @@ describe(`Test creation of wallet from walletId`, () => {
         await Wallet.fromId(
           "wif:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
-      } catch (e:any) {
+      } catch (e: any) {
         expect(e.message).toBe(
           "Mainnet type wif cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6 passed, should start with L or K"
         );
@@ -113,7 +113,7 @@ describe(`Test creation of wallet from walletId`, () => {
         await Wallet.fromId(
           "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
-      } catch (e:any) {
+      } catch (e: any) {
         expect(e.message).toBe("Unknown wallet type 'hd'");
       }
     });
@@ -124,7 +124,7 @@ describe(`Test creation of wallet from walletId`, () => {
         await Wallet.fromId(
           "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
         );
-      } catch (e:any) {
+      } catch (e: any) {
         expect(e.message).toBe("Unknown wallet type 'q2k'");
       }
     });
@@ -136,7 +136,7 @@ describe(`Tests named wallet creation`, () => {
     expect.assertions(1);
     try {
       await Wallet.named("");
-    } catch (e:any) {
+    } catch (e: any) {
       expect(e.message).toBe("Named wallets must have a non-empty name");
     }
   });
@@ -146,7 +146,7 @@ describe(`Tests named wallet creation`, () => {
     try {
       await RegTestWallet.named("duplicate_name", "dup_test");
       await RegTestWallet.named("duplicate_name", "dup_test", true);
-    } catch (e:any) {
+    } catch (e: any) {
       expect(e.message).toBe(
         "A wallet with the name duplicate_name already exists in dup_test"
       );
@@ -657,7 +657,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       await bobWallet.send([
         { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
       ]);
-    } catch (e:any) {
+    } catch (e: any) {
       expect(e.message).toBe(
         `the transaction was rejected by network rules.\n\ndust (code 64)\n`
       );
