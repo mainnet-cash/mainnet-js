@@ -12,6 +12,7 @@ import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 
 import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util";
+import { CancelWatchFn } from "../wallet/interface";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -169,24 +170,71 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  // Wait for the next block or a block at given blockchain height.
-  public async waitForBlock(height?: number): Promise<HeaderI> {
-    return new Promise(async (resolve) => {
-      let acknowledged = false;
-      const waitForBlockCallback = async (header: any) => {
-        if (!acknowledged) {
-          acknowledged = true;
+  public watchAddress(cashaddr: string, callback: (txHash: string) => void): CancelWatchFn {
+    const watchAddressCallback = async (data) => {
+      // subscription acknowledgement is the latest known status or null if no status is known
+      // status is an array: [ cashaddr, [tx_hashes] ]
+      if (data instanceof Array) {
+        let addr = data[0] as string;
+        if (addr !== cashaddr) {
           return;
         }
 
-        header = header instanceof Array ? header[0] : header;
+        for (const txHash of data[1]) {
+          if (!txHash) {
+            // data[1] can be null eventually if there are no tx for this address
+            continue;
+          }
+          callback(txHash);
+        }
+      }
+    };
 
+    this.subscribeToAddressTransactions(cashaddr, watchAddressCallback);
+
+    return async () => {
+      await this.unsubscribeFromAddressTransactions(
+        cashaddr,
+        watchAddressCallback
+      );
+    }
+  }
+
+  public watchAddressTransactions(cashaddr: string, callback: (tx: ElectrumRawTransaction) => void): CancelWatchFn {
+    return this.watchAddress(cashaddr, async (txHash: string) => {
+      const tx  = await this.getRawTransactionObject(txHash);
+      callback(tx);
+    });
+  }
+
+  // Wait for the next block or a block at given blockchain height.
+  public watchBlocks(callback: (header: HeaderI) => void): CancelWatchFn {
+    let acknowledged = false;
+    const waitForBlockCallback = (_header: HeaderI | HeaderI[]) => {
+      if (!acknowledged) {
+        acknowledged = true;
+        return;
+      }
+
+      _header = _header instanceof Array ? _header[0] : _header;
+      callback(_header);
+    };
+    this.subscribeToHeaders(waitForBlockCallback);
+
+    return async () => {
+      this.unsubscribeFromHeaders(waitForBlockCallback);
+    }
+  }
+
+  // Wait for the next block or a block at given blockchain height.
+  public async waitForBlock(height?: number): Promise<HeaderI> {
+    return new Promise(async (resolve) => {
+      const cancelWatch = this.watchBlocks(async (header) => {
         if (height === undefined || header.height >= height!) {
-          await this.unsubscribeFromHeaders(waitForBlockCallback);
+          await cancelWatch();
           resolve(header);
         }
-      };
-      await this.subscribeToHeaders(waitForBlockCallback);
+      });
     });
   }
 
@@ -219,6 +267,28 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<void> {
     await this.unsubscribeRequest(
       "blockchain.address.subscribe",
+      callback,
+      cashaddr
+    );
+  }
+
+  async subscribeToAddressTransactions(
+    cashaddr: string,
+    callback: (data: any) => void
+  ): Promise<void> {
+    await this.subscribeRequest(
+      "blockchain.address.transactions.subscribe",
+      callback,
+      cashaddr
+    );
+  }
+
+  async unsubscribeFromAddressTransactions(
+    cashaddr: string,
+    callback: (data: any) => void
+  ): Promise<void> {
+    await this.unsubscribeRequest(
+      "blockchain.address.transactions.subscribe",
       callback,
       cashaddr
     );

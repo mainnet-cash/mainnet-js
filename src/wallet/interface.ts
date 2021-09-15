@@ -87,6 +87,8 @@ export interface WaitForTransactionOptions {
 }
 
 export interface WaitForTransactionResponse {
-  transactionInfo?: ElectrumRawTransaction | any;
+  transactionInfo?: ElectrumRawTransaction;
   balance?: BalanceResponse;
 }
+
+export type CancelWatchFn = () => Promise<void>;

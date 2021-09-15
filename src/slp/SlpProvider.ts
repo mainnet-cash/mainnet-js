@@ -2,7 +2,7 @@ import { SlpTokenBalance, SlpTokenInfo, SlpTxI, SlpUtxoI } from "./interface";
 import BigNumber from "bignumber.js";
 
 export type SlpWatchTransactionCallback = (tx: SlpTxI) => void;
-export type SlpCancelWatchFn = () => void;
+export type SlpCancelWatchFn = () => Promise<void>;
 export type SlpWatchBalanceCallback = (balance: SlpTokenBalance) => void;
 
 export interface SlpProvider {

@@ -28,7 +28,7 @@ export class Contract {
   public script: string = "";
   public parameters: Argument[] = [];
   public contract: ethers.Contract;
-  private provider: ethers.providers.Provider;
+  public provider: ethers.providers.Provider;
   public network: Network = NetworkType.Mainnet;
   private signer?: ethers.Signer;
   public deployReceipt?: ethers.providers.TransactionReceipt;

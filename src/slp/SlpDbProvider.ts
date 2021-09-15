@@ -153,7 +153,7 @@ export class SlpDbProvider implements SlpProvider {
     return new Promise(async (resolve) => {
       const cancelFn = this.SlpWatchTransactions(
         async (tx: SlpTxI) => {
-          cancelFn();
+          await cancelFn();
           resolve(tx);
         },
         slpaddr,
@@ -168,17 +168,18 @@ export class SlpDbProvider implements SlpProvider {
     slpaddr: string,
     tokenId: string
   ): Promise<SlpTokenBalance> {
-    return new Promise((resolve) =>
-      this.SlpWatchBalance(
-        (balance: SlpTokenBalance) => {
+    return new Promise((resolve) => {
+      const cancelFn = this.SlpWatchBalance(
+        async (balance: SlpTokenBalance) => {
           if (balance.value.isGreaterThanOrEqualTo(new BigNumber(value))) {
+            await cancelFn()
             resolve(balance);
           }
         },
         slpaddr,
         tokenId
-      )
-    );
+      );
+    });
   }
 
   // set's up a callback to be executed each time the token balance of the wallet is changed
@@ -187,7 +188,7 @@ export class SlpDbProvider implements SlpProvider {
     slpaddr: string,
     tokenId: string
   ): SlpCancelWatchFn {
-    const cancelFn = this.SlpWatchTransactions(
+    return this.SlpWatchTransactions(
       async () => {
         const balance = await this.SlpTokenBalance(slpaddr, tokenId);
         callback(balance);
@@ -195,7 +196,6 @@ export class SlpDbProvider implements SlpProvider {
       slpaddr,
       tokenId
     );
-    return cancelFn;
   }
 
   // sets up a callback to be executed each time a new transaction associated with this wallet's address is entering the mempool
@@ -207,7 +207,7 @@ export class SlpDbProvider implements SlpProvider {
     const eventSource: EventSource = this.SlpSocketEventSource(
       SlpWaitForTransactionTemplate(slpaddr, tokenId)
     );
-    const cancelFn: SlpCancelWatchFn = () => {
+    const cancelFn: SlpCancelWatchFn = async () => {
       eventSource.close();
     };
 

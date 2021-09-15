@@ -20,7 +20,7 @@ import { Network, SignatureTemplate } from "cashscript";
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum";
 
-import { TxI } from "../interface";
+import { HeaderI, TxI } from "../interface";
 
 import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
@@ -28,6 +28,7 @@ import { PrivateKeyI, UtxoI } from "../interface";
 import { BaseWallet } from "./Base";
 import { WalletTypeEnum } from "./enum";
 import {
+  CancelWatchFn,
   SendRequestOptionsI,
   WaitForTransactionOptions,
   WaitForTransactionResponse,
@@ -91,13 +92,13 @@ import {
 import { getNetworkProvider } from "../network";
 import { generateRandomBytes } from "../util/randomBytes";
 import { SignedMessageI, SignedMessage } from "../message";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
+import { amountInSatoshi } from "../util/amountInSatoshi";
 
 //#endregion Imports
 
 const secp256k1Promise = instantiateSecp256k1();
 const sha256Promise = instantiateSha256();
-
-type WatchBalanceCancel = () => void;
 
 /**
  * Class to manage a bitcoin cash wallet.
@@ -529,26 +530,25 @@ export class Wallet extends BaseWallet {
     }
   }
 
+  // waiting for any transaction hash of this wallet
+  public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchAddress(this.getDepositAddress(), callback);
+  }
+
+  // waiting for any transaction of this wallet
+  public watchAddressTransactions(callback: (tx: ElectrumRawTransaction) => void): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(this.getDepositAddress(), callback);
+  }
+
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
   public watchBalance(
-    callback: (balance: BalanceResponse) => boolean | void
-  ): WatchBalanceCancel {
-    let watchBalanceCallback: () => void;
-    let cancel: WatchBalanceCancel = async () => {
-      await this.provider!.unsubscribeFromAddress(
-        this.cashaddr!,
-        watchBalanceCallback
-      );
-    };
-
-    watchBalanceCallback = async () => {
-      const balance = (await this.getBalance(undefined)) as BalanceResponse;
-      await callback(balance);
-    };
-    this.provider!.subscribeToAddress(this.cashaddr!, watchBalanceCallback);
-
-    return cancel;
+    callback: (balance: BalanceResponse) => void
+  ): CancelWatchFn {
+    return this.watchAddress(async (_txHash: string) => {
+      const balance = await this.getBalance() as BalanceResponse;
+      callback(balance);
+    });
   }
 
   // waits for address balance to be greater than or equal to the target value
@@ -558,28 +558,14 @@ export class Wallet extends BaseWallet {
     rawUnit: UnitEnum = UnitEnum.BCH
   ): Promise<number | BalanceResponse> {
     return new Promise(async (resolve) => {
-      const waitForBalanceCallback = async (data) => {
-        if (data instanceof Array) {
-          let addr = data[0] as string;
-          if (addr !== this.cashaddr!) {
-            return;
-          }
-
-          const balance = await this.getBalance(rawUnit);
-          if (balance >= value) {
-            await this.provider!.unsubscribeFromAddress(
-              this.cashaddr!,
-              waitForBalanceCallback
-            );
-            resolve(balance);
-          }
-        }
-      };
-
-      await this.provider!.subscribeToAddress(
-        this.cashaddr!,
-        waitForBalanceCallback
-      );
+      const watchCancel = this.watchBalance(
+        async (balance: BalanceResponse) => {
+          const satoshiBalance = await amountInSatoshi(value, rawUnit);
+            if (balance.sat! >= satoshiBalance) {
+              await watchCancel();
+              resolve(balance);
+            }
+        });
     });
   }
 
@@ -797,6 +783,27 @@ export class Wallet extends BaseWallet {
 
       this.provider!.subscribeToAddress(this.cashaddr!, watchAddressCallback);
     });
+  }
+
+  /**
+   * watchBlocks Watch network blocks
+   *
+   * @param callback callback with a block header object
+   *
+   * @returns a function which will cancel watching upon evaluation
+   */
+  public watchBlocks(callback: (header: HeaderI) => void): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchBlocks(callback);
+  }
+
+  /**
+   * waitForBlock Wait for a network block
+   *
+   * @param height if specified waits for this exact blockchain height, otherwise resolves with the next block
+   *
+   */
+  public async waitForBlock(height?: number): Promise<HeaderI> {
+    return (this.provider! as ElectrumNetworkProvider).waitForBlock(height);
   }
   //#endregion Funds
 
