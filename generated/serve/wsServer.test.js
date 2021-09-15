@@ -44,6 +44,18 @@ describe("Test websocket server methods", () => {
       .expectJson((actual) => (actual.bch > 0.1))
       .close()
       .expectClosed();
+
+    const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
+    const bobWallet = await mainnet.RegTestWallet.newRandom();
+
+    setTimeout(async () => {
+      await aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr,
+        value: 1000,
+        unit: "satoshis",
+      },
+    ])}, 2000);
   });
 
   test("Test waitForBalance ws method", async () => {
@@ -62,7 +74,7 @@ describe("Test websocket server methods", () => {
     await request(app)
       .ws('/wallet')
       .sendJson({ method: "waitForBalance", data: { cashaddr: bobWallet.cashaddr, value: 500, unit: "satoshi" }})
-      .expectJson((actual) => (actual.balance >= 500))
+      .expectJson((actual) => (actual.balance.sat >= 500))
       .close()
       .expectClosed();
   });

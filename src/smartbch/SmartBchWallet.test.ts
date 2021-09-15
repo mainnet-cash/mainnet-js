@@ -8,7 +8,7 @@ import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 describe(`Test Ethereum functions`, () => {
-  test("Filter logs", async () => {
+  test.skip("Filter logs", async () => {
     expect(
       ethers.utils.hexZeroPad("0x8486c538dcbd6a707c5b3f730b6413286fe8c854", 32)
     ).toBe(

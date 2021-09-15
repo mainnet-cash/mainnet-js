@@ -426,7 +426,7 @@ export class SmartBchWallet extends BaseWallet {
   public async waitForBalance(
     value: number,
     rawUnit: UnitEnum = UnitEnum.BCH
-  ): Promise<number | BalanceResponse> {
+  ): Promise<BalanceResponse> {
     return new Promise((resolve) => {
       const watchCancel = this.watchBalance(
         async (balance: BalanceResponse) => {

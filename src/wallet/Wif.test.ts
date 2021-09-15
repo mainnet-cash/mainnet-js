@@ -394,7 +394,7 @@ describe(`Wallet subscriptions`, () => {
     ]);
 
     let balance = await bobWallet.waitForBalance(2000, UnitEnum.SATOSHIS);
-    expect(balance).toBeGreaterThanOrEqual(2000);
+    expect(balance.sat!).toBeGreaterThanOrEqual(2000);
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
 
@@ -412,9 +412,8 @@ describe(`Wallet subscriptions`, () => {
 
     let cancel = bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
-    expect(balance).toBe(2000);
-    cancel();
-    //expect(bobAny.sat).toBe(2000);
+    expect(balance.sat!).toBe(2000);
+    await cancel();
   });
 
   test("Should watch multiple wallets", async () => {
@@ -463,9 +462,9 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     let daveBalance = await dave.waitForBalance(1000, "sat");
-    expect(bobBalance).toBe(1000);
-    expect(charlieBalance).toBe(1000);
-    expect(daveBalance).toBe(1000);
+    expect(bobBalance.sat!).toBe(1000);
+    expect(charlieBalance.sat!).toBe(1000);
+    expect(daveBalance.sat!).toBe(1000);
     setTimeout(
       () =>
         alice.send([
