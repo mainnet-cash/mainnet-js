@@ -4,7 +4,7 @@ import { Sep20 } from "./Sep20";
 import { RegTestSmartBchWallet } from "./SmartBchWallet";
 
 describe(`Test Ethereum functions`, () => {
-  test("Test eth mainnet contract", async () => {
+  test.skip("Test eth mainnet contract", async () => {
     const abi = Sep20.abi;
 
     const contract = new Contract(

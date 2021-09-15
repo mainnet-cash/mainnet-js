@@ -586,6 +586,7 @@ describe(`Wallet subscriptions`, () => {
     });
 
     await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
+    await delay(1000);
     await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
 
     await delay(5000);
