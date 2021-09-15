@@ -532,12 +532,20 @@ export class Wallet extends BaseWallet {
 
   // waiting for any transaction hash of this wallet
   public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddress(this.getDepositAddress(), callback);
+    return (this.provider! as ElectrumNetworkProvider).watchAddress(
+      this.getDepositAddress(),
+      callback
+    );
   }
 
   // waiting for any transaction of this wallet
-  public watchAddressTransactions(callback: (tx: ElectrumRawTransaction) => void): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(this.getDepositAddress(), callback);
+  public watchAddressTransactions(
+    callback: (tx: ElectrumRawTransaction) => void
+  ): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(
+      this.getDepositAddress(),
+      callback
+    );
   }
 
   // sets up a callback to be called upon wallet's balance change
@@ -546,7 +554,7 @@ export class Wallet extends BaseWallet {
     callback: (balance: BalanceResponse) => void
   ): CancelWatchFn {
     return this.watchAddress(async (_txHash: string) => {
-      const balance = await this.getBalance() as BalanceResponse;
+      const balance = (await this.getBalance()) as BalanceResponse;
       callback(balance);
     });
   }
@@ -561,11 +569,12 @@ export class Wallet extends BaseWallet {
       const watchCancel = this.watchBalance(
         async (balance: BalanceResponse) => {
           const satoshiBalance = await amountInSatoshi(value, rawUnit);
-            if (balance.sat! >= satoshiBalance) {
-              await watchCancel();
-              resolve(balance);
-            }
-        });
+          if (balance.sat! >= satoshiBalance) {
+            await watchCancel();
+            resolve(balance);
+          }
+        }
+      );
     });
   }
 

@@ -28,15 +28,17 @@ describe(`Test Ethereum functions`, () => {
     // expect(JSON.stringify(cont)).toEqual(JSON.stringify(contract));
     // console.log(contract.contract.filters.Transfer(null, null))
     // console.log(await contract.provider.getLogs(contract.contract.filters.Transfer(null, null)))
-    console.log(await contract.provider.getLogs(
-    {
-      // address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-      fromBlock: 0xA3B631,
-      topics: [
-        '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef', null,
-        '0x000000000000000000000000b55438d2261c9dfa801848c89377d77fa35a1917'
-      ]
-    }));
+    console.log(
+      await contract.provider.getLogs({
+        // address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+        fromBlock: 0xa3b631,
+        topics: [
+          "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+          null,
+          "0x000000000000000000000000b55438d2261c9dfa801848c89377d77fa35a1917",
+        ],
+      })
+    );
   });
 
   test("Test deploying contract, getting gas estimates and invoking methods", async () => {

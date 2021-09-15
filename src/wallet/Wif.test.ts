@@ -509,15 +509,16 @@ describe(`Wallet subscriptions`, () => {
   });
 
   test("Test waiting and watching", async () => {
-    const alice = await RegTestWallet.fromId(
-      process.env.ALICE_ID!
-    );
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
 
     const bob = await RegTestWallet.newRandom();
 
     let waitTxResult = false;
     setTimeout(async () => {
-      const result = await alice.waitForTransaction({ getBalance: true, getTransactionInfo: true });
+      const result = await alice.waitForTransaction({
+        getBalance: true,
+        getTransactionInfo: true,
+      });
       expect(result.balance!.sat!).toBeGreaterThan(0);
       expect(result.transactionInfo!.hash.length).toBe(64);
       waitTxResult = true;
@@ -525,7 +526,10 @@ describe(`Wallet subscriptions`, () => {
 
     let waitBalanceResult = false;
     setTimeout(async () => {
-      const result = await alice.waitForBalance(0.001, "bch") as BalanceResponse;
+      const result = (await alice.waitForBalance(
+        0.001,
+        "bch"
+      )) as BalanceResponse;
       expect(result.sat!).toBeGreaterThan(0);
       waitBalanceResult = true;
     }, 0);
@@ -558,7 +562,9 @@ describe(`Wallet subscriptions`, () => {
 
     let blockWaitResult = false;
     setTimeout(async () => {
-      const blockNumber = await (alice.provider! as ElectrumNetworkProvider).getBlockHeight();
+      const blockNumber = await (
+        alice.provider! as ElectrumNetworkProvider
+      ).getBlockHeight();
       const result = await alice.waitForBlock();
       expect(result.height).toBe(blockNumber + 1);
       blockWaitResult = true;
@@ -566,15 +572,19 @@ describe(`Wallet subscriptions`, () => {
 
     let blockNumberWaitResult = false;
     setTimeout(async () => {
-      const blockNumber = await (alice.provider! as ElectrumNetworkProvider).getBlockHeight();
+      const blockNumber = await (
+        alice.provider! as ElectrumNetworkProvider
+      ).getBlockHeight();
       const result = await alice.waitForBlock(blockNumber + 2);
       expect(result.height).toBe(blockNumber + 2);
       blockNumberWaitResult = true;
     }, 0);
 
-    await alice.send(
-      { cashaddr: bob.getDepositAddress(), value: 0.001, unit: "bch" },
-    );
+    await alice.send({
+      cashaddr: bob.getDepositAddress(),
+      value: 0.001,
+      unit: "bch",
+    });
 
     await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
     await mine({ cashaddr: alice.cashaddr!, blocks: 1 });

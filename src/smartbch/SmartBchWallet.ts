@@ -33,7 +33,16 @@ import {
 } from "./Sep20";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
-import { asSendRequestObject, satToWei, waitForBlock, watchAddress, watchAddressTransactions, watchBlocks, weiToSat, zeroAddress } from "./Utils";
+import {
+  asSendRequestObject,
+  satToWei,
+  waitForBlock,
+  watchAddress,
+  watchAddressTransactions,
+  watchBlocks,
+  weiToSat,
+  zeroAddress,
+} from "./Utils";
 
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.BaseProvider;
@@ -390,8 +399,14 @@ export class SmartBchWallet extends BaseWallet {
   }
 
   // waiting for any transaction of this wallet
-  public watchAddressTransactions(callback: (tx: ethers.providers.TransactionResponse) => void): CancelWatchFn {
-    return watchAddressTransactions(this.provider!, this.getDepositAddress(), callback);
+  public watchAddressTransactions(
+    callback: (tx: ethers.providers.TransactionResponse) => void
+  ): CancelWatchFn {
+    return watchAddressTransactions(
+      this.provider!,
+      this.getDepositAddress(),
+      callback
+    );
   }
 
   // sets up a callback to be called upon wallet's balance change
@@ -400,7 +415,7 @@ export class SmartBchWallet extends BaseWallet {
     callback: (balance: BalanceResponse) => void
   ): CancelWatchFn {
     const watchBalanceCallback = async () => {
-      const balance = await this.getBalance() as BalanceResponse;
+      const balance = (await this.getBalance()) as BalanceResponse;
       await callback(balance);
     };
     return this.watchAddress(watchBalanceCallback);
@@ -412,16 +427,17 @@ export class SmartBchWallet extends BaseWallet {
     value: number,
     rawUnit: UnitEnum = UnitEnum.BCH
   ): Promise<number | BalanceResponse> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const watchCancel = this.watchBalance(
         async (balance: BalanceResponse) => {
           const satoshiBalance = await amountInSatoshi(value, rawUnit);
-            if (balance.sat! >= satoshiBalance) {
-              await watchCancel();
-              resolve(balance);
-            }
-        });
-      });
+          if (balance.sat! >= satoshiBalance) {
+            await watchCancel();
+            resolve(balance);
+          }
+        }
+      );
+    });
   }
 
   // waits for next transaction, program execution is halted
@@ -448,10 +464,12 @@ export class SmartBchWallet extends BaseWallet {
     // tx hash is known, just wait for it
     if (options.txHash) {
       const result: WaitForTransactionResponse = {
-        transactionInfo: await this.provider!.waitForTransaction(options.txHash!)
+        transactionInfo: await this.provider!.waitForTransaction(
+          options.txHash!
+        ),
       };
       if (options.getBalance!) {
-        result.balance = await this.getBalance() as BalanceResponse;
+        result.balance = (await this.getBalance()) as BalanceResponse;
       }
 
       return result;
@@ -460,12 +478,15 @@ export class SmartBchWallet extends BaseWallet {
     // tx hash is unknown, let's wait for the first one
     // by listening for all pending transactions and filtering for our address
     return new Promise(async (resolve) => {
-      const watchCancel = this.watchAddressTransactions(async (tx: ethers.providers.TransactionResponse) => {
-        await watchCancel();
-        resolve(await this.waitForTransaction({ ...options, txHash: tx.hash }));
-      });
+      const watchCancel = this.watchAddressTransactions(
+        async (tx: ethers.providers.TransactionResponse) => {
+          await watchCancel();
+          resolve(
+            await this.waitForTransaction({ ...options, txHash: tx.hash })
+          );
+        }
+      );
     });
-
   }
 
   /**
@@ -475,7 +496,9 @@ export class SmartBchWallet extends BaseWallet {
    *
    * @returns a function which will cancel watching upon evaluation
    */
-  public watchBlocks(callback: (block: ethers.providers.Block) => void): CancelWatchFn {
+  public watchBlocks(
+    callback: (block: ethers.providers.Block) => void
+  ): CancelWatchFn {
     return watchBlocks(this.provider!, callback);
   }
 
@@ -485,7 +508,9 @@ export class SmartBchWallet extends BaseWallet {
    * @param targetBlockNumber if specified waits for this exact blockchain height, otherwise resolves with the next block
    *
    */
-  public async waitForBlock(targetBlockNumber?: number): Promise<ethers.providers.Block> {
+  public async waitForBlock(
+    targetBlockNumber?: number
+  ): Promise<ethers.providers.Block> {
     return waitForBlock(this.provider!, targetBlockNumber);
   }
   //#endregion Funds

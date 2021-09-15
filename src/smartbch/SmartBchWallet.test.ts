@@ -122,7 +122,10 @@ describe(`Test Ethereum functions`, () => {
 
     let waitTxResult = false;
     setTimeout(async () => {
-      const result = await alice.waitForTransaction({ getBalance: true, getTransactionInfo: true });
+      const result = await alice.waitForTransaction({
+        getBalance: true,
+        getTransactionInfo: true,
+      });
       expect(result.balance!.sat!).toBeGreaterThan(0);
       expect(result.transactionInfo!.transactionHash.length).toBe(66);
       waitTxResult = true;
@@ -130,7 +133,10 @@ describe(`Test Ethereum functions`, () => {
 
     let waitBalanceResult = false;
     setTimeout(async () => {
-      const result = await alice.waitForBalance(0.001, "bch") as BalanceResponse;
+      const result = (await alice.waitForBalance(
+        0.001,
+        "bch"
+      )) as BalanceResponse;
       expect(result.sat!).toBeGreaterThan(0);
       waitBalanceResult = true;
     }, 0);

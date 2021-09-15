@@ -51,7 +51,11 @@ export function convertToClass(object: SendRequest) {
 }
 
 // waiting for any address transaction using an ethers provider
-function watchAddressMempool(provider: ethers.providers.BaseProvider, address: string, callback: (tx: ethers.providers.TransactionResponse) => void): CancelWatchFn {
+function watchAddressMempool(
+  provider: ethers.providers.BaseProvider,
+  address: string,
+  callback: (tx: ethers.providers.TransactionResponse) => void
+): CancelWatchFn {
   const mempoolHandler = async (txHash: string) => {
     const tx = await provider.getTransaction(txHash);
     if (tx.to! === address || tx.from! === address) {
@@ -63,16 +67,24 @@ function watchAddressMempool(provider: ethers.providers.BaseProvider, address: s
 
   return async () => {
     provider.removeListener("pending", mempoolHandler);
-  }
+  };
 }
 
-export function watchAddress(provider: ethers.providers.BaseProvider, address: string, callback: (txHash: string) => void): CancelWatchFn {
+export function watchAddress(
+  provider: ethers.providers.BaseProvider,
+  address: string,
+  callback: (txHash: string) => void
+): CancelWatchFn {
   return watchAddressTransactions(provider, address, (tx) => {
     callback(tx.hash);
   });
 }
 
-export function watchAddressTransactions(provider: ethers.providers.BaseProvider, address: string, callback: (tx: ethers.providers.TransactionResponse) => void): CancelWatchFn {
+export function watchAddressTransactions(
+  provider: ethers.providers.BaseProvider,
+  address: string,
+  callback: (tx: ethers.providers.TransactionResponse) => void
+): CancelWatchFn {
   const blockHandler = async (blockNumber: number) => {
     const block = await provider.getBlockWithTransactions(blockNumber);
     for (const tx of block.transactions) {
@@ -86,10 +98,13 @@ export function watchAddressTransactions(provider: ethers.providers.BaseProvider
 
   return async () => {
     provider.removeListener("block", blockHandler);
-  }
+  };
 }
 
-export function watchBlocks(provider: ethers.providers.BaseProvider, callback: (block: ethers.providers.Block) => void): CancelWatchFn {
+export function watchBlocks(
+  provider: ethers.providers.BaseProvider,
+  callback: (block: ethers.providers.Block) => void
+): CancelWatchFn {
   const blockHandler = async (blockNumber: number) => {
     const block = await provider.getBlock(blockNumber);
     callback(block);
@@ -99,13 +114,19 @@ export function watchBlocks(provider: ethers.providers.BaseProvider, callback: (
 
   return async () => {
     provider.removeListener("block", blockHandler);
-  }
+  };
 }
 
-export async function waitForBlock(provider: ethers.providers.BaseProvider, targetBlockNumber?: number): Promise<ethers.providers.Block> {
+export async function waitForBlock(
+  provider: ethers.providers.BaseProvider,
+  targetBlockNumber?: number
+): Promise<ethers.providers.Block> {
   return new Promise((resolve) => {
     const watchCancel = watchBlocks(provider, async (block) => {
-      if (targetBlockNumber === undefined || block.number >= targetBlockNumber!) {
+      if (
+        targetBlockNumber === undefined ||
+        block.number >= targetBlockNumber!
+      ) {
         await watchCancel();
         resolve(block);
       }

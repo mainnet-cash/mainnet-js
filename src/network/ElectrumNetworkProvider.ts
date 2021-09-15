@@ -170,7 +170,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  public watchAddress(cashaddr: string, callback: (txHash: string) => void): CancelWatchFn {
+  public watchAddress(
+    cashaddr: string,
+    callback: (txHash: string) => void
+  ): CancelWatchFn {
     const watchAddressCallback = async (data) => {
       // subscription acknowledgement is the latest known status or null if no status is known
       // status is an array: [ cashaddr, [tx_hashes] ]
@@ -197,12 +200,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         cashaddr,
         watchAddressCallback
       );
-    }
+    };
   }
 
-  public watchAddressTransactions(cashaddr: string, callback: (tx: ElectrumRawTransaction) => void): CancelWatchFn {
+  public watchAddressTransactions(
+    cashaddr: string,
+    callback: (tx: ElectrumRawTransaction) => void
+  ): CancelWatchFn {
     return this.watchAddress(cashaddr, async (txHash: string) => {
-      const tx  = await this.getRawTransactionObject(txHash);
+      const tx = await this.getRawTransactionObject(txHash);
       callback(tx);
     });
   }
@@ -223,7 +229,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
     return async () => {
       this.unsubscribeFromHeaders(waitForBlockCallback);
-    }
+    };
   }
 
   // Wait for the next block or a block at given blockchain height.

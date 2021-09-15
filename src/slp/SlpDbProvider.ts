@@ -172,7 +172,7 @@ export class SlpDbProvider implements SlpProvider {
       const cancelFn = this.SlpWatchBalance(
         async (balance: SlpTokenBalance) => {
           if (balance.value.isGreaterThanOrEqualTo(new BigNumber(value))) {
-            await cancelFn()
+            await cancelFn();
             resolve(balance);
           }
         },
