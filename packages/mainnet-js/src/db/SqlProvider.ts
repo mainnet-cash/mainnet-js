@@ -25,16 +25,16 @@ export default class SqlProvider implements StorageProvider {
       );
     }
     const dbConfig = parseDbUrl(process.env.DATABASE_URL);
-    const Pool = eval('require')("pg").Pool;
+    const Pool = eval("require")("pg").Pool;
     this.db = new Pool(dbConfig);
-    this.formatter = eval('require')("pg-format");
+    this.formatter = eval("require")("pg-format");
   }
 
   public async init(): Promise<StorageProvider> {
     if (!this.isInit) {
       this.isInit = true;
-      await this.db
-      await this.formatter
+      await this.db;
+      await this.formatter;
 
       let createWalletTable = this.formatter(
         "CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );",
@@ -99,7 +99,10 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async getWallet(name: string): Promise<WalletI | undefined> {
-    let text = this.formatter("SELECT * FROM %I WHERE name = $1", this.walletTable);
+    let text = this.formatter(
+      "SELECT * FROM %I WHERE name = $1",
+      this.walletTable
+    );
     let result = await this.db.query(text, [name]);
     let w = result.rows[0];
     return w;
@@ -190,7 +193,10 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async getWebhook(id: number): Promise<Webhook | undefined> {
-    const text = this.formatter("SELECT * FROM %I WHERE id = $1;", this.webhookTable);
+    const text = this.formatter(
+      "SELECT * FROM %I WHERE id = $1;",
+      this.webhookTable
+    );
     const result = await this.db.query(text, [id]);
     let hook = result.rows[0];
     if (hook) {
@@ -221,7 +227,10 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async deleteWebhook(id: number): Promise<void> {
-    let text = this.formatter("DELETE FROM %I WHERE id = $1;", this.webhookTable);
+    let text = this.formatter(
+      "DELETE FROM %I WHERE id = $1;",
+      this.webhookTable
+    );
     await this.db.query(text, [id]);
   }
 

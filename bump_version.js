@@ -17,10 +17,11 @@ let rootPackageFile = "./package.json";
 
 // update package.json
 const workspacePackageFiles = [
-  "./packages/mainnet-js/package.json",
   "./packages/contract/package.json",
-  "./packages/smartbch/package.json",
+  "./packages/demo/package.json",
   "./packages/mainnet-cash/package.json",
+  "./packages/mainnet-js/package.json",
+  "./packages/smartbch/package.json",
 ];
 const workspacePackages = [
   "mainnet-js",
@@ -54,6 +55,10 @@ function updatePackageFile(file) {
   }
   for (const p of workspacePackages) {
     if (p in package.dependencies) {
+      package.dependencies[p] = newVersion;
+      console.log(`Updated ${package.name}.dependency ${p} to ${newVersion}`);
+    }
+    if (p in package.devDependencies) {
       package.dependencies[p] = newVersion;
       console.log(`Updated ${package.name}.dependency ${p} to ${newVersion}`);
     }

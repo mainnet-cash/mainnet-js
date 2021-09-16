@@ -8,11 +8,11 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "homepage": "https://mainnet.cash",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
-  "browser": "dist/mainnet-0.4.1.js",
+  "browser": "dist/mainnet-0.4.2.js",
   "types": "dist/main/index.d.ts",
   "exports": {
     "require": "./dist/main/index.js",
@@ -40,7 +40,7 @@
     "events": "^3.2.0",
     "fake-indexeddb": "^3.1.2",
     "jest": "^27.0.5",
-    "jest-runner":"^27.2.0",
+    "jest-runner": "^27.2.0",
     "jest-playwright-preset": "^1.6.1",
     "jest-process-manager": "^0.3.1",
     "node-postgres": "^0.6.2",
