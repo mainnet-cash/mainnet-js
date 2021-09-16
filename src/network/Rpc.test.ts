@@ -62,14 +62,15 @@ test("Watch wallet balance", async () => {
   const aliceWallet = await RegTestWallet.fromId(aliceWif);
 
   let result = false;
-  await aliceWallet.watchBalance((balance) => {
+  aliceWallet.watchBalance((balance) => {
     expect(balance.bch).toBeGreaterThan(0);
     result = true;
     // stop watching
     return true;
   });
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-  expect(result).toBe(true);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // we do not trigger the callback upon subscription anymore
+  expect(result).toBe(false);
 });
 
 test("Wait for block timeout", async () => {
