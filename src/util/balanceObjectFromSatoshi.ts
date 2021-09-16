@@ -15,7 +15,8 @@ export class BalanceResponse {
 }
 
 export async function balanceResponseFromSatoshi(
-  value: number
+  value: number,
+  usdPriceCache: boolean = true
 ): Promise<BalanceResponse> {
   let response = new BalanceResponse();
   let returnUnits: UnitEnum[] = ["bch", "sat", "usd"];
@@ -29,7 +30,7 @@ export async function balanceResponseFromSatoshi(
         response.sat = value;
         break;
       case UnitEnum.USD:
-        let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd"));
+        let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd", usdPriceCache));
         response.usd = Number(usd.toFixed(2));
         break;
       default:
@@ -43,7 +44,8 @@ export async function balanceResponseFromSatoshi(
 
 export async function balanceFromSatoshi(
   value: number,
-  rawUnit: string
+  rawUnit: string,
+  usdPriceCache: boolean = true
 ): Promise<number> {
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
@@ -58,7 +60,7 @@ export async function balanceFromSatoshi(
     case UnitEnum.SATOSHIS:
       return value;
     case UnitEnum.USD:
-      let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd"));
+      let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd", usdPriceCache));
       return Number(usd.toFixed(2));
     default:
       throw Error(

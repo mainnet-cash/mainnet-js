@@ -500,16 +500,17 @@ export class Wallet extends BaseWallet {
   }
 
   // gets wallet balance in sats, bch and usd
-  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+  public async getBalance(rawUnit?: string, usdPriceCache = true): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = sanitizeUnit(rawUnit);
       return await balanceFromSatoshi(
         await this.getBalanceFromProvider(),
-        unit
+        unit,
+        usdPriceCache
       );
     } else {
       return await balanceResponseFromSatoshi(
-        await this.getBalanceFromProvider()
+        await this.getBalanceFromProvider(), usdPriceCache
       );
     }
   }
@@ -557,6 +558,33 @@ export class Wallet extends BaseWallet {
       const balance = (await this.getBalance()) as BalanceResponse;
       callback(balance);
     });
+  }
+
+  // sets up a callback to be called upon wallet's BCH or USD balance change
+  // if BCH balance does not change, the callback will be triggered every
+  // @param `usdPriceRefreshInterval` milliseconds by polling for new BCH USD price
+  // Since we want to be most sensitive to usd value change, we do not use the cached exchange rates
+  // can be cancelled by calling the function returned from this one
+  public watchBalanceUsd(
+    callback: (balance: BalanceResponse) => void, usdPriceRefreshInterval = 30000
+  ): CancelWatchFn {
+    let usdPrice = -1;
+
+    const _callback = async () => {
+      const balance = (await this.getBalance(undefined, false)) as BalanceResponse;
+      if (usdPrice !== balance.usd!) {
+        usdPrice = balance.usd!;
+        callback(balance);
+      }
+    };
+
+    const watchCancel = this.watchAddress(_callback);
+    const interval = setInterval(_callback, usdPriceRefreshInterval);
+
+    return async () => {
+      await watchCancel();
+      clearInterval(interval);
+    }
   }
 
   // waits for address balance to be greater than or equal to the target value
