@@ -1,3 +1,5 @@
+export { delay } from "../util/delay";
+
 export function expect(expected) {
   return {
     toBe: function (received) {

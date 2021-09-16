@@ -273,4 +273,101 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.w4).toBe(result.seedId);
     expect(result.w6).toBe(result.w5);
   });
+
+  test("Test waiting and watching", async () => {
+    await page.evaluate(async (ALICE_ID) => {
+
+      const alice = await RegTestWallet.fromId(ALICE_ID);
+
+      const bob = await RegTestWallet.newRandom();
+
+      let waitTxResult = false;
+      setTimeout(async () => {
+        const result = await alice.waitForTransaction({
+          getBalance: true,
+          getTransactionInfo: true,
+        });
+        expect(result.balance.sat).toBeGreaterThan(0);
+        expect(result.transactionInfo.hash.length).toBe(64);
+        waitTxResult = true;
+      }, 0);
+
+      let waitBalanceResult = false;
+      setTimeout(async () => {
+        const result = await alice.waitForBalance(
+          0.001,
+          "bch"
+        );
+        expect(result.sat).toBeGreaterThan(0);
+        waitBalanceResult = true;
+      }, 0);
+
+      let aliceWatchResult = false;
+      const aliceWatchCancel = alice.watchAddressTransactions((_tx) => {
+        aliceWatchCancel();
+        aliceWatchResult = true;
+      });
+
+      let bobWatchResult = false;
+      const bobWatchCancel = bob.watchAddress((_txHash) => {
+        bobWatchCancel();
+        bobWatchResult = true;
+      });
+
+      let bobBalanceWatchResult = false;
+      const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+        expect(balance.bch).toBe(0.001);
+        bobBalanceWatchCancel();
+        bobBalanceWatchResult = true;
+      });
+
+      // let blockWatchResult = false;
+      // const blockWatchCancel = bob.watchBlocks((block) => {
+      //   expect(block.height).toBeGreaterThan(1);
+      //   blockWatchCancel();
+      //   blockWatchResult = true;
+      // });
+
+      // let blockWaitResult = false;
+      // setTimeout(async () => {
+      //   const blockNumber = await (
+      //     alice.provider
+      //   ).getBlockHeight();
+      //   const result = await alice.waitForBlock();
+      //   expect(result.height).toBe(blockNumber + 1);
+      //   blockWaitResult = true;
+      // }, 0);
+
+      // let blockNumberWaitResult = false;
+      // setTimeout(async () => {
+      //   const blockNumber = await (
+      //     alice.provider
+      //   ).getBlockHeight();
+      //   const result = await alice.waitForBlock(blockNumber + 2);
+      //   expect(result.height).toBe(blockNumber + 2);
+      //   blockNumberWaitResult = true;
+      // }, 0);
+
+      await alice.send({
+        cashaddr: bob.getDepositAddress(),
+        value: 0.001,
+        unit: "bch",
+      });
+
+      //! mining not supported in browser
+      // await mine({ cashaddr: alice.cashaddr, blocks: 1 });
+      // await delay(1000);
+      // await mine({ cashaddr: alice.cashaddr, blocks: 1 });
+
+      await delay(5000);
+      expect(waitTxResult).toBe(true);
+      expect(waitBalanceResult).toBe(true);
+      expect(aliceWatchResult).toBe(true);
+      expect(bobWatchResult).toBe(true);
+      expect(bobBalanceWatchResult).toBe(true);
+      // expect(blockWatchResult).toBe(true);
+      // expect(blockWaitResult).toBe(true);
+      // expect(blockNumberWaitResult).toBe(true);
+    }, process.env.ALICE_ID);
+  });
 });
