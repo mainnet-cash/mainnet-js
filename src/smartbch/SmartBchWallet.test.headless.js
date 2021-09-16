@@ -78,17 +78,10 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
   test("Test waiting and watching", async () => {
     await page.evaluate(async (SBCH_ALICE_ID) => {
+      // let all transactions in previous blocks be settled
+      await delay(7000);
 
-      const temp = await RegTestSmartBchWallet.fromId(
-        SBCH_ALICE_ID
-      );
-
-      const alice = await RegTestSmartBchWallet.newRandom();
-      await temp.send(
-        { address: alice.getDepositAddress(), value: 0.01, unit: "bch" },
-        {},
-        { gasPrice: 10 ** 10 }
-      );
+      const alice = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
 
       const bob = await RegTestSmartBchWallet.newRandom();
 
@@ -105,10 +98,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
       let waitBalanceResult = false;
       setTimeout(async () => {
-        const result = await alice.waitForBalance(
-          0.001,
-          "bch"
-        );
+        const result = await alice.waitForBalance(0.001, "bch");
         expect(result.sat).toBeGreaterThan(0);
         waitBalanceResult = true;
       }, 0);
@@ -167,6 +157,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
         { gasPrice: 10 ** 10 }
       );
 
+      // lets wait for 2 more blocks to be mined
       await delay(15000);
       expect(waitTxResult).toBe(true);
       expect(waitBalanceResult).toBe(true);

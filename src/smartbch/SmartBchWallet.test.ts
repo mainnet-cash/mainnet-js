@@ -114,13 +114,11 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("Test waiting and watching", async () => {
-    const temp = await RegTestSmartBchWallet.fromId(process.env.SBCH_ALICE_ID!);
+    // let all transactions in previous blocks be settled
+    await delay(7000);
 
-    const alice = await RegTestSmartBchWallet.newRandom();
-    await temp.send(
-      { address: alice.getDepositAddress(), value: 0.01, unit: "bch" },
-      {},
-      { gasPrice: 10 ** 10 }
+    const alice = await RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID!
     );
 
     const bob = await RegTestSmartBchWallet.newRandom();
@@ -200,6 +198,7 @@ describe(`Test Ethereum functions`, () => {
       { gasPrice: 10 ** 10 }
     );
 
+    // lets wait for 2 more blocks to be mined
     await delay(15000);
     expect(waitTxResult).toBe(true);
     expect(waitBalanceResult).toBe(true);

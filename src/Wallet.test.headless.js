@@ -276,7 +276,6 @@ describe(`Wallet should function in the browser`, () => {
 
   test("Test waiting and watching", async () => {
     await page.evaluate(async (ALICE_ID) => {
-
       const alice = await RegTestWallet.fromId(ALICE_ID);
 
       const bob = await RegTestWallet.newRandom();
@@ -294,10 +293,7 @@ describe(`Wallet should function in the browser`, () => {
 
       let waitBalanceResult = false;
       setTimeout(async () => {
-        const result = await alice.waitForBalance(
-          0.001,
-          "bch"
-        );
+        const result = await alice.waitForBalance(0.001, "bch");
         expect(result.sat).toBeGreaterThan(0);
         waitBalanceResult = true;
       }, 0);
