@@ -1,6 +1,14 @@
 Newest changes
 --------------
 
+0.4.1
+
+- SmartBch: added watchAddress, watchAddressTransactions, watchBalance, watchBalanceUsd, watchBlocks,
+  waitForTransaction, waitForBalance, waitForBlock methods
+- BCH: reworked transaction subscriptions using new method blockchain.address.transactions.subscribe;
+  added and/or reworked watchAddress, watchAddressTransactions, watchBalance, watchBalanceUsd, watchBlocks,
+  waitForTransaction, waitForBalance, waitForBlock methods
+
 0.4.0
 
 - SmartBch support!
