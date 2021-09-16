@@ -1,4 +1,3 @@
-const assert = require("assert");
 const playwright = require("playwright");
 const PAGE_URL = "http://localhost:8080";
 
@@ -74,6 +73,100 @@ describe(`SmartBchWallet should function in the browser`, () => {
 
       expect((await bob.getBalance()).bch).toBe(0.2);
       expect((await charlie.getBalance()).bch).toBe(0.1);
+    }, process.env.SBCH_ALICE_ID);
+  });
+
+  test("Test waiting and watching", async () => {
+    await page.evaluate(async (SBCH_ALICE_ID) => {
+      // let all transactions in previous blocks be settled
+      await delay(7000);
+
+      const alice = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
+
+      const bob = await RegTestSmartBchWallet.newRandom();
+
+      let waitTxResult = false;
+      setTimeout(async () => {
+        const result = await alice.waitForTransaction({
+          getBalance: true,
+          getTransactionInfo: true,
+        });
+        expect(result.balance.sat).toBeGreaterThan(0);
+        expect(result.transactionInfo.transactionHash.length).toBe(66);
+        waitTxResult = true;
+      }, 0);
+
+      let waitBalanceResult = false;
+      setTimeout(async () => {
+        const result = await alice.waitForBalance(0.001, "bch");
+        expect(result.sat).toBeGreaterThan(0);
+        waitBalanceResult = true;
+      }, 0);
+
+      let aliceWatchResult = false;
+      const aliceWatchCancel = alice.watchAddressTransactions((tx) => {
+        expect(tx.from).toBe(alice.getDepositAddress());
+        expect(tx.to).toBe(bob.getDepositAddress());
+        aliceWatchCancel();
+        aliceWatchResult = true;
+      });
+
+      let bobWatchResult = false;
+      const bobWatchCancel = bob.watchAddressTransactions((tx) => {
+        expect(tx.from).toBe(alice.getDepositAddress());
+        expect(tx.to).toBe(bob.getDepositAddress());
+        bobWatchCancel();
+        bobWatchResult = true;
+      });
+
+      let bobBalanceWatchResult = false;
+      const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+        expect(balance.bch).toBe(0.001);
+        bobBalanceWatchCancel();
+        bobBalanceWatchResult = true;
+      });
+
+      let blockWatchResult = false;
+      const blockWatchCancel = bob.watchBlocks((block) => {
+        expect(block.hash.length).toBe(66);
+        blockWatchCancel();
+        blockWatchResult = true;
+      });
+
+      let blockWaitResult = false;
+      setTimeout(async () => {
+        const blockNumber = await alice.provider.getBlockNumber();
+        const result = await alice.waitForBlock();
+        expect(result.hash.length).toBe(66);
+        expect(result.number).toBe(blockNumber + 1);
+        blockWaitResult = true;
+      }, 0);
+
+      let blockNumberWaitResult = false;
+      setTimeout(async () => {
+        const blockNumber = await alice.provider.getBlockNumber();
+        const result = await alice.waitForBlock(blockNumber + 2);
+        expect(result.hash.length).toBe(66);
+        expect(result.number).toBe(blockNumber + 2);
+        blockNumberWaitResult = true;
+      }, 0);
+
+      alice.send(
+        { address: bob.getDepositAddress(), value: 0.001, unit: "bch" },
+        {},
+        { gasPrice: 10 ** 10 }
+      );
+
+      // lets wait for 2 more blocks to be mined
+      await delay(15000);
+      expect(waitTxResult).toBe(true);
+      expect(waitBalanceResult).toBe(true);
+      expect(aliceWatchResult).toBe(true);
+      expect(bobWatchResult).toBe(true);
+      expect(bobBalanceWatchResult).toBe(true);
+      expect(blockWatchResult).toBe(true);
+      expect(blockWaitResult).toBe(true);
+      expect(blockNumberWaitResult).toBe(true);
     }, process.env.SBCH_ALICE_ID);
   });
 });

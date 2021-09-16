@@ -16,7 +16,7 @@ makeWsServer = (server) => {
         if (data.method === "watchBalance") {
           const addr = data.data.cashaddr;
           const w = await mainnet.Wallet.fromCashaddr(addr);
-          fn = await w.watchBalance((balance) => {
+          fn = w.watchBalance((balance) => {
             socket.send(JSON.stringify(balance));
           });
           socket.unsubscribeFunctions.push(fn);
@@ -48,7 +48,7 @@ makeWsServer = (server) => {
           const slpaddr = data.data.slpaddr;
           const tokenId = data.data.tokenId;
           const w = await getSlpWallet(slpaddr);
-          fn = await w.slp.watchBalance((balance) => {
+          fn = w.slp.watchBalance((balance) => {
             socket.send(JSON.stringify(balance));
           }, tokenId);
           socket.unsubscribeFunctions.push(fn);
@@ -80,7 +80,9 @@ makeWsServer = (server) => {
 
     socket.on('close', async () => {
       socket.unsubscribeFunctions.forEach(async () => {
-        await fn();
+        try {
+          await fn();
+        } catch {}
       });
       socket.unsubscribeFunctions = [];
     });
