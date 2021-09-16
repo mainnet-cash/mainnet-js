@@ -3,7 +3,11 @@
   "compilerOptions": {
     "target": "es2020",
     "outDir": "./dist/module",
-    "module": "esnext"
+    "module": "esnext",
+    "baseUrl": "src",
+    "paths": {
+      "pg": ["false*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**", "dist/**", "src/**/*test.ts"]

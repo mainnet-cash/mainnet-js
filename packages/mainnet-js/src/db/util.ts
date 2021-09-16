@@ -1,5 +1,5 @@
 import { StorageProvider } from ".";
-import { getRuntimePlatform } from "../util";
+import { getRuntimePlatform } from "../util/index";
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
 import { default as SqlProvider } from "./SqlProvider";
 

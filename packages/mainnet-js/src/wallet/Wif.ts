@@ -86,9 +86,9 @@ import {
   WatchUtil,
   WifUtil,
 } from "./Util";
-import { getNetworkProvider } from "../network";
+import { getNetworkProvider } from "../network/index";
 import { generateRandomBytes } from "../util/randomBytes";
-import { SignedMessageI, SignedMessage } from "../message";
+import { SignedMessageI, SignedMessage } from "../message/index";
 
 //#endregion Imports
 

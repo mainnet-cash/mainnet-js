@@ -4,7 +4,7 @@ export * from "./slp/index";
 export * from "./test/expect";
 export * from "./webhook/index";
 
-export * from "./network";
+export * from "./network/index";
 export { SignedMessage } from "./message/signed";
 
 export { BaseWallet } from "./wallet/Base";

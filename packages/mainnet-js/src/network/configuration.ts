@@ -1,4 +1,4 @@
-import { getRuntimePlatform } from "../util";
+import { getRuntimePlatform } from "../util/index";
 import * as primary from "./constant";
 
 let mainnetServers: string[],
