@@ -30,7 +30,9 @@ export async function balanceResponseFromSatoshi(
         response.sat = value;
         break;
       case UnitEnum.USD:
-        let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd", usdPriceCache));
+        let usd =
+          (value / bchParam.subUnits) *
+          (await ExchangeRate.get("usd", usdPriceCache));
         response.usd = Number(usd.toFixed(2));
         break;
       default:
@@ -60,7 +62,9 @@ export async function balanceFromSatoshi(
     case UnitEnum.SATOSHIS:
       return value;
     case UnitEnum.USD:
-      let usd = (value / bchParam.subUnits) * (await ExchangeRate.get("usd", usdPriceCache));
+      let usd =
+        (value / bchParam.subUnits) *
+        (await ExchangeRate.get("usd", usdPriceCache));
       return Number(usd.toFixed(2));
     default:
       throw Error(

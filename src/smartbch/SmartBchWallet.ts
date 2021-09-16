@@ -289,7 +289,10 @@ export class SmartBchWallet extends BaseWallet {
 
   //#region Funds
   // gets wallet balance in sats, bch and usd
-  public async getBalance(rawUnit?: string, usdPriceCache = true): Promise<BalanceResponse | number> {
+  public async getBalance(
+    rawUnit?: string,
+    usdPriceCache = true
+  ): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = sanitizeUnit(rawUnit);
       return await balanceFromSatoshi(
@@ -299,7 +302,8 @@ export class SmartBchWallet extends BaseWallet {
       );
     } else {
       return await balanceResponseFromSatoshi(
-        await this.getBalanceFromProvider(), usdPriceCache
+        await this.getBalanceFromProvider(),
+        usdPriceCache
       );
     }
   }
@@ -428,12 +432,16 @@ export class SmartBchWallet extends BaseWallet {
   // Since we want to be most sensitive to usd value change, we do not use the cached exchange rates
   // can be cancelled by calling the function returned from this one
   public watchBalanceUsd(
-    callback: (balance: BalanceResponse) => void, usdPriceRefreshInterval = 30000
+    callback: (balance: BalanceResponse) => void,
+    usdPriceRefreshInterval = 30000
   ): CancelWatchFn {
     let usdPrice = -1;
 
     const _callback = async () => {
-      const balance = (await this.getBalance(undefined, false)) as BalanceResponse;
+      const balance = (await this.getBalance(
+        undefined,
+        false
+      )) as BalanceResponse;
       if (usdPrice !== balance.usd!) {
         usdPrice = balance.usd!;
         callback(balance);
@@ -446,7 +454,7 @@ export class SmartBchWallet extends BaseWallet {
     return async () => {
       await watchCancel();
       clearInterval(interval);
-    }
+    };
   }
 
   // waits for address balance to be greater than or equal to the target value

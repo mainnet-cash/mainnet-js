@@ -24,7 +24,7 @@ test("Test watchBalanceUsd", async () => {
 
   const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
   const bob = await RegTestWallet.newRandom();
-  const balance = await alice.getBalance() as BalanceResponse;
+  const balance = (await alice.getBalance()) as BalanceResponse;
   let cbCounter = 0;
   const cancelWatchFn = alice.watchBalanceUsd(async (newBalance) => {
     cbCounter++;
@@ -33,17 +33,24 @@ test("Test watchBalanceUsd", async () => {
     }
   }, 3000);
 
-  ExchangeRate.setupAxiosMock("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
+  ExchangeRate.setupAxiosMock(
+    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
     { "bitcoin-cash": { usd: 777.777 } }
   );
 
   await delay(3000);
 
-  await alice.send({ cashaddr: bob.getDepositAddress(), value: 10000, unit: "sat" });
+  await alice.send({
+    cashaddr: bob.getDepositAddress(),
+    value: 10000,
+    unit: "sat",
+  });
 
   await delay(3000);
 
-  ExchangeRate.removeAxiosMock("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd");
+  ExchangeRate.removeAxiosMock(
+    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd"
+  );
   expect(cbCounter).toBe(2);
   await cancelWatchFn();
 });
