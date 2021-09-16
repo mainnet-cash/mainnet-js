@@ -134,7 +134,7 @@ jobs:
         run: echo "NPM_TOKEN secret not set, skipping publishing"
       - if: env.HAS_NPM_TOKEN
         name: Publish to npm
-        run: yarn publish
+        run: yarn workspaces run publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
@@ -168,14 +168,31 @@ jobs:
       - if: env.HAS_CDN_FTP_UPLOAD == false
         run: echo "CDN_FTP_UPLOAD secret not set, skipping publishing"
       - if: env.HAS_CDN_FTP_UPLOAD
-        name: Publish to bunny cdn
+        name: Publish mainnet-js to bunny cdn
         uses: sebastianpopp/ftp-action@releases/v2
         with:
           host: storage.bunnycdn.com
           user: mainnet-js
           password: ${{ secrets.CDN_FTP_UPLOAD }}
-          localDir: "dist"
-
+          localDir: "packages/mainnet-js/dist"
+      - if: env.HAS_CDN_FTP_UPLOAD
+        name: Publish @mainnet-cash/contract to bunny cdn
+        uses: sebastianpopp/ftp-action@releases/v2        
+        with:
+          host: storage.bunnycdn.com
+          user: mainnet-js
+          password: ${{ secrets.CDN_FTP_UPLOAD }}
+          localDir: "packages/contract/dist"
+          remoteDir: "contract"
+      - if: env.HAS_CDN_FTP_UPLOAD
+        name: Publish @mainnet-cash/smartbch to bunny cdn
+        uses: sebastianpopp/ftp-action@releases/v2        
+        with:
+          host: storage.bunnycdn.com
+          user: mainnet-js
+          password: ${{ secrets.CDN_FTP_UPLOAD }}
+          localDir: "packages/smartbch/dist"
+          remoteDir: "smartbch"
 
   # Build a matrix of API clients: php, python and go
   # After being built, the clients are commited to their repositories, new tag and github release are created for them
