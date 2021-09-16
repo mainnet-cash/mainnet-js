@@ -114,9 +114,7 @@ describe(`Test Ethereum functions`, () => {
   });
 
   test("Test waiting and watching", async () => {
-    const temp = await RegTestSmartBchWallet.fromId(
-      process.env.SBCH_ALICE_ID!
-    );
+    const temp = await RegTestSmartBchWallet.fromId(process.env.SBCH_ALICE_ID!);
 
     const alice = await RegTestSmartBchWallet.newRandom();
     await temp.send(
