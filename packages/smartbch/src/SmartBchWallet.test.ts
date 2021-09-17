@@ -3,10 +3,7 @@ import { Mainnet } from "mainnet-js";
 
 type BalanceResponse = Mainnet.BalanceResponse;
 
-import {
-  RegTestSmartBchWallet,
-  SmartBchWallet,
-} from "./SmartBchWallet";
+import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 describe(`Test Ethereum functions`, () => {
