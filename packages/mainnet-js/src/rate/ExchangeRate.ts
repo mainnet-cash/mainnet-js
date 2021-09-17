@@ -68,24 +68,32 @@ export class ExchangeRate {
     axios.interceptors.mocks[mockUrl] = responseData;
   }
 
+  static removeAxiosMock(mockUrl) {
+    delete (axios.interceptors.mocks || {})[mockUrl];
+  }
+
   toString() {
     this.rate.toFixed(2);
   }
 
-  static async get(symbol: string) {
+  static async get(symbol: string, useCache = true) {
     const platform = getRuntimePlatform();
     if (platform !== RuntimePlatform.node && indexedDbIsAvailable()) {
       try {
-        return await this.getRateFromIndexedDb(symbol);
+        return await this.getRateFromIndexedDb(symbol, useCache);
       } catch {
-        return await this.getRateFromGlobalScope(symbol);
+        return await this.getRateFromGlobalScope(symbol, useCache);
       }
     } else {
-      return await this.getRateFromGlobalScope(symbol);
+      return await this.getRateFromGlobalScope(symbol, useCache);
     }
   }
 
-  static async getRateFromIndexedDb(symbol): Promise<number> {
+  static async getRateFromIndexedDb(symbol, useCache = true): Promise<number> {
+    if (!useCache) {
+      return await getRateFromExchange(symbol);
+    }
+
     let cache = new ExchangeRateProvider();
     let cacheRate = await cache.getRate(symbol);
     if (cacheRate) {
@@ -100,7 +108,11 @@ export class ExchangeRate {
     return freshRate;
   }
 
-  static async getRateFromGlobalScope(symbol) {
+  static async getRateFromGlobalScope(symbol, useCache = true) {
+    if (!useCache) {
+      return await getRateFromExchange(symbol);
+    }
+
     if (globalThis.RATE) {
       let rateObject = globalThis.RATE;
       if (symbol in rateObject) {

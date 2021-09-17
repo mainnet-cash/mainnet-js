@@ -8,6 +8,8 @@ import { delay } from "../util/delay";
 import { OpReturnData, SendResponse } from "./model";
 import { ElectrumRawTransaction } from "../network/interface";
 import { binToHex, binToUtf8, hexToBin, utf8ToBin } from "@bitauth/libauth";
+import { ElectrumNetworkProvider } from "cashscript";
+import { mine } from "../mine";
 
 beforeAll(async () => {
   await initProviders();
@@ -392,7 +394,7 @@ describe(`Wallet subscriptions`, () => {
     ]);
 
     let balance = await bobWallet.waitForBalance(2000, UnitEnum.SATOSHIS);
-    expect(balance).toBeGreaterThanOrEqual(2000);
+    expect(balance.sat!).toBeGreaterThanOrEqual(2000);
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
 
@@ -410,9 +412,8 @@ describe(`Wallet subscriptions`, () => {
 
     let cancel = bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
-    expect(balance).toBe(2000);
-    cancel();
-    //expect(bobAny.sat).toBe(2000);
+    expect(balance.sat!).toBe(2000);
+    await cancel();
   });
 
   test("Should watch multiple wallets", async () => {
@@ -461,9 +462,9 @@ describe(`Wallet subscriptions`, () => {
       600
     );
     let daveBalance = await dave.waitForBalance(1000, "sat");
-    expect(bobBalance).toBe(1000);
-    expect(charlieBalance).toBe(1000);
-    expect(daveBalance).toBe(1000);
+    expect(bobBalance.sat!).toBe(1000);
+    expect(charlieBalance.sat!).toBe(1000);
+    expect(daveBalance.sat!).toBe(1000);
     setTimeout(
       () =>
         alice.send([
@@ -504,6 +505,99 @@ describe(`Wallet subscriptions`, () => {
     bobResponse = await bob.waitForTransaction();
     expect(bobResponse.transactionInfo!.version).toBe(2);
     expect(await bob.getBalance("sat")).toBe(4000);
+  });
+
+  test("Test waiting and watching", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+
+    const bob = await RegTestWallet.newRandom();
+
+    let waitTxResult = false;
+    setTimeout(async () => {
+      const result = await alice.waitForTransaction({
+        getBalance: true,
+        getTransactionInfo: true,
+      });
+      expect(result.balance!.sat!).toBeGreaterThan(0);
+      expect(result.transactionInfo!.hash.length).toBe(64);
+      waitTxResult = true;
+    }, 0);
+
+    let waitBalanceResult = false;
+    setTimeout(async () => {
+      const result = (await alice.waitForBalance(
+        0.001,
+        "bch"
+      )) as BalanceResponse;
+      expect(result.sat!).toBeGreaterThan(0);
+      waitBalanceResult = true;
+    }, 0);
+
+    let aliceWatchResult = false;
+    const aliceWatchCancel = alice.watchAddressTransactions((_tx) => {
+      aliceWatchCancel();
+      aliceWatchResult = true;
+    });
+
+    let bobWatchResult = false;
+    const bobWatchCancel = bob.watchAddress((_txHash) => {
+      bobWatchCancel();
+      bobWatchResult = true;
+    });
+
+    let bobBalanceWatchResult = false;
+    const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+      expect(balance.bch!).toBe(0.001);
+      bobBalanceWatchCancel();
+      bobBalanceWatchResult = true;
+    });
+
+    let blockWatchResult = false;
+    const blockWatchCancel = bob.watchBlocks((block) => {
+      expect(block.height).toBeGreaterThan(1);
+      blockWatchCancel();
+      blockWatchResult = true;
+    });
+
+    let blockWaitResult = false;
+    setTimeout(async () => {
+      const blockNumber = await (
+        alice.provider! as ElectrumNetworkProvider
+      ).getBlockHeight();
+      const result = await alice.waitForBlock();
+      expect(result.height).toBe(blockNumber + 1);
+      blockWaitResult = true;
+    }, 0);
+
+    let blockNumberWaitResult = false;
+    setTimeout(async () => {
+      const blockNumber = await (
+        alice.provider! as ElectrumNetworkProvider
+      ).getBlockHeight();
+      const result = await alice.waitForBlock(blockNumber + 2);
+      expect(result.height).toBe(blockNumber + 2);
+      blockNumberWaitResult = true;
+    }, 0);
+
+    await alice.send({
+      cashaddr: bob.getDepositAddress(),
+      value: 0.001,
+      unit: "bch",
+    });
+
+    await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
+    await delay(1000);
+    await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
+
+    await delay(5000);
+    expect(waitTxResult).toBe(true);
+    expect(waitBalanceResult).toBe(true);
+    expect(aliceWatchResult).toBe(true);
+    expect(bobWatchResult).toBe(true);
+    expect(bobBalanceWatchResult).toBe(true);
+    expect(blockWatchResult).toBe(true);
+    expect(blockWaitResult).toBe(true);
+    expect(blockNumberWaitResult).toBe(true);
   });
 
   test.skip("Should get testnet satoshis and send them back", async () => {

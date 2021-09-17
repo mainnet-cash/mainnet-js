@@ -38,7 +38,7 @@ services:
     networks:
       - bitcoin
   fulcrum:
-    image: cculianu/fulcrum
+    image: mainnet/fulcrum
     command: /bin/sh -c "/bin/sleep 10 && Fulcrum /tmp/fulcrum.conf"
     ports:
       - "60001:60001"

@@ -27,6 +27,20 @@ export interface BalanceResponse {
   usd?: number;
 }
 
+export type CancelWatchFn = () => Promise<void>;
+
+export interface WaitForTransactionOptions {
+  confirmations?: number;
+  getTransactionInfo?: boolean;
+  getBalance?: boolean;
+  txHash?: string;
+}
+
+export interface WaitForTransactionResponse {
+  transactionInfo?: ethers.providers.TransactionReceipt;
+  balance?: BalanceResponse;
+}
+
 //#region Sep20
 export interface Sep20GenesisOptions {
   name: string;
@@ -121,4 +135,5 @@ export interface ContractFnResponseI {
   txId?: string;
   receipt?: ethers.providers.TransactionReceipt;
 }
+
 //#endregion Contract

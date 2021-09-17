@@ -11,6 +11,9 @@ import {
   SendRequestArray,
   SendResponse,
   BalanceResponse,
+  CancelWatchFn,
+  WaitForTransactionOptions,
+  WaitForTransactionResponse,
 } from "./interface";
 import { SendRequestOptionsI } from "./interface";
 
@@ -27,12 +30,21 @@ import {
 } from "./Sep20";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "mainnet-js";
 import { getNetworkProvider } from "./Network";
-import { asSendRequestObject, satToWei, weiToSat, zeroAddress } from "./Utils";
+import {
+  asSendRequestObject,
+  satToWei,
+  waitForBlock,
+  watchAddress,
+  watchAddressTransactions,
+  watchBlocks,
+  weiToSat,
+  zeroAddress,
+} from "./Utils";
 
 Mainnet.randomValues;
 
 export class SmartBchWallet extends BaseWallet {
-  provider?: ethers.providers.Provider;
+  provider?: ethers.providers.BaseProvider;
   ethersWallet?: ethers.Wallet;
   ethersSigner?: ethers.Signer;
   privateKey?: string;
@@ -276,16 +288,21 @@ export class SmartBchWallet extends BaseWallet {
 
   //#region Funds
   // gets wallet balance in sats, bch and usd
-  public async getBalance(rawUnit?: string): Promise<BalanceResponse | number> {
+  public async getBalance(
+    rawUnit?: string,
+    usdPriceCache = true
+  ): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = Mainnet.sanitizeUnit(rawUnit);
       return await Mainnet.balanceFromSatoshi(
         await this.getBalanceFromProvider(),
-        unit
+        unit,
+        usdPriceCache
       );
     } else {
       return await Mainnet.balanceResponseFromSatoshi(
-        await this.getBalanceFromProvider()
+        await this.getBalanceFromProvider(),
+        usdPriceCache
       );
     }
   }
@@ -378,6 +395,158 @@ export class SmartBchWallet extends BaseWallet {
         overrides
       )
     )[0];
+  }
+
+  // waiting for any transaction hash of this wallet
+  public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
+    return watchAddress(this.provider!, this.getDepositAddress(), callback);
+  }
+
+  // waiting for any transaction of this wallet
+  public watchAddressTransactions(
+    callback: (tx: ethers.providers.TransactionResponse) => void
+  ): CancelWatchFn {
+    return watchAddressTransactions(
+      this.provider!,
+      this.getDepositAddress(),
+      callback
+    );
+  }
+
+  // sets up a callback to be called upon wallet's balance change
+  // can be cancelled by calling the function returned from this one
+  public watchBalance(
+    callback: (balance: BalanceResponse) => void
+  ): CancelWatchFn {
+    const watchBalanceCallback = async () => {
+      const balance = (await this.getBalance()) as BalanceResponse;
+      await callback(balance);
+    };
+    return this.watchAddress(watchBalanceCallback);
+  }
+
+  // sets up a callback to be called upon wallet's BCH or USD balance change
+  // if BCH balance does not change, the callback will be triggered every
+  // @param `usdPriceRefreshInterval` milliseconds by polling for new BCH USD price
+  // Since we want to be most sensitive to usd value change, we do not use the cached exchange rates
+  // can be cancelled by calling the function returned from this one
+  public watchBalanceUsd(
+    callback: (balance: BalanceResponse) => void,
+    usdPriceRefreshInterval = 30000
+  ): CancelWatchFn {
+    let usdPrice = -1;
+
+    const _callback = async () => {
+      const balance = (await this.getBalance(
+        undefined,
+        false
+      )) as BalanceResponse;
+      if (usdPrice !== balance.usd!) {
+        usdPrice = balance.usd!;
+        callback(balance);
+      }
+    };
+
+    const watchCancel = this.watchAddress(_callback);
+    const interval = setInterval(_callback, usdPriceRefreshInterval);
+
+    return async () => {
+      await watchCancel();
+      clearInterval(interval);
+    };
+  }
+
+  // waits for address balance to be greater than or equal to the target value
+  // this call halts the execution
+  public async waitForBalance(
+    value: number,
+    rawUnit: UnitEnum = UnitEnum.BCH
+  ): Promise<BalanceResponse> {
+    return new Promise((resolve) => {
+      const watchCancel = this.watchBalance(
+        async (balance: BalanceResponse) => {
+          const satoshiBalance = await Mainnet.amountInSatoshi(value, rawUnit);
+          if (balance.sat! >= satoshiBalance) {
+            await watchCancel();
+            resolve(balance);
+          }
+        }
+      );
+    });
+  }
+
+  // waits for next transaction, program execution is halted
+  public async waitForTransaction(
+    options: WaitForTransactionOptions = {
+      confirmations: 1,
+      getTransactionInfo: true,
+      getBalance: false,
+      txHash: undefined,
+    }
+  ): Promise<WaitForTransactionResponse> {
+    if (options.confirmations === undefined) {
+      options.confirmations = 1;
+    }
+
+    if (options.getTransactionInfo === undefined) {
+      options.getTransactionInfo = true;
+    }
+
+    if (options.getBalance === undefined) {
+      options.getBalance = false;
+    }
+
+    // tx hash is known, just wait for it
+    if (options.txHash) {
+      const result: WaitForTransactionResponse = {
+        transactionInfo: await this.provider!.waitForTransaction(
+          options.txHash!
+        ),
+      };
+      if (options.getBalance!) {
+        result.balance = (await this.getBalance()) as BalanceResponse;
+      }
+
+      return result;
+    }
+
+    // tx hash is unknown, let's wait for the first one
+    // by listening for all pending transactions and filtering for our address
+    return new Promise(async (resolve) => {
+      const watchCancel = this.watchAddressTransactions(
+        async (tx: ethers.providers.TransactionResponse) => {
+          await watchCancel();
+          resolve(
+            await this.waitForTransaction({ ...options, txHash: tx.hash })
+          );
+        }
+      );
+    });
+  }
+
+  /**
+   * watchBlocks Watch network blocks
+   *
+   * @param callback callback with a block object
+   *
+   * @returns a function which will cancel watching upon evaluation
+   */
+  public watchBlocks(
+    callback: (block: ethers.providers.Block) => void
+  ): CancelWatchFn {
+    return watchBlocks(this.provider!, callback);
+  }
+
+  /**
+   * waitForBlock Wait for a network block
+   *
+   * @param targetBlockNumber if specified waits for this exact blockchain height, otherwise resolves with the next block
+   *
+   */
+  public async waitForBlock(
+    targetBlockNumber?: number
+  ): Promise<ethers.providers.Block> {
+    return waitForBlock(this.provider!, targetBlockNumber);
   }
   //#endregion Funds
 
