@@ -548,15 +548,6 @@ contract SmartBchSep20 is ERC20, ERC20Burnable, AccessControl {
 /**
  * Class to manage an slp enabled testnet wallet.
  */
-export class Web3Sep20 extends Sep20 {
-  static get walletType() {
-    return Web3SmartBchWallet;
-  }
-}
-
-/**
- * Class to manage an slp enabled testnet wallet.
- */
 export class TestNetSep20 extends Sep20 {
   static get walletType() {
     return TestNetSmartBchWallet;

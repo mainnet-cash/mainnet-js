@@ -133,3 +133,7 @@ export async function waitForBlock(
     });
   });
 }
+
+export function isValidAddress(address: string): boolean {
+  return ethers.utils.isAddress(address);
+}

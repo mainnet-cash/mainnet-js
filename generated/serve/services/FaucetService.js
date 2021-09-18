@@ -4,7 +4,8 @@ var mainnet = require("mainnet-js");
 var config  = require('../config');
 
 const assertFaucetAvailable = () => {
-  if ([config.FAUCET_CASHADDR, config.FAUCET_WIF, config.FAUCET_SLP_CASHADDR, config.FAUCET_SLP_WIF].some(val => !val)) {
+  if ([config.FAUCET_CASHADDR, config.FAUCET_WIF, config.FAUCET_SLP_CASHADDR, config.FAUCET_SLP_WIF,
+       config.FAUCET_SBCH_ADDRESS, config.FAUCET_SBCH_PRIVKEY, config.FAUCET_SBCH_TOKEN_ID].some(val => !val)) {
     throw new Error('Faucet service was not configured for this server');
   }
 }
@@ -21,10 +22,11 @@ const getAddresses = () => new Promise(
       assertFaucetAvailable();
       resolve(Service.successResponse({
         bchtest: config.FAUCET_CASHADDR,
-        slptest: config.FAUCET_SLP_CASHADDR
+        slptest: config.FAUCET_SLP_CASHADDR,
+        sbchtest: config.FAUCET_SBCH_ADDRESS
       }));
     } catch (e) {
-      // console.log(e);
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -90,7 +92,68 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
       const sendResponse = await wallet.slp.send([{slpaddr: getTestnetSlpRequest.slpaddr, value: diff, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
-      // console.log(e, getTestnetSlpRequest);
+      console.trace(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get testnet SmartBCH bch 
+*
+* getTestnetSbchRequest GetTestnetSbchRequest Request to bch faucet 
+* returns GetTestnetSbchResponse
+* */
+const getTestnetSbch = ({ getTestnetSbchRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      assertFaucetAvailable();
+      if (!mainnet.SmartBch.isValidAddress(getTestnetSbchRequest.address))
+        throw new Error("Incorrect SmartBch address");
+
+      const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSbchRequest.address);
+      const receiverBalance = await receiverWallet.getBalance("bch");
+      const diff = 0.1 - receiverBalance;
+      if (diff <= 0)
+        throw new Error("You have 0.1 BCH or more. Refusing to refill.");
+
+      const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+      const sendResponse = await wallet.send([{address: getTestnetSbchRequest.address, value: diff, unit: "BCH"}], {}, { gasPrice: 10 ** 10 });
+      resolve(Service.successResponse({ txId: sendResponse[0].txId }));
+    } catch (e) {
+      console.trace(e);
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get testnet SmartBch SEP20 tokens 
+*
+* getTestnetSep20Request GetTestnetSep20Request Request to SEP20 faucet 
+* returns GetTestnetSep20Response
+* */
+const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      assertFaucetAvailable();
+      if (!mainnet.SmartBch.isValidAddress(getTestnetSep20Request.address))
+      throw new Error("Incorrect SmartBch address");
+      const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSep20Request.address);
+      const receiverBalance = await receiverWallet.sep20.getBalance(getTestnetSep20Request.tokenId);
+      const diff = 10 - (receiverBalance.value.toNumber());
+      if (diff <= 0)
+        throw new Error("You have 10 tokens or more of this type. Refusing to refill.");
+
+      const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+      const sendResponse = await wallet.sep20.send([{address: getTestnetSep20Request.address, value: diff, tokenId: getTestnetSep20Request.tokenId}], { gasPrice: 10 ** 10 });
+      resolve(Service.successResponse({ txId: sendResponse[0].txId }));
+    } catch (e) {
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -102,5 +165,7 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
 module.exports = {
   getAddresses,
   getTestnetBch,
-  getTestnetSlp
+  getTestnetSlp,
+  getTestnetSbch,
+  getTestnetSep20
 };
