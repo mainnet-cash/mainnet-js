@@ -3,6 +3,7 @@ import { delay } from "../util/delay";
 import {
   RegTestSmartBchWallet,
   SmartBchWallet,
+  TestNetSmartBchWallet,
 } from "../smartbch/SmartBchWallet";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { JsonRpcProvider } from "@ethersproject/providers";
@@ -208,5 +209,13 @@ describe(`Test Ethereum functions`, () => {
     expect(blockWatchResult).toBe(true);
     expect(blockWaitResult).toBe(true);
     expect(blockNumberWaitResult).toBe(true);
+  });
+
+  test("Test faucet", async () => {
+    const alice = await TestNetSmartBchWallet.newRandom(
+
+    );
+
+    console.log(await alice.getTestnetSatoshis());
   });
 });

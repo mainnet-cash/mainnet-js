@@ -363,6 +363,58 @@ paths:
       tags:
       - faucet
       x-eov-operation-handler: controllers/FaucetController
+  /faucet/get_testnet_sbch:
+    post:
+      operationId: getTestnetSbch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetTestnetSbchRequest'
+        description: |
+          Request to bch faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTestnetSbchResponse'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get testnet SmartBCH bch
+      tags:
+      - faucet
+      x-eov-operation-handler: controllers/FaucetController
+  /faucet/get_testnet_sep20:
+    post:
+      operationId: getTestnetSep20
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetTestnetSep20Request'
+        description: |
+          Request to SEP20 faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTestnetSep20Response'
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Get testnet SmartBch SEP20 tokens
+      tags:
+      - faucet
+      x-eov-operation-handler: controllers/FaucetController
   /faucet/get_addresses:
     post:
       operationId: getAddresses
@@ -3455,16 +3507,55 @@ components:
         txId:
           description: Transaction id
           type: string
+    GetTestnetSbchRequest:
+      example:
+        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+      properties:
+        address:
+          description: Receiver's SmartBch testnet address
+          type: string
+    GetTestnetSbchResponse:
+      example:
+        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+      properties:
+        txId:
+          description: Transaction id
+          type: string
+    GetTestnetSep20Request:
+      example:
+        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+      properties:
+        address:
+          description: Receiver's SmartBch testnet address
+          type: string
+        tokenId:
+          description: Token unique hexadecimal identifier
+          type: string
+      required:
+      - address
+      - tokenId
+    GetTestnetSep20Response:
+      example:
+        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+      properties:
+        txId:
+          description: Transaction id
+          type: string
     GetAddressesResponse:
       example:
         bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
         slptest: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        sbchtest: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
       properties:
         bchtest:
           description: Cashaddr to return testnet BCH
           type: string
         slptest:
           description: Slpaddr to return testnet SLP tokens
+          type: string
+        sbchtest:
+          description: SmartBch testnet address to return BCH and SEP20 tokens
           type: string
     SmartBchDepositAddressResponse:
       example:

@@ -1,5 +1,4 @@
 const path = require('path');
-const os = require('os');
 
 if (process.env.USE_DOTENV) {
   require("dotenv").config({ path: ".env.regtest" });
@@ -21,12 +20,15 @@ const config = {
   FAUCET_WIF: process.env.FAUCET_WIF,
   FAUCET_SLP_CASHADDR: process.env.FAUCET_SLP_CASHADDR,
   FAUCET_SLP_WIF: process.env.FAUCET_SLP_WIF,
+  FAUCET_SBCH_ADDRESS: process.env.FAUCET_SBCH_ADDRESS,
+  FAUCET_SBCH_PRIVKEY: process.env.FAUCET_SBCH_PRIVKEY,
+  FAUCET_SBCH_TOKEN_ID: process.env.FAUCET_SBCH_TOKEN_ID,
   API_KEY: process.env.API_KEY
 };
+console.log(config);
 config.OPENAPI_YAML = path.join(config.ROOT_DIR, 'api', 'openapi.yaml');
 config.DOC_YAML = path.join(config.ROOT_DIR, "../../swagger/v1/", "api.yml");
 config.FULL_PATH = `${config.URL_PATH}:${config.URL_PORT}/${config.BASE_VERSION}`;
 config.FILE_UPLOAD_PATH = path.join(config.PROJECT_DIR, 'uploaded_files');
-
 
 module.exports = config;

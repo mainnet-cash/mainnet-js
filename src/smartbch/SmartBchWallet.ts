@@ -11,6 +11,7 @@ import {
   CancelWatchFn,
   WaitForTransactionOptions,
   WaitForTransactionResponse,
+  Sep20SendResponse,
 } from "./interface";
 import { SendRequestOptionsI } from "./interface";
 import {
@@ -43,6 +44,8 @@ import {
   weiToSat,
   zeroAddress,
 } from "./Utils";
+
+import axios from "axios";
 
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.BaseProvider;
@@ -605,8 +608,71 @@ export class Web3SmartBchWallet extends SmartBchWallet {
  * Class to manage a testnet wallet.
  */
 export class TestNetSmartBchWallet extends SmartBchWallet {
+  static faucetServer = "https://rest-unstable.mainnet.cash";
   constructor(name = "") {
     super(name, NetworkType.Testnet);
+  }
+
+  // will receive top-up to 0.1 testnet BCH, rate limits apply
+  async getTestnetSatoshis(): Promise<string> {
+    try {
+      const response = await axios.post(
+        `${TestNetSmartBchWallet.faucetServer}/faucet/get_testnet_sbch`,
+        { address: this.getDepositAddress() }
+      );
+      const data = response.data;
+      return data.txId;
+    } catch (e) {
+      // console.log(e);
+      // console.log(e.response ? e.response.data : "");
+      throw e;
+    }
+  }
+
+  // be nice and return them back
+  async returnTestnetSatoshis(): Promise<SendResponse> {
+    try {
+      const response = await axios.post(
+        `${TestNetSmartBchWallet.faucetServer}/faucet/get_addresses`
+      );
+      const data = response.data;
+      return await this.sendMax(data.sbchtest);
+    } catch (e: any) {
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
+      throw e;
+    }
+  }
+
+  // will receive 10 testnet tokens, rate limits apply
+  async getTestnetSep20(tokenId: string): Promise<string> {
+    try {
+      const response = await axios.post(
+        `${TestNetSmartBchWallet.faucetServer}/faucet/get_testnet_sep20`,
+        { address: this.getDepositAddress(), tokenId: tokenId }
+      );
+      const data = response.data;
+      return data.txId;
+    } catch (e) {
+      //console.log(e);
+      //console.log(e.response ? e.response.data : "");
+      throw e;
+    }
+  }
+
+  // be nice and return them back
+  async returnTestnetSep20(tokenId: string): Promise<Sep20SendResponse> {
+    try {
+      const response = await axios.post(
+        `${TestNetSmartBchWallet.faucetServer}/faucet/get_addresses`
+      );
+      const data = response.data;
+      return await this.sep20.sendMax(data.sep20test, tokenId);
+    } catch (e: any) {
+      console.log(e);
+      console.log(e.response ? e.response.data : "");
+      throw e;
+    }
   }
 
   // interface to static sep20 functions. see Sep20.ts
