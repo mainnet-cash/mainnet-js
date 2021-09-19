@@ -25,7 +25,6 @@ const config = {
   FAUCET_SBCH_TOKEN_ID: process.env.FAUCET_SBCH_TOKEN_ID,
   API_KEY: process.env.API_KEY
 };
-console.log(config);
 config.OPENAPI_YAML = path.join(config.ROOT_DIR, 'api', 'openapi.yaml');
 config.DOC_YAML = path.join(config.ROOT_DIR, "../../swagger/v1/", "api.yml");
 config.FULL_PATH = `${config.URL_PATH}:${config.URL_PORT}/${config.BASE_VERSION}`;

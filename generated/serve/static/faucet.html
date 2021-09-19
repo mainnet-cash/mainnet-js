@@ -123,6 +123,20 @@
 
       async update() {
         try {
+          new Promise(async () => {
+            try {
+              const wallet = await Web3TestNetSmartBchWallet.init();
+              this.address = wallet.getDepositAddress();
+            } catch (error) {
+              if (error.message.indexOf("Metamask or another Web3 browser") === 0) {
+                if (window.confirm("Metamask or another Web3 browser extension is not installed. Click OK to download Metamask.")) {
+                  window.location.assign("http://metamask.io");
+                  return;
+                }
+              }
+            }
+          });
+
           const fetchopt = {
             method: "POST",
             headers: { "Content-type": "application/json; charset=UTF-8" }
@@ -139,19 +153,19 @@
           this.faucetSbchAddress = json.sbchtest;
 
           await Promise.all([
-          new Promise(async () => {
-            const wallet = await Wallet.fromCashaddr(this.faucetCashaddr);
-            this.balance = await wallet.slpAware().getBalance("bch");
-          }),
-          new Promise(async () => {
-            const slpWallet = await Wallet.fromSlpaddr(this.faucetSlpCashaddr);
-            this.slpBalances = await slpWallet.slp.getAllBalances();
-          }),
-          new Promise(async () => {
-            const sbchWallet = await TestNetSmartBchWallet.watchOnly(this.faucetSbchAddress);
-            this.sbchBalance = await sbchWallet.getBalance("bch");
-            this.sep20Balances = [await sbchWallet.sep20.getBalance("0x406bA6982E442674A057a1DbCB185677eF224392")];
-          }),
+            new Promise(async () => {
+              const wallet = await Wallet.fromCashaddr(this.faucetCashaddr);
+              this.balance = await wallet.slpAware().getBalance("bch");
+            }),
+            new Promise(async () => {
+              const slpWallet = await Wallet.fromSlpaddr(this.faucetSlpCashaddr);
+              this.slpBalances = await slpWallet.slp.getAllBalances();
+            }),
+            new Promise(async () => {
+              const sbchWallet = await TestNetSmartBchWallet.watchOnly(this.faucetSbchAddress);
+              this.sbchBalance = await sbchWallet.getBalance("bch");
+              this.sep20Balances = [await sbchWallet.sep20.getBalance("0x406bA6982E442674A057a1DbCB185677eF224392")];
+            }),
           ]);
         } catch (error) {
           alert(error.message);

@@ -30,7 +30,6 @@ import {
   TestNetPrivKeySep20,
   TestNetWatchSep20,
   WatchSep20,
-  Web3Sep20,
 } from "./Sep20";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "../message";
 import { getNetworkProvider } from "./Network";
@@ -114,19 +113,73 @@ export class SmartBchWallet extends BaseWallet {
   public async useBrowserWeb3Provider(
     addressOrIndex: number | string | undefined
   ) {
+    const network = await this.provider!.getNetwork();
+
     const ethereum = ((window as any) || {}).ethereum;
-    if (ethereum) {
-      await ethereum.enable();
-      const provider = new ethers.providers.Web3Provider(
-        (window as any).ethereum
-      );
-      this.ethersWallet = undefined;
-      this.privateKey = undefined;
-      this.publicKey = undefined;
-      this.ethersSigner = provider.getSigner(addressOrIndex);
-      this.address = await this.ethersSigner!.getAddress();
-      this.provider = provider;
+    if (!ethereum) {
+      throw Error("Metamask or another Web3 browser extension is not installed");
     }
+
+    try {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: ethers.BigNumber.from(network.chainId).toHexString() }],
+      });
+    } catch (switchError: any) {
+      console.log(switchError);
+      // This error code indicates that the chain has not been added to MetaMask.
+      if (switchError.code === 4902) {
+        try {
+          const connectionUrl = ((this.provider! as any || {}).connection || {}).url;
+          console.log(connectionUrl, network);
+          if (!connectionUrl) {
+            throw Error("Incompatible Wallet network provider. connectionUrl is not defined.");
+          }
+
+          if (this.network === NetworkType.Regtest) {
+            const message = `Can not automatically add regtest network to Metamask
+You can add it manually:
+  Network Name: SmartBch RegTest
+  New RPC URL: http://localhost:8545
+  Chain ID: 0x2712
+  Currency Symbol (optional): BCH`;
+            window.alert(message);
+            throw Error(message);
+          }
+
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: ethers.BigNumber.from(network.chainId).toHexString(),
+              chainName: `SmartBch ${this.network.replace(/\b\w/g, l => l.toUpperCase())}`,
+              blockExplorerUrls: [this.explorerUrl()],
+              rpcUrls: [connectionUrl],
+              nativeCurrency: {
+                name: 'BCH',
+                symbol: 'BCH',
+                decimals: 18,
+              },
+            }],
+          });
+        } catch (addError) {
+          console.log(addError);
+          // handle adding network error
+          throw addError;
+        }
+      }
+      // handle other "switch" errors
+      throw switchError;
+    }
+
+    const provider = new ethers.providers.Web3Provider(
+      (window as any).ethereum
+    );
+    this.ethersWallet = undefined;
+    this.privateKey = undefined;
+    this.publicKey = undefined;
+    this.ethersSigner = provider.getSigner(addressOrIndex);
+    this.address = await this.ethersSigner!.getAddress();
+    this.provider = provider;
   }
 
   /**
@@ -135,14 +188,18 @@ export class SmartBchWallet extends BaseWallet {
    * @param txId   transaction Id
    * @returns   Url string
    */
-  public explorerUrl(txId: string) {
+  public explorerUrl(txId?: string) {
     const explorerUrlMap = {
-      mainnet: "https://www.smartscan.cash/transaction/",
-      testnet: "",
+      mainnet: "https://www.smartscan.cash/",
+      testnet: "https://www.smartscan.cash/",
       regtest: "",
     };
 
-    return explorerUrlMap[this.network] + txId;
+    if (txId) {
+      return `${explorerUrlMap[this.network]}transaction/${txId}`;
+    }
+
+    return explorerUrlMap[this.network];
   }
   //#endregion Accessors
 
@@ -587,26 +644,6 @@ export class SmartBchWallet extends BaseWallet {
 /**
  * Class to manage a testnet wallet.
  */
-export class Web3SmartBchWallet extends SmartBchWallet {
-  public static async init(addressOrIndex: number | string | undefined) {
-    const wallet = new Web3SmartBchWallet();
-    await wallet.useBrowserWeb3Provider(addressOrIndex);
-    return wallet;
-  }
-
-  public explorerUrl(txId: string) {
-    return txId;
-  }
-
-  // interface to static sep20 functions. see Sep20.ts
-  public static get sep20() {
-    return Web3Sep20;
-  }
-}
-
-/**
- * Class to manage a testnet wallet.
- */
 export class TestNetSmartBchWallet extends SmartBchWallet {
   static faucetServer = "https://rest-unstable.mainnet.cash";
   constructor(name = "") {
@@ -667,7 +704,7 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
         `${TestNetSmartBchWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.sep20.sendMax(data.sep20test, tokenId);
+      return await this.sep20.sendMax(data.sbchtest, tokenId);
     } catch (e: any) {
       console.log(e);
       console.log(e.response ? e.response.data : "");
@@ -782,5 +819,65 @@ export class RegTestWatchSmartBchWallet extends SmartBchWallet {
   // interface to static sep20 functions. see Sep20.ts
   public static get sep20() {
     return RegTestWatchSep20;
+  }
+}
+
+/**
+ * Class to manage a web3 wallet.
+ */
+ export class Web3SmartBchWallet extends SmartBchWallet {
+  constructor(name = "") {
+    super(name, NetworkType.Mainnet);
+  }
+
+  public static async init(addressOrIndex: number | string | undefined) {
+    const wallet = new Web3SmartBchWallet();
+    await wallet.useBrowserWeb3Provider(addressOrIndex);
+    return wallet;
+  }
+
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return Sep20;
+  }
+}
+
+/**
+ * Class to manage a testnet web3 wallet.
+ */
+ export class Web3TestNetSmartBchWallet extends TestNetSmartBchWallet {
+  constructor(name = "") {
+    super(name);
+  }
+
+  public static async init(addressOrIndex: number | string | undefined) {
+    const wallet = new Web3TestNetSmartBchWallet();
+    await wallet.useBrowserWeb3Provider(addressOrIndex);
+    return wallet;
+  }
+
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return TestNetSep20;
+  }
+}
+
+/**
+ * Class to manage a regtese web3 wallet.
+ */
+ export class Web3RegTestSmartBchWallet extends RegTestSmartBchWallet {
+  constructor(name = "") {
+    super(name);
+  }
+
+  public static async init(addressOrIndex: number | string | undefined) {
+    const wallet = new Web3RegTestSmartBchWallet();
+    await wallet.useBrowserWeb3Provider(addressOrIndex);
+    return wallet;
+  }
+
+  // interface to static sep20 functions. see Sep20.ts
+  public static get sep20() {
+    return RegTestSep20;
   }
 }
