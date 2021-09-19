@@ -26,7 +26,7 @@ const getAddresses = () => new Promise(
         sbchtest: config.FAUCET_SBCH_ADDRESS
       }));
     } catch (e) {
-      // console.log(e);
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -92,7 +92,7 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
       const sendResponse = await wallet.slp.send([{slpaddr: getTestnetSlpRequest.slpaddr, value: diff, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
-      // console.log(e, getTestnetSlpRequest);
+      console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -143,19 +143,14 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
       assertFaucetAvailable();
       if (!mainnet.SmartBch.isValidAddress(getTestnetSep20Request.address))
       throw new Error("Incorrect SmartBch address");
-      console.log(1);
       const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSep20Request.address);
-      console.log(2);
       const receiverBalance = await receiverWallet.sep20.getBalance(getTestnetSep20Request.tokenId);
-      console.log(3);
       const diff = 10 - (receiverBalance.value.toNumber());
       if (diff <= 0)
         throw new Error("You have 10 tokens or more of this type. Refusing to refill.");
 
       const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
-      console.log(4);
       const sendResponse = await wallet.sep20.send([{address: getTestnetSep20Request.address, value: diff, tokenId: getTestnetSep20Request.tokenId}], { gasPrice: 10 ** 10 });
-      console.log(5);
       resolve(Service.successResponse({ txId: sendResponse[0].txId }));
     } catch (e) {
       console.trace(e);
