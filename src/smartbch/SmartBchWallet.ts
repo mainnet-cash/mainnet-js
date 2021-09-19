@@ -45,6 +45,7 @@ import {
 } from "./Utils";
 
 import axios from "axios";
+import { SmartBch } from "..";
 
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.BaseProvider;
@@ -134,15 +135,7 @@ export class SmartBchWallet extends BaseWallet {
       // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
-          const connectionUrl = (
-            ((this.provider! as any) || {}).connection || {}
-          ).url;
-          console.log(connectionUrl, network);
-          if (!connectionUrl) {
-            throw Error(
-              "Incompatible Wallet network provider. connectionUrl is not defined."
-            );
-          }
+          const rpcUrls = SmartBch.Network.defaultServers[this.network];
 
           if (this.network === NetworkType.Regtest) {
             const message = `Can not automatically add regtest network to Metamask
@@ -164,7 +157,7 @@ You can add it manually:
                   l.toUpperCase()
                 )}`,
                 blockExplorerUrls: [this.explorerUrl()],
-                rpcUrls: [connectionUrl],
+                rpcUrls: rpcUrls,
                 nativeCurrency: {
                   name: "BCH",
                   symbol: "BCH",
