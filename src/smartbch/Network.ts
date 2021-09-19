@@ -22,7 +22,8 @@ export function getNetworkProvider(
     }
     case NetworkType.Testnet: {
       return new ethers.providers.JsonRpcProvider(
-        "https://moeing.tech:9545",
+        "http://35.220.203.194:8545",
+        // "https://moeing.tech:9545",
         { name: "smartbch", chainId: 10001 }
       );
     }
