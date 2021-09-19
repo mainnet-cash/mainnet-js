@@ -117,23 +117,31 @@ export class SmartBchWallet extends BaseWallet {
 
     const ethereum = ((window as any) || {}).ethereum;
     if (!ethereum) {
-      throw Error("Metamask or another Web3 browser extension is not installed");
+      throw Error(
+        "Metamask or another Web3 browser extension is not installed"
+      );
     }
 
     try {
       await ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: ethers.BigNumber.from(network.chainId).toHexString() }],
+        method: "wallet_switchEthereumChain",
+        params: [
+          { chainId: ethers.BigNumber.from(network.chainId).toHexString() },
+        ],
       });
     } catch (switchError: any) {
       console.log(switchError);
       // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
-          const connectionUrl = ((this.provider! as any || {}).connection || {}).url;
+          const connectionUrl = (
+            ((this.provider! as any) || {}).connection || {}
+          ).url;
           console.log(connectionUrl, network);
           if (!connectionUrl) {
-            throw Error("Incompatible Wallet network provider. connectionUrl is not defined.");
+            throw Error(
+              "Incompatible Wallet network provider. connectionUrl is not defined."
+            );
           }
 
           if (this.network === NetworkType.Regtest) {
@@ -148,18 +156,22 @@ You can add it manually:
           }
 
           await ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: ethers.BigNumber.from(network.chainId).toHexString(),
-              chainName: `SmartBch ${this.network.replace(/\b\w/g, l => l.toUpperCase())}`,
-              blockExplorerUrls: [this.explorerUrl()],
-              rpcUrls: [connectionUrl],
-              nativeCurrency: {
-                name: 'BCH',
-                symbol: 'BCH',
-                decimals: 18,
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: ethers.BigNumber.from(network.chainId).toHexString(),
+                chainName: `SmartBch ${this.network.replace(/\b\w/g, (l) =>
+                  l.toUpperCase()
+                )}`,
+                blockExplorerUrls: [this.explorerUrl()],
+                rpcUrls: [connectionUrl],
+                nativeCurrency: {
+                  name: "BCH",
+                  symbol: "BCH",
+                  decimals: 18,
+                },
               },
-            }],
+            ],
           });
         } catch (addError) {
           console.log(addError);
@@ -704,7 +716,9 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
         `${TestNetSmartBchWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.sep20.sendMax(data.sbchtest, tokenId, { gasPrice: 10 ** 10 });
+      return await this.sep20.sendMax(data.sbchtest, tokenId, {
+        gasPrice: 10 ** 10,
+      });
     } catch (e: any) {
       console.log(e);
       console.log(e.response ? e.response.data : "");
@@ -825,7 +839,7 @@ export class RegTestWatchSmartBchWallet extends SmartBchWallet {
 /**
  * Class to manage a web3 wallet.
  */
- export class Web3SmartBchWallet extends SmartBchWallet {
+export class Web3SmartBchWallet extends SmartBchWallet {
   constructor(name = "") {
     super(name, NetworkType.Mainnet);
   }
@@ -845,7 +859,7 @@ export class RegTestWatchSmartBchWallet extends SmartBchWallet {
 /**
  * Class to manage a testnet web3 wallet.
  */
- export class Web3TestNetSmartBchWallet extends TestNetSmartBchWallet {
+export class Web3TestNetSmartBchWallet extends TestNetSmartBchWallet {
   constructor(name = "") {
     super(name);
   }
@@ -865,7 +879,7 @@ export class RegTestWatchSmartBchWallet extends SmartBchWallet {
 /**
  * Class to manage a regtese web3 wallet.
  */
- export class Web3RegTestSmartBchWallet extends RegTestSmartBchWallet {
+export class Web3RegTestSmartBchWallet extends RegTestSmartBchWallet {
   constructor(name = "") {
     super(name);
   }

@@ -15,5 +15,4 @@ controllers/WalletUtilController.js
 controllers/WebhookController.js
 controllers/index.js
 logger.js
-services/FaucetService.js
 utils/openapiRouter.js
