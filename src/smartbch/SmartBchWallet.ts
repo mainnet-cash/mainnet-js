@@ -673,7 +673,7 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
         `${TestNetSmartBchWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.sendMax(data.sbchtest);
+      return await this.sendMax(data.sbchtest, {}, { gasPrice: 10 ** 10 });
     } catch (e: any) {
       console.log(e);
       console.log(e.response ? e.response.data : "");
@@ -704,7 +704,7 @@ export class TestNetSmartBchWallet extends SmartBchWallet {
         `${TestNetSmartBchWallet.faucetServer}/faucet/get_addresses`
       );
       const data = response.data;
-      return await this.sep20.sendMax(data.sbchtest, tokenId);
+      return await this.sep20.sendMax(data.sbchtest, tokenId, { gasPrice: 10 ** 10 });
     } catch (e: any) {
       console.log(e);
       console.log(e.response ? e.response.data : "");

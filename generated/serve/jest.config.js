@@ -25,5 +25,5 @@ module.exports = {
   globalTeardown: "<rootDir>/jest/node.teardown.js",
   verbose: true,
   maxConcurrency: 1,
-  testTimeout: 95000,
+  testTimeout: 120000,
 };

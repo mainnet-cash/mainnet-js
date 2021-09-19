@@ -220,18 +220,18 @@ describe(`Test Ethereum functions`, () => {
 
     const response = await wallet.returnTestnetSatoshis();
     delay(3000);
-    expect(response.balance!.sat!).toBe(0);
+    expect(response.balance!.sat!).toBeLessThan(50000);
   });
 
-  test("Should get testnet slp tokens and send them back", async () => {
+  test("Should get testnet sep20 tokens and send them back", async () => {
     let alicePrivKey = `${process.env.FAUCET_SBCH_PRIVKEY!}`;
-    let aliceWallet = await TestNetSmartBchWallet.fromId(alicePrivKey);
+    let aliceWallet = await TestNetSmartBchWallet.fromPrivateKey(alicePrivKey);
 
     const wallet = await TestNetSmartBchWallet.newRandom();
 
     // send bob some bch gas to enable him to send SEP20 tokens
     await aliceWallet
-      .send([{ address: wallet.getDepositAddress(), value: 30000, unit: "sat" }]);
+      .send([{ address: wallet.getDepositAddress(), value: 300000, unit: "sat" }], {}, { gasPrice: 10 ** 10 });
 
     const txid = await wallet.getTestnetSep20(process.env.FAUCET_SBCH_TOKEN_ID!);
     expect(txid.length).toBe(66);
@@ -241,6 +241,6 @@ describe(`Test Ethereum functions`, () => {
     const response = await wallet.returnTestnetSep20(process.env.FAUCET_SBCH_TOKEN_ID!);
     expect(response.balance.value.toNumber()).toBe(0);
 
-    await wallet.sendMax(aliceWallet.getDepositAddress());
+    await wallet.sendMax(aliceWallet.getDepositAddress(), {}, { gasPrice: 10 ** 10 });
   });
 });
