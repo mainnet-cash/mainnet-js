@@ -7,9 +7,6 @@ if (process.env.USE_DOTENV) {
   require("dotenv").config({ path: "../../.env.testnet" });
 }
 
-// temporary issue workaround for https://moeing.tech:9545
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
 const config = {
   ROOT_DIR: __dirname,
   URL_PORT: process.env.PORT ? parseInt(process.env.PORT) : 3000,
