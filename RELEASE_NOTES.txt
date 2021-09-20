@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+0.4.2
+
+- Rework electrum provider blockchain height tracking
+- Rework and optimize waitForTransaction not to query the transaction history
+
 0.4.1
 
 - SmartBch: added watchAddress, watchAddressTransactions, watchBalance, watchBalanceUsd, watchBlocks,
