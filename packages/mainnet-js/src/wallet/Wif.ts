@@ -640,9 +640,6 @@ export class Wallet extends BaseWallet {
 
     // Get current height to assure recently mined coins are not spent.
     const bestHeight = await this.provider!.getBlockHeight();
-    if (!bestHeight) {
-      throw Error("Couldn't get chain height");
-    }
 
     // simulate outputs using the sender's address
     const sendRequest = new SendRequest({
@@ -763,7 +760,7 @@ export class Wallet extends BaseWallet {
     return new Promise(async (resolve) => {
       let txHashSeen = false;
 
-      const makeResponse = async () => {
+      const makeResponse = async (txHash: string) => {
         const response = <WaitForTransactionResponse>{};
         const promises: any[] = [undefined, undefined];
 
@@ -772,7 +769,7 @@ export class Wallet extends BaseWallet {
         }
 
         if (options.getTransactionInfo === true) {
-          promises[1] = this.getLastTransaction();
+          promises[1] = this.provider!.getRawTransactionObject(txHash);
         }
 
         const result = await Promise.all(promises);
@@ -792,7 +789,7 @@ export class Wallet extends BaseWallet {
               waitForTransactionCallback
             );
 
-            resolve(await makeResponse());
+            resolve(makeResponse(options.txHash!));
           }
         };
 
@@ -804,23 +801,10 @@ export class Wallet extends BaseWallet {
       }
 
       // waiting for any address transaction
-      const watchAddressCallback = async (data) => {
-        if (data instanceof Array) {
-          let addr = data[0] as string;
-          if (addr !== this.cashaddr!) {
-            return;
-          }
-
-          this.provider!.unsubscribeFromAddress(
-            this.cashaddr!,
-            watchAddressCallback
-          );
-
-          resolve(await makeResponse());
-        }
-      };
-
-      this.provider!.subscribeToAddress(this.cashaddr!, watchAddressCallback);
+      const watchCancel = this.watchAddress(async (txHash) => {
+        watchCancel();
+        resolve(makeResponse(txHash));
+      });
     });
   }
 

@@ -13,12 +13,14 @@ import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util";
 import { CancelWatchFn } from "../wallet/interface";
+import { resolve } from "path/posix";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
   public subscriptions: number = 0;
   private connectPromise;
   private mutex = new Mutex();
+  private blockHeight = 0;
 
   constructor(
     electrum: ElectrumCluster | ElectrumClient,
@@ -54,7 +56,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       //       reject(
       //         new Error(`Could not connect to electrum network ${this.network}`)
       //       );
-      //     }, timeout))
+      //     }, _timeout))
       // ),
     ]);
     clearTimeout(timeoutHandle);
@@ -86,11 +88,16 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBlockHeight(): Promise<number> {
-    const { height } = (await this.performRequest(
-      "blockchain.headers.subscribe"
-    )) as BlockHeader;
+    if (!this.blockHeight) {
+      return new Promise(async (resolve) => {
+        await this.subscribeToHeaders((header: HeaderI) => {
+          this.blockHeight = header.height;
+        });
+        resolve(this.blockHeight);
+      });
+    }
 
-    return height;
+    return this.blockHeight;
   }
 
   async getRawTransaction(
