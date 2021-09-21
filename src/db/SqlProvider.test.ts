@@ -1,6 +1,7 @@
 import { default as SqlProvider } from "./SqlProvider";
 import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 import { WebhookRecurrence, WebhookType } from "../webhook";
+import { WalletI } from "./interface";
 
 /**
  * @jest-environment jsdom
@@ -115,4 +116,31 @@ test("Should fail registering SLP webhook without tokenId", async () => {
   ).rejects.toThrow();
 
   db.close();
+});
+
+test("Test wallet database name regression", async () => {
+  const name = `test ${Math.random()}`;
+
+  let wallet: Wallet, db: SqlProvider, dbWallet: WalletI | undefined;
+
+  wallet = await Wallet.named(name);
+  db = new SqlProvider("bitcoincash");
+  await db.init();
+  dbWallet = await db.getWallet(name);
+  expect(wallet.toDbString()).toBe(dbWallet!.wallet);
+  await db.close();
+
+  wallet = await TestNetWallet.named(name);
+  db = new SqlProvider("bchtest");
+  await db.init();
+  dbWallet = await db.getWallet(name);
+  expect(wallet.toDbString()).toBe(dbWallet!.wallet);
+  await db.close();
+
+  wallet = await RegTestWallet.named(name);
+  db = new SqlProvider("bchreg");
+  await db.init();
+  dbWallet = await db.getWallet(name);
+  expect(wallet.toDbString()).toBe(dbWallet!.wallet);
+  await db.close();
 });
