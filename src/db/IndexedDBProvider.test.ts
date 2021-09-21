@@ -1,5 +1,6 @@
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
 import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
+import { WalletI } from "./interface";
 
 /**
  * @jest-environment jsdom

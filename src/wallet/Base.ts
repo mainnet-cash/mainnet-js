@@ -1,6 +1,6 @@
 import { getStorageProvider } from "../db/util";
 import { MnemonicI, WalletI } from "./interface";
-import { NetworkType } from "../enum";
+import { NetworkType, prefixFromNetworkMap } from "../enum";
 import { StorageProvider } from "../db";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
 import { qrAddress } from "../qr/Qr";
@@ -319,7 +319,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : (this.network as string);
+    dbName = dbName ? dbName : prefixFromNetworkMap[this.network];
     let db = getStorageProvider(dbName);
 
     // If there is a database, force saving or error
@@ -371,7 +371,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : (this.network as string);
+    dbName = dbName ? dbName : prefixFromNetworkMap[this.network];
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -406,7 +406,7 @@ export class BaseWallet implements WalletI {
       throw Error("Named wallets must have a non-empty name");
     }
     _checkContextSafety(this);
-    dbName = dbName ? dbName : (this.network as string);
+    dbName = dbName ? dbName : prefixFromNetworkMap[this.network];
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -505,13 +505,14 @@ const _checkContextSafety = function (wallet: BaseWallet) {
  */
 export async function getNamedWalletId(
   name: string,
+  networkType: NetworkType,
   dbName?: string
 ): Promise<string | undefined> {
   if (name.length === 0) {
     throw Error("Named wallets must have a non-empty name");
   }
 
-  dbName = dbName ? dbName : (dbName as string);
+  dbName = dbName ? dbName : prefixFromNetworkMap[networkType];
   let db = getStorageProvider(dbName);
 
   if (db) {
