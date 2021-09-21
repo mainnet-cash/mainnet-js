@@ -1,7 +1,9 @@
 Newest changes
 --------------
 
-0.4.5
+0.4.3
+
+- Fix regression with wallet database names
 
 0.4.2
 
