@@ -75,7 +75,7 @@ jobs:
 
       # Actual job
       - name: Build docker image
-        run: docker build ./generated/serve/docker --tag mainnet/mainnet-rest:${{ env.TAG_NAME }} --build-arg GIT_REPO=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} --build-arg GIT_COMMIT=${GITHUB_SHA} --build-arg MAINNET_TAG=${{ env.TAG_NAME }}
+        run: docker build ./packages/mainnet-cash/serve/docker --tag mainnet/mainnet-rest:${{ env.TAG_NAME }} --build-arg GIT_REPO=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} --build-arg GIT_COMMIT=${GITHUB_SHA} --build-arg MAINNET_TAG=${{ env.TAG_NAME }}
 
       - name: Push image to docker hub
         run: docker push mainnet/mainnet-rest:${{ env.TAG_NAME }}

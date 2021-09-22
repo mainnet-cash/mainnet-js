@@ -8,11 +8,11 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "homepage": "https://mainnet.cash",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
-  "browser": "dist/mainnet-0.4.7.js",
+  "browser": "dist/mainnet-0.4.8.js",
   "types": "dist/main/index.d.ts",
   "exports": {
     "require": "./dist/main/index.js",
@@ -28,6 +28,7 @@
     "build:module": "tsc -p tsconfig.browser.json",
     "build:browser": "npx webpack",
     "demo": "npx reload --dir=demo/",
+    "publish": "yarn publish",
     "test": "npx jest --runInBand  --logHeapUsage --forceExit",
     "reload": "npx reload --dir=../../jest/playwright "
   },
