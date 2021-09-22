@@ -119,7 +119,7 @@ test("Should fail registering SLP webhook without tokenId", async () => {
 });
 
 test("Test wallet database name regression", async () => {
-  const name = (`test ${Math.random()}`);
+  const name = `test ${Math.random()}`;
 
   let wallet: Wallet, db: SqlProvider, dbWallet: WalletI | undefined;
 
