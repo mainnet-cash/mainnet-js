@@ -3,7 +3,12 @@ Newest changes
 
 0.4.3
 
-- Fix regression with wallet database names
+- Fix regression with BCH wallet database names
+
+
+0.4.3
+
+- Fix regression with wallet database names (broken release)
 
 0.4.2
 
