@@ -35,11 +35,19 @@ jobs:
         run: |
           git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
           cd mainnet-docs
-          HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
-          sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/README.md
-          sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/README.md
-          sed -i "s|mainnet-[0-9]\+\.[0-9]\+\.[0-9]\+\.js|mainnet-${{ env.TAG_NAME }}.js|g" docs/src/tutorial/smartbch.md
-          sed -i "s|integrity=\".*\"|integrity=\"$HASH\"|g" docs/src/tutorial/smartbch.md
+          SEMVER='(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(\-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?'
+          MAINNET_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
+          CONTRACT_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/contract/contract-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
+          SMARTBCH_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/smartbch/smartbch-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
+          MAINNET_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/mainnet' docs/src/tutorial/README.md | cut -d: -f 1 ) +1 ))
+          CONTRACT_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/contract' docs/src/tutorial/README.md | cut -d: -f 1 ) +1 ))
+          SMARTBCH_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/smartbch' docs/src/tutorial/smartbch.md | cut -d: -f 1 ) +1 ))
+          sed -Ei "s/mainnet-${SEMVER}.js/mainnet-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
+          sed -Ei "s/contract\/contract-${SEMVER}.js/contract\/contract-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
+          sed -Ei "s/smartbch\/smartbch-${SEMVER}.js/smartbch\/smartbch-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/smartbch.md
+          sed -n '$MAINNET_INTEGRITY_LN' -i "s|integrity=\".*\"|integrity=\"$MAINNET_HASH\"|g" docs/src/tutorial/README.md
+          sed -n '$CONTRACT_INTEGRITY_LN' -i "s|integrity=\".*\"|integrity=\"$CONTRACT_HASH\"|g" docs/src/tutorial/README.md
+          sed -n '$SMARTBCH_INTEGRITY_LN' -i "s|integrity=\".*\"|integrity=\"$SMARTBCH_HASH\"|g" docs/src/tutorial/smartbch.md
           git config user.email "hello@mainnet.cash"
           git config user.name "Auto-Generated"
           git add .
