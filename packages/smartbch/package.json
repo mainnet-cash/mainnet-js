@@ -1,0 +1,41 @@
+{
+  "name": "@mainnet-cash/smartbch",
+  "version": "0.4.5",
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "browser": "dist/smartbch-0.4.5.js",
+  "types": "dist/main/index.d.ts",
+  "exports": {
+    "require": "./dist/main/index.js",
+    "import": "./dist/module/index.js"
+  },
+  "license": "MIT",
+  "author": "readcash",
+  "dependencies": {
+    "mainnet-js": "0.4.5",
+    "@mainnet-cash/contract": "0.4.5",
+    "@openzeppelin/contracts": "^4.2.0",
+    "cashc": "^0.6.5",
+    "cashscript": "^0.6.5",
+    "ethers": "^5.4.5",
+    "solc": "^0.8.7-fixed",
+    "xmlhttprequest-ssl": "^2.0.0",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "jest": "^27.0.5",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.3.2"
+  },
+  "scripts": {
+    "build": "yarn build:main && yarn build:module && yarn build:browser",
+    "build:main": "tsc",
+    "build:module": "tsc -p tsconfig.browser.json",
+    "build:browser": "npx webpack",
+    "test": "jest"
+  },
+  "testPathIgnorePatterns": [
+    "dist"
+  ]
+}
