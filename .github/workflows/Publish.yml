@@ -45,9 +45,9 @@ jobs:
           sed -Ei "s/mainnet-${SEMVER}.js/mainnet-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
           sed -Ei "s/contract\/contract-${SEMVER}.js/contract\/contract-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
           sed -Ei "s/smartbch\/smartbch-${SEMVER}.js/smartbch\/smartbch-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/smartbch.md
-          sed -n '$MAINNET_INTEGRITY_LN' -i "s|integrity=\".*\"|integrity=\"$MAINNET_HASH\"|g" docs/src/tutorial/README.md
-          sed -n '$CONTRACT_INTEGRITY_LN' -i "s|integrity=\".*\"|integrity=\"$CONTRACT_HASH\"|g" docs/src/tutorial/README.md
-          sed -n '$SMARTBCH_INTEGRITY_LN' -i "s|integrity=\".*\"|integrity=\"$SMARTBCH_HASH\"|g" docs/src/tutorial/smartbch.md
+          sed -i "${MAINNET_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$MAINNET_HASH\"|g" docs/src/tutorial/README.md
+          sed -i "${CONTRACT_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$CONTRACT_HASH\"|g" docs/src/tutorial/README.md
+          sed -i "${SMARTBCH_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$SMARTBCH_HASH\"|g" docs/src/tutorial/smartbch.md
           git config user.email "hello@mainnet.cash"
           git config user.name "Auto-Generated"
           git add .
