@@ -428,13 +428,10 @@ export class Wallet extends BaseWallet {
     return this;
   }
 
-  protected async newRandom(
-    name: string,
-    dbName?: string
-  ): Promise<this> {
+  protected async newRandom(name: string, dbName?: string): Promise<this> {
     dbName = dbName ? dbName : this.networkPrefix;
     return super.newRandom(name, dbName);
-  };
+  }
 
   protected async named(
     name: string,

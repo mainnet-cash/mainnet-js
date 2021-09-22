@@ -282,16 +282,13 @@ export class BaseWallet implements WalletI {
    * @param {string} name              name of the wallet
    * @param {string} dbName            database name the wallet is stored in
    */
-  protected async newRandom(
-    name: string,
-    dbName?: string
-  ): Promise<this> {
+  protected async newRandom(name: string, dbName?: string): Promise<this> {
     if (name.length > 0) {
       return this.named(name, dbName);
     } else {
       return this.generate();
     }
-  };
+  }
 
   // @ts-ignore
   protected async watchOnly(address: string): Promise<this> {
