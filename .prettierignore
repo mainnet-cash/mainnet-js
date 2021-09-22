@@ -1,10 +1,13 @@
 .github/
+.vscode
+compilation-stats.json
 .nyc_output/
 coverage/
 demo/
-dist/
+dist
 jest/playwright/
-generated/
-node_modules/
+packages/mainnet-cash/
+node_modules
 swagger/
 package.json
+stats.json

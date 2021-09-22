@@ -6,16 +6,47 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 
 This code is in a prototype stage, so there is no backwards-compatibility guarantee
 
+# Before you begin
+
+## Node Version
+
+`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started.
+
+Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
+
+## What is this project? and how do I use it?
+
+Mainnet-js strives to provide an easy to use API to develop BCH applications on the web.
+
+It is an OpenAPI 3 specification (swagger), implemented as a library in typescript. That library is then used in a generated express server to provide a REST service. And that service can be deployed in a production stack via docker.
+
+Clients can also be generated for most common languages, so you don't have to use javascript whatsoever to use mainnet-js.
+
+However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
+
+The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides crypto related functions using wasm binaries.
+
+For the above reason, mainnet-js is not well suited for use as a library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, but may in the future.
+
 # Installation
 
     git clone https://github.com/mainnet-cash/mainnet-js.git
     yarn
 
+# Mono-Repository Structure
+
+This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
+
+| Project                | Description           |
+| ---------------------- | --------------------- |
+| mainnet-js             | Core TS Library       |
+| mainnet-cash           | REST Express Server   |
+| @mainnet-cash/smartbch | SmartBch Library      |
+| @mainnet-cash/contract | CashScript Library    |
+| @mainnet-cash/demo     | Demo Vue Webapp       |
+| @mainnet-cash/root     | Top-level Placeholder |
+
 # Running library tests
-
-    npx test
-
-or (a bit slower):
 
     yarn test
 
@@ -24,10 +55,6 @@ a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
 the library, as well as the rest API server.
 
 # Running browser tests
-
-    npx test:browser
-
-or
 
     yarn test:browser
 
@@ -90,18 +117,6 @@ The express server is committed in a folder called `generated/serve` but needs t
 
     yarn api:build:server
 
-To install the requirements from project root:
-
-    yarn api:serve:install
-
-**Important:** The server automatically uses a [link](https://classic.yarnpkg.com/en/docs/cli/link)ed copy of `mainnet-js` referencing the project root directory. It is important to note that this is essentially a symlink version and removing `node_modules/mainnet-js/*` on the server may attempt to delete the project root directory contents. It is safe to remove `generated/serve/node_modules/`, but never attempt to remove the contents of `generated/serve/node_modules/mainnet-js/` without [unlink](https://classic.yarnpkg.com/en/docs/cli/unlink)ing first:
-
-```
-# in ./generated/serve/
-yarn unlink mainnet-js
-```
-
-rm 'generated/client/typescript-mock/model/valueType.ts'
 To start the API server for development:
 
     yarn api:serve
@@ -114,9 +129,9 @@ To run multiple instances of the API server in "cluster" mode:
 
 Tests for the express server may be run with:
 
-    yarn test:api
+    yarn test:rest
 
-The `mainnet-js` package is linked to the REST expressServer automatically after installing the respective package requirements. Updating `mainnet-js` with code changes is handled automatically by the `test:api` command.
+The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command.
 
 If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
 

@@ -1,18 +1,21 @@
 module.exports = {
   rootDir: "./",
   collectCoverage: true,
-
   collectCoverageFrom: [
     "**/*.{js,jsx,ts}",
     "!**/node_modules/**",
-    "!**/generated/**",
+    "!**/packages/mainnet-cash/**",
   ],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
     ".*/src/.*\\.test\\.{ts,js}",
     ".*/src/.*\\.test\\.headless\\.js",
   ],
-  roots: ["<rootDir>/src"],
+  roots: [
+    "<rootDir>/packages/mainnet-js/src",
+    "<rootDir>/packages/contract/src",
+    "<rootDir>/packages/smartbch/src",
+  ],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",

@@ -13,32 +13,71 @@ const types = [
 
 let newVersion = undefined;
 
+let rootPackageFile = "./package.json";
+
 // update package.json
-const files = ["./package.json", "./generated/serve/package.json"];
-files.forEach((file) => {
+const workspacePackageFiles = [
+  "./packages/contract/package.json",
+  "./packages/demo/package.json",
+  "./packages/mainnet-cash/package.json",
+  "./packages/mainnet-js/package.json",
+  "./packages/smartbch/package.json",
+];
+const workspacePackages = [
+  "mainnet-js",
+  "@mainnet-cash/smartbch",
+  "@mainnet-cash/contract",
+];
+
+// Get the package version from the root package
+
+let rootPackage = require(rootPackageFile);
+let version = rootPackage.version;
+console.log("Old root package version:", version);
+
+if (semver.valid(process.argv[2])) {
+  newVersion = process.argv[2];
+} else {
+  let bumpType = types.includes(process.argv[2]) ? process.argv[2] : "patch";
+  let preType = process.argv[3];
+  newVersion = semver.inc(rootPackage.version, bumpType, preType);
+}
+console.log("New root package version:", newVersion);
+
+function updatePackageFile(file) {
   let package = require(file);
-  let version = package.version;
-  console.log("Package version:", version);
+  package.version = newVersion;
+  console.log(`Updated ${package.name} to version: ${newVersion}`);
 
-  if (semver.valid(process.argv[2])) {
-    newVersion = process.argv[2];
-  } else {
-    let bumpType = types.includes(process.argv[2]) ? process.argv[2] : "patch";
-    let preType = process.argv[3];
-    newVersion = semver.inc(package.version, bumpType, preType);
-  }
-
-  console.log(`Updating ${file} to version: ${newVersion}`);
-  package.main = package.main.replace(version, newVersion);
   if (typeof package.browser !== "undefined") {
     package.browser = package.browser.replace(version, newVersion);
+    console.log(`Updated ${package.name}.browser to ${package.browser} `);
   }
-  package.version = newVersion;
+  for (const p of workspacePackages) {
+    if (p in package.dependencies) {
+      package.dependencies[p] = newVersion;
+      console.log(`Updated ${package.name}.dependency ${p} to ${newVersion}`);
+    }
+    if (p in package.devDependencies) {
+      package.dependencies[p] = newVersion;
+      console.log(`Updated ${package.name}.dependency ${p} to ${newVersion}`);
+    }
+  }
 
   fs.writeFileSync(file, JSON.stringify(package, null, 2) + "\n");
+}
+
+updatePackageFile(rootPackageFile);
+
+workspacePackageFiles.forEach((file) => {
+  updatePackageFile(file);
 });
 
-const swag = ["./swagger/v1/api.yml", "./generated/serve/api/openapi.yaml"];
+// update the openapi and the express copy
+const swag = [
+  "./swagger/v1/api.yml",
+  "./packages/mainnet-cash/api/openapi.yaml",
+];
 swag.forEach((val) => {
   fs.writeFileSync(
     val,
@@ -46,4 +85,5 @@ swag.forEach((val) => {
       .readFileSync(val, "utf8")
       .replace(/  version: \d+\.\d+\.\d+.*/g, `  version: ${newVersion}`)
   );
+  console.log(`Updated ${val} to ${newVersion}`);
 });

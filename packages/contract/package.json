@@ -1,0 +1,35 @@
+{
+  "name": "@mainnet-cash/contract",
+  "version": "0.4.6",
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "browser": "dist/contract-0.4.6.js",
+  "types": "dist/main/index.d.ts",
+  "exports": {
+    "require": "./dist/main/index.js",
+    "import": "./dist/module/index.js"
+  },
+  "license": "MIT",
+  "author": "readcash",
+  "dependencies": {
+    "mainnet-js": "0.4.6",
+    "cashc": "^0.6.5",
+    "cashscript": "^0.6.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "jest": "^27.0.5",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.3.2"
+  },
+  "scripts": {
+    "build": "yarn build:main && yarn build:module && yarn build:browser",
+    "build:main": "tsc",
+    "build:module": "tsc -p tsconfig.browser.json",
+    "build:browser": "npx webpack",
+    "test": "jest"
+  },
+  "testPathIgnorePatterns": [
+    "dist"
+  ]
+}

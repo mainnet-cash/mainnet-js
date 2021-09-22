@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "target": "es2020",
+    "outDir": "./dist/module",
+    "module": "esnext"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules/**", "dist/**", "src/**/*test.ts"]
+}
