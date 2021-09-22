@@ -1,6 +1,6 @@
 import { getStorageProvider } from "../db/util";
 import { MnemonicI, WalletI } from "./interface";
-import { NetworkType, prefixFromNetworkMap } from "../enum";
+import { NetworkType } from "../enum";
 import { StorageProvider } from "../db";
 import { getRuntimePlatform } from "../util/getRuntimePlatform";
 import { qrAddress } from "../qr/Qr";
@@ -282,16 +282,13 @@ export class BaseWallet implements WalletI {
    * @param {string} name              name of the wallet
    * @param {string} dbName            database name the wallet is stored in
    */
-  protected newRandom = async (
-    name: string,
-    dbName?: string
-  ): Promise<this> => {
+  protected async newRandom(name: string, dbName?: string): Promise<this> {
     if (name.length > 0) {
       return this.named(name, dbName);
     } else {
       return this.generate();
     }
-  };
+  }
 
   // @ts-ignore
   protected async watchOnly(address: string): Promise<this> {
@@ -309,17 +306,17 @@ export class BaseWallet implements WalletI {
    * @throws {Error} if forceNew is true and the wallet already exists
    * @returns a promise to a named wallet
    */
-  protected named = async (
+  protected async named(
     name: string,
     dbName?: string,
     forceNew: boolean = false
-  ): Promise<this> => {
+  ): Promise<this> {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : prefixFromNetworkMap[this.network];
+    dbName = dbName ? dbName : (this.network as string);
     let db = getStorageProvider(dbName);
 
     // If there is a database, force saving or error
@@ -347,7 +344,7 @@ export class BaseWallet implements WalletI {
         "No database was available or configured to store the named wallet."
       );
     }
-  };
+  }
 
   /**
    * replaceNamed - Replace (recover) named wallet with a new walletId
@@ -371,7 +368,7 @@ export class BaseWallet implements WalletI {
     }
     _checkContextSafety(this);
     this.name = name;
-    dbName = dbName ? dbName : prefixFromNetworkMap[this.network];
+    dbName = dbName ? dbName : (this.network as string);
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -406,7 +403,7 @@ export class BaseWallet implements WalletI {
       throw Error("Named wallets must have a non-empty name");
     }
     _checkContextSafety(this);
-    dbName = dbName ? dbName : prefixFromNetworkMap[this.network];
+    dbName = dbName ? dbName : (this.network as string);
     let db = getStorageProvider(dbName);
 
     if (db) {
@@ -505,14 +502,13 @@ const _checkContextSafety = function (wallet: BaseWallet) {
  */
 export async function getNamedWalletId(
   name: string,
-  networkType: NetworkType,
   dbName?: string
 ): Promise<string | undefined> {
   if (name.length === 0) {
     throw Error("Named wallets must have a non-empty name");
   }
 
-  dbName = dbName ? dbName : prefixFromNetworkMap[networkType];
+  dbName = dbName ? dbName : (dbName as string);
   let db = getStorageProvider(dbName);
 
   if (db) {
