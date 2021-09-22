@@ -427,6 +427,37 @@ export class Wallet extends BaseWallet {
     await this.deriveInfo();
     return this;
   }
+
+  protected newRandom = async (
+    name: string,
+    dbName?: string
+  ): Promise<this> => {
+    dbName = dbName ? dbName : this.networkPrefix;
+    return super.newRandom(name, dbName);
+  }
+
+  protected async named(
+    name: string,
+    dbName?: string,
+    forceNew: boolean = false
+  ): Promise<this> {
+    dbName = dbName ? dbName : this.networkPrefix;
+    return super.named(name, dbName, forceNew);
+  }
+
+  protected async replaceNamed(
+    name: string,
+    walletId: string,
+    dbName?: string
+  ): Promise<this> {
+    dbName = dbName ? dbName : this.networkPrefix;
+    return super.replaceNamed(name, walletId, dbName);
+  }
+
+  protected async namedExists(name: string, dbName?: string): Promise<boolean> {
+    dbName = dbName ? dbName : this.networkPrefix;
+    return super.namedExists(name, dbName);
+  }x
   //#endregion Protected Implementations
 
   //#region Serialization

@@ -11,6 +11,7 @@ import {
 } from "./Wif";
 import { getNamedWalletId } from "./Base";
 import { WalletRequestI, WalletResponseI } from "./interface";
+import { prefixFromNetworkMap } from "../enum";
 
 // Convenience map to access classes by types and network
 export const walletClassMap = {
@@ -96,14 +97,14 @@ export async function namedWallet(
   }
 
   let wallet;
+  const dbName = prefixFromNetworkMap[networkType];
   if (walletClassMap[walletType] !== undefined) {
     wallet = await walletClassMap[walletType][networkType]().named(
-      name,
-      networkType
+      name
     );
     checkWalletTypeAndNetwork(wallet, walletType, networkType);
   } else {
-    let walletId = await getNamedWalletId(name, networkType);
+    let walletId = await getNamedWalletId(name, dbName);
     if (walletId !== undefined) {
       wallet = await walletFromId(walletId);
       wallet.name = name;
@@ -179,7 +180,6 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   if (body.name && body.name.length > 0) {
     wallet = await walletClassMap[walletType][networkType]().slp.named(
       body.name,
-      body.network
     );
     if (wallet.network != networkType) {
       throw Error(
