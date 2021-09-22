@@ -10,7 +10,7 @@ This code is in a prototype stage, so there is no backwards-compatibility guaran
 
 ## Node Version
 
-`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started. 
+`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started.
 
 Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
 
@@ -22,9 +22,9 @@ It is an OpenAPI 3 specification (swagger), implemented as a library in typescri
 
 Clients can also be generated for most common languages, so you don't have to use javascript whatsoever to use mainnet-js.
 
-However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file. 
+However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
 
-The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides crypto related functions using wasm binaries. 
+The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides crypto related functions using wasm binaries.
 
 For the above reason, mainnet-js is not well suited for use as a library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, but may in the future.
 
@@ -37,14 +37,14 @@ For the above reason, mainnet-js is not well suited for use as a library support
 
 This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
 
-| Project | Description |
-| --------------- | --------------- |
-| mainnet-js | Core TS Library | 
-| mainnet-cash | REST Express Server |
-| @mainnet-cash/smartbch | SmartBch Library |
-| @mainnet-cash/contract | CashScript Library |
-| @mainnet-cash/demo | Demo Vue Webapp |
-| @mainnet-cash/root | Top-level Placeholder |
+| Project                | Description           |
+| ---------------------- | --------------------- |
+| mainnet-js             | Core TS Library       |
+| mainnet-cash           | REST Express Server   |
+| @mainnet-cash/smartbch | SmartBch Library      |
+| @mainnet-cash/contract | CashScript Library    |
+| @mainnet-cash/demo     | Demo Vue Webapp       |
+| @mainnet-cash/root     | Top-level Placeholder |
 
 # Running library tests
 
