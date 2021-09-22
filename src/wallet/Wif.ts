@@ -428,10 +428,10 @@ export class Wallet extends BaseWallet {
     return this;
   }
 
-  protected newRandom = async (
+  protected async newRandom(
     name: string,
     dbName?: string
-  ): Promise<this> => {
+  ): Promise<this> {
     dbName = dbName ? dbName : this.networkPrefix;
     return super.newRandom(name, dbName);
   };
@@ -458,7 +458,6 @@ export class Wallet extends BaseWallet {
     dbName = dbName ? dbName : this.networkPrefix;
     return super.namedExists(name, dbName);
   }
-  x;
   //#endregion Protected Implementations
 
   //#region Serialization
