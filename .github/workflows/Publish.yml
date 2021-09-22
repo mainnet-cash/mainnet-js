@@ -31,7 +31,8 @@ jobs:
         run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       # Update sources, commit and push
-      - name: Clone repo, update release version and integrity hash
+      - if: endsWith(env.TAG_NAME, "[0-9]")
+        name: Clone repo, update release version and integrity hash
         run: |
           git clone https://${{ env.REPO_USER }}:${{ secrets.COMMIT_USER_TOKEN }}@github.com/mainnet-cash/mainnet-docs mainnet-docs
           cd mainnet-docs
