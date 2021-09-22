@@ -99,9 +99,7 @@ export async function namedWallet(
   let wallet;
   const dbName = prefixFromNetworkMap[networkType];
   if (walletClassMap[walletType] !== undefined) {
-    wallet = await walletClassMap[walletType][networkType]().named(
-      name
-    );
+    wallet = await walletClassMap[walletType][networkType]().named(name);
     checkWalletTypeAndNetwork(wallet, walletType, networkType);
   } else {
     let walletId = await getNamedWalletId(name, dbName);
@@ -179,7 +177,7 @@ export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
   // Named wallets are saved in the database
   if (body.name && body.name.length > 0) {
     wallet = await walletClassMap[walletType][networkType]().slp.named(
-      body.name,
+      body.name
     );
     if (wallet.network != networkType) {
       throw Error(

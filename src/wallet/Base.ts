@@ -347,7 +347,7 @@ export class BaseWallet implements WalletI {
         "No database was available or configured to store the named wallet."
       );
     }
-  };
+  }
 
   /**
    * replaceNamed - Replace (recover) named wallet with a new walletId
