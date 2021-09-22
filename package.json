@@ -23,7 +23,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.4.10",
+  "version": "0.4.11",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
@@ -33,6 +33,7 @@
     "api:serve:test": "yarn workspace mainnet-cash run test",
     "api:serve:cluster": "yarn workspace mainnet-cash run start",
     "api:serve": "node packages/mainnet-cash/serve.js",
+    "bump": "node bump_version.js",
     "cli": "yarn workspace mainnet-cash run cli",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent yarn run cover",
     "cover": "yarn run cover:core && yarn run cover:report",
