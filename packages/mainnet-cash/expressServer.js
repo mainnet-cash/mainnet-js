@@ -46,6 +46,7 @@ class ExpressServer {
     this.app.use(cors());
     let module_path = require.resolve("mainnet-js").replace("main/index.js", "")
     const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
+    this.app.use('/scripts/mainnet.js', express.static(module_path +latest));
     this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
@@ -74,7 +75,7 @@ class ExpressServer {
       res.status(200);
       res.json(req.query);
     });
-
+    console.log("here")
     setupRateLimits(this.app);
   }
 
@@ -127,9 +128,11 @@ class ExpressServer {
 
         server.app = this.app;
         this.server = server;
+        console.log("launch return")
         return server;
       }).catch(error => {
-        console.warn(error)
+        console.log("launch error suppressed")
+//        console.warn(error)
       });
   }
 
