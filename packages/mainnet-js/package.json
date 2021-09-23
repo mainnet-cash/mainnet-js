@@ -1,0 +1,100 @@
+{
+  "test": "jest",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/mainnet-cash/mainnet-js/"
+  },
+  "bugs": {
+    "url": "https://github.com/mainnet-cash/mainnet-js/issues"
+  },
+  "name": "mainnet-js",
+  "version": "0.4.15",
+  "homepage": "https://mainnet.cash",
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "browser": "dist/mainnet-0.4.15.js",
+  "types": "dist/main/index.d.ts",
+  "exports": {
+    "require": "./dist/main/index.js",
+    "import": "./dist/module/index.js"
+  },
+  "scripts": {
+    "clean": "rm -fr dist/* && rm -fr jest/playwright/*",
+    "cli": "npx ts-node src/cli.ts",
+    "lint": "eslint . --ext .ts",
+    "prebuild": "yarn install",
+    "build": "yarn clean && yarn build:main && yarn build:module  && yarn build:browser",
+    "build:main": "tsc",
+    "build:module": "tsc -p tsconfig.browser.json",
+    "build:browser": "npx webpack",
+    "demo": "npx reload --dir=demo/",
+    "publish:public": "yarn publish --access public",
+    "test": "npx jest --runInBand  --logHeapUsage --forceExit",
+    "reload": "npx reload --dir=../../jest/playwright "
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/js-yaml": "^4.0.1",
+    "@types/node": "^15.12.2",
+    "@types/pg": "^8.6.0",
+    "@types/pg-format": "^1.0.1",
+    "events": "^3.2.0",
+    "fake-indexeddb": "^3.1.2",
+    "jest": "^27.0.5",
+    "jest-runner": "^27.2.0",
+    "jest-playwright-preset": "^1.6.1",
+    "jest-process-manager": "^0.3.1",
+    "node-postgres": "^0.6.2",
+    "nyc": "^15.1.0",
+    "pg-native": "^3.0.0",
+    "playwright": "^1.12.1",
+    "reload": "^3.2.0",
+    "supertest": "^6.1.3",
+    "terser-webpack-plugin": "^5.1.3",
+    "ts-jest": "^27.0.5",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2",
+    "unzipper": "^0.10.11",
+    "winston": "3.3.3"
+  },
+  "optionalDependencies": {
+    "@bitauth/libauth": "^1.18.0",
+    "assert": "^2.0.0",
+    "async-mutex": "^0.3.1",
+    "axios": "^0.21.1",
+    "bchaddrjs-slp": "^0.2.12",
+    "bigint-polyfill": "^0.1.0",
+    "bignumber": "^1.1.0",
+    "bignumber.js": "^9.0.1",
+    "bip39": "^3.0.3",
+    "buffer": "^6.0.3",
+    "cashaddrjs": "^0.4.4",
+    "deepmerge": "^4.2.2",
+    "dexie": "^3.0.2",
+    "dotenv": "^10.0.0",
+    "electrum-cash": "^2.0.8",
+    "eventsource": "^1.0.7",
+    "npm-dts-webpack-plugin": "^1.3.7",
+    "parse-database-url": "^0.3.0",
+    "pg": "^8.4.1",
+    "pg-format": "^1.0.4",
+    "qrcode-svg": "^1.1.0",
+    "slp-parser": "^0.0.4",
+    "stream-browserify": "^3.0.0",
+    "ts-loader": "^9.2.3",
+    "webpack": "^v5.1.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-merge": "^5.8.0",
+    "yarn": "^1.22.10"
+  },
+  "testPathIgnorePatterns": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "bch",
+    "bitcoin cash"
+  ],
+  "author": "readcash",
+  "dependencies": {}
+}

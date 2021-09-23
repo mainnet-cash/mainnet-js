@@ -1,6 +1,32 @@
 Newest changes
 --------------
 
+0.4.5 
+
+- Refactored to yarn workspaces, splitting packages into the following mono repo:
+   - mainnet-js (javascript library)
+   - mainnet-cash (unchanged, express server)
+   - @mainnet-cash/contract (cashscript functionality)
+   - @mainnet-cash/demo (demo app [WIP])
+   - @mainnet-cash/smartbch (SmartBCH functionality)
+- Refactored nodejs and ECMA script module to not pass through webpack
+- Fixed issue with type definitions
+- Switched to lazy-loading postgres.
+
+0.4.4
+
+- Fix regression with BCH wallet database names
+
+
+0.4.3
+
+- Fix regression with wallet database names (broken release)
+
+0.4.2
+
+- Rework electrum provider blockchain height tracking
+- Rework and optimize waitForTransaction not to query the transaction history
+
 0.4.1
 
 - SmartBch: added watchAddress, watchAddressTransactions, watchBalance, watchBalanceUsd, watchBlocks,

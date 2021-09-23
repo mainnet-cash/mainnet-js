@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "rootDir": "src",
     "moduleResolution": "node",
-    "module": "commonjs",
+    "module": "esNext",
     "declaration": true,
     "declarationMap": false,
     "sourceMap": true,
@@ -39,7 +38,7 @@
     "lib": ["es2017", "es2020.bigint", "dom"],
     "typeRoots": ["node_modules/@types", "src/types"]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**", "src/**/*test.ts"],
+  "include": ["packages/*/src/**/*.ts"],
+  "exclude": ["node_modules/**", "dist"],
   "compileOnSave": false
 }
