@@ -1,9 +1,9 @@
 {
   "name": "@mainnet-cash/contract",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
-  "browser": "dist/contract-0.4.13.js",
+  "browser": "dist/contract-0.4.14.js",
   "types": "dist/main/index.d.ts",
   "exports": {
     "require": "./dist/main/index.js",
@@ -12,7 +12,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "0.4.13",
+    "mainnet-js": "0.4.14",
     "cashc": "^0.6.5",
     "cashscript": "^0.6.5"
   },
