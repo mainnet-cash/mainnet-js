@@ -43,6 +43,9 @@ import {
 
 Mainnet.randomValues;
 
+import axios from "axios";
+import { defaultServers } from "./Network";
+
 export class SmartBchWallet extends BaseWallet {
   provider?: ethers.providers.BaseProvider;
   ethersWallet?: ethers.Wallet;
@@ -131,7 +134,7 @@ export class SmartBchWallet extends BaseWallet {
       // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
-          const rpcUrls = SmartBch.Network.defaultServers[this.network];
+          const rpcUrls = defaultServers[this.network];
 
           if (this.network === NetworkType.Regtest) {
             const message = `Can not automatically add regtest network to Metamask

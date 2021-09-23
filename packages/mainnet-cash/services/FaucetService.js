@@ -110,7 +110,7 @@ const getTestnetSbch = ({ getTestnetSbchRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!mainnet.SmartBch.isValidAddress(getTestnetSbchRequest.address))
+      if (!_smartBch.isValidAddress(getTestnetSbchRequest.address))
         throw new Error("Incorrect SmartBch address");
 
       const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSbchRequest.address);
@@ -141,7 +141,7 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!mainnet.SmartBch.isValidAddress(getTestnetSep20Request.address))
+      if (!_smartbch.isValidAddress(getTestnetSep20Request.address))
       throw new Error("Incorrect SmartBch address");
       const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSep20Request.address);
       const receiverBalance = await receiverWallet.sep20.getBalance(getTestnetSep20Request.tokenId);

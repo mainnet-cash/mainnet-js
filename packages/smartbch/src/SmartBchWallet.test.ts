@@ -3,7 +3,7 @@ import { Mainnet } from "mainnet-js";
 
 type BalanceResponse = Mainnet.BalanceResponse;
 
-import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
+import { RegTestSmartBchWallet, TestNetSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 describe(`Test Ethereum functions`, () => {
@@ -217,7 +217,7 @@ describe(`Test Ethereum functions`, () => {
     expect(balance).toBe(0.1);
 
     const response = await wallet.returnTestnetSatoshis();
-    delay(3000);
+    Mainnet.delay(3000);
     expect(response.balance!.sat!).toBeLessThan(50000);
   });
 
