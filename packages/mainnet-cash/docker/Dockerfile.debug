@@ -12,7 +12,7 @@ RUN apt-get update \
   && cd opt \
   && git clone ${GIT_REPO} mainnet-js \
   && cd mainnet-js && git checkout $GIT_COMMIT \
-  && yarn install && yarn build && yarn api:serve:install \
+  && yarn install && yarn api:serve:install \
   && rm -rf node_modules
 
 COPY ./entrypoint.sh ./http.conf ./https.conf ./https.le.conf.tpl ./supervisor.conf /opt/
