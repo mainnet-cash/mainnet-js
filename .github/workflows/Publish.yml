@@ -142,7 +142,7 @@ jobs:
         run: echo "NPM_TOKEN secret not set, skipping publishing"
       - if: env.HAS_NPM_TOKEN
         name: Publish to npm
-        run: yarn workspaces run publish
+        run: yarn workspaces run publish:public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
