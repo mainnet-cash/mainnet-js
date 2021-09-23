@@ -1,0 +1,33 @@
+name: Deploy Unstable (from master)
+
+on:
+  push:
+    branches:
+      - deploy
+jobs:
+  deploy_unstable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{secrets.UNSTABLE_PRIVATE_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan rest-unstable.mainnet.cash >> ~/.ssh/known_hosts
+        shell: bash
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - name: Copy and commit certain files for Dokku
+        run: |
+          cp dokku/* .
+          git add .dockerignore CHECKS Dockerfile
+          git commit -m 'Dokku files'
+      - name: Fetch unshallow
+        run: git fetch --prune --tags --unshallow
+      - name: Push to rest-unstable
+        run: |
+          git branch
+          git remote add dokku dokku@rest-unstable.mainnet.cash:rest-unstable.mainnet.cash
+          git push -f dokku deploy:master
+        shell: bash
