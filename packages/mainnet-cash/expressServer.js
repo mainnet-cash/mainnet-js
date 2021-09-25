@@ -17,14 +17,6 @@ const setupRateLimits = require('./rateLimits');
 
 const makeWsServer = require('./wsServer');
 
-for (const handler of process.listeners('unhandledRejection')) {
-  if (handler.name === "abort") {
-    process.removeListener('unhandledRejection', handler);
-    process.addListener('unhandledRejection', (reason, promise) => {
-      console.trace(`[mainnet-js][REST] Unhandled promise rejection:\n${reason}\n${promise}`);
-    });
-  }
-}
 
 class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
@@ -75,7 +67,6 @@ class ExpressServer {
       res.status(200);
       res.json(req.query);
     });
-    console.log("here")
     setupRateLimits(this.app);
   }
 
@@ -128,11 +119,9 @@ class ExpressServer {
 
         server.app = this.app;
         this.server = server;
-        console.log("launch return")
         return server;
       }).catch(error => {
-        console.log("launch error suppressed")
-//        console.warn(error)
+         console.warn(error)
       });
   }
 
