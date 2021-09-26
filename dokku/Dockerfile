@@ -27,9 +27,7 @@ RUN chown -R appuser:appuser /app/
 # Run npm
 USER appuser
 WORKDIR /app/
-COPY --chown=appuser:appuser . /app/
+COPY --chown=appuser:appuser packages/mainnet-cash/ /app/
 RUN yarn install --production=true
-RUN yarn build 
-RUN yarn api:serve:install
 
-CMD bash -lc "echo $WORKERS workers will be run; yarn api:serve:cluster"
+CMD bash -lc "echo $WORKERS workers will be run; yarn start"
