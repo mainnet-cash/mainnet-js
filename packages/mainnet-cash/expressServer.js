@@ -38,6 +38,7 @@ class ExpressServer {
     this.app.use(cors());
     let module_path = require.resolve("mainnet-js").replace("main/index.js", "")
     const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
+    this.app.use('/scripts/mainnet.js', express.static(module_path +latest));
     this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());

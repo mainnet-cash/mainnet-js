@@ -14,7 +14,8 @@ import {
 } from "mainnet-js";
 
 import { getNetworkProvider } from "./Network";
-import solc from "solc";
+//import solc from "solc";
+import solc from "../polyfill/solc";
 
 import {
   Argument,

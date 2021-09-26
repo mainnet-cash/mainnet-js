@@ -48,11 +48,13 @@ if (typeof window === "object") {
   window.solc = solc;
 } else {
   var solc = require("solc");
-  for (const handler of process.listeners('unhandledRejection')) {
+  for (const handler of process.listeners("unhandledRejection")) {
     if (handler.name === "abort") {
-      process.removeListener('unhandledRejection', handler);
-      process.addListener('unhandledRejection', (reason, promise) => {
-        console.trace(`[mainnet-js] Unhandled promise rejection:\n${reason}\n${promise}`);
+      process.removeListener("unhandledRejection", handler);
+      process.addListener("unhandledRejection", (reason, promise) => {
+        console.trace(
+          `[mainnet-js] Unhandled promise rejection:\n${reason}\n${promise}`
+        );
       });
     }
   }
