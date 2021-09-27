@@ -46,6 +46,37 @@ This project contains a number of smaller projects in a mono-repo structure, wit
 | @mainnet-cash/demo     | Demo Vue Webapp       |
 | @mainnet-cash/root     | Top-level Placeholder |
 
+# Demo
+
+With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
+so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
+
+**However**, the following commands must be used from the root project directory.
+
+## Project setup
+
+```
+yarn
+```
+
+### Compiles and hot-reloads for development
+
+```
+yarn demo:serve
+```
+
+### Compiles and minifies for production
+
+```
+yarn demo:build
+```
+
+### Run Tests
+
+```
+yarn demo:test
+```
+
 # Running library tests
 
     yarn test
@@ -68,7 +99,7 @@ in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
 and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
 getting more testnet coins is an annoyance.
 
-# Workflow
+# Development Workflow
 
 ## Overview
 
@@ -103,27 +134,35 @@ So the endpoint defined at `wallet/send` should match the behavior of `mywallet.
 
 Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript.
 
-## Testing
+# Running library tests
 
-Tests for the library are run with:
+To test the library, use:
 
     yarn test
 
-## Developing the API server
+The testing harness should automatically start a docker image with
+a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
+the library, as well as the rest API server.
 
-Much of the code for the REST server is automatically generated from the specification. **NOTE** the express server automatically enforces required fields and return types for the service.
+## Speeding up testing
 
-The express server is committed in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
+The test harness takes some time to start and mine coins. For this reason, it might be helpful to start it once and leave it running.
 
-    yarn api:build:server
+This can be done with:
 
-To start the API server for development:
+```
+yarn regtest:up
+// &
+yarn regtest:down
+```
 
-    yarn api:serve
+With regtest running, you may then run one-off tests like so:
 
-To run multiple instances of the API server in "cluster" mode:
+```
+SKIP_REGTEST_INIT=1 npx jest packages/mainnet-js/src/rate/ExchangeRate.test.t
+```
 
-    yarn api:serve:cluster
+or `yarn test:skip` run the suite of library tests.
 
 ## REST Testing
 
@@ -131,7 +170,7 @@ Tests for the express server may be run with:
 
     yarn test:rest
 
-The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command.
+The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command. If regtest is already running `yarn test:rest:skip`.
 
 If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
 
@@ -142,6 +181,16 @@ If there are any failing tests in REST assure that similar coverage exists in `m
 Browsers do not have access to many standard node libraries by design. For this reason, some libraries either don't work in the browser or don't work in nodejs.
 
 All browser tests are denoted by `*.test.headless.js`.
+
+Tests in the browser require for the library to be bundled for the browser. With:
+
+    yarn
+
+The bundle is built with webpack and does **not** use browserify, rather it simply
+omits nodejs libraries. Browser tests are run against testnet, using secrets stored
+in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
+and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
+getting more testnet coins is an annoyance.
 
 Integration tests for the browser can be run so:
 

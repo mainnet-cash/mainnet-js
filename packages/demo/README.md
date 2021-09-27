@@ -1,29 +1,10 @@
 # demo
 
-## Project setup
-```
-yarn install
-```
+**IMPORTANT** This demo uses `yarn workspaces` to link local packages. 
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+It is intended be used from the root project directory.
 
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Run your unit tests
-```
-yarn test:unit
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
+Please see [demo section](../../README.md#Demo) of the main readme.
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
