@@ -46,29 +46,33 @@ This project contains a number of smaller projects in a mono-repo structure, wit
 | @mainnet-cash/demo     | Demo Vue Webapp       |
 | @mainnet-cash/root     | Top-level Placeholder |
 
-# Demo 
+# Demo
 
-With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`, 
+With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
 so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
 
 **However**, the following commands must be used from the root project directory.
 
 ## Project setup
+
 ```
 yarn
 ```
 
 ### Compiles and hot-reloads for development
+
 ```
 yarn demo:serve
 ```
 
 ### Compiles and minifies for production
+
 ```
 yarn demo:build
 ```
 
 ### Run Tests
+
 ```
 yarn demo:test
 ```
@@ -142,7 +146,7 @@ the library, as well as the rest API server.
 
 ## Speeding up testing
 
-The test harness 
+The test harness
 
 ## REST Testing
 
@@ -177,7 +181,6 @@ Integration tests for the browser can be run so:
     yarn test:browser
 
 Unit testing is not as critical for the browser, but may be helpful in places, to narrow the scope of potential issues.
-
 
 ## Developing API clients
 
