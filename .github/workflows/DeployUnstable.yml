@@ -23,13 +23,13 @@ jobs:
           node-version: "14.x"
       - name: build
         run: |
-          yarn install --only=production
-          yarn build
+          yarn
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
           git add -f packages/mainnet-js/dist/* 
-          git add -f packages/smartbch/dist/*
           git add -f packages/contract/dist/*
+          git add -f packages/smartbch/dist/*
+          git add -f packages/mainnet-cash/dist/*
           git commit -m 'Add packaged modules'
       - name: Copy and commit certain files for Dokku
         run: |
