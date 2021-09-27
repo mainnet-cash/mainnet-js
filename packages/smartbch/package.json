@@ -3,7 +3,6 @@
   "version": "0.4.17",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
-  "browser": "dist/smartbch-0.4.17.js",
   "types": "dist/main/index.d.ts",
   "exports": {
     "require": "./dist/main/index.js",

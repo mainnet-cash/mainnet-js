@@ -46,6 +46,33 @@ This project contains a number of smaller projects in a mono-repo structure, wit
 | @mainnet-cash/demo     | Demo Vue Webapp       |
 | @mainnet-cash/root     | Top-level Placeholder |
 
+# Demo 
+
+With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`, 
+so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
+
+**However**, the following commands must be used from the root project directory.
+
+## Project setup
+```
+yarn
+```
+
+### Compiles and hot-reloads for development
+```
+yarn demo:serve
+```
+
+### Compiles and minifies for production
+```
+yarn demo:build
+```
+
+### Run Tests
+```
+yarn demo:test
+```
+
 # Running library tests
 
     yarn test
@@ -68,7 +95,7 @@ in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
 and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
 getting more testnet coins is an annoyance.
 
-# Workflow
+# Development Workflow
 
 ## Overview
 
@@ -103,27 +130,19 @@ So the endpoint defined at `wallet/send` should match the behavior of `mywallet.
 
 Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript.
 
-## Testing
+# Running library tests
 
-Tests for the library are run with:
+To test the library, use:
 
     yarn test
 
-## Developing the API server
+The testing harness should automatically start a docker image with
+a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
+the library, as well as the rest API server.
 
-Much of the code for the REST server is automatically generated from the specification. **NOTE** the express server automatically enforces required fields and return types for the service.
+## Speeding up testing
 
-The express server is committed in a folder called `generated/serve` but needs to be updated on any changes to the swagger specifications to match correctly:
-
-    yarn api:build:server
-
-To start the API server for development:
-
-    yarn api:serve
-
-To run multiple instances of the API server in "cluster" mode:
-
-    yarn api:serve:cluster
+The test harness 
 
 ## REST Testing
 
@@ -143,11 +162,22 @@ Browsers do not have access to many standard node libraries by design. For this 
 
 All browser tests are denoted by `*.test.headless.js`.
 
+Tests in the browser require for the library to be bundled for the browser. With:
+
+    yarn
+
+The bundle is built with webpack and does **not** use browserify, rather it simply
+omits nodejs libraries. Browser tests are run against testnet, using secrets stored
+in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
+and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
+getting more testnet coins is an annoyance.
+
 Integration tests for the browser can be run so:
 
     yarn test:browser
 
 Unit testing is not as critical for the browser, but may be helpful in places, to narrow the scope of potential issues.
+
 
 ## Developing API clients
 
