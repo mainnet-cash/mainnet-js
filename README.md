@@ -146,7 +146,23 @@ the library, as well as the rest API server.
 
 ## Speeding up testing
 
-The test harness
+The test harness takes some time to start and mine coins. For this reason, it might be helpful to start it once and leave it running.
+
+This can be done with:
+
+```
+yarn regtest:up
+// &
+yarn regtest:down
+```
+
+With regtest running, you may then run one-off tests like so:
+
+```
+SKIP_REGTEST_INIT=1 npx jest packages/mainnet-js/src/rate/ExchangeRate.test.t
+```
+
+or `yarn test:skip` run the suite of library tests.
 
 ## REST Testing
 
@@ -154,7 +170,7 @@ Tests for the express server may be run with:
 
     yarn test:rest
 
-The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command.
+The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command. If regtest is already running `yarn test:rest:skip`.
 
 If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
 
