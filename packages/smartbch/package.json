@@ -1,6 +1,6 @@
 {
   "name": "@mainnet-cash/smartbch",
-  "version": "0.4.17",
+  "version": "0.4.18",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "types": "dist/main/index.d.ts",
@@ -11,8 +11,8 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "0.4.17",
-    "@mainnet-cash/contract": "0.4.17",
+    "mainnet-js": "0.4.18",
+    "@mainnet-cash/contract": "0.4.18",
     "@openzeppelin/contracts": "^4.2.0",
     "cashc": "^0.6.5",
     "cashscript": "^0.6.5",
