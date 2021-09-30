@@ -27,19 +27,19 @@ export default class SqlProvider implements StorageProvider {
       );
     }
     let dbConfig = parseDbUrl(process.env.DATABASE_URL);
-    let ssl = getSslConfig()
-    if (ssl.cert){
-      dbConfig.ssl = ssl
+    let ssl = getSslConfig();
+    if (ssl.cert) {
+      dbConfig.ssl = ssl;
     }
-    this.config = dbConfig
-    
+    this.config = dbConfig;
+
     const Pool = eval("require")("pg").Pool;
     this.db = new Pool(dbConfig);
     this.formatter = eval("require")("pg-format");
   }
 
-  public getConfig(){
-    return this.config
+  public getConfig() {
+    return this.config;
   }
 
   public async init(): Promise<StorageProvider> {
@@ -251,4 +251,3 @@ export default class SqlProvider implements StorageProvider {
     await this.db.query(text);
   }
 }
-

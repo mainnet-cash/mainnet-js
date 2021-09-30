@@ -10,9 +10,9 @@ export interface ExchangeRateI {
   ttl: number;
 }
 
-export interface sslConfigI{
-  rejectUnauthorized: boolean,
-  ca?: string,
-  key?: string,
-  cert?: string,
+export interface sslConfigI {
+  rejectUnauthorized: boolean;
+  ca?: string;
+  key?: string;
+  cert?: string;
 }
