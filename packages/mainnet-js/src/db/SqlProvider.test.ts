@@ -144,3 +144,37 @@ test("Test wallet database name regression", async () => {
   expect(wallet.toDbString()).toBe(dbWallet!.wallet);
   await db.close();
 });
+
+test("Should get ssl parameters from env", async () => {
+  process.env.DATABASE_SSL_REJECT_UNAUTHORIZED = "false"
+  process.env.DATABASE_SSL_CA = "fake"
+  process.env.DATABASE_SSL_KEY = "fake"
+  process.env.DATABASE_SSL_CERT = "fake"
+  let provider = new SqlProvider(`regtest ${Math.random()}`);
+  let c = provider.getConfig()
+  expect(c.ssl.rejectUnauthorized).toBe(false);
+  expect(c.ssl.ca).toBe("fake");
+  expect(c.ssl.key).toBe("fake");
+  expect(c.ssl.cert).toBe("fake");
+
+});
+
+test("Should default to rejectUnauthorized false if not exactly false", async () => {
+  process.env.DATABASE_SSL_REJECT_UNAUTHORIZED = "False"
+
+  let provider = new SqlProvider(`regtest ${Math.random()}`);
+  let c = provider.getConfig()
+  expect(c.ssl.rejectUnauthorized).toBe(true);
+
+
+});
+
+test("Should default to rejectUnauthorized when unconfigured", async () => {
+  process.env.DATABASE_SSL_REJECT_UNAUTHORIZED = undefined
+
+  let provider = new SqlProvider(`regtest ${Math.random()}`);
+  let c = provider.getConfig()
+  expect(c.ssl.rejectUnauthorized).toBe(true);
+
+
+});

@@ -1,5 +1,5 @@
 import StorageProvider from "./StorageProvider";
-import { WalletI } from "./interface";
+import { sslConfigI, WalletI } from "./interface";
 import { TxI } from "../interface";
 import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook";
 import { WebhookBch } from "../webhook/WebhookBch";
@@ -7,9 +7,11 @@ import { WebhookSlp } from "../webhook/WebhookSlp";
 import { RegisterWebhookParams } from "../webhook/interface";
 import { isCashAddress } from "../util/bchaddr";
 var parseDbUrl = require("parse-database-url");
+import { getSslConfig } from "./util";
 
 export default class SqlProvider implements StorageProvider {
   private db;
+  private config;
   private info;
   private formatter;
   private walletTable: string;
@@ -24,10 +26,20 @@ export default class SqlProvider implements StorageProvider {
         "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
       );
     }
-    const dbConfig = parseDbUrl(process.env.DATABASE_URL);
+    let dbConfig = parseDbUrl(process.env.DATABASE_URL);
+    let ssl = getSslConfig()
+    if (ssl.cert){
+      dbConfig.ssl = ssl
+    }
+    this.config = dbConfig
+    
     const Pool = eval("require")("pg").Pool;
     this.db = new Pool(dbConfig);
     this.formatter = eval("require")("pg-format");
+  }
+
+  public getConfig(){
+    return this.config
   }
 
   public async init(): Promise<StorageProvider> {
@@ -239,3 +251,4 @@ export default class SqlProvider implements StorageProvider {
     await this.db.query(text);
   }
 }
+
