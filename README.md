@@ -231,6 +231,8 @@ By default, the API service assumes it is connected to a secured private postgre
 
     ALLOW_MAINNET_USER_WALLETS=true
 
+For advanced ssl authorization configuration see the [official documentation](https://mainnet.cash/tutorial/running-rest.html#configuration)
+
 ## Wallet Behavior
 
 **In nodejs only**, Controls the number responses from electrum-cash nodes that must be in agreement for a network response to return
