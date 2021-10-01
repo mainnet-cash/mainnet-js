@@ -23,7 +23,7 @@ export function indexedDbIsAvailable() {
   return "indexedDB" in globalThis;
 }
 
-export function getSslConfig(): sslConfigI|undefined {
+export function getSslConfig(): sslConfigI | undefined {
   const ca = process.env.DATABASE_SSL_CA
     ? Buffer.from(process.env.DATABASE_SSL_CA, "base64").toString("ascii")
     : undefined;
@@ -40,9 +40,9 @@ export function getSslConfig(): sslConfigI|undefined {
     key: key,
     cert: cert,
   };
-  if(ssl.ca||ssl.cert||ssl.key){
+  if (ssl.ca || ssl.cert || ssl.key) {
     return ssl;
-  }else{
-    return 
+  } else {
+    return;
   }
 }
