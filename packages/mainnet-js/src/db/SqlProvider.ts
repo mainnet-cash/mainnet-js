@@ -28,7 +28,7 @@ export default class SqlProvider implements StorageProvider {
     }
     let dbConfig = parseDbUrl(process.env.DATABASE_URL);
     let ssl = getSslConfig();
-    if (ssl.cert) {
+    if (ssl) {
       dbConfig.ssl = ssl;
     }
     this.config = dbConfig;
