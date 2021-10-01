@@ -251,10 +251,27 @@ test("Should default to rejectUnauthorized false if not exactly false", async ()
   expect(c.ssl.rejectUnauthorized).toBe(true);
 });
 
-test("Should default to rejectUnauthorized when unconfigured", async () => {
+test("Should default to rejectUnauthorized when undefined", async () => {
   process.env.DATABASE_SSL_REJECT_UNAUTHORIZED = undefined;
 
   let provider = new SqlProvider(`regtest ${Math.random()}`);
   let c = provider.getConfig();
   expect(c.ssl.rejectUnauthorized).toBe(true);
+});
+
+test("Should default to rejectUnauthorized when non-existent", async () => {
+  delete process.env.DATABASE_SSL_REJECT_UNAUTHORIZED;
+  let provider = new SqlProvider(`regtest ${Math.random()}`);
+  let c = provider.getConfig();
+  expect(c.ssl.rejectUnauthorized).toBe(true);
+});
+
+test("Should not have ssl property when unconfigured", async () => {
+  delete process.env.DATABASE_SSL_REJECT_UNAUTHORIZED;
+  delete process.env.DATABASE_SSL_CA;
+  delete process.env.DATABASE_SSL_KEY;
+  delete process.env.DATABASE_SSL_CERT;
+  let provider = new SqlProvider(`regtest ${Math.random()}`);
+  let c = provider.getConfig();
+  expect(c.ssl).toBe(undefined);
 });
