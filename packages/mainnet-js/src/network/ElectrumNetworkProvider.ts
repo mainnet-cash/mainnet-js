@@ -139,6 +139,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return new Promise(async (resolve, reject) => {
       let txHash = await Util.getTransactionHash(txHex);
       if (!awaitPropagation) {
+        this.performRequest("blockchain.transaction.broadcast", txHex);
         resolve(txHash);
       } else {
         const waitForTransactionCallback = async (data) => {
@@ -176,48 +177,76 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  public watchAddress(
+  public watchAddressStatus(
     cashaddr: string,
-    callback: (txHash: string) => void
+    callback: (status: string) => void
   ): CancelWatchFn {
-    const watchAddressCallback = async (data) => {
+    const watchAddressStatusCallback = async (data) => {
       // subscription acknowledgement is the latest known status or null if no status is known
-      // status is an array: [ cashaddr, [tx_hashes] ]
+      // status is an array: [ cashaddr, statusHash ]
       if (data instanceof Array) {
-        let addr = data[0] as string;
+        const addr = data[0] as string;
         if (addr !== cashaddr) {
           return;
         }
 
-        for (const txHash of data[1]) {
-          if (!txHash) {
-            // data[1] can be null eventually if there are no tx for this address
-            continue;
-          }
-          callback(txHash);
-        }
+        const status = data[1];
+        callback(status);
       }
     };
 
-    this.subscribeToAddressTransactions(cashaddr, watchAddressCallback);
+    this.subscribeToAddress(cashaddr, watchAddressStatusCallback);
 
     return async () => {
-      await this.unsubscribeFromAddressTransactions(
+      await this.unsubscribeFromAddress(
         cashaddr,
-        watchAddressCallback
+        watchAddressStatusCallback
       );
     };
   }
 
-  public watchAddressTransactions(
-    cashaddr: string,
-    callback: (tx: ElectrumRawTransaction) => void
-  ): CancelWatchFn {
-    return this.watchAddress(cashaddr, async (txHash: string) => {
-      const tx = await this.getRawTransactionObject(txHash);
-      callback(tx);
-    });
-  }
+  // public watchAddress(
+  //   cashaddr: string,
+  //   callback: (txHash: string) => void
+  // ): CancelWatchFn {
+  //   const watchAddressCallback = async (data) => {
+  //     // subscription acknowledgement is the latest known status or null if no status is known
+  //     // status is an array: [ cashaddr, [tx_hashes] ]
+  //     if (data instanceof Array) {
+  //       let addr = data[0] as string;
+  //       if (addr !== cashaddr) {
+  //         return;
+  //       }
+
+  //       for (const txHash of data[1]) {
+  //         if (!txHash) {
+  //           // data[1] can be null eventually if there are no tx for this address
+  //           continue;
+  //         }
+  //         callback(txHash);
+  //       }
+  //     }
+  //   };
+
+  //   this.subscribeToAddressTransactions(cashaddr, watchAddressCallback);
+
+  //   return async () => {
+  //     await this.unsubscribeFromAddressTransactions(
+  //       cashaddr,
+  //       watchAddressCallback
+  //     );
+  //   };
+  // }
+
+  // public watchAddressTransactions(
+  //   cashaddr: string,
+  //   callback: (tx: ElectrumRawTransaction) => void
+  // ): CancelWatchFn {
+  //   return this.watchAddress(cashaddr, async (txHash: string) => {
+  //     const tx = await this.getRawTransactionObject(txHash);
+  //     callback(tx);
+  //   });
+  // }
 
   // Wait for the next block or a block at given blockchain height.
   public watchBlocks(callback: (header: HeaderI) => void): CancelWatchFn {
