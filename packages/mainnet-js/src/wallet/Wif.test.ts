@@ -365,39 +365,50 @@ describe(`Wallet subscriptions`, () => {
     let balance, newBalance;
     balance = await aliceWallet.getBalance("sat");
 
-    aliceWallet.send([
-      {
-        cashaddr: bobWallet.cashaddr!,
-        value: 1000,
-        unit: "satoshis",
-      },
-    ], { awaitTransactionPropagation: false }).then(async () => {
-      newBalance = await aliceWallet.getBalance("sat");
-      expect(balance).toBe(newBalance);
-    });
+    aliceWallet
+      .send(
+        [
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ],
+        { awaitTransactionPropagation: false }
+      )
+      .then(async () => {
+        newBalance = await aliceWallet.getBalance("sat");
+        expect(balance).toBe(newBalance);
+      });
 
     await delay(1500);
 
     balance = await aliceWallet.getBalance("sat");
-    await aliceWallet.send([
-      {
-        cashaddr: bobWallet.cashaddr!,
-        value: 1000,
-        unit: "satoshis",
-      },
-    ], { awaitTransactionPropagation: false });
+    await aliceWallet.send(
+      [
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ],
+      { awaitTransactionPropagation: false }
+    );
 
     newBalance = await aliceWallet.getBalance("sat");
     expect(balance).toBe(newBalance);
 
     balance = await aliceWallet.getBalance("sat");
-    await aliceWallet.send([
-      {
-        cashaddr: bobWallet.cashaddr!,
-        value: 1000,
-        unit: "satoshis",
-      },
-    ], { awaitTransactionPropagation: true });
+    await aliceWallet.send(
+      [
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ],
+      { awaitTransactionPropagation: true }
+    );
 
     newBalance = await aliceWallet.getBalance("sat");
     expect(balance).toBeGreaterThan(newBalance);
@@ -579,13 +590,17 @@ describe(`Wallet subscriptions`, () => {
     }, 0);
 
     let aliceWatchResult = false;
-    const aliceWatchCancel = (alice.provider! as ElectrumNetworkProvider).watchAddressStatus(alice.getDepositAddress(), (_status) => {
+    const aliceWatchCancel = (
+      alice.provider! as ElectrumNetworkProvider
+    ).watchAddressStatus(alice.getDepositAddress(), (_status) => {
       aliceWatchCancel();
       aliceWatchResult = true;
     });
 
     let bobWatchResult = false;
-    const bobWatchCancel = (bob.provider! as ElectrumNetworkProvider).watchAddressStatus(bob.getDepositAddress(), (_status) => {
+    const bobWatchCancel = (
+      bob.provider! as ElectrumNetworkProvider
+    ).watchAddressStatus(bob.getDepositAddress(), (_status) => {
       bobWatchCancel();
       bobWatchResult = true;
     });

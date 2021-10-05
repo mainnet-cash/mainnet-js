@@ -198,10 +198,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     this.subscribeToAddress(cashaddr, watchAddressStatusCallback);
 
     return async () => {
-      await this.unsubscribeFromAddress(
-        cashaddr,
-        watchAddressStatusCallback
-      );
+      await this.unsubscribeFromAddress(cashaddr, watchAddressStatusCallback);
     };
   }
 

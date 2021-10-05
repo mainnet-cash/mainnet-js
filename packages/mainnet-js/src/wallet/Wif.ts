@@ -582,10 +582,13 @@ export class Wallet extends BaseWallet {
   public watchBalance(
     callback: (balance: BalanceResponse) => void
   ): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(this.getDepositAddress(), async (_status: string) => {
-      const balance = (await this.getBalance()) as BalanceResponse;
-      callback(balance);
-    });
+    return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(
+      this.getDepositAddress(),
+      async (_status: string) => {
+        const balance = (await this.getBalance()) as BalanceResponse;
+        callback(balance);
+      }
+    );
   }
 
   // sets up a callback to be called upon wallet's BCH or USD balance change
@@ -610,7 +613,9 @@ export class Wallet extends BaseWallet {
       }
     };
 
-    const watchCancel = (this.provider! as ElectrumNetworkProvider).watchAddressStatus(this.getDepositAddress(), _callback);
+    const watchCancel = (
+      this.provider! as ElectrumNetworkProvider
+    ).watchAddressStatus(this.getDepositAddress(), _callback);
     const interval = setInterval(_callback, usdPriceRefreshInterval);
 
     return async () => {
@@ -840,7 +845,9 @@ export class Wallet extends BaseWallet {
       }
 
       // waiting for any address transaction
-      const watchCancel = (this.provider! as ElectrumNetworkProvider).watchAddressStatus(this.getDepositAddress(), async (_status) => {
+      const watchCancel = (
+        this.provider! as ElectrumNetworkProvider
+      ).watchAddressStatus(this.getDepositAddress(), async (_status) => {
         watchCancel();
         resolve(makeResponse());
       });
