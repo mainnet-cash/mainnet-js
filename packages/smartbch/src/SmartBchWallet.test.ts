@@ -1,11 +1,11 @@
 import { ethers } from "ethers";
-import { delay } from "../util/delay";
+import { delay } from "mainnet-js";
 import {
   RegTestSmartBchWallet,
   SmartBchWallet,
   TestNetSmartBchWallet,
-} from "../smartbch/SmartBchWallet";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
+  BalanceResponse
+} from "./";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 describe(`Test Ethereum functions`, () => {

@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 var mainnet = require("mainnet-js");
+var smartbch = require("@mainnet-cash/smartbch");
 var config  = require('../config');
 
 const assertFaucetAvailable = () => {
@@ -110,16 +111,16 @@ const getTestnetSbch = ({ getTestnetSbchRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!mainnet.SmartBch.isValidAddress(getTestnetSbchRequest.address))
+      if (!smartbch.isValidAddress(getTestnetSbchRequest.address))
         throw new Error("Incorrect SmartBch address");
 
-      const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSbchRequest.address);
+      const receiverWallet = await smartbch.TestNetSmartBchWallet.watchOnly(getTestnetSbchRequest.address);
       const receiverBalance = await receiverWallet.getBalance("bch");
       const diff = 0.1 - receiverBalance;
       if (diff <= 0)
         throw new Error("You have 0.1 BCH or more. Refusing to refill.");
 
-      const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+      const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
       const sendResponse = await wallet.send([{address: getTestnetSbchRequest.address, value: diff, unit: "BCH"}], {}, { gasPrice: 10 ** 10 });
       resolve(Service.successResponse({ txId: sendResponse[0].txId }));
     } catch (e) {
@@ -141,15 +142,15 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!mainnet.SmartBch.isValidAddress(getTestnetSep20Request.address))
+      if (!smartbch.isValidAddress.isValidAddress(getTestnetSep20Request.address))
       throw new Error("Incorrect SmartBch address");
-      const receiverWallet = await mainnet.TestNetSmartBchWallet.watchOnly(getTestnetSep20Request.address);
+      const receiverWallet = await smartbch.TestNetSmartBchWallet.watchOnly(getTestnetSep20Request.address);
       const receiverBalance = await receiverWallet.sep20.getBalance(getTestnetSep20Request.tokenId);
       const diff = 10 - (receiverBalance.value.toNumber());
       if (diff <= 0)
         throw new Error("You have 10 tokens or more of this type. Refusing to refill.");
 
-      const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+      const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
       const sendResponse = await wallet.sep20.send([{address: getTestnetSep20Request.address, value: diff, tokenId: getTestnetSep20Request.tokenId}], { gasPrice: 10 ** 10 });
       resolve(Service.successResponse({ txId: sendResponse[0].txId }));
     } catch (e) {

@@ -1,7 +1,9 @@
 import { ethers } from "ethers";
+import { SmartBchWallet } from ".";
 import { Contract } from "./Contract";
 import { Sep20 } from "./Sep20";
 import { RegTestSmartBchWallet } from "./SmartBchWallet";
+import { delay } from "mainnet-js";
 
 describe(`Test Ethereum functions`, () => {
   test.skip("Test eth mainnet contract", async () => {
