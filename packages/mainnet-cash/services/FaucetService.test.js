@@ -2,6 +2,7 @@ var server = require("../")
 
 var request = require("supertest");
 var mainnet = require("mainnet-js");
+var smartbch = require("@mainnet-cash/smartbch");
 var config  = require('../config');
 
 var app;
@@ -113,8 +114,8 @@ describe("Test faucet endpoints", () => {
     expect(resp.statusCode).toEqual(405);
     expect(resp.body.message).toBe("Incorrect SmartBch address");
 
-    const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
-    const bobwallet = await mainnet.TestNetSmartBchWallet.newRandom();
+    const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+    const bobwallet = await smartbch.TestNetSmartBchWallet.newRandom();
     resp = await request(app).post("/faucet/get_testnet_sbch/").send({
       address: bobwallet.getDepositAddress()
     });
@@ -147,8 +148,8 @@ describe("Test faucet endpoints", () => {
     expect(resp.statusCode).toEqual(405);
     expect(resp.body.message).toBe("Incorrect SmartBch address");
 
-    const wallet = await mainnet.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
-    const bobwallet = await mainnet.TestNetSmartBchWallet.newRandom();
+    const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+    const bobwallet = await smartbch.TestNetSmartBchWallet.newRandom();
     resp = await request(app).post("/faucet/get_testnet_sep20/").send({
       address: bobwallet.getDepositAddress(),
       tokenId: tokenId
