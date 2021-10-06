@@ -4,7 +4,7 @@ import {
   RegTestSmartBchWallet,
   SmartBchWallet,
   TestNetSmartBchWallet,
-  BalanceResponse
+  BalanceResponse,
 } from "./";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
