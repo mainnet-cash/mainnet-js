@@ -27,7 +27,7 @@ const getAddresses = () => new Promise(
         sbchtest: config.FAUCET_SBCH_ADDRESS
       }));
     } catch (e) {
-      console.trace(e);
+      // console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -93,7 +93,7 @@ const getTestnetSlp = ({ getTestnetSlpRequest }) => new Promise(
       const sendResponse = await wallet.slp.send([{slpaddr: getTestnetSlpRequest.slpaddr, value: diff, tokenId: getTestnetSlpRequest.tokenId}]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
-      console.trace(e);
+      // console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -124,7 +124,7 @@ const getTestnetSbch = ({ getTestnetSbchRequest }) => new Promise(
       const sendResponse = await wallet.send([{address: getTestnetSbchRequest.address, value: diff, unit: "BCH"}], {}, { gasPrice: 10 ** 10 });
       resolve(Service.successResponse({ txId: sendResponse[0].txId }));
     } catch (e) {
-      console.trace(e);
+      // console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,
@@ -142,7 +142,7 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
   async (resolve, reject) => {
     try {
       assertFaucetAvailable();
-      if (!smartbch.isValidAddress.isValidAddress(getTestnetSep20Request.address))
+      if (!smartbch.isValidAddress(getTestnetSep20Request.address))
       throw new Error("Incorrect SmartBch address");
       const receiverWallet = await smartbch.TestNetSmartBchWallet.watchOnly(getTestnetSep20Request.address);
       const receiverBalance = await receiverWallet.sep20.getBalance(getTestnetSep20Request.tokenId);
@@ -154,7 +154,7 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
       const sendResponse = await wallet.sep20.send([{address: getTestnetSep20Request.address, value: diff, tokenId: getTestnetSep20Request.tokenId}], { gasPrice: 10 ** 10 });
       resolve(Service.successResponse({ txId: sendResponse[0].txId }));
     } catch (e) {
-      console.trace(e);
+      // console.trace(e);
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
         e.status || 405,

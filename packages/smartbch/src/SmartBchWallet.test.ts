@@ -211,7 +211,7 @@ describe(`Test Ethereum functions`, () => {
     expect(blockNumberWaitResult).toBe(true);
   });
 
-  test("Should get testnet satoshis and send them back", async () => {
+  test.skip("Should get testnet satoshis and send them back", async () => {
     const wallet = await TestNetSmartBchWallet.newRandom();
     const txid = await wallet.getTestnetSatoshis();
     expect(txid.length).toBe(66);
@@ -223,7 +223,7 @@ describe(`Test Ethereum functions`, () => {
     expect(response.balance!.sat!).toBeLessThan(50000);
   });
 
-  test("Should get testnet sep20 tokens and send them back", async () => {
+  test.skip("Should get testnet sep20 tokens and send them back", async () => {
     let alicePrivKey = `${process.env.FAUCET_SBCH_PRIVKEY!}`;
     let aliceWallet = await TestNetSmartBchWallet.fromPrivateKey(alicePrivKey);
 
