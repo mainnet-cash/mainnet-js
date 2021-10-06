@@ -8,8 +8,8 @@ import { delay } from "../util/delay";
 import { OpReturnData, SendResponse } from "./model";
 import { ElectrumRawTransaction } from "../network/interface";
 import { binToHex, binToUtf8, hexToBin, utf8ToBin } from "@bitauth/libauth";
-import { ElectrumNetworkProvider } from "cashscript";
 import { mine } from "../mine";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 
 beforeAll(async () => {
   await initProviders();
@@ -358,6 +358,62 @@ describe(`Wallet subscriptions`, () => {
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
 
+  test("Should await and skip transaction propagation", async () => {
+    const aliceWallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    let balance, newBalance;
+    balance = await aliceWallet.getBalance("sat");
+
+    aliceWallet
+      .send(
+        [
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ],
+        { awaitTransactionPropagation: false }
+      )
+      .then(async () => {
+        newBalance = await aliceWallet.getBalance("sat");
+        expect(balance).toBe(newBalance);
+      });
+
+    await delay(1500);
+
+    balance = await aliceWallet.getBalance("sat");
+    await aliceWallet.send(
+      [
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ],
+      { awaitTransactionPropagation: false }
+    );
+
+    newBalance = await aliceWallet.getBalance("sat");
+    expect(balance).toBe(newBalance);
+
+    balance = await aliceWallet.getBalance("sat");
+    await aliceWallet.send(
+      [
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ],
+      { awaitTransactionPropagation: true }
+    );
+
+    newBalance = await aliceWallet.getBalance("sat");
+    expect(balance).toBeGreaterThan(newBalance);
+  });
+
   test("Create two wallets, get balances concurrently", async () => {
     let balance1 = 999,
       balance2 = 666;
@@ -534,13 +590,17 @@ describe(`Wallet subscriptions`, () => {
     }, 0);
 
     let aliceWatchResult = false;
-    const aliceWatchCancel = alice.watchAddressTransactions((_tx) => {
+    const aliceWatchCancel = (
+      alice.provider! as ElectrumNetworkProvider
+    ).watchAddressStatus(alice.getDepositAddress(), (_status) => {
       aliceWatchCancel();
       aliceWatchResult = true;
     });
 
     let bobWatchResult = false;
-    const bobWatchCancel = bob.watchAddress((_txHash) => {
+    const bobWatchCancel = (
+      bob.provider! as ElectrumNetworkProvider
+    ).watchAddressStatus(bob.getDepositAddress(), (_status) => {
       bobWatchCancel();
       bobWatchResult = true;
     });
