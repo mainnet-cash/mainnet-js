@@ -9,7 +9,6 @@ import {
   TestNetSmartBchWallet,
   TestNetWatchSmartBchWallet,
   WatchSmartBchWallet,
-  Web3SmartBchWallet,
 } from "./SmartBchWallet";
 import { ethers } from "ethers";
 import { Contract } from "./Contract";
@@ -545,15 +544,6 @@ contract SmartBchSep20 is ERC20, ERC20Burnable, AccessControl {
 }
 
 //#region Specific Sep20 wallet classes
-/**
- * Class to manage an slp enabled testnet wallet.
- */
-export class Web3Sep20 extends Sep20 {
-  static get walletType() {
-    return Web3SmartBchWallet;
-  }
-}
-
 /**
  * Class to manage an slp enabled testnet wallet.
  */

@@ -1,5 +1,5 @@
 const playwright = require("playwright");
-const PAGE_URL = "http://localhost:8080/smartbch/index.html";
+const PAGE_URL = "http://localhost:8080";
 
 describe(`SmartBchWallet should function in the browser`, () => {
   let browser = null;
