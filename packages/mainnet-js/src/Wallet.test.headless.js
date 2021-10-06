@@ -298,17 +298,17 @@ describe(`Wallet should function in the browser`, () => {
         waitBalanceResult = true;
       }, 0);
 
-      let aliceWatchResult = false;
-      const aliceWatchCancel = alice.watchAddressTransactions((_tx) => {
-        aliceWatchCancel();
-        aliceWatchResult = true;
-      });
+      // let aliceWatchResult = false;
+      // const aliceWatchCancel = alice.watchAddressTransactions((_tx) => {
+      //   aliceWatchCancel();
+      //   aliceWatchResult = true;
+      // });
 
-      let bobWatchResult = false;
-      const bobWatchCancel = bob.watchAddress((_txHash) => {
-        bobWatchCancel();
-        bobWatchResult = true;
-      });
+      // let bobWatchResult = false;
+      // const bobWatchCancel = bob.watchAddress((_txHash) => {
+      //   bobWatchCancel();
+      //   bobWatchResult = true;
+      // });
 
       let bobBalanceWatchResult = false;
       const bobBalanceWatchCancel = bob.watchBalance((balance) => {
@@ -358,8 +358,8 @@ describe(`Wallet should function in the browser`, () => {
       await delay(5000);
       expect(waitTxResult).toBe(true);
       expect(waitBalanceResult).toBe(true);
-      expect(aliceWatchResult).toBe(true);
-      expect(bobWatchResult).toBe(true);
+      // expect(aliceWatchResult).toBe(true);
+      // expect(bobWatchResult).toBe(true);
       expect(bobBalanceWatchResult).toBe(true);
       // expect(blockWatchResult).toBe(true);
       // expect(blockWaitResult).toBe(true);

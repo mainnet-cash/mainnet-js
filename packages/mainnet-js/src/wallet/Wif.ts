@@ -557,33 +557,38 @@ export class Wallet extends BaseWallet {
     }
   }
 
-  // waiting for any transaction hash of this wallet
-  public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddress(
-      this.getDepositAddress(),
-      callback
-    );
-  }
+  // // waiting for any transaction hash of this wallet
+  // // commented out until fulcrum supports new method https://github.com/cculianu/Fulcrum/pull/89
+  // public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
+  //   return (this.provider! as ElectrumNetworkProvider).watchAddress(
+  //     this.getDepositAddress(),
+  //     callback
+  //   );
+  // }
 
-  // waiting for any transaction of this wallet
-  public watchAddressTransactions(
-    callback: (tx: ElectrumRawTransaction) => void
-  ): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(
-      this.getDepositAddress(),
-      callback
-    );
-  }
+  // // waiting for any transaction of this wallet
+  // // commented out until fulcrum supports new method https://github.com/cculianu/Fulcrum/pull/89
+  // public watchAddressTransactions(
+  //   callback: (tx: ElectrumRawTransaction) => void
+  // ): CancelWatchFn {
+  //   return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(
+  //     this.getDepositAddress(),
+  //     callback
+  //   );
+  // }
 
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
   public watchBalance(
     callback: (balance: BalanceResponse) => void
   ): CancelWatchFn {
-    return this.watchAddress(async (_txHash: string) => {
-      const balance = (await this.getBalance()) as BalanceResponse;
-      callback(balance);
-    });
+    return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(
+      this.getDepositAddress(),
+      async (_status: string) => {
+        const balance = (await this.getBalance()) as BalanceResponse;
+        callback(balance);
+      }
+    );
   }
 
   // sets up a callback to be called upon wallet's BCH or USD balance change
@@ -608,7 +613,9 @@ export class Wallet extends BaseWallet {
       }
     };
 
-    const watchCancel = this.watchAddress(_callback);
+    const watchCancel = (
+      this.provider! as ElectrumNetworkProvider
+    ).watchAddressStatus(this.getDepositAddress(), _callback);
     const interval = setInterval(_callback, usdPriceRefreshInterval);
 
     return async () => {
@@ -690,7 +697,12 @@ export class Wallet extends BaseWallet {
     });
     const spendableAmount = await sumUtxoValue(fundingUtxos);
 
-    return await balanceResponseFromSatoshi(spendableAmount - fee);
+    let result = spendableAmount - fee;
+    if (result < 0) {
+      result = 0;
+    }
+
+    return await balanceResponseFromSatoshi(result);
   }
 
   /**
@@ -788,7 +800,7 @@ export class Wallet extends BaseWallet {
     return new Promise(async (resolve) => {
       let txHashSeen = false;
 
-      const makeResponse = async (txHash: string) => {
+      const makeResponse = async (txHash?: string) => {
         const response = <WaitForTransactionResponse>{};
         const promises: any[] = [undefined, undefined];
 
@@ -797,7 +809,11 @@ export class Wallet extends BaseWallet {
         }
 
         if (options.getTransactionInfo === true) {
-          promises[1] = this.provider!.getRawTransactionObject(txHash);
+          if (!txHash) {
+            promises[1] = this.getLastTransaction();
+          } else {
+            promises[1] = this.provider!.getRawTransactionObject(txHash);
+          }
         }
 
         const result = await Promise.all(promises);
@@ -829,9 +845,11 @@ export class Wallet extends BaseWallet {
       }
 
       // waiting for any address transaction
-      const watchCancel = this.watchAddress(async (txHash) => {
+      const watchCancel = (
+        this.provider! as ElectrumNetworkProvider
+      ).watchAddressStatus(this.getDepositAddress(), async (_status) => {
         watchCancel();
-        resolve(makeResponse(txHash));
+        resolve(makeResponse());
       });
     });
   }
