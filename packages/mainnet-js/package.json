@@ -69,7 +69,8 @@
   "sideEffects": false,
   "keywords": [
     "bch",
-    "bitcoin cash"
+    "bitcoin cash",
+    "wasm"
   ],
   "author": "readcash"
 }

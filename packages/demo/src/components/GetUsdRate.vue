@@ -1,17 +1,22 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-
+  <div class="rate">
+    <p>${{ rate }}</p>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
+import { Mainnet } from "mainnet-js";
 export default defineComponent({
-  name: "HelloWorld",
-  props: {
-    msg: String,
+  name: "GetUsdRate",
+  async setup() {
+    
+    const rate = await Mainnet.getUsdRate();
+
+    // expose to template
+    return {
+      rate,
+    };
   },
 });
 </script>

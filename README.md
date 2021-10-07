@@ -1,119 +1,137 @@
-# mainnet.js
+# mainnet-js
 
 A high-level developer friendly interface to interact with Bitcoin Cash (BCH) network (prototype stage)
 
-# Unstable
+# Contents
 
-This code is in a prototype stage, so there is no backwards-compatibility guarantee
+- [mainnet-js](#mainnet-js)
+- [Contents](#contents)
+- [Before you begin](#before-you-begin)
+  - [Unstable](#unstable)
+  - [What is exactly is this? and how can I use it?](#what-is-exactly-is-this-and-how-can-i-use-it)
+  - [Where can't mainnet-js be used (for now)](#where-cant-mainnet-js-be-used-for-now)
+  - [Check Node Version](#check-node-version)
+- [Installation](#installation)
+  - [As a REST service](#as-a-rest-service)
+  - [For webapps](#for-webapps)
+- [Overview of packages](#overview-of-packages)
+- [Documentation](#documentation)
+- [Developer Guide](#developer-guide)
+  - [Overview](#overview)
+  - [1. Specification](#1-specification)
+  - [2. Typescript library](#2-typescript-library)
+  - [3. Running library tests](#3-running-library-tests)
+    - [Speeding up testing](#speeding-up-testing)
+  - [4. Update REST server](#4-update-rest-server)
+  - [5. Implement REST service](#5-implement-rest-service)
+  - [6. REST Testing](#6-rest-testing)
+  - [7. Browser Testing](#7-browser-testing)
+  - [8. Documentation](#8-documentation)
+- [Demo app [WIP]](#demo-app-wip)
+- [Developing API clients](#developing-api-clients)
+- [Continuous Integration](#continuous-integration)
+- [Continuous Deployment](#continuous-deployment)
+  - [Deployment and package publishing](#deployment-and-package-publishing)
+    - [Versioning](#versioning)
+      - [Incrementing version](#incrementing-version)
+      - [Incrementing other versions](#incrementing-other-versions)
+      - [Enforcing certain version](#enforcing-certain-version)
+    - [Publishing](#publishing)
+
 
 # Before you begin
 
-## Node Version
+## Unstable
 
-`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started.
 
-Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
+| :warning: WARNING          |
+|:---------------------------|
+| This code is in a prototype stage, so there is no backwards-compatibility guarantee.     |
 
-## What is this project? and how do I use it?
 
-Mainnet-js strives to provide an easy to use API to develop BCH applications on the web.
+## What is exactly is this? and how can I use it?
+
+Mainnet-js provides a developer friendly API to develop BCH applications on the web.
 
 It is an OpenAPI 3 specification (swagger), implemented as a library in typescript. That library is then used in a generated express server to provide a REST service. And that service can be deployed in a production stack via docker.
 
-Clients can also be generated for most common languages, so you don't have to use javascript whatsoever to use mainnet-js.
+From there, clients can also be generated for most common languages, so you don't have to write javascript whatsoever to use mainnet-js.
 
 However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
 
-The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides crypto related functions using wasm binaries.
+## Where can't mainnet-js be used (for now)
 
-For the above reason, mainnet-js is not well suited for use as a library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, but may in the future.
+The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides fast battle-tested crypto related functions using wasm binaries in WebAssembly.
+
+For the above reason, mainnet-js is not well suited for use as a library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, at the time of writing. Nor is it suitable for KaiOS devices below v3, for the same reason.
+
+## Check Node Version
+
+`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started. Check the nodejs version first.
+
+Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
 
 # Installation
 
-    git clone https://github.com/mainnet-cash/mainnet-js.git
-    yarn
+  ## As a REST service
 
-# Mono-Repository Structure
+To run the rest service under docker (recommended) use:
+
+    docker pull mainnet/mainnet-rest
+    docker run -d --env WORKERS=5 -p 127.0.0.1:3000:80 mainnet/mainnet-rest
+
+
+See the [full documentation](https://mainnet.cash/tutorial/running-rest.html) for more installation and configuration details.
+
+
+  ## For webapps
+
+To install mainnet as a dependency of your webapp use:
+  
+    yarn add mainnet-js
+
+To include contracts and smartBCH functionality, use the following packages:
+
+    yarn add @mainnet-cash/contract
+    yarn add @mainnet-cash/smartbch
+
+See the [full documentation](https://mainnet.cash/tutorial/shipping-mainnet.html) for notes and examples for bundling mainnet-js in your project.
+
+# Overview of packages
 
 This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
 
 | Project                | Description           |
 | ---------------------- | --------------------- |
-| mainnet-js             | Core TS Library       |
+| mainnet-js             | Base Library          |
 | mainnet-cash           | REST Express Server   |
 | @mainnet-cash/smartbch | SmartBch Library      |
 | @mainnet-cash/contract | CashScript Library    |
 | @mainnet-cash/demo     | Demo Vue Webapp       |
 | @mainnet-cash/root     | Top-level Placeholder |
 
-# Demo
+# Documentation
 
-With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
-so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
+Tutorials are available for both REST and javascript at [mainnet.cash](https://mainnet.cash)
 
-**However**, the following commands must be used from the root project directory.
+Additionally, a live version of the current REST api is available for viewing at [rest-unstable.mainnet.cash](https://rest-unstable.mainnet.cash)
 
-## Project setup
-
-```
-yarn
-```
-
-### Compiles and hot-reloads for development
-
-```
-yarn demo:serve
-```
-
-### Compiles and minifies for production
-
-```
-yarn demo:build
-```
-
-### Run Tests
-
-```
-yarn demo:test
-```
-
-# Running library tests
-
-    yarn test
-
-The testing harness should automatically start a docker image with
-a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
-the library, as well as the rest API server.
-
-# Running browser tests
-
-    yarn test:browser
-
-Tests in the browser require for the library to be bundled for the browser. With:
-
-    yarn build
-
-The bundle is built with webpack and does **not** use browserify, rather it simply
-omits nodejs libraries. Browser tests are run against testnet, using secrets stored
-in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
-and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
-getting more testnet coins is an annoyance.
-
-# Development Workflow
+# Developer Guide
 
 ## Overview
 
-To implement even the simplest function, is a multi step process. It's fastest to follow these steps in order:
+Implementing even the simplest feature is a multi step process. It's fastest to follow these steps in order:
 
 1. Write the finished REST specification
-2. Implement the function in Typescript as closely to the pattern of the spec as possible
+2. Implement the function in Typescript as closely to the pattern of the api spec as possible
 3. **Fully test** the typescript functions
 4. Rebuild the REST server from spec
 5. Add required endpoint services, adding new files to .openapi-generator-ignore as necessary.
 6. **Fully test** the rest endpoints
-7. Finally, it must work in the browser so, **fully test** an integrated workflow with a `*.test.headless.js` file.
+7. Finally, it must work in the browser, so, **fully test** an integrated workflow with a `*.test.headless.js` file.
+8. Documentation
 
-## Specification
+## 1. Specification
 
 This is a specification driven project. The rest interface is defined using OpenAPI 3
 in a folder called [swagger](swagger/v1/api.yml).
@@ -124,7 +142,7 @@ Changes may be validated using openapi-generator locally using:
 
 If you need better validation, you may also try [a swagger web editor](https://editor.swagger.io/)
 
-## Typescript library
+## 2. Typescript library
 
 All code for the javascript library should be contained in src/.
 
@@ -134,7 +152,7 @@ So the endpoint defined at `wallet/send` should match the behavior of `mywallet.
 
 Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript.
 
-# Running library tests
+## 3. Running library tests
 
 To test the library, use:
 
@@ -144,7 +162,7 @@ The testing harness should automatically start a docker image with
 a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
 the library, as well as the rest API server.
 
-## Speeding up testing
+### Speeding up testing
 
 The test harness takes some time to start and mine coins. For this reason, it might be helpful to start it once and leave it running.
 
@@ -164,7 +182,22 @@ SKIP_REGTEST_INIT=1 npx jest packages/mainnet-js/src/rate/ExchangeRate.test.t
 
 or `yarn test:skip` run the suite of library tests.
 
-## REST Testing
+## 4. Update REST server
+
+The REST server service stubs and data validation are updated automatically to match the swagger spec with:
+
+    api:build:server
+
+This should generate stubs for any services and controllers needed, as well as copy the new spec to the server project.
+
+**If you added new files to the express server and then modified them, they **must** be added to `.openapi-generator-ignore` in the server project root folder or the changes will be reverted when the server is regenerated from spec.**
+
+## 5. Implement REST service
+
+Implementing the rest service should be as easy as finding the generated stub and calling the function written in step 2, but it is sometimes more complex than that.
+
+
+## 6. REST Testing
 
 Tests for the express server may be run with:
 
@@ -172,19 +205,19 @@ Tests for the express server may be run with:
 
 The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command. If regtest is already running `yarn test:rest:skip`.
 
-If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
+**If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.**
 
-If there are any failing tests in REST assure that similar coverage exists in `mainnet-js` src prior to debugging.
+If there are any failing tests in REST assure that similar coverage exists in `mainnet-js` src prior to debugging. Go back to step 3, or 2 if necessary.
 
-## Browser Testing
+When the REST service is successfully implemented and tested, it's a good idea to commit all code and regenerate the server to see if any files get reverted to stubs. 
+
+Alternatively, this check is also performed as part of continuous integration.
+
+## 7. Browser Testing
 
 Browsers do not have access to many standard node libraries by design. For this reason, some libraries either don't work in the browser or don't work in nodejs.
 
 All browser tests are denoted by `*.test.headless.js`.
-
-Tests in the browser require for the library to be bundled for the browser. With:
-
-    yarn
 
 The bundle is built with webpack and does **not** use browserify, rather it simply
 omits nodejs libraries. Browser tests are run against testnet, using secrets stored
@@ -198,7 +231,45 @@ Integration tests for the browser can be run so:
 
 Unit testing is not as critical for the browser, but may be helpful in places, to narrow the scope of potential issues.
 
-## Developing API clients
+## 8. Documentation
+
+Follow the instructions in the [mainnet-docs](https://github.com/mainnet-cash/mainnet-docs) to update documentation and examples for both javascript and REST usage.
+
+
+# Demo app [WIP]
+
+A simple demo is available to demonstrate and test first-class high-level functions and to run unit testing of functions when called in a webapp.
+
+With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
+so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
+
+**However**, the following commands must be used from the root project directory.
+
+Running yarn in the root folder will build local dependencies of the demo.
+
+```
+yarn
+```
+
+Compiles and hot-reloads for development
+
+```
+yarn demo:serve
+```
+
+Compiles and minifies for production
+
+```
+yarn demo:build
+```
+
+ Run Unit Tests
+
+```
+yarn demo:test
+```
+
+# Developing API clients
 
 To generate clients in a particular language, use:
 
@@ -211,65 +282,25 @@ https://openapi-generator.tech/docs/generators/
 If you need additionalProperties passed to the client generator, these may be added in
 he [wrapper script](swagger/generate.js)
 
-# Configuration Variables
+# Continuous Integration
 
-## Express
+CI is run using github actions on the `master`, `feature/*` , `bugfix/*` , branches.
 
-    PORT=3000  # The port express will run on
-    URL_PATH   # The url express is serving from
+It's controlled by [a github action](.github/workflows/CI.yml) and runs the following actions:
 
-    WORKERS=10 # How many threads to run express on
-    TIMEOUT=60 # sets the default timeout for requests
+- API validation
+- Linting
+- Typescript tests
+- REST tests
+- Browser tests
+- Test coverage
 
-### Database
+Some steps require access to environment secrets in github to pass. Adding the secrets to your fork of the project on github can allow you to test using github actions run under your github account.
 
-Postgres configuration is passed url encoded
+# Continuous Deployment
 
-    DATABASE_URL='postgres://postgres:trusted@localhost:15432/wallet'
 
-By default, the API service assumes it is connected to a secured private postgres database. If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true.
-
-    ALLOW_MAINNET_USER_WALLETS=true
-
-For advanced ssl authorization configuration see the [official documentation](https://mainnet.cash/tutorial/running-rest.html#configuration)
-
-## Wallet Behavior
-
-**In nodejs only**, Controls the number responses from electrum-cash nodes that must be in agreement for a network response to return
-
-    CLUSTER_CONFIDENCE=1
-
-## Mining
-
-If you would like to mine some regtest coins, the following environment variables are used:
-
-    RPC_USER="alice"
-    RPC_PASS="password"
-    RPC_PORT=18443
-    RPC_HOST=bitcoind
-
-The above variables should be configured already in `.env.regtest` for integration tests against docker services
-
-## Regtest Wallet
-
-Below are the public and private keys for a regtest wallet
-
-    ADDRESS="bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
-    ADDRESS_LEGACY="18uVyRcvE7RdR9WFLyD1kMPjehKxyE91in"
-    PRIVATE_WIF="cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-    PRIVATE_SEED="pink wash guitar agree screen suspect soon misery dog menu issue recipe"
-
-## Testnet Wallet
-
-For now, testnet integration tests use static wallets:
-
-    ALICE_TESTNET_ADDRESS   # A testnet address    ALICE_TESTNET_WALLET_ID # A wallet in mainnet serialized format
-    BOB_TESTNET_ADDRESS     # A wallet for the Bob
-    BOB_TESTNET_WALLET_ID   # His serialized walletId
-
-These will be removed at a later date when an API is configured.
-
-# Deployment and package publishing
+## Deployment and package publishing
 
 The workflow is simple, bump the version, commit, push to github and create a release with a tag name equal to the version to which the project got bumped.
 
@@ -277,7 +308,7 @@ The github actions will then take care about everything else.
 
 See details below.
 
-## Versioning
+### Versioning
 
 The version format follows the `semver` - semantic versioning.
 
@@ -285,11 +316,11 @@ Use the `bump_version` utility to increment the project version. It will as well
 
 See https://github.com/npm/node-semver
 
-### Incrementing version
+#### Incrementing version
 
 Execute `node bump_version.js` to simply increase the project's patch version.
 
-### Incrementing other versions
+#### Incrementing other versions
 
 Use `node bump_version.js major`, `node bump_version.js minor`, `node bump_version.js patch` to increase x, y and z in the x.y.z version format, respectively.
 
@@ -297,11 +328,11 @@ Use `node bump_version.js prerelease rc`, `node bump_version.js prerelease alpha
 
 `node bump_version.js prerelease rc` will produce version `x.y.z-rc.0`. With `0` incrementing further to `1`, etc.
 
-### Enforcing certain version
+#### Enforcing certain version
 
 Execute `node bump_version.js x.y.z` to set the project and swagger version to `x.y.z`
 
-## Publishing
+### Publishing
 
 Upon creation of a new release on the github, the github publishing actions will be triggered.
 

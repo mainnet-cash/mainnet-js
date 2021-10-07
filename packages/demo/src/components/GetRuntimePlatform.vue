@@ -1,6 +1,6 @@
 <template>
   <div class="platform">
-    <h1>{{ platform }}</h1>
+    <p>{{ platform }}</p>
   </div>
 </template>
 
@@ -9,11 +9,9 @@ import { defineComponent } from "vue";
 import { Mainnet } from "mainnet-js";
 export default defineComponent({
   name: "GetRuntimePlatform",
-  props: {
-    msg: String,
-  },
-  setup(props) {
-    props;
+
+  setup() {
+    
     const platform = Mainnet.getRuntimePlatform();
 
     // expose to template
