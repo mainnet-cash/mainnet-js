@@ -39,6 +39,6 @@ export { WalletRequestI, WalletResponseI } from "./wallet/interface";
 // TODO move this up to util (Mainnet) ?
 export * from "./util/bchaddr";
 
-export function cube(x:number) {
+export function cube(x: number) {
   return x * x * x;
 }

@@ -38,16 +38,13 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
       - [Enforcing certain version](#enforcing-certain-version)
     - [Publishing](#publishing)
 
-
 # Before you begin
 
 ## Unstable
 
-
-| :warning: WARNING          |
-|:---------------------------|
-| This code is in a prototype stage, so there is no backwards-compatibility guarantee.     |
-
+| :warning: WARNING                                                                    |
+| :----------------------------------------------------------------------------------- |
+| This code is in a prototype stage, so there is no backwards-compatibility guarantee. |
 
 ## What is exactly is this? and how can I use it?
 
@@ -73,21 +70,19 @@ Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your i
 
 # Installation
 
-  ## As a REST service
+## As a REST service
 
 To run the rest service under docker (recommended) use:
 
     docker pull mainnet/mainnet-rest
     docker run -d --env WORKERS=5 -p 127.0.0.1:3000:80 mainnet/mainnet-rest
 
-
 See the [full documentation](https://mainnet.cash/tutorial/running-rest.html) for more installation and configuration details.
 
-
-  ## For webapps
+## For webapps
 
 To install mainnet as a dependency of your webapp use:
-  
+
     yarn add mainnet-js
 
 To include contracts and smartBCH functionality, use the following packages:
@@ -196,7 +191,6 @@ This should generate stubs for any services and controllers needed, as well as c
 
 Implementing the rest service should be as easy as finding the generated stub and calling the function written in step 2, but it is sometimes more complex than that.
 
-
 ## 6. REST Testing
 
 Tests for the express server may be run with:
@@ -209,7 +203,7 @@ The `mainnet-js` package is sym-linked to the REST expressServer automatically b
 
 If there are any failing tests in REST assure that similar coverage exists in `mainnet-js` src prior to debugging. Go back to step 3, or 2 if necessary.
 
-When the REST service is successfully implemented and tested, it's a good idea to commit all code and regenerate the server to see if any files get reverted to stubs. 
+When the REST service is successfully implemented and tested, it's a good idea to commit all code and regenerate the server to see if any files get reverted to stubs.
 
 Alternatively, this check is also performed as part of continuous integration.
 
@@ -234,7 +228,6 @@ Unit testing is not as critical for the browser, but may be helpful in places, t
 ## 8. Documentation
 
 Follow the instructions in the [mainnet-docs](https://github.com/mainnet-cash/mainnet-docs) to update documentation and examples for both javascript and REST usage.
-
 
 # Demo app [WIP]
 
@@ -263,7 +256,7 @@ Compiles and minifies for production
 yarn demo:build
 ```
 
- Run Unit Tests
+Run Unit Tests
 
 ```
 yarn demo:test
@@ -298,7 +291,6 @@ It's controlled by [a github action](.github/workflows/CI.yml) and runs the foll
 Some steps require access to environment secrets in github to pass. Adding the secrets to your fork of the project on github can allow you to test using github actions run under your github account.
 
 # Continuous Deployment
-
 
 ## Deployment and package publishing
 

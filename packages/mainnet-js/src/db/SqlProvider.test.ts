@@ -266,11 +266,10 @@ test("Should default to rejectUnauthorized when non-existent", async () => {
   expect(c.ssl.rejectUnauthorized).toBe(true);
 });
 
-
 test("Should not have ssl property when unconfigured", async () => {
   delete process.env.DATABASE_SSL_REJECT_UNAUTHORIZED;
   delete process.env.DATABASE_SSL_CA;
-  delete process.env.DATABASE_SSL_KEY; 
+  delete process.env.DATABASE_SSL_KEY;
   delete process.env.DATABASE_SSL_CERT;
   let provider = new SqlProvider(`regtest ${Math.random()}`);
   let c = provider.getConfig();
