@@ -16,3 +16,9 @@ export interface sslConfigI {
   key?: string;
   cert?: string;
 }
+
+export interface FaucetQueueItemI {
+  id: number;
+  address: string;
+  value: string;
+}

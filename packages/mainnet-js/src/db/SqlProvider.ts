@@ -1,5 +1,5 @@
 import StorageProvider from "./StorageProvider";
-import { sslConfigI, WalletI } from "./interface";
+import { sslConfigI, WalletI, FaucetQueueItemI } from "./interface";
 import { TxI } from "../interface";
 import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook";
 import { WebhookBch } from "../webhook/WebhookBch";
@@ -15,12 +15,12 @@ export default class SqlProvider implements StorageProvider {
   private info;
   private formatter;
   private walletTable: string;
-  private webhookTable: string;
+  private webhookTable: string = "webhook";
+  private faucetQueueTable: string = "faucet_queue";
   private isInit = false;
 
   public constructor(walletTable?: string) {
     this.walletTable = walletTable ? walletTable : "wallet";
-    this.webhookTable = "webhook";
     if (!process.env.DATABASE_URL) {
       throw new Error(
         "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
@@ -69,10 +69,20 @@ export default class SqlProvider implements StorageProvider {
           ");",
         this.webhookTable
       );
-      const resWebhook = await this.db.query(createWebhookTable);
+      // const resWebhook = await this.db.query(createWebhookTable);
 
-      if (!resWallet || !resWebhook)
-        throw new Error("Failed to init SqlProvider");
+      let createFaucetQueueTable = this.formatter(
+        "CREATE TABLE IF NOT EXISTS %I (" +
+          "id SERIAL PRIMARY KEY," +
+          "address TEXT," +
+          "value TEXT" +
+          ");",
+        this.faucetQueueTable
+      );
+      const resFaucetQueue = await this.db.query(createFaucetQueueTable);
+
+      // if (!resWallet || !resWebhook || !resFaucetQueue)
+      //   throw new Error("Failed to init SqlProvider");
     }
 
     return this;
@@ -96,7 +106,7 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async getWallets(): Promise<Array<WalletI>> {
-    let text = this.formatter("SELECT * FROM %I", this.walletTable);
+    let text = this.formatter("SELECT * FROM %I;", this.walletTable);
     let result = await this.db.query(text);
     if (result) {
       const WalletArray: WalletI[] = await Promise.all(
@@ -112,7 +122,7 @@ export default class SqlProvider implements StorageProvider {
 
   public async getWallet(name: string): Promise<WalletI | undefined> {
     let text = this.formatter(
-      "SELECT * FROM %I WHERE name = $1",
+      "SELECT * FROM %I WHERE name = $1;",
       this.walletTable
     );
     let result = await this.db.query(text, [name]);
@@ -188,7 +198,7 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async getWebhooks(): Promise<Array<Webhook>> {
-    let text = this.formatter("SELECT * FROM %I", this.webhookTable);
+    let text = this.formatter("SELECT * FROM %I;", this.webhookTable);
     let result = await this.db.query(text);
     if (result) {
       const WebhookArray: Webhook[] = await Promise.all(
@@ -249,5 +259,48 @@ export default class SqlProvider implements StorageProvider {
   public async clearWebhooks(): Promise<void> {
     let text = this.formatter("DELETE FROM %I;", this.webhookTable);
     await this.db.query(text);
+  }
+
+  public async addFaucetQueueItem(address: string, value: string): Promise<boolean> {
+    let text = this.formatter(
+      "INSERT into %I (address,value) VALUES ($1, $2);",
+      this.faucetQueueTable
+    );
+    return await this.db.query(text, [address, value]);
+  }
+
+  public async getFaucetQueue(): Promise<Array<FaucetQueueItemI>> {
+    let text = this.formatter("SELECT * FROM %I;", this.faucetQueueTable);
+    let result = await this.db.query(text);
+    if (result) {
+      const FaucetQueueItemArray: FaucetQueueItemI[] = await Promise.all(
+        result.rows.map(async (obj: FaucetQueueItemI) => {
+          return obj;
+        })
+      );
+      return FaucetQueueItemArray;
+    } else {
+      return [];
+    }
+  }
+
+  public async deleteFaucetQueueItems(items: Array<FaucetQueueItemI>): Promise<boolean> {
+    const ids = items.map(val => val.id);
+    let text = this.formatter("DELETE FROM %I WHERE id IN (%L);", this.faucetQueueTable, ids);
+    console.log(text);
+    let result = await this.db.query(text);
+    return result;
+  }
+
+  public async beginTransaction(): Promise<boolean> {
+    return await this.db.query("BEGIN");
+  }
+
+  public async commitTransaction(): Promise<boolean> {
+    return await this.db.query("COMMIT");
+  }
+
+  public async rollbackTransaction(): Promise<boolean> {
+    return await this.db.query("ROLLBACK");
   }
 }

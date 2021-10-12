@@ -3,12 +3,55 @@ const Service = require('./Service');
 var mainnet = require("mainnet-js");
 var smartbch = require("@mainnet-cash/smartbch");
 var config  = require('../config');
+const cluster = require('cluster');
+const { ethers } = require('ethers');
 
 const assertFaucetAvailable = () => {
   if ([config.FAUCET_CASHADDR, config.FAUCET_WIF, config.FAUCET_SLP_CASHADDR, config.FAUCET_SLP_WIF,
        config.FAUCET_SBCH_ADDRESS, config.FAUCET_SBCH_PRIVKEY, config.FAUCET_SBCH_TOKEN_ID].some(val => !val)) {
     throw new Error('Faucet service was not configured for this server');
   }
+}
+
+if (cluster.isMaster) {
+  console.log(111);
+  a = async () => {
+    const db = new mainnet.SqlProvider();
+
+    const wallet = await smartbch.RegTestSmartBchWallet.fromId(
+      process.env.SBCH_ALICE_ID
+    );
+    console.log(1);
+    const contract = new smartbch.Contract("0x15e01A2bcFAF4C03EE59Ae7448EF915498B606A0", [
+      "function send(address[] calldata _to, uint[] calldata _value) public"
+    ], mainnet.Network.REGTEST);
+    contract.setSigner(wallet);
+    await db.init();
+    wallet.provider.on("block", async (blockNumber) => {
+      await db.beginTransaction()
+      const faucetItems = await db.getFaucetQueue();
+      if (!faucetItems.length) {
+        return;
+      }
+
+      const addresses = faucetItems.map(val => val.address);
+      const hexValues = faucetItems.map(val => val.value);
+
+      console.log(faucetItems);
+
+      try {
+        console.log(await contract.send(addresses, hexValues, { gasPrice: ethers.BigNumber.from(10 ** 10), gasLimit: 1e7}));
+
+        await db.deleteFaucetQueueItems(faucetItems);
+        await db.commitTransaction();
+      } catch (e) {
+        console.log('error', e);
+        await db.deleteFaucetQueueItems(faucetItems);
+        await db.rollbackTransaction();
+      };
+    });
+  }
+  a();
 }
 
 /**
@@ -114,15 +157,25 @@ const getTestnetSbch = ({ getTestnetSbchRequest }) => new Promise(
       if (!smartbch.isValidAddress(getTestnetSbchRequest.address))
         throw new Error("Incorrect SmartBch address");
 
-      const receiverWallet = await smartbch.TestNetSmartBchWallet.watchOnly(getTestnetSbchRequest.address);
-      const receiverBalance = await receiverWallet.getBalance("bch");
-      const diff = 0.1 - receiverBalance;
+      const receiverWallet = await smartbch.RegTestSmartBchWallet.watchOnly(getTestnetSbchRequest.address);
+      const receiverBalance = await receiverWallet.getBalance("sat");
+      // const diff = 1e7 - receiverBalance;
+      const diff = 1e10 - receiverBalance;
+
       if (diff <= 0)
         throw new Error("You have 0.1 BCH or more. Refusing to refill.");
 
-      const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
-      const sendResponse = await wallet.send([{address: getTestnetSbchRequest.address, value: diff, unit: "BCH"}], {}, { gasPrice: 10 ** 10 });
-      resolve(Service.successResponse({ txId: sendResponse[0].txId }));
+      // const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+      // const sendResponse = await wallet.send([{address: getTestnetSbchRequest.address, value: diff, unit: "BCH"}], {}, { gasPrice: 10 ** 10 });
+      text = `${getTestnetSbchRequest.address};${ethers.BigNumber.from(diff).mul(ethers.BigNumber.from(1e10)).toHexString()}`
+
+      let db = new mainnet.SqlProvider();
+      await db.init();
+      await db.addFaucetQueueItem(getTestnetSbchRequest.address, ethers.BigNumber.from(diff).mul(ethers.BigNumber.from(1e10)).toHexString());
+      console.log("add", getTestnetSbchRequest.address);
+      db.close();
+
+      resolve(Service.successResponse({ txId: "0x0" }));
     } catch (e) {
       // console.trace(e);
       reject(Service.rejectResponse(
