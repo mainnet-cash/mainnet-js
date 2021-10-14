@@ -11,7 +11,7 @@ if [ ! -f regtest.init ]; then
   rm -rf /root/.smartbchd/*
 
   smartbchd init mynode --chain-id 0x2712 \
-      --init-balance=10000000000000000000 \
+      --init-balance=10000000000000000000000 \
       --test-keys=$(paste -d, -s test-keys.txt) \
       --home=/root/.smartbchd --overwrite
 

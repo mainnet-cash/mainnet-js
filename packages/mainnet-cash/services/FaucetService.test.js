@@ -107,39 +107,34 @@ describe("Test faucet endpoints", () => {
   });
 
   it("Should send testnet SmartBch to recepient", async () => {
-    // let resp = await request(app).post("/faucet/get_testnet_sbch/").send({
-    //   address: ""
-    // });
+    let resp = await request(app).post("/faucet/get_testnet_sbch/").send({
+      address: ""
+    });
 
-    // expect(resp.statusCode).toEqual(405);
-    // expect(resp.body.message).toBe("Incorrect SmartBch address");
+    expect(resp.statusCode).toEqual(405);
+    expect(resp.body.message).toBe("Incorrect SmartBch address");
 
-    // const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
-    const wallet = await smartbch.RegTestSmartBchWallet.fromId(process.env.SBCH_ALICE_ID);
-    const bobwallet = await smartbch.RegTestSmartBchWallet.newRandom();
-    const charliewallet = await smartbch.RegTestSmartBchWallet.newRandom();
-    await Promise.all([request(app).post("/faucet/get_testnet_sbch/").send({
-      address: bobwallet.getDepositAddress()
-    }),
-    request(app).post("/faucet/get_testnet_sbch/").send({
-      address: charliewallet.getDepositAddress()
-    }),
-    request(app).post("/faucet/get_testnet_sbch/").send({
-      address: charliewallet.getDepositAddress()
-    })
-  ]);
+    const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
+    const bobwallet = await smartbch.TestNetSmartBchWallet.newRandom();
+    const charliewallet = await smartbch.TestNetSmartBchWallet.newRandom();
+    resp = await Promise.all([
+      request(app).post("/faucet/get_testnet_sbch/").send({
+        address: bobwallet.getDepositAddress()
+      }),
+      request(app).post("/faucet/get_testnet_sbch/").send({
+        address: charliewallet.getDepositAddress()
+      }),
+      request(app).post("/faucet/get_testnet_sbch/").send({
+        address: charliewallet.getDepositAddress()
+      })
+    ]);
+    expect(resp[0].body.success).toBe(true);
+    expect(resp[1].body.success).toBe(true);
+    expect(resp[2].body.success).toBe(true);
 
-    await mainnet.delay(25000);
-    console.log(await bobwallet.provider.getBalance(bobwallet.getDepositAddress()));
-    console.log(await bobwallet.provider.getBalance(charliewallet.getDepositAddress()));
-    return;
-
-    if (resp.statusCode !== 200) console.log(resp.body);
-    expect(resp.statusCode).toEqual(200);
-    expect(resp.body.txId.length).toBe(66);
-
-    const balance = await bobwallet.getBalance("bch");
-    expect(balance).toBe(0.1);
+    await mainnet.delay(20000);
+    expect(await bobwallet.getBalance("bch")).toBe(0.1);
+    expect(await charliewallet.getBalance("bch")).toBe(0.1);
 
     resp = await request(app).post("/faucet/get_testnet_sbch/").send({
       address: bobwallet.getDepositAddress()
@@ -149,6 +144,7 @@ describe("Test faucet endpoints", () => {
     expect(resp.body.message).toBe("You have 0.1 BCH or more. Refusing to refill.");
 
     await bobwallet.sendMax(wallet.getDepositAddress(), {}, { gasPrice: 10 ** 10 });
+    await charliewallet.sendMax(wallet.getDepositAddress(), {}, { gasPrice: 10 ** 10 });
   });
 
   it("Should send testnet SmartBch SEP20 tokens to recepient", async () => {
@@ -171,7 +167,9 @@ describe("Test faucet endpoints", () => {
 
     if (resp.statusCode !== 200) console.log(resp.body);
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.txId.length).toBe(66);
+    expect(resp.body.success).toBe(true);
+
+    await mainnet.delay(20000);
 
     const balance = await bobwallet.sep20.getBalance(tokenId);
     expect(balance.value.toNumber()).toBe(10);
@@ -199,5 +197,7 @@ describe("Test faucet endpoints", () => {
     expect(resp.body.bchtest).toBe(config.FAUCET_CASHADDR);
     expect(resp.body.slptest).toBe(config.FAUCET_SLP_CASHADDR);
     expect(resp.body.sbchtest).toBe(config.FAUCET_SBCH_ADDRESS);
+    expect(resp.body.sbchcontract).toBe(config.FAUCET_SBCH_CONTRACT_ADDRESS);
+    expect(resp.body.sbchtoken).toBe(config.FAUCET_SBCH_TOKEN_ID);
   });
 });

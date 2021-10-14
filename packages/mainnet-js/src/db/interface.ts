@@ -20,5 +20,6 @@ export interface sslConfigI {
 export interface FaucetQueueItemI {
   id: number;
   address: string;
+  token: string;
   value: string;
 }

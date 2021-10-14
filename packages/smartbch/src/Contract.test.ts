@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { SmartBchWallet } from ".";
 import { Contract } from "./Contract";
 import { Sep20 } from "./Sep20";
 import { RegTestSmartBchWallet } from "./SmartBchWallet";

@@ -75,6 +75,7 @@ export default class SqlProvider implements StorageProvider {
         "CREATE TABLE IF NOT EXISTS %I (" +
           "id SERIAL PRIMARY KEY," +
           "address TEXT," +
+          "token TEXT," +
           "value TEXT" +
           ");",
         this.faucetQueueTable
@@ -261,12 +262,12 @@ export default class SqlProvider implements StorageProvider {
     await this.db.query(text);
   }
 
-  public async addFaucetQueueItem(address: string, value: string): Promise<boolean> {
+  public async addFaucetQueueItem(address: string, tokenId: string, value: string): Promise<boolean> {
     let text = this.formatter(
-      "INSERT into %I (address,value) VALUES ($1, $2);",
+      "INSERT into %I (address,token,value) VALUES ($1, $2, $3);",
       this.faucetQueueTable
     );
-    return await this.db.query(text, [address, value]);
+    return await this.db.query(text, [address, tokenId, value]);
   }
 
   public async getFaucetQueue(): Promise<Array<FaucetQueueItemI>> {
@@ -287,7 +288,6 @@ export default class SqlProvider implements StorageProvider {
   public async deleteFaucetQueueItems(items: Array<FaucetQueueItemI>): Promise<boolean> {
     const ids = items.map(val => val.id);
     let text = this.formatter("DELETE FROM %I WHERE id IN (%L);", this.faucetQueueTable, ids);
-    console.log(text);
     let result = await this.db.query(text);
     return result;
   }

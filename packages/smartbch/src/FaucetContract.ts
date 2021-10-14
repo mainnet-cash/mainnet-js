@@ -14,7 +14,9 @@ export class FaucetContract extends Contract {
   }
 
   static abi = [
-    "function send(address[] calldata _to, uint[] calldata _value) public"
+    "function destroy() public",
+    "function send(address[] calldata _tokenAddress, address[] calldata _to, uint256[] calldata _value) public",
+    "event Send(address _tokenAddress, address _to, uint256 _value)",
   ];
 
   static script = `
@@ -24,47 +26,45 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract faucet {
-  using SafeMath for uint;
+  using SafeMath for uint256;
 
   address public owner;
 
+  event Send(address _tokenAddress, address _to, uint256 _value);
+
   constructor() payable {
     owner = msg.sender;
+  }
+
+  receive() external payable {}
+
+  function destroy() public {
+    require(msg.sender == owner, "Only contract owner can call destroy()");
+    selfdestruct(payable(owner));
   }
 
   function balance() public view returns (uint256) {
     return address(this).balance;
   }
 
-  function send(address[] calldata _to, uint[] calldata _value) public
+  function send(address[] calldata _tokenAddress, address[] calldata _to, uint256[] calldata _value) public
   {
-    require(msg.sender == this.owner());
-    uint sendAmount = _value[0];
-    uint remainingValue = address(this).balance;
-
-    require(remainingValue >= sendAmount);
+    require(msg.sender == owner, "Only contract owner can interact with it");
 
     require(_to.length == _value.length);
+    require(_to.length == _tokenAddress.length);
     require(_to.length <= 255);
 
     for (uint8 i = 0; i < _to.length; i++) {
-      remainingValue = remainingValue.sub(_value[i]);
-      require(payable(_to[i]).send(_value[i]));
+      if (_tokenAddress[i] == address(0)) {
+        require(payable(_to[i]).send(_value[i]));
+      } else {
+        ERC20 token = ERC20(_tokenAddress[i]);
+        token.transfer(_to[i], _value[i]);
+      }
+      emit Send(_tokenAddress[i], _to[i], _value[i]);
     }
   }
-
-  // function sendToken(address[] calldata _tokenAddress, address[] _to, uint[] _value) public {
-  //   require(_to.length == _value.length);
-  //   require(_to.length == _tokenAddress.length);
-  //   require(_to.length <= 255);
-
-  //   uint256 sendAmount = _value[0];
-  //   ERC20 token = ERC20(_tokenAddress);
-
-  //   for (uint8 i = 0; i < _to.length; i++) {
-  //       token.transferFrom(msg.sender, _to[i], _value[i]);
-  //   }
-  // }
 }
 `;
 }

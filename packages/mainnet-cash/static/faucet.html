@@ -3,6 +3,7 @@
     <meta charset="utf-8">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script src="/scripts/mainnet.js"></script>
+    <script src="/scripts/@mainnet-cash/smartbch.js"></script>
     <script src="https://unpkg.com/buefy/dist/components/input"></script>
     <script src="https://unpkg.com/buefy/dist/components/button"></script>
     <script src="https://unpkg.com/buefy/dist/components/field"></script>
@@ -30,6 +31,8 @@
       faucetCashaddr: "",
       faucetSlpCashaddr: "",
       faucetSbchAddress: "",
+      faucetSbchContractAddress: "",
+      faucetSbchTokenId: "",
     },
 
     template: `
@@ -101,7 +104,7 @@
           if (json.code >= 400) {
             throw new Error(json.message);
           }
-          alert("Successfully got coins, txid "+(json.txId))
+          alert("Successfully got coins, txid "+(json.txId));
         }).catch(error => alert(error));
       },
       async getBch() {
@@ -121,36 +124,40 @@
         await this.update();
       },
 
-      async update() {
+      async update(first = false) {
         try {
-          new Promise(async () => {
-            try {
-              const wallet = await Web3TestNetSmartBchWallet.init();
-              this.address = wallet.getDepositAddress();
-            } catch (error) {
-              if (error.message.indexOf("Metamask or another Web3 browser") === 0) {
-                if (window.confirm("Metamask or another Web3 browser extension is not installed. Click OK to download Metamask.")) {
-                  window.location.assign("http://metamask.io");
-                  return;
+          if (first) {
+            new Promise(async () => {
+              try {
+                const wallet = await Web3TestNetSmartBchWallet.init();
+                this.address = wallet.getDepositAddress();
+              } catch (error) {
+                if (error.message.indexOf("Metamask or another Web3 browser") === 0) {
+                  if (window.confirm("Metamask or another Web3 browser extension is not installed. Click OK to download Metamask.")) {
+                    window.location.assign("http://metamask.io");
+                    return;
+                  }
                 }
               }
+            });
+
+            const fetchopt = {
+              method: "POST",
+              headers: { "Content-type": "application/json; charset=UTF-8" }
+            };
+
+            const result = await fetch("/faucet/get_addresses", fetchopt);
+            const json = await result.json();
+            if (json.code >= 400) {
+              throw new Error(json.message);
             }
-          });
 
-          const fetchopt = {
-            method: "POST",
-            headers: { "Content-type": "application/json; charset=UTF-8" }
-          };
-
-          const result = await fetch("/faucet/get_addresses", fetchopt);
-          const json = await result.json();
-          if (json.code >= 400) {
-            throw new Error(json.message);
+            this.faucetCashaddr = json.bchtest;
+            this.faucetSlpCashaddr = json.slptest;
+            this.faucetSbchAddress = json.sbchtest;
+            this.faucetSbchContractAddress = json.sbchcontract;
+            this.faucetSbchTokenId = json.sbchtoken;
           }
-
-          this.faucetCashaddr = json.bchtest;
-          this.faucetSlpCashaddr = json.slptest;
-          this.faucetSbchAddress = json.sbchtest;
 
           await Promise.all([
             new Promise(async () => {
@@ -162,9 +169,9 @@
               this.slpBalances = await slpWallet.slp.getAllBalances();
             }),
             new Promise(async () => {
-              const sbchWallet = await TestNetSmartBchWallet.watchOnly(this.faucetSbchAddress);
+              const sbchWallet = await TestNetSmartBchWallet.watchOnly(this.faucetSbchContractAddress);
               this.sbchBalance = await sbchWallet.getBalance("bch");
-              this.sep20Balances = [await sbchWallet.sep20.getBalance("0x406bA6982E442674A057a1DbCB185677eF224392")];
+              this.sep20Balances = [await sbchWallet.sep20.getBalance(this.faucetSbchTokenId)];
             }),
           ]);
         } catch (error) {
@@ -174,7 +181,12 @@
     },
 
     mounted: async function () {
-      await this.update();
-    }});
+      (await TestNetSmartBchWallet.newRandom()).provider.on('block', async (blockNumber) => {
+        console.log(blockNumber);
+        await this.update();
+      });
+      this.update(true);
+    }
+  });
   </script>
 </html>
