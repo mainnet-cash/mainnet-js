@@ -69,7 +69,7 @@ export default class SqlProvider implements StorageProvider {
           ");",
         this.webhookTable
       );
-      // const resWebhook = await this.db.query(createWebhookTable);
+      const resWebhook = await this.db.query(createWebhookTable);
 
       let createFaucetQueueTable = this.formatter(
         "CREATE TABLE IF NOT EXISTS %I (" +
@@ -82,8 +82,8 @@ export default class SqlProvider implements StorageProvider {
       );
       const resFaucetQueue = await this.db.query(createFaucetQueueTable);
 
-      // if (!resWallet || !resWebhook || !resFaucetQueue)
-      //   throw new Error("Failed to init SqlProvider");
+      if (!resWallet || !resWebhook || !resFaucetQueue)
+        throw new Error("Failed to init SqlProvider");
     }
 
     return this;
