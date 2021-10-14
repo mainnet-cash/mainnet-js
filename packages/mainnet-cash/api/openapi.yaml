@@ -385,7 +385,8 @@ paths:
           content: {}
           description: Invalid input
       summary: |
-        Get testnet SmartBCH bch
+        Request testnet SmartBCH funds. The request is enqueued and served within 1-3 block confirmations.
+        If the target address holds more that 0.1 BCH, the request will fail. Otherwise the address will be topped up to 0.1 BCH.
       tags:
       - faucet
       x-eov-operation-handler: controllers/FaucetController
@@ -411,7 +412,8 @@ paths:
           content: {}
           description: Invalid input
       summary: |
-        Get testnet SmartBch SEP20 tokens
+        Request testnet SmartBch SEP20 tokens. The request is enqueued and served within 1-3 block confirmations.
+        If the target address holds more that 10 tokens of requested kind, the request will fail. Otherwise the address will be topped up to 10 tokens.
       tags:
       - faucet
       x-eov-operation-handler: controllers/FaucetController
@@ -3516,11 +3518,11 @@ components:
           type: string
     GetTestnetSbchResponse:
       example:
-        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+        success: true
       properties:
-        txId:
-          description: Transaction id
-          type: string
+        success:
+          description: Enqueue request result
+          type: boolean
     GetTestnetSep20Request:
       example:
         address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
@@ -3537,16 +3539,18 @@ components:
       - tokenId
     GetTestnetSep20Response:
       example:
-        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+        success: true
       properties:
-        txId:
-          description: Transaction id
-          type: string
+        success:
+          description: Enqueue request result
+          type: boolean
     GetAddressesResponse:
       example:
         bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
         slptest: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        sbchtest: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+        sbchtest: 0xA01a60F9c0ac519c1288191CC363b0B5Fd6e7e09
+        sbchcontract: 0x4Fcb637828E5F79F254b86E97Fcf72361549e28f
+        sbchtoken: 0xAAb45D7f352005c19E93F13dfA346ddAe5b97f65
       properties:
         bchtest:
           description: Cashaddr to return testnet BCH
@@ -3555,7 +3559,13 @@ components:
           description: Slpaddr to return testnet SLP tokens
           type: string
         sbchtest:
-          description: SmartBch testnet address to return BCH and SEP20 tokens
+          description: SmartBch testnet faucet contract owner address
+          type: string
+        sbchcontract:
+          description: SmartBch testnet contract address to return BCH and SEP20 tokens
+          type: string
+        sbchtoken:
+          description: SmartBch testnet sample SEP20 token address
           type: string
     SmartBchDepositAddressResponse:
       example:
