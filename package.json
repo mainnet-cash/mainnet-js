@@ -42,7 +42,7 @@
     "demo:test": "yarn workspace @mainnet-cash/demo run test:unit",
     "demo:serve": "yarn workspace @mainnet-cash/demo run serve",
     "docs": "npx typedoc",
-    "test": "node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --config jest.config.js  --logHeapUsage",
+    "test": "node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --config jest.config.js  --logHeapUsage  --forceExit",
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
     "test:rest": "yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",

@@ -132,7 +132,7 @@ describe("Test faucet endpoints", () => {
     expect(resp[1].body.success).toBe(true);
     expect(resp[2].body.success).toBe(true);
 
-    await mainnet.delay(20000);
+    await mainnet.delay(30000);
     expect(await bobwallet.getBalance("bch")).toBe(0.1);
     expect(await charliewallet.getBalance("bch")).toBe(0.1);
 
