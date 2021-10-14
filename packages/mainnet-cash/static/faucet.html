@@ -76,6 +76,7 @@
                 <a>[{{ token.ticker }}]</a>
               </b-tooltip>
               {{ token.name }}
+              <img @click="addToMetamask(token.tokenId)" style="width: 1.5rem; height: 1.5rem; cursor: pointer" src="https://www.marketcap.cash/metamask.svg"></img>
             </li>
           </div>
         </div>
@@ -87,7 +88,7 @@
         <p>&nbsp;</p>
         <p>Remember to return the tBCH back to the faucet or donate your own tBCH to <strong>{{ faucetCashaddr }}</strong> </p>
         <p>Donate your SLP tokens to <strong>{{ faucetSlpCashaddr }}</strong> </p>
-        <p>Donate your SmartBch tBCH and SEP20 tokens to <strong>{{ faucetSbchAddress }}</strong> </p>
+        <p>Donate your SmartBch tBCH and SEP20 tokens to <strong>{{ faucetSbchContractAddress }}</strong> </p>
       </section>
     </div>`,
 
@@ -122,6 +123,29 @@
       async getSep20Tokens(tokenId) {
         await this.fetch("/faucet/get_testnet_sep20", {address: this.address, tokenId: tokenId});
         await this.update();
+      },
+
+      async addToMetamask(tokenId) {
+        console.log(tokenId);
+        const wallet = await TestNetSmartBchWallet.newRandom();
+        const info = await wallet.sep20.getTokenInfo(tokenId);
+
+        ethereum
+          .request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: tokenId,
+                symbol: info.ticker,
+                decimals: info.decimals,
+              },
+            },
+          })
+          .then((success) => {
+            if (!success)
+              alert('Something went wrong.');
+          });
       },
 
       async update(first = false) {
