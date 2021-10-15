@@ -31,7 +31,7 @@ if (cluster.isMaster) {
       if (pending) {
         return;
       }
-      await db.beginTransaction()
+      // await db.beginTransaction();
       let faucetItems = await db.getFaucetQueue();
 
       if (!faucetItems.length) {
@@ -60,10 +60,10 @@ if (cluster.isMaster) {
           .catch(() => { pending = false; });
 
         await db.deleteFaucetQueueItems(itemsToDelete);
-        await db.commitTransaction();
+        // await db.commitTransaction();
       } catch (e) {
         // console.log('error', e);
-        await db.rollbackTransaction();
+        // await db.rollbackTransaction();
         pending = false;
       };
     });
