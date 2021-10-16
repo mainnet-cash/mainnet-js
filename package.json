@@ -110,6 +110,5 @@
   ],
   "author": "readcash",
   "dependencies": {
-    "electrum-cash":"../library/"
   }
 }
