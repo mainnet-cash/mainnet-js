@@ -264,8 +264,10 @@ dotenv@^10.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
-"electrum-cash@file:../../../library":
+electrum-cash@^2.0.8:
   version "2.0.8"
+  resolved "https://registry.yarnpkg.com/electrum-cash/-/electrum-cash-2.0.8.tgz#3e42d0f830c81633e0a25265a671676ed324bf7d"
+  integrity sha512-rUBzeDVJ2LA9DzUEzBSuZsu01w1WHCNIbbMq7713uaEXwvhemuMWAZMMc79+JPXW/+UjOLn+Pu/24POTZGXsoA==
   dependencies:
     "@types/ws" "^7.4.6"
     async-mutex "^0.3.1"
