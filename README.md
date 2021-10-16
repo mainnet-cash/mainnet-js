@@ -1,206 +1,91 @@
-# mainnet.js
+# mainnet-js
 
 A high-level developer friendly interface to interact with Bitcoin Cash (BCH) network (prototype stage)
 
-# Unstable
+# Contents
 
-This code is in a prototype stage, so there is no backwards-compatibility guarantee
+- [mainnet-js](#mainnet-js)
+- [Contents](#contents)
+- [Before you begin](#before-you-begin)
+  - [Unstable](#unstable)
+  - [What is exactly is this?](#what-is-exactly-is-this)
+  - [How can I use it?](#how-can-i-use-it)
+  - [Where can't mainnet-js be used? (for now)](#where-cant-mainnet-js-be-used-for-now)
+  - [Finaly, Check Your Node Version First](#finaly-check-your-node-version-first)
+- [Installation](#installation)
+  - [As a REST service](#as-a-rest-service)
+  - [For webapps & nodejs](#for-webapps--nodejs)
+  - [REST clients for other languages](#rest-clients-for-other-languages)
+- [Overview of packages](#overview-of-packages)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Demo app [WIP]](#demo-app-wip)
 
 # Before you begin
 
-## Node Version
+## Unstable
 
-`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started.
+| :warning: WARNING                                                                    |
+| :----------------------------------------------------------------------------------- |
+| This code is in a prototype stage, so there is no backwards-compatibility guarantee. |
 
-Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
+## What is exactly is this?
 
-## What is this project? and how do I use it?
-
-Mainnet-js strives to provide an easy to use API to develop BCH applications on the web.
+Mainnet-js provides a developer friendly API to develop BCH applications on the web.
 
 It is an OpenAPI 3 specification (swagger), implemented as a library in typescript. That library is then used in a generated express server to provide a REST service. And that service can be deployed in a production stack via docker.
 
-Clients can also be generated for most common languages, so you don't have to use javascript whatsoever to use mainnet-js.
+## How can I use it?
+
+The rest service can be called as a REST api from any language that can POST and receive json. Additionally, client libraries can be generated automatically if preferred in [most common languages](https://openapi-generator.tech/docs/generators/). You don't need to write javascript or typescript to use mainnet.
 
 However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
 
-The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides crypto related functions using wasm binaries.
+So it can be used in the browser, nodejs, electrum apps, WebWorkers and the like.
 
-For the above reason, mainnet-js is not well suited for use as a library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, but may in the future.
+## Where can't mainnet-js be used? (for now)
+
+The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides fast battle-tested crypto related functions using wasm binaries in WebAssembly.
+
+For the above reason, mainnet-js is not well suited for use as a javascript library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, at the time of writing (It may be possible with WebView, but with tradeoffs). Nor is it suitable for KaiOS devices below v3, for the same reason.
+
+## Finaly, Check Your Node Version First
+
+`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started. Check the nodejs version first.
+
+Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
 
 # Installation
 
-    git clone https://github.com/mainnet-cash/mainnet-js.git
-    yarn
+## As a REST service
 
-# Mono-Repository Structure
+To run the rest service under docker (recommended) use:
 
-This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
+    docker pull mainnet/mainnet-rest
+    docker run -d --env WORKERS=5 -p 127.0.0.1:3000:80 mainnet/mainnet-rest
 
-| Project                | Description           |
-| ---------------------- | --------------------- |
-| mainnet-js             | Core TS Library       |
-| mainnet-cash           | REST Express Server   |
-| @mainnet-cash/smartbch | SmartBch Library      |
-| @mainnet-cash/contract | CashScript Library    |
-| @mainnet-cash/demo     | Demo Vue Webapp       |
-| @mainnet-cash/root     | Top-level Placeholder |
+See the [full documentation](https://mainnet.cash/tutorial/running-rest.html) for more installation and configuration details.
 
-# Demo
+## For webapps & nodejs
 
-With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
-so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
+To install mainnet as a dependency of your webapp use:
 
-**However**, the following commands must be used from the root project directory.
+    yarn add mainnet-js
 
-## Project setup
+To include contracts and smartBCH functionality, use the following packages:
 
-```
-yarn
-```
+    yarn add @mainnet-cash/contract
+    yarn add @mainnet-cash/smartbch
 
-### Compiles and hot-reloads for development
+See the [full documentation](https://mainnet.cash/tutorial/shipping-mainnet.html) for notes and examples for bundling mainnet-js in your project.
 
-```
-yarn demo:serve
-```
+## REST clients for other languages
 
-### Compiles and minifies for production
+It may be possible to use a generated client in your preferred programming language to interact with your REST service.
 
-```
-yarn demo:build
-```
+Client libraries are pre-built and available in [python](https://github.com/mainnet-cash/mainnet-python-generated), [php](https://github.com/mainnet-cash/mainnet-php-generated) and [golang](https://github.com/mainnet-cash/mainnet-go-generated).
 
-### Run Tests
-
-```
-yarn demo:test
-```
-
-# Running library tests
-
-    yarn test
-
-The testing harness should automatically start a docker image with
-a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
-the library, as well as the rest API server.
-
-# Running browser tests
-
-    yarn test:browser
-
-Tests in the browser require for the library to be bundled for the browser. With:
-
-    yarn build
-
-The bundle is built with webpack and does **not** use browserify, rather it simply
-omits nodejs libraries. Browser tests are run against testnet, using secrets stored
-in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
-and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
-getting more testnet coins is an annoyance.
-
-# Development Workflow
-
-## Overview
-
-To implement even the simplest function, is a multi step process. It's fastest to follow these steps in order:
-
-1. Write the finished REST specification
-2. Implement the function in Typescript as closely to the pattern of the spec as possible
-3. **Fully test** the typescript functions
-4. Rebuild the REST server from spec
-5. Add required endpoint services, adding new files to .openapi-generator-ignore as necessary.
-6. **Fully test** the rest endpoints
-7. Finally, it must work in the browser so, **fully test** an integrated workflow with a `*.test.headless.js` file.
-
-## Specification
-
-This is a specification driven project. The rest interface is defined using OpenAPI 3
-in a folder called [swagger](swagger/v1/api.yml).
-
-Changes may be validated using openapi-generator locally using:
-
-    yarn api:validate
-
-If you need better validation, you may also try [a swagger web editor](https://editor.swagger.io/)
-
-## Typescript library
-
-All code for the javascript library should be contained in src/.
-
-The javascript library is meant to mimic the REST API defined by the specification to the extent possible.
-
-So the endpoint defined at `wallet/send` should match the behavior of `mywallet.send(...)` .
-
-Prior to implementing a REST service, it is fastest to **thoroughly test** and debug issues in typescript.
-
-# Running library tests
-
-To test the library, use:
-
-    yarn test
-
-The testing harness should automatically start a docker image with
-a Bitcoin Cash Node and Fulcrum in regtest mode. The test covers
-the library, as well as the rest API server.
-
-## Speeding up testing
-
-The test harness takes some time to start and mine coins. For this reason, it might be helpful to start it once and leave it running.
-
-This can be done with:
-
-```
-yarn regtest:up
-// &
-yarn regtest:down
-```
-
-With regtest running, you may then run one-off tests like so:
-
-```
-SKIP_REGTEST_INIT=1 npx jest packages/mainnet-js/src/rate/ExchangeRate.test.t
-```
-
-or `yarn test:skip` run the suite of library tests.
-
-## REST Testing
-
-Tests for the express server may be run with:
-
-    yarn test:rest
-
-The `mainnet-js` package is sym-linked to the REST expressServer automatically by yarn workspaces. Updating `mainnet-js` with code changes is handled automatically by the `test:rest` command. If regtest is already running `yarn test:rest:skip`.
-
-If the mainnet-js library function being tested is not implemented correctly, no amount of debugging the service endpoint will cause it to work.
-
-If there are any failing tests in REST assure that similar coverage exists in `mainnet-js` src prior to debugging.
-
-## Browser Testing
-
-Browsers do not have access to many standard node libraries by design. For this reason, some libraries either don't work in the browser or don't work in nodejs.
-
-All browser tests are denoted by `*.test.headless.js`.
-
-Tests in the browser require for the library to be bundled for the browser. With:
-
-    yarn
-
-The bundle is built with webpack and does **not** use browserify, rather it simply
-omits nodejs libraries. Browser tests are run against testnet, using secrets stored
-in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
-and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
-getting more testnet coins is an annoyance.
-
-Integration tests for the browser can be run so:
-
-    yarn test:browser
-
-Unit testing is not as critical for the browser, but may be helpful in places, to narrow the scope of potential issues.
-
-## Developing API clients
-
-To generate clients in a particular language, use:
+If you have docker installed, you can generate clients in a particular language from the project folder using:
 
     yarn api:build:client <generator_name>
 
@@ -208,109 +93,60 @@ For a list of generators see:
 
 https://openapi-generator.tech/docs/generators/
 
-If you need additionalProperties passed to the client generator, these may be added in
-he [wrapper script](swagger/generate.js)
+If you need additionalProperties passed to the client generator, these may be added in the [wrapper script](swagger/generate.js)
 
-# Configuration Variables
+# Overview of packages
 
-## Express
+This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
 
-    PORT=3000  # The port express will run on
-    URL_PATH   # The url express is serving from
+| Project                | Description           |
+| ---------------------- | --------------------- |
+| mainnet-js             | Base Library          |
+| mainnet-cash           | REST Express Server   |
+| @mainnet-cash/smartbch | SmartBch Library      |
+| @mainnet-cash/contract | CashScript Library    |
+| @mainnet-cash/demo     | Demo Vue Webapp       |
+| @mainnet-cash/root     | Top-level Placeholder |
 
-    WORKERS=10 # How many threads to run express on
-    TIMEOUT=60 # sets the default timeout for requests
+# Documentation
 
-### Database
+Tutorials are available for both REST and javascript at [mainnet.cash](https://mainnet.cash)
 
-Postgres configuration is passed url encoded
+Additionally, a live version of the current REST api is available for viewing at [rest-unstable.mainnet.cash](https://rest-unstable.mainnet.cash)
 
-    DATABASE_URL='postgres://postgres:trusted@localhost:15432/wallet'
+# Contributing
 
-By default, the API service assumes it is connected to a secured private postgres database. If you intend to expose the api to the general public this setting **MUST** be changed to **'false'**, default is true.
+Please see the [contributing guide](./CONTRIBUTING.md) for more detailed information.
 
-    ALLOW_MAINNET_USER_WALLETS=true
+# Demo app [WIP]
 
-For advanced ssl authorization configuration see the [official documentation](https://mainnet.cash/tutorial/running-rest.html#configuration)
+A simple demo is available to demonstrate and test first-class high-level functions and to run unit testing of functions when called in a webapp.
 
-## Wallet Behavior
+With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
+so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
 
-**In nodejs only**, Controls the number responses from electrum-cash nodes that must be in agreement for a network response to return
+**However**, the following commands must be used from the root project directory.
 
-    CLUSTER_CONFIDENCE=1
+Running yarn in the root folder will build local dependencies of the demo.
 
-## Mining
+```
+yarn
+```
 
-If you would like to mine some regtest coins, the following environment variables are used:
+Compiles and hot-reloads for development
 
-    RPC_USER="alice"
-    RPC_PASS="password"
-    RPC_PORT=18443
-    RPC_HOST=bitcoind
+```
+yarn demo:serve
+```
 
-The above variables should be configured already in `.env.regtest` for integration tests against docker services
+Compiles and minifies for production
 
-## Regtest Wallet
+```
+yarn demo:build
+```
 
-Below are the public and private keys for a regtest wallet
+Run Unit Tests
 
-    ADDRESS="bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
-    ADDRESS_LEGACY="18uVyRcvE7RdR9WFLyD1kMPjehKxyE91in"
-    PRIVATE_WIF="cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-    PRIVATE_SEED="pink wash guitar agree screen suspect soon misery dog menu issue recipe"
-
-## Testnet Wallet
-
-For now, testnet integration tests use static wallets:
-
-    ALICE_TESTNET_ADDRESS   # A testnet address    ALICE_TESTNET_WALLET_ID # A wallet in mainnet serialized format
-    BOB_TESTNET_ADDRESS     # A wallet for the Bob
-    BOB_TESTNET_WALLET_ID   # His serialized walletId
-
-These will be removed at a later date when an API is configured.
-
-# Deployment and package publishing
-
-The workflow is simple, bump the version, commit, push to github and create a release with a tag name equal to the version to which the project got bumped.
-
-The github actions will then take care about everything else.
-
-See details below.
-
-## Versioning
-
-The version format follows the `semver` - semantic versioning.
-
-Use the `bump_version` utility to increment the project version. It will as well be propagated to swagger API version.
-
-See https://github.com/npm/node-semver
-
-### Incrementing version
-
-Execute `node bump_version.js` to simply increase the project's patch version.
-
-### Incrementing other versions
-
-Use `node bump_version.js major`, `node bump_version.js minor`, `node bump_version.js patch` to increase x, y and z in the x.y.z version format, respectively.
-
-Use `node bump_version.js prerelease rc`, `node bump_version.js prerelease alpha`, `node bump_version.js prerelease beta` to increase the prerelease version with rc, alpha or beta designations.
-
-`node bump_version.js prerelease rc` will produce version `x.y.z-rc.0`. With `0` incrementing further to `1`, etc.
-
-### Enforcing certain version
-
-Execute `node bump_version.js x.y.z` to set the project and swagger version to `x.y.z`
-
-## Publishing
-
-Upon creation of a new release on the github, the github publishing actions will be triggered.
-
-Among these are:
-
-- docker image with API REST server for self hosting `mainnet/mainnet-rest`, requires `DOCKERHUB_PASSWORD` secret
-- rest server https://rest-unstable.mainnet.cash, requires `COMMIT_USER_TOKEN` secret, which is the github access token
-- npm package `mainnet-js`, requires `NPM_TOKEN` secret
-- python pypi package `mainnet` with autogenerated client, requires `PYPI_TOKEN` secret
-- php composer package `mainnet/mainnet` with autogenerated client, requires `PACKAGIST_TOKEN` secret
-
-Trying to republish/rerelease the same version will fail miserably
+```
+yarn demo:test
+```
