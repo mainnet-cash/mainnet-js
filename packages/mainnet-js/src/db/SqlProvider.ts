@@ -25,7 +25,7 @@ export default class SqlProvider implements StorageProvider {
         "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
       );
     }
-    const parseDbUrl = eval("require")("parse-database-url")
+    const parseDbUrl = eval("require")("parse-database-url");
     let dbConfig = parseDbUrl(process.env.DATABASE_URL);
     let ssl = getSslConfig();
     if (ssl) {

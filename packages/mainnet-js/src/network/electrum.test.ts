@@ -8,7 +8,7 @@ test("Should get a transaction with bare electrum", async () => {
     "1.4.1",
     "bch.imaginary.cash",
     50004,
-    'wss'
+    "wss"
   );
   await electrum.connect();
   const transactionID =

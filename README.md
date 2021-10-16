@@ -29,7 +29,7 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 | :----------------------------------------------------------------------------------- |
 | This code is in a prototype stage, so there is no backwards-compatibility guarantee. |
 
-## What is exactly is this? 
+## What is exactly is this?
 
 Mainnet-js provides a developer friendly API to develop BCH applications on the web.
 
@@ -41,7 +41,7 @@ The rest service can be called as a REST api from any language that can POST and
 
 However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
 
-So it can be used in the browser, nodejs, electrum apps, WebWorkers and the like. 
+So it can be used in the browser, nodejs, electrum apps, WebWorkers and the like.
 
 ## Where can't mainnet-js be used? (for now)
 
@@ -66,8 +66,7 @@ To run the rest service under docker (recommended) use:
 
 See the [full documentation](https://mainnet.cash/tutorial/running-rest.html) for more installation and configuration details.
 
-
-  ## For webapps & nodejs
+## For webapps & nodejs
 
 To install mainnet as a dependency of your webapp use:
 
@@ -96,8 +95,6 @@ https://openapi-generator.tech/docs/generators/
 
 If you need additionalProperties passed to the client generator, these may be added in the [wrapper script](swagger/generate.js)
 
-
-
 # Overview of packages
 
 This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
@@ -119,7 +116,7 @@ Additionally, a live version of the current REST api is available for viewing at
 
 # Contributing
 
-Please see the [contributing guide](./CONTRIBUTING.md) for more detailed information. 
+Please see the [contributing guide](./CONTRIBUTING.md) for more detailed information.
 
 # Demo app [WIP]
 

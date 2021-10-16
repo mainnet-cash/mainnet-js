@@ -115,7 +115,6 @@ This should generate stubs for any services and controllers needed, as well as c
 
 Implementing the rest service should be as easy as finding the generated stub and calling the function written in step 2, but it is sometimes more complex than that.
 
-
 ## 6. REST Testing
 
 Tests for the express server may be run with:
@@ -128,7 +127,7 @@ The `mainnet-js` package is sym-linked to the REST expressServer automatically b
 
 If there are any failing tests in REST assure that similar coverage exists in `mainnet-js` src prior to debugging. Go back to step 3, or 2 if necessary.
 
-When the REST service is successfully implemented and tested, it's a good idea to commit all code and regenerate the server to see if any files get reverted to stubs. 
+When the REST service is successfully implemented and tested, it's a good idea to commit all code and regenerate the server to see if any files get reverted to stubs.
 
 Alternatively, this check is also performed as part of continuous integration.
 
@@ -154,9 +153,6 @@ Unit testing is not as critical for the browser, but may be helpful in places, t
 
 Follow the instructions in the [mainnet-docs](https://github.com/mainnet-cash/mainnet-docs) to update documentation and examples for both javascript and REST usage.
 
-
-
-
 # Continuous Integration
 
 CI is run using github actions on the `master`, `feature/*` , `bugfix/*` , branches.
@@ -173,7 +169,6 @@ It's controlled by [a github action](.github/workflows/CI.yml) and runs the foll
 Some steps require access to environment secrets in github to pass. Adding the secrets to your fork of the project on github can allow you to test using github actions run under your github account.
 
 # Continuous Deployment
-
 
 ## Deployment and package publishing
 
