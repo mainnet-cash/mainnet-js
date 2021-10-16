@@ -4,7 +4,7 @@ let EventSource;
 if (getRuntimePlatform() != "node") {
   EventSource = globalThis.EventSource;
 } else {
-  EventSource = require("eventsource/");
+  EventSource = eval("require")("eventsource/");
 }
 
 export default EventSource;

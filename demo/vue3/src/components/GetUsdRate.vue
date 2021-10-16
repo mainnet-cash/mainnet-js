@@ -1,6 +1,6 @@
 <template>
   <div class="rate">
-    <p>${{ rate }}</p>
+    ${{ rate }}
   </div>
 </template>
 

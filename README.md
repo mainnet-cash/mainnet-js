@@ -11,7 +11,7 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
   - [What is exactly is this?](#what-is-exactly-is-this)
   - [How can I use it?](#how-can-i-use-it)
   - [Where can't mainnet-js be used? (for now)](#where-cant-mainnet-js-be-used-for-now)
-  - [Check Your Node Version](#check-your-node-version)
+  - [Finaly, Check Your Node Version First](#finaly-check-your-node-version-first)
 - [Installation](#installation)
   - [As a REST service](#as-a-rest-service)
   - [For webapps & nodejs](#for-webapps--nodejs)
@@ -37,7 +37,7 @@ It is an OpenAPI 3 specification (swagger), implemented as a library in typescri
 
 ## How can I use it?
 
-The rest service can be called as a REST api from any language that POST json. Additionally client libraries can be generated automatically if preferred in [most common languages](https://openapi-generator.tech/docs/generators/). You don't need to write javascript or typescript to use it.
+The rest service can be called as a REST api from any language that can POST and receive json. Additionally, client libraries can be generated automatically if preferred in [most common languages](https://openapi-generator.tech/docs/generators/). You don't need to write javascript or typescript to use mainnet.
 
 However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
 
@@ -47,9 +47,9 @@ So it can be used in the browser, nodejs, electrum apps, WebWorkers and the like
 
 The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provides fast battle-tested crypto related functions using wasm binaries in WebAssembly.
 
-For the above reason, mainnet-js is not well suited for use as a library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, at the time of writing (It may be possible with WebView, but with tradeoffs). Nor is it suitable for KaiOS devices below v3, for the same reason.
+For the above reason, mainnet-js is not well suited for use as a javascript library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, at the time of writing (It may be possible with WebView, but with tradeoffs). Nor is it suitable for KaiOS devices below v3, for the same reason.
 
-## Check Your Node Version
+## Finaly, Check Your Node Version First
 
 `mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started. Check the nodejs version first.
 
@@ -86,7 +86,7 @@ It may be possible to use a generated client in your preferred programming langu
 
 Client libraries are pre-built and available in [python](https://github.com/mainnet-cash/mainnet-python-generated), [php](https://github.com/mainnet-cash/mainnet-php-generated) and [golang](https://github.com/mainnet-cash/mainnet-go-generated).
 
-If you have docker installed, to generate clients in a particular language, use:
+If you have docker installed, you can generate clients in a particular language from the project folder using:
 
     yarn api:build:client <generator_name>
 

@@ -11,7 +11,8 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "./packages/*"
+      "./packages/*",
+      "./demo/*"
     ],
     "nohoist": [
       "**/ts-jest/**",
@@ -20,7 +21,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.4.20",
+  "version": "0.4.22",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
@@ -31,7 +32,7 @@
     "api:serve:cluster": "yarn workspace mainnet-cash run start",
     "api:serve": "node packages/mainnet-cash/serve.js",
     "bump": "node bump_version.js",
-    "cli": "yarn workspace mainnet-cash run cli",
+    "cli": "yarn workspace mainnet-js run cli",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent yarn run cover",
     "cover": "yarn run cover:core && yarn run cover:report",
     "cover:core": "nyc --silent yarn run test",
@@ -54,7 +55,9 @@
     "regtest:down": "./jest/docker/stop.sh",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "nuke": "rm -fr jest/playwright/* && rm -fr node_modules && rm -fr packages/*/node_modules && rm -fr packages/*/dist",
+    "nuke": "rm -fr jest/playwright/* && rm -fr node_modules && yarn remove:packages && yarn remove:demo",
+    "remove:packages": "rm -fr packages/*/node_modules && rm -fr packages/*/dist",
+    "remove:demo": "rm -fr demo/*/node_modules && rm -fr demo/*/dist",
     "build": "yarn build:mainnet-js && yarn build:contract && yarn build:smartbch",
     "build:mainnet-js": "yarn workspace mainnet-js run build ",
     "build:contract": "yarn workspace @mainnet-cash/contract run build",
@@ -101,11 +104,12 @@
     "xmlhttprequest-ssl": "^2.0.0",
     "yarn": "^1.22.10"
   },
-  "sideEffects": false,
   "keywords": [
     "bch",
     "bitcoin cash"
   ],
   "author": "readcash",
-  "dependencies": {}
+  "dependencies": {
+    "electrum-cash":"../library/"
+  }
 }

@@ -1,9 +1,6 @@
 const path = require(`path`);
 
 module.exports = {
-    // chainWebpack: (config) => {
-    //     config.resolve.symlinks(false)
-    //   },
     configureWebpack: {
         resolve: {
             symlinks: false,
@@ -18,7 +15,7 @@ module.exports = {
               minSize: 50000,
               maxSize: 230000,
             }
-          }
+        }
     },
     transpileDependencies: [
         'electrum-cash'

@@ -6,7 +6,6 @@ import { WebhookBch } from "../webhook/WebhookBch";
 import { WebhookSlp } from "../webhook/WebhookSlp";
 import { RegisterWebhookParams } from "../webhook/interface";
 import { isCashAddress } from "../util/bchaddr";
-var parseDbUrl = require("parse-database-url");
 import { getSslConfig } from "./util";
 
 export default class SqlProvider implements StorageProvider {
@@ -26,6 +25,7 @@ export default class SqlProvider implements StorageProvider {
         "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
       );
     }
+    const parseDbUrl = eval("require")("parse-database-url")
     let dbConfig = parseDbUrl(process.env.DATABASE_URL);
     let ssl = getSslConfig();
     if (ssl) {

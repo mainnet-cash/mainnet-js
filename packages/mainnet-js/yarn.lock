@@ -152,6 +152,11 @@ bs58check@^2.1.2:
     create-hash "^1.1.0"
     safe-buffer "^5.1.2"
 
+buffer-lite@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/buffer-lite/-/buffer-lite-1.0.0.tgz#677f42bd0d5cb63fa2ee41e17903d04a84ff6b71"
+  integrity sha512-PGWl2OKxX317hJJaQpLW6Gikg4bEyyyMqJKlIH0NY56ePbqCATg02OctB/CWkvjtJG/kWxvM1ObEkNQFx8xJnA==
+
 buffer-writer@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/buffer-writer/-/buffer-writer-2.0.0.tgz#ce7eb81a38f7829db09c873f2fbb792c0c98ec04"
@@ -259,10 +264,8 @@ dotenv@^10.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
-electrum-cash@^2.0.8:
+"electrum-cash@file:../../../library":
   version "2.0.8"
-  resolved "https://registry.yarnpkg.com/electrum-cash/-/electrum-cash-2.0.8.tgz#3e42d0f830c81633e0a25265a671676ed324bf7d"
-  integrity sha512-rUBzeDVJ2LA9DzUEzBSuZsu01w1WHCNIbbMq7713uaEXwvhemuMWAZMMc79+JPXW/+UjOLn+Pu/24POTZGXsoA==
   dependencies:
     "@types/ws" "^7.4.6"
     async-mutex "^0.3.1"
@@ -730,10 +733,9 @@ punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-qrcode-svg@^1.1.0:
+"qrcode-svg@git+https://github.com/2qx/qrcode-svg.git":
   version "1.1.0"
-  resolved "https://registry.yarnpkg.com/qrcode-svg/-/qrcode-svg-1.1.0.tgz#2087549843dc5d0a3f8e8aa046cd9bcf23708cc3"
-  integrity sha512-XyQCIXux1zEIA3NPb0AeR8UMYvXZzWEhgdBgBjH9gO7M48H9uoHzviNz8pXw3UzrAcxRRRn9gxHewAVK7bn9qw==
+  resolved "git+https://github.com/2qx/qrcode-svg.git#221aa1128985b069814a1d2ae95143ef4bf4c84a"
 
 querystringify@^2.1.1:
   version "2.2.0"

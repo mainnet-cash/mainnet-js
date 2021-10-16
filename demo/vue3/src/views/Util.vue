@@ -2,11 +2,10 @@
   <div class="util">
     <p>This code was executed in </p>
     <get-runtime-platform />
-    <p>US Dollars have plummeted to </p>
       <suspense>
-    <get-usd-rate />
-  </suspense>
-  <p> per BCH</p>
+    <get-usd-rate /> 
+  </suspense>USD per BCH
+  
   </div>
 </template>
 
