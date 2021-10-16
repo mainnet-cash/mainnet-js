@@ -14,6 +14,8 @@ module.exports = {
             // mainnet-js
             "stream": require.resolve("stream-browserify"), // for bip39
             "crypto": require.resolve('crypto-browserify'), // for bip39
+            "net":false, // electrum-cash
+            "tls":false, // electrum-cash
 
             // @mainnet-cash/contract
             "fs":false,    // cashscript/utils

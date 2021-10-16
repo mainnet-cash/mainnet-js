@@ -1,2 +1,2 @@
-import "@ethersproject/shims"
-import {Mainnet} from "@mainnet-cash/smartbch"
+
+import {Mainnet} from "mainnet-js";
