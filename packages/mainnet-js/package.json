@@ -8,10 +8,16 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.4.21",
+  "version": "0.4.22",
   "homepage": "https://mainnet.cash",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
+  "browser":{
+    "http":false,
+    "https":false,
+    "fs":false,
+    "url":false
+  },
   "types": "dist/main/index.d.ts",
   "exports": {
     "require": "./dist/main/index.js",
@@ -40,13 +46,14 @@
     "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
     "bip39": "^3.0.3",
-    "buffer": "^6.0.3",
+    "buffer":"^6.0.3",
+    "buffer-lite": "^1.0.0",
     "cashaddrjs": "^0.4.4",
-    "events": "^3.2.0",
-    "fake-indexeddb": "^3.1.2",
     "electrum-cash": "^2.0.8",
+    "events": "^3.2.0",
     "eventsource": "^1.0.7",
-    "qrcode-svg": "^1.1.0",
+    "fake-indexeddb": "^3.1.2",
+    "qrcode-svg": "git+https://github.com/2qx/qrcode-svg.git",
     "slp-parser": "^0.0.4"
   },
   "devDependencies": {},
@@ -66,10 +73,16 @@
   "testPathIgnorePatterns": [
     "dist"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "src/rate/ExchangeRate.ts",
+    "src/network/getRelayFeeCache.ts",
+    "src/network/default.ts",
+    "src/util/eventsource.ts"
+  ],
   "keywords": [
     "bch",
-    "bitcoin cash"
+    "bitcoin cash",
+    "wasm"
   ],
   "author": "readcash"
 }
