@@ -1,19 +1,20 @@
 {
   "name": "@mainnet-cash/demo-min",
-  "version": "0.4.22",
+  "version": "0.4.23",
+  "private": true,
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build":"webpack"
+    "build": "webpack"
   },
   "dependencies": {
-    "@mainnet-cash/contract":"0.4.22"
+    "@mainnet-cash/contract": "0.4.23"
   },
   "devDependencies": {
-    "webpack":"5.58.1",
-    "stream-browserify":"^3.0.0",
-    "crypto-browserify":"^3.12.0",
+    "webpack": "5.58.1",
+    "stream-browserify": "^3.0.0",
+    "crypto-browserify": "^3.12.0",
     "ethers": "^5.4.5",
-    "@ethersproject/shims":"^5.4.0"
+    "@ethersproject/shims": "^5.4.0"
   }
 }
