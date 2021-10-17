@@ -50,7 +50,6 @@ function updatePackageFile(file) {
   package.version = newVersion;
   console.log(`Updated ${package.name} to version: ${newVersion}`);
 
-
   for (const p of workspacePackages) {
     if (p in package.dependencies) {
       package.dependencies[p] = newVersion;
