@@ -106,6 +106,7 @@ This project contains a number of smaller projects in a mono-repo structure, wit
 | @mainnet-cash/smartbch | SmartBch Library      |
 | @mainnet-cash/contract | CashScript Library    |
 | @mainnet-cash/demo     | Demo Vue Webapp       |
+| @mainnet-cash/demo-min | Minimal Demo          |
 | @mainnet-cash/root     | Top-level Placeholder |
 
 # Documentation
