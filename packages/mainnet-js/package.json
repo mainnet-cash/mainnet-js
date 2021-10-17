@@ -8,15 +8,15 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.4.22",
+  "version": "0.4.23",
   "homepage": "https://mainnet.cash",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
-  "browser":{
-    "http":false,
-    "https":false,
-    "fs":false,
-    "url":false
+  "browser": {
+    "http": false,
+    "https": false,
+    "fs": false,
+    "url": false
   },
   "types": "dist/main/index.d.ts",
   "exports": {
@@ -46,7 +46,7 @@
     "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
     "bip39": "^3.0.3",
-    "buffer":"^6.0.3",
+    "buffer": "^6.0.3",
     "buffer-lite": "^1.0.0",
     "cashaddrjs": "^0.4.4",
     "electrum-cash": "^2.0.8",

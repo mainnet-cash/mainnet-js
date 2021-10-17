@@ -21,7 +21,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.4.22",
+  "version": "0.4.23",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
@@ -109,6 +109,5 @@
     "bitcoin cash"
   ],
   "author": "readcash",
-  "dependencies": {
-  }
+  "dependencies": {}
 }
