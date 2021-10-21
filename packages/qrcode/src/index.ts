@@ -17,7 +17,7 @@ export class QrCode {
     return new QrCode();
   };
 
-  public encode_svg(str: String){
-    return encode_svg(str)
+  public encode_svg(str: String) {
+    return encode_svg(str);
   }
 }
