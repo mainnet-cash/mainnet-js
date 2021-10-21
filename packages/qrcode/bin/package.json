@@ -1,0 +1,21 @@
+{
+  "name": "qrcode",
+  "collaborators": [
+    "2qx <2qx.rust.qrcode@small.neomailbox.ch>"
+  ],
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mainnet-js/packages/qrcode"
+  },
+  "files": [
+    "qrcode_bg.wasm",
+    "qrcode.js",
+    "qrcode_bg.js",
+    "qrcode.d.ts"
+  ],
+  "module": "qrcode.js",
+  "types": "qrcode.d.ts",
+  "sideEffects": false
+}

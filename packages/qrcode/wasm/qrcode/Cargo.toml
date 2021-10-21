@@ -1,0 +1,15 @@
+[package]
+name = "qrcode"
+version = "0.1.0"
+authors = ["2qx <2qx.rust.qrcode@small.neomailbox.ch>"]
+license = "MIT"
+repository = "https://github.com/mainnet-js/packages/qrcode"
+publish = false
+
+[dependencies]
+qrcode = "0.11"
+wasm-bindgen = "0.2"
+wasm-bindgen-test = "0.3.28"
+
+[lib]
+crate-type = ["cdylib"]

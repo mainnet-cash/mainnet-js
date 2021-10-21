@@ -1,0 +1,15 @@
+{
+  "name": "@mainnet-cash/qrcode",
+  "version": "0.4.24",
+  "description": "qr encoder for mainnet-js",
+  "main": "index.js",
+  "author": "mainnet developers",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf dist/ && rollup -c",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --detectOpenHandles --runInBand --forceExit"
+  },
+  "dependencies": {
+    "@types/jest": "^27.0.2"
+  }
+}
