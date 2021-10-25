@@ -1,10 +1,12 @@
 const ws = require('ws');
 
 const mainnet = require("mainnet-js");
+const config = require('./config');
 
 makeWsServer = (server) => {
   const wsServer = new ws.Server({ noServer: true, path: '/wallet' });
   wsServer.on('connection', socket => {
+    
     socket.unsubscribeFunctions = [];
 
     socket.isAlive = true;
@@ -13,6 +15,23 @@ makeWsServer = (server) => {
     socket.on('message', async data => {
       try {
         data = JSON.parse(data);
+
+        if(config.API_KEY){
+          if(!data.data.bearer){
+              let error = {"Error":"Bearer authentication required","code":401}
+              socket.send(JSON.stringify(error));
+              socket.close();
+              return;
+          }
+          if(data.data.bearer != config.API_KEY){
+              let error = {"Error":"Bearer authentication required","code":403,"message":"forbidden"}
+              socket.send(JSON.stringify(error));
+              socket.close();
+              return;
+          }
+        }
+
+
         if (data.method === "watchBalance") {
           const addr = data.data.cashaddr;
           const w = await mainnet.Wallet.fromCashaddr(addr);
