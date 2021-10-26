@@ -130,6 +130,11 @@ describe(`Test Ethereum functions`, () => {
       new BigNumber(2)
     );
 
+    // get all balances
+    const balances = await charlie.sep20.getAllBalances();
+    expect(balances.length).toBe(1);
+    expect(balances[0].value).toStrictEqual(new BigNumber(1));
+
     // sendMax
     const sendMaxResult = await bob.sep20.sendMax(
       alice.getDepositAddress(),

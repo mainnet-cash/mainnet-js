@@ -1430,6 +1430,30 @@ paths:
       tags:
         - smartbch/sep20
 
+  /smartbch/sep20/all_balances:
+    post:
+      operationId: smartBchSep20AllBalances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchSep20AllBalancesRequest"
+        description: |
+          Request for a wallet SEP20 token balances.
+          Does a deep blockchain scan for tokens transferred to or from this address
+          Might take a long time to run and time-out.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchSep20AllBalancesResponse'
+          description: successful operation
+      summary: Get all SmartBch SEP20 balances of the wallet
+      tags:
+        - smartbch/sep20
+
   /smartbch/sep20/balance:
     post:
       operationId: smartBchSep20Balance
@@ -2177,7 +2201,7 @@ components:
            type: string
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
         options:
-          $ref: "#/components/schemas/SendRequestOptions"  
+          $ref: "#/components/schemas/SendRequestOptions"
       example:
           walletId: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
@@ -3592,6 +3616,30 @@ components:
           type: string
           example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
           description: Token unique hexadecimal identifier
+
+    SmartBchSep20AllBalancesRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        options:
+          properties:
+            forceRescan:
+              type: boolean
+              example: false
+              description: Force rediscover all address tokens
+            hideEmpty:
+              type: boolean
+              example: true
+              description: Exclude tokens with zero balances from result array
+      required:
+        - walletId
+
+    SmartBchSep20AllBalancesResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/SmartBchSep20BalanceResponse"
 
     SmartBchSep20SendRequest:
       properties:

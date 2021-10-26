@@ -10,7 +10,7 @@ export const networkTickerMap = {
 
 export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];
 
-export const testnetServers = ["wss://electroncash.de:60004"];
+export const testnetServers = ["wss://tbch.loping.net:60004"];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];
 

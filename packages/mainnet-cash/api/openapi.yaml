@@ -1461,6 +1461,30 @@ paths:
       tags:
       - smartbch/sep20
       x-eov-operation-handler: controllers/SmartbchSep20Controller
+  /smartbch/sep20/all_balances:
+    post:
+      operationId: smartBchSep20AllBalances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartBchSep20AllBalancesRequest'
+        description: |
+          Request for a wallet SEP20 token balances.
+          Does a deep blockchain scan for tokens transferred to or from this address
+          Might take a long time to run and time-out.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchSep20AllBalancesResponse'
+          description: successful operation
+      summary: Get all SmartBch SEP20 balances of the wallet
+      tags:
+      - smartbch/sep20
+      x-eov-operation-handler: controllers/SmartbchSep20Controller
   /smartbch/sep20/balance:
     post:
       operationId: smartBchSep20Balance
@@ -4014,6 +4038,31 @@ components:
           description: Token unique hexadecimal identifier
           example: 0xdac17f958d2ee523a2206206994597c13d831ec7
           type: string
+    SmartBchSep20AllBalancesRequest:
+      example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+        options: '{}'
+      properties:
+        walletId:
+          description: serialized wallet
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+          type: string
+        options:
+          properties:
+            forceRescan:
+              description: Force rediscover all address tokens
+              example: false
+              type: boolean
+            hideEmpty:
+              description: Exclude tokens with zero balances from result array
+              example: true
+              type: boolean
+      required:
+      - walletId
+    SmartBchSep20AllBalancesResponse:
+      items:
+        $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
+      type: array
     SmartBchSep20SendRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
