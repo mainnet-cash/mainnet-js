@@ -36,9 +36,12 @@ class ExpressServer {
   setupMiddleware() {
     // this.setupAllowedMedia();
     this.app.use(cors());
-    let module_path = require.resolve("mainnet-js").replace("main/index.js", "")
+    const module_path = require.resolve("mainnet-js").replace("main/index.js", "");
     const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
-    this.app.use('/scripts/mainnet.js', express.static(module_path +latest));
+    this.app.use('/scripts/mainnet.js', express.static(module_path + latest));
+    const smartBchModulePath = require.resolve("@mainnet-cash/smartbch").replace("main/index.js", "");
+    const smartBchLatest = fs.readdirSync(smartBchModulePath).filter(val => val.match(/smartbch-\d+\.\d+.\d+.js$/)).pop();
+    this.app.use('/scripts/@mainnet-cash/smartbch.js', express.static(smartBchModulePath + smartBchLatest));
     this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());

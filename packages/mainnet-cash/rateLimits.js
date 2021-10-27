@@ -3,7 +3,7 @@ const rateLimit = require("express-rate-limit");
 function setupRateLimits(app) {
   if (process.env.JEST_WORKER_ID !== undefined)
     return;
-  const message = '{"message":"Too many requests, please try again later","code":419}'
+  const message = '{"message":"Too many requests, please try again later","code":429}'
   // 1 per 15 minutes from the same ip
   const limiter1p15mIP = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes

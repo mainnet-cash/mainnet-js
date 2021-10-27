@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+0.4.25
+
+- Add testnet faucet for SmartBch and SEP20 tokens (visit https://rest-unstable.mainnet.cash/faucet.html)
+- Add new method wallet.sep20.getAllBalances()
+
 0.4.22
 
 - Move demo packages

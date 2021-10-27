@@ -8,6 +8,10 @@
 
 const Controller = require('./Controller');
 const service = require('../services/SmartbchSep20Service');
+const smartBchSep20AllBalances = async (request, response) => {
+  await Controller.handleRequest(request, response, service.smartBchSep20AllBalances);
+};
+
 const smartBchSep20Balance = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartBchSep20Balance);
 };
@@ -42,6 +46,7 @@ const smartBchSep20TokenInfo = async (request, response) => {
 
 
 module.exports = {
+  smartBchSep20AllBalances,
   smartBchSep20Balance,
   smartBchSep20DepositAddress,
   smartBchSep20DepositQr,
