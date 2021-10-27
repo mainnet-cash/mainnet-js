@@ -17,8 +17,9 @@ let rootPackageFile = "./package.json";
 
 // update package.json
 const workspacePackageFiles = [
+  "./demo/vue3/package.json",
+  "./demo/min/package.json",
   "./packages/contract/package.json",
-  "./packages/demo/package.json",
   "./packages/mainnet-cash/package.json",
   "./packages/mainnet-js/package.json",
   "./packages/smartbch/package.json",
@@ -49,10 +50,6 @@ function updatePackageFile(file) {
   package.version = newVersion;
   console.log(`Updated ${package.name} to version: ${newVersion}`);
 
-  if (typeof package.browser !== "undefined") {
-    package.browser = package.browser.replace(version, newVersion);
-    console.log(`Updated ${package.name}.browser to ${package.browser} `);
-  }
   for (const p of workspacePackages) {
     if (p in package.dependencies) {
       package.dependencies[p] = newVersion;

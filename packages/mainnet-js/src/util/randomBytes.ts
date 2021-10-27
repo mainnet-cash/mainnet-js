@@ -3,7 +3,8 @@ import { getRuntimePlatform } from "./getRuntimePlatform";
 export function generateRandomBytes(len = 32) {
   // nodejs
   if (getRuntimePlatform() === "node") {
-    let crypto = require("crypto");
+    //
+    const crypto = eval("require")("crypto");
     return crypto.randomBytes(len);
   }
   // window, webworkers, service workers
