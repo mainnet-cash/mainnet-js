@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.4.24
+  version: 0.4.25
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -356,6 +356,58 @@ paths:
         Get testnet slp tokens
       tags:
         - faucet
+  /faucet/get_testnet_sbch:
+    post:
+      operationId: getTestnetSbch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetTestnetSbchRequest"
+        description: |
+          Request to bch faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTestnetSbchResponse"
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Request testnet SmartBCH funds. The request is enqueued and served within 1-3 block confirmations.
+        If the target address holds more that 0.1 BCH, the request will fail. Otherwise the address will be topped up to 0.1 BCH.
+      tags:
+        - faucet
+  /faucet/get_testnet_sep20:
+    post:
+      operationId: getTestnetSep20
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetTestnetSep20Request"
+        description: |
+          Request to SEP20 faucet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTestnetSep20Response"
+          description: Successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: |
+        Request testnet SmartBch SEP20 tokens. The request is enqueued and served within 1-3 block confirmations.
+        If the target address holds more that 10 tokens of requested kind, the request will fail. Otherwise the address will be topped up to 10 tokens.
+      tags:
+        - faucet
   /faucet/get_addresses:
     post:
       operationId: getAddresses
@@ -372,7 +424,7 @@ paths:
       summary: |
         Get addresses to return back or donate the testnet bch and tokens
       tags:
-        - faucet     
+        - faucet
   /mine:
     post:
       summary: Mine regtest coins to a specified address
@@ -1378,6 +1430,30 @@ paths:
       tags:
         - smartbch/sep20
 
+  /smartbch/sep20/all_balances:
+    post:
+      operationId: smartBchSep20AllBalances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmartBchSep20AllBalancesRequest"
+        description: |
+          Request for a wallet SEP20 token balances.
+          Does a deep blockchain scan for tokens transferred to or from this address
+          Might take a long time to run and time-out.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartBchSep20AllBalancesResponse'
+          description: successful operation
+      summary: Get all SmartBch SEP20 balances of the wallet
+      tags:
+        - smartbch/sep20
+
   /smartbch/sep20/balance:
     post:
       operationId: smartBchSep20Balance
@@ -2125,7 +2201,7 @@ components:
            type: string
            example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
         options:
-          $ref: "#/components/schemas/SendRequestOptions"  
+          $ref: "#/components/schemas/SendRequestOptions"
       example:
           walletId: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           cashaddr: "bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t"
@@ -3107,6 +3183,41 @@ components:
           description: Transaction id
       example:
         txId: dc38ee5d4233163e69144e4ec6e49257d41f5605e297d05c0af8f1d81ae1a387
+    GetTestnetSbchRequest:
+      properties:
+        address:
+          type: string
+          description: Receiver's SmartBch testnet address
+      example:
+        address: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+    GetTestnetSbchResponse:
+      properties:
+        success:
+          type: boolean
+          description: Enqueue request result
+      example:
+        success: true
+    GetTestnetSep20Request:
+      properties:
+        address:
+          type: string
+          description: Receiver's SmartBch testnet address
+        tokenId:
+          type: string
+          description: Token unique hexadecimal identifier
+      required:
+        - address
+        - tokenId
+      example:
+        address: "0xE25ddbAF8DD61b627727e03e190E32feddBD1319"
+        tokenId: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    GetTestnetSep20Response:
+      properties:
+        success:
+          type: boolean
+          description: Enqueue request result
+      example:
+        success: true
     GetAddressesResponse:
       properties:
         bchtest:
@@ -3115,9 +3226,21 @@ components:
         slptest:
           type: string
           description: Slpaddr to return testnet SLP tokens
+        sbchtest:
+          type: string
+          description: SmartBch testnet faucet contract owner address
+        sbchcontract:
+          type: string
+          description: SmartBch testnet contract address to return BCH and SEP20 tokens
+        sbchtoken:
+          type: string
+          description: SmartBch testnet sample SEP20 token address
       example:
         bchtest: "bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga"
         slptest: "slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866"
+        sbchtest: "0xA01a60F9c0ac519c1288191CC363b0B5Fd6e7e09"
+        sbchcontract: "0x4Fcb637828E5F79F254b86E97Fcf72361549e28f"
+        sbchtoken: "0xAAb45D7f352005c19E93F13dfA346ddAe5b97f65"
 
     SmartBchDepositAddressResponse:
       properties:
@@ -3493,6 +3616,30 @@ components:
           type: string
           example: "0xdac17f958d2ee523a2206206994597c13d831ec7"
           description: Token unique hexadecimal identifier
+
+    SmartBchSep20AllBalancesRequest:
+      properties:
+        walletId:
+          type: string
+          example: "privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45"
+          description: serialized wallet
+        options:
+          properties:
+            forceRescan:
+              type: boolean
+              example: false
+              description: Force rediscover all address tokens
+            hideEmpty:
+              type: boolean
+              example: true
+              description: Exclude tokens with zero balances from result array
+      required:
+        - walletId
+
+    SmartBchSep20AllBalancesResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/SmartBchSep20BalanceResponse"
 
     SmartBchSep20SendRequest:
       properties:

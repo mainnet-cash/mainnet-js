@@ -167,6 +167,17 @@ describe("Test Wallet SmartBch Sep20 Endpoints", () => {
         tokenId: result.tokenId,
       });
 
+    let charlieBalancesResponse = await request(app)
+      .post("/smartbch/sep20/all_balances")
+      .send({
+        walletId: charlieResponse.body.walletId,
+        options: { forceRescan: true, hideEmpty: true },
+      });
+
+    expect(charlieBalancesResponse.body.length).toBe(1);
+    expect(Number(charlieBalancesResponse.body[0].value)).toBe(1);
+
+
     expect(Number(daveBalanceResponse.body.value)).toBe(2);
 
     // sendMax

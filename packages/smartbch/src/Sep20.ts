@@ -1,4 +1,4 @@
-import { ImageI } from "mainnet-js";
+import { ImageI, NetworkType } from "mainnet-js";
 import {
   PrivKeySmartBchWallet,
   RegTestPrivKeySmartBchWallet,
@@ -9,7 +9,6 @@ import {
   TestNetSmartBchWallet,
   TestNetWatchSmartBchWallet,
   WatchSmartBchWallet,
-  Web3SmartBchWallet,
 } from "./SmartBchWallet";
 import { ethers } from "ethers";
 import { Contract } from "./Contract";
@@ -18,6 +17,7 @@ import { zeroAddress } from "./Utils";
 import {
   Sep20GenesisOptions,
   Sep20GenesisResult,
+  Sep20GetAllBalancesOptions,
   Sep20MintOptions,
   Sep20MintResult,
   Sep20SendRequest,
@@ -32,6 +32,8 @@ const _cache = {};
  * Class to manage Sep20 tokens.
  */
 export class Sep20 {
+  static addressTokens: Map<string, string[]> = new Map<string, string[]>();
+
   readonly wallet: SmartBchWallet;
   contracts: Map<string, Contract> = new Map<string, Contract>();
 
@@ -140,7 +142,7 @@ export class Sep20 {
   /**
    * getDepositAddress - get the SmartBch deposit address
    *
-   * a high-level function, see also /smartbch/erc20/deposit_address REST endpoint
+   * a high-level function, see also /smartbch/sep20/deposit_address REST endpoint
    *
    * @returns The SmartBch address as a string
    */
@@ -151,7 +153,7 @@ export class Sep20 {
   /**
    * getDepositQr - get the SmartBch address qrcode, encoded for display on the web
    *
-   * a high-level function, see also /smartbch/erc20/deposit_qr REST endpoint
+   * a high-level function, see also /smartbch/sep20/deposit_qr REST endpoint
    *
    * @returns The qrcode for the SmartBch address
    */
@@ -178,7 +180,7 @@ export class Sep20 {
   /**
    * getTokenInfo - get data associated with a token
    *
-   * a high-level function, see also /smartbch/erc20/token_info REST endpoint
+   * a high-level function, see also /smartbch/sep20/token_info REST endpoint
    *
    * @param tokenId  Sep20 Token Id (contract address)
    *
@@ -204,7 +206,7 @@ export class Sep20 {
   /**
    * getBalance - get a token balance for a particular address
    *
-   * a high-level function, see also /smartbch/erc20/balance REST endpoint
+   * a high-level function, see also /smartbch/sep20/balance REST endpoint
    *
    * @param tokenId   Sep20 Token Id (contract address)
    *
@@ -228,12 +230,91 @@ export class Sep20 {
   }
 
   /**
-   * genesis - create a new SmartBch ERC20 token
+   * getAllBalances - get all token balances for a particular address
+   *
+   * a high-level function, see also /wallet/slp/all_balances REST endpoint
+   *
+   * Does a deep blockchain scan for tokens transferred to or from this address
+   * Might take a long time to run. Set progress progressCallback to get notified about the scan process.
+   *
+   * @returns Promise to an array of Sep20TokenBalance
+   */
+  public async getAllBalances(
+    options: Sep20GetAllBalancesOptions = {
+      forceRescan: false,
+      hideEmpty: true,
+      progressCallback: undefined,
+    }
+  ): Promise<Sep20TokenBalance[]> {
+    if (options.forceRescan === undefined) options.forceRescan = false;
+    if (options.hideEmpty === undefined) options.hideEmpty = true;
+
+    let tokenIds: string[] =
+      Sep20.addressTokens.get(this.getDepositAddress()) || [];
+
+    if (options.forceRescan || !tokenIds.length) {
+      const sep20TransferTopic =
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+      const now = await this.wallet.provider!._getFastBlockNumber();
+      const addressTopic =
+        "0x000000000000000000000000" + this.getDepositAddress().substring(2);
+
+      const blockBatch = 10000;
+      const scanBlockStart =
+        this.wallet.network === NetworkType.Mainnet ? 412000 : 0; // first smartbch transactions appear around here
+      const scanBlockStop = now;
+
+      for (let i = scanBlockStart; i < scanBlockStop; i += blockBatch) {
+        const incomingLogs = this.wallet.provider!.getLogs({
+          fromBlock: i,
+          toBlock: i + blockBatch - 1,
+          topics: [sep20TransferTopic, null, addressTopic],
+        });
+
+        const outgoingLogs = this.wallet.provider!.getLogs({
+          fromBlock: i,
+          toBlock: i + blockBatch - 1,
+          topics: [sep20TransferTopic, addressTopic],
+        });
+        const result = await Promise.all([incomingLogs, outgoingLogs]);
+
+        tokenIds = tokenIds.concat(
+          [...result[0], ...result[1]]
+            .map((val) => val.address)
+            .filter((val, index, arr) => arr.indexOf(val) === index)
+        );
+
+        if (options.progressCallback) {
+          const progress =
+            (i - scanBlockStart) / (scanBlockStop - scanBlockStart);
+          options.progressCallback(progress);
+        }
+      }
+
+      tokenIds = tokenIds.filter(
+        (val, index, arr) => arr.indexOf(val) === index
+      );
+      Sep20.addressTokens.set(this.getDepositAddress(), tokenIds);
+    }
+
+    let balances = await Promise.all(
+      tokenIds.map((val) => this.getBalance(val))
+    );
+    if (options.hideEmpty) {
+      balances = balances.filter((val) => val.value.gt(0));
+    }
+
+    return balances;
+  }
+
+  /**
+   * genesis - create a new SmartBch SEP20 token
    *
    * @param {Sep20GenesisOptions} options    Token creation options
    * @param {ethers.CallOverrides} overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
    *
-   * a high-level function, see also /smartbch/erc20/genesis REST endpoint
+   * a high-level function, see also /smartbch/sep20/genesis REST endpoint
    *
    * @returns {Sep20GenesisResult} Token Id and new token balance
    */
@@ -272,7 +353,7 @@ export class Sep20 {
   /**
    * sendMax - send the maximum spendable amount for a token to a smartbch address.
    *
-   * a high-level function, see also /smartbch/erc20/send_max REST endpoint
+   * a high-level function, see also /smartbch/sep20/send_max REST endpoint
    *
    * @param address   destination smartbch address
    * @param tokenId   Sep20 Token Id (contract address) to be spent
@@ -299,7 +380,7 @@ export class Sep20 {
   /**
    * send - process a list of Sep20 send requests.
    *
-   * a high-level function, see also /smartbch/erc20/send REST endpoint
+   * a high-level function, see also /smartbch/sep20/send REST endpoint
    *
    * @param [requests]   list of send requests
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
@@ -362,7 +443,7 @@ export class Sep20 {
   /**
    * mint - create new tokens to increase the circulation supply.
    *
-   * a high-level function, see also /smartbch/erc20/mint endpoint
+   * a high-level function, see also /smartbch/sep20/mint endpoint
    *
    * @param options    Mint options to steer the process
    * @param overrides  SmartBch parameters to be enforced (gas price, gas limit etc)
@@ -493,6 +574,8 @@ export class Sep20 {
     "function transfer(address to, uint amount)",
     "function transferFrom(address sender, address recipient, uint256 amount) external returns (bool)",
     "function mint(address to, uint256 amount)",
+    "function allowance(address owner, address spender) external view returns (uint)",
+    "function approve(address spender, uint value) external returns (bool)",
     "event Transfer(address indexed from, address indexed to, uint amount)",
     "event Approval(address indexed owner, address indexed spender, uint256 value)",
   ];
@@ -545,15 +628,6 @@ contract SmartBchSep20 is ERC20, ERC20Burnable, AccessControl {
 }
 
 //#region Specific Sep20 wallet classes
-/**
- * Class to manage an slp enabled testnet wallet.
- */
-export class Web3Sep20 extends Sep20 {
-  static get walletType() {
-    return Web3SmartBchWallet;
-  }
-}
-
 /**
  * Class to manage an slp enabled testnet wallet.
  */

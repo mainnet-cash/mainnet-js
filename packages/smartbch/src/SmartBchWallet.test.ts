@@ -1,9 +1,11 @@
 import { ethers } from "ethers";
-import { Mainnet } from "mainnet-js";
-
-type BalanceResponse = Mainnet.BalanceResponse;
-
-import { RegTestSmartBchWallet, SmartBchWallet } from "./SmartBchWallet";
+import { delay } from "mainnet-js";
+import {
+  RegTestSmartBchWallet,
+  SmartBchWallet,
+  TestNetSmartBchWallet,
+  BalanceResponse,
+} from "./";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 describe(`Test Ethereum functions`, () => {
@@ -114,7 +116,7 @@ describe(`Test Ethereum functions`, () => {
 
   test("Test waiting and watching", async () => {
     // let all transactions in previous blocks be settled
-    await Mainnet.delay(7000);
+    await delay(7000);
 
     const alice = await RegTestSmartBchWallet.fromId(
       process.env.SBCH_ALICE_ID!
@@ -198,7 +200,7 @@ describe(`Test Ethereum functions`, () => {
     );
 
     // lets wait for 2 more blocks to be mined
-    await Mainnet.delay(15000);
+    await delay(15000);
     expect(waitTxResult).toBe(true);
     expect(waitBalanceResult).toBe(true);
     expect(aliceWatchResult).toBe(true);
@@ -207,5 +209,51 @@ describe(`Test Ethereum functions`, () => {
     expect(blockWatchResult).toBe(true);
     expect(blockWaitResult).toBe(true);
     expect(blockNumberWaitResult).toBe(true);
+  });
+
+  test.skip("Should get testnet satoshis and send them back", async () => {
+    const wallet = await TestNetSmartBchWallet.newRandom();
+    const txid = await wallet.getTestnetSatoshis();
+    expect(txid.length).toBe(66);
+    const balance = await wallet.getBalance("bch");
+    expect(balance).toBe(0.1);
+
+    const response = await wallet.returnTestnetSatoshis();
+    delay(3000);
+    expect(response.balance!.sat!).toBeLessThan(50000);
+  });
+
+  test.skip("Should get testnet sep20 tokens and send them back", async () => {
+    let alicePrivKey = `${process.env.FAUCET_SBCH_PRIVKEY!}`;
+    let aliceWallet = await TestNetSmartBchWallet.fromPrivateKey(alicePrivKey);
+
+    const wallet = await TestNetSmartBchWallet.newRandom();
+
+    // send bob some bch gas to enable him to send SEP20 tokens
+    await aliceWallet.send(
+      [{ address: wallet.getDepositAddress(), value: 300000, unit: "sat" }],
+      {},
+      { gasPrice: 10 ** 10 }
+    );
+
+    const txid = await wallet.getTestnetSep20(
+      process.env.FAUCET_SBCH_TOKEN_ID!
+    );
+    expect(txid.length).toBe(66);
+    let balance = await wallet.sep20.getBalance(
+      process.env.FAUCET_SBCH_TOKEN_ID!
+    );
+    expect(balance.value.toNumber()).toBe(10);
+
+    const response = await wallet.returnTestnetSep20(
+      process.env.FAUCET_SBCH_TOKEN_ID!
+    );
+    expect(response.balance.value.toNumber()).toBe(0);
+
+    await wallet.sendMax(
+      aliceWallet.getDepositAddress(),
+      {},
+      { gasPrice: 10 ** 10 }
+    );
   });
 });

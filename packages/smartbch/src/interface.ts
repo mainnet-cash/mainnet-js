@@ -60,6 +60,12 @@ export interface Sep20TokenInfo {
   totalSupply: BigNumber;
 }
 
+export interface Sep20GetAllBalancesOptions {
+  forceRescan?: boolean;
+  hideEmpty?: boolean;
+  progressCallback?: (progress: number) => void;
+}
+
 export interface Sep20TokenBalance {
   value: BigNumber;
   ticker: string;
