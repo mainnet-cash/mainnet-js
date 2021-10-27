@@ -16,6 +16,14 @@ const getTestnetBch = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetBch);
 };
 
+const getTestnetSbch = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getTestnetSbch);
+};
+
+const getTestnetSep20 = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getTestnetSep20);
+};
+
 const getTestnetSlp = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetSlp);
 };
@@ -24,5 +32,7 @@ const getTestnetSlp = async (request, response) => {
 module.exports = {
   getAddresses,
   getTestnetBch,
+  getTestnetSbch,
+  getTestnetSep20,
   getTestnetSlp,
 };

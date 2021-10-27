@@ -8,13 +8,18 @@ export const networkTickerMap = {
   regtest: "rBCH",
 };
 
-export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];
+export const mainnetServers = [
+  "wss://fulcrum.fountainhead.cash",
+  // "wss://electrum.imaginary.cash:50004",
+  // "wss://bch.imaginary.cash:50004",
+  // "wss://electroncash.dk:50004"
+];
 
 export const testnetServers = [
-  //"wss://electroncash.de:60004", //,
+  // "wss://electroncash.de:60004", 
   // "wss://testnet.bitcoincash.network:60004",
   // "wss://blackie.c3-soft.com:60004",
-  "wss://tbch.loping.net:60004",
+  "wss://tbch.loping.net:60004"
 ];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];

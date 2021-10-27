@@ -3,6 +3,27 @@ const Service = require('./Service');
 const _smartbch = require("@mainnet-cash/smartbch");
 
 /**
+* Get all SmartBch SEP20 balances of the wallet
+*
+* smartBchSep20AllBalancesRequest SmartBchSep20AllBalancesRequest Request for a wallet SEP20 token balances. Does a deep blockchain scan for tokens transferred to or from this address Might take a long time to run and time-out. 
+* returns List
+* */
+const smartBchSep20AllBalances = ({ smartBchSep20AllBalancesRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await _smartbch.walletFromId(smartBchSep20AllBalancesRequest.walletId);
+      const response = await wallet.sep20.getAllBalances(smartBchSep20AllBalancesRequest.options);
+
+      resolve(Service.successResponse(response));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
 * Get total SmartBch SEP20 token balance of the wallet
 *
 * smartBchSep20BalanceRequest SmartBchSep20BalanceRequest Request for a wallet SmartBch SEP20 token balance 
@@ -185,6 +206,7 @@ const smartBchSep20TokenInfo = ({ smartBchSep20TokenInfoRequest }) => new Promis
 );
 
 module.exports = {
+  smartBchSep20AllBalances,
   smartBchSep20Balance,
   smartBchSep20DepositAddress,
   smartBchSep20DepositQr,

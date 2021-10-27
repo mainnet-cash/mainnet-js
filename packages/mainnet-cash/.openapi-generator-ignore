@@ -30,7 +30,8 @@ services/*.test.ts
 #!services/WebhookService.js
 #!services/SmartbchWalletService.js
 #!services/SmartbchContractService.js
-#!services/SmartbchWalletSep20Service.js
+#!services/SmartbchSep20Service.js
+#!services/FaucetService.js
 controllers/Controller.js
 package.json
 index.js
