@@ -16,7 +16,10 @@ export function getNetworkProvider(
 ): ethers.providers.BaseProvider {
   let url = defaultServers[network][0] || "";
   if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.browser) {
-    url = defaultServers[network].filter(val => val.indexOf("https://") === 0)[0] || url;
+    url =
+      defaultServers[network].filter(
+        (val) => val.indexOf("https://") === 0
+      )[0] || url;
   }
   switch (network as any) {
     case "EthMainnet": {
