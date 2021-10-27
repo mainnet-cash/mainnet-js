@@ -239,61 +239,70 @@ export class Sep20 {
    *
    * @returns Promise to an array of Sep20TokenBalance
    */
-  public async getAllBalances(options: Sep20GetAllBalancesOptions = { forceRescan: false, hideEmpty: true, progressCallback: undefined }): Promise<Sep20TokenBalance[]> {
-    if (options.forceRescan === undefined)
-      options.forceRescan = false;
-    if (options.hideEmpty === undefined)
-      options.hideEmpty = true;
+  public async getAllBalances(
+    options: Sep20GetAllBalancesOptions = {
+      forceRescan: false,
+      hideEmpty: true,
+      progressCallback: undefined,
+    }
+  ): Promise<Sep20TokenBalance[]> {
+    if (options.forceRescan === undefined) options.forceRescan = false;
+    if (options.hideEmpty === undefined) options.hideEmpty = true;
 
-    let tokenIds: string[] = Sep20.addressTokens.get(this.getDepositAddress()) || [];
+    let tokenIds: string[] =
+      Sep20.addressTokens.get(this.getDepositAddress()) || [];
 
     if (options.forceRescan || !tokenIds.length) {
-
-      const sep20TransferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+      const sep20TransferTopic =
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
       const now = await this.wallet.provider!._getFastBlockNumber();
-      const addressTopic = '0x000000000000000000000000' + this.getDepositAddress().substring(2);
+      const addressTopic =
+        "0x000000000000000000000000" + this.getDepositAddress().substring(2);
 
       const blockBatch = 10000;
-      const scanBlockStart = this.wallet.network === NetworkType.Mainnet ? 412000 : 0; // first smartbch transactions appear around here
+      const scanBlockStart =
+        this.wallet.network === NetworkType.Mainnet ? 412000 : 0; // first smartbch transactions appear around here
       const scanBlockStop = now;
 
       for (let i = scanBlockStart; i < scanBlockStop; i += blockBatch) {
         const incomingLogs = this.wallet.provider!.getLogs({
           fromBlock: i,
           toBlock: i + blockBatch - 1,
-          topics: [
-            sep20TransferTopic,
-            null,
-            addressTopic
-          ]
+          topics: [sep20TransferTopic, null, addressTopic],
         });
 
-        const outgoingLogs = this. wallet.provider!.getLogs({
+        const outgoingLogs = this.wallet.provider!.getLogs({
           fromBlock: i,
           toBlock: i + blockBatch - 1,
-          topics: [
-            sep20TransferTopic,
-            addressTopic
-          ]
+          topics: [sep20TransferTopic, addressTopic],
         });
         const result = await Promise.all([incomingLogs, outgoingLogs]);
 
-        tokenIds = tokenIds.concat([...result[0], ...result[1]].map(val => val.address).filter((val, index, arr) => arr.indexOf(val) === index));
+        tokenIds = tokenIds.concat(
+          [...result[0], ...result[1]]
+            .map((val) => val.address)
+            .filter((val, index, arr) => arr.indexOf(val) === index)
+        );
 
         if (options.progressCallback) {
-          const progress = (i - scanBlockStart)/(scanBlockStop - scanBlockStart);
+          const progress =
+            (i - scanBlockStart) / (scanBlockStop - scanBlockStart);
           options.progressCallback(progress);
         }
       }
 
-      tokenIds = tokenIds.filter((val, index, arr) => arr.indexOf(val) === index);
+      tokenIds = tokenIds.filter(
+        (val, index, arr) => arr.indexOf(val) === index
+      );
       Sep20.addressTokens.set(this.getDepositAddress(), tokenIds);
     }
 
-    let balances = await Promise.all(tokenIds.map(val => this.getBalance(val)));
+    let balances = await Promise.all(
+      tokenIds.map((val) => this.getBalance(val))
+    );
     if (options.hideEmpty) {
-      balances = balances.filter(val => val.value.gt(0));
+      balances = balances.filter((val) => val.value.gt(0));
     }
 
     return balances;

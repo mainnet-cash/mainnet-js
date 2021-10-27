@@ -3,12 +3,15 @@ import { SmartBchWallet, Contract } from ".";
 import { NetworkType } from "mainnet-js";
 
 export class FaucetContract extends Contract {
-
   constructor(address: string, network: NetworkType.Mainnet) {
     super(address, FaucetContract.abi, network);
-  };
+  }
 
-  static async deployFaucet(signer: SmartBchWallet, value: ethers.BigNumber, overrides: ethers.CallOverrides = {}) {
+  static async deployFaucet(
+    signer: SmartBchWallet,
+    value: ethers.BigNumber,
+    overrides: ethers.CallOverrides = {}
+  ) {
     overrides.value = value;
     return Contract.deploy(signer, FaucetContract.script, overrides);
   }
