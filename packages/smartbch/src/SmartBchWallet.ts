@@ -122,6 +122,8 @@ export class SmartBchWallet extends BaseWallet {
       );
     }
 
+    await ethereum.enable();
+
     try {
       await ethereum.request({
         method: "wallet_switchEthereumChain",

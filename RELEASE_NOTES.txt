@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.4.27
+
+- Bugfix: put back web3 browser support enabling statement
+
 0.4.26
 
 - SmartBch wallets use https provider connection in browser
