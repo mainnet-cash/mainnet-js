@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { NetworkType } from "mainnet-js";
+import { Mainnet, NetworkType } from "mainnet-js";
 
 export let defaultServers = {
   EthMainnet: ["https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
@@ -14,7 +14,10 @@ export let defaultServers = {
 export function getNetworkProvider(
   network: NetworkType = NetworkType.Mainnet
 ): ethers.providers.BaseProvider {
-  const url = defaultServers[network][0] || "";
+  let url = defaultServers[network][0] || "";
+  if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.browser) {
+    url = defaultServers[network].filter(val => val.indexOf("https://") === 0)[0] || url;
+  }
   switch (network as any) {
     case "EthMainnet": {
       return new ethers.providers.JsonRpcProvider(url);

@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.4.26
+
+- SmartBch wallets use https provider connection in browser
+
 0.4.25
 
 - Add testnet faucet for SmartBch and SEP20 tokens (visit https://rest-unstable.mainnet.cash/faucet.html)

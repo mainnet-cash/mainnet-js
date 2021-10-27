@@ -126,7 +126,6 @@
       },
 
       async addToMetamask(tokenId) {
-        console.log(tokenId);
         const wallet = await TestNetSmartBchWallet.newRandom();
         const info = await wallet.sep20.getTokenInfo(tokenId);
 
@@ -206,7 +205,6 @@
 
     mounted: async function () {
       (await TestNetSmartBchWallet.newRandom()).provider.on('block', async (blockNumber) => {
-        console.log(blockNumber);
         await this.update();
       });
       this.update(true);
