@@ -13,6 +13,7 @@ let aliceWif;
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
+      console.log(process.env.API_KEY)
       if (process.env.PRIVATE_WIF) {
         alice = process.env.ADDRESS!;
         aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
@@ -310,6 +311,48 @@ describe("Webhook worker tests", () => {
           expect(
             Webhook.debug.responses["http://example.com/watchBalance"].length
           ).toBe(1);
+          expect(worker.activeHooks.size).toBe(0);
+
+          resolve(true);
+        }, 3000)
+      );
+    } catch (e: any) {
+      console.log(e, e.stack, e.message);
+      throw e;
+    }
+  });
+
+  test("Test hook signature", async () => {
+    try {
+      const aliceWallet = await RegTestWallet.fromId(aliceWif);
+      const bobWallet = await RegTestWallet.newRandom();
+      await worker.registerWebhook({
+        cashaddr: bobWallet.cashaddr!,
+        url: "http://example.com/watchBalance",
+        type: WebhookType.balance,
+        recurrence: WebhookRecurrence.once,
+      });
+
+      await Promise.all([
+        aliceWallet.send([
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ]),
+        bobWallet.waitForTransaction(),
+      ]);
+
+      // return funds
+      // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
+
+      await new Promise((resolve) =>
+        setTimeout(async () => {
+          console.log(Webhook.debug.responses)
+          // expect(
+            
+          // ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);

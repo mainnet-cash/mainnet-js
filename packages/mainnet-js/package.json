@@ -43,7 +43,6 @@
     "axios": "^0.21.1",
     "bchaddrjs-slp": "^0.2.12",
     "bigint-polyfill": "^0.1.0",
-    "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
     "bip39": "^3.0.3",
     "buffer": "^6.0.3",

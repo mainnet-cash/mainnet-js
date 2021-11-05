@@ -46,6 +46,7 @@
     "demo:report:view": "npx reload --dir=packages/demo/public/",
     "docs": "npx typedoc",
     "test": "node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --config jest.config.js  --logHeapUsage  --forceExit",
+    "test:webhook": "SKIP_REGTEST_INIT=1 node --max-old-space-size=8000  --expose-gc ./node_modules/jest/bin/jest.js --runInBand  --config jest.config.js  --logHeapUsage  --forceExit Webhook",
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
     "test:rest": "yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",

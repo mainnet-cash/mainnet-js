@@ -1,5 +1,7 @@
 import SqlProvider from "../db/SqlProvider";
 import { TxI } from "../interface";
+import { instantiateSha256, utf8ToBin, binToBase64 } from "@bitauth/libauth";
+import { getRuntimePlatform } from "../util";
 
 const axios = require("axios").default;
 
@@ -31,7 +33,7 @@ export class Webhook {
   tx_seen!: TxI[]; // bch only
   tokenId?: string; // slp only
   expires_at!: Date;
-
+  signature?: string;
   db!: SqlProvider;
 
   constructor(hook: Webhook | Object) {
@@ -52,17 +54,32 @@ export class Webhook {
 
   async post(data: any): Promise<boolean> {
     try {
+
+      console.log(data)
+      if(getRuntimePlatform() === 'node'){
+        data.signature = await this.getSig(data)
+      }
+      console.log(data)
       await axios.post(this.url, data);
-      // console.debug("Posted webhook", this.url, data);
+      console.debug("Posted webhook", this.url, data);
       return true;
     } catch (e: any) {
       if (e.message && e.message.status === 200) {
         return true;
       }
 
-      // console.debug("Failed to post webhook", this.url, e);
+      console.debug("Failed to post webhook", this.url, e);
       return false;
     }
+  }
+
+  async getSig(data:any):Promise<string>{
+
+    let msg = JSON.stringify(data, Object.keys(data).sort());
+    let keyedMsgBytes = utf8ToBin(process.env.API_KEY+msg)
+    const sha256 = await instantiateSha256()
+    let sig = 'sha256='+ binToBase64(sha256.hash(keyedMsgBytes))
+    return sig
   }
 
   //#region debug
