@@ -13,7 +13,7 @@ let aliceWif;
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
-      console.log(process.env.API_KEY)
+      console.log(process.env.API_KEY);
       if (process.env.PRIVATE_WIF) {
         alice = process.env.ADDRESS!;
         aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
@@ -349,9 +349,9 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          console.log(Webhook.debug.responses)
+          console.log(Webhook.debug.responses);
           // expect(
-            
+
           // ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
