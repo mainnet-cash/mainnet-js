@@ -37,4 +37,10 @@ describe("Gspp Provider tests", () => {
     );
     expect(rotate(binToHex(base64ToBin(resultOracle.tokenid)))).toBe(tokenId);
   });
+
+  test("Test graphsearch status", async () => {
+    const provider = new GsppProvider(Network.MAINNET);
+    const resultStatus = await provider.Status();
+    expect(resultStatus.block_height).toBeGreaterThan(0);
+  });
 });

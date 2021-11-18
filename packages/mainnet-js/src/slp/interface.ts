@@ -37,6 +37,19 @@ export interface GsppTx {
   txHash: string;
 }
 
+export interface GsppStatus {
+  block_height: number;
+  best_block_hash: string;
+  last_incoming_zmq_tx_unix: string;
+  last_outgoing_zmq_tx_unix: string;
+  last_incoming_zmq_tx: string;
+  last_outgoing_zmq_tx: string;
+  last_incoming_zmq_blk_unix: string;
+  last_outgoing_zmq_blk_unix: string;
+  last_incoming_zmq_blk_size: string;
+  last_outgoing_zmq_blk_size: string;
+}
+
 export interface SlpTxI extends TxI {
   details: SlpDbTx | GsppTx;
 }

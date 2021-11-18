@@ -1,3 +1,13 @@
+// Slp get token list
+// prettier-ignore
+export const SlpEmptyTemplate = () => ({
+    "v": 3,
+    "q": {
+      "find": {},
+      "limit": 1
+    }
+})
+
 // Slp Utxos for bch operation, to prevent accident burning of tokens and baton
 // prettier-ignore
 export const SlpAllUtxosTemplate = (slpaddr: string) => ({

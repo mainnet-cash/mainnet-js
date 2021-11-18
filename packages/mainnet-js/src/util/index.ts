@@ -13,6 +13,7 @@ export { sanitizeUnit } from "./sanitizeUnit";
 export { getRandomInt } from "./randomInt";
 import * as randomValues from "./randomValues";
 export { randomValues };
+export { status } from "./status"
 export { sumUtxoValue } from "./sumUtxoValue";
 export {
   BalanceResponse,

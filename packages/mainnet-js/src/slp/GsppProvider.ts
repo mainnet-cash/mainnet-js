@@ -1,5 +1,6 @@
 import { Network, TxI } from "../interface";
 import {
+  GsppStatus,
   GsppTx,
   SlpTokenBalance,
   SlpTokenInfo,
@@ -56,6 +57,13 @@ export class GsppProvider implements SlpProvider {
       if (process.env.GSPP_REGTEST_EVENTS)
         this.servers.regtest.eventSource = process.env.GSPP_REGTEST_EVENTS;
     }
+  }
+
+  // all oupoints, including mint batons
+  async Status(): Promise<GsppStatus> {
+    return (
+      await this.GsppQuery({}, "v1/graphsearch/status")
+    ) as GsppStatus;
   }
 
   // all oupoints, including mint batons

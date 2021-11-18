@@ -10,6 +10,7 @@ import {
 import {
   SlpAllUtxosTemplate,
   SlpAddressTransactionHistoryTemplate,
+  SlpEmptyTemplate,
   SlpWaitForTransactionTemplate,
   SlpBatonUtxosTemplate,
   SlpSpendableUtxosTemplate,
@@ -72,6 +73,11 @@ export class SlpDbProvider implements SlpProvider {
       if (process.env.SLPDB_REGTEST_EVENTS)
         this.servers.regtest.eventSource = process.env.SLPDB_REGTEST_EVENTS;
     }
+  }
+
+  // all oupoints, including mint batons
+  async Status(): Promise<any> {
+    return (await this.SlpDbQuery(SlpEmptyTemplate())).g;
   }
 
   // all oupoints, including mint batons
