@@ -37,5 +37,3 @@ export const clusterParams = {
     timeout: 5000,
   },
 };
-
-

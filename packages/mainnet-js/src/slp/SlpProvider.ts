@@ -6,10 +6,9 @@ export type SlpCancelWatchFn = () => Promise<void>;
 export type SlpWatchBalanceCallback = (balance: SlpTokenBalance) => void;
 
 export interface SlpProvider {
-
   // Get server status
   Status(): Promise<any>;
-  
+
   // all oupoints, including mint batons
   SlpOutpoints(slpaddr: string): Promise<String[]>;
 

@@ -1,4 +1,4 @@
-import {getRuntimePlatform, RuntimePlatform}  from "../util/index";
+import { getRuntimePlatform, RuntimePlatform } from "../util/index";
 import * as primary from "./constant";
 
 let mainnetServers: string[],
@@ -6,8 +6,6 @@ let mainnetServers: string[],
   regtestServers: string[];
 
 export function getDefaultServers() {
-
-
   if (getRuntimePlatform() === RuntimePlatform.node) {
     mainnetServers = process.env.ELECTRUM
       ? process.env.ELECTRUM.split(",")

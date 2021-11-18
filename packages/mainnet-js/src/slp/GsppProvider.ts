@@ -61,9 +61,7 @@ export class GsppProvider implements SlpProvider {
 
   // all oupoints, including mint batons
   async Status(): Promise<GsppStatus> {
-    return (
-      await this.GsppQuery({}, "v1/graphsearch/status")
-    ) as GsppStatus;
+    return (await this.GsppQuery({}, "v1/graphsearch/status")) as GsppStatus;
   }
 
   // all oupoints, including mint batons
