@@ -2,6 +2,7 @@ export { amountInSatoshi } from "./amountInSatoshi";
 export { asSendRequestObject } from "./asSendRequestObject";
 export { btoa, atob } from "./base64";
 export { convert, convertObject } from "./convert";
+export { convertLegacy, convertLegacyObject } from "./convertLegacy";
 export { delay } from "./delay";
 export { getRuntimePlatform, RuntimePlatform } from "./getRuntimePlatform";
 export { getUsdRate } from "./getUsdRate";

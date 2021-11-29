@@ -29,4 +29,15 @@ describe("Test Util Endpoints", () => {
     expect(convertResp.statusCode).toEqual(200);
     expect(convertResp.text).toEqual(rate.toString());
   });
+
+
+
+  it("Should convert legacy address", async () => {
+
+    const convertLegacyResp = await request(app).post("/util/convert/legacy").send({
+      legacyAddress: "3NFvYKuZrxTDJxgqqJSfouNHjT1dAG1Fta",
+    });
+    expect(convertLegacyResp.statusCode).toEqual(200);
+    expect(convertLegacyResp.text).toEqual("bitcoincash:prseh0a4aejjcewhc665wjqhppgwrz2lw5txgn666a");
+  });
 });

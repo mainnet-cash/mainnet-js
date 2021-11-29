@@ -13,7 +13,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.4.28
+  version: 0.4.29
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -471,7 +471,27 @@ paths:
       summary: convert between units
       tags:
         - util
-
+  /util/convert/legacy:
+    post:
+      operationId: convertLegacy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConvertLegacyRequest"
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ConvertLegacyResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Convert a legacy address to a cashaddress
+      tags:
+        - util
   /wallet/create:
     post:
       operationId: createWallet
@@ -2327,7 +2347,27 @@ components:
       required:
         - value
         - from
-        - to                
+        - to          
+    ConvertLegacyRequest:
+      properties:
+        legacyAddress:
+          description:
+            Legacy address to be converted
+          type: string
+        prefix:
+          description:
+            Network address prefix, automatically detected for "bitcoincash" & "bchtest", required otherwise.
+          type: string          
+      required:
+        - legacyAddress   
+    ConvertLegacyResponse:
+      properties:
+        cashaddr:
+          description:
+            Cashaddr for the legacy address.
+          type: string       
+      required:
+        - legacyAddress          
     WalletRequest:
       example:
         type: seed

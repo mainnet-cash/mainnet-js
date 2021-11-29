@@ -21,6 +21,27 @@ const convert = ({ convertRequest }) => new Promise(
   },
 );
 
+
+/**
+* convert legacy bitcoin address to cashaddr
+*
+* convertLegacyRequest ConvertLegacyRequest 
+* returns string
+* */
+const convertLegacy = ({ convertLegacyRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.Mainnet.convertLegacyObject(convertLegacyRequest)
+      resolve(Service.successResponse(resp.toString()));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+
 module.exports = {
   convert,
+  convertLegacy
 };
