@@ -1,6 +1,5 @@
 import { convertLegacy } from "./convertLegacy";
 
-
 test("Should a mainnet p2sh base58 address to cashaddr", async () => {
   let legacyBase58Address = "3NFvYKuZrxTDJxgqqJSfouNHjT1dAG1Fta";
   let cashaddr = await convertLegacy(legacyBase58Address);
@@ -57,9 +56,8 @@ test("Should convert regtest p2sh address to cashaddr", async () => {
 
 test("Should throw error on unknown character", () => {
   expect(async () => {
-    await convertLegacy("1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62I")
-  }).rejects.toThrow("Base58Address error: address may only contain valid base58 characters");
+    await convertLegacy("1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62I");
+  }).rejects.toThrow(
+    "Base58Address error: address may only contain valid base58 characters"
+  );
 });
-
-
-
