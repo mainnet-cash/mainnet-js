@@ -894,7 +894,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     expect(await bob.getBalance("sat")).toBe(1000);
 
     expect(
-      await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })
+      (await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })).sat
     ).toBe(780);
     await bob.sendMax(alice.getDepositAddress());
     expect(await bob.getBalance("sat")).toBe(0);
