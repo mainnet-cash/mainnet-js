@@ -738,13 +738,6 @@ describe("Test Wallet Endpoints", () => {
         });
       expect(result.body.sat).toBe(1546);
 
-      result = await request(app)
-        .post("/wallet/max_amount_to_send")
-        .send({
-          walletId: bobsWalletId
-        });
-      expect(result.body.sat).toBe(1546);
-
       // slpSemiAware
       result = await request(app)
         .post("/wallet/balance")
@@ -760,7 +753,7 @@ describe("Test Wallet Endpoints", () => {
           walletId: bobsWalletId,
           slpSemiAware: true
         });
-      expect(result.body.sat).toBe(1000);
+      expect(result.body.sat).toBe(880);
 
 
       result = await request(app)

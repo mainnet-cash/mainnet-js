@@ -508,8 +508,7 @@ export class Wallet extends BaseWallet {
     } else if (this._slpSemiAware) {
       const bchUtxos: UtxoI[] = await this.provider!.getUtxos(address);
       return bchUtxos.filter(
-        (bchutxo) =>
-          bchutxo.satoshis > DUST_UTXO_THRESHOLD
+        (bchutxo) => bchutxo.satoshis > DUST_UTXO_THRESHOLD
       );
     } else {
       return await this.provider!.getUtxos(address);
