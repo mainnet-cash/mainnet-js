@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.4.28
+  version: 0.4.29
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -1772,12 +1772,29 @@ components:
       - $ref: '#/components/schemas/UnitType'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        slpAware: true
+        slpSemiAware: true
       properties:
         walletId:
           description: |
             The walletId to get a balance for.
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
+        slpAware:
+          default: false
+          description: If you have any SLP tokens on the address, you should set `slpAware`
+            to `true` to prevent accidental token burning This flag activates utxo
+            checking against an external slp indexer So far this option is not switched
+            on by default
+          example: true
+          type: boolean
+        slpSemiAware:
+          default: false
+          description: This flag requires an utxo to have more than 546 sats to be
+            spendable and counted in the balance This option is not switched on by
+            default
+          example: true
+          type: boolean
       required:
       - walletId
     BalanceResponse:
@@ -2374,6 +2391,7 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         output_count: 0
+        options: '{}'
       properties:
         walletId:
           description: |
@@ -2386,6 +2404,23 @@ components:
             \            \n"
           format: int32
           type: integer
+        options:
+          properties:
+            slpAware:
+              default: false
+              description: If you have any SLP tokens on the address, you should set
+                `slpAware` to `true` to prevent accidental token burning This flag
+                activates utxo checking against an external slp indexer So far this
+                option is not switched on by default
+              example: true
+              type: boolean
+            slpSemiAware:
+              default: false
+              description: This flag requires an utxo to have more than 546 sats to
+                be spendable and counted in the balance This option is not switched
+                on by default
+              example: true
+              type: boolean
       required:
       - walletId
     SerializedWallet:
@@ -2645,8 +2680,16 @@ components:
         slpAware:
           default: false
           description: If you have any SLP tokens on the address, you should set `slpAware`
-            to `true` to prevent accidental token burning So far this option is not
-            switched on by default
+            to `true` to prevent accidental token burning This flag activates utxo
+            checking against an external slp indexer So far this option is not switched
+            on by default
+          example: true
+          type: boolean
+        slpSemiAware:
+          default: false
+          description: This flag requires an utxo to have more than 546 sats to be
+            spendable and counted in the balance This option is not switched on by
+            default
           example: true
           type: boolean
         queryBalance:
