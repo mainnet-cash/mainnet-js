@@ -169,8 +169,8 @@ export class Wallet extends BaseWallet {
    */
   public explorerUrl(txId: string) {
     const explorerUrlMap = {
-      mainnet: "https://explorer.bitcoin.com/bch/tx/",
-      testnet: "https://explorer.bitcoin.com/tbch/tx/",
+      mainnet: "https://blockchair.com/bitcoin-cash/transaction/",
+      testnet: "https://www.blockchain.com/bch-testnet/tx/",
       regtest: "",
     };
 
