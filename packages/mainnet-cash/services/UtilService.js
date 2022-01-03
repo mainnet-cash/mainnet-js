@@ -21,6 +21,35 @@ const convert = ({ convertRequest }) => new Promise(
   },
 );
 
+const getAddrsByXpubKey = ({getAddrsByXpubKeyRequest})=> new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.Mainnet.getAddrsByXpubKeyObject(getAddrsByXpubKeyRequest)
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+
+const getXpubKeyInfo = ({getXpubKeyInfoRequest})=> new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.Mainnet.getXpubKeyInfoObject(getXpubKeyInfoRequest)
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+
+
 module.exports = {
   convert,
+  getAddrsByXpubKey,
+  getXpubKeyInfo
 };

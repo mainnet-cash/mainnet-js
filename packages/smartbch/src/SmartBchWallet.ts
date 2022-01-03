@@ -54,6 +54,7 @@ export class SmartBchWallet extends BaseWallet {
   publicKey?: string;
   mnemonic?: string;
   derivationPath: string = "m/44'/60'/0'/0/0";
+  parentDerivationPath: string = "m/44'/60'/0'";
   _sep20?: Sep20;
 
   //#region Accessors
@@ -292,6 +293,12 @@ You can add it manually:
 
     if (derivationPath) {
       this.derivationPath = derivationPath;
+
+      // If the derivation path is for the first account child, set the parent derivation path
+      let path = derivationPath.split("/")
+      if(path.slice(-2).join("/")=="0/0"){
+        this.parentDerivationPath = path.slice(0,-2).join("/")
+      }
     }
 
     this.ethersWallet = ethers.Wallet.fromMnemonic(
@@ -319,7 +326,7 @@ You can add it manually:
     this.ethersWallet = new ethers.Wallet(secret).connect(this.provider!);
     this.ethersSigner = this.ethersWallet;
     this.walletType = WalletTypeEnum.PrivateKey;
-    await this.deriveInfo();
+    await this.deriveInfo()
     return this;
   }
   //#endregion Protected implementations

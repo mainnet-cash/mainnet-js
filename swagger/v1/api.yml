@@ -471,7 +471,50 @@ paths:
       summary: convert between units
       tags:
         - util
-
+  /util/get_addrs_by_xpubkey:
+    post:
+      operationId: getAddrsByXpubKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAddrsByXpubKeyRequest"
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/getAddrsByXpubKeyResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Derive heristic determined addresses from an extended public key, per BIP32
+      tags:
+        - util
+  /util/get_xpubkey_info:
+    post:
+      operationId: getXpubKeyInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getXpubKeyInfoRequest"
+        description: Decode information about an extended public key, per BIP32
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getXpubKeyInfoResponse"
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Decode information about an extended public key, per BIP32
+      tags:
+        - util
   /wallet/create:
     post:
       operationId: createWallet
@@ -495,7 +538,6 @@ paths:
       summary: create a new wallet
       tags:
         - wallet
-
   /wallet/replace_named:
     post:
       operationId: replaceNamed
@@ -2327,7 +2369,59 @@ components:
       required:
         - value
         - from
-        - to                
+        - to       
+    getAddrsByXpubKeyRequest:
+      example:
+        xpubkey: xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj
+        path: "0/0"
+        count: 3
+      properties:
+        xpubkey: 
+          type: string
+        path: 
+          type: string
+        count: 
+          type: number
+    getAddrsByXpubKeyResponse:
+      example:
+              [
+                "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59",                
+                "bitcoincash:qp4wzvqu73x22ft4r5tk8tz0aufdz9fescwtpcmhc7",
+                "bitcoincash:qr0kwqzf2h3wvjjhn4pg895lrxwp96wqgyhkksq2nh" 
+                ]
+      type: array
+      items:
+          anyOf:
+            - type: string
+              format: cashaddr
+    getXpubKeyInfoRequest:
+      example:
+        xpubkey: xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj
+      properties:
+        xpubkey: 
+          type: string
+    getXpubKeyInfoResponse:
+      example:
+        version: 'mainnet'
+        depth: 3
+        parentFingerprint: '155bca59'
+        childNumber: 2147483648,
+        chain: '3da4bc190a2680111d31fadfdc905f2a7f6ce77c6f109919116f253d43445219'
+        data: '03774c910fcf07fa96886ea794f0d5caed9afe30b44b83f7e213bb92930e7df4bd'
+        fingerprint: '6cc9f252'
+      properties:
+        version: 
+          type: string  
+        depth: 
+          type: number
+        parentFingerprint:
+          type: string   
+          description: the first four bytes of the public key as hex
+        data:
+          type: string
+          description: the public key as hex
+        chain:
+          description: The chain code, 32 bytes of entrophy extended for the public key  
     WalletRequest:
       example:
         type: seed

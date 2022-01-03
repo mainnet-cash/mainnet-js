@@ -23,6 +23,7 @@ export interface WalletResponseI {
   privkey?: string;
   seed?: string;
   derivationPath?: string;
+  parentDerivationPath?: string;
 }
 
 export interface WalletInfoI {
@@ -32,6 +33,8 @@ export interface WalletInfoI {
   network: NetworkEnum;
   seed?: string;
   derivationPath?: string;
+  parentDerivationPath?: string;
+  parentXPubKey?: string;
   publicKey?: string;
   publicKeyHash?: string;
   privateKey?: string;
@@ -51,6 +54,7 @@ export interface SendRequestOptionsI {
 export interface MnemonicI {
   seed: string;
   derivationPath: string;
+  parentDerivationPath: string;
 }
 
 export interface WalletI {

@@ -14,6 +14,8 @@ import { WalletTypeEnum } from "./enum";
 export class BaseWallet implements WalletI {
   provider?: any;
   derivationPath: string = "m/44'/0'/0'/0/0";
+  parentDerivationPath: string = "m/44'/0'/0'";
+  parentXPubKey?: string; 
   mnemonic?: string;
   address?: string;
   privateKey?: any;
@@ -69,6 +71,7 @@ export class BaseWallet implements WalletI {
     return {
       seed: this.mnemonic,
       derivationPath: this.derivationPath,
+      parentDerivationPath: this.parentDerivationPath
     };
   }
   //#endregion Accessors
@@ -182,7 +185,7 @@ export class BaseWallet implements WalletI {
   /**
    * replaceNamed - replace (recover) named wallet with a new walletId
    *
-   * If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
+   * If wallet with a provided name does not exist yet, it will be created with a `walletId` supplied
    * If wallet exists it will be overwritten without exception
    *
    * @param name   user friendly wallet alias

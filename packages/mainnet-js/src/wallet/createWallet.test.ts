@@ -66,6 +66,8 @@ describe(`Named Wallets`, () => {
       isTestnet: true,
       name: "",
       network: "testnet",
+      parentDerivationPath: undefined,
+      parentXPubKey: undefined,
       privateKey: undefined,
       privateKeyWif: undefined,
       publicKey: undefined,
