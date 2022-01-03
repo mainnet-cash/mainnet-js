@@ -101,6 +101,7 @@ import { SignedMessageI, SignedMessage } from "../message";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { getXPubKey } from "../util/getXPubKey";
+import { DUST_UTXO_THRESHOLD } from "../constant";
 
 //#endregion Imports
 
@@ -122,7 +123,8 @@ export class Wallet extends BaseWallet {
   publicKeyHash?: Uint8Array;
   networkPrefix: CashAddressNetworkPrefix;
   _slp?: Slp;
-  _slpAware: boolean = false;
+  _slpAware: boolean = false; // a flag which activates utxo checking against an external slp indexer
+  _slpSemiAware: boolean = false; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
   _util?: Util;
   static signedMessage: SignedMessageI = new SignedMessage();
 
@@ -161,6 +163,11 @@ export class Wallet extends BaseWallet {
     return this;
   }
 
+  public slpSemiAware(value: boolean = true): Wallet {
+    this._slpSemiAware = value;
+    return this;
+  }
+
   public getNetworkProvider(network: Network = Network.MAINNET) {
     return getNetworkProvider(network);
   }
@@ -173,8 +180,8 @@ export class Wallet extends BaseWallet {
    */
   public explorerUrl(txId: string) {
     const explorerUrlMap = {
-      mainnet: "https://explorer.bitcoin.com/bch/tx/",
-      testnet: "https://explorer.bitcoin.com/tbch/tx/",
+      mainnet: "https://blockchair.com/bitcoin-cash/transaction/",
+      testnet: "https://www.blockchain.com/bch-testnet/tx/",
       regtest: "",
     };
 
@@ -571,6 +578,11 @@ export class Wallet extends BaseWallet {
             (slpOutpoint) => `${bchutxo.txid}:${bchutxo.vout}` === slpOutpoint
           ) === -1
       );
+    } else if (this._slpSemiAware) {
+      const bchUtxos: UtxoI[] = await this.provider!.getUtxos(address);
+      return bchUtxos.filter(
+        (bchutxo) => bchutxo.satoshis > DUST_UTXO_THRESHOLD
+      );
     } else {
       return await this.provider!.getUtxos(address);
     }
@@ -623,7 +635,7 @@ export class Wallet extends BaseWallet {
   // Gets balance from fulcrum
   public async getBalanceFromProvider(): Promise<number> {
     // TODO not sure why getting the balance from a provider doesn't work
-    if (this._slpAware) {
+    if (this._slpAware || this._slpSemiAware) {
       return await this.getBalanceFromUtxos();
     } else {
       return await this.provider!.getBalance(this.cashaddr!);
@@ -734,6 +746,10 @@ export class Wallet extends BaseWallet {
 
     if (params.options && params.options.slpAware) {
       this._slpAware = true;
+    }
+
+    if (params.options && params.options.slpSemiAware) {
+      this._slpSemiAware = true;
     }
 
     // get inputs
@@ -998,6 +1014,10 @@ export class Wallet extends BaseWallet {
 
     if (options && options.slpAware) {
       this._slpAware = true;
+    }
+
+    if (options && options.slpSemiAware) {
+      this._slpSemiAware = true;
     }
 
     // get inputs from options or query all inputs

@@ -712,4 +712,84 @@ describe("Test Wallet Endpoints", () => {
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
     expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
   });
+
+  /**
+   * slpSemiAware integration test
+   */
+   it("Should return the balance from a watch only regtest wallet", async () => {
+    const bobsWalletResp = await request(app).post("/wallet/create").send({
+      network: "regtest",
+    });
+    const bobsCashaddr = bobsWalletResp.body.cashaddr;
+    const bobsWalletId = bobsWalletResp.body.walletId;
+
+
+    await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        to: [
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 546,
+          },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 1000,
+          },
+        ],
+      });
+
+      let result;
+      result = await request(app)
+        .post("/wallet/balance")
+        .send({
+          walletId: bobsWalletId
+        });
+      expect(result.body.sat).toBe(1546);
+
+      // slpSemiAware
+      result = await request(app)
+        .post("/wallet/balance")
+        .send({
+          walletId: bobsWalletId,
+          slpSemiAware: true
+        });
+      expect(result.body.sat).toBe(1000);
+
+      result = await request(app)
+        .post("/wallet/max_amount_to_send")
+        .send({
+          walletId: bobsWalletId,
+          options: { slpSemiAware: true }
+        });
+      expect(result.body.sat).toBe(780);
+
+
+      result = await request(app)
+        .post("/wallet/send_max")
+        .send({
+          walletId: bobsWalletId,
+          cashaddr: process.env.ADDRESS as string,
+          options: { slpSemiAware: true }
+        });
+
+      result = await request(app)
+        .post("/wallet/balance")
+        .send({
+          walletId: bobsWalletId,
+          slpSemiAware: true
+        });
+      expect(result.body.sat).toBe(0);
+
+      result = await request(app)
+        .post("/wallet/balance")
+        .send({
+          walletId: bobsWalletId,
+          slpSemiAware: false
+        });
+      expect(result.body.sat).toBe(546);
+  });
 });

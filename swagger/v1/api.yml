@@ -1778,6 +1778,21 @@ components:
           example: "wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
           description: |
             The walletId to get a balance for.
+        slpAware:
+          type: boolean
+          example: true
+          default: false
+          description:
+            If you have any SLP tokens on the address, you should set `slpAware` to `true` to prevent accidental token burning
+            This flag activates utxo checking against an external slp indexer
+            So far this option is not switched on by default
+        slpSemiAware:
+          type: boolean
+          example: true
+          default: false
+          description:
+            This flag requires an utxo to have more than 546 sats to be spendable and counted in the balance
+            This option is not switched on by default
       allOf:
         - $ref: "#/components/schemas/UnitType"
       required:
@@ -2264,6 +2279,23 @@ components:
             (optional) if sending all funds to multiple addresses, the
             count of the number of address funds will be sent
             to may be included.            
+        options:
+          properties:
+            slpAware:
+              type: boolean
+              example: true
+              default: false
+              description:
+                If you have any SLP tokens on the address, you should set `slpAware` to `true` to prevent accidental token burning
+                This flag activates utxo checking against an external slp indexer
+                So far this option is not switched on by default
+            slpSemiAware:
+              type: boolean
+              example: true
+              default: false
+              description:
+                This flag requires an utxo to have more than 546 sats to be spendable and counted in the balance
+                This option is not switched on by default
       required:
         - walletId
     SerializedWallet:
@@ -2569,7 +2601,15 @@ components:
           default: false
           description:
             If you have any SLP tokens on the address, you should set `slpAware` to `true` to prevent accidental token burning
+            This flag activates utxo checking against an external slp indexer
             So far this option is not switched on by default
+        slpSemiAware:
+          type: boolean
+          example: true
+          default: false
+          description:
+            This flag requires an utxo to have more than 546 sats to be spendable and counted in the balance
+            This option is not switched on by default
         queryBalance:
           type: boolean
           example: false
@@ -2619,7 +2659,7 @@ components:
           $ref: "#/components/schemas/BalanceResponse"
         explorerUrl:
           type: string
-          example: "https://explorer.bitcoin.com/tbch/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
+          example: "https://www.blockchain.com/bch-testnet/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
           description: Web url to a transaction on a block explorer
       type: object
     SendRequestArray:

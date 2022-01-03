@@ -1,6 +1,19 @@
 Newest changes
 --------------
 
+0.4.30
+
+- Update mainnet explorer url to https://blockchair.com/bitcoin-cash/
+- Update testnet explorer url to https://www.blockchain.com/bch-testnet/
+
+0.4.29
+
+- Add `slpSemiAware`: a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
+
+0.4.28
+
+- Bugfix: Round down getMaxAmountToSend()
+
 0.4.27
 
 - Bugfix: put back web3 browser support enabling statement

@@ -401,7 +401,6 @@ describe(`Watch only Wallets`, () => {
       let aliceBalance = await alice.send([
         { cashaddr: alice.cashaddr!, value: 526, unit: "sat" },
       ]);
-      expect(aliceBalance.explorerUrl!).toContain("explorer.bitcoin.com");
       expect(aliceBalance.balance!.sat!).toBeGreaterThan(5000);
     }
   });
@@ -970,5 +969,29 @@ describe(`Wallet extrema behavior regression testing`, () => {
     expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([
       0x6a, 0x4c, 0x00,
     ]);
+  });
+
+  test("Test slpSemiAware", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+    await alice.send([
+      { cashaddr: bob.getDepositAddress(), unit: UnitEnum.SAT, value: 546 },
+      { cashaddr: bob.getDepositAddress(), unit: UnitEnum.SAT, value: 1000 },
+    ]);
+    expect(await bob.getBalance("sat")).toBe(1546);
+    bob.slpSemiAware();
+    expect(await bob.getBalance("sat")).toBe(1000);
+
+    expect(
+      (await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })).sat
+    ).toBe(780);
+    await bob.sendMax(alice.getDepositAddress());
+    expect(await bob.getBalance("sat")).toBe(0);
+
+    bob.slpSemiAware(false);
+    expect(await bob.getBalance("sat")).toBe(546);
+    expect(
+      (await bob.getMaxAmountToSend({ options: { slpSemiAware: false } })).sat
+    ).toBeLessThanOrEqual(546);
   });
 });
