@@ -160,31 +160,24 @@ export class SendResponse {
   }
 }
 
-
 export class XPubKey {
   path: string;
   xPubKey: string;
 
-  constructor({
-    path,
-    xPubKey
-  }:{
-    path: string;
-    xPubKey: string
-  }){
+  constructor({ path, xPubKey }: { path: string; xPubKey: string }) {
     this.path = path;
-    this.xPubKey = xPubKey
+    this.xPubKey = xPubKey;
   }
 
-  public async ready(){
-    await this.xPubKey
-    return this.asObject()
+  public async ready() {
+    await this.xPubKey;
+    return this.asObject();
   }
 
-  public asObject(){
+  public asObject() {
     return {
-      "path": this.path,
-      "xPubKey": this.xPubKey
-    }
+      path: this.path,
+      xPubKey: this.xPubKey,
+    };
   }
 }

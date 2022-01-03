@@ -295,9 +295,9 @@ You can add it manually:
       this.derivationPath = derivationPath;
 
       // If the derivation path is for the first account child, set the parent derivation path
-      let path = derivationPath.split("/")
-      if(path.slice(-2).join("/")=="0/0"){
-        this.parentDerivationPath = path.slice(0,-2).join("/")
+      let path = derivationPath.split("/");
+      if (path.slice(-2).join("/") == "0/0") {
+        this.parentDerivationPath = path.slice(0, -2).join("/");
       }
     }
 
@@ -326,7 +326,7 @@ You can add it manually:
     this.ethersWallet = new ethers.Wallet(secret).connect(this.provider!);
     this.ethersSigner = this.ethersWallet;
     this.walletType = WalletTypeEnum.PrivateKey;
-    await this.deriveInfo()
+    await this.deriveInfo();
     return this;
   }
   //#endregion Protected implementations

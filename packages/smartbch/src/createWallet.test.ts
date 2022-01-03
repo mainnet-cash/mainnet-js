@@ -30,9 +30,9 @@ describe(`Named Wallets`, () => {
   });
   test("Create a named smartbch wallet", async () => {
     const req = {
-      name:"sbch Bob's Regtest Wallet 2",
-      type:"seed",
-      network:"regtest"
+      name: "sbch Bob's Regtest Wallet 2",
+      type: "seed",
+      network: "regtest",
     } as WalletRequestI;
     let w = await createWallet(req);
     expect(w.getDepositAddress()).toMatch(/0x/);

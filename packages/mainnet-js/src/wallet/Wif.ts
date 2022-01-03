@@ -1,6 +1,12 @@
 //#region Imports
 // Stable
-import { deriveHdPublicNodeIdentifier, encodeHdPublicKey, HdKeyNetwork, instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
+import {
+  deriveHdPublicNodeIdentifier,
+  encodeHdPublicKey,
+  HdKeyNetwork,
+  instantiateSecp256k1,
+  instantiateSha256,
+} from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -41,7 +47,7 @@ import {
   SendResponse,
   UtxoItem,
   UtxoResponse,
-  XPubKey
+  XPubKey,
 } from "./model";
 
 import {
@@ -184,7 +190,9 @@ export class Wallet extends BaseWallet {
       network: this.network as any,
       seed: this.mnemonic ? this.getSeed().seed : undefined,
       derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
-      parentDerivationPath: this.mnemonic ? this.getSeed().parentDerivationPath : undefined,
+      parentDerivationPath: this.mnemonic
+        ? this.getSeed().parentDerivationPath
+        : undefined,
       parentXPubKey: this.parentXPubKey ? this.parentXPubKey : undefined,
       publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
       publicKeyHash: binToHex(this.publicKeyHash!),
@@ -319,11 +327,14 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateMnemonic() {
-
     this.mnemonic = generateMnemonic();
     let seed = mnemonicToSeedSync(this.mnemonic!);
-    let network = (this.isTestnet ? "testnet": "mainnet")
-    this.parentXPubKey = await getXPubKey(seed, this.parentDerivationPath, network)
+    let network = this.isTestnet ? "testnet" : "mainnet";
+    this.parentXPubKey = await getXPubKey(
+      seed,
+      this.parentDerivationPath,
+      network
+    );
 
     const crypto = await instantiateBIP32Crypto();
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
@@ -331,13 +342,9 @@ export class Wallet extends BaseWallet {
       throw Error("Invalid private key derived from mnemonic seed");
     }
 
-    let zerothChild = deriveHdPath(
-      crypto,
-      hdNode,
-      this.derivationPath
-    );
-    if(typeof zerothChild === "string"){
-      throw Error(zerothChild)
+    let zerothChild = deriveHdPath(crypto, hdNode, this.derivationPath);
+    if (typeof zerothChild === "string") {
+      throw Error(zerothChild);
     }
     this.privateKey = zerothChild.privateKey;
 
@@ -378,24 +385,24 @@ export class Wallet extends BaseWallet {
       this.derivationPath = derivationPath;
 
       // If the derivation path is for the first account child, set the parent derivation path
-      let path = derivationPath.split("/")
-      if(path.slice(-2).join("/")=="0/0"){
-        this.parentDerivationPath = path.slice(0,-2).join("/")
+      let path = derivationPath.split("/");
+      if (path.slice(-2).join("/") == "0/0") {
+        this.parentDerivationPath = path.slice(0, -2).join("/");
       }
     }
 
-    let zerothChild = deriveHdPath(
-      crypto,
-      hdNode,
-      this.derivationPath
-    );
-    if(typeof zerothChild === "string"){
-      throw Error(zerothChild)
+    let zerothChild = deriveHdPath(crypto, hdNode, this.derivationPath);
+    if (typeof zerothChild === "string") {
+      throw Error(zerothChild);
     }
     this.privateKey = zerothChild.privateKey;
-    
-    let network = (this.isTestnet ? "testnet": "mainnet")
-    this.parentXPubKey = await getXPubKey(seed, this.parentDerivationPath, network)
+
+    let network = this.isTestnet ? "testnet" : "mainnet";
+    this.parentXPubKey = await getXPubKey(
+      seed,
+      this.parentDerivationPath,
+      network
+    );
 
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
@@ -404,8 +411,6 @@ export class Wallet extends BaseWallet {
 
   // Get common xpub paths from zerothChild privateKey
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
-    
-
     const crypto = await instantiateBIP32Crypto();
     let seed = mnemonicToSeedSync(this.mnemonic!);
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
@@ -413,38 +418,36 @@ export class Wallet extends BaseWallet {
       throw Error("Invalid private key derived from mnemonic seed");
     }
 
-    let result: any[] =[]
-    
-    for(const path of hdPaths){
+    let result: any[] = [];
 
-      if(path==="m"){
-        throw Error("Usage of the root extended public key may lead to loss of funds. Storing or sharing the root public key is strongly discouraged. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications")
+    for (const path of hdPaths) {
+      if (path === "m") {
+        throw Error(
+          "Usage of the root extended public key may lead to loss of funds. Storing or sharing the root public key is strongly discouraged. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+        );
       }
-      let childNode = deriveHdPath(
-        crypto,
-        hdNode,
-        path
-      );
-      if(typeof childNode === "string"){
-        throw Error(childNode)
+      let childNode = deriveHdPath(crypto, hdNode, path);
+      if (typeof childNode === "string") {
+        throw Error(childNode);
       }
-      let node = deriveHdPublicNode(crypto, childNode)
-      if(typeof node === "string"){
-         throw Error(node)
+      let node = deriveHdPublicNode(crypto, childNode);
+      if (typeof node === "string") {
+        throw Error(node);
       }
       let xPubKey = encodeHdPublicKey(crypto, {
         network: this.network as HdKeyNetwork,
         node: node,
-      })
+      });
       let key = new XPubKey({
         path: path,
-        xPubKey: xPubKey
-      })
-      
-      result.push(await key.ready())
-      
+        xPubKey: xPubKey,
+      });
+
+      result.push(await key.ready());
     }
-    return await Promise.all(result).then((result) => {return result})
+    return await Promise.all(result).then((result) => {
+      return result;
+    });
   }
 
   // Initialize a watch only wallet from a cash addr

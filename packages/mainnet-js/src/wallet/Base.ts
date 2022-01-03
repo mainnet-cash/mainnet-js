@@ -15,7 +15,7 @@ export class BaseWallet implements WalletI {
   provider?: any;
   derivationPath: string = "m/44'/0'/0'/0/0";
   parentDerivationPath: string = "m/44'/0'/0'";
-  parentXPubKey?: string; 
+  parentXPubKey?: string;
   mnemonic?: string;
   address?: string;
   privateKey?: any;
@@ -71,7 +71,7 @@ export class BaseWallet implements WalletI {
     return {
       seed: this.mnemonic,
       derivationPath: this.derivationPath,
-      parentDerivationPath: this.parentDerivationPath
+      parentDerivationPath: this.parentDerivationPath,
     };
   }
   //#endregion Accessors
