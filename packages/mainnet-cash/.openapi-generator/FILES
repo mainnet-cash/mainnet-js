@@ -10,6 +10,7 @@ controllers/SmartbchSep20Controller.js
 controllers/SmartbchWalletController.js
 controllers/UtilController.js
 controllers/WalletController.js
+controllers/WalletSignedController.js
 controllers/WalletSlpController.js
 controllers/WalletUtilController.js
 controllers/WebhookController.js

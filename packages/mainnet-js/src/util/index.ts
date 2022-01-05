@@ -10,14 +10,14 @@ export {
   getAddrsByXpubKeyObject,
   getXpubKeyInfo,
   getXpubKeyInfoObject,
-} from "./getAddrsByXpubKey";
+} from "../util/getAddrsByXpubKey";
 export { getRuntimePlatform, RuntimePlatform } from "./getRuntimePlatform";
 export { getUsdRate } from "./getUsdRate";
 export { ExchangeRate } from "../rate/ExchangeRate";
 export { sanitizeAddress } from "./sanitizeAddress";
 export { sanitizeUnit } from "./sanitizeUnit";
 export { getRandomInt } from "./randomInt";
-export { getXPubKey } from "./getXPubKey";
+export { getXPubKey } from "../util/getXPubKey";
 import * as randomValues from "./randomValues";
 export { randomValues };
 export { sumUtxoValue } from "./sumUtxoValue";

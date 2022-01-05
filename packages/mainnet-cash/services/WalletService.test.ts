@@ -492,52 +492,6 @@ describe("Test Wallet Endpoints", () => {
     expect(charlieBalanceResp.body.sat).toBeGreaterThan(1600)
 });
 
- /**
-   * sign message
-   */
- it("Should return a signed message", async () => {
-  const resp = await request(app)
-    .post("/wallet/signed/sign")
-    .send({
-      walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-      message: "test"
-    });
-   expect(resp.statusCode).toBe(200)
-   expect(resp.body!.signature).toBe("IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U=");
-  
-});
-
-/**
-   * verify signed message
-   */
- it("Should verify a signed message", async () => {
-  const resp = await request(app)
-    .post("/wallet/signed/verify")
-    .send({
-      walletId: `watch:regtest:${process.env.ADDRESS}`,
-      message: "test",
-      signature: "IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U="
-    });
-   expect(resp.statusCode).toBe(200)
-   expect(resp.body!.valid).toBe(true);
-});
-
- /**
-   * verify schnorr signed message 
-   */
- it("Should verify a schnorr signed message", async () => {
-  const resp = await request(app)
-    .post("/wallet/signed/verify")
-    .send({
-      walletId: `watch:regtest:${process.env.ADDRESS}`,
-      message: "test",
-      signature: "8vgrWti0BItJ2wlY4s/8bT4jCNjGCLaDAoAWoj/r73Y4xiiLsU8PVVHPDB0MTnMgQzS3+rY1amLgON7lhW0EEA==",
-      publicKey: "BHjUqiocZD/Gig3lRU5HxSDPWWQ1JkdOY7MgFE3p4NWa1BVOWh8oeK0vmwNs4K71d1gVVmkS43hbW3HL16PmtNo="
-    });
-   expect(resp.statusCode).toBe(200)
-   expect(resp.body!.valid).toBe(true);
-});
-
   /**
    * utxos
    */
@@ -791,5 +745,97 @@ describe("Test Wallet Endpoints", () => {
           slpSemiAware: false
         });
       expect(result.body.sat).toBe(546);
+  });
+  /**
+   * xpubkeys should return valid xpubkeys
+   */
+   it("Should return xpubkeys if not provided a path", async () => {
+
+    let resp;
+
+
+    const seedId = `seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon:m/44'/0'/0'/0/0`;
+    resp = await request(app)
+      .post("/wallet/xpubkeys")
+      .send({
+        walletId: seedId,
+    });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toStrictEqual({
+      "xpubkeys": [
+        {
+          "path": "m/0",
+          "xPubKey": "tpubD91aWShAWDihZv8MDnUTBeCorLByKmTtZkDp1oveS5mbpKx8NfGdVLzMLemGkUf4mLWbnYh4uJ1sDMEnS7wxMjyeN5V1zaavLhLXFBFyZSf"
+        },
+        {
+          "path": "m/0'",
+          "xPubKey": "tpubD91aWShJqtFfkVVYVy7MKbjUaDq6drkWJRtnJYDeWdo354d8bfRrvH2WP6afX5oF8PgtfDKVLNd53tCkneiYsJvwrTYc5UvhXoJEeDz3bh1"
+        },
+        {
+          "path": "m/0'/0",
+          "xPubKey": "tpubDB336hWdU8wPh8osn5r2tMfAS9tFddi8385cYYNxmoPveywUB7Sc933W5ynePX3zSo7yddLCaa5bKt9RWUrDEG9tBf3H8tbdCFUj3zvtQ3E"
+        },
+        {
+          "path": "m/0'/0'",
+          "xPubKey": "tpubDB336hWmooUMr6d5fydDSE5SRuqMYu2GboMJN7W1Bu2ohML4kJ2FWcKE3zc6e7nw4VPTsm9b6gg9JXHSGZUmFNNXyxmgTMDHUgzLfG7LzCy"
+        },
+        {
+          "path": "m/0'/0'/0'",
+          "xPubKey": "tpubDD6uFgyUvH2iqB8hKdX8NLZqanjpNhk38yfPjWW4L82Yhx6WxFao1xekJBx9W6hyZSBpE54yAmPUEjegTB9DoAxcVfebh8Ck2rJj2xHvP7H"
+        },
+        {
+          "path": "m/44'/0'/0'",
+          "xPubKey": "tpubDCnFe4aFbkmx3UzTnqBjrFBgnTJMwTrM9Aub6CZe1nXvNgYYmRdHFEzCcJDBA3X5R6i9z3ZaBpacAEGXsR23pWFeuxp3hdh25MqeNGVYNwr"
+        },
+        {
+          "path": "m/44'/0'/0'/0",
+          "xPubKey": "tpubDFWbesvfMfxhNbeAzincx27PYVsecZb2TRac2pXdvpQNEQUiJiZvqqwu58PRjVoEGqdSL1gM8TEGxMrPZh4DVy6GeRnehTjFLtTPKM2SQfb"
+        },
+        {
+          "path": "m/44'/145'/0'",
+          "xPubKey": "tpubDDo2Yq1mwM1HDBxiWfv8Gq7yP7UBVEPnKrLrEgXcbMY1jREqH5qcxhqXiqZnCxMyotTWaMfUGu4LGRdW9oEVTKNe48M65Y4khyPKtRxrQuj"
+        },
+        {
+          "path": "m/44'/145'/0'/0",
+          "xPubKey": "tpubDEdTFZ3zBajr9TU8C817GzWaCbppADPczTJzhni98wE5qT3ARzRENQqBdW6Y4SnVFrDQvB39PPjGqMgtiZkP2Lue3Yj6yveQV1wACgMaHzu"
+        },
+        {
+          "path": "m/44'/245'/0",
+          "xPubKey": "tpubDDDqxcAmqt9W3fkx5uiCa3r8EDFNvPerUKxEjvRkNFAHoEGbzqu4WmdcSBFRd4syiu6aZmcBV9HMhRGC3FpEvydbezABeGw69btyG35L1g2"
+        },
+        {
+          "path": "m/44'/245'/0'",
+          "xPubKey": "tpubDDDqxcAvBYgUEeRJmy7RQh8VBvaEZLLxis1k8MJa4TnF9Sct31zi34TCUQ8fLwt2chPvx9yFAJYcJSB1RvPQC1BjuLLPbw5mt3cUKGVAQXr"
+        },
+        {
+          "path": "m/44'/245'/0'/0",
+          "xPubKey": "tpubDDyZneHARuhWkYF7qBCtmnUjyXoSVz5ikGsNNBkTmpXVGh6BsVtTWChYF7E89J3fEb52txw7FSTZBvkBhpAdNiceNGaVnCyCgC4r5GTbQdX"
+        }
+      ]
+    });
+  });
+  it("Should return xpubkeys if provided a path", async () => {
+
+    let resp;
+
+
+    const seedId = `seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon:m/44'/0'/0'/0/0`;
+    resp = await request(app)
+      .post("/wallet/xpubkeys")
+      .send({
+        walletId: seedId,
+        paths: ["m/44'/0'/0'"]
+    });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toStrictEqual({
+        "xpubkeys": [
+          [
+            {
+              "path": "m/44'/0'/0'",
+              "xPubKey": "tpubDCnFe4aFbkmx3UzTnqBjrFBgnTJMwTrM9Aub6CZe1nXvNgYYmRdHFEzCcJDBA3X5R6i9z3ZaBpacAEGXsR23pWFeuxp3hdh25MqeNGVYNwr"
+            }
+          ]
+        ]
+      });
   });
 });

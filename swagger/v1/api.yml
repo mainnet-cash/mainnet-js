@@ -53,6 +53,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
+  - name: wallet/signed
+    description: Sign and verify messages
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/sign
   - name: wallet/slp
     description: Interact with SLP functions of the wallets
     externalDocs:
@@ -776,7 +781,27 @@ paths:
       summary: Get detailed information about unspent outputs (utxos)
       tags:
         - wallet
-
+  /wallet/xpubkeys:
+    post:
+      operationId: xpubkeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/XPubKeyRequest"
+        description: |
+          x
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/XPubKeyResponse"
+          description: successful operation
+      summary: A set of xpubkeys and paths for the wallet.
+      tags:
+        - wallet
   /wallet/signed/sign:
     post: 
       operationId: signedMessageSign
@@ -796,7 +821,7 @@ paths:
           description: successful operation
       summary: Returns the message signature
       tags:
-        - wallet
+        - wallet/signed
   /wallet/signed/verify:
     post: 
       operationId: signedMessageVerify
@@ -816,8 +841,7 @@ paths:
           description: successful operation
       summary: Returns a boolean indicating whether message was valid for a given address
       tags:
-        - wallet
-
+        - wallet/signed
   /wallet/slp/create:
     post:
       operationId: slpCreateWallet
@@ -1771,6 +1795,12 @@ components:
         - value
         - txId
         - utxoId
+    XPubKey:
+      properties:
+        path:
+          type: string
+        xpubkey:
+          type: string
     BalanceRequest:
       properties:
         walletId:
@@ -2314,6 +2344,28 @@ components:
         cashaddr:
           type: string
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+    XPubKeyRequest:
+      properties:
+        walletId:
+          type: string
+          example: "seed:testnet:anchor stone process they donkey foam danger boat palace kind west cute:m/44'/0'/0'/0/0"
+          description: |
+            walletId for a seed wallet
+        paths:
+          type: array
+          items:
+            type: string
+            description: a list of derivation paths
+            example: "m/44'/0'/0'"
+      required:
+        - "walletId"
+    XPubKeyResponse:
+      properties:
+        xpubkeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/XPubKey"
+        
     UtxoResponse:
       properties:
         utxos:

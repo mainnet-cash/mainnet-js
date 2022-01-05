@@ -54,6 +54,11 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
   name: wallet
+- description: Sign and verify messages
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/sign
+  name: wallet/signed
 - description: Interact with SLP functions of the wallets
   externalDocs:
     description: Find out more
@@ -801,6 +806,28 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/xpubkeys:
+    post:
+      operationId: xpubkeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/XPubKeyRequest'
+        description: |
+          x
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XPubKeyResponse'
+          description: successful operation
+      summary: A set of xpubkeys and paths for the wallet.
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/signed/sign:
     post:
       operationId: signedMessageSign
@@ -820,8 +847,8 @@ paths:
           description: successful operation
       summary: Returns the message signature
       tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
+      - wallet/signed
+      x-eov-operation-handler: controllers/WalletSignedController
   /wallet/signed/verify:
     post:
       operationId: signedMessageVerify
@@ -842,8 +869,8 @@ paths:
       summary: Returns a boolean indicating whether message was valid for a given
         address
       tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
+      - wallet/signed
+      x-eov-operation-handler: controllers/WalletSignedController
   /wallet/slp/create:
     post:
       operationId: slpCreateWallet
@@ -1814,6 +1841,15 @@ components:
       - txId
       - utxoId
       - value
+    XPubKey:
+      example:
+        path: path
+        xpubkey: xpubkey
+      properties:
+        path:
+          type: string
+        xpubkey:
+          type: string
     BalanceRequest:
       allOf:
       - $ref: '#/components/schemas/UnitType'
@@ -2490,6 +2526,40 @@ components:
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
+    XPubKeyRequest:
+      example:
+        walletId: seed:testnet:anchor stone process they donkey foam danger boat palace
+          kind west cute:m/44'/0'/0'/0/0
+        paths:
+        - m/44'/0'/0'
+        - m/44'/0'/0'
+      properties:
+        walletId:
+          description: |
+            walletId for a seed wallet
+          example: seed:testnet:anchor stone process they donkey foam danger boat
+            palace kind west cute:m/44'/0'/0'/0/0
+          type: string
+        paths:
+          items:
+            description: a list of derivation paths
+            example: m/44'/0'/0'
+            type: string
+          type: array
+      required:
+      - walletId
+    XPubKeyResponse:
+      example:
+        xpubkeys:
+        - path: path
+          xpubkey: xpubkey
+        - path: path
+          xpubkey: xpubkey
+      properties:
+        xpubkeys:
+          items:
+            $ref: '#/components/schemas/XPubKey'
+          type: array
     UtxoResponse:
       example:
         utxos:

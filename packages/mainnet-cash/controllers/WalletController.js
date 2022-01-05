@@ -1,6 +1,6 @@
 /**
  * The WalletController file is a very simple one, which does not need to be changed manually,
- * unless there's a case where business logic routes the request to an entity which is not
+ * unless there's a case where business logic reoutes the request to an entity which is not
  * the service.
  * The heavy lifting of the Controller item is done in Request.js - that is where request
  * parameters are extracted and sent to the service, and where response is handled.
@@ -48,16 +48,12 @@ const sendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.sendMax);
 };
 
-const signedMessageSign = async (request, response) => {
-  await Controller.handleRequest(request, response, service.signedMessageSign);
-};
-
-const signedMessageVerify = async (request, response) => {
-  await Controller.handleRequest(request, response, service.signedMessageVerify);
-};
-
 const utxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.utxos);
+};
+
+const xpubkeys = async (request, response) => {
+  await Controller.handleRequest(request, response, service.xpubkeys);
 };
 
 
@@ -72,7 +68,6 @@ module.exports = {
   replaceNamed,
   send,
   sendMax,
-  signedMessageSign,
-  signedMessageVerify,
   utxos,
+  xpubkeys,
 };

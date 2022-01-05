@@ -101,7 +101,7 @@ import { SignedMessageI, SignedMessage } from "../message";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { getXPubKey } from "../util/getXPubKey";
-import { DUST_UTXO_THRESHOLD } from "../constant";
+import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
 
 //#endregion Imports
 
@@ -374,6 +374,20 @@ export class Wallet extends BaseWallet {
     return super.fromId(walletId);
   };
 
+  public async getXPubKeys(paths?){
+    if(this.mnemonic){
+      if(paths){
+        let xPubKeys = await this.deriveHdPaths(paths)
+        return [xPubKeys]  
+      }else{
+        return await this.deriveHdPaths(DERIVATION_PATHS)
+      }
+    }else{
+      throw Error("xpubkeys can only be derived from seed type wallets.")
+    }
+
+
+  }
   // Initialize wallet from a mnemonic phrase
   protected async fromSeed(
     mnemonic: string,
