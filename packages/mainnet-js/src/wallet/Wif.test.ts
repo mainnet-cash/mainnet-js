@@ -313,87 +313,87 @@ describe(`XPubKey path derivation`, () => {
     }
   });
 
-    test("Expect '11x abandon about' to have the correct xpubs for common derivation paths, seed and path", async () => {
+  test("Expect '11x abandon about' to have the correct xpubs for common derivation paths, seed and path", async () => {
+    let w = await Wallet.fromId(
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    );
+    let commonPaths = await w.getXPubKeys();
+    expect(commonPaths).toStrictEqual([
+      {
+        path: "m/0",
+        xPubKey:
+          "xpub68jrRzQfUmwSaf5Y37Yd5uwfnMRxiR14M3HBonDr91GB7GKEh7R9Mvu2UeCtbASfXZ9FdNo9FwFx6a37HNXUDiXVQFXuadXmevRBa3y7rL8",
+      },
+      {
+        path: "m/0'",
+        xPubKey:
+          "xpub68jrRzQopSUQm76hJ6TNtiJMJfhj38u1X12xCzExrw388hcN443UVnYpswdUkV7vPJ3KayiCdp3Q5E23s4wvkucohVTh7eSstJdBFyn2DMx",
+      },
+      {
+        path: "m/0'/0",
+        xPubKey:
+          "xpub6A7PsGUCo9qsn1jhZVB68WKWU9bTt1Wu7fzRqhczRbJ3u3xsF1bJmWBL1MvygTtrfmvNw1adLzmRjQHtDCJDXAHFa4K3wELpGGqEXL4e6d4",
+      },
+      {
+        path: "m/0'/0'",
+        xPubKey:
+          "xpub6A7PsGUM8pNqwy9AceVuFK6KxY88FhvFMRGP9fjEDKA3P4WpR1zyHH3Lmczj7eorx4RbDC4Qttd8C7HhLA2W9LsxxZzXo1DMCwJFb3zZKZ8",
+      },
+      {
+        path: "m/0'/0'/0'",
+        xPubKey:
+          "xpub6BiChRN7aqq51RA7RnAmKhqKdGckPncrHWLrj1xoj6ZMfdMJ1dX4Ysh9V3yEhpFCpC3BapjR83xPKY693XXTEU6qgWU3qZs78WBHA15uhYf",
+      },
+      {
+        path: "m/44'/0'/0'",
+        xPubKey:
+          "xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj",
+      },
+      {
+        path: "m/44'/0'/0'/0",
+        xPubKey:
+          "xpub6ELHKXNimKbxMCytPh7EdC2QXx46T9qLDJWGnTraz1H9kMMFdcduoU69wh9cxP12wDxqAAfbaESWGYt5rREsX1J8iR2TEunvzvddduAPYcY",
+      },
+      {
+        path: "m/44'/145'/0'",
+        xPubKey:
+          "xpub6ByHsPNSQXTWZ7PLESMY2FufyYWtLXagSUpMQq7Un96SiThZH2iJB1X7pwviH1WtKVeDP6K8d6xxFzzoaFzF3s8BKCZx8oEDdDkNnp4owAZ",
+      },
+      {
+        path: "m/44'/145'/0'/0",
+        xPubKey:
+          "xpub6F2iaK2JUPcgrZ6RTGH6t8VybLPu1XzfrHsDsaKvK6NfULznU6i6aw6ZoefDW2DpNruSLw73RwQg46qvpqB3eryeJJ2tkFCF4Z6gbr8Pjja",
+      },
+      {
+        path: "m/44'/245'/0",
+        xPubKey:
+          "xpub6Ch34ms5osevEtkEZX81n8EG4c6vgHWGH1gQXBG2uf2Tihb1eed4H1wozLfZB31mV9JD7mymYTQxcLKFFjZHdM5NGdH2Ud1ksSkfwSFjjCg",
+      },
+      {
+        path: "m/44'/245'/0'",
+        xPubKey:
+          "xpub6Ch34msE9YBtQV7pZrLyRXHwocrpJtNN4KDG8bbyxyhGmEM5MirtqkiH4h9dvnVJ3MekET3w2Fkvej3fyo8WLz9bRPyDynDf6NXNfuydhv1",
+      },
+      {
+        path: "m/44'/245'/0'/0",
+        xPubKey:
+          "xpub6FFeETss5Zwkw78NDAibKEaGxigU3bgYzLihcqbQqqTyb6jorR9mgR9AexYydxmiPU8koAf5ndaQPjPWK3sDz1wjBjf2TkLbD982S9PWd9Z",
+      },
+    ]);
+  });
+  test("Expect '11x abandon about' to return 'protected' for root path", async () => {
+    expect.assertions(1);
+    try {
       let w = await Wallet.fromId(
         "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
       );
-      let commonPaths = await w.getXPubKeys();
-      expect(commonPaths).toStrictEqual([
-        {
-          path: "m/0",
-          xPubKey:
-            "xpub68jrRzQfUmwSaf5Y37Yd5uwfnMRxiR14M3HBonDr91GB7GKEh7R9Mvu2UeCtbASfXZ9FdNo9FwFx6a37HNXUDiXVQFXuadXmevRBa3y7rL8",
-        },
-        {
-          path: "m/0'",
-          xPubKey:
-            "xpub68jrRzQopSUQm76hJ6TNtiJMJfhj38u1X12xCzExrw388hcN443UVnYpswdUkV7vPJ3KayiCdp3Q5E23s4wvkucohVTh7eSstJdBFyn2DMx",
-        },
-        {
-          path: "m/0'/0",
-          xPubKey:
-            "xpub6A7PsGUCo9qsn1jhZVB68WKWU9bTt1Wu7fzRqhczRbJ3u3xsF1bJmWBL1MvygTtrfmvNw1adLzmRjQHtDCJDXAHFa4K3wELpGGqEXL4e6d4",
-        },
-        {
-          path: "m/0'/0'",
-          xPubKey:
-            "xpub6A7PsGUM8pNqwy9AceVuFK6KxY88FhvFMRGP9fjEDKA3P4WpR1zyHH3Lmczj7eorx4RbDC4Qttd8C7HhLA2W9LsxxZzXo1DMCwJFb3zZKZ8",
-        },
-        {
-          path: "m/0'/0'/0'",
-          xPubKey:
-            "xpub6BiChRN7aqq51RA7RnAmKhqKdGckPncrHWLrj1xoj6ZMfdMJ1dX4Ysh9V3yEhpFCpC3BapjR83xPKY693XXTEU6qgWU3qZs78WBHA15uhYf",
-        },
-        {
-          path: "m/44'/0'/0'",
-          xPubKey:
-            "xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj",
-        },
-        {
-          path: "m/44'/0'/0'/0",
-          xPubKey:
-            "xpub6ELHKXNimKbxMCytPh7EdC2QXx46T9qLDJWGnTraz1H9kMMFdcduoU69wh9cxP12wDxqAAfbaESWGYt5rREsX1J8iR2TEunvzvddduAPYcY",
-        },
-        {
-          path: "m/44'/145'/0'",
-          xPubKey:
-            "xpub6ByHsPNSQXTWZ7PLESMY2FufyYWtLXagSUpMQq7Un96SiThZH2iJB1X7pwviH1WtKVeDP6K8d6xxFzzoaFzF3s8BKCZx8oEDdDkNnp4owAZ",
-        },
-        {
-          path: "m/44'/145'/0'/0",
-          xPubKey:
-            "xpub6F2iaK2JUPcgrZ6RTGH6t8VybLPu1XzfrHsDsaKvK6NfULznU6i6aw6ZoefDW2DpNruSLw73RwQg46qvpqB3eryeJJ2tkFCF4Z6gbr8Pjja",
-        },
-        {
-          path: "m/44'/245'/0",
-          xPubKey:
-            "xpub6Ch34ms5osevEtkEZX81n8EG4c6vgHWGH1gQXBG2uf2Tihb1eed4H1wozLfZB31mV9JD7mymYTQxcLKFFjZHdM5NGdH2Ud1ksSkfwSFjjCg",
-        },
-        {
-          path: "m/44'/245'/0'",
-          xPubKey:
-            "xpub6Ch34msE9YBtQV7pZrLyRXHwocrpJtNN4KDG8bbyxyhGmEM5MirtqkiH4h9dvnVJ3MekET3w2Fkvej3fyo8WLz9bRPyDynDf6NXNfuydhv1",
-        },
-        {
-          path: "m/44'/245'/0'/0",
-          xPubKey:
-            "xpub6FFeETss5Zwkw78NDAibKEaGxigU3bgYzLihcqbQqqTyb6jorR9mgR9AexYydxmiPU8koAf5ndaQPjPWK3sDz1wjBjf2TkLbD982S9PWd9Z",
-        },
-      ]);
-    });
-    test("Expect '11x abandon about' to return 'protected' for root path", async () => {
-      expect.assertions(1);
-      try {
-        let w = await Wallet.fromId(
-          "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
-        );
-        let commonPaths = await w.getXPubKeys(["m"]);
-      } catch (e: any) {
-        expect(e.message).toBe(
-          "Usage of the root extended public key may lead to loss of funds. Storing or sharing the root public key is strongly discouraged. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
-        );
-      }
-    });
+      let commonPaths = await w.getXPubKeys(["m"]);
+    } catch (e: any) {
+      expect(e.message).toBe(
+        "Usage of the root extended public key may lead to loss of funds. Storing or sharing the root public key is strongly discouraged. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+      );
+    }
+  });
 });
 
 describe(`Watch only Wallets`, () => {

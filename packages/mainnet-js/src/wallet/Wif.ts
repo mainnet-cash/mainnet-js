@@ -374,19 +374,17 @@ export class Wallet extends BaseWallet {
     return super.fromId(walletId);
   };
 
-  public async getXPubKeys(paths?){
-    if(this.mnemonic){
-      if(paths){
-        let xPubKeys = await this.deriveHdPaths(paths)
-        return [xPubKeys]  
-      }else{
-        return await this.deriveHdPaths(DERIVATION_PATHS)
+  public async getXPubKeys(paths?) {
+    if (this.mnemonic) {
+      if (paths) {
+        let xPubKeys = await this.deriveHdPaths(paths);
+        return [xPubKeys];
+      } else {
+        return await this.deriveHdPaths(DERIVATION_PATHS);
       }
-    }else{
-      throw Error("xpubkeys can only be derived from seed type wallets.")
+    } else {
+      throw Error("xpubkeys can only be derived from seed type wallets.");
     }
-
-
   }
   // Initialize wallet from a mnemonic phrase
   protected async fromSeed(
