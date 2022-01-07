@@ -308,7 +308,7 @@ describe(`XPubKey path derivation`, () => {
       let commonPaths = await w.deriveHdPaths(["m"]);
     } catch (e: any) {
       expect(e.message).toBe(
-        "toring or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+        "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
       );
     }
   });
