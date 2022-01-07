@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.4.30
+  version: 0.4.31
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -54,6 +54,11 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
   name: wallet
+- description: Sign and verify messages
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/sign
+  name: wallet/signed
 - description: Interact with SLP functions of the wallets
   externalDocs:
     description: Find out more
@@ -483,6 +488,53 @@ paths:
       tags:
       - util
       x-eov-operation-handler: controllers/UtilController
+  /util/get_addrs_by_xpubkey:
+    post:
+      operationId: getAddrsByXpubKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getAddrsByXpubKeyRequest'
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/getAddrsByXpubKeyResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Derive heristic determined addresses from an extended public key, per
+        BIP32
+      tags:
+      - util
+      x-eov-operation-handler: controllers/UtilController
+  /util/get_xpubkey_info:
+    post:
+      operationId: getXpubKeyInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getXpubKeyInfoRequest'
+        description: Decode information about an extended public key, per BIP32
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getXpubKeyInfoResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: Decode information about an extended public key, per BIP32
+      tags:
+      - util
+      x-eov-operation-handler: controllers/UtilController
   /wallet/create:
     post:
       operationId: createWallet
@@ -754,6 +806,28 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/xpubkeys:
+    post:
+      operationId: xpubkeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/XPubKeyRequest'
+        description: |
+          x
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XPubKeyResponse'
+          description: successful operation
+      summary: A set of xpubkeys and paths for the wallet.
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/signed/sign:
     post:
       operationId: signedMessageSign
@@ -773,8 +847,8 @@ paths:
           description: successful operation
       summary: Returns the message signature
       tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
+      - wallet/signed
+      x-eov-operation-handler: controllers/WalletSignedController
   /wallet/signed/verify:
     post:
       operationId: signedMessageVerify
@@ -795,8 +869,8 @@ paths:
       summary: Returns a boolean indicating whether message was valid for a given
         address
       tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
+      - wallet/signed
+      x-eov-operation-handler: controllers/WalletSignedController
   /wallet/slp/create:
     post:
       operationId: slpCreateWallet
@@ -1767,6 +1841,15 @@ components:
       - txId
       - utxoId
       - value
+    XPubKey:
+      example:
+        path: path
+        xpubkey: xpubkey
+      properties:
+        path:
+          type: string
+        xpubkey:
+          type: string
     BalanceRequest:
       allOf:
       - $ref: '#/components/schemas/UnitType'
@@ -2443,6 +2526,40 @@ components:
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
+    XPubKeyRequest:
+      example:
+        walletId: seed:testnet:anchor stone process they donkey foam danger boat palace
+          kind west cute:m/44'/0'/0'/0/0
+        paths:
+        - m/44'/0'/0'
+        - m/44'/0'/0'
+      properties:
+        walletId:
+          description: |
+            walletId for a seed wallet
+          example: seed:testnet:anchor stone process they donkey foam danger boat
+            palace kind west cute:m/44'/0'/0'/0/0
+          type: string
+        paths:
+          items:
+            description: a list of derivation paths
+            example: m/44'/0'/0'
+            type: string
+          type: array
+      required:
+      - walletId
+    XPubKeyResponse:
+      example:
+        xpubkeys:
+        - path: path
+          xpubkey: xpubkey
+        - path: path
+          xpubkey: xpubkey
+      properties:
+        xpubkeys:
+          items:
+            $ref: '#/components/schemas/XPubKey'
+          type: array
     UtxoResponse:
       example:
         utxos:
@@ -2548,6 +2665,57 @@ components:
       - from
       - to
       - value
+    getAddrsByXpubKeyRequest:
+      example:
+        xpubkey: xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj
+        path: 0/0
+        count: 3
+      properties:
+        xpubkey:
+          type: string
+        path:
+          type: string
+        count:
+          type: number
+    getAddrsByXpubKeyResponse:
+      example:
+      - bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59
+      - bitcoincash:qp4wzvqu73x22ft4r5tk8tz0aufdz9fescwtpcmhc7
+      - bitcoincash:qr0kwqzf2h3wvjjhn4pg895lrxwp96wqgyhkksq2nh
+      items:
+        anyOf:
+        - format: cashaddr
+          type: string
+      type: array
+    getXpubKeyInfoRequest:
+      example:
+        xpubkey: xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj
+      properties:
+        xpubkey:
+          type: string
+    getXpubKeyInfoResponse:
+      example:
+        version: mainnet
+        depth: 3
+        parentFingerprint: 155bca59
+        childNumber: 2147483648,
+        chain: 3da4bc190a2680111d31fadfdc905f2a7f6ce77c6f109919116f253d43445219
+        data: 03774c910fcf07fa96886ea794f0d5caed9afe30b44b83f7e213bb92930e7df4bd
+        fingerprint: 6cc9f252
+      properties:
+        version:
+          type: string
+        depth:
+          type: number
+        parentFingerprint:
+          description: the first four bytes of the public key as hex
+          type: string
+        data:
+          description: the public key as hex
+          type: string
+        chain:
+          description: The chain code, 32 bytes of entrophy extended for the public
+            key
     WalletRequest:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
