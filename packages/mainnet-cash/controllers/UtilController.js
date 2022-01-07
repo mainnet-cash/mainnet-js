@@ -12,7 +12,17 @@ const convert = async (request, response) => {
   await Controller.handleRequest(request, response, service.convert);
 };
 
+const getAddrsByXpubKey = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getAddrsByXpubKey);
+};
+
+const getXpubKeyInfo = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getXpubKeyInfo);
+};
+
 
 module.exports = {
   convert,
+  getAddrsByXpubKey,
+  getXpubKeyInfo,
 };

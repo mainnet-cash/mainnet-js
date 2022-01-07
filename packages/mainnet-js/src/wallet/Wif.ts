@@ -1,11 +1,18 @@
 //#region Imports
 // Stable
-import { instantiateSecp256k1, instantiateSha256 } from "@bitauth/libauth";
+import {
+  deriveHdPublicNodeIdentifier,
+  encodeHdPublicKey,
+  HdKeyNetwork,
+  instantiateSecp256k1,
+  instantiateSha256,
+} from "@bitauth/libauth";
 
 // Unstable?
 import {
   binToHex,
   CashAddressNetworkPrefix,
+  deriveHdPublicNode,
   decodePrivateKeyWif,
   encodePrivateKeyWif,
   deriveHdPrivateNodeFromSeed,
@@ -40,6 +47,7 @@ import {
   SendResponse,
   UtxoItem,
   UtxoResponse,
+  XPubKey,
 } from "./model";
 
 import {
@@ -92,7 +100,8 @@ import { generateRandomBytes } from "../util/randomBytes";
 import { SignedMessageI, SignedMessage } from "../message";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 import { amountInSatoshi } from "../util/amountInSatoshi";
-import { DUST_UTXO_THRESHOLD } from "../constant";
+import { getXPubKey } from "../util/getXPubKey";
+import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
 
 //#endregion Imports
 
@@ -105,6 +114,8 @@ const sha256Promise = instantiateSha256();
 export class Wallet extends BaseWallet {
   cashaddr?: string;
   derivationPath: string = "m/44'/0'/0'/0/0";
+  parentDerivationPath: string = "m/44'/0'/0'";
+  parentXPubKey?: string;
   privateKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
   privateKeyWif?: string;
@@ -186,6 +197,10 @@ export class Wallet extends BaseWallet {
       network: this.network as any,
       seed: this.mnemonic ? this.getSeed().seed : undefined,
       derivationPath: this.mnemonic ? this.getSeed().derivationPath : undefined,
+      parentDerivationPath: this.mnemonic
+        ? this.getSeed().parentDerivationPath
+        : undefined,
+      parentXPubKey: this.parentXPubKey ? this.parentXPubKey : undefined,
       publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
       publicKeyHash: binToHex(this.publicKeyHash!),
       privateKey: this.privateKey ? binToHex(this.privateKey!) : undefined,
@@ -319,19 +334,25 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateMnemonic() {
-    const crypto = await instantiateBIP32Crypto();
     this.mnemonic = generateMnemonic();
     let seed = mnemonicToSeedSync(this.mnemonic!);
+    let network = this.isTestnet ? "testnet" : "mainnet";
+    this.parentXPubKey = await getXPubKey(
+      seed,
+      this.parentDerivationPath,
+      network
+    );
+
+    const crypto = await instantiateBIP32Crypto();
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
 
-    let zerothChild = deriveHdPath(
-      crypto,
-      hdNode,
-      this.derivationPath
-    ) as HdPrivateNodeValid;
+    let zerothChild = deriveHdPath(crypto, hdNode, this.derivationPath);
+    if (typeof zerothChild === "string") {
+      throw Error(zerothChild);
+    }
     this.privateKey = zerothChild.privateKey;
 
     this.walletType = WalletTypeEnum.Seed;
@@ -353,6 +374,18 @@ export class Wallet extends BaseWallet {
     return super.fromId(walletId);
   };
 
+  public async getXPubKeys(paths?) {
+    if (this.mnemonic) {
+      if (paths) {
+        let xPubKeys = await this.deriveHdPaths(paths);
+        return [xPubKeys];
+      } else {
+        return await this.deriveHdPaths(DERIVATION_PATHS);
+      }
+    } else {
+      throw Error("xpubkeys can only be derived from seed type wallets.");
+    }
+  }
   // Initialize wallet from a mnemonic phrase
   protected async fromSeed(
     mnemonic: string,
@@ -369,18 +402,71 @@ export class Wallet extends BaseWallet {
     }
     if (derivationPath) {
       this.derivationPath = derivationPath;
+
+      // If the derivation path is for the first account child, set the parent derivation path
+      let path = derivationPath.split("/");
+      if (path.slice(-2).join("/") == "0/0") {
+        this.parentDerivationPath = path.slice(0, -2).join("/");
+      }
     }
 
-    let zerothChild = deriveHdPath(
-      crypto,
-      hdNode,
-      this.derivationPath
-    ) as HdPrivateNodeValid;
+    let zerothChild = deriveHdPath(crypto, hdNode, this.derivationPath);
+    if (typeof zerothChild === "string") {
+      throw Error(zerothChild);
+    }
     this.privateKey = zerothChild.privateKey;
+
+    let network = this.isTestnet ? "testnet" : "mainnet";
+    this.parentXPubKey = await getXPubKey(
+      seed,
+      this.parentDerivationPath,
+      network
+    );
 
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
+  }
+
+  // Get common xpub paths from zerothChild privateKey
+  public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
+    const crypto = await instantiateBIP32Crypto();
+    let seed = mnemonicToSeedSync(this.mnemonic!);
+    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    if (!hdNode.valid) {
+      throw Error("Invalid private key derived from mnemonic seed");
+    }
+
+    let result: any[] = [];
+
+    for (const path of hdPaths) {
+      if (path === "m") {
+        throw Error(
+          "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+        );
+      }
+      let childNode = deriveHdPath(crypto, hdNode, path);
+      if (typeof childNode === "string") {
+        throw Error(childNode);
+      }
+      let node = deriveHdPublicNode(crypto, childNode);
+      if (typeof node === "string") {
+        throw Error(node);
+      }
+      let xPubKey = encodeHdPublicKey(crypto, {
+        network: this.network as HdKeyNetwork,
+        node: node,
+      });
+      let key = new XPubKey({
+        path: path,
+        xPubKey: xPubKey,
+      });
+
+      result.push(await key.ready());
+    }
+    return await Promise.all(result).then((result) => {
+      return result;
+    });
   }
 
   // Initialize a watch only wallet from a cash addr
@@ -417,8 +503,7 @@ export class Wallet extends BaseWallet {
     const sha256 = await sha256Promise;
     let wifResult = decodePrivateKeyWif(sha256, secret);
 
-    const hasError = typeof wifResult === "string";
-    if (hasError) {
+    if (typeof wifResult === "string") {
       throw Error(wifResult as string);
     }
     let resultData: PrivateKeyI = wifResult as PrivateKeyI;

@@ -48,16 +48,12 @@ const sendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.sendMax);
 };
 
-const signedMessageSign = async (request, response) => {
-  await Controller.handleRequest(request, response, service.signedMessageSign);
-};
-
-const signedMessageVerify = async (request, response) => {
-  await Controller.handleRequest(request, response, service.signedMessageVerify);
-};
-
 const utxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.utxos);
+};
+
+const xpubkeys = async (request, response) => {
+  await Controller.handleRequest(request, response, service.xpubkeys);
 };
 
 
@@ -72,7 +68,6 @@ module.exports = {
   replaceNamed,
   send,
   sendMax,
-  signedMessageSign,
-  signedMessageVerify,
   utxos,
+  xpubkeys,
 };
