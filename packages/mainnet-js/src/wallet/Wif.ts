@@ -808,6 +808,8 @@ export class Wallet extends BaseWallet {
 
   /**
    * send Send some amount to an address
+   * this function processes the send requests, encodes the transaction, sends it to the network
+   * @returns (depending on the options parameter) the transaction id, new address balance and a link to the transaction on the blockchain explorer
    *
    * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
    *
@@ -820,14 +822,24 @@ export class Wallet extends BaseWallet {
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let sendRequests = asSendRequestObject(requests);
-    let result = await this._processSendRequests(
-      sendRequests,
+    let encodedTransaction = await this.encodeTransaction(
+      requests,
       undefined,
       options
     );
+
+    const awaitTransactionPropagation =
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
+
+    const txId = await this.submitTransaction(
+      encodedTransaction,
+      awaitTransactionPropagation
+    );
+
     let resp = new SendResponse({});
-    resp.txId = result;
+    resp.txId = txId;
     const queryBalance =
       !options || options.queryBalance === undefined || options.queryBalance;
     if (queryBalance) {
@@ -837,6 +849,14 @@ export class Wallet extends BaseWallet {
     return resp;
   }
 
+  /**
+   * sendMax Send all available funds to a destination cash address
+   *
+   * @param  {string} cashaddr destination cash address
+   * @param  {SendRequestOptionsI} options Options of the send requests
+   *
+   * @returns (depending on the options parameter) the transaction id, new address balance and a link to the transaction on the blockchain explorer
+   */
   public async sendMax(
     cashaddr: string,
     options?: SendRequestOptionsI
@@ -853,7 +873,18 @@ export class Wallet extends BaseWallet {
     };
   }
 
-  private async sendMaxRaw(cashaddr: string, options?: SendRequestOptionsI) {
+  /**
+   * sendMaxRaw (internal) Send all available funds to a destination cash address
+   *
+   * @param  {string} cashaddr destination cash address
+   * @param  {SendRequestOptionsI} options Options of the send requests
+   *
+   * @returns the transaction id sent to the network
+   */
+  private async sendMaxRaw(
+    cashaddr: string,
+    options?: SendRequestOptionsI
+  ): Promise<string> {
     let maxSpendableAmount = await this.getMaxAmountToSend({
       outputCount: 1,
       options: options,
@@ -866,7 +897,129 @@ export class Wallet extends BaseWallet {
       value: maxSpendableAmount.sat,
       unit: "sat",
     });
-    return await this._processSendRequests([sendRequest], true, options);
+
+    const encodedTransaction = await this.encodeTransaction(
+      [sendRequest],
+      true,
+      options
+    );
+    const awaitTransactionPropagation =
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
+
+    const txId = await this.submitTransaction(
+      encodedTransaction,
+      awaitTransactionPropagation
+    );
+
+    return txId;
+  }
+
+  /**
+   * encodeTransaction given a list of sendRequests, options and estimate fees.
+   * @param  {SendRequest[]} sendRequests SendRequests
+   * @param  {boolean} discardChange=false
+   * @param  {SendRequestOptionsI} options Options of the send requests
+   */
+  public async encodeTransaction(
+    requests:
+      | SendRequest
+      | OpReturnData
+      | Array<SendRequest | OpReturnData>
+      | SendRequestArray[],
+    discardChange: boolean = false,
+    options?: SendRequestOptionsI
+  ) {
+    let sendRequests = asSendRequestObject(requests);
+
+    if (!this.privateKey) {
+      throw new Error(
+        `Wallet ${this.name} is missing either a network or private key`
+      );
+    }
+    if (!this.cashaddr) {
+      throw Error("attempted to send without a cashaddr");
+    }
+
+    if (options && options.slpAware) {
+      this._slpAware = true;
+    }
+
+    if (options && options.slpSemiAware) {
+      this._slpSemiAware = true;
+    }
+
+    // get inputs from options or query all inputs
+    let utxos: UtxoI[];
+    if (options && options.utxoIds) {
+      utxos = options.utxoIds.map((utxoId) =>
+        UtxoItem.fromId(utxoId).asElectrum()
+      );
+    } else {
+      utxos = await this.getAddressUtxos(this.cashaddr);
+    }
+
+    const bestHeight = await this.provider!.getBlockHeight()!;
+    const spendAmount = await sumSendRequestAmounts(sendRequests);
+
+    if (utxos.length === 0) {
+      throw Error("There were no Unspent Outputs");
+    }
+    if (typeof spendAmount !== "bigint") {
+      throw Error("Couldn't get spend amount when building transaction");
+    }
+
+    const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
+    const feeEstimate = await getFeeAmount({
+      utxos: utxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey,
+      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
+      slpOutputs: [],
+    });
+
+    const fundingUtxos = await getSuitableUtxos(
+      utxos,
+      BigInt(spendAmount) + BigInt(feeEstimate),
+      bestHeight
+    );
+    if (fundingUtxos.length === 0) {
+      throw Error(
+        "The available inputs couldn't satisfy the request with fees"
+      );
+    }
+    const fee = await getFeeAmount({
+      utxos: fundingUtxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey,
+      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
+      slpOutputs: [],
+    });
+    const encodedTransaction = await buildEncodedTransaction(
+      fundingUtxos,
+      sendRequests,
+      this.privateKey,
+      fee,
+      discardChange
+    );
+
+    return encodedTransaction;
+  }
+
+  // Submit a raw transaction
+  public async submitTransaction(
+    transaction: Uint8Array,
+    awaitPropagation: boolean = true
+  ): Promise<string> {
+    if (!this.provider) {
+      throw Error("Wallet network provider was not initialized");
+    }
+    let rawTransaction = binToHex(transaction);
+    return await this.provider.sendRawTransaction(
+      rawTransaction,
+      awaitPropagation
+    );
   }
 
   // gets transaction history of this wallet
@@ -877,11 +1030,16 @@ export class Wallet extends BaseWallet {
   // gets last transaction of this wallet
   public async getLastTransaction(
     confirmedOnly: boolean = false
-  ): Promise<ElectrumRawTransaction> {
+  ): Promise<ElectrumRawTransaction | null> {
     let history: TxI[] = await this.getHistory();
     if (confirmedOnly) {
       history = history.filter((val) => val.height > 0);
     }
+
+    if (!history.length) {
+      return null;
+    }
+
     const [lastTx] = history.slice(-1);
     return this.provider!.getRawTransactionObject(lastTx.tx_hash);
   }
@@ -1001,115 +1159,6 @@ export class Wallet extends BaseWallet {
     this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     return this;
-  }
-
-  /**
-   * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
-   * This function is an internal wrapper and may change.
-   * @param  {SendRequest[]} sendRequests SendRequests
-   * @param  {} discardChange=false
-   * @param  {SendRequestOptionsI} options Options of the send requests
-   */
-  private async _processSendRequests(
-    sendRequests: Array<SendRequest | OpReturnData>,
-    discardChange = false,
-    options?: SendRequestOptionsI
-  ) {
-    if (!this.privateKey) {
-      throw new Error(
-        `Wallet ${this.name} is missing either a network or private key`
-      );
-    }
-    if (!this.cashaddr) {
-      throw Error("attempted to send without a cashaddr");
-    }
-
-    if (options && options.slpAware) {
-      this._slpAware = true;
-    }
-
-    if (options && options.slpSemiAware) {
-      this._slpSemiAware = true;
-    }
-
-    // get inputs from options or query all inputs
-    let utxos: UtxoI[];
-    if (options && options.utxoIds) {
-      utxos = options.utxoIds.map((utxoId) =>
-        UtxoItem.fromId(utxoId).asElectrum()
-      );
-    } else {
-      utxos = await this.getAddressUtxos(this.cashaddr);
-    }
-
-    const bestHeight = await this.provider!.getBlockHeight()!;
-    const spendAmount = await sumSendRequestAmounts(sendRequests);
-
-    if (utxos.length === 0) {
-      throw Error("There were no Unspent Outputs");
-    }
-    if (typeof spendAmount !== "bigint") {
-      throw Error("Couldn't get spend amount when building transaction");
-    }
-
-    const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
-    const feeEstimate = await getFeeAmount({
-      utxos: utxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      slpOutputs: [],
-    });
-
-    const fundingUtxos = await getSuitableUtxos(
-      utxos,
-      BigInt(spendAmount) + BigInt(feeEstimate),
-      bestHeight
-    );
-    if (fundingUtxos.length === 0) {
-      throw Error(
-        "The available inputs couldn't satisfy the request with fees"
-      );
-    }
-    const fee = await getFeeAmount({
-      utxos: fundingUtxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      slpOutputs: [],
-    });
-    const encodedTransaction = await buildEncodedTransaction(
-      fundingUtxos,
-      sendRequests,
-      this.privateKey,
-      fee,
-      discardChange
-    );
-
-    const awaitTransactionPropagation =
-      !options ||
-      options.awaitTransactionPropagation === undefined ||
-      options.awaitTransactionPropagation;
-
-    return await this._submitTransaction(
-      encodedTransaction,
-      awaitTransactionPropagation
-    );
-  }
-
-  // Submit a raw transaction
-  private async _submitTransaction(
-    transaction: Uint8Array,
-    awaitPropagation: boolean = true
-  ): Promise<string> {
-    if (!this.provider) {
-      throw Error("Wallet network provider was not initialized");
-    }
-    let rawTransaction = binToHex(transaction);
-    return await this.provider.sendRawTransaction(
-      rawTransaction,
-      awaitPropagation
-    );
   }
   //#endregion Private implementation details
 

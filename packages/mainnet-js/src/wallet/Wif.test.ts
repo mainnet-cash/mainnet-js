@@ -500,6 +500,24 @@ describe(`Watch only Wallets`, () => {
       expect(aliceBalance.sat).toBeGreaterThan(2000);
     }
   });
+
+  test("Should get last transaction", async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    expect(await bobWallet.getLastTransaction()).toBeNull();
+
+    await aliceWallet.send([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 2000,
+        unit: "satoshis",
+      },
+    ]);
+
+    expect(await bobWallet.getLastTransaction()).not.toBeNull();
+  });
 });
 describe(`Wallet subscriptions`, () => {
   test("Should wait for transaction", async () => {
