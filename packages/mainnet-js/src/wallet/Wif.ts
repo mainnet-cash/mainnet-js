@@ -881,7 +881,10 @@ export class Wallet extends BaseWallet {
    *
    * @returns the transaction id sent to the network
    */
-  private async sendMaxRaw(cashaddr: string, options?: SendRequestOptionsI): Promise<string> {
+  private async sendMaxRaw(
+    cashaddr: string,
+    options?: SendRequestOptionsI
+  ): Promise<string> {
     let maxSpendableAmount = await this.getMaxAmountToSend({
       outputCount: 1,
       options: options,
@@ -895,7 +898,11 @@ export class Wallet extends BaseWallet {
       unit: "sat",
     });
 
-    const encodedTransaction = await this.encodeTransaction([sendRequest], true, options);
+    const encodedTransaction = await this.encodeTransaction(
+      [sendRequest],
+      true,
+      options
+    );
     const awaitTransactionPropagation =
       !options ||
       options.awaitTransactionPropagation === undefined ||
@@ -915,12 +922,12 @@ export class Wallet extends BaseWallet {
    * @param  {boolean} discardChange=false
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
-   public async encodeTransaction(
+  public async encodeTransaction(
     requests:
-    | SendRequest
-    | OpReturnData
-    | Array<SendRequest | OpReturnData>
-    | SendRequestArray[],
+      | SendRequest
+      | OpReturnData
+      | Array<SendRequest | OpReturnData>
+      | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI
   ) {
