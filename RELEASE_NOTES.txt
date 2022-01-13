@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+0.4.32
+
+- Add public transaction building and broadcasting methods
+- Fix unhandled exception in getLastTransaction
+
+0.4.31
+
+- Add functions and endpoints to derive xpubkeys and cashaddrs from them
+
 0.4.30
 
 - Update mainnet explorer url to https://blockchair.com/bitcoin-cash/
