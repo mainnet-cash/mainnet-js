@@ -820,14 +820,24 @@ export class Wallet extends BaseWallet {
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let sendRequests = asSendRequestObject(requests);
-    let result = await this._processSendRequests(
-      sendRequests,
+    let encodedTransaction = await this.encodeTransaction(
+      requests,
       undefined,
       options
     );
+
+    const awaitTransactionPropagation =
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
+
+    const txId = await this.submitTransaction(
+      encodedTransaction,
+      awaitTransactionPropagation
+    );
+
     let resp = new SendResponse({});
-    resp.txId = result;
+    resp.txId = txId;
     const queryBalance =
       !options || options.queryBalance === undefined || options.queryBalance;
     if (queryBalance) {
@@ -866,7 +876,19 @@ export class Wallet extends BaseWallet {
       value: maxSpendableAmount.sat,
       unit: "sat",
     });
-    return await this._processSendRequests([sendRequest], true, options);
+
+    const encodedTransaction = await this.encodeTransaction([sendRequest], true, options);
+    const awaitTransactionPropagation =
+      !options ||
+      options.awaitTransactionPropagation === undefined ||
+      options.awaitTransactionPropagation;
+
+    const txId = await this.submitTransaction(
+      encodedTransaction,
+      awaitTransactionPropagation
+    );
+
+    return txId;
   }
 
   // gets transaction history of this wallet
@@ -1004,17 +1026,23 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * _processSendRequests given a list of sendRequests, estimate fees, build the transaction and submit it.
+   * encodeTransaction given a list of sendRequests, estimate fees, build the transaction and submit it.
    * This function is an internal wrapper and may change.
    * @param  {SendRequest[]} sendRequests SendRequests
    * @param  {} discardChange=false
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
-  private async _processSendRequests(
-    sendRequests: Array<SendRequest | OpReturnData>,
+  public async encodeTransaction(
+    requests:
+    | SendRequest
+    | OpReturnData
+    | Array<SendRequest | OpReturnData>
+    | SendRequestArray[],
     discardChange = false,
     options?: SendRequestOptionsI
   ) {
+    let sendRequests = asSendRequestObject(requests);
+
     if (!this.privateKey) {
       throw new Error(
         `Wallet ${this.name} is missing either a network or private key`
@@ -1086,19 +1114,11 @@ export class Wallet extends BaseWallet {
       discardChange
     );
 
-    const awaitTransactionPropagation =
-      !options ||
-      options.awaitTransactionPropagation === undefined ||
-      options.awaitTransactionPropagation;
-
-    return await this._submitTransaction(
-      encodedTransaction,
-      awaitTransactionPropagation
-    );
+    return encodedTransaction;
   }
 
   // Submit a raw transaction
-  private async _submitTransaction(
+  public async submitTransaction(
     transaction: Uint8Array,
     awaitPropagation: boolean = true
   ): Promise<string> {
