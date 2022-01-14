@@ -1,19 +1,11 @@
-FROM christroutner/ct-base-ubuntu
+FROM node:12-buster-slim
 
 RUN apt-get update -y
 
-RUN apt-get install -y autoconf libtool
+RUN apt-get install -y autoconf libtool git python3 build-essential
 
-#Set the working directory to be the home directory
 WORKDIR /home/safeuser
 
-# Switch to user account.
-USER safeuser
-# Prep 'sudo' commands.
-#RUN echo 'abcd8765' | sudo -S pwd
-
-# Clone the Bitcore repository
-WORKDIR /home/safeuser
 RUN git clone https://github.com/fountainhead-cash/slpsockserve
 WORKDIR /home/safeuser/slpsockserve
 RUN npm install
