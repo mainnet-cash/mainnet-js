@@ -941,4 +941,42 @@ describe("Test Wallet Endpoints", () => {
         ]
       });
   });
+
+  it("Should encode and submit a transaction", async () => {
+    const bobsWalletResp = await request(app).post("/wallet/create").send({
+      network: "regtest",
+    });
+    const bobsCashaddr = bobsWalletResp.body.cashaddr;
+
+    const encodedTransactionResponse = await request(app)
+      .post("/wallet/encode_transaction")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        to: [
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 2000,
+          },
+        ],
+      });
+
+    expect(encodedTransactionResponse.statusCode).toBe(200);
+    expect(encodedTransactionResponse.body.transactionHex?.length).toBeGreaterThan(0);
+
+    const submitTransactionResponse = await request(app).post("/wallet/submit_transaction").send({
+      walletId: bobsWalletResp.body.walletId,
+      transactionHex: encodedTransactionResponse.body.transactionHex,
+    });
+    expect(submitTransactionResponse.statusCode).toBe(200);
+    expect(submitTransactionResponse.body?.txId?.length).toBeGreaterThan(0);
+
+    const bobBalanceResponse = await request(app)
+      .post("/wallet/balance")
+      .send({
+        walletId: bobsWalletResp.body.walletId,
+      });
+    expect(bobBalanceResponse.statusCode).toEqual(200);
+    expect(bobBalanceResponse.body.sat).toBe(2000);
+  });
 });

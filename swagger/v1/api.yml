@@ -760,6 +760,58 @@ paths:
       summary: Send all available funds to a given address
       tags:
         - wallet
+  /wallet/encode_transaction:
+    post:
+      operationId: encodeTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendRequest"
+        description: encode a transaction
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EncodeTransactionResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: Encode and sign a transaction given a list of sendRequests, options and estimate fees
+      tags:
+        - wallet
+  /wallet/submit_transaction:
+    post:
+      operationId: submitTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitTransactionRequest"
+        description: submit an encoded and signed transaction to the network
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmitTransactionResponse"
+          description: transaction accepted
+        "400":
+          content: {}
+          description: Invalid Request
+        "418":
+          content: {}
+          description: Invalid network for given address
+      summary: submit an encoded and signed transaction to the network
+      tags:
+        - wallet
   /wallet/utxo:
     post:
       operationId: utxos
@@ -2739,6 +2791,39 @@ components:
         anyOf:
           - $ref: "#/components/schemas/SendRequestItem"
           - $ref: "#/components/schemas/OpReturnData"
+    EncodeTransactionResponse:
+      type: object
+      properties:
+        transactionHex:
+          type: string
+          description: encoded transaction in hex format
+      required:
+        - transactionHex
+    SubmitTransactionRequest:
+      type: object
+      properties:
+        walletId:
+          type: string
+          example: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
+        transactionHex:
+          type: string
+          description: encoded transaction in hex format
+        awaitPropagation:
+          type: boolean
+          default: true
+          description:
+            A boolean flag to wait for transaction to propagate through the network and be registered in the bitcoind and indexer.
+            If set to false, the `send` call will be very fast, but the wallet UTXO state might be invalid for some 500ms.
+      required:
+        - walletId
+        - transactionHex
+    SubmitTransactionResponse:
+      type: object
+      properties:
+        txId:
+          type: string
+          example: "1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f"
+          description: The hash of a transaction
     CashscriptReceiptArray:
       type: array
       items:

@@ -501,6 +501,26 @@ describe(`Watch only Wallets`, () => {
     }
   });
 
+  test("Should encode and submit a transaction", async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    const encodedTransaction = await aliceWallet.encodeTransaction([
+      {
+        cashaddr: bobWallet.cashaddr!,
+        value: 2000,
+        unit: "satoshis",
+      },
+    ]);
+    expect(encodedTransaction.length).toBeGreaterThan(0);
+
+    const txId = await aliceWallet.submitTransaction(encodedTransaction, true);
+    expect(txId.length).toBeGreaterThan(0);
+
+    expect(await bobWallet.getBalance("sat")).toBe(2000);
+  });
+
   test("Should get last transaction", async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
