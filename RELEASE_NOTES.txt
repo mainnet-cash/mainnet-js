@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+0.4.34
+
+- Add rest endpoints `wallet/encode_transaction` and `wallet/submit_transaction`
+- Add tests
+
 0.4.32
 
 - Add public transaction building and broadcasting methods

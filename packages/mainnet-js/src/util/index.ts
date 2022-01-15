@@ -1,6 +1,7 @@
 export { amountInSatoshi } from "./amountInSatoshi";
 export { asSendRequestObject } from "./asSendRequestObject";
 export { atob, btoa } from "./base64";
+export { binToHex, hexToBin } from "@bitauth/libauth";
 export { convert, convertObject } from "./convert";
 export { delay } from "./delay";
 export { derivedNetwork } from "./deriveNetwork";
