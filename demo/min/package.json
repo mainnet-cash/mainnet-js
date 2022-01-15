@@ -1,6 +1,10 @@
 {
   "name": "@mainnet-cash/demo-min",
+<<<<<<< HEAD
   "version": "0.4.35",
+=======
+  "version": "0.4.34",
+>>>>>>> ec01793a (Feature/tx encode submit rest (#145))
   "private": true,
   "main": "index.js",
   "license": "MIT",
@@ -9,7 +13,11 @@
     "publish:public": "echo 'noop'"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@mainnet-cash/contract": "0.4.35"
+=======
+    "@mainnet-cash/contract": "0.4.34"
+>>>>>>> ec01793a (Feature/tx encode submit rest (#145))
   },
   "devDependencies": {
     "webpack": "5.58.1",
