@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const mainnet = require("mainnet-js");
-const { base64ToBin } = require('@bitauth/libauth');
 
 /**
 * Get total balance for wallet
@@ -218,7 +217,53 @@ const sendMax = ({ sendMaxRequest }) =>
       );
     }
   });
-  
+
+/**
+* Encode and sign a transaction given a list of sendRequests, options and estimate fees
+*
+* sendRequest SendRequest encode a transaction
+* returns EncodeTransactionResponse
+* */
+const encodeTransaction = ({ sendRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(sendRequest.walletId);
+      if (!wallet) {
+        throw Error("Could not derive wallet");
+      }
+
+      const encodedTransaction = await wallet.encodeTransaction(sendRequest.to, sendRequest.options);
+      const txHex = mainnet.Mainnet.binToHex(encodedTransaction)
+      resolve(Service.successResponse({ transactionHex: txHex }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+/**
+* submit an encoded and signed transaction to the network
+*
+* submitTransactionRequest SubmitTransactionRequest submit an encoded and signed transaction to the network
+* returns SubmitTransactionResponse
+* */
+const submitTransaction = ({ submitTransactionRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(submitTransactionRequest.walletId);
+
+      const encodedTransaction = mainnet.Mainnet.hexToBin(submitTransactionRequest.transactionHex)
+      const txId = await wallet.submitTransaction(encodedTransaction, submitTransactionRequest.awaitPropagation);
+      resolve(Service.successResponse({ txId: txId }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+
 /**
 * Get detailed information about unspent outputs (utxos)
 *
@@ -273,6 +318,8 @@ module.exports = {
   maxAmountToSend,
   send,
   sendMax,
+  encodeTransaction,
+  submitTransaction,
   utxos,
   xpubkeys
 };

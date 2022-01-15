@@ -917,7 +917,7 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * encodeTransaction given a list of sendRequests, options and estimate fees.
+   * encodeTransaction Encode and sign a transaction given a list of sendRequests, options and estimate fees.
    * @param  {SendRequest[]} sendRequests SendRequests
    * @param  {boolean} discardChange=false
    * @param  {SendRequestOptionsI} options Options of the send requests
