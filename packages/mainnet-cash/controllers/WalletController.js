@@ -24,6 +24,10 @@ const depositQr = async (request, response) => {
   await Controller.handleRequest(request, response, service.depositQr);
 };
 
+const encodeTransaction = async (request, response) => {
+  await Controller.handleRequest(request, response, service.encodeTransaction);
+};
+
 const info = async (request, response) => {
   await Controller.handleRequest(request, response, service.info);
 };
@@ -48,6 +52,10 @@ const sendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.sendMax);
 };
 
+const submitTransaction = async (request, response) => {
+  await Controller.handleRequest(request, response, service.submitTransaction);
+};
+
 const utxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.utxos);
 };
@@ -62,12 +70,14 @@ module.exports = {
   createWallet,
   depositAddress,
   depositQr,
+  encodeTransaction,
   info,
   maxAmountToSend,
   namedExists,
   replaceNamed,
   send,
   sendMax,
+  submitTransaction,
   utxos,
   xpubkeys,
 };
