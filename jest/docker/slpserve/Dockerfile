@@ -1,16 +1,8 @@
-FROM christroutner/ct-base-ubuntu
+FROM node:12-buster-slim
 
+# Update the OS and install any OS packages needed.
 RUN apt-get update -y
-
-RUN apt-get install -y autoconf libtool
-
-#Set the working directory to be the home directory
-WORKDIR /home/safeuser
-
-# Switch to user account.
-USER safeuser
-# Prep 'sudo' commands.
-#RUN echo 'abcd8765' | sudo -S pwd
+RUN apt-get install -y git autoconf libtool python3 build-essential
 
 # Clone the Bitcore repository
 WORKDIR /home/safeuser
@@ -21,7 +13,3 @@ RUN npm install
 COPY env .env
 
 CMD ["npm", "start"]
-
-#COPY startup-script.sh startup-script.sh
-#CMD ["./startup-script.sh"]
-#CMD ["bitcoind", "-conf=/home/bitcoin/.bitcoin/bitcoin.conf", "-datadir=/data", "-disablewallet"]
