@@ -13,5 +13,5 @@ export enum FeePaidByEnum {
   last = "lastOutput",
   changeThenFirst = "changeThenFirst",
   changeThenAny = "changeThenAny",
-  changeThenLast = "changeThenLast"
+  changeThenLast = "changeThenLast",
 }

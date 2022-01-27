@@ -681,7 +681,7 @@ export class Slp {
       privateKey: this.wallet.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: slpOutputsResult.SlpOutputs,
-      feePaidBy: FeePaidByEnum.change
+      feePaidBy: FeePaidByEnum.change,
     });
 
     const bchSpendAmount = slpOutputsResult.BchSendRequests.map(
@@ -707,7 +707,7 @@ export class Slp {
       privateKey: this.wallet.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: slpOutputsResult.SlpOutputs,
-      feePaidBy: FeePaidByEnum.change
+      feePaidBy: FeePaidByEnum.change,
     });
 
     const encodedTransaction = await buildEncodedTransaction(

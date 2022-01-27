@@ -764,11 +764,11 @@ export class Wallet extends BaseWallet {
       this._slpSemiAware = true;
     }
 
-    let feePaidBy
+    let feePaidBy;
     if (params.options && params.options.feePaidBy) {
       feePaidBy = params.options.feePaidBy;
-    }else{
-      feePaidBy = FeePaidByEnum.change
+    } else {
+      feePaidBy = FeePaidByEnum.change;
     }
 
     // get inputs
@@ -794,7 +794,12 @@ export class Wallet extends BaseWallet {
       .fill(0)
       .map(() => sendRequest);
 
-    const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight, feePaidBy);
+    const fundingUtxos = await getSuitableUtxos(
+      utxos,
+      undefined,
+      bestHeight,
+      feePaidBy
+    );
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
@@ -802,7 +807,7 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
-      feePaidBy: feePaidBy
+      feePaidBy: feePaidBy,
     });
     const spendableAmount = await sumUtxoValue(fundingUtxos);
 
@@ -1040,11 +1045,11 @@ export class Wallet extends BaseWallet {
       this._slpSemiAware = true;
     }
 
-    let feePaidBy
+    let feePaidBy;
     if (options && options.feePaidBy) {
       feePaidBy = options.feePaidBy;
-    }else{
-      feePaidBy = FeePaidByEnum.change
+    } else {
+      feePaidBy = FeePaidByEnum.change;
     }
 
     // get inputs from options or query all inputs
@@ -1074,7 +1079,7 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
-      feePaidBy: feePaidBy
+      feePaidBy: feePaidBy,
     });
 
     const fundingUtxos = await getSuitableUtxos(
@@ -1094,7 +1099,7 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
-      feePaidBy: feePaidBy
+      feePaidBy: feePaidBy,
     });
     const encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,

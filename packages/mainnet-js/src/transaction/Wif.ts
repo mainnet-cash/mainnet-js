@@ -57,16 +57,13 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   try {
-    const changeAmount =
-    BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+    const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
 
-
-    outputs = allocateFee(outputs, fee, feePaidBy, changeAmount)
+    outputs = allocateFee(outputs, fee, feePaidBy, changeAmount);
 
     let lockedOutputs = await prepareOutputs(outputs);
 
     if (discardChange !== true) {
-
       if (changeAmount > DUST_UTXO_THRESHOLD) {
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
@@ -220,8 +217,8 @@ export async function getSuitableUtxos(
   }
 
   // if the fee is split with a feePaidBy option, skip checking change.
-  if(feePaidBy && feePaidBy != FeePaidByEnum.change){
-    return suitableUtxos
+  if (feePaidBy && feePaidBy != FeePaidByEnum.change) {
+    return suitableUtxos;
   }
 
   // If the amount needed is met, or no amount is given, return
@@ -247,14 +244,14 @@ export async function getFeeAmount({
   privateKey,
   relayFeePerByteInSatoshi,
   slpOutputs,
-  feePaidBy
+  feePaidBy,
 }: {
   utxos: UtxoI[];
   sendRequests: Array<SendRequest | OpReturnData>;
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
   slpOutputs: any[];
-  feePaidBy: FeePaidByEnum
+  feePaidBy: FeePaidByEnum;
 }) {
   // build transaction
   if (utxos) {
