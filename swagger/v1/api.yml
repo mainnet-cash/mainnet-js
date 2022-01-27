@@ -2676,7 +2676,26 @@ components:
           description:
             A boolean flag to wait for transaction to propagate through the network and be registered in the bitcoind and indexer.
             If set to false, the `send` call will be very fast, but the wallet UTXO state might be invalid for some 500ms.
-
+        feePaidBy:
+            enum:
+              - change
+              - firstOutput
+              - anyOutputs
+              - lastOutput
+              - changeThenFirst
+              - changeThenAny
+              - changeThenLast
+            default: change
+            type: string
+            description: >
+              Fee allocation stragety. Convenience option to subtract fees from outputs if change is not sufficent to cover transaction costs.
+                * `change` - Change, pay the fees from change or error
+                * `firstOutput` - First Output, pay the fee from the first output or error
+                * `lastOutput` - Last Output, pay the fee from the last output or error
+                * `anyOutput` - Any Output, pay the fee from dust outputs or divide across all remaining non-dust outputs.
+                * `changeThenFirst` - Use change then first output or error.
+                * `changeThenLast` - Use change then last output or error.
+                * `changeThenAny` - Use change then any output stragety or error.
     SlpSendRequestOptions:
       type: object
       properties:

@@ -13,12 +13,14 @@ import {
   AuthenticationProgramStateBCH,
 } from "@bitauth/libauth";
 import { UtxoI } from "../interface";
+import { allocateFee } from "./allocateFee";
 
 import { DUST_UTXO_THRESHOLD } from "../constant";
 import { OpReturnData, SendRequest } from "../wallet/model";
 import { amountInSatoshi } from "../util/amountInSatoshi";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
 import { sumUtxoValue } from "../util/sumUtxoValue";
+import { FeePaidByEnum } from "../wallet/enum";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
@@ -27,7 +29,8 @@ export async function buildP2pkhNonHdTransaction(
   signingKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
-  slpOutputs: any[] = []
+  slpOutputs: any[] = [],
+  feePaidBy: FeePaidByEnum = FeePaidByEnum.change
 ) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -42,6 +45,7 @@ export async function buildP2pkhNonHdTransaction(
 
   const compiler = await authenticationTemplateToCompilerBCH(template);
   const inputAmount = await sumUtxoValue(inputs);
+
   const sendAmount = await sumSendRequestAmounts(outputs);
 
   // Get the change locking bytecode
@@ -53,11 +57,16 @@ export async function buildP2pkhNonHdTransaction(
   }
 
   try {
+    const changeAmount =
+    BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+
+
+    outputs = allocateFee(outputs, fee, feePaidBy, changeAmount)
+
     let lockedOutputs = await prepareOutputs(outputs);
 
     if (discardChange !== true) {
-      const changeAmount =
-        BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+
       if (changeAmount > DUST_UTXO_THRESHOLD) {
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
@@ -188,7 +197,8 @@ export function prepareOpReturnOutput(request: OpReturnData) {
 export async function getSuitableUtxos(
   unspentOutputs: UtxoI[],
   amountRequired: BigInt | undefined,
-  bestHeight: number
+  bestHeight: number,
+  feePaidBy: FeePaidByEnum
 ): Promise<UtxoI[]> {
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = BigInt(0);
@@ -207,6 +217,11 @@ export async function getSuitableUtxos(
     if (amountRequired && amountAvailable > amountRequired) {
       break;
     }
+  }
+
+  // if the fee is split with a feePaidBy option, skip checking change.
+  if(feePaidBy && feePaidBy != FeePaidByEnum.change){
+    return suitableUtxos
   }
 
   // If the amount needed is met, or no amount is given, return
@@ -232,12 +247,14 @@ export async function getFeeAmount({
   privateKey,
   relayFeePerByteInSatoshi,
   slpOutputs,
+  feePaidBy
 }: {
   utxos: UtxoI[];
   sendRequests: Array<SendRequest | OpReturnData>;
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
   slpOutputs: any[];
+  feePaidBy: FeePaidByEnum
 }) {
   // build transaction
   if (utxos) {
@@ -248,7 +265,8 @@ export async function getFeeAmount({
       privateKey,
       0, //DUST_UTXO_THRESHOLD
       false,
-      slpOutputs
+      slpOutputs,
+      feePaidBy
     );
 
     return draftTransaction.length * relayFeePerByteInSatoshi + 1;
@@ -266,7 +284,8 @@ export async function buildEncodedTransaction(
   privateKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
-  slpOutputs: any[] = []
+  slpOutputs: any[] = [],
+  feePaidBy: FeePaidByEnum = FeePaidByEnum.change
 ) {
   let txn = await buildP2pkhNonHdTransaction(
     fundingUtxos,
@@ -274,7 +293,8 @@ export async function buildEncodedTransaction(
     privateKey,
     fee,
     discardChange,
-    slpOutputs
+    slpOutputs,
+    feePaidBy
   );
   // submit transaction
   if (txn.success) {

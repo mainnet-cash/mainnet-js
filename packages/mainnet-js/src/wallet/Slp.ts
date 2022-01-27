@@ -53,6 +53,7 @@ import { GsppProvider } from "../slp/GsppProvider";
 import { delay } from "../util/delay";
 import { Util } from "./Util";
 import { Mainnet } from "../index";
+import { FeePaidByEnum } from "./enum";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -680,6 +681,7 @@ export class Slp {
       privateKey: this.wallet.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: slpOutputsResult.SlpOutputs,
+      feePaidBy: FeePaidByEnum.change
     });
 
     const bchSpendAmount = slpOutputsResult.BchSendRequests.map(
@@ -689,7 +691,8 @@ export class Slp {
     let fundingUtxos = await getSuitableUtxos(
       fundingBchUtxos,
       BigInt(bchSpendAmount) + BigInt(feeEstimate),
-      bestHeight
+      bestHeight,
+      FeePaidByEnum.change
     );
 
     if (fundingUtxos.length === 0) {
@@ -704,6 +707,7 @@ export class Slp {
       privateKey: this.wallet.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: slpOutputsResult.SlpOutputs,
+      feePaidBy: FeePaidByEnum.change
     });
 
     const encodedTransaction = await buildEncodedTransaction(

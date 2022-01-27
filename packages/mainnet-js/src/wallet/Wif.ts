@@ -31,7 +31,7 @@ import { networkPrefixMap } from "../enum";
 import { PrivateKeyI, UtxoI } from "../interface";
 
 import { BaseWallet } from "./Base";
-import { WalletTypeEnum } from "./enum";
+import { FeePaidByEnum, WalletTypeEnum } from "./enum";
 import {
   CancelWatchFn,
   SendRequestOptionsI,
@@ -764,6 +764,13 @@ export class Wallet extends BaseWallet {
       this._slpSemiAware = true;
     }
 
+    let feePaidBy
+    if (params.options && params.options.feePaidBy) {
+      feePaidBy = params.options.feePaidBy;
+    }else{
+      feePaidBy = FeePaidByEnum.change
+    }
+
     // get inputs
     let utxos: UtxoI[];
     if (params.options && params.options.utxoIds) {
@@ -787,7 +794,7 @@ export class Wallet extends BaseWallet {
       .fill(0)
       .map(() => sendRequest);
 
-    const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight);
+    const fundingUtxos = await getSuitableUtxos(utxos, undefined, bestHeight, feePaidBy);
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
@@ -795,6 +802,7 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
+      feePaidBy: feePaidBy
     });
     const spendableAmount = await sumUtxoValue(fundingUtxos);
 
@@ -1032,6 +1040,13 @@ export class Wallet extends BaseWallet {
       this._slpSemiAware = true;
     }
 
+    let feePaidBy
+    if (options && options.feePaidBy) {
+      feePaidBy = options.feePaidBy;
+    }else{
+      feePaidBy = FeePaidByEnum.change
+    }
+
     // get inputs from options or query all inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
@@ -1059,12 +1074,14 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
+      feePaidBy: feePaidBy
     });
 
     const fundingUtxos = await getSuitableUtxos(
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
-      bestHeight
+      bestHeight,
+      feePaidBy
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1077,13 +1094,16 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
+      feePaidBy: feePaidBy
     });
     const encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,
       sendRequests,
       this.privateKey,
       fee,
-      discardChange
+      discardChange,
+      [],
+      feePaidBy
     );
 
     const awaitTransactionPropagation =

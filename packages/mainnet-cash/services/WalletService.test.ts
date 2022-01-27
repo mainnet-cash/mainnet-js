@@ -347,6 +347,108 @@ describe("Test Wallet Endpoints", () => {
   });
 
   /**
+   * send w/feePaidBy
+   */
+
+   test("Should send with feePaidBy strategy", async () => {
+    if (!process.env.PRIVATE_WIF) {
+      throw Error("Attempted to pass an empty WIF");
+    } else {
+      const aliceResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const bobResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const charlieResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const daveResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const edwardResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const fundingResp = await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        to: [{
+          cashaddr: aliceResp.body.cashaddr,
+          unit: 'sat',
+          value: 4500
+        }]
+      });
+      const sendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: aliceResp.body.walletId,
+          to: [{
+            cashaddr: bobResp.body.cashaddr,
+            unit: 'sat',
+            value: 549
+          },
+          {
+            cashaddr: charlieResp.body.cashaddr,
+            unit: 'sat',
+            value: 550
+          },
+          {
+            cashaddr: daveResp.body.cashaddr,
+            unit: 'sat',
+            value: 551
+          },
+          {
+            cashaddr: edwardResp.body.cashaddr,
+            unit: 'sat',
+            value: 2552
+          }],
+          options:{feePaidBy:'changeThenAny'}
+        });
+
+      const aliceBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: aliceResp.body.walletId,
+      });
+      const bobBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: bobResp.body.walletId,
+      });
+      const charlieBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: charlieResp.body.walletId,
+      });
+      const daveBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: daveResp.body.walletId,
+      });
+      const edwardBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: edwardResp.body.walletId,
+      });
+
+      const alice = aliceBalanceResp.body.sat as number;
+      const bob = bobBalanceResp.body.sat as number;
+      const charlie = charlieBalanceResp.body.sat as number;
+      const dave = daveBalanceResp.body.sat as number;
+      const edward = edwardBalanceResp.body.sat as number;
+
+      expect(sendResp.statusCode).toBe(200);
+      expect(aliceBalanceResp.statusCode).toBe(200);
+      expect(bobBalanceResp.statusCode).toBe(200);
+      expect(charlieBalanceResp.statusCode).toBe(200);
+      expect(daveBalanceResp.statusCode).toBe(200);
+      expect(edwardBalanceResp.statusCode).toBe(200);
+      expect((sendResp.body.txId as string).length).toBe(64);
+      expect(alice).toBe(0);
+      expect(bob).toBe(0);
+      expect(charlie).toBe(550);
+      expect(dave).toBe(551);
+      expect(edward).toBe(2552);
+    }
+  });
+
+  /**
    * sendMax
    */
 
@@ -746,6 +848,7 @@ describe("Test Wallet Endpoints", () => {
         });
       expect(result.body.sat).toBe(546);
   });
+
   /**
    * xpubkeys should return valid xpubkeys
    */
