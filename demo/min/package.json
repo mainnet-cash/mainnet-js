@@ -13,11 +13,7 @@
     "publish:public": "echo 'noop'"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@mainnet-cash/contract": "0.4.35"
-=======
-    "@mainnet-cash/contract": "0.4.34"
->>>>>>> ec01793a (Feature/tx encode submit rest (#145))
   },
   "devDependencies": {
     "webpack": "5.58.1",
