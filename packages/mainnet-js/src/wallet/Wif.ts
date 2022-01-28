@@ -930,7 +930,7 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * encodeTransaction Encode and sign a transaction given a list of sendRequests, options and estimate fees.
+   * encodeTransaction given a list of sendRequests, options and estimate fees.
    * @param  {SendRequest[]} sendRequests SendRequests
    * @param  {boolean} discardChange=false
    * @param  {SendRequestOptionsI} options Options of the send requests
@@ -1185,7 +1185,6 @@ export class Wallet extends BaseWallet {
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     return this;
   }
-
   //#endregion Private implementation details
 
   //#region Signing
