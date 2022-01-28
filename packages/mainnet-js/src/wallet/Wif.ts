@@ -997,7 +997,7 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
-      feePaidBy: feePaidBy
+      feePaidBy: feePaidBy,
     });
 
     const fundingUtxos = await getSuitableUtxos(
@@ -1017,7 +1017,7 @@ export class Wallet extends BaseWallet {
       privateKey: this.privateKey,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
-      feePaidBy: feePaidBy
+      feePaidBy: feePaidBy,
     });
     const encodedTransaction = await buildEncodedTransaction(
       fundingUtxos,
