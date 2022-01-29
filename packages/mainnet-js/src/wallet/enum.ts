@@ -5,3 +5,13 @@ export enum WalletTypeEnum {
   Watch = "watch",
   PrivateKey = "privkey",
 }
+
+export enum FeePaidByEnum {
+  change = "change",
+  first = "firstOutput",
+  any = "anyOutputs",
+  last = "lastOutput",
+  changeThenFirst = "changeThenFirst",
+  changeThenAny = "changeThenAny",
+  changeThenLast = "changeThenLast",
+}

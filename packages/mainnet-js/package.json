@@ -8,7 +8,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.4.34",
+  "version": "0.4.35",
   "homepage": "https://mainnet.cash",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",

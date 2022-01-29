@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.4.34
+  version: 0.4.35
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -2930,6 +2930,26 @@ components:
             invalid for some 500ms.
           example: false
           type: boolean
+        feePaidBy:
+          default: change
+          description: |
+            Fee allocation stragety. Convenience option to subtract fees from outputs if change is not sufficent to cover transaction costs.
+              * `change` - Change, pay the fees from change or error
+              * `firstOutput` - First Output, pay the fee from the first output or error
+              * `lastOutput` - Last Output, pay the fee from the last output or error
+              * `anyOutput` - Any Output, pay the fee from dust outputs or divide across all remaining non-dust outputs.
+              * `changeThenFirst` - Use change then first output or error.
+              * `changeThenLast` - Use change then last output or error.
+              * `changeThenAny` - Use change then any output stragety or error.
+          enum:
+          - change
+          - firstOutput
+          - anyOutputs
+          - lastOutput
+          - changeThenFirst
+          - changeThenAny
+          - changeThenLast
+          type: string
       type: object
     SlpSendRequestOptions:
       example:
