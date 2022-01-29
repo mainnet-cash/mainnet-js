@@ -1,4 +1,4 @@
-import { WalletTypeEnum } from "./enum";
+import { WalletTypeEnum, FeePaidByEnum } from "./enum";
 import { NetworkEnum } from "../enum";
 import { ImageI } from "../qr/interface";
 import { ElectrumRawTransaction } from "../network/interface";
@@ -50,6 +50,7 @@ export interface SendRequestOptionsI {
   slpSemiAware?: boolean; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
   queryBalance?: boolean;
   awaitTransactionPropagation?: boolean;
+  feePaidBy?: FeePaidByEnum;
 }
 
 export interface MnemonicI {
