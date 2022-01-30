@@ -30,7 +30,8 @@ export async function buildP2pkhNonHdTransaction(
   fee: number = 0,
   discardChange = false,
   slpOutputs: any[] = [],
-  feePaidBy: FeePaidByEnum = FeePaidByEnum.change
+  feePaidBy: FeePaidByEnum = FeePaidByEnum.change,
+  changeAddress: string = ""
 ) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -48,14 +49,6 @@ export async function buildP2pkhNonHdTransaction(
 
   const sendAmount = await sumSendRequestAmounts(outputs);
 
-  // Get the change locking bytecode
-  let changeLockingBytecode = compiler.generateBytecode("lock", {
-    keys: { privateKeys: { key: signingKey } },
-  });
-  if (!changeLockingBytecode.success) {
-    throw new Error(changeLockingBytecode.toString());
-  }
-
   try {
     const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
 
@@ -65,6 +58,18 @@ export async function buildP2pkhNonHdTransaction(
 
     if (discardChange !== true) {
       if (changeAmount > DUST_UTXO_THRESHOLD) {
+        let changeLockingBytecode;
+        if (changeAddress) {
+          changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
+        } else {
+          // Get the change locking bytecode
+          changeLockingBytecode = compiler.generateBytecode("lock", {
+            keys: { privateKeys: { key: signingKey } },
+          });
+        }
+        if (typeof changeLockingBytecode === "string") {
+          throw new Error(changeLockingBytecode);
+        }
         lockedOutputs.push({
           lockingBytecode: changeLockingBytecode.bytecode,
           satoshis: bigIntToBinUint64LEClamped(BigInt(changeAmount)),
@@ -282,7 +287,8 @@ export async function buildEncodedTransaction(
   fee: number = 0,
   discardChange = false,
   slpOutputs: any[] = [],
-  feePaidBy: FeePaidByEnum = FeePaidByEnum.change
+  feePaidBy: FeePaidByEnum = FeePaidByEnum.change,
+  changeAddress: string = ""
 ) {
   let txn = await buildP2pkhNonHdTransaction(
     fundingUtxos,
@@ -291,7 +297,8 @@ export async function buildEncodedTransaction(
     fee,
     discardChange,
     slpOutputs,
-    feePaidBy
+    feePaidBy,
+    changeAddress
   );
   // submit transaction
   if (txn.success) {

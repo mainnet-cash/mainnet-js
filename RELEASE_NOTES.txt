@@ -1,6 +1,14 @@
 Newest changes
 --------------
 
+0.4.36
+
+- Fix changeAddress for send
+
+0.4.35
+
+- Add feePaidBy option for send
+
 0.4.34
 
 - Add rest endpoints `wallet/encode_transaction` and `wallet/submit_transaction`
