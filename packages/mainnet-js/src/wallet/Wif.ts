@@ -970,6 +970,13 @@ export class Wallet extends BaseWallet {
       feePaidBy = FeePaidByEnum.change;
     }
 
+    let changeAddress;
+    if(options && options.changeAddress){
+      changeAddress = options.changeAddress
+    }else{
+      changeAddress = ""
+    }
+
     // get inputs from options or query all inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
@@ -1026,7 +1033,8 @@ export class Wallet extends BaseWallet {
       fee,
       discardChange,
       [],
-      feePaidBy
+      feePaidBy,
+      changeAddress
     );
 
     return encodedTransaction;
