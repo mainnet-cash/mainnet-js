@@ -971,10 +971,10 @@ export class Wallet extends BaseWallet {
     }
 
     let changeAddress;
-    if(options && options.changeAddress){
-      changeAddress = options.changeAddress
-    }else{
-      changeAddress = ""
+    if (options && options.changeAddress) {
+      changeAddress = options.changeAddress;
+    } else {
+      changeAddress = "";
     }
 
     // get inputs from options or query all inputs

@@ -49,8 +49,6 @@ export async function buildP2pkhNonHdTransaction(
 
   const sendAmount = await sumSendRequestAmounts(outputs);
 
-
-
   try {
     const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
 
@@ -60,10 +58,10 @@ export async function buildP2pkhNonHdTransaction(
 
     if (discardChange !== true) {
       if (changeAmount > DUST_UTXO_THRESHOLD) {
-        let changeLockingBytecode
-        if(changeAddress){
-          changeLockingBytecode = cashAddressToLockingBytecode(changeAddress)
-        }else{
+        let changeLockingBytecode;
+        if (changeAddress) {
+          changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
+        } else {
           // Get the change locking bytecode
           changeLockingBytecode = compiler.generateBytecode("lock", {
             keys: { privateKeys: { key: signingKey } },
