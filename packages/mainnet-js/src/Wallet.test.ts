@@ -225,6 +225,50 @@ describe(`Test Wallet library`, () => {
     }
   });
 
+  test("Should send a transaction with change to different change address", async () => {
+    // Build Alice's wallet from Wallet Import Format string, send some sats
+    if (!process.env.PRIVATE_WIF) {
+      throw Error("Attempted to pass an empty WIF");
+    } else {
+      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
+
+      const alice = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+      const bob = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+      const charlie = await createWallet({
+        type: WalletTypeEnum.Wif,
+        network: "regtest",
+      });
+      await funder.send([
+        {
+          cashaddr: alice.cashaddr!,
+          value: 3000,
+          unit: "satoshis",
+        },
+      ]);
+
+      let sendResponse = await alice.send(
+        [
+          {
+            cashaddr: bob.cashaddr!,
+            value: 1000,
+            unit: "satoshis",
+          },
+        ],
+        {
+          changeAddress: charlie.cashaddr!,
+        }
+      );
+      expect(await bob.getBalance("sat")).toBe(1000);
+      expect(await charlie.getBalance("sat")).toBe(1780);
+    }
+  });
+
   test("Should send maximum amount from specific utxos", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
     if (!process.env.PRIVATE_WIF) {

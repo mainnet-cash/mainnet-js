@@ -244,6 +244,66 @@ describe("Test Wallet Endpoints", () => {
     }
   });
 
+  test("Should send from a Regtest wallet with the API", async () => {
+    if (!process.env.PRIVATE_WIF) {
+      throw Error("Attempted to pass an empty WIF");
+    } else {
+      const aliceWalletResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const bobsWalletResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+      const bobsCashaddr = bobsWalletResp.body.cashaddr;
+      const charlieWalletResp = await request(app).post("/wallet/create").send({
+        type: "wif",
+        network: "regtest",
+      });
+
+      const aliceSendResp = await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        to: [{
+          cashaddr: aliceWalletResp.body.cashaddr,
+          unit: 'sat',
+          value: 5000
+        }]
+      });
+      const sendResp = await request(app)
+        .post("/wallet/send")
+        .send({
+          walletId: aliceWalletResp.body.walletId,
+          to: [{
+            cashaddr: bobsCashaddr,
+            unit: 'sat',
+            value: 3000
+          }],
+          options:{
+            changeAddress: charlieWalletResp.body.cashaddr!
+          }
+        });
+
+      const bobBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: bobsWalletResp.body.walletId,
+      });
+      const charlieBalanceResp = await request(app).post("/wallet/balance").send({
+        walletId: charlieWalletResp.body.walletId,
+      });
+
+
+      expect(sendResp.statusCode).toBe(200);
+      expect((sendResp.body.txId as string).length).toBe(64);
+      expect(bobBalanceResp.statusCode).toBe(200);
+      expect(bobBalanceResp.body.sat as number).toBe(3000);
+
+      expect(charlieBalanceResp.statusCode).toBe(200);
+      expect(charlieBalanceResp.body.sat as number).toBe(1780);
+    }
+  });
+
   // This is an integration test of send w/utxoIds
   test("Should send from specific utxos", async () => {
    
