@@ -1261,7 +1261,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UtilDecodeTransactionResponse'
+                $ref: '#/components/schemas/ElectrumRawTransaction'
           description: successful operation
       summary: Decode a bitcoin transaction. Accepts both transaction hash or raw
         transaction in hex format.
@@ -1870,6 +1870,29 @@ paths:
       x-eov-operation-handler: controllers/SmartbchContractController
 components:
   schemas:
+    UnitType:
+      discriminator:
+        mapping:
+          Utxo: '#/components/schemas/Utxo'
+          BalanceRequest: '#/components/schemas/BalanceRequest'
+        propertyName: unit_type
+      properties:
+        unit:
+          description: Unit of account.
+          enum:
+          - bch
+          - BCH
+          - usd
+          - USD
+          - bit
+          - bits
+          - sat
+          - SAT
+          - sats
+          - satoshi
+          - satoshis
+          example: sat
+          type: string
     Utxo:
       allOf:
       - $ref: '#/components/schemas/UnitType'
@@ -1896,15 +1919,6 @@ components:
       - txId
       - utxoId
       - value
-    XPubKey:
-      example:
-        path: path
-        xpubkey: xpubkey
-      properties:
-        path:
-          type: string
-        xpubkey:
-          type: string
     BalanceRequest:
       allOf:
       - $ref: '#/components/schemas/UnitType'
@@ -1935,237 +1949,61 @@ components:
           type: boolean
       required:
       - walletId
-    BalanceResponse:
-      example:
-        bch: 1
-        sat: 100000000
-        usd: 438.02
-      properties:
-        bch:
-          description: Amount in whole Bitcoin Cash
-          example: 1
-          format: float
-          type: number
-        sat:
-          description: Amount in satoshis
-          example: 100000000
-          type: integer
-        usd:
-          description: Amount in United States Dollars
-          example: 438.02
-          type: number
-    Error:
-      example:
-        message: An server error occurred
-        code: 500
-      properties:
-        message:
-          type: string
-        code:
-          type: number
-    WatchAddressRequest:
-      example:
-        recurrence: recurrent
-        cashaddr: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
-        tokenId: ""
-        type: transaction:in,out
-        url: http://example.com/webhook
-        duration_sec: 86400
-      properties:
-        cashaddr:
-          description: |
-            Cash address to watch
-          example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
-          type: string
-        url:
-          description: Url to be called when configured action is triggered
-          example: http://example.com/webhook
-          type: string
-        type:
-          default: transaction:in,out
-          description: Type of watch operation
-          enum:
-          - transaction:in
-          - transaction:out
-          - transaction:in,out
-          - balance
-          - slptransaction:in
-          - slptransaction:out
-          - slptransaction:in,out
-          - slpbalance
-          example: transaction:in,out
-          type: string
-        recurrence:
-          default: once
-          description: Action recurrence. Indicates if webhook should be triggered
-            recurrently until expire or only once
-          enum:
-          - once
-          - recurrent
-          example: recurrent
-          type: string
-        tokenId:
-          description: Token unique hexadecimal identifier to use. Mandatory in SLP
-            webhooks.
-        duration_sec:
-          default: 86400
-          description: Duration of the webhook lifetime in seconds before it will
-            expire.
-          example: 86400
-          type: number
-      required:
-      - cashaddr
-      - type
-      - url
-    WatchAddressResponse:
-      example:
-        id: 1
-      properties:
-        id:
-          description: Webhook Id created in the system
-          example: 1
-          type: integer
-    ZeroBalanceResponse:
-      example:
-        bch: 0
-        sat: 0
-        usd: 0
-      properties:
-        bch:
-          description: Amount in whole Bitcoin Cash
-          example: 0
-          format: float
-          type: number
-        sat:
-          description: Amount in satoshis
-          example: 0
-          type: integer
-        usd:
-          description: Amount in United States Dollars
-          example: 0
-          type: number
-    Contract:
-      example:
-        contractId: contractId
-      properties:
-        contractId:
-          description: |
-            serialized contract
-          type: string
-      required:
-      - contractId
-    EscrowContract:
-      example:
-        escrowContractId: escrowContractId
-      properties:
-        escrowContractId:
-          description: |
-            serialized escrow contract
-          type: string
-      required:
-      - escrowContractId
-    EscrowRequest:
-      example:
-        arbiterAddr: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
-        amount: 10000
-        buyerAddr: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
-        sellerAddr: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
-      properties:
-        buyerAddr:
-          description: The cashaddress of the buyer
-          example: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
-        arbiterAddr:
-          description: The cashaddress of the arbiter
-          example: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
-        sellerAddr:
-          description: The cashaddress of the seller
-          example: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
-        amount:
-          description: Numeric amount to be transferred by the contract in satoshi,
-            amount must be less than 21 BCH.
-          example: 10000
-          type: number
-      required:
-      - amount
-      - arbiterAddr
-      - buyerAddr
-      - sellerAddr
-    EscrowResponse:
-      example:
-        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        escrowContractId: escrowContract:testnet:WW1Ob2RHVnpkRHB4ZWpBd2NHczViR1p6TUdzNVpqVjJaak5xT0dnMk5uRm1iWEZoWjJzNGJtTTFObVZzY1RSa2RqST06WW1Ob2RHVnpkRHB4Y201c2RYVm5aVFUyWVdoNGMzazJjSEJzY1RRemNuWmhOMnMyY3psa2EyNTFOSEExTWpjNFlXZz06WW1Ob2RHVnpkRHB4ZW5Od1kzbDNlRzF0TkdaeGFHWTVhMnB5YTI1eVl6Tm5jbk4yTW5aMWEyVnhlV3B4YkdFd2JuUT06TVRBd01EQT0=:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok1UQTNOVEU0TkRjeU53PT0=:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNi4xOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:1075184727
-      properties:
-        escrowContractId:
-          description: |
-            serialized escrow contract
-          example: escrowContract:testnet:WW1Ob2RHVnpkRHB4ZWpBd2NHczViR1p6TUdzNVpqVjJaak5xT0dnMk5uRm1iWEZoWjJzNGJtTTFObVZzY1RSa2RqST06WW1Ob2RHVnpkRHB4Y201c2RYVm5aVFUyWVdoNGMzazJjSEJzY1RRemNuWmhOMnMyY3psa2EyNTFOSEExTWpjNFlXZz06WW1Ob2RHVnpkRHB4ZW5Od1kzbDNlRzF0TkdaeGFHWTVhMnB5YTI1eVl6Tm5jbk4yTW5aMWEyVnhlV3B4YkdFd2JuUT06TVRBd01EQT0=:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok1UQTNOVEU0TkRjeU53PT0=:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNi4xOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:1075184727
-          type: string
-        cashaddr:
-          description: The funding address for the escrow contract
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-    ContractRequest:
-      allOf:
-      - $ref: '#/components/schemas/NetworkEnum'
-      example:
-        parameters:
-        - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
-        - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
-        - 215
-        script: |
-          contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
-              function transfer(sig recipientSig) {
-                  require(checkSig(recipientSig, recipient));
-              }
-
-              function timeout(sig senderSig) {
-                  require(checkSig(senderSig, sender));
-                  require(tx.time >= timeout);
-              }
-          }
-      properties:
-        script:
-          description: |
-            The smart contract in cashscript syntax
-          example: |
-            contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
-                function transfer(sig recipientSig) {
-                    require(checkSig(recipientSig, recipient));
-                }
-
-                function timeout(sig senderSig) {
-                    require(checkSig(senderSig, sender));
-                    require(tx.time >= timeout);
-                }
-            }
-          type: string
-        parameters:
-          description: Parameters to construct the contract
-          example:
-          - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
-          - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
-          - 215
-          items:
-            description: Parameters passed as an array, where binary values are passed
-              as hex
+    SendRequestItem:
+      anyOf:
+      - description: Send request in array form ['cashadr', 100, 'sats']
+        items:
+          anyOf:
+          - type: string
+          - type: number
+        type: array
+      - $ref: '#/components/schemas/SendRequestItem_anyOf'
+    OpReturnData:
+      anyOf:
+      - description: OP_RETURN message in format ['OP_RETURN', 'MEMO\x10LÖL😅'] or
+          ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']
+        items:
+          anyOf:
+          - type: string
+          - format: byte
             type: string
-          type: array
-      required:
-      - network
-      - parameters
-      - script
-    ContractResponse:
-      example:
-        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        contractId: testnet:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok5EZ3dOVE01TWpreg==:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNS4zOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:480539293
+        type: array
+      - description: OP_RETURN message in object notation, either in plain text or
+          as a base64 encoded byte buffer If buffer lacks the OP_RETURN and OP_PUSHDATA
+          opcodes, they will be prepended.
+        oneOf:
+        - properties:
+            dataString:
+              example: "MEMO\x10LÖL\U0001f605"
+              type: string
+          required:
+          - dataString
+          type: object
+        - properties:
+            dataBuffer:
+              format: byte
+              type: string
+          required:
+          - dataBuffer
+          type: object
+    SendRequestArray:
+      items:
+        anyOf:
+        - $ref: '#/components/schemas/SendRequestItem'
+        - $ref: '#/components/schemas/OpReturnData'
+      type: array
+    CashscriptReceipt:
       properties:
-        contractId:
-          description: |
-            serialized contract
-          example: testnet:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok5EZ3dOVE01TWpreg==:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNS4zOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:480539293
+        to:
+          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           type: string
-        cashaddr:
-          description: The funding address for the contract
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        amount:
+          example: 100
+          type: number
+    CashscriptReceiptArray:
+      items:
+        $ref: '#/components/schemas/CashscriptReceipt'
+      type: array
     ContractFnRequest:
       example:
         minChange: 1.4658129805029452
@@ -2265,6 +2103,215 @@ components:
       - contractId
       - function
       - to
+    ContractFnResponse:
+      example:
+        debug: |
+          meep debug --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000 --idx=0 --amt=21000 --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
+        contractId: contractId
+        txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+        hex: 0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          type: string
+        txId:
+          description: The hash of a transaction
+          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          type: string
+        hex:
+          description: The transaction as bitcoin encoded hex.
+          example: 0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251
+          type: string
+        debug:
+          description: if a debugger action is passed in the request, the result will
+            return here.
+          example: |
+            meep debug --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000 --idx=0 --amt=21000 --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
+          type: string
+    Error:
+      example:
+        message: An server error occurred
+        code: 500
+      properties:
+        message:
+          type: string
+        code:
+          type: number
+    NetworkEnum:
+      discriminator:
+        mapping: {}
+        propertyName: network
+      properties:
+        network:
+          description: network type
+          enum:
+          - mainnet
+          - testnet
+          - regtest
+          example: testnet
+          type: string
+    ContractRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        parameters:
+        - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
+        - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
+        - 215
+        script: |
+          contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
+              function transfer(sig recipientSig) {
+                  require(checkSig(recipientSig, recipient));
+              }
+
+              function timeout(sig senderSig) {
+                  require(checkSig(senderSig, sender));
+                  require(tx.time >= timeout);
+              }
+          }
+      properties:
+        script:
+          description: |
+            The smart contract in cashscript syntax
+          example: |
+            contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
+                function transfer(sig recipientSig) {
+                    require(checkSig(recipientSig, recipient));
+                }
+
+                function timeout(sig senderSig) {
+                    require(checkSig(senderSig, sender));
+                    require(tx.time >= timeout);
+                }
+            }
+          type: string
+        parameters:
+          description: Parameters to construct the contract
+          example:
+          - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
+          - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
+          - 215
+          items:
+            description: Parameters passed as an array, where binary values are passed
+              as hex
+            type: string
+          type: array
+      required:
+      - network
+      - parameters
+      - script
+    ContractResponse:
+      example:
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        contractId: testnet:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok5EZ3dOVE01TWpreg==:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNS4zOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:480539293
+      properties:
+        contractId:
+          description: |
+            serialized contract
+          example: testnet:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok5EZ3dOVE01TWpreg==:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNS4zOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:480539293
+          type: string
+        cashaddr:
+          description: The funding address for the contract
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+    EscrowRequest:
+      example:
+        arbiterAddr: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
+        amount: 10000
+        buyerAddr: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
+        sellerAddr: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
+      properties:
+        buyerAddr:
+          description: The cashaddress of the buyer
+          example: bchtest:qrnluuge56ahxsy6pplq43rva7k6s9dknu4p5278ah
+        arbiterAddr:
+          description: The cashaddress of the arbiter
+          example: bchtest:qzspcywxmm4fqhf9kjrknrc3grsv2vukeqyjqla0nt
+        sellerAddr:
+          description: The cashaddress of the seller
+          example: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
+        amount:
+          description: Numeric amount to be transferred by the contract in satoshi,
+            amount must be less than 21 BCH.
+          example: 10000
+          type: number
+      required:
+      - amount
+      - arbiterAddr
+      - buyerAddr
+      - sellerAddr
+    EscrowResponse:
+      example:
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        escrowContractId: escrowContract:testnet:WW1Ob2RHVnpkRHB4ZWpBd2NHczViR1p6TUdzNVpqVjJaak5xT0dnMk5uRm1iWEZoWjJzNGJtTTFObVZzY1RSa2RqST06WW1Ob2RHVnpkRHB4Y201c2RYVm5aVFUyWVdoNGMzazJjSEJzY1RRemNuWmhOMnMyY3psa2EyNTFOSEExTWpjNFlXZz06WW1Ob2RHVnpkRHB4ZW5Od1kzbDNlRzF0TkdaeGFHWTVhMnB5YTI1eVl6Tm5jbk4yTW5aMWEyVnhlV3B4YkdFd2JuUT06TVRBd01EQT0=:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok1UQTNOVEU0TkRjeU53PT0=:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNi4xOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:1075184727
+      properties:
+        escrowContractId:
+          description: |
+            serialized escrow contract
+          example: escrowContract:testnet:WW1Ob2RHVnpkRHB4ZWpBd2NHczViR1p6TUdzNVpqVjJaak5xT0dnMk5uRm1iWEZoWjJzNGJtTTFObVZzY1RSa2RqST06WW1Ob2RHVnpkRHB4Y201c2RYVm5aVFUyWVdoNGMzazJjSEJzY1RRemNuWmhOMnMyY3psa2EyNTFOSEExTWpjNFlXZz06WW1Ob2RHVnpkRHB4ZW5Od1kzbDNlRzF0TkdaeGFHWTVhMnB5YTI1eVl6Tm5jbk4yTW5aMWEyVnhlV3B4YkdFd2JuUT06TVRBd01EQT0=:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok1UQTNOVEU0TkRjeU53PT0=:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNi4xOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczM0IG91dHB1dCA9IG5ldyBPdXRwdXRQMlBLSChieXRlczgoYW1vdW50KSwgc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gyNTYob3V0cHV0KSA9PSB0eC5oYXNoT3V0cHV0cyk7CiAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgZnVuY3Rpb24gcmVmdW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtofHxoYXNoMTYwKHNpZ25pbmdQaykgPT0gc2VsbGVyUGtoKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoYW1vdW50ID49IGNvbnRyYWN0QW1vdW50KTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKG5vbmNlID09IGNvbnRyYWN0Tm9uY2UpOwogICAgICAgICAgICAgICAgICAgIGJ5dGVzMzQgb3V0cHV0ID0gbmV3IE91dHB1dFAyUEtIKGJ5dGVzOChhbW91bnQpLCBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShoYXNoMjU2KG91dHB1dCkgPT0gdHguaGFzaE91dHB1dHMpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAg:1075184727
+          type: string
+        cashaddr:
+          description: The funding address for the escrow contract
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+    EscrowFnRequest:
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        escrowContractId: escrowContractId
+        function: spend
+        action: build
+        to: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        utxoIds:
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
+        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
+      properties:
+        escrowContractId:
+          description: |
+            serialized contract
+          type: string
+        walletId:
+          description: |
+            The walletId of the transaction signer.
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        function:
+          description: Function to call on the escrow contract.
+          enum:
+          - spend
+          - refund
+          example: spend
+          type: string
+        to:
+          description: Output address for the transaction
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+        action:
+          description: In addition to `send`ing the built transaction, the built transaction
+            hex may be returned (without broadcasting) with `build` action, or the
+            [`meep 🔗`](https://github.com/gcash/meep) debugger command
+          enum:
+          - build
+          - send
+          - meep
+          type: string
+        utxoIds:
+          items:
+            description: The hash of a transaction and index of the utxo and amount
+              in satoshi
+            example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
+            type: string
+          type: array
+      required:
+      - escrowContractId
+      - function
+      - walletId
+    EscrowInfoRequest:
+      example:
+        escrowContractId: escrowContractId
+      properties:
+        escrowContractId:
+          description: |
+            serialized escrow contract
+          type: string
     EscrowInfoResponse:
       example:
         cashaddr: bchtest:prxla49zwqm8m2nzgn82qza3ssrqnpt8vgv60hlwm2
@@ -2352,7 +2399,7 @@ components:
           description: A unique number used once for each instance of a contract.
           example: 1996128042
           type: number
-    EscrowInfoRequest:
+    EscrowContract:
       example:
         escrowContractId: escrowContractId
       properties:
@@ -2360,83 +2407,24 @@ components:
           description: |
             serialized escrow contract
           type: string
-    EscrowFnRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        escrowContractId: escrowContractId
-        function: spend
-        action: build
-        to: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        utxoIds:
-        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
-        - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
-      properties:
-        escrowContractId:
-          description: |
-            serialized contract
-          type: string
-        walletId:
-          description: |
-            The walletId of the transaction signer.
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        function:
-          description: Function to call on the escrow contract.
-          enum:
-          - spend
-          - refund
-          example: spend
-          type: string
-        to:
-          description: Output address for the transaction
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-        action:
-          description: In addition to `send`ing the built transaction, the built transaction
-            hex may be returned (without broadcasting) with `build` action, or the
-            [`meep 🔗`](https://github.com/gcash/meep) debugger command
-          enum:
-          - build
-          - send
-          - meep
-          type: string
-        utxoIds:
-          items:
-            description: The hash of a transaction and index of the utxo and amount
-              in satoshi
-            example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
-            type: string
-          type: array
       required:
       - escrowContractId
-      - function
-      - walletId
-    ContractFnResponse:
+    UtxoResponse:
       example:
-        debug: |
-          meep debug --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000 --idx=0 --amt=21000 --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
-        contractId: contractId
-        txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-        hex: 0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251
+        utxos:
+        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
+          index: 0.8008281904610115
+          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          value: 100
+        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
+          index: 0.8008281904610115
+          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          value: 100
       properties:
-        contractId:
-          description: |
-            serialized contract
-          type: string
-        txId:
-          description: The hash of a transaction
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: string
-        hex:
-          description: The transaction as bitcoin encoded hex.
-          example: 0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251
-          type: string
-        debug:
-          description: if a debugger action is passed in the request, the result will
-            return here.
-          example: |
-            meep debug --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000 --idx=0 --amt=21000 --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
-          type: string
+        utxos:
+          items:
+            $ref: '#/components/schemas/Utxo'
+          type: array
     ContractInfoRequest:
       example:
         contractId: contractId
@@ -2486,183 +2474,110 @@ components:
         cashaddr:
           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           type: string
-    ScalableVectorGraphic:
+    Contract:
       example:
-        src: data:image/svg+xml;base64,PD94bWwgdm... ==**
-        alt: A Bitcoin Cash Qr Code
-        title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        contractId: contractId
       properties:
-        src:
+        contractId:
           description: |
-            A Qr code image data in svg format as utf-8 encoded string.
-            Suitable for inclusion in html using:
-                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
-          example: data:image/svg+xml;base64,PD94bWwgdm... ==**
-          type: string
-        title:
-          description: hover text for graphic
-          example: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-        alt:
-          description: assistive text
-          example: A Bitcoin Cash Qr Code
-          type: string
-    SendMaxRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-      properties:
-        walletId:
-          description: |
-            The walletId of the sender
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        cashaddr:
-          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          type: string
-        options:
-          $ref: '#/components/schemas/SendRequestOptions'
-      required:
-      - cashaddr
-      - walletId
-    MaxAmountToSendRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        output_count: 0
-        options: '{}'
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        output_count:
-          description: "(optional) if sending all funds to multiple addresses, the\n\
-            count of the number of address funds will be sent\nto may be included.\
-            \            \n"
-          format: int32
-          type: integer
-        options:
-          properties:
-            slpAware:
-              default: false
-              description: If you have any SLP tokens on the address, you should set
-                `slpAware` to `true` to prevent accidental token burning This flag
-                activates utxo checking against an external slp indexer So far this
-                option is not switched on by default
-              example: true
-              type: boolean
-            slpSemiAware:
-              default: false
-              description: This flag requires an utxo to have more than 546 sats to
-                be spendable and counted in the balance This option is not switched
-                on by default
-              example: true
-              type: boolean
-      required:
-      - walletId
-    SerializedWallet:
-      discriminator:
-        propertyName: walletId
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+            serialized contract
           type: string
       required:
-      - walletId
-    DepositAddressResponse:
+      - contractId
+    GetTestnetBchRequest:
       example:
-        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
       properties:
         cashaddr:
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          description: Receiver's cashaddr
           type: string
-    XPubKeyRequest:
+    GetTestnetBchResponse:
       example:
-        walletId: seed:testnet:anchor stone process they donkey foam danger boat palace
-          kind west cute:m/44'/0'/0'/0/0
-        paths:
-        - m/44'/0'/0'
-        - m/44'/0'/0'
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
-        walletId:
-          description: |
-            walletId for a seed wallet
-          example: seed:testnet:anchor stone process they donkey foam danger boat
-            palace kind west cute:m/44'/0'/0'/0/0
+        txId:
+          description: Transaction id
           type: string
-        paths:
-          items:
-            description: a list of derivation paths
-            example: m/44'/0'/0'
-            type: string
-          type: array
-      required:
-      - walletId
-    XPubKeyResponse:
+    GetTestnetSlpRequest:
       example:
-        xpubkeys:
-        - path: path
-          xpubkey: xpubkey
-        - path: path
-          xpubkey: xpubkey
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       properties:
-        xpubkeys:
-          items:
-            $ref: '#/components/schemas/XPubKey'
-          type: array
-    UtxoResponse:
-      example:
-        utxos:
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
-          index: 0.8008281904610115
-          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          value: 100
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
-          index: 0.8008281904610115
-          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          value: 100
-      properties:
-        utxos:
-          items:
-            $ref: '#/components/schemas/Utxo'
-          type: array
-    WalletResponse:
-      allOf:
-      - $ref: '#/components/schemas/NetworkEnum'
-      anyOf:
-      - $ref: '#/components/schemas/Wif'
-      - $ref: '#/components/schemas/WalletMnemonic'
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        slpaddr: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
-        name: username1
-      properties:
-        walletId:
-          description: |
-            All the information necessary to reconstruct a wallet, including private information, type and network.
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        name:
-          description: User defined string for wallet
-          example: username1
-          type: string
-        cashaddr:
-          description: |
-            The address in cashaddr format.
-          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
         slpaddr:
-          description: |
-            The SLP address of the wallet in cashaddr format.
-          example: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
+          description: Receiver's slpaddr
           type: string
-      type: object
+        tokenId:
+          description: Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+          type: string
+      required:
+      - slpaddr
+      - tokenId
+    GetTestnetSlpResponse:
+      example:
+        txId: dc38ee5d4233163e69144e4ec6e49257d41f5605e297d05c0af8f1d81ae1a387
+      properties:
+        txId:
+          description: Transaction id
+          type: string
+    GetTestnetSbchRequest:
+      example:
+        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+      properties:
+        address:
+          description: Receiver's SmartBch testnet address
+          type: string
+    GetTestnetSbchResponse:
+      example:
+        success: true
+      properties:
+        success:
+          description: Enqueue request result
+          type: boolean
+    GetTestnetSep20Request:
+      example:
+        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+      properties:
+        address:
+          description: Receiver's SmartBch testnet address
+          type: string
+        tokenId:
+          description: Token unique hexadecimal identifier
+          type: string
+      required:
+      - address
+      - tokenId
+    GetTestnetSep20Response:
+      example:
+        success: true
+      properties:
+        success:
+          description: Enqueue request result
+          type: boolean
+    GetAddressesResponse:
+      example:
+        bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
+        slptest: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        sbchtest: 0xA01a60F9c0ac519c1288191CC363b0B5Fd6e7e09
+        sbchcontract: 0x4Fcb637828E5F79F254b86E97Fcf72361549e28f
+        sbchtoken: 0xAAb45D7f352005c19E93F13dfA346ddAe5b97f65
+      properties:
+        bchtest:
+          description: Cashaddr to return testnet BCH
+          type: string
+        slptest:
+          description: Slpaddr to return testnet SLP tokens
+          type: string
+        sbchtest:
+          description: SmartBch testnet faucet contract owner address
+          type: string
+        sbchcontract:
+          description: SmartBch testnet contract address to return BCH and SEP20 tokens
+          type: string
+        sbchtoken:
+          description: SmartBch testnet sample SEP20 token address
+          type: string
     MineRequest:
       example:
         cashaddr: bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
@@ -2785,6 +2700,26 @@ components:
           example: username1
           type: string
       type: object
+    WalletType:
+      discriminator:
+        mapping:
+          WalletRequest: '#/components/schemas/WalletRequest'
+          WalletReplaceNamedRequest: '#/components/schemas/WalletReplaceNamedRequest'
+          WalletNamedExistsRequest: '#/components/schemas/WalletNamedExistsRequest'
+        propertyName: wallet_type
+      properties:
+        type:
+          description: Wallet type, either a mnemonic seed single address wallet,
+            a simple private key (wif) or a *Hierarchical Deterministic wallet determined
+            from a seed (not yet implemented)* .
+          enum:
+          - wif
+          - hd
+          - seed
+          - watch
+          - privkey
+          example: seed
+          type: string
     WalletReplaceNamedRequest:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
@@ -2802,15 +2737,6 @@ components:
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
       type: object
-    WalletReplaceNamedResponse:
-      description: |
-        True if operation was successful
-        False if service database was not configured or other exception occured
-      properties:
-        result:
-          example: true
-          type: boolean
-      type: boolean
     WalletNamedExistsRequest:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
@@ -2823,6 +2749,62 @@ components:
           example: walletName
           type: string
       type: object
+    Wif:
+      properties:
+        wif:
+          description: |
+            The wallet in Wallet Import Format (WIF)
+          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+    WalletMnemonic:
+      discriminator:
+        propertyName: seed
+      properties:
+        seed:
+          type: string
+        derivationPath:
+          type: string
+    WalletResponse:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      anyOf:
+      - $ref: '#/components/schemas/Wif'
+      - $ref: '#/components/schemas/WalletMnemonic'
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+        slpaddr: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
+        name: username1
+      properties:
+        walletId:
+          description: |
+            All the information necessary to reconstruct a wallet, including private information, type and network.
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        name:
+          description: User defined string for wallet
+          example: username1
+          type: string
+        cashaddr:
+          description: |
+            The address in cashaddr format.
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+        slpaddr:
+          description: |
+            The SLP address of the wallet in cashaddr format.
+          example: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
+          type: string
+      type: object
+    WalletReplaceNamedResponse:
+      description: |
+        True if operation was successful
+        False if service database was not configured or other exception occured
+      properties:
+        result:
+          example: true
+          type: boolean
+      type: boolean
     WalletNamedExistsResponse:
       description: |
         Boolean true or false
@@ -2831,64 +2813,151 @@ components:
           example: true
           type: boolean
       type: boolean
-    SendRequest:
+    SerializedWallet:
+      discriminator:
+        propertyName: walletId
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        to:
-          unit: sat
-          cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
-          value: 1000
       properties:
         walletId:
           description: |
-            The walletId of the source of funds to spend from.
+            ID that is returned in `wallet` field of /wallet call
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
-        to:
-          anyOf:
-          - $ref: '#/components/schemas/SendRequestItem'
-          - $ref: '#/components/schemas/SendRequestArray'
-          - $ref: '#/components/schemas/OpReturnData'
+      required:
+      - walletId
+    WalletInfo:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf
+        isTestnet: true
+        name: ""
+        network: testnet
+        seed: empty solar plunge document bridge announce purse erupt joy vague illegal
+          angle
+        derivationPath: m/44'/0'/0'/0/0
+        publicKey: 04410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a72e8d04d8a1634f35a05d6bd59d20c545e165f5d7dd6043fe3e843e7ec547b6df
+        publicKeyHash: 56b6b22042b90dd67bf2fbfb9aff7d37fbee1124
+        privateKey: 207efc5233effadd4f2df00410526dc4d0ca901ca8f0b7a1e92a42d3baf14e7f
+        privateKeyWif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        walletId: wif:testnet:empty solar plunge document bridge announce purse erupt
+          joy vague illegal angle:m/44'/0'/0'/0/0
+        walletDbEntry: wif:testnet:empty solar plunge document bridge announce purse
+          erupt joy vague illegal angle:m/44'/0'/0'/0/0
+      properties:
+        cashaddr:
+          type: string
+        isTestnet:
+          description: Whether the agreed value of the network is zero. True for all
+            non-mainnet networks.
+          type: boolean
+        name:
+          type: string
+        publicKey:
+          type: string
+        publicKeyHash:
+          type: string
+        privateKey:
+          type: string
+        privateKeyWif:
+          type: string
+        seed:
+          type: string
+        derivationPath:
+          type: string
+        walletId:
+          type: string
+        walletDbEntry:
+          description: The serialized form with private information
+          type: string
+    BalanceResponse:
+      example:
+        bch: 1
+        sat: 100000000
+        usd: 438.02
+      properties:
+        bch:
+          description: Amount in whole Bitcoin Cash
+          example: 1
+          format: float
+          type: number
+        sat:
+          description: Amount in satoshis
+          example: 100000000
+          type: integer
+        usd:
+          description: Amount in United States Dollars
+          example: 438.02
+          type: number
+    MaxAmountToSendRequest:
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        output_count: 0
+        options: '{}'
+      properties:
+        walletId:
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        output_count:
+          description: "(optional) if sending all funds to multiple addresses, the\n\
+            count of the number of address funds will be sent\nto may be included.\
+            \            \n"
+          format: int32
+          type: integer
         options:
-          $ref: '#/components/schemas/SendRequestOptions'
-      type: object
-    SendRequestItem:
-      anyOf:
-      - description: Send request in array form ['cashadr', 100, 'sats']
-        items:
-          anyOf:
-          - type: string
-          - type: number
-        type: array
-      - $ref: '#/components/schemas/SendRequestItem_anyOf'
-    OpReturnData:
-      anyOf:
-      - description: OP_RETURN message in format ['OP_RETURN', 'MEMO\x10LÖL😅'] or
-          ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']
-        items:
-          anyOf:
-          - type: string
-          - format: byte
-            type: string
-        type: array
-      - description: OP_RETURN message in object notation, either in plain text or
-          as a base64 encoded byte buffer If buffer lacks the OP_RETURN and OP_PUSHDATA
-          opcodes, they will be prepended.
-        oneOf:
-        - properties:
-            dataString:
-              example: "MEMO\x10LÖL\U0001f605"
-              type: string
-          required:
-          - dataString
-          type: object
-        - properties:
-            dataBuffer:
-              format: byte
-              type: string
-          required:
-          - dataBuffer
-          type: object
+          properties:
+            slpAware:
+              default: false
+              description: If you have any SLP tokens on the address, you should set
+                `slpAware` to `true` to prevent accidental token burning This flag
+                activates utxo checking against an external slp indexer So far this
+                option is not switched on by default
+              example: true
+              type: boolean
+            slpSemiAware:
+              default: false
+              description: This flag requires an utxo to have more than 546 sats to
+                be spendable and counted in the balance This option is not switched
+                on by default
+              example: true
+              type: boolean
+      required:
+      - walletId
+    DepositAddressResponse:
+      example:
+        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      properties:
+        cashaddr:
+          example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+    ScalableVectorGraphic:
+      example:
+        src: data:image/svg+xml;base64,PD94bWwgdm... ==**
+        alt: A Bitcoin Cash Qr Code
+        title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+      properties:
+        src:
+          description: |
+            A Qr code image data in svg format as utf-8 encoded string.
+            Suitable for inclusion in html using:
+                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
+          example: data:image/svg+xml;base64,PD94bWwgdm... ==**
+          type: string
+        title:
+          description: hover text for graphic
+          example: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
+          type: string
+        alt:
+          description: assistive text
+          example: A Bitcoin Cash Qr Code
+          type: string
+    SerializedUtxo:
+      description: Serialized unspent outpoint
+      example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
+      type: string
     SendRequestOptions:
       properties:
         utxoIds:
@@ -2951,39 +3020,26 @@ components:
           - changeThenLast
           type: string
       type: object
-    SlpSendRequestOptions:
+    SendRequest:
       example:
-        utxoIds:
-        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        to:
+          unit: sat
+          cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+          value: 1000
       properties:
-        utxoIds:
-          items:
-            $ref: '#/components/schemas/SlpSerializedUtxo'
-          type: array
-      type: object
-    SerializedUtxo:
-      description: Serialized unspent outpoint
-      example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:5000
-      type: string
-    SlpSerializedUtxo:
-      description: Slp Serialized unspent outpoint
-      example: shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-      type: string
-    SendMaxResponse:
-      example:
-        balance:
-          bch: 0
-          sat: 0
-          usd: 0
-        txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-      properties:
-        txId:
-          description: The hash of a transaction
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+        walletId:
+          description: |
+            The walletId of the source of funds to spend from.
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
-        balance:
-          $ref: '#/components/schemas/ZeroBalanceResponse'
+        to:
+          anyOf:
+          - $ref: '#/components/schemas/SendRequestItem'
+          - $ref: '#/components/schemas/SendRequestArray'
+          - $ref: '#/components/schemas/OpReturnData'
+        options:
+          $ref: '#/components/schemas/SendRequestOptions'
       type: object
     SendResponse:
       example:
@@ -3005,12 +3061,58 @@ components:
           example: https://www.blockchain.com/bch-testnet/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
       type: object
-    SendRequestArray:
-      items:
-        anyOf:
-        - $ref: '#/components/schemas/SendRequestItem'
-        - $ref: '#/components/schemas/OpReturnData'
-      type: array
+    SendMaxRequest:
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+      properties:
+        walletId:
+          description: |
+            The walletId of the sender
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        cashaddr:
+          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+          type: string
+        options:
+          $ref: '#/components/schemas/SendRequestOptions'
+      required:
+      - cashaddr
+      - walletId
+    ZeroBalanceResponse:
+      example:
+        bch: 0
+        sat: 0
+        usd: 0
+      properties:
+        bch:
+          description: Amount in whole Bitcoin Cash
+          example: 0
+          format: float
+          type: number
+        sat:
+          description: Amount in satoshis
+          example: 0
+          type: integer
+        usd:
+          description: Amount in United States Dollars
+          example: 0
+          type: number
+    SendMaxResponse:
+      example:
+        balance:
+          bch: 0
+          sat: 0
+          usd: 0
+        txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+      properties:
+        txId:
+          description: The hash of a transaction
+          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          type: string
+        balance:
+          $ref: '#/components/schemas/ZeroBalanceResponse'
+      type: object
     EncodeTransactionResponse:
       example:
         transactionHex: transactionHex
@@ -3053,66 +3155,49 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
       type: object
-    CashscriptReceiptArray:
-      items:
-        $ref: '#/components/schemas/CashscriptReceipt'
-      type: array
-    CashscriptReceipt:
+    XPubKeyRequest:
+      example:
+        walletId: seed:testnet:anchor stone process they donkey foam danger boat palace
+          kind west cute:m/44'/0'/0'/0/0
+        paths:
+        - m/44'/0'/0'
+        - m/44'/0'/0'
       properties:
-        to:
-          example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        walletId:
+          description: |
+            walletId for a seed wallet
+          example: seed:testnet:anchor stone process they donkey foam danger boat
+            palace kind west cute:m/44'/0'/0'/0/0
           type: string
-        amount:
-          example: 100
-          type: number
-    NetworkEnum:
-      discriminator:
-        propertyName: network
+        paths:
+          items:
+            description: a list of derivation paths
+            example: m/44'/0'/0'
+            type: string
+          type: array
+      required:
+      - walletId
+    XPubKey:
+      example:
+        path: path
+        xpubkey: xpubkey
       properties:
-        network:
-          description: network type
-          enum:
-          - mainnet
-          - testnet
-          - regtest
-          example: testnet
+        path:
           type: string
-    UnitType:
-      discriminator:
-        propertyName: unit_type
+        xpubkey:
+          type: string
+    XPubKeyResponse:
+      example:
+        xpubkeys:
+        - path: path
+          xpubkey: xpubkey
+        - path: path
+          xpubkey: xpubkey
       properties:
-        unit:
-          description: Unit of account.
-          enum:
-          - bch
-          - BCH
-          - usd
-          - USD
-          - bit
-          - bits
-          - sat
-          - SAT
-          - sats
-          - satoshi
-          - satoshis
-          example: sat
-          type: string
-    WalletType:
-      discriminator:
-        propertyName: wallet_type
-      properties:
-        type:
-          description: Wallet type, either a mnemonic seed single address wallet,
-            a simple private key (wif) or a *Hierarchical Deterministic wallet determined
-            from a seed (not yet implemented)* .
-          enum:
-          - wif
-          - hd
-          - seed
-          - watch
-          - privkey
-          example: seed
-          type: string
+        xpubkeys:
+          items:
+            $ref: '#/components/schemas/XPubKey'
+          type: array
     CreateSignedMessageRequest:
       example:
         walletId: wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN
@@ -3123,25 +3208,6 @@ components:
           type: string
         message:
           example: Chancellor on brink of second bailout for banks
-    SignedMessageResponse:
-      example:
-        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
-        raw:
-          schnorr: schnorr
-          der: der
-          ecdsa: ecdsa
-        details:
-          messageHash: messageHash
-          compressed: true
-          recoveryId: 0.8008281904610115
-      properties:
-        signature:
-          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
-          type: string
-        raw:
-          $ref: '#/components/schemas/SignedMessageResponseRaw'
-        details:
-          $ref: '#/components/schemas/SignedMessageResponseDetails'
     SignedMessageResponseRaw:
       example:
         schnorr: schnorr
@@ -3174,6 +3240,25 @@ components:
           description: The double sha256 hash of the string encoded as Bitcoin Message
             binary.
           type: string
+    SignedMessageResponse:
+      example:
+        signature: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+        raw:
+          schnorr: schnorr
+          der: der
+          ecdsa: ecdsa
+        details:
+          messageHash: messageHash
+          compressed: true
+          recoveryId: 0.8008281904610115
+      properties:
+        signature:
+          example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
+          type: string
+        raw:
+          $ref: '#/components/schemas/SignedMessageResponseRaw'
+        details:
+          $ref: '#/components/schemas/SignedMessageResponseDetails'
     VerifySignedMessageRequest:
       example:
         walletId: watch:mainnet:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw
@@ -3195,20 +3280,6 @@ components:
           description: If the publicKey is not recoverable from the signature, the
             base64 encoded public key may be passed as instead of the walletId
           type: string
-    VerifySignedMessageResponse:
-      example:
-        valid: true
-        details:
-          signatureValid: true
-          signatureType: signatureType
-          messageHash: messageHash
-          publicKeyHashMatch: true
-      properties:
-        valid:
-          description: Whether the message was signed by a given address
-          type: boolean
-        details:
-          $ref: '#/components/schemas/VerifySignedMessageResponseDetails'
     VerifySignedMessageResponseDetails:
       example:
         signatureValid: true
@@ -3231,66 +3302,20 @@ components:
           description: A boolean indicating whether the publicKeyHash of a recoverable
             signature matches the provided cashaddr, false otherwise
           type: boolean
-    WalletInfo:
-      allOf:
-      - $ref: '#/components/schemas/NetworkEnum'
+    VerifySignedMessageResponse:
       example:
-        cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf
-        isTestnet: true
-        name: ""
-        network: testnet
-        seed: empty solar plunge document bridge announce purse erupt joy vague illegal
-          angle
-        derivationPath: m/44'/0'/0'/0/0
-        publicKey: 04410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a72e8d04d8a1634f35a05d6bd59d20c545e165f5d7dd6043fe3e843e7ec547b6df
-        publicKeyHash: 56b6b22042b90dd67bf2fbfb9aff7d37fbee1124
-        privateKey: 207efc5233effadd4f2df00410526dc4d0ca901ca8f0b7a1e92a42d3baf14e7f
-        privateKeyWif: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        walletId: wif:testnet:empty solar plunge document bridge announce purse erupt
-          joy vague illegal angle:m/44'/0'/0'/0/0
-        walletDbEntry: wif:testnet:empty solar plunge document bridge announce purse
-          erupt joy vague illegal angle:m/44'/0'/0'/0/0
+        valid: true
+        details:
+          signatureValid: true
+          signatureType: signatureType
+          messageHash: messageHash
+          publicKeyHashMatch: true
       properties:
-        cashaddr:
-          type: string
-        isTestnet:
-          description: Whether the agreed value of the network is zero. True for all
-            non-mainnet networks.
+        valid:
+          description: Whether the message was signed by a given address
           type: boolean
-        name:
-          type: string
-        publicKey:
-          type: string
-        publicKeyHash:
-          type: string
-        privateKey:
-          type: string
-        privateKeyWif:
-          type: string
-        seed:
-          type: string
-        derivationPath:
-          type: string
-        walletId:
-          type: string
-        walletDbEntry:
-          description: The serialized form with private information
-          type: string
-    WalletMnemonic:
-      discriminator:
-        propertyName: seed
-      properties:
-        seed:
-          type: string
-        derivationPath:
-          type: string
-    Wif:
-      properties:
-        wif:
-          description: |
-            The wallet in Wallet Import Format (WIF)
-          example: cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
+        details:
+          $ref: '#/components/schemas/VerifySignedMessageResponseDetails'
     SlpGenesisRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -3359,6 +3384,36 @@ components:
       - name
       - ticker
       - walletId
+    SlpBalanceResponse:
+      example:
+        ticker: MNC
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        name: Mainnet coin
+        type: 1
+        value: "10000"
+      properties:
+        value:
+          description: A big number represented as a string to avoid precision loss
+          example: "10000"
+          format: float
+          type: string
+        ticker:
+          description: Token ticker
+          example: MNC
+          type: string
+        name:
+          description: Full name of the SLP token
+          example: Mainnet coin
+          type: string
+        tokenId:
+          description: Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
+        type:
+          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          example: 1
+          type: number
     SlpGenesisResponse:
       example:
         tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
@@ -3375,13 +3430,59 @@ components:
           type: string
         balance:
           $ref: '#/components/schemas/SlpBalanceResponse'
-    SlpDepositAddressResponse:
+    SlpMintRequest:
       example:
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        endBaton: false
+        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        value: "10000"
       properties:
-        slpaddr:
+        walletId:
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        value:
+          description: Value is represented as a string to avoid precision loss
+          example: "10000"
+          type: string
+        tokenId:
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
+        endBaton:
+          description: Indicates if token should not be 'mintable' anymore, e.g. total
+            circulation amount increased
+          example: false
+          type: boolean
+        tokenReceiverSlpAddr:
           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
           type: string
+        batonReceiverSlpAddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+      required:
+      - tokenId
+      - value
+      - walletId
+    SlpMintResponse:
+      example:
+        balance:
+          ticker: MNC
+          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          name: Mainnet coin
+          type: 1
+          value: "10000"
+        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+      properties:
+        txId:
+          description: |
+            Transaction id
+          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          type: string
+        balance:
+          $ref: '#/components/schemas/SlpBalanceResponse'
     SlpTokenInfoRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -3444,59 +3545,10 @@ components:
           example: 1
           type: number
       type: object
-    SlpMintRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        endBaton: false
-        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        value: "10000"
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        value:
-          description: Value is represented as a string to avoid precision loss
-          example: "10000"
-          type: string
-        tokenId:
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        endBaton:
-          description: Indicates if token should not be 'mintable' anymore, e.g. total
-            circulation amount increased
-          example: false
-          type: boolean
-        tokenReceiverSlpAddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        batonReceiverSlpAddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-      required:
-      - tokenId
-      - value
-      - walletId
-    SlpMintResponse:
-      example:
-        balance:
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          name: Mainnet coin
-          type: 1
-          value: "10000"
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        txId:
-          description: |
-            Transaction id
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        balance:
-          $ref: '#/components/schemas/SlpBalanceResponse'
+    SlpBalanceArrayResponse:
+      items:
+        $ref: '#/components/schemas/SlpBalanceResponse'
+      type: array
     SlpBalanceRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -3513,40 +3565,35 @@ components:
           type: string
       required:
       - walletId
-    SlpBalanceArrayResponse:
-      items:
-        $ref: '#/components/schemas/SlpBalanceResponse'
-      type: array
-    SlpBalanceResponse:
+    SlpDepositAddressResponse:
       example:
-        ticker: MNC
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        name: Mainnet coin
-        type: 1
-        value: "10000"
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
       properties:
+        slpaddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
+    SlpSendRequestItem:
+      example:
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+        value: 100
+      properties:
+        slpaddr:
+          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
+          type: string
         value:
-          description: A big number represented as a string to avoid precision loss
-          example: "10000"
-          format: float
-          type: string
-        ticker:
-          description: Token ticker
-          example: MNC
-          type: string
-        name:
-          description: Full name of the SLP token
-          example: Mainnet coin
-          type: string
+          example: 100
+          type: number
         tokenId:
           description: Token unique hexadecimal identifier, also the id of the token
             creation transaction
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
-        type:
-          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
-          example: 1
-          type: number
+      required:
+      - slpaddr
+      - tokenId
+      - value
+      type: object
     SlpSendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -3571,28 +3618,6 @@ components:
       - to
       - walletId
       type: object
-    SlpSendRequestItem:
-      example:
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        value: 100
-      properties:
-        slpaddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        value:
-          example: 100
-          type: number
-        tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-      required:
-      - slpaddr
-      - tokenId
-      - value
-      type: object
     SlpSendResponse:
       example:
         balance:
@@ -3614,6 +3639,21 @@ components:
           description: Web url to a transaction on a block explorer
           example: https://testnet.simpleledger.info/#tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
+      type: object
+    SlpSerializedUtxo:
+      description: Slp Serialized unspent outpoint
+      example: shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+      type: string
+    SlpSendRequestOptions:
+      example:
+        utxoIds:
+        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
+      properties:
+        utxoIds:
+          items:
+            $ref: '#/components/schemas/SlpSerializedUtxo'
+          type: array
       type: object
     SlpSendMaxRequest:
       example:
@@ -3644,32 +3684,6 @@ components:
       - slpaddr
       - tokenId
       - walletId
-    SlpUtxoResponse:
-      example:
-        utxos:
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          decimals: 2
-          index: 0.8008281904610115
-          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: 1
-          value: "10000"
-          satoshis: 546
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          decimals: 2
-          index: 0.8008281904610115
-          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: 1
-          value: "10000"
-          satoshis: 546
-      properties:
-        utxos:
-          items:
-            $ref: '#/components/schemas/SlpUtxo'
-          type: array
     SlpUtxo:
       example:
         utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
@@ -3717,6 +3731,32 @@ components:
           description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
           example: 1
           type: number
+    SlpUtxoResponse:
+      example:
+        utxos:
+        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+          ticker: MNC
+          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          decimals: 2
+          index: 0.8008281904610115
+          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          type: 1
+          value: "10000"
+          satoshis: 546
+        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
+          ticker: MNC
+          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+          decimals: 2
+          index: 0.8008281904610115
+          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
+          type: 1
+          value: "10000"
+          satoshis: 546
+      properties:
+        utxos:
+          items:
+            $ref: '#/components/schemas/SlpUtxo'
+          type: array
     SlpOutpointsResponse:
       example:
         outpoints:
@@ -3729,6 +3769,21 @@ components:
             example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
             type: string
           type: array
+    UtilDecodeTransactionRequest:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      example:
+        transactionHashOrHex: transactionHashOrHex
+        loadInputValues: true
+      properties:
+        transactionHashOrHex:
+          type: string
+        loadInputValues:
+          description: A flag whether to load or not extra information about transaction
+            inputs (cashaddress and value)
+          type: boolean
+      required:
+      - transactionHashOrHex
     ElectrumRawTransaction:
       example:
         blockhash: blockhash
@@ -3808,117 +3863,79 @@ components:
           items:
             $ref: '#/components/schemas/ElectrumRawTransaction_vout'
           type: array
-    UtilDecodeTransactionRequest:
-      allOf:
-      - $ref: '#/components/schemas/NetworkEnum'
+    WatchAddressRequest:
       example:
-        transactionHashOrHex: transactionHashOrHex
-        loadInputValues: true
-      properties:
-        transactionHashOrHex:
-          type: string
-        loadInputValues:
-          description: A flag whether to load or not extra information about transaction
-            inputs (cashaddress and value)
-          type: boolean
-      required:
-      - transactionHashOrHex
-    UtilDecodeTransactionResponse:
-      $ref: '#/components/schemas/ElectrumRawTransaction'
-    GetTestnetBchRequest:
-      example:
-        cashaddr: bchtest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq27mxesg8
+        recurrence: recurrent
+        cashaddr: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
+        tokenId: ""
+        type: transaction:in,out
+        url: http://example.com/webhook
+        duration_sec: 86400
       properties:
         cashaddr:
-          description: Receiver's cashaddr
+          description: |
+            Cash address to watch
+          example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
           type: string
-    GetTestnetBchResponse:
-      example:
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        txId:
-          description: Transaction id
+        url:
+          description: Url to be called when configured action is triggered
+          example: http://example.com/webhook
           type: string
-    GetTestnetSlpRequest:
-      example:
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        slpaddr:
-          description: Receiver's slpaddr
+        type:
+          default: transaction:in,out
+          description: Type of watch operation
+          enum:
+          - transaction:in
+          - transaction:out
+          - transaction:in,out
+          - balance
+          - slptransaction:in
+          - slptransaction:out
+          - slptransaction:in,out
+          - slpbalance
+          example: transaction:in,out
           type: string
-        tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
-          type: string
-      required:
-      - slpaddr
-      - tokenId
-    GetTestnetSlpResponse:
-      example:
-        txId: dc38ee5d4233163e69144e4ec6e49257d41f5605e297d05c0af8f1d81ae1a387
-      properties:
-        txId:
-          description: Transaction id
-          type: string
-    GetTestnetSbchRequest:
-      example:
-        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
-      properties:
-        address:
-          description: Receiver's SmartBch testnet address
-          type: string
-    GetTestnetSbchResponse:
-      example:
-        success: true
-      properties:
-        success:
-          description: Enqueue request result
-          type: boolean
-    GetTestnetSep20Request:
-      example:
-        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
-        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
-      properties:
-        address:
-          description: Receiver's SmartBch testnet address
+        recurrence:
+          default: once
+          description: Action recurrence. Indicates if webhook should be triggered
+            recurrently until expire or only once
+          enum:
+          - once
+          - recurrent
+          example: recurrent
           type: string
         tokenId:
-          description: Token unique hexadecimal identifier
+          description: Token unique hexadecimal identifier to use. Mandatory in SLP
+            webhooks.
+        duration_sec:
+          default: 86400
+          description: Duration of the webhook lifetime in seconds before it will
+            expire.
+          example: 86400
+          type: number
+      required:
+      - cashaddr
+      - type
+      - url
+    WatchAddressResponse:
+      example:
+        id: 1
+      properties:
+        id:
+          description: Webhook Id created in the system
+          example: 1
+          type: integer
+    SmartBchMaxAmountToSendRequest:
+      example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+      properties:
+        walletId:
+          description: |
+            ID that is returned in `wallet` field of /wallet call
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
           type: string
       required:
-      - address
-      - tokenId
-    GetTestnetSep20Response:
-      example:
-        success: true
-      properties:
-        success:
-          description: Enqueue request result
-          type: boolean
-    GetAddressesResponse:
-      example:
-        bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
-        slptest: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        sbchtest: 0xA01a60F9c0ac519c1288191CC363b0B5Fd6e7e09
-        sbchcontract: 0x4Fcb637828E5F79F254b86E97Fcf72361549e28f
-        sbchtoken: 0xAAb45D7f352005c19E93F13dfA346ddAe5b97f65
-      properties:
-        bchtest:
-          description: Cashaddr to return testnet BCH
-          type: string
-        slptest:
-          description: Slpaddr to return testnet SLP tokens
-          type: string
-        sbchtest:
-          description: SmartBch testnet faucet contract owner address
-          type: string
-        sbchcontract:
-          description: SmartBch testnet contract address to return BCH and SEP20 tokens
-          type: string
-        sbchtoken:
-          description: SmartBch testnet sample SEP20 token address
-          type: string
+      - walletId
     SmartBchDepositAddressResponse:
       example:
         address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
@@ -3926,35 +3943,6 @@ components:
         address:
           example: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
           type: string
-    SmartBchSendRequest:
-      example:
-        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-        to:
-          address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
-          value: 1000
-          unit: sat
-        options:
-          queryBalance: false
-        overrides:
-          gasPrice: 0x13370000
-      properties:
-        walletId:
-          description: |
-            The walletId of the source of funds to spend from.
-          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-          type: string
-        to:
-          anyOf:
-          - $ref: '#/components/schemas/SmartBchSendRequestItem'
-          - $ref: '#/components/schemas/SmartBchSendRequestArray'
-        options:
-          $ref: '#/components/schemas/SmartBchSendRequestOptions'
-        overrides:
-          $ref: '#/components/schemas/SmartBchOverrides'
-      required:
-      - to
-      - walletId
-      type: object
     SmartBchSendRequestItem:
       anyOf:
       - description: Send request in array form ['address', 100, 'sats']
@@ -4026,10 +4014,35 @@ components:
           - type: string
         from:
           type: string
-    SmartBchSendResponse:
-      items:
-        $ref: '#/components/schemas/SmartBchSendResponseItem'
-      type: array
+    SmartBchSendRequest:
+      example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+        to:
+          address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+          value: 1000
+          unit: sat
+        options:
+          queryBalance: false
+        overrides:
+          gasPrice: 0x13370000
+      properties:
+        walletId:
+          description: |
+            The walletId of the source of funds to spend from.
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+          type: string
+        to:
+          anyOf:
+          - $ref: '#/components/schemas/SmartBchSendRequestItem'
+          - $ref: '#/components/schemas/SmartBchSendRequestArray'
+        options:
+          $ref: '#/components/schemas/SmartBchSendRequestOptions'
+        overrides:
+          $ref: '#/components/schemas/SmartBchOverrides'
+      required:
+      - to
+      - walletId
+      type: object
     SmartBchSendResponseItem:
       example:
         balance:
@@ -4050,6 +4063,10 @@ components:
           example: https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
           type: string
       type: object
+    SmartBchSendResponse:
+      items:
+        $ref: '#/components/schemas/SmartBchSendResponseItem'
+      type: array
     SmartBchSendMaxRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
@@ -4070,90 +4087,6 @@ components:
       required:
       - address
       - walletId
-    SmartBchMaxAmountToSendRequest:
-      example:
-        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-          type: string
-      required:
-      - walletId
-    SmartBchTransactionReceipt:
-      example:
-        logsBloom: logsBloom
-        blockHash: blockHash
-        contractAddress: contractAddress
-        transactionIndex: 0.8008281904610115
-        confirmations: 1.4658129805029452
-        type: 5.962133916683182
-        transactionHash: transactionHash
-        gasUsed: gasUsed
-        root: root
-        blockNumber: 6.027456183070403
-        cumulativeGasUsed: cumulativeGasUsed
-        from: from
-        to: to
-        effectiveGasPrice: effectiveGasPrice
-        logs:
-        - ""
-        - ""
-        byzantium: true
-        status: 5.637376656633329
-      properties:
-        to:
-          type: string
-        from:
-          type: string
-        contractAddress:
-          type: string
-        transactionIndex:
-          type: number
-        root:
-          type: string
-        gasUsed:
-          type: string
-        logsBloom:
-          type: string
-        blockHash:
-          type: string
-        transactionHash:
-          type: string
-        logs:
-          items: {}
-          type: array
-        blockNumber:
-          type: number
-        confirmations:
-          type: number
-        cumulativeGasUsed:
-          type: string
-        effectiveGasPrice:
-          type: string
-        byzantium:
-          type: boolean
-        type:
-          type: number
-        status:
-          type: number
-      required:
-      - blockHash
-      - blockNumber
-      - byzantium
-      - confirmations
-      - contractAddress
-      - cumulativeGasUsed
-      - effectiveGasPrice
-      - from
-      - gasUsed
-      - logs
-      - logsBloom
-      - to
-      - transactionHash
-      - transactionIndex
-      - type
     SmartBchSep20GenesisRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
@@ -4215,6 +4148,30 @@ components:
       - name
       - ticker
       - walletId
+    SmartBchSep20BalanceResponse:
+      example:
+        ticker: MNC
+        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+        name: Mainnet coin
+        value: "10000"
+      properties:
+        value:
+          description: A big number represented as a string to avoid precision loss
+          example: "10000"
+          format: float
+          type: string
+        ticker:
+          description: Token ticker
+          example: MNC
+          type: string
+        name:
+          description: Token name
+          example: Mainnet coin
+          type: string
+        tokenId:
+          description: Token unique hexadecimal identifier
+          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
+          type: string
     SmartBchSep20GenesisResponse:
       example:
         tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
@@ -4230,48 +4187,6 @@ components:
           type: string
         balance:
           $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
-    SmartBchSep20TokenInfoRequest:
-      example:
-        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
-      properties:
-        walletId:
-          description: serialized wallet
-          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-          type: string
-        tokenId:
-          description: Token unique hexadecimal identifier
-          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
-          type: string
-      required:
-      - tokenId
-      - walletId
-    SmartBchSep20TokenInfoResponse:
-      example:
-        ticker: MNC
-        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
-        totalSupply: totalSupply
-        decimals: 2
-        name: Mainnet coin
-      properties:
-        name:
-          description: Token name
-          example: Mainnet coin
-          type: string
-        ticker:
-          description: Token ticker
-          example: MNC
-          type: string
-        tokenId:
-          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
-          type: string
-        decimals:
-          description: Indicates that 1 token is divisible into 10^decimals base units
-          example: 2
-          type: number
-        totalSupply:
-          description: Total amount of tokens in circulation
-          type: string
     SmartBchSep20MintRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
@@ -4326,7 +4241,7 @@ components:
           type: string
         balance:
           $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
-    SmartBchSep20BalanceRequest:
+    SmartBchSep20TokenInfoRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
         tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
@@ -4342,29 +4257,31 @@ components:
       required:
       - tokenId
       - walletId
-    SmartBchSep20BalanceResponse:
+    SmartBchSep20TokenInfoResponse:
       example:
         ticker: MNC
         tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+        totalSupply: totalSupply
+        decimals: 2
         name: Mainnet coin
-        value: "10000"
       properties:
-        value:
-          description: A big number represented as a string to avoid precision loss
-          example: "10000"
-          format: float
+        name:
+          description: Token name
+          example: Mainnet coin
           type: string
         ticker:
           description: Token ticker
           example: MNC
           type: string
-        name:
-          description: Token name
-          example: Mainnet coin
-          type: string
         tokenId:
-          description: Token unique hexadecimal identifier
           example: 0xdac17f958d2ee523a2206206994597c13d831ec7
+          type: string
+        decimals:
+          description: Indicates that 1 token is divisible into 10^decimals base units
+          example: 2
+          type: number
+        totalSupply:
+          description: Total amount of tokens in circulation
           type: string
     SmartBchSep20AllBalancesRequest:
       example:
@@ -4391,6 +4308,44 @@ components:
       items:
         $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
       type: array
+    SmartBchSep20BalanceRequest:
+      example:
+        walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+      properties:
+        walletId:
+          description: serialized wallet
+          example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
+          type: string
+        tokenId:
+          description: Token unique hexadecimal identifier
+          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
+          type: string
+      required:
+      - tokenId
+      - walletId
+    SmartBchSep20SendRequestItem:
+      example:
+        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+        value: 100
+      properties:
+        address:
+          example: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
+          type: string
+        value:
+          anyOf:
+          - type: number
+          - type: string
+          example: 100
+        tokenId:
+          description: Token unique hexadecimal identifier
+          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
+          type: string
+      required:
+      - address
+      - tokenId
+      - value
     SmartBchSep20SendRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
@@ -4425,28 +4380,6 @@ components:
       - to
       - walletId
       type: object
-    SmartBchSep20SendRequestItem:
-      example:
-        address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
-        tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
-        value: 100
-      properties:
-        address:
-          example: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
-          type: string
-        value:
-          anyOf:
-          - type: number
-          - type: string
-          example: 100
-        tokenId:
-          description: Token unique hexadecimal identifier
-          example: 0xdac17f958d2ee523a2206206994597c13d831ec7
-          type: string
-      required:
-      - address
-      - tokenId
-      - value
     SmartBchSep20SendResponse:
       items:
         properties:
@@ -4562,6 +4495,79 @@ components:
       required:
       - contractId
       - function
+    SmartBchTransactionReceipt:
+      example:
+        logsBloom: logsBloom
+        blockHash: blockHash
+        contractAddress: contractAddress
+        transactionIndex: 0.8008281904610115
+        confirmations: 1.4658129805029452
+        type: 5.962133916683182
+        transactionHash: transactionHash
+        gasUsed: gasUsed
+        root: root
+        blockNumber: 6.027456183070403
+        cumulativeGasUsed: cumulativeGasUsed
+        from: from
+        to: to
+        effectiveGasPrice: effectiveGasPrice
+        logs:
+        - ""
+        - ""
+        byzantium: true
+        status: 5.637376656633329
+      properties:
+        to:
+          type: string
+        from:
+          type: string
+        contractAddress:
+          type: string
+        transactionIndex:
+          type: number
+        root:
+          type: string
+        gasUsed:
+          type: string
+        logsBloom:
+          type: string
+        blockHash:
+          type: string
+        transactionHash:
+          type: string
+        logs:
+          items: {}
+          type: array
+        blockNumber:
+          type: number
+        confirmations:
+          type: number
+        cumulativeGasUsed:
+          type: string
+        effectiveGasPrice:
+          type: string
+        byzantium:
+          type: boolean
+        type:
+          type: number
+        status:
+          type: number
+      required:
+      - blockHash
+      - blockNumber
+      - byzantium
+      - confirmations
+      - contractAddress
+      - cumulativeGasUsed
+      - effectiveGasPrice
+      - from
+      - gasUsed
+      - logs
+      - logsBloom
+      - to
+      - transactionHash
+      - transactionIndex
+      - type
     SmartBchContractFnCallResponse:
       description: |
         Contract function evaluation response.
