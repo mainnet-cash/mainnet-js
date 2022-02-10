@@ -15,7 +15,12 @@ export const mainnetServers = [
   "wss://blackie.c3-soft.com:50004",
 ];
 
-export const testnetServers = ["wss://tbch.loping.net:60004"];
+export const testnetServers = [
+  "wss://tbch.loping.net:60004",
+  "wss://bch0.kister.net:51004",
+  "wss://blackie.c3-soft.com:60004",
+  "wss://testnet.bitcoincash.network:60004"
+];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];
 
@@ -33,8 +38,9 @@ export const clusterParams = {
     timeout: 45000,
   },
   testnet: {
+    confidence: 1,
     distribution: 1,
-    order: ClusterOrder.PRIORITY,
+    order: ClusterOrder.RANDOM,
     timeout: 50000,
   },
   regtest: {
