@@ -8,7 +8,10 @@ export const networkTickerMap = {
   regtest: "rBCH",
 };
 
-export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];
+export const mainnetServers = ["wss://fulcrum.fountainhead.cash",
+"wss://bch.imaginary.cash:50004",
+"wss://electrum.imaginary.cash:50004",
+"wss://blackie.c3-soft.com:50004"];
 
 export const testnetServers = ["wss://tbch.loping.net:60004"];
 
@@ -22,8 +25,9 @@ export const defaultServers = {
 
 export const clusterParams = {
   mainnet: {
-    distribution: 2,
-    order: ClusterOrder.PRIORITY,
+    confidence: 1,
+    distribution: 1,
+    order: ClusterOrder.RANDOM,
     timeout: 45000,
   },
   testnet: {
