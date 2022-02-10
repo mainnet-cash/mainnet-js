@@ -17,7 +17,6 @@ export const mainnetServers = [
 
 export const testnetServers = [
   "wss://tbch.loping.net:60004",
-  "wss://bch0.kister.net:51004",
   "wss://blackie.c3-soft.com:60004",
   "wss://testnet.bitcoincash.network:60004",
 ];
