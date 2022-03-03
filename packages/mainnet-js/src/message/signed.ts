@@ -147,7 +147,9 @@ export class SignedMessage implements SignedMessageI {
       if (secp256k1.verifySignatureDER(sig, publicKey, messageHash)) {
         signatureType = "der";
         valid = true;
-      } else if (secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)) {
+      } else if (
+        secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)
+      ) {
         signatureType = "schnorr";
         valid = true;
       } else if (

@@ -363,13 +363,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     let result = await this.electrum.request(name, ...parameters);
 
     // If the first request fails, retry
-    if (result instanceof Error){
-
+    if (result instanceof Error) {
       result = await this.electrum.request(name, ...parameters);
-      
+
       // If the second attempt fails, throw.
       if (result instanceof Error) throw result;
-    } 
+    }
 
     return result;
   }

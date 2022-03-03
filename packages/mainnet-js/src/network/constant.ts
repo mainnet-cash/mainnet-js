@@ -12,18 +12,18 @@ export const mainnetServers = [
   "wss://bch.imaginary.cash:50004",
   //"wss://blackie.c3-soft.com:50004",
   "wss://electrum.imaginary.cash:50004",
-  "wss://fulcrum.fountainhead.cash"
+  "wss://fulcrum.fountainhead.cash",
 ];
 
 export const testnetServers = [
   "wss://tbch.loping.net:60004",
   "wss://blackie.c3-soft.com:60004",
-  "wss://testnet.bitcoincash.network:60004"
+  "wss://testnet.bitcoincash.network:60004",
   //,"wss://unavailable.invalid:50004"
 ];
 
 export const regtestServers = [
-  "ws://127.0.0.1:60003"
+  "ws://127.0.0.1:60003",
   //,"wss://unavailable.invalid:50004"
 ];
 
