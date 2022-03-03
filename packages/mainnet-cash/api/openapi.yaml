@@ -2,17 +2,15 @@ openapi: 3.0.1
 info:
   contact:
     email: hello@mainnet.cash
-  description: |
-    A developer friendly bitcoin cash wallet api
-
-    This API is currently in *active* development, breaking changes may
-    be made prior to official release of version 1.0.0.
+  description: "A developer friendly bitcoin cash wallet api\n\nThis API is currently\
+    \ in *active* development, breaking changes may\nbe made prior to official release\
+    \ of version 1.0.0.\n"
   license:
     name: MIT Licence
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.4.37
+  version: 0.4.38
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -29,7 +27,7 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/contract/
   name: contract
-- description: Use a stock escrow contract, with some helpers.
+- description: "Use a stock escrow contract, with some helpers."
   externalDocs:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/contract/escrow/
@@ -389,9 +387,10 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: |
-        Request testnet SmartBCH funds. The request is enqueued and served within 1-3 block confirmations.
-        If the target address holds more that 0.1 BCH, the request will fail. Otherwise the address will be topped up to 0.1 BCH.
+      summary: "Request testnet SmartBCH funds. The request is enqueued and served\
+        \ within 1-3 block confirmations.\nIf the target address holds more that 0.1\
+        \ BCH, the request will fail. Otherwise the address will be topped up to 0.1\
+        \ BCH.\n"
       tags:
       - faucet
       x-eov-operation-handler: controllers/FaucetController
@@ -416,9 +415,10 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: |
-        Request testnet SmartBch SEP20 tokens. The request is enqueued and served within 1-3 block confirmations.
-        If the target address holds more that 10 tokens of requested kind, the request will fail. Otherwise the address will be topped up to 10 tokens.
+      summary: "Request testnet SmartBch SEP20 tokens. The request is enqueued and\
+        \ served within 1-3 block confirmations.\nIf the target address holds more\
+        \ that 10 tokens of requested kind, the request will fail. Otherwise the address\
+        \ will be topped up to 10 tokens.\n"
       tags:
       - faucet
       x-eov-operation-handler: controllers/FaucetController
@@ -478,7 +478,7 @@ paths:
           content:
             text/plain:
               schema:
-                description: If a unit of account is passed, a plain number is returned.
+                description: "If a unit of account is passed, a plain number is returned."
                 type: number
           description: successful operation
         "405":
@@ -506,8 +506,8 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: Derive heristic determined addresses from an extended public key, per
-        BIP32
+      summary: "Derive heristic determined addresses from an extended public key,\
+        \ per BIP32"
       tags:
       - util
       x-eov-operation-handler: controllers/UtilController
@@ -519,7 +519,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/getXpubKeyInfoRequest'
-        description: Decode information about an extended public key, per BIP32
+        description: "Decode information about an extended public key, per BIP32"
         required: true
       responses:
         "200":
@@ -531,7 +531,7 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: Decode information about an extended public key, per BIP32
+      summary: "Decode information about an extended public key, per BIP32"
       tags:
       - util
       x-eov-operation-handler: controllers/UtilController
@@ -579,10 +579,9 @@ paths:
         "405":
           content: {}
           description: Invalid input
-      summary: |
-        Replace (recover) named wallet with a new walletId.
-        If wallet with a provided name does not exist yet, it will be creted with a `walletId` supplied
-        If wallet exists it will be overwritten without exception
+      summary: "Replace (recover) named wallet with a new walletId.\nIf wallet with\
+        \ a provided name does not exist yet, it will be creted with a `walletId`\
+        \ supplied\nIf wallet exists it will be overwritten without exception\n"
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -618,8 +617,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          The wallet to request information about, in serialized form.
+        description: "The wallet to request information about, in serialized form.\n"
         required: true
       responses:
         "200":
@@ -627,8 +625,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletInfo'
-          description: |
-            Information about the wallet network, type, and keys
+          description: "Information about the wallet network, type, and keys\n"
       summary: Get information about a wallet
       tags:
       - wallet
@@ -652,7 +649,7 @@ paths:
                 $ref: '#/components/schemas/BalanceResponse'
             text/plain:
               schema:
-                description: If a unit of account is passed, a plain number is returned.
+                description: "If a unit of account is passed, a plain number is returned."
                 type: number
           description: successful operation
       summary: Get total balance for wallet
@@ -667,8 +664,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/MaxAmountToSendRequest'
-        description: get amount that will be spend with a spend max request. If a
-          unit type is specified, a numeric value will be returned.
+        description: "get amount that will be spend with a spend max request. If a\
+          \ unit type is specified, a numeric value will be returned."
         required: true
       responses:
         "200":
@@ -726,9 +723,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
+          description: "A Qr code image data encoded string in the src field suitable\
+            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
+            \\>\n"
       summary: Get receiving cash address as a qrcode
       tags:
       - wallet
@@ -807,8 +804,8 @@ paths:
         "418":
           content: {}
           description: Invalid network for given address
-      summary: Encode and sign a transaction given a list of sendRequests, options
-        and estimate fees
+      summary: "Encode and sign a transaction given a list of sendRequests, options\
+        \ and estimate fees"
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -1143,9 +1140,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
+          description: "A Qr code image data encoded string in the src field suitable\
+            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
+            \\>\n"
       summary: Get an SLP receiving cash address as a qrcode
       tags:
       - wallet/slp
@@ -1276,18 +1273,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WatchAddressRequest'
-        description: |
-          Based on the 'type' parameter the webhook will be triggered to either post balance or raw transactions to the 'url':
-          - 'transaction:in' for incoming BCH transactions
-          - 'transaction:out' for outgoing BCH transactions
-          - 'transaction:in,out' both for incoming and outgoing BCH transactions
-          - 'balance' will post the object according to 'BalanceResponse' schema
-          - 'slptransaction:in' for incoming SLP transactions
-          - 'slptransaction:out' for outgoing SLP transactions
-          - 'slptransaction:in,out' both for incoming and outgoing SLP transactions
-          - 'slpbalance' will post the object according to 'SlpBalanceResponse' schema
-
-          'tokenId' parameter is mandatory when using SLP webhooks.
+        description: "Based on the 'type' parameter the webhook will be triggered\
+          \ to either post balance or raw transactions to the 'url':\n- 'transaction:in'\
+          \ for incoming BCH transactions\n- 'transaction:out' for outgoing BCH transactions\n\
+          - 'transaction:in,out' both for incoming and outgoing BCH transactions\n\
+          - 'balance' will post the object according to 'BalanceResponse' schema\n\
+          - 'slptransaction:in' for incoming SLP transactions\n- 'slptransaction:out'\
+          \ for outgoing SLP transactions\n- 'slptransaction:in,out' both for incoming\
+          \ and outgoing SLP transactions\n- 'slpbalance' will post the object according\
+          \ to 'SlpBalanceResponse' schema\n\n'tokenId' parameter is mandatory when\
+          \ using SLP webhooks.\n"
         required: true
       responses:
         "200":
@@ -1347,7 +1342,7 @@ paths:
                 $ref: '#/components/schemas/BalanceResponse'
             text/plain:
               schema:
-                description: If a unit of account is passed, a plain number is returned.
+                description: "If a unit of account is passed, a plain number is returned."
                 type: number
           description: successful operation
       summary: Get total balance for wallet
@@ -1362,8 +1357,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SmartBchMaxAmountToSendRequest'
-        description: get amount that will be spend with a spend max request. If a
-          unit type is specified, a numeric value will be returned.
+        description: "get amount that will be spend with a spend max request. If a\
+          \ unit type is specified, a numeric value will be returned."
         required: true
       responses:
         "200":
@@ -1421,9 +1416,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
+          description: "A Qr code image data encoded string in the src field suitable\
+            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
+            \\>\n"
       summary: Get receiving cash address as a qrcode
       tags:
       - smartbch/wallet
@@ -1675,9 +1670,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
+          description: "A Qr code image data encoded string in the src field suitable\
+            \ for inclusion in html using:\n   - \\<img src\\=\\\"{response.src}\"\
+            \\>\n"
       summary: Get an SmartBch SEP20 receiving address as a qrcode
       tags:
       - smartbch/sep20
@@ -1934,10 +1929,10 @@ components:
           type: string
         slpAware:
           default: false
-          description: If you have any SLP tokens on the address, you should set `slpAware`
-            to `true` to prevent accidental token burning This flag activates utxo
-            checking against an external slp indexer So far this option is not switched
-            on by default
+          description: "If you have any SLP tokens on the address, you should set\
+            \ `slpAware` to `true` to prevent accidental token burning This flag activates\
+            \ utxo checking against an external slp indexer So far this option is\
+            \ not switched on by default"
           example: true
           type: boolean
         slpSemiAware:
@@ -1951,7 +1946,7 @@ components:
       - walletId
     SendRequestItem:
       anyOf:
-      - description: Send request in array form ['cashadr', 100, 'sats']
+      - description: "Send request in array form ['cashadr', 100, 'sats']"
         items:
           anyOf:
           - type: string
@@ -1960,17 +1955,17 @@ components:
       - $ref: '#/components/schemas/SendRequestItem_anyOf'
     OpReturnData:
       anyOf:
-      - description: OP_RETURN message in format ['OP_RETURN', 'MEMO\x10LÖL😅'] or
-          ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']
+      - description: "OP_RETURN message in format ['OP_RETURN', 'MEMO\\x10LÖL\U0001f605\
+          '] or ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']"
         items:
           anyOf:
           - type: string
           - format: byte
             type: string
         type: array
-      - description: OP_RETURN message in object notation, either in plain text or
-          as a base64 encoded byte buffer If buffer lacks the OP_RETURN and OP_PUSHDATA
-          opcodes, they will be prepended.
+      - description: "OP_RETURN message in object notation, either in plain text or\
+          \ as a base64 encoded byte buffer If buffer lacks the OP_RETURN and OP_PUSHDATA\
+          \ opcodes, they will be prepended."
         oneOf:
         - properties:
             dataString:
@@ -2032,9 +2027,10 @@ components:
           type: string
         action:
           default: send
-          description: In addition to `send`ing the built transaction, the built transaction
-            hex may be returned (without broadcasting) with `build` action, or the
-            [`meep 🔗`](https://github.com/gcash/meep) debugger command.
+          description: "In addition to `send`ing the built transaction, the built\
+            \ transaction hex may be returned (without broadcasting) with `build`\
+            \ action, or the [`meep \U0001f517`](https://github.com/gcash/meep) debugger\
+            \ command."
           enum:
           - build
           - send
@@ -2058,8 +2054,8 @@ components:
           - $ref: '#/components/schemas/SendRequestArray'
           - $ref: '#/components/schemas/CashscriptReceipt'
           - $ref: '#/components/schemas/CashscriptReceiptArray'
-          description: The output destination, as a SendRequest, cashscript style
-            output(s), array of either.
+          description: "The output destination, as a SendRequest, cashscript style\
+            \ output(s), array of either."
         utxoIds:
           description: Serialized utxoId(s) to spend from
           items:
@@ -2069,35 +2065,36 @@ components:
             type: string
           type: array
         opReturn:
-          description: |
-            Add OP_RETURN outputs to the transaction. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withopreturn)
+          description: "Add OP_RETURN outputs to the transaction. See [cashscript\
+            \ docs](https://cashscript.org/docs/sdk/transactions#withopreturn)\n"
           items:
             type: string
           type: array
         feePerByte:
-          description: |
-            The withFeePerByte() function allows you to specify the fee per per bytes for the transaction. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withfeeperbyte)
+          description: "The withFeePerByte() function allows you to specify the fee\
+            \ per per bytes for the transaction. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withfeeperbyte)\n"
           type: number
         hardcodedFee:
-          description: |
-            Specify a hardcoded fee to the transaction. By default the transaction fee is automatically calculated by the CashScript SDK. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withhardcodedfee)
+          description: "Specify a hardcoded fee to the transaction. By default the\
+            \ transaction fee is automatically calculated by the CashScript SDK. See\
+            \ [cashscript docs](https://cashscript.org/docs/sdk/transactions#withhardcodedfee)\n"
           type: number
         minChange:
-          description: |
-            Set a threshold for including a change output. Any remaining amount under this threshold will be added to the transaction fee instead. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withminchange)
+          description: "Set a threshold for including a change output. Any remaining\
+            \ amount under this threshold will be added to the transaction fee instead.\
+            \ See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withminchange)\n"
           type: number
         withoutChange:
           default: false
-          description: |
-            Disable the change output. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withoutchange)
+          description: "Disable the change output. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withoutchange)\n"
           type: boolean
         age:
-          description: |
-            Specify the minimum age of the transaction inputs. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withage)
+          description: "Specify the minimum age of the transaction inputs. See [cashscript\
+            \ docs](https://cashscript.org/docs/sdk/transactions#withage)\n"
           type: number
         time:
-          description: |
-            Specify the minimum block number that the transaction can be included in. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withtime)
+          description: "Specify the minimum block number that the transaction can\
+            \ be included in. See [cashscript docs](https://cashscript.org/docs/sdk/transactions#withtime)\n"
           type: number
       required:
       - contractId
@@ -2124,8 +2121,8 @@ components:
           example: 0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251
           type: string
         debug:
-          description: if a debugger action is passed in the request, the result will
-            return here.
+          description: "if a debugger action is passed in the request, the result\
+            \ will return here."
           example: |
             meep debug --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000 --idx=0 --amt=21000 --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
           type: string
@@ -2159,32 +2156,20 @@ components:
         - 03410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7
         - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
         - 215
-        script: |
-          contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
-              function transfer(sig recipientSig) {
-                  require(checkSig(recipientSig, recipient));
-              }
-
-              function timeout(sig senderSig) {
-                  require(checkSig(senderSig, sender));
-                  require(tx.time >= timeout);
-              }
-          }
+        script: "contract TransferWithTimeout(pubkey sender, pubkey recipient, int\
+          \ timeout) {\n    function transfer(sig recipientSig) {\n        require(checkSig(recipientSig,\
+          \ recipient));\n    }\n\n    function timeout(sig senderSig) {\n       \
+          \ require(checkSig(senderSig, sender));\n        require(tx.time >= timeout);\n\
+          \    }\n}\n"
       properties:
         script:
           description: |
             The smart contract in cashscript syntax
-          example: |
-            contract TransferWithTimeout(pubkey sender, pubkey recipient, int timeout) {
-                function transfer(sig recipientSig) {
-                    require(checkSig(recipientSig, recipient));
-                }
-
-                function timeout(sig senderSig) {
-                    require(checkSig(senderSig, sender));
-                    require(tx.time >= timeout);
-                }
-            }
+          example: "contract TransferWithTimeout(pubkey sender, pubkey recipient,\
+            \ int timeout) {\n    function transfer(sig recipientSig) {\n        require(checkSig(recipientSig,\
+            \ recipient));\n    }\n\n    function timeout(sig senderSig) {\n     \
+            \   require(checkSig(senderSig, sender));\n        require(tx.time >=\
+            \ timeout);\n    }\n}\n"
           type: string
         parameters:
           description: Parameters to construct the contract
@@ -2193,8 +2178,8 @@ components:
           - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
           - 215
           items:
-            description: Parameters passed as an array, where binary values are passed
-              as hex
+            description: "Parameters passed as an array, where binary values are passed\
+              \ as hex"
             type: string
           type: array
       required:
@@ -2231,8 +2216,8 @@ components:
           description: The cashaddress of the seller
           example: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
         amount:
-          description: Numeric amount to be transferred by the contract in satoshi,
-            amount must be less than 21 BCH.
+          description: "Numeric amount to be transferred by the contract in satoshi,\
+            \ amount must be less than 21 BCH."
           example: 10000
           type: number
       required:
@@ -2285,9 +2270,10 @@ components:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
           type: string
         action:
-          description: In addition to `send`ing the built transaction, the built transaction
-            hex may be returned (without broadcasting) with `build` action, or the
-            [`meep 🔗`](https://github.com/gcash/meep) debugger command
+          description: "In addition to `send`ing the built transaction, the built\
+            \ transaction hex may be returned (without broadcasting) with `build`\
+            \ action, or the [`meep \U0001f517`](https://github.com/gcash/meep) debugger\
+            \ command"
           enum:
           - build
           - send
@@ -2374,8 +2360,8 @@ components:
           - 10000
           - 1996128042
           items:
-            description: Parameters passed as an array, where binary values are passed
-              as hex
+            description: "Parameters passed as an array, where binary values are passed\
+              \ as hex"
             type: string
           type: array
         cashaddr:
@@ -2391,8 +2377,8 @@ components:
           description: The cashaddress of the seller
           example: bchtest:qz00pk9lfs0k9f5vf3j8h66qfmqagk8nc56elq4dv2
         amount:
-          description: Numeric amount to be transferred by the contract in satoshi,
-            amount must be less than 21 BCH.
+          description: "Numeric amount to be transferred by the contract in satoshi,\
+            \ amount must be less than 21 BCH."
           example: 10000
           type: number
         nonce:
@@ -2467,8 +2453,8 @@ components:
           - 034978ac464f358b235f11212eb6e017af90215b90b1ff7471d9ae2abb5e09263b
           - 215
           items:
-            description: Parameters passed as an array, where binary values are passed
-              as hex
+            description: "Parameters passed as an array, where binary values are passed\
+              \ as hex"
             type: string
           type: array
         cashaddr:
@@ -2507,8 +2493,8 @@ components:
           description: Receiver's slpaddr
           type: string
         tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
           type: string
       required:
       - slpaddr
@@ -2668,7 +2654,7 @@ components:
         version: mainnet
         depth: 3
         parentFingerprint: 155bca59
-        childNumber: 2147483648,
+        childNumber: "2147483648,"
         chain: 3da4bc190a2680111d31fadfdc905f2a7f6ce77c6f109919116f253d43445219
         data: 03774c910fcf07fa96886ea794f0d5caed9afe30b44b83f7e213bb92930e7df4bd
         fingerprint: 6cc9f252
@@ -2684,8 +2670,8 @@ components:
           description: the public key as hex
           type: string
         chain:
-          description: The chain code, 32 bytes of entrophy extended for the public
-            key
+          description: "The chain code, 32 bytes of entrophy extended for the public\
+            \ key"
     WalletRequest:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
@@ -2709,9 +2695,9 @@ components:
         propertyName: wallet_type
       properties:
         type:
-          description: Wallet type, either a mnemonic seed single address wallet,
-            a simple private key (wif) or a *Hierarchical Deterministic wallet determined
-            from a seed (not yet implemented)* .
+          description: "Wallet type, either a mnemonic seed single address wallet,\
+            \ a simple private key (wif) or a *Hierarchical Deterministic wallet determined\
+            \ from a seed (not yet implemented)* ."
           enum:
           - wif
           - hd
@@ -2777,8 +2763,8 @@ components:
         name: username1
       properties:
         walletId:
-          description: |
-            All the information necessary to reconstruct a wallet, including private information, type and network.
+          description: "All the information necessary to reconstruct a wallet, including\
+            \ private information, type and network.\n"
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         name:
@@ -2894,7 +2880,7 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         output_count: 0
-        options: '{}'
+        options: "{}"
       properties:
         walletId:
           description: |
@@ -2911,10 +2897,10 @@ components:
           properties:
             slpAware:
               default: false
-              description: If you have any SLP tokens on the address, you should set
-                `slpAware` to `true` to prevent accidental token burning This flag
-                activates utxo checking against an external slp indexer So far this
-                option is not switched on by default
+              description: "If you have any SLP tokens on the address, you should\
+                \ set `slpAware` to `true` to prevent accidental token burning This\
+                \ flag activates utxo checking against an external slp indexer So\
+                \ far this option is not switched on by default"
               example: true
               type: boolean
             slpSemiAware:
@@ -2935,16 +2921,15 @@ components:
           type: string
     ScalableVectorGraphic:
       example:
-        src: data:image/svg+xml;base64,PD94bWwgdm... ==**
+        src: "data:image/svg+xml;base64,PD94bWwgdm... ==**"
         alt: A Bitcoin Cash Qr Code
         title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
       properties:
         src:
-          description: |
-            A Qr code image data in svg format as utf-8 encoded string.
-            Suitable for inclusion in html using:
-                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
-          example: data:image/svg+xml;base64,PD94bWwgdm... ==**
+          description: "A Qr code image data in svg format as utf-8 encoded string.\n\
+            Suitable for inclusion in html using:\n    - \\<img src\\=\\\"**data:image/svg+xml;base64,PD94bWwgdm...\
+            \ ==**\"\\>\n"
+          example: "data:image/svg+xml;base64,PD94bWwgdm... ==**"
           type: string
         title:
           description: hover text for graphic
@@ -2971,10 +2956,10 @@ components:
           type: string
         slpAware:
           default: false
-          description: If you have any SLP tokens on the address, you should set `slpAware`
-            to `true` to prevent accidental token burning This flag activates utxo
-            checking against an external slp indexer So far this option is not switched
-            on by default
+          description: "If you have any SLP tokens on the address, you should set\
+            \ `slpAware` to `true` to prevent accidental token burning This flag activates\
+            \ utxo checking against an external slp indexer So far this option is\
+            \ not switched on by default"
           example: true
           type: boolean
         slpSemiAware:
@@ -2986,30 +2971,30 @@ components:
           type: boolean
         queryBalance:
           default: true
-          description: A boolean flag to include the wallet balance after the successful
-            `send` operation to the returned result If set to false, the balance will
-            not be queried and returned, making the `send` call faster
+          description: "A boolean flag to include the wallet balance after the successful\
+            \ `send` operation to the returned result If set to false, the balance\
+            \ will not be queried and returned, making the `send` call faster"
           example: false
           type: boolean
         awaitTransactionPropagation:
           default: true
-          description: A boolean flag to wait for transaction to propagate through
-            the network and be registered in the bitcoind and indexer. If set to false,
-            the `send` call will be very fast, but the wallet UTXO state might be
-            invalid for some 500ms.
+          description: "A boolean flag to wait for transaction to propagate through\
+            \ the network and be registered in the bitcoind and indexer. If set to\
+            \ false, the `send` call will be very fast, but the wallet UTXO state\
+            \ might be invalid for some 500ms."
           example: false
           type: boolean
         feePaidBy:
           default: change
-          description: |
-            Fee allocation stragety. Convenience option to subtract fees from outputs if change is not sufficent to cover transaction costs.
-              * `change` - Change, pay the fees from change or error
-              * `firstOutput` - First Output, pay the fee from the first output or error
-              * `lastOutput` - Last Output, pay the fee from the last output or error
-              * `anyOutput` - Any Output, pay the fee from dust outputs or divide across all remaining non-dust outputs.
-              * `changeThenFirst` - Use change then first output or error.
-              * `changeThenLast` - Use change then last output or error.
-              * `changeThenAny` - Use change then any output stragety or error.
+          description: "Fee allocation stragety. Convenience option to subtract fees\
+            \ from outputs if change is not sufficent to cover transaction costs.\n\
+            \  * `change` - Change, pay the fees from change or error\n  * `firstOutput`\
+            \ - First Output, pay the fee from the first output or error\n  * `lastOutput`\
+            \ - Last Output, pay the fee from the last output or error\n  * `anyOutput`\
+            \ - Any Output, pay the fee from dust outputs or divide across all remaining\
+            \ non-dust outputs.\n  * `changeThenFirst` - Use change then first output\
+            \ or error.\n  * `changeThenLast` - Use change then last output or error.\n\
+            \  * `changeThenAny` - Use change then any output stragety or error.\n"
           enum:
           - change
           - firstOutput
@@ -3137,10 +3122,10 @@ components:
           type: string
         awaitPropagation:
           default: true
-          description: A boolean flag to wait for transaction to propagate through
-            the network and be registered in the bitcoind and indexer. If set to false,
-            the `send` call will be very fast, but the wallet UTXO state might be
-            invalid for some 500ms.
+          description: "A boolean flag to wait for transaction to propagate through\
+            \ the network and be registered in the bitcoind and indexer. If set to\
+            \ false, the `send` call will be very fast, but the wallet UTXO state\
+            \ might be invalid for some 500ms."
           type: boolean
       required:
       - transactionHex
@@ -3218,8 +3203,10 @@ components:
           description: Elliptic Curve Digital messageHash encoded as a base64 string
           type: string
         schnorr:
-          description: |
-            Schnorr signature of the messageHash encoded as a base64 string, Note from libauth: Nonces are generated using RFC6979, where the Section 3.6, 16-byte ASCII "additional data" is set to Schnorr+SHA256, see https://libauth.org/interfaces/secp256k1.html#signmessagehashschnorr
+          description: "Schnorr signature of the messageHash encoded as a base64 string,\
+            \ Note from libauth: Nonces are generated using RFC6979, where the Section\
+            \ 3.6, 16-byte ASCII \"additional data\" is set to Schnorr+SHA256, see\
+            \ https://libauth.org/interfaces/secp256k1.html#signmessagehashschnorr\n"
           type: string
         der:
           description: |
@@ -3277,8 +3264,8 @@ components:
             the related cashaddr
           example: IA+oq/uGz4kKA2bNgxPcM+T216abyUiBhofMg1J8fC5BLAbbIpF2toCHaO7/LQAxhQBtu5D6ROq1JjXiRwPAASg=
         publicKey:
-          description: If the publicKey is not recoverable from the signature, the
-            base64 encoded public key may be passed as instead of the walletId
+          description: "If the publicKey is not recoverable from the signature, the\
+            \ base64 encoded public key may be passed as instead of the walletId"
           type: string
     VerifySignedMessageResponseDetails:
       example:
@@ -3299,8 +3286,8 @@ components:
             message
           type: boolean
         publicKeyHashMatch:
-          description: A boolean indicating whether the publicKeyHash of a recoverable
-            signature matches the provided cashaddr, false otherwise
+          description: "A boolean indicating whether the publicKeyHash of a recoverable\
+            \ signature matches the provided cashaddr, false otherwise"
           type: boolean
     VerifySignedMessageResponse:
       example:
@@ -3360,12 +3347,12 @@ components:
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           type: string
         endBaton:
-          description: Indicates if token should not be 'mintable', e.g. total circulation
-            amount increased
+          description: "Indicates if token should not be 'mintable', e.g. total circulation\
+            \ amount increased"
           example: false
           type: boolean
         type:
-          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
           example: 1
           type: number
         tokenReceiverSlpAddr:
@@ -3406,12 +3393,12 @@ components:
           example: Mainnet coin
           type: string
         tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
         type:
-          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
           example: 1
           type: number
     SlpGenesisResponse:
@@ -3452,8 +3439,8 @@ components:
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
         endBaton:
-          description: Indicates if token should not be 'mintable' anymore, e.g. total
-            circulation amount increased
+          description: "Indicates if token should not be 'mintable' anymore, e.g.\
+            \ total circulation amount increased"
           example: false
           type: boolean
         tokenReceiverSlpAddr:
@@ -3494,8 +3481,8 @@ components:
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
       required:
@@ -3541,7 +3528,7 @@ components:
           example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
           type: string
         type:
-          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
           example: 1
           type: number
       type: object
@@ -3585,8 +3572,8 @@ components:
           example: 100
           type: number
         tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
       required:
@@ -3674,8 +3661,8 @@ components:
           example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
           type: string
         tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
         options:
@@ -3723,12 +3710,12 @@ components:
           example: MNC
           type: string
         tokenId:
-          description: Token unique hexadecimal identifier, also the id of the token
-            creation transaction
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
           example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
           type: string
         type:
-          description: Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child
+          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
           example: 1
           type: number
     SlpUtxoResponse:
@@ -3823,7 +3810,7 @@ components:
             type: type
             reqSigs: 4.145608029883936
           value: 7.386281948385884
-          n: 2.027123023002322
+          "n": 2.027123023002322
         - scriptPubKey:
             addresses:
             - addresses
@@ -3833,7 +3820,7 @@ components:
             type: type
             reqSigs: 4.145608029883936
           value: 7.386281948385884
-          n: 2.027123023002322
+          "n": 2.027123023002322
       properties:
         blockhash:
           type: string
@@ -3868,7 +3855,7 @@ components:
         recurrence: recurrent
         cashaddr: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
         tokenId: ""
-        type: transaction:in,out
+        type: "transaction:in,out"
         url: http://example.com/webhook
         duration_sec: 86400
       properties:
@@ -3882,18 +3869,18 @@ components:
           example: http://example.com/webhook
           type: string
         type:
-          default: transaction:in,out
+          default: "transaction:in,out"
           description: Type of watch operation
           enum:
           - transaction:in
           - transaction:out
-          - transaction:in,out
+          - "transaction:in,out"
           - balance
           - slptransaction:in
           - slptransaction:out
-          - slptransaction:in,out
+          - "slptransaction:in,out"
           - slpbalance
-          example: transaction:in,out
+          example: "transaction:in,out"
           type: string
         recurrence:
           default: once
@@ -3945,7 +3932,7 @@ components:
           type: string
     SmartBchSendRequestItem:
       anyOf:
-      - description: Send request in array form ['address', 100, 'sats']
+      - description: "Send request in array form ['address', 100, 'sats']"
         items:
           anyOf:
           - type: string
@@ -3960,16 +3947,16 @@ components:
       properties:
         queryBalance:
           default: true
-          description: A boolean flag to include the wallet balance after the successful
-            `send` operation to the returned result If set to false, the balance will
-            not be queried and returned, making the `send` call faster
+          description: "A boolean flag to include the wallet balance after the successful\
+            \ `send` operation to the returned result If set to false, the balance\
+            \ will not be queried and returned, making the `send` call faster"
           example: false
           type: boolean
         awaitTransactionPropagation:
           default: true
-          description: A boolean flag to wait for transaction to propagate through
-            the network. If set to false, the `send` call will be faster, but other
-            subsequent operations might fail due to nonce number mismatch.
+          description: "A boolean flag to wait for transaction to propagate through\
+            \ the network. If set to false, the `send` call will be faster, but other\
+            \ subsequent operations might fail due to nonce number mismatch."
           example: false
           type: boolean
       type: object
@@ -4130,8 +4117,8 @@ components:
           description: Indicates that 1 token is divisible into 10^decimals base units
           type: number
         endBaton:
-          description: Indicates if token should not be 'mintable', e.g. total circulation
-            amount increased
+          description: "Indicates if token should not be 'mintable', e.g. total circulation\
+            \ amount increased"
           example: false
           type: boolean
         tokenReceiverAddress:
@@ -4286,7 +4273,7 @@ components:
     SmartBchSep20AllBalancesRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-        options: '{}'
+        options: "{}"
       properties:
         walletId:
           description: serialized wallet
@@ -4429,8 +4416,8 @@ components:
           example: 0xdac17f958d2ee523a2206206994597c13d831ec7
           type: string
         abi:
-          description: Contract ABI (Application Binary Interface), which describes
-            the contract interaction
+          description: "Contract ABI (Application Binary Interface), which describes\
+            \ the contract interaction"
           example: |
             - "function name() view returns (string)"
             - "function symbol() view returns (string)"
@@ -4454,10 +4441,10 @@ components:
           description: Contract address
           example: 0xdac17f958d2ee523a2206206994597c13d831ec7
     SmartBchContractFnCallRequest:
-      description: |
-        Contract function evaluation request.
-        A constant function (non state changing, also does not cost gas) does not require a signer (walletId)
-        A state changing function will generate a transaction and does require a signer (walletId)
+      description: "Contract function evaluation request.\nA constant function (non\
+        \ state changing, also does not cost gas) does not require a signer (walletId)\n\
+        A state changing function will generate a transaction and does require a signer\
+        \ (walletId)\n"
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
         function: function
@@ -4569,10 +4556,10 @@ components:
       - transactionIndex
       - type
     SmartBchContractFnCallResponse:
-      description: |
-        Contract function evaluation response.
-        A constant function (non state changing, also does not cost gas) evaluates to a `result` field
-        A state changing function will generate a transaction and `txId` and `receipt` fields will be filled
+      description: "Contract function evaluation response.\nA constant function (non\
+        \ state changing, also does not cost gas) evaluates to a `result` field\n\
+        A state changing function will generate a transaction and `txId` and `receipt`\
+        \ fields will be filled\n"
       example:
         result: ""
         contractId: contractId
@@ -4674,15 +4661,10 @@ components:
         parameters:
         - MyToken
         - MTK
-        script: |
-          // SPDX-License-Identifier: MIT
-          pragma solidity ^0.8.2;
-
-          import "@openzeppelin/contracts/token/SEP20/SEP20.sol";
-
-          contract MyToken is SEP20 {
-            constructor(string memory name, string memory symbol) SEP20(name, symbol) {}
-          }
+        script: "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.2;\n\nimport\
+          \ \"@openzeppelin/contracts/token/SEP20/SEP20.sol\";\n\ncontract MyToken\
+          \ is SEP20 {\n  constructor(string memory name, string memory symbol) SEP20(name,\
+          \ symbol) {}\n}\n"
       properties:
         contractId:
           description: serialized contract
@@ -4691,8 +4673,8 @@ components:
           description: Address of an already deployed contract
           type: string
         abi:
-          description: Contract ABI (Application Binary Interface), which describes
-            the contract interaction
+          description: "Contract ABI (Application Binary Interface), which describes\
+            \ the contract interaction"
           example: |
             - "function name() view returns (string)"
             - "function symbol() view returns (string)"
@@ -4701,15 +4683,10 @@ components:
           type: array
         script:
           description: solidity source code used to create this contract instance
-          example: |
-            // SPDX-License-Identifier: MIT
-            pragma solidity ^0.8.2;
-
-            import "@openzeppelin/contracts/token/SEP20/SEP20.sol";
-
-            contract MyToken is SEP20 {
-              constructor(string memory name, string memory symbol) SEP20(name, symbol) {}
-            }
+          example: "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.2;\n\nimport\
+            \ \"@openzeppelin/contracts/token/SEP20/SEP20.sol\";\n\ncontract MyToken\
+            \ is SEP20 {\n  constructor(string memory name, string memory symbol)\
+            \ SEP20(name, symbol) {}\n}\n"
           type: string
         parameters:
           description: constructor parameters used to create this contract instance
@@ -4733,15 +4710,10 @@ components:
         parameters:
         - MyToken
         - MTK
-        script: |
-          // SPDX-License-Identifier: MIT
-          pragma solidity ^0.8.2;
-
-          import "@openzeppelin/contracts/token/SEP20/SEP20.sol";
-
-          contract MyToken is SEP20 {
-            constructor(string memory name, string memory symbol) SEP20(name, symbol) {}
-          }
+        script: "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.2;\n\nimport\
+          \ \"@openzeppelin/contracts/token/SEP20/SEP20.sol\";\n\ncontract MyToken\
+          \ is SEP20 {\n  constructor(string memory name, string memory symbol) SEP20(name,\
+          \ symbol) {}\n}\n"
       properties:
         walletId:
           description: Serialized wallet
@@ -4749,15 +4721,10 @@ components:
           type: string
         script:
           description: solidity source code used to create this contract instance
-          example: |
-            // SPDX-License-Identifier: MIT
-            pragma solidity ^0.8.2;
-
-            import "@openzeppelin/contracts/token/SEP20/SEP20.sol";
-
-            contract MyToken is SEP20 {
-              constructor(string memory name, string memory symbol) SEP20(name, symbol) {}
-            }
+          example: "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.2;\n\nimport\
+            \ \"@openzeppelin/contracts/token/SEP20/SEP20.sol\";\n\ncontract MyToken\
+            \ is SEP20 {\n  constructor(string memory name, string memory symbol)\
+            \ SEP20(name, symbol) {}\n}\n"
           type: string
         parameters:
           description: constructor parameters used to create this contract instance
@@ -4894,9 +4861,9 @@ components:
           type: type
           reqSigs: 4.145608029883936
         value: 7.386281948385884
-        n: 2.027123023002322
+        "n": 2.027123023002322
       properties:
-        n:
+        "n":
           type: number
         scriptPubKey:
           $ref: '#/components/schemas/ElectrumRawTransaction_scriptPubKey'

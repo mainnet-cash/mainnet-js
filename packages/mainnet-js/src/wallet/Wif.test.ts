@@ -471,7 +471,7 @@ describe(`Watch only Wallets`, () => {
     }
   });
 
-  test("Should send to a testnet coins to a random address", async () => {
+  test("Should send to testnet coins to a random address", async () => {
     if (!process.env.ALICE_TESTNET_WALLET_ID) {
       throw Error("Attempted to pass an empty address");
     } else {

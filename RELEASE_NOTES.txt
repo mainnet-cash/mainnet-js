@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+0.4.38 
+
+- Switch default electrum-cash connection to using a single response from a random server in a cluster.
+- Retries failed electrum-cash queries once before failing.
+- upgrade libauth to 1.19.1
+- upgrade electrum-cash to 2.0.10
+
 0.4.36
 
 - Fix changeAddress for send

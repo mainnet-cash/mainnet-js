@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@bitauth/libauth@^1.18.0":
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.18.1.tgz#b1c632ed85f73c16a0ff89d81e8a92809fa15108"
-  integrity sha512-s7evdGbdGAnGkv7xt6mCbcWTTNvburc1Z9EX/8JKwcRLqofjDs7VAEz+RP3a8OGEo4MWFV6Ydqu/BeJjIA7Kdg==
+"@bitauth/libauth@^1.19.1":
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.19.1.tgz#713751bbc09815b667f8fe00a1cc5b0f3bf45dd1"
+  integrity sha512-R524tD5VwOt3QRHr7N518nqTVR/HKgfWL4LypekcGuNQN8R4PWScvuRcRzrY39A28kLztMv+TJdiKuMNbkU1ug==
 
 "@types/node@*":
   version "16.9.1"
@@ -264,10 +264,10 @@ dotenv@^10.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
-electrum-cash@^2.0.8:
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/electrum-cash/-/electrum-cash-2.0.8.tgz#3e42d0f830c81633e0a25265a671676ed324bf7d"
-  integrity sha512-rUBzeDVJ2LA9DzUEzBSuZsu01w1WHCNIbbMq7713uaEXwvhemuMWAZMMc79+JPXW/+UjOLn+Pu/24POTZGXsoA==
+electrum-cash@^2.0.10:
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/electrum-cash/-/electrum-cash-2.0.10.tgz#0b2831d01b214bff1dfee7b90022f36126cb6945"
+  integrity sha512-xxKXWyDsnUR2pkqzb7r7ANf6yzlHO8+Rkq8HOFkKiH1tF1BJwyh6sDhGAy4lkTv2sU8Uv1em/itYZ5n2Cr6zaA==
   dependencies:
     "@types/ws" "^7.4.6"
     async-mutex "^0.3.1"
