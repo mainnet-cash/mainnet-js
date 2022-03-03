@@ -8,11 +8,24 @@ export const networkTickerMap = {
   regtest: "rBCH",
 };
 
-export const mainnetServers = ["wss://fulcrum.fountainhead.cash"];
+export const mainnetServers = [
+  "wss://bch.imaginary.cash:50004",
+  //"wss://blackie.c3-soft.com:50004",
+  "wss://electrum.imaginary.cash:50004",
+  "wss://fulcrum.fountainhead.cash",
+];
 
-export const testnetServers = ["wss://tbch.loping.net:60004"];
+export const testnetServers = [
+  "wss://tbch.loping.net:60004",
+  "wss://blackie.c3-soft.com:60004",
+  "wss://testnet.bitcoincash.network:60004",
+  //,"wss://unavailable.invalid:50004"
+];
 
-export const regtestServers = ["ws://127.0.0.1:60003"];
+export const regtestServers = [
+  "ws://127.0.0.1:60003",
+  //,"wss://unavailable.invalid:50004"
+];
 
 export const defaultServers = {
   mainnet: mainnetServers,
@@ -22,13 +35,15 @@ export const defaultServers = {
 
 export const clusterParams = {
   mainnet: {
-    distribution: 2,
-    order: ClusterOrder.PRIORITY,
+    confidence: 1,
+    distribution: 1,
+    order: ClusterOrder.RANDOM,
     timeout: 45000,
   },
   testnet: {
+    confidence: 1,
     distribution: 1,
-    order: ClusterOrder.PRIORITY,
+    order: ClusterOrder.RANDOM,
     timeout: 50000,
   },
   regtest: {

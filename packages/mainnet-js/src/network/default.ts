@@ -100,7 +100,13 @@ function getCluster(servers: string[], params) {
 
   for (const s of servers) {
     let url = parseElectrumUrl(s);
-    electrum.addServer(url.host, url.port, url.scheme, false);
+    try {
+      electrum.addServer(url.host, url.port, url.scheme, false);
+    } catch (error) {
+      console.log(
+        `Error connecting ${url.host}:${url.port} over ${url.scheme}`
+      );
+    }
   }
   return electrum;
 }
