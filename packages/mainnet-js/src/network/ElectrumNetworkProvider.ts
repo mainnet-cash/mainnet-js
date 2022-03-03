@@ -360,9 +360,16 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<RequestResponse> {
     await this.ready();
 
-    const result = await this.electrum.request(name, ...parameters);
+    let result = await this.electrum.request(name, ...parameters);
 
-    if (result instanceof Error) throw result;
+    // If the first request fails, retry
+    if (result instanceof Error){
+
+      result = await this.electrum.request(name, ...parameters);
+      
+      // If the second attempt fails, throw.
+      if (result instanceof Error) throw result;
+    } 
 
     return result;
   }
