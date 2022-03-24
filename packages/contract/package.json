@@ -12,8 +12,8 @@
   "author": "readcash",
   "dependencies": {
     "mainnet-js": "0.4.38",
-    "cashc": "^0.6.5",
-    "cashscript": "^0.6.5"
+    "cashc": "0.7.0-next.0",
+    "cashscript": "0.7.0-next.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",

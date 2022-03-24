@@ -981,6 +981,14 @@
     "@bitauth/libauth" "^1.18.1"
     hash.js "^1.1.7"
 
+"@cashscript/utils@^0.7.0-next.0":
+  version "0.7.0-next.0"
+  resolved "https://registry.yarnpkg.com/@cashscript/utils/-/utils-0.7.0-next.0.tgz#4ad4cfb7c86c7be191d6774b1db284a69033a9db"
+  integrity sha512-WB62ACAp7Xv5C11LcY1ViM+bbkAaJoSaLAMGBiwtH6EFthsBaFqyXVlQBCSz/dvnvgkOMI6QROVOzs4isv90eQ==
+  dependencies:
+    "@bitauth/libauth" "^1.18.1"
+    hash.js "^1.1.7"
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -4683,6 +4691,17 @@ cashaddrjs@^0.4.4:
   dependencies:
     big-integer "1.6.36"
 
+cashc@0.7.0-next.0:
+  version "0.7.0-next.0"
+  resolved "https://registry.yarnpkg.com/cashc/-/cashc-0.7.0-next.0.tgz#04aa091cfee5feb552e17e7c22fdefa49a9c7949"
+  integrity sha512-toelNe55D8RLFmFe+uDFIlEYhagmN2eRfYL+dO/VGOP0B/Hqh463244dbgPDJLoxDiUd01P0n06YT2Ez7iNBfg==
+  dependencies:
+    "@bitauth/libauth" "^1.18.1"
+    "@cashscript/utils" "^0.7.0-next.0"
+    antlr4ts "^0.5.0-alpha.4"
+    commander "^7.1.0"
+    semver "^7.3.4"
+
 cashc@^0.6.5:
   version "0.6.5"
   resolved "https://registry.yarnpkg.com/cashc/-/cashc-0.6.5.tgz#6c27f7ad0f88ffa16097eba067852ef33bed8a04"
@@ -4693,6 +4712,18 @@ cashc@^0.6.5:
     antlr4ts "^0.5.0-alpha.4"
     commander "^7.1.0"
     semver "^7.3.4"
+
+cashscript@0.7.0-next.0:
+  version "0.7.0-next.0"
+  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.7.0-next.0.tgz#0f3da1b6b0d600595e94ac330c4409edccb6a870"
+  integrity sha512-ExgXsD5LeCKCs1jAqHyRCaF7KFCD/ZecdywQD0KXZXDIoLB2VhJS/BiVtyn6k+hRTGsSf/nv61IRo0fz4d1cSQ==
+  dependencies:
+    "@bitauth/libauth" "^1.18.1"
+    "@cashscript/utils" "^0.7.0-next.0"
+    bip68 "^1.0.4"
+    bitcoin-rpc-promise-retry "^1.3.0"
+    delay "^5.0.0"
+    electrum-cash "^2.0.6"
 
 cashscript@^0.6.5:
   version "0.6.5"

@@ -62,7 +62,7 @@ describe("Test Escrow Contract Services", () => {
 
     expect(respSpend.statusCode).toEqual(200);
     expect(respSpend.body.txId.length).toEqual(64);
-    expect(respSpend.body.hex.length).toBeGreaterThan(1000);
+    expect(respSpend.body.hex.length).toBeGreaterThan(700);
 
     const resp = await request(app)
       .post("/wallet/balance")
@@ -242,7 +242,7 @@ describe("Test Escrow Contract Services", () => {
 
     expect(respSpend.statusCode).toEqual(200);
     expect(respSpend.body.txId.length).toEqual(64);
-    expect(respSpend.body.hex.length).toBeGreaterThan(1000);
+    expect(respSpend.body.hex.length).toBeGreaterThan(700);
 
     const resp = await request(app)
       .post("/wallet/balance")
