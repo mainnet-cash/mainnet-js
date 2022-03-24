@@ -308,9 +308,7 @@ describe(`Test Escrow Contracts`, () => {
       true
     );
     // Assure the hex is long enough.
-    expect((hexOnly as TransactionDetails).hex).toMatch(
-      /020000000[0-9a-f]+/
-    );
+    expect((hexOnly as TransactionDetails).hex).toMatch(/020000000[0-9a-f]+/);
     // Assure the contract funds are still there
     expect(await escrow.getBalance()).toBe(450000);
   });
