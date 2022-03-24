@@ -15,19 +15,19 @@ export const mainnetServers = [
   "wss://fulcrum.fountainhead.cash",
 ];
 
-// export const testnetServers = [
-//   "wss://tbch.loping.net:60004",
-//   "wss://blackie.c3-soft.com:60004",
-//   "wss://testnet.bitcoincash.network:60004",
-//   //,"wss://unavailable.invalid:50004"
-// ];
-
-// testnet4
 export const testnetServers = [
-  //"wss://t4fork.c3-soft.com:61004",
-  "wss://testnet4.imaginary.cash:50004",
+  "wss://tbch.loping.net:60004",
+  "wss://blackie.c3-soft.com:60004",
+  "wss://testnet.bitcoincash.network:60004",
   //,"wss://unavailable.invalid:50004"
 ];
+
+// testnet4
+// export const testnetServers = [
+//   //"wss://t4fork.c3-soft.com:61004",
+//   "wss://testnet4.imaginary.cash:50004",
+//   //,"wss://unavailable.invalid:50004"
+// ];
 
 export const regtestServers = [
   "ws://127.0.0.1:60003",
