@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.4.39
+
+- Fix "Bearer" token to be case-insensitive for php client
+
 0.4.38 
 
 - Switch default electrum-cash connection to using a single response from a random server in a cluster.
