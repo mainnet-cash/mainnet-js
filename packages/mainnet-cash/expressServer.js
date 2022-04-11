@@ -85,7 +85,8 @@ class ExpressServer {
               throw { status: 401, message: 'No bearer authorization header provided' };
             }
 
-            const token = req.headers.authorization.split("bearer ")[1];
+            // Splitting on "earer" makes authorization name case insensitive.
+            const token = req.headers.authorization.split("earer ")[1];
 
             if (config.API_KEY !== token) {
               throw { status: 403, message: 'forbidden' };
