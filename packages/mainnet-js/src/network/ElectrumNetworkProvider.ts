@@ -13,6 +13,7 @@ import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util";
 import { CancelWatchFn } from "../wallet/interface";
+import { resolve } from "path";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -459,15 +460,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async connectClient(): Promise<void[]> {
-    let connectionPromise = async () => {
-      try {
-        return await (this.electrum as ElectrumClient).connect();
-      } catch (e) {
-        console.warn(
-          `Warning: Failed to connect to client on ${this.network}.`
-        );
-      }
-    };
+    let connectionPromise = async () =>  { 
+        try {
+          return await (this.electrum as ElectrumClient).connect()
+        } catch (e){
+          console.warn(`Warning: Failed to connect to client on ${this.network}.`)
+          return
+        }
+    }
     return [await connectionPromise()];
   }
 
