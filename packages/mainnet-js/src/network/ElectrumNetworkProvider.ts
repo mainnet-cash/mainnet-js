@@ -459,7 +459,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async connectClient(): Promise<void[]> {
-    return [await (this.electrum as ElectrumClient).connect()];
+    let connectionPromise = async () =>  { 
+        try {
+          return await (this.electrum as ElectrumClient).connect()
+        } catch (e){
+          console.warn(`Warning: Failed to connect to client on ${this.network}.`)
+        }
+    }
+    return [await connectionPromise()];
   }
 
   async disconnectCluster(): Promise<boolean[]> {
