@@ -45,10 +45,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         this.connectPromise = undefined;
 
         if (this.electrum instanceof ElectrumCluster) {
-          try{
+          try {
             await this.connectCluster();
-          }catch (e){
-            console.warn(`Unable to connect to one or more electrum-cash hosts: ${e}`)
+          } catch (e) {
+            console.warn(
+              `Unable to connect to one or more electrum-cash hosts: ${e}`
+            );
           }
           resolve(await this.readyCluster());
         } else {
@@ -366,31 +368,36 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<RequestResponse> {
     await this.ready();
 
-    const requestTimeout = new Promise(function(_resolve, reject) {
-      setTimeout(function() {
-        reject('electrum-cash request timed out, retrying');
+    const requestTimeout = new Promise(function (_resolve, reject) {
+      setTimeout(function () {
+        reject("electrum-cash request timed out, retrying");
       }, 30000);
-    }).catch(function(e) {
-      throw e; 
+    }).catch(function (e) {
+      throw e;
     });
-    
+
     const request = this.electrum.request(name, ...parameters);
-    
-    return await Promise.race([request, requestTimeout]).then((value) => {
-      if (value instanceof Error) throw value;
-      let result = value as RequestResponse 
-      return result;
-    }).catch( async () => {
-      console.warn("initial electrum-cash request attempt timed out, retrying...")
-      return await Promise.race([request, requestTimeout]).then((value) => {
-      if (value instanceof Error) throw value;
-       let result = value as RequestResponse
-       return result;
-      }).catch(function(e) {
-        throw e; 
+
+    return await Promise.race([request, requestTimeout])
+      .then((value) => {
+        if (value instanceof Error) throw value;
+        let result = value as RequestResponse;
+        return result;
+      })
+      .catch(async () => {
+        console.warn(
+          "initial electrum-cash request attempt timed out, retrying..."
+        );
+        return await Promise.race([request, requestTimeout])
+          .then((value) => {
+            if (value instanceof Error) throw value;
+            let result = value as RequestResponse;
+            return result;
+          })
+          .catch(function (e) {
+            throw e;
+          });
       });
-    });
-         
   }
 
   private async subscribeRequest(
