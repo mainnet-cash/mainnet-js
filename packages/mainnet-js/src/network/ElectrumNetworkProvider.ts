@@ -14,6 +14,7 @@ import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util";
 import { CancelWatchFn } from "../wallet/interface";
 import { resolve } from "path";
+import { rejects } from "assert";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -44,7 +45,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         this.connectPromise = undefined;
 
         if (this.electrum instanceof ElectrumCluster) {
-          await this.connectCluster();
+          try{
+            await this.connectCluster();
+          }catch (e){
+            console.warn(`Unable to connect to one or more electrum-cash hosts: ${e}`)
+          }
           resolve(await this.readyCluster());
         } else {
           resolve(await this.connectClient());
@@ -54,7 +59,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       //   (_resolve, reject) =>
       //     (timeoutHandle = setTimeout(() => {
       //       reject(
-      //         new Error(`Could not connect to electrum network ${this.network}`)
+      //         new Error(`Timeout connecting to electrum network: ${this.network}`)
       //       );
       //     }, _timeout))
       // ),
@@ -361,17 +366,31 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<RequestResponse> {
     await this.ready();
 
-    let result = await this.electrum.request(name, ...parameters);
-
-    // If the first request fails, retry
-    if (result instanceof Error) {
-      result = await this.electrum.request(name, ...parameters);
-
-      // If the second attempt fails, throw.
-      if (result instanceof Error) throw result;
-    }
-
-    return result;
+    const requestTimeout = new Promise(function(_resolve, reject) {
+      setTimeout(function() {
+        reject('electrum-cash request timed out, retrying');
+      }, 30000);
+    }).catch(function(e) {
+      throw e; 
+    });
+    
+    const request = this.electrum.request(name, ...parameters);
+    
+    return await Promise.race([request, requestTimeout]).then((value) => {
+      if (value instanceof Error) throw value;
+      let result = value as RequestResponse 
+      return result;
+    }).catch( async () => {
+      console.warn("initial electrum-cash request attempt timed out, retrying...")
+      return await Promise.race([request, requestTimeout]).then((value) => {
+      if (value instanceof Error) throw value;
+       let result = value as RequestResponse
+       return result;
+      }).catch(function(e) {
+        throw e; 
+      });
+    });
+         
   }
 
   private async subscribeRequest(

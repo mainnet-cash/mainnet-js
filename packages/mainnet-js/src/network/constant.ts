@@ -18,7 +18,7 @@ export const mainnetServers = [
 export const testnetServers = [
   "wss://tbch.loping.net:60004",
   "wss://blackie.c3-soft.com:60004",
-  "wss://testnet.bitcoincash.network:60004",
+  "wss://testnet.bitcoincash.network:60004"
   //,"wss://unavailable.invalid:50004"
 ];
 
