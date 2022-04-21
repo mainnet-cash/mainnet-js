@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+0.4.40 
+
+- Make electrum-cash fault tolerant to failed servers and timed-out requests.
+
 0.4.39
 
 - Fix "Bearer" token to be case-insensitive for php client
