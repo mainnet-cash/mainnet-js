@@ -1983,9 +1983,7 @@ components:
           type: object
     SendRequestArray:
       items:
-        anyOf:
-        - $ref: '#/components/schemas/SendRequestItem'
-        - $ref: '#/components/schemas/OpReturnData'
+        $ref: '#/components/schemas/SendRequestArray_inner'
       type: array
     CashscriptReceipt:
       properties:
@@ -2011,7 +2009,7 @@ components:
         arguments:
         - arguments
         - arguments
-        to: ""
+        to: null
         utxoIds:
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
         - 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:1000
@@ -2049,13 +2047,7 @@ components:
             type: string
           type: array
         to:
-          anyOf:
-          - $ref: '#/components/schemas/SendRequestItem'
-          - $ref: '#/components/schemas/SendRequestArray'
-          - $ref: '#/components/schemas/CashscriptReceipt'
-          - $ref: '#/components/schemas/CashscriptReceiptArray'
-          description: "The output destination, as a SendRequest, cashscript style\
-            \ output(s), array of either."
+          $ref: '#/components/schemas/ContractFnRequest_to'
         utxoIds:
           description: Serialized utxoId(s) to spend from
           items:
@@ -2639,9 +2631,7 @@ components:
       - bitcoincash:qp4wzvqu73x22ft4r5tk8tz0aufdz9fescwtpcmhc7
       - bitcoincash:qr0kwqzf2h3wvjjhn4pg895lrxwp96wqgyhkksq2nh
       items:
-        anyOf:
-        - format: cashaddr
-          type: string
+        $ref: '#/components/schemas/getAddrsByXpubKeyResponse_inner'
       type: array
     getXpubKeyInfoRequest:
       example:
@@ -2880,7 +2870,9 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         output_count: 0
-        options: "{}"
+        options:
+          slpAware: true
+          slpSemiAware: true
       properties:
         walletId:
           description: |
@@ -2894,22 +2886,7 @@ components:
           format: int32
           type: integer
         options:
-          properties:
-            slpAware:
-              default: false
-              description: "If you have any SLP tokens on the address, you should\
-                \ set `slpAware` to `true` to prevent accidental token burning This\
-                \ flag activates utxo checking against an external slp indexer So\
-                \ far this option is not switched on by default"
-              example: true
-              type: boolean
-            slpSemiAware:
-              default: false
-              description: This flag requires an utxo to have more than 546 sats to
-                be spendable and counted in the balance This option is not switched
-                on by default
-              example: true
-              type: boolean
+          $ref: '#/components/schemas/MaxAmountToSendRequest_options'
       required:
       - walletId
     DepositAddressResponse:
@@ -3019,10 +2996,7 @@ components:
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         to:
-          anyOf:
-          - $ref: '#/components/schemas/SendRequestItem'
-          - $ref: '#/components/schemas/SendRequestArray'
-          - $ref: '#/components/schemas/OpReturnData'
+          $ref: '#/components/schemas/SendRequest_to'
         options:
           $ref: '#/components/schemas/SendRequestOptions'
       type: object
@@ -3844,11 +3818,11 @@ components:
           type: number
         vin:
           items:
-            $ref: '#/components/schemas/ElectrumRawTransaction_vin'
+            $ref: '#/components/schemas/ElectrumRawTransaction_vin_inner'
           type: array
         vout:
           items:
-            $ref: '#/components/schemas/ElectrumRawTransaction_vout'
+            $ref: '#/components/schemas/ElectrumRawTransaction_vout_inner'
           type: array
     WatchAddressRequest:
       example:
@@ -3962,43 +3936,29 @@ components:
       type: object
     SmartBchOverrides:
       example:
-        gasLimit: ""
-        maxPriorityFeePerGas: ""
+        gasLimit: null
+        maxPriorityFeePerGas: null
         from: from
-        maxFeePerGas: ""
-        nonce: ""
-        value: ""
-        blockTag: ""
-        gasPrice: ""
+        maxFeePerGas: null
+        nonce: null
+        value: null
+        blockTag: null
+        gasPrice: null
       properties:
         gasLimit:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         gasPrice:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         maxFeePerGas:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         maxPriorityFeePerGas:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         nonce:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         value:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         blockTag:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
         from:
           type: string
     SmartBchSendRequest:
@@ -4019,9 +3979,7 @@ components:
           example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
           type: string
         to:
-          anyOf:
-          - $ref: '#/components/schemas/SmartBchSendRequestItem'
-          - $ref: '#/components/schemas/SmartBchSendRequestArray'
+          $ref: '#/components/schemas/SmartBchSendRequest_to'
         options:
           $ref: '#/components/schemas/SmartBchSendRequestOptions'
         overrides:
@@ -4085,14 +4043,14 @@ components:
         name: Mainnet coin
         batonReceiverAddress: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
         overrides:
-          gasLimit: ""
-          maxPriorityFeePerGas: ""
+          gasLimit: null
+          maxPriorityFeePerGas: null
           from: from
-          maxFeePerGas: ""
-          nonce: ""
-          value: ""
-          blockTag: ""
-          gasPrice: ""
+          maxFeePerGas: null
+          nonce: null
+          value: null
+          blockTag: null
+          gasPrice: null
       properties:
         walletId:
           description: serialized wallet
@@ -4107,12 +4065,7 @@ components:
           example: MNC
           type: string
         initialAmount:
-          anyOf:
-          - type: number
-          - type: string
-          description: Value is represented as number or string to avoid precision
-            loss
-          example: 10000
+          $ref: '#/components/schemas/SmartBchSep20GenesisRequest_initialAmount'
         decimals:
           description: Indicates that 1 token is divisible into 10^decimals base units
           type: number
@@ -4180,14 +4133,14 @@ components:
         tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
         tokenReceiverAddress: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
         overrides:
-          gasLimit: ""
-          maxPriorityFeePerGas: ""
+          gasLimit: null
+          maxPriorityFeePerGas: null
           from: from
-          maxFeePerGas: ""
-          nonce: ""
-          value: ""
-          blockTag: ""
-          gasPrice: ""
+          maxFeePerGas: null
+          nonce: null
+          value: null
+          blockTag: null
+          gasPrice: null
         value: 10000
       properties:
         walletId:
@@ -4195,12 +4148,7 @@ components:
           example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
           type: string
         value:
-          anyOf:
-          - type: number
-          - type: string
-          description: Value is represented as number or string to avoid precision
-            loss
-          example: 10000
+          $ref: '#/components/schemas/SmartBchSep20GenesisRequest_initialAmount'
         tokenId:
           example: 0xdac17f958d2ee523a2206206994597c13d831ec7
           type: string
@@ -4273,22 +4221,16 @@ components:
     SmartBchSep20AllBalancesRequest:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
-        options: "{}"
+        options:
+          forceRescan: false
+          hideEmpty: true
       properties:
         walletId:
           description: serialized wallet
           example: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
           type: string
         options:
-          properties:
-            forceRescan:
-              description: Force rediscover all address tokens
-              example: false
-              type: boolean
-            hideEmpty:
-              description: Exclude tokens with zero balances from result array
-              example: true
-              type: boolean
+          $ref: '#/components/schemas/SmartBchSep20AllBalancesRequest_options'
       required:
       - walletId
     SmartBchSep20AllBalancesResponse:
@@ -4321,10 +4263,7 @@ components:
           example: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
           type: string
         value:
-          anyOf:
-          - type: number
-          - type: string
-          example: 100
+          $ref: '#/components/schemas/SmartBchSep20SendRequestItem_value'
         tokenId:
           description: Token unique hexadecimal identifier
           example: 0xdac17f958d2ee523a2206206994597c13d831ec7
@@ -4344,14 +4283,14 @@ components:
           tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
           value: 100
         overrides:
-          gasLimit: ""
-          maxPriorityFeePerGas: ""
+          gasLimit: null
+          maxPriorityFeePerGas: null
           from: from
-          maxFeePerGas: ""
-          nonce: ""
-          value: ""
-          blockTag: ""
-          gasPrice: ""
+          maxFeePerGas: null
+          nonce: null
+          value: null
+          blockTag: null
+          gasPrice: null
       properties:
         walletId:
           description: serialized wallet
@@ -4369,17 +4308,7 @@ components:
       type: object
     SmartBchSep20SendResponse:
       items:
-        properties:
-          txId:
-            description: The hash of a transaction
-            example: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
-            type: string
-          balance:
-            $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
-          explorerUrl:
-            description: Web url to a transaction on a block explorer
-            example: https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
-            type: string
+        $ref: '#/components/schemas/SmartBchSep20SendResponse_inner'
       type: array
     SmartBchSep20SendMaxRequest:
       example:
@@ -4453,14 +4382,14 @@ components:
         - ""
         - ""
         overrides:
-          gasLimit: ""
-          maxPriorityFeePerGas: ""
+          gasLimit: null
+          maxPriorityFeePerGas: null
           from: from
-          maxFeePerGas: ""
-          nonce: ""
-          value: ""
-          blockTag: ""
-          gasPrice: ""
+          maxFeePerGas: null
+          nonce: null
+          value: null
+          blockTag: null
+          gasPrice: null
       properties:
         walletId:
           description: Serialized wallet
@@ -4607,14 +4536,14 @@ components:
         - ""
         - ""
         overrides:
-          gasLimit: ""
-          maxPriorityFeePerGas: ""
+          gasLimit: null
+          maxPriorityFeePerGas: null
           from: from
-          maxFeePerGas: ""
-          nonce: ""
-          value: ""
-          blockTag: ""
-          gasPrice: ""
+          maxFeePerGas: null
+          nonce: null
+          value: null
+          blockTag: null
+          gasPrice: null
       properties:
         walletId:
           description: Serialized wallet
@@ -4638,12 +4567,10 @@ components:
       - function
     SmartBchContractEstimateGasResponse:
       example:
-        gas: ""
+        gas: null
       properties:
         gas:
-          anyOf:
-          - type: number
-          - type: string
+          $ref: '#/components/schemas/SmartBchOverrides_gasLimit'
     SmartBchContractInfoRequest:
       example:
         contractId: contractId
@@ -4699,14 +4626,14 @@ components:
       example:
         walletId: privkey:regtest:0x758c7be51a76a9b6bc6b3e1a90e5ff4cc27aa054b77b7acb6f4f08a219c1ce45
         overrides:
-          gasLimit: ""
-          maxPriorityFeePerGas: ""
+          gasLimit: null
+          maxPriorityFeePerGas: null
           from: from
-          maxFeePerGas: ""
-          nonce: ""
-          value: ""
-          blockTag: ""
-          gasPrice: ""
+          maxFeePerGas: null
+          nonce: null
+          value: null
+          blockTag: null
+          gasPrice: null
         parameters:
         - MyToken
         - MTK
@@ -4791,7 +4718,48 @@ components:
       - unit
       - value
       type: object
-    ElectrumRawTransaction_scriptSig:
+    SendRequestArray_inner:
+      anyOf:
+      - $ref: '#/components/schemas/SendRequestItem'
+      - $ref: '#/components/schemas/OpReturnData'
+    ContractFnRequest_to:
+      anyOf:
+      - $ref: '#/components/schemas/SendRequestItem'
+      - $ref: '#/components/schemas/SendRequestArray'
+      - $ref: '#/components/schemas/CashscriptReceipt'
+      - $ref: '#/components/schemas/CashscriptReceiptArray'
+      description: "The output destination, as a SendRequest, cashscript style output(s),\
+        \ array of either."
+    getAddrsByXpubKeyResponse_inner:
+      anyOf:
+      - format: cashaddr
+        type: string
+    MaxAmountToSendRequest_options:
+      example:
+        slpAware: true
+        slpSemiAware: true
+      properties:
+        slpAware:
+          default: false
+          description: "If you have any SLP tokens on the address, you should set\
+            \ `slpAware` to `true` to prevent accidental token burning This flag activates\
+            \ utxo checking against an external slp indexer So far this option is\
+            \ not switched on by default"
+          example: true
+          type: boolean
+        slpSemiAware:
+          default: false
+          description: This flag requires an utxo to have more than 546 sats to be
+            spendable and counted in the balance This option is not switched on by
+            default
+          example: true
+          type: boolean
+    SendRequest_to:
+      anyOf:
+      - $ref: '#/components/schemas/SendRequestItem'
+      - $ref: '#/components/schemas/SendRequestArray'
+      - $ref: '#/components/schemas/OpReturnData'
+    ElectrumRawTransaction_vinItems_scriptSig:
       example:
         asm: asm
         hex: hex
@@ -4801,7 +4769,7 @@ components:
         hex:
           type: string
       type: object
-    ElectrumRawTransaction_vin:
+    ElectrumRawTransaction_vin_inner:
       example:
         sequence: 7.061401241503109
         scriptSig:
@@ -4813,7 +4781,7 @@ components:
         vout: 9.301444243932576
       properties:
         scriptSig:
-          $ref: '#/components/schemas/ElectrumRawTransaction_scriptSig'
+          $ref: '#/components/schemas/ElectrumRawTransaction_vinItems_scriptSig'
         sequence:
           type: number
         txid:
@@ -4827,7 +4795,7 @@ components:
           description: optional extention by mainnet.cash
           type: string
       type: object
-    ElectrumRawTransaction_scriptPubKey:
+    ElectrumRawTransaction_voutItems_scriptPubKey:
       example:
         addresses:
         - addresses
@@ -4850,7 +4818,7 @@ components:
         type:
           type: string
       type: object
-    ElectrumRawTransaction_vout:
+    ElectrumRawTransaction_vout_inner:
       example:
         scriptPubKey:
           addresses:
@@ -4866,7 +4834,7 @@ components:
         "n":
           type: number
         scriptPubKey:
-          $ref: '#/components/schemas/ElectrumRawTransaction_scriptPubKey'
+          $ref: '#/components/schemas/ElectrumRawTransaction_voutItems_scriptPubKey'
         value:
           type: number
       type: object
@@ -4884,6 +4852,58 @@ components:
       - unit
       - value
       type: object
+    SmartBchOverrides_gasLimit:
+      anyOf:
+      - type: number
+      - type: string
+    SmartBchSendRequest_to:
+      anyOf:
+      - $ref: '#/components/schemas/SmartBchSendRequestItem'
+      - $ref: '#/components/schemas/SmartBchSendRequestArray'
+    SmartBchSep20GenesisRequest_initialAmount:
+      anyOf:
+      - type: number
+      - type: string
+      description: Value is represented as number or string to avoid precision loss
+      example: 10000
+    SmartBchSep20AllBalancesRequest_options:
+      example:
+        forceRescan: false
+        hideEmpty: true
+      properties:
+        forceRescan:
+          description: Force rediscover all address tokens
+          example: false
+          type: boolean
+        hideEmpty:
+          description: Exclude tokens with zero balances from result array
+          example: true
+          type: boolean
+    SmartBchSep20SendRequestItem_value:
+      anyOf:
+      - type: number
+      - type: string
+      example: 100
+    SmartBchSep20SendResponse_inner:
+      example:
+        balance:
+          ticker: MNC
+          tokenId: 0xdac17f958d2ee523a2206206994597c13d831ec7
+          name: Mainnet coin
+          value: "10000"
+        explorerUrl: https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+        txId: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+      properties:
+        txId:
+          description: The hash of a transaction
+          example: 0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+          type: string
+        balance:
+          $ref: '#/components/schemas/SmartBchSep20BalanceResponse'
+        explorerUrl:
+          description: Web url to a transaction on a block explorer
+          example: https://www.smartscan.cash/transaction/0xc519c3b66955a598dd1f298fcfaf92530db39b70d6d4699c57ffc5faa5aa30f7
+          type: string
   securitySchemes:
     bearerAuth:
       scheme: bearer
