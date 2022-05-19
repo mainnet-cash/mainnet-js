@@ -2,7 +2,6 @@ import { utf8ToBin, binToHex } from "@bitauth/libauth";
 import { RegTestWallet, Network, mine, getNetworkProvider } from "mainnet-js";
 import { Contract } from "./Contract";
 
-
 let script = `pragma cashscript >= 0.7.0;
 
     // This is an experimental perpetuity contract 
@@ -51,22 +50,20 @@ let script = `pragma cashscript >= 0.7.0;
     
     }`;
 
-
 describe(`Example Perpituity Tests`, () => {
   test("Should pay a perpituity contract", async () => {
-
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.fromSeed(
       "rubber amateur across squirrel deposit above dish toddler visa cherry clerk egg"
     );
-    const charlie = await RegTestWallet.newRandom()
+    const charlie = await RegTestWallet.newRandom();
 
     const bobPkh = bob.getPublicKeyHash();
-    let regtestProvider = getNetworkProvider("regtest")
-    let now = await regtestProvider.getBlockHeight()
-    let fee = 5000
-    let decay = 120
-    let step = 10
+    let regtestProvider = getNetworkProvider("regtest");
+    let now = await regtestProvider.getBlockHeight();
+    let fee = 5000;
+    let decay = 120;
+    let step = 10;
     let contract = new Contract(
       script,
       [bobPkh, now, step, fee, decay],
@@ -83,40 +80,43 @@ describe(`Example Perpituity Tests`, () => {
       },
     ]);
 
-    let contracts = [contract]
+    let contracts = [contract];
 
-    
-    for(let x=0; x<11; x++){
+    for (let x = 0; x < 11; x++) {
+      await mine({
+        cashaddr: "bchreg:ppt0dzpt8xmt9h2apv9r60cydmy9k0jkfg4atpnp2f",
+        blocks: step,
+      });
 
-      await mine({"cashaddr":"bchreg:ppt0dzpt8xmt9h2apv9r60cydmy9k0jkfg4atpnp2f", "blocks":step})
-      
       let balance = await contracts.slice(-1)[0]!.getBalance();
-      let installment = Math.round(balance/120)
-      let fn = contracts.slice(-1)[0]!.getContractFunction("execute")()
-      
-      
-      now += step
+      let installment = Math.round(balance / 120);
+      let fn = contracts.slice(-1)[0]!.getContractFunction("execute")();
+
+      now += step;
       let nextContract = new Contract(
         script,
         [bobPkh, now, step, fee, decay],
         Network.REGTEST,
         1
-      );   
+      );
 
-      let txn = await fn.to(
-        [
-          {"to":bob.getDepositAddress(), "amount":installment+3},
-          {"to":nextContract.getDepositAddress(), "amount":balance-(installment+fee)+3},
-          {"to":charlie.getDepositAddress(), "amount":700+x},
-        ]
-        ).withTime(now).withAge(10).withoutChange().send();
+      let txn = await fn
+        .to([
+          { to: bob.getDepositAddress(), amount: installment + 3 },
+          {
+            to: nextContract.getDepositAddress(),
+            amount: balance - (installment + fee) + 3,
+          },
+          { to: charlie.getDepositAddress(), amount: 700 + x },
+        ])
+        .withTime(now)
+        .withAge(10)
+        .withoutChange()
+        .send();
 
-      contracts.push(nextContract)
-
+      contracts.push(nextContract);
     }
 
-    expect(await bob.getBalance("sat")).toBeGreaterThan(50000000)  
-
+    expect(await bob.getBalance("sat")).toBeGreaterThan(50000000);
   });
-
 });
