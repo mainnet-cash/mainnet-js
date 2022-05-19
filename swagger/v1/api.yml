@@ -789,7 +789,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendRequest'
+              $ref: '#/components/schemas/EncodeTransactionRequest'
         description: encode a transaction
         required: true
       responses:
@@ -3016,6 +3016,23 @@ components:
         balance:
           $ref: '#/components/schemas/ZeroBalanceResponse'
       type: object
+    EncodeTransactionRequest:
+      properties:
+        walletId:
+          type: string
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          description: |
+            The walletId of the source of funds to spend from.
+        discardChange:
+          type: boolean
+          default: false
+        to:
+          anyOf:
+            - $ref: '#/components/schemas/SendRequestItem'
+            - $ref: '#/components/schemas/SendRequestArray'
+            - $ref: '#/components/schemas/OpReturnData'
+        options:
+          $ref: '#/components/schemas/SendRequestOptions'
     EncodeTransactionResponse:
       type: object
       properties:
