@@ -1,6 +1,10 @@
 {
   "name": "@mainnet-cash/demo",
+<<<<<<< HEAD
   "version": "0.5.0",
+=======
+  "version": "0.4.39",
+>>>>>>> 545c54d7 (fix Bearer/bearer case issue (#150))
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -13,7 +17,11 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "electrum-cash": "^2.0.8",
+<<<<<<< HEAD
     "mainnet-js": "0.5.0",
+=======
+    "mainnet-js": "0.4.39",
+>>>>>>> 545c54d7 (fix Bearer/bearer case issue (#150))
     "register-service-worker": "^1.7.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"

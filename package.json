@@ -21,7 +21,11 @@
       "**/jest-runner/**"
     ]
   },
+<<<<<<< HEAD
   "version": "0.5.0",
+=======
+  "version": "0.4.39",
+>>>>>>> 545c54d7 (fix Bearer/bearer case issue (#150))
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
