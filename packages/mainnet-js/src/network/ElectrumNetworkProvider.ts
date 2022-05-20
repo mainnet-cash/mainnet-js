@@ -13,6 +13,8 @@ import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
 import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util";
 import { CancelWatchFn } from "../wallet/interface";
+import { resolve } from "path";
+import { rejects } from "assert";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
