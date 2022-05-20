@@ -15,7 +15,7 @@ services:
 
   bitcoind:
     image: mainnet/bitcoin-cash-node
-    command: bitcoind -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -upgrade8activationtime=1637694000 -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
+    command: bitcoind -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
       interval: 1m30s
