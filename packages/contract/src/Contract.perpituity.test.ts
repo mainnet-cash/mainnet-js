@@ -50,7 +50,7 @@ let script = `pragma cashscript >= 0.7.0;
     
     }`;
 
-    let script2 = `pragma cashscript >= 0.7.0;
+let script2 = `pragma cashscript >= 0.7.0;
 
     // v20220522
 
@@ -103,7 +103,6 @@ let script = `pragma cashscript >= 0.7.0;
     }`;
 
 describe(`Example Perpituity Tests`, () => {
-  
   // test("Should pay a perpituity contract", async () => {
   //   const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
   //   const bob = await RegTestWallet.fromSeed(
@@ -218,8 +217,7 @@ describe(`Example Perpituity Tests`, () => {
 
       now += period;
 
-
-      console.log(contract.getDepositAddress())
+      console.log(contract.getDepositAddress());
       let txn = await fn
         .to([
           { to: bob.getDepositAddress(), amount: installment + 3 },
