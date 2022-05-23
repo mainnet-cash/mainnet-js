@@ -18,23 +18,11 @@ describe("Test faucet endpoints", () => {
   });
 
   /**
-   * test mining blocks
+   * test bch faucet 
    */
   it("Should send testnet bch to recepient", async () => {
     const random = await mainnet.TestNetWallet.newRandom();
-    // FIXME: we do not have gspp testnet yet
-    if (random.slp.provider instanceof mainnet.GsppProvider) {
-      console.warn("we do not have gspp testnet yet");
-      return;
-    }
-
-    let resp = await request(app).post("/faucet/get_testnet_bch/").send({
-      cashaddr: ""
-    });
-
-    expect(resp.statusCode).toEqual(405);
-    expect(resp.body.message).toBe("Incorrect cashaddr");
-
+    
     const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_WIF);
     const bobwallet = await mainnet.TestNetWallet.newRandom();
     resp = await request(app).post("/faucet/get_testnet_bch/").send({
@@ -48,6 +36,27 @@ describe("Test faucet endpoints", () => {
     const balance = await bobwallet.getBalance("sat");
     expect(balance).toBe(10000);
 
+  });
+
+
+  /**
+   * test faucet error
+   */
+   it("Should refuse to send coins to address over 10000 balance ", async () => {
+    const random = await mainnet.TestNetWallet.newRandom();
+    
+    const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_WIF);
+    const bobwallet = await mainnet.TestNetWallet.newRandom();
+    resp = await request(app).post("/faucet/get_testnet_bch/").send({
+      cashaddr: bobwallet.cashaddr
+    });
+
+    if (resp.statusCode !== 200) console.log(resp.body);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body.txId.length).toBe(64);
+
+    const balance = await bobwallet.getBalance("sat");
+
     resp = await request(app).post("/faucet/get_testnet_bch/").send({
       cashaddr: bobwallet.cashaddr
     });
@@ -57,6 +66,21 @@ describe("Test faucet endpoints", () => {
 
     await bobwallet.slpAware().sendMax(wallet.cashaddr);
   });
+
+    /**
+   * test faucet to invalid address
+   */
+     it("Should error sending testnet bch to invalid address", async () => {
+      const random = await mainnet.TestNetWallet.newRandom();
+        
+      let resp = await request(app).post("/faucet/get_testnet_bch/").send({
+        cashaddr: ""
+      });
+  
+      expect(resp.statusCode).toEqual(405);
+      expect(resp.body.message).toBe("Incorrect cashaddr");
+  
+    });
 
   it("Should send testnet slp tokens to recepient", async () => {
     const random = await mainnet.TestNetWallet.newRandom();

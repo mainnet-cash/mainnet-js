@@ -29,7 +29,7 @@ describe("Test Mine Endpoints", () => {
       blocks: 15,
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     await request(app).post("/wallet/balance").send({
       walletId: bobsWalletResp.body.walletId,
     });
