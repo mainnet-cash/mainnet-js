@@ -32,5 +32,5 @@ test("Should connect to the default regtest client", async () => {
 
   expect(provider.network).toBe("regtest");
   const bal = await provider.getBalance(process.env.ADDRESS!);
-  expect(bal).toBeGreaterThan(100);
+  expect(bal).toBeGreaterThan(0);
 });

@@ -29,10 +29,7 @@ export const testnetServers = [
 //   //,"wss://unavailable.invalid:50004"
 // ];
 
-export const regtestServers = [
-  "ws://127.0.0.1:60003",
-  //,"wss://unavailable.invalid:50004"
-];
+export const regtestServers = ["ws://127.0.0.1:60003"];
 
 export const defaultServers = {
   mainnet: mainnetServers,
@@ -54,8 +51,9 @@ export const clusterParams = {
     timeout: 50000,
   },
   regtest: {
+    confidence: 1,
     distribution: 1,
     order: ClusterOrder.PRIORITY,
-    timeout: 10000,
+    timeout: 3000,
   },
 };

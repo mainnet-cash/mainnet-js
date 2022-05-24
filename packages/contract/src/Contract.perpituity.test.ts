@@ -217,7 +217,6 @@ describe(`Example Perpituity Tests`, () => {
 
       now += period;
 
-      console.log(contract.getDepositAddress());
       let txn = await fn
         .to([
           { to: bob.getDepositAddress(), amount: installment + 3 },
