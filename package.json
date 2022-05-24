@@ -11,8 +11,7 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "./packages/*",
-      "./demo/*"
+      "./packages/*"
     ],
     "nohoist": [
       "**/ts-jest/**",
