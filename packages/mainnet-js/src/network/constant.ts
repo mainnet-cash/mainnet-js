@@ -48,7 +48,7 @@ export const clusterParams = {
     confidence: 1,
     distribution: 1,
     order: ClusterOrder.RANDOM,
-    timeout: 50000,
+    timeout: 30000,
   },
   regtest: {
     confidence: 1,
