@@ -194,7 +194,7 @@ describe("Test faucet endpoints", () => {
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.success).toBe(true);
 
-    await mainnet.delay(20000);
+    await mainnet.delay(40000);
 
     const balance = await bobwallet.sep20.getBalance(tokenId);
     expect(balance.value.toNumber()).toBe(10);
