@@ -27,7 +27,6 @@ test("Should connect to the default testnet cluster", async () => {
   expect(bal).toBeGreaterThan(100);
 });
 
-
 // TODO: Fix timeout issue
 // test("Should connect to the default regtest client", async () => {
 //   let provider = getNetworkProvider("regtest");
