@@ -371,7 +371,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     const requestTimeout = new Promise(function (_resolve, reject) {
       setTimeout(function () {
         reject("electrum-cash request timed out, retrying");
-      }, 60000);
+      }, 30000);
     }).catch(function (e) {
       throw e;
     });

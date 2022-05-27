@@ -481,7 +481,7 @@ describe(`Watch only Wallets`, () => {
       // Build Bob's wallet from a public address, check his balance.
       expect(alice.getPublicKeyHash()!.length).toBe(20);
       let aliceBalance = await alice.send([
-        { cashaddr: alice.cashaddr!, value: 526, unit: "sat" },
+        { cashaddr: alice.cashaddr!, value: 720, unit: "sat" },
       ]);
       expect(aliceBalance.balance!.sat!).toBeGreaterThan(5000);
     }
