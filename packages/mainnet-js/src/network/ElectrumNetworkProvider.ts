@@ -371,7 +371,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     const requestTimeout = new Promise(function (_resolve, reject) {
       setTimeout(function () {
         reject("electrum-cash request timed out, retrying");
-      }, 60000);
+      }, 30000);
     }).catch(function (e) {
       throw e;
     });
@@ -385,9 +385,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         return result;
       })
       .catch(async () => {
-        console.warn(
-          "initial electrum-cash request attempt timed out, retrying..."
-        );
+        // console.warn(
+        //   "initial electrum-cash request attempt timed out, retrying..."
+        // );
         return await Promise.race([request, requestTimeout])
           .then((value) => {
             if (value instanceof Error) throw value;

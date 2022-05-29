@@ -224,15 +224,15 @@ const sendMax = ({ sendMaxRequest }) =>
 * sendRequest SendRequest encode a transaction
 * returns EncodeTransactionResponse
 * */
-const encodeTransaction = ({ sendRequest }) => new Promise(
+const encodeTransaction = ( { encodeTransactionRequest } ) => new Promise(
   async (resolve, reject) => {
     try {
-      const wallet = await mainnet.walletFromId(sendRequest.walletId);
+      const wallet = await mainnet.walletFromId(encodeTransactionRequest.walletId);
       if (!wallet) {
         throw Error("Could not derive wallet");
       }
 
-      const encodedTransaction = await wallet.encodeTransaction(sendRequest.to, sendRequest.options);
+      const encodedTransaction = await wallet.encodeTransaction(encodeTransactionRequest.to, encodeTransactionRequest.discardChange, encodeTransactionRequest.options);
       const txHex = mainnet.Mainnet.binToHex(encodedTransaction)
       resolve(Service.successResponse({ transactionHex: txHex }));
     } catch (e) {

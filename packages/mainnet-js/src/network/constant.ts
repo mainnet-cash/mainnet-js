@@ -17,15 +17,19 @@ export const mainnetServers = [
 
 export const testnetServers = [
   "wss://tbch.loping.net:60004",
-  "wss://blackie.c3-soft.com:60004",
-  "wss://testnet.bitcoincash.network:60004",
+  //"wss://blackie.c3-soft.com:60004",
+  //"wss://testnet.bitcoincash.network:60004",
   //,"wss://unavailable.invalid:50004"
 ];
 
-export const regtestServers = [
-  "ws://127.0.0.1:60003",
-  //,"wss://unavailable.invalid:50004"
-];
+// testnet4
+// export const testnetServers = [
+//   //"wss://t4fork.c3-soft.com:61004",
+//   "wss://testnet4.imaginary.cash:50004",
+//   //,"wss://unavailable.invalid:50004"
+// ];
+
+export const regtestServers = ["ws://127.0.0.1:60003"];
 
 export const defaultServers = {
   mainnet: mainnetServers,
@@ -44,11 +48,12 @@ export const clusterParams = {
     confidence: 1,
     distribution: 1,
     order: ClusterOrder.RANDOM,
-    timeout: 50000,
+    timeout: 30000,
   },
   regtest: {
+    confidence: 1,
     distribution: 1,
     order: ClusterOrder.PRIORITY,
-    timeout: 5000,
+    timeout: 3000,
   },
 };

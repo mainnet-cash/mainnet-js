@@ -213,7 +213,7 @@ export class EscrowContract extends Contract {
    * @returns The contract text in CashScript
    */
   static getContractText(): string {
-    return `pragma cashscript ^0.6.1;
+    return `pragma cashscript ^0.7.0;
             contract escrow(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
 
                 function spend(pubkey signingPk, sig s, int amount, int nonce) {
@@ -221,8 +221,10 @@ export class EscrowContract extends Contract {
                     require(checkSig(s, signingPk));
                     require(amount >= contractAmount);
                     require(nonce == contractNonce);
-                    bytes34 output = new OutputP2PKH(bytes8(amount), sellerPkh);
-                    require(hash256(output) == tx.hashOutputs);
+                    bytes25 lockingCode = new LockingBytecodeP2PKH(sellerPkh);
+                    bool sendsToSeller = tx.outputs[0].lockingBytecode == lockingCode;
+                    require(tx.outputs[0].value == amount);
+                    require(sendsToSeller);
                 }
 
                 function refund(pubkey signingPk, sig s, int amount, int nonce) {
@@ -230,8 +232,10 @@ export class EscrowContract extends Contract {
                     require(checkSig(s, signingPk));
                     require(amount >= contractAmount);
                     require(nonce == contractNonce);
-                    bytes34 output = new OutputP2PKH(bytes8(amount), buyerPkh);
-                    require(hash256(output) == tx.hashOutputs);
+                    bytes25 lockingCode = new LockingBytecodeP2PKH(buyerPkh);
+                    bool sendsToSeller = tx.outputs[0].lockingBytecode == lockingCode;
+                    require(tx.outputs[0].value == amount);
+                    require(sendsToSeller);
                 }
             }
         `;

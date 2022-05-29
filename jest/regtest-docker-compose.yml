@@ -51,7 +51,7 @@ services:
     volumes:
       - ./docker/fulcrum/fulcrum.conf:/tmp/fulcrum.conf
   db:
-    image: postgres:12-alpine
+    image: postgres:14-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
