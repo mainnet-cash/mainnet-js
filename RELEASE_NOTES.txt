@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+0.5.0 
+
+- Update to cashscript 0.7.0
+- Fixes bug with send raw transaction rest endpoint
+
 0.4.40 
 
 - Make electrum-cash fault tolerant to failed servers and timed-out requests.
