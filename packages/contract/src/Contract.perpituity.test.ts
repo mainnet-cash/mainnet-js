@@ -212,7 +212,7 @@ describe(`Example Perpituity Tests`, () => {
         blocks: 10,
       });
       let balance = await contracts.slice(-1)[0]!.getBalance();
-      let installment = Math.round(balance / 120);
+      let installment = Math.round(balance / decay);
       let fn = contracts.slice(-1)[0]!.getContractFunction("execute")();
 
       now += period;
