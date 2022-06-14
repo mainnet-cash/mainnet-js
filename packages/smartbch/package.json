@@ -17,7 +17,7 @@
     "cashc": "^0.6.5",
     "cashscript": "^0.6.5",
     "ethers": "^5.4.5",
-    "solc": "^0.8.7-fixed",
+    "solc": "0.8.7-fixed",
     "xmlhttprequest-ssl": "^2.0.0",
     "webpack-node-externals": "^3.0.0"
   },
