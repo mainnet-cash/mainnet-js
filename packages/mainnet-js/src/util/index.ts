@@ -14,6 +14,7 @@ export {
 } from "../util/getAddrsByXpubKey";
 export { getRuntimePlatform, RuntimePlatform } from "./getRuntimePlatform";
 export { getUsdRate } from "./getUsdRate";
+export { hash160 } from "./hash160";
 export { ExchangeRate } from "../rate/ExchangeRate";
 export { sanitizeAddress } from "./sanitizeAddress";
 export { sanitizeUnit } from "./sanitizeUnit";

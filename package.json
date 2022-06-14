@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.5.2",
+  "version": "0.5.3",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",

@@ -7156,7 +7156,7 @@ slp-parser@^0.0.4:
   dependencies:
     bignumber.js "^9.0.0"
 
-solc@^0.8.7-fixed:
+solc@0.8.7-fixed:
   version "0.8.7-fixed"
   resolved "https://registry.yarnpkg.com/solc/-/solc-0.8.7-fixed.tgz#76eb37d33637ad278ad858e2633e9da597d877ac"
   integrity sha512-nWZRkdPwfBpimAelO30Bz7/hxoj+mylb30gEpBL8hhEWR4xqu2ezQAxWK1Hz5xx1NqesbgGjSgnGul49tRHWgQ==
