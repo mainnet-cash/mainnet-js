@@ -143,7 +143,7 @@ export class SmartBchWallet extends BaseWallet {
             const message = `Can not automatically add regtest network to Metamask
 You can add it manually:
   Network Name: SmartBch RegTest
-  New RPC URL: http://localhost:8545
+  New RPC URL: http://127.0.0.1:8545
   Chain ID: 0x2712
   Currency Symbol (optional): BCH`;
             window.alert(message);
