@@ -62,7 +62,6 @@ services:
     ports:
       - 15432:5432
 
-
 networks:
   bitcoin:
 
