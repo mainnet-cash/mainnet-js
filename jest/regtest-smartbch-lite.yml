@@ -1,0 +1,73 @@
+version: "3.7"
+
+services:
+  smartbch-regtest:
+    image: mainnet/smartbch
+    entrypoint: init_regtest.sh
+    ports:
+      - "8545:8545"
+      - "9545:9545"
+    restart: always
+    volumes:
+      - smartbch_data:/root/.smartbchd
+      - ./docker/smartbch/test-keys.txt:/root/test-keys.txt
+      - ./docker/smartbch/init_regtest.sh:/build/init_regtest.sh
+
+  bitcoind:
+    image: mainnet/bitcoin-cash-node
+    command: bitcoind -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
+    healthcheck:
+      test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    container_name: bitcoind
+    # ports:
+    #   - "18443:18443" # rpc
+    #   - "28332:28332" # zmq pub
+    expose: [18443, 28332]
+    volumes:
+      - bitcoin-data:/data
+    networks:
+      - bitcoin
+  bitcoin-mine:
+    image: mainnet/bitcoin-cash-node
+    entrypoint: ["/entrypoint.sh"]
+    command: /bin/sh -c "/bin/sleep 10 && bitcoin-cli -regtest -rpcconnect=bitcoind  -rpcuser=alice -rpcpassword=password -rpcport=18443 generatetoaddress 215 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 1> /dev/null"
+    networks:
+      - bitcoin
+  fulcrum:
+    image: cculianu/fulcrum
+    command: /bin/sh -c "/bin/sleep 10 && Fulcrum /tmp/fulcrum.conf"
+    ports:
+      - "60001:60001"
+      - "60003:60003"
+    expose: [60001, 60003]
+    depends_on:
+      - bitcoin-mine
+    networks:
+      - bitcoin
+    volumes:
+      - ./docker/fulcrum/fulcrum.conf:/tmp/fulcrum.conf
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: wallet
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - "sql-data:/var/lib/postgresql/data"
+    ports:
+      - 15432:5432
+
+
+networks:
+  bitcoin:
+
+volumes:
+  bitcoin-data:
+  sql-data:
+  fulcrum-data:
+  smartbch_data:

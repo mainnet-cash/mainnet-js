@@ -27,11 +27,11 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 
 | :warning: WARNING                                                                    |
 | :----------------------------------------------------------------------------------- |
-| This code is in a prototype stage, so there is no backwards-compatibility guarantee. |
+| This code is in a alpha stage, so there is no backwards-compatibility guarantee. |
 
 ## What is exactly is this?
 
-Mainnet-js provides a developer friendly API to develop BCH applications on the web.
+Mainnet-js provides a developer friendly API to develop BCH applications.
 
 It is an OpenAPI 3 specification (swagger), implemented as a library in typescript. That library is then used in a generated express server to provide a REST service. And that service can be deployed in a production stack via docker.
 

@@ -1,0 +1,1 @@
+docker-compose -f jest/regtest-smartbch-lite.yml down -v

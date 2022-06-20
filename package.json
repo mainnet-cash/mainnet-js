@@ -52,6 +52,8 @@
     "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
     "regtest:up": "./jest/docker/start.sh",
     "regtest:down": "./jest/docker/stop.sh",
+    "regtest:sbch:up": "./jest/docker/start-sbch-lite.sh",
+    "regtest:sbch:down": "./jest/docker/stop-sbch-lite.sh",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "nuke": "rm -fr jest/playwright/* && rm -fr node_modules && yarn remove:packages && yarn remove:demo",
@@ -63,7 +65,8 @@
     "build:smartbch": "yarn workspace @mainnet-cash/smartbch run build",
     "postinstall": "yarn build",
     "demo": "yarn workspace mainnet-demo start",
-    "reload": "npx reload --dir=jest/playwright "
+    "live": "npx reload --dir=jest/playwright ",
+    "reload":"yarn live"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",

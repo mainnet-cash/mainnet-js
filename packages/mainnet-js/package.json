@@ -65,7 +65,7 @@
     "dotenv": "^10.0.0",
     "node-postgres": "^0.6.2",
     "parse-database-url": "^0.3.0",
-    "pg": "8.6.0",
+    "pg": "8.5.1",
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
     "stream-browserify": "^3.0.0"
