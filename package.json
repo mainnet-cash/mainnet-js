@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.5.5",
+  "version": "0.5.6",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
@@ -66,7 +66,7 @@
     "postinstall": "yarn build",
     "demo": "yarn workspace mainnet-demo start",
     "live": "npx reload --dir=jest/playwright ",
-    "reload":"yarn live"
+    "reload": "yarn live"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
