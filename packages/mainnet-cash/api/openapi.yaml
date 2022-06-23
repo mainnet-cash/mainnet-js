@@ -4374,9 +4374,8 @@ components:
       - $ref: '#/components/schemas/NetworkEnum'
       example:
         address: 0xdac17f958d2ee523a2206206994597c13d831ec7
-        abi: |
-          - "function name() view returns (string)"
-          - "function symbol() view returns (string)"
+        abi: "- [\"function name() view returns (string)\"]\n- [\"function symbol()\
+          \ view returns (string)\"]\n"
       properties:
         address:
           description: Address of an already deployed contract
@@ -4385,9 +4384,8 @@ components:
         abi:
           description: "Contract ABI (Application Binary Interface), which describes\
             \ the contract interaction"
-          example: |
-            - "function name() view returns (string)"
-            - "function symbol() view returns (string)"
+          example: "- [\"function name() view returns (string)\"]\n- [\"function symbol()\
+            \ view returns (string)\"]\n"
           items:
             type: string
           type: array
@@ -4620,9 +4618,8 @@ components:
       example:
         address: address
         contractId: contractId
-        abi: |
-          - "function name() view returns (string)"
-          - "function symbol() view returns (string)"
+        abi: "- [\"function name() view returns (string)\"]\n- [\"function symbol()\
+          \ view returns (string)\"]\n"
         parameters:
         - MyToken
         - MTK
@@ -4640,9 +4637,8 @@ components:
         abi:
           description: "Contract ABI (Application Binary Interface), which describes\
             \ the contract interaction"
-          example: |
-            - "function name() view returns (string)"
-            - "function symbol() view returns (string)"
+          example: "- [\"function name() view returns (string)\"]\n- [\"function symbol()\
+            \ view returns (string)\"]\n"
           items:
             type: string
           type: array
