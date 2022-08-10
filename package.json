@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.5.4",
+  "version": "0.5.7",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
@@ -52,6 +52,8 @@
     "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
     "regtest:up": "./jest/docker/start.sh",
     "regtest:down": "./jest/docker/stop.sh",
+    "regtest:sbch:up": "./jest/docker/start-sbch-lite.sh",
+    "regtest:sbch:down": "./jest/docker/stop-sbch-lite.sh",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "nuke": "rm -fr jest/playwright/* && rm -fr node_modules && yarn remove:packages && yarn remove:demo",
@@ -63,7 +65,8 @@
     "build:smartbch": "yarn workspace @mainnet-cash/smartbch run build",
     "postinstall": "yarn build",
     "demo": "yarn workspace mainnet-demo start",
-    "reload": "npx reload --dir=jest/playwright "
+    "live": "npx reload --dir=jest/playwright ",
+    "reload": "yarn live"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
@@ -87,7 +90,7 @@
   "optionalDependencies": {
     "assert": "^2.0.0",
     "deepmerge": "^4.2.2",
-    "dexie": "^3.0.2",
+    "dexie": "3.0.3",
     "dotenv": "^10.0.0",
     "ethers": "^5.4.6",
     "eventsource": "^1.0.7",
