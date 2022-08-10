@@ -336,9 +336,10 @@ export class Wallet extends BaseWallet {
 
   private async _generateMnemonic() {
     this.mnemonic = generateMnemonic();
-    if(this.mnemonic.length ==0 ) throw Error("refusing to create wallet from empty mnemonic")
+    if (this.mnemonic.length == 0)
+      throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic!);
-    checkForEmptySeed(seed)
+    checkForEmptySeed(seed);
     let network = this.isTestnet ? "testnet" : "mainnet";
     this.parentXPubKey = await getXPubKey(
       seed,
@@ -397,9 +398,10 @@ export class Wallet extends BaseWallet {
     this.mnemonic = mnemonic;
 
     const crypto = await instantiateBIP32Crypto();
-    if(this.mnemonic.length ==0 ) throw Error("refusing to create wallet from empty mnemonic")
+    if (this.mnemonic.length == 0)
+      throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic);
-    checkForEmptySeed(seed)
+    checkForEmptySeed(seed);
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
@@ -435,9 +437,10 @@ export class Wallet extends BaseWallet {
   // Get common xpub paths from zerothChild privateKey
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
     const crypto = await instantiateBIP32Crypto();
-    if(!this.mnemonic) throw Error("refusing to create wallet from empty mnemonic")
+    if (!this.mnemonic)
+      throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic!);
-    checkForEmptySeed(seed)
+    checkForEmptySeed(seed);
     let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
