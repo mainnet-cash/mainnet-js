@@ -12,3 +12,4 @@ jest/playwright/*
 jest/docker/data
 dist
 mainnet-js.tgz
+basecamp_archive
