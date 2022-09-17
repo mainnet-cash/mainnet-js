@@ -104,9 +104,7 @@ import { amountInSatoshi } from "../util/amountInSatoshi";
 import { getXPubKey } from "../util/getXPubKey";
 import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
 
-import {
-  TransactionHistoryI
-} from "../history/interface"
+import { TransactionHistoryI } from "../history/interface";
 import { getAddressHistory } from "../history/electrumTransformer";
 
 //#endregion Imports
@@ -1074,10 +1072,21 @@ export class Wallet extends BaseWallet {
     return await this.provider!.getHistory(this.cashaddr!);
   }
 
-
   // gets transaction history of this wallet
-  public async getHistory(unit:UnitEnum, start?: number, count?: number, collapseChange?:boolean): Promise<TransactionHistoryI> {
-    return getAddressHistory(this.cashaddr!, this.provider!, unit, start, count, collapseChange)
+  public async getHistory(
+    unit: UnitEnum,
+    start?: number,
+    count?: number,
+    collapseChange?: boolean
+  ): Promise<TransactionHistoryI> {
+    return getAddressHistory(
+      this.cashaddr!,
+      this.provider!,
+      unit,
+      start,
+      count,
+      collapseChange
+    );
   }
 
   // gets last transaction of this wallet
