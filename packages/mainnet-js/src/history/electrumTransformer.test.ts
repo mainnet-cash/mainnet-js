@@ -47,7 +47,6 @@ test("Should get an address history", async () => {
         unit: "satoshis",
       },
     ]);
-    let height = await alice.provider.getBlockHeight();
     expect(sendResponse!.txId!.length).toBe(64);
     expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
@@ -63,7 +62,6 @@ test("Should get an address history", async () => {
     expect(bobHistory.transactions[1].value).toBe(-2100);
     expect(bobHistory.transactions[1].from).toBe(bob.getDepositAddress());
     expect(bobHistory.transactions[1].to).toBe(charlie.getDepositAddress());
-    expect(bobHistory.transactions[1].blockheight).toBe(height);
     expect(bobHistory.transactions[2].value).toBe(31000);
     expect(bobHistory.transactions[2].balance).toBe(31000);
     expect(bobHistory.transactions[2].fee).toBe(0);
@@ -107,7 +105,6 @@ test("Should get a history with multi-party sends", async () => {
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
-    let height = await alice.provider.getBlockHeight();
     expect(sendResponse!.txId!.length).toBe(64);
     expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
@@ -128,7 +125,6 @@ test("Should get a history with multi-party sends", async () => {
     expect(bobHistory.transactions[1].to).toBe(charlie.getDepositAddress());
     expect(bobHistory.transactions[1].from).toBe(bob.getDepositAddress());
 
-    expect(bobHistory.transactions[1].blockheight).toBe(height);
     expect(bobHistory.transactions[2].value).toBe(31000);
     expect(bobHistory.transactions[2].balance).toBe(31000);
     expect(bobHistory.transactions[2].fee).toBe(0);
@@ -177,7 +173,6 @@ test("Should cut results with a longer history to given count", async () => {
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
-    let height = await alice.provider.getBlockHeight();
     expect(sendResponse!.txId!.length).toBe(64);
     expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
@@ -196,7 +191,6 @@ test("Should cut results with a longer history to given count", async () => {
     expect(bobHistory.transactions[0].to).toBe(alice.getDepositAddress());
     expect(bobHistory.transactions[1].value).toBe(-2100);
     expect(bobHistory.transactions[1].to).toBe(alice.getDepositAddress());
-    expect(bobHistory.transactions[1].blockheight).toBe(height);
   }
 });
 
@@ -240,7 +234,6 @@ test("Should handel input and fee from many utxos", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
     await bob.sendMax(charlie.cashaddr!);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
-    let height = await alice.provider.getBlockHeight();
     expect(sendResponse!.txId!.length).toBe(64);
     expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
