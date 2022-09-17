@@ -255,6 +255,5 @@ test("Should handel input and fee from many utxos", async () => {
     expect(bobHistory.transactions[0].value).toBeLessThan(-1700);
     expect(bobHistory.transactions[0].to).toBe(charlie.getDepositAddress());
     expect(bobHistory.transactions[1].from).toBe(alice.getDepositAddress());
-    expect(bobHistory.transactions[0].blockheight).toBe(height);
   }
 });
