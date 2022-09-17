@@ -656,6 +656,28 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/get_history:
+    post:
+      operationId: getHistory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+        description: |
+          Request for a wallet history
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+          description: successful operation
+      summary: Get a simplified list of transactions related to a wallet
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -1871,6 +1893,8 @@ components:
           Utxo: '#/components/schemas/Utxo'
           BalanceRequest: '#/components/schemas/BalanceRequest'
         propertyName: unit_type
+      example:
+        unit: sat
       properties:
         unit:
           description: Unit of account.
@@ -1944,6 +1968,124 @@ components:
           type: boolean
       required:
       - walletId
+    HistoryRequest:
+      example:
+        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+        unit: sat
+        collapseChange: true
+        start: 0.8008281904610115
+        count: 6.027456183070403
+      properties:
+        walletId:
+          description: |
+            The walletId to get a history for.
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          type: string
+        unit:
+          default: sat
+          description: Unit of account for running balance.
+          enum:
+          - bch
+          - BCH
+          - usd
+          - USD
+          - bit
+          - bits
+          - sat
+          - SAT
+          - sats
+          - satoshi
+          - satoshis
+          example: sat
+          type: string
+        start:
+          description: The first record to return starting from zero
+          type: number
+        count:
+          description: The number of records to return
+          type: number
+        collapseChange:
+          default: true
+          description: Exclude transactions returned to the wallet as change in response.
+          example: true
+          type: boolean
+      required:
+      - walletId
+    HistoryResponse:
+      example:
+        transactions:
+        - unit:
+            unit: sat
+          balance: 5.637376656633329
+          fee: 5.962133916683182
+          index: 0.8008281904610115
+          txId: txId
+          from: from
+          to: to
+          txn: txn
+          value: 1.4658129805029452
+          blockheight: 6.027456183070403
+        - unit:
+            unit: sat
+          balance: 5.637376656633329
+          fee: 5.962133916683182
+          index: 0.8008281904610115
+          txId: txId
+          from: from
+          to: to
+          txn: txn
+          value: 1.4658129805029452
+          blockheight: 6.027456183070403
+      properties:
+        transactions:
+          items:
+            $ref: '#/components/schemas/TransactionHistoryItem'
+          type: array
+    TransactionHistoryItem:
+      example:
+        unit:
+          unit: sat
+        balance: 5.637376656633329
+        fee: 5.962133916683182
+        index: 0.8008281904610115
+        txId: txId
+        from: from
+        to: to
+        txn: txn
+        value: 1.4658129805029452
+        blockheight: 6.027456183070403
+      properties:
+        to:
+          description: cashaddr of the receiving cash address.
+          type: string
+        from:
+          description: cashadd of the sending cash address.
+          type: string
+        unit:
+          $ref: '#/components/schemas/UnitType'
+        index:
+          description: the index of the input or output in the transaction
+          type: number
+        blockheight:
+          description: the blockheight of transaction
+          type: number
+        txn:
+          description: The hash of the transaction
+          type: string
+        txId:
+          description: a unique identifier for the sub-transaction
+          type: string
+        value:
+          description: "The amount of the transaction, in the unit provided, with\
+            \ respect to the wallet provided."
+          type: number
+        fee:
+          description: "The amount paid, if any, by the wallet for the transaction\
+            \ (incoming tranactions are \"free\")"
+          type: number
+        balance:
+          description: A running balance
+          type: number
     SendRequestItem:
       anyOf:
       - description: "Send request in array form ['cashadr', 100, 'sats']"

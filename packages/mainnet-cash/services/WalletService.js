@@ -97,6 +97,28 @@ const depositQr = ({ serializedWallet }) =>
       );
     }
   });
+
+/**
+* Get wallet history
+*
+* historyRequest HistoryRequest Request a simplified wallet
+* returns HistoryResponse
+* */
+const getHistory = ({ historyRequest }) =>
+new Promise(async (resolve, reject) => {
+  try {
+    let wallet = await mainnet.walletFromId(serializedWallet.walletId);
+    let args = historyRequest;
+    delete args.walletId;
+    let resp = await wallet.getHistory(args);
+    resolve(Service.successResponse({ ...resp }));
+  } catch (e) {
+    reject(
+      Service.rejectResponse(e, e.status || 500)
+    );
+  }
+});
+
 /**
 * Get wallet info
 *
@@ -312,6 +334,7 @@ module.exports = {
   createWallet,
   depositAddress,
   depositQr,
+  getHistory,
   info,
   namedExists,
   replaceNamed,

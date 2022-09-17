@@ -169,6 +169,23 @@ describe("Test Wallet Endpoints", () => {
   });
 
   /**
+   * getHistory
+   */
+   it("Should return a wallet history", async () => {
+    let resp = await request(app).post("/wallet/get_history").send({
+      walletId:
+        `wif:regtest:${process.env.PRIVATE_WIF}`,
+    });
+    const body = resp.body;
+
+    expect(resp.statusCode).toBe(200);
+    expect(
+      body!.transactions!.length
+    ).toBeGreaterThan(5);
+    console.log(body!.transactions)
+  });
+
+  /**
    * maxAmountToSend
    */
   it("Should accept a max amount to send request for a regtest wallet", async () => {
