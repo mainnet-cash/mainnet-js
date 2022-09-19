@@ -107,10 +107,10 @@ const depositQr = ({ serializedWallet }) =>
 const getHistory = ({ historyRequest }) =>
 new Promise(async (resolve, reject) => {
   try {
-    let wallet = await mainnet.walletFromId(serializedWallet.walletId);
+    let wallet = await mainnet.walletFromId(historyRequest.walletId);
     let args = historyRequest;
     delete args.walletId;
-    let resp = await wallet.getHistory(args);
+    let resp = await wallet.getHistory(args.unit, args.start, args.count, args.collapseChange);
     resolve(Service.successResponse({ ...resp }));
   } catch (e) {
     reject(
