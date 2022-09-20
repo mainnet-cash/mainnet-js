@@ -209,6 +209,11 @@ describe("Test Wallet Endpoints", () => {
             unit: 'satoshis',
             value: 6000,
           },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
         ],
       });
 
