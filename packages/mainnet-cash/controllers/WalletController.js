@@ -28,6 +28,10 @@ const encodeTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.encodeTransaction);
 };
 
+const getHistory = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getHistory);
+};
+
 const info = async (request, response) => {
   await Controller.handleRequest(request, response, service.info);
 };
@@ -71,6 +75,7 @@ module.exports = {
   depositAddress,
   depositQr,
   encodeTransaction,
+  getHistory,
   info,
   maxAmountToSend,
   namedExists,

@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.5.7
+  version: 0.5.8
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -660,6 +660,27 @@ paths:
       summary: Get total balance for wallet
       tags:
         - wallet
+  /wallet/get_history:
+    post:
+      operationId: getHistory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+        description: |
+          Request for a wallet history
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+          description: successful operation
+      summary: Get a simplified list of transactions related to a wallet
+      tags:
+        - wallet        
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -1930,6 +1951,81 @@ components:
         - $ref: '#/components/schemas/UnitType'
       required:
         - walletId
+    HistoryRequest:
+      properties:
+        walletId:
+          type: string
+          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+          description: |
+            The walletId to get a history for.
+        unit:
+          description: Unit of account for running balance.
+          enum:
+            - bch
+            - BCH
+            - usd
+            - USD
+            - bit
+            - bits
+            - sat
+            - SAT
+            - sats
+            - satoshi
+            - satoshis
+          example: sat
+          default: sat
+          type: string
+        start:
+          type: number
+          description: The first record to return starting from zero
+        count:
+          type: number
+          description: The number of records to return
+        collapseChange:
+          type: boolean
+          example: true
+          default: true
+          description: >-
+            Exclude transactions returned to the wallet as change in response.
+      required:
+        - walletId
+    HistoryResponse:
+      properties:
+        transactions:
+          type: array
+          items: 
+            $ref: '#/components/schemas/TransactionHistoryItem'  
+    TransactionHistoryItem:
+      properties:
+        to: 
+          type: string
+          description: cashaddr of the receiving cash address.
+        from: 
+          type: string
+          description: cashadd of the sending cash address.
+        unit: 
+          $ref: '#/components/schemas/UnitType'
+        index: 
+          type: number
+          description: the index of the input or output in the transaction
+        blockheight: 
+          type: number
+          description: the blockheight of transaction
+        txn: 
+          type: string
+          description: The hash of the transaction
+        txId: 
+          type: string
+          description: a unique identifier for the sub-transaction
+        value: 
+          type: number
+          description: The amount of the transaction, in the unit provided, with respect to the wallet provided.
+        fee: 
+          type: number
+          description: The amount paid, if any, by the wallet for the transaction (incoming tranactions are "free")
+        balance: 
+          type: number      
+          description: A running balance 
     SendRequestItem:
       anyOf:
         - description: Send request in array form ['cashadr', 100, 'sats']
