@@ -63,7 +63,7 @@ export async function getAddressHistory(
   let txns = applyBalance(preprocessedTxns, currentBalance, unit, factor);
 
 
-
+  
   return {
     transactions: txns,
   };
