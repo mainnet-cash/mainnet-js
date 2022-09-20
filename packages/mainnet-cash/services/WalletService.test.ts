@@ -222,13 +222,10 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobsWalletResp.body.walletId,
     });
     const body = resp.body;
-
-    console.log(JSON.stringify(resp,undefined,2))
     expect(resp.statusCode).toBe(200);
     expect(
       body!.transactions!.length
     ).toBeGreaterThan(5);
-    console.log(body!.transactions)
   });
 
   /**
