@@ -169,6 +169,66 @@ describe("Test Wallet Endpoints", () => {
   });
 
   /**
+   * getHistory
+   */
+   it("Should return a wallet history", async () => {
+    const bobsWalletResp = await request(app).post("/wallet/create").send({
+      name: "bobs wallet",
+      network: "regtest",
+    });
+
+    const bobsCashaddr = bobsWalletResp.body.cashaddr;
+
+    await request(app)
+      .post("/wallet/send")
+      .send({
+        walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
+        to: [
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
+          {
+            cashaddr: bobsCashaddr,
+            unit: 'satoshis',
+            value: 6000,
+          },
+        ],
+      });
+
+
+    let resp = await request(app).post("/wallet/get_history").send({
+      walletId: bobsWalletResp.body.walletId,
+    });
+    const body = resp.body;
+    expect(resp.statusCode).toBe(200);
+    expect(
+      body!.transactions!.length
+    ).toBeGreaterThan(5);
+  });
+
+  /**
    * maxAmountToSend
    */
   it("Should accept a max amount to send request for a regtest wallet", async () => {

@@ -104,6 +104,9 @@ import { amountInSatoshi } from "../util/amountInSatoshi";
 import { getXPubKey } from "../util/getXPubKey";
 import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
 
+import { TransactionHistoryI } from "../history/interface";
+import { getAddressHistory } from "../history/electrumTransformer";
+
 //#endregion Imports
 
 const secp256k1Promise = instantiateSecp256k1();
@@ -1065,15 +1068,32 @@ export class Wallet extends BaseWallet {
   }
 
   // gets transaction history of this wallet
-  public async getHistory(): Promise<TxI[]> {
+  public async getRawHistory(): Promise<TxI[]> {
     return await this.provider!.getHistory(this.cashaddr!);
+  }
+
+  // gets transaction history of this wallet
+  public async getHistory(
+    unit: UnitEnum,
+    start?: number,
+    count?: number,
+    collapseChange?: boolean
+  ): Promise<TransactionHistoryI> {
+    return getAddressHistory(
+      this.cashaddr!,
+      this.provider!,
+      unit,
+      start,
+      count,
+      collapseChange
+    );
   }
 
   // gets last transaction of this wallet
   public async getLastTransaction(
     confirmedOnly: boolean = false
   ): Promise<ElectrumRawTransaction | null> {
-    let history: TxI[] = await this.getHistory();
+    let history: TxI[] = await this.getRawHistory();
     if (confirmedOnly) {
       history = history.filter((val) => val.height > 0);
     }
