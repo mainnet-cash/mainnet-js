@@ -220,7 +220,7 @@ describe(`Test Wallet library`, () => {
         ],
         { utxoIds: oddUtxoIds }
       );
-      expect(sendResponse2.balance!.sat).toBe(19967);
+      expect(sendResponse2.balance!.sat).toBe(19966);
       expect(await charlie.getBalance("sat")).toBe(1675);
     }
   });
@@ -265,7 +265,7 @@ describe(`Test Wallet library`, () => {
         }
       );
       expect(await bob.getBalance("sat")).toBe(1000);
-      expect(await charlie.getBalance("sat")).toBe(1780);
+      expect(await charlie.getBalance("sat")).toBe(1779);
     }
   });
 
@@ -422,8 +422,76 @@ describe(`Test Wallet library`, () => {
     const sendMaxResponse = await bob.sendMax(alice.cashaddr);
     expect(sendMaxResponse.txId!.length).toBe(64);
 
-    // Assume fulcrum node polling is 1s
+    // 
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
+  });
+
+  test("Send all coins back on regtest", async () => {
+    // Build Alice's wallet from Wallet Import Format string, send some sats
+
+    const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const bob = await createWallet({
+      type: WalletTypeEnum.Seed,
+      network: "regtest",
+      name: "Bob's random wallet",
+    });
+
+    const charlie = await createWallet({
+      type: WalletTypeEnum.Seed,
+      network: "regtest",
+      name: "Charlie's random wallet",
+    });
+    if (!alice.cashaddr || !bob.cashaddr) {
+      throw Error("Alice or Bob's wallet are missing addresses");
+    }
+    if (!alice.privateKey || !bob.privateKey) {
+      throw Error("Alice or Bob's wallet are missing private keys");
+    }
+
+    // Assume fulcrum node polling is 1s
+    await alice.send([
+      {
+        cashaddr: bob.cashaddr,
+        value: 3400,
+        unit: UnitEnum.SAT,
+      },
+      {
+        cashaddr: bob.cashaddr,
+        value: 3400,
+        unit: UnitEnum.SAT,
+      },
+      {
+        cashaddr: bob.cashaddr,
+        value: 3400,
+        unit: UnitEnum.SAT,
+      },
+      {
+        cashaddr: bob.cashaddr,
+        value: 3400,
+        unit: UnitEnum.SAT,
+      },
+      {
+        cashaddr: bob.cashaddr,
+        value: 3400,
+        unit: UnitEnum.SAT,
+      },
+    ]);
+
+    // Send ALL of Bob's coins to Charlie.
+    const sendMaxResponse = await bob.sendMax(charlie.cashaddr!);
+    expect(sendMaxResponse.txId!.length).toBe(64);
+    expect(sendMaxResponse.balance!.sat!).toBe(0);
+
+    const bobFinalBalance = await bob.getBalance('sat')
+    expect(bobFinalBalance).toBe(0);
+
+    // Send ALL of Charlie's coins to Alice.
+    const sendMaxResponse2 = await charlie.sendMax(alice.cashaddr);
+    expect(sendMaxResponse2.txId!.length).toBe(64);
+    expect(sendMaxResponse2.balance!.sat!).toBe(0);
+  
+    const charlieFinalBalance = await charlie.getBalance('sat')
+    expect(charlieFinalBalance).toBe(0);
   });
 });

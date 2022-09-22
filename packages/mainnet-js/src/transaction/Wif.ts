@@ -271,7 +271,7 @@ export async function getFeeAmount({
       feePaidBy
     );
 
-    return draftTransaction.length * relayFeePerByteInSatoshi + 1;
+    return draftTransaction.length * relayFeePerByteInSatoshi + 2;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"

@@ -126,7 +126,6 @@ test("Should get a history with multi-party sends", async () => {
     expect(bobHistory.transactions[1].from).toBe(bob.getDepositAddress());
 
     expect(bobHistory.transactions[2].value).toBe(31000);
-    expect(bobHistory.transactions[2].balance).toBe(31000);
     expect(bobHistory.transactions[2].fee).toBe(0);
     expect(bobHistory.transactions[2].from).toBe(alice.getDepositAddress());
   }
