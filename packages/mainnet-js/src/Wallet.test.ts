@@ -422,7 +422,7 @@ describe(`Test Wallet library`, () => {
     const sendMaxResponse = await bob.sendMax(alice.cashaddr);
     expect(sendMaxResponse.txId!.length).toBe(64);
 
-    // 
+    //
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalanceFinal.sat).toBe(0);
   });
@@ -483,15 +483,15 @@ describe(`Test Wallet library`, () => {
     expect(sendMaxResponse.txId!.length).toBe(64);
     expect(sendMaxResponse.balance!.sat!).toBe(0);
 
-    const bobFinalBalance = await bob.getBalance('sat')
+    const bobFinalBalance = await bob.getBalance("sat");
     expect(bobFinalBalance).toBe(0);
 
     // Send ALL of Charlie's coins to Alice.
     const sendMaxResponse2 = await charlie.sendMax(alice.cashaddr);
     expect(sendMaxResponse2.txId!.length).toBe(64);
     expect(sendMaxResponse2.balance!.sat!).toBe(0);
-  
-    const charlieFinalBalance = await charlie.getBalance('sat')
+
+    const charlieFinalBalance = await charlie.getBalance("sat");
     expect(charlieFinalBalance).toBe(0);
   });
 });
