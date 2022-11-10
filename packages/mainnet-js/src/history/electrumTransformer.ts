@@ -29,9 +29,9 @@ export async function getAddressHistory(
 
   // Assume transaction hashes will be served in chronological order
   // Slice count in from the end and count to the provided inputs
-  let len =  txnHashes.length
-  txnHashes = txnHashes.slice(len-start-count, len-start);
-  
+  let len = txnHashes.length;
+  txnHashes = txnHashes.slice(len - start - count, len - start);
+
   // get the current balance in satoshis
   let currentBalance = await provider.getBalance(cashaddr);
 
@@ -62,8 +62,6 @@ export async function getAddressHistory(
   // Apply the unit factor and
   let txns = applyBalance(preprocessedTxns, currentBalance, unit, factor);
 
-
-  
   return {
     transactions: txns,
   };
