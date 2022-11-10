@@ -184,7 +184,7 @@ test("Should cut results with a longer history to given count", async () => {
       0,
       2
     );
-    expect(bobHistory.transactions.length).toBe(2);
+    expect(bobHistory.transactions.length).toBe(4);
 
     expect(bobHistory.transactions[0].value).toBe(-2100);
     expect(bobHistory.transactions[0].to).toBe(alice.getDepositAddress());
