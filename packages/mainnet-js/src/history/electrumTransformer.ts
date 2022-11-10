@@ -52,7 +52,7 @@ export async function getAddressHistory(
   // flatten the array of responses
   let preprocessedTxns = Array.prototype.concat.apply([], items);
 
-  // Reverse cronological order (again), so list appear as newest first.
+  // Reverse chronological order (again), so list appear as newest first.
   preprocessedTxns = preprocessedTxns.reverse();
 
   // Get the factor to apply the requested unit of measure
