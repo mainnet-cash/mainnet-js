@@ -220,7 +220,7 @@ describe(`Test Wallet library`, () => {
         ],
         { utxoIds: oddUtxoIds }
       );
-      expect(sendResponse2.balance!.sat).toBe(19966);
+      expect(sendResponse2.balance!.sat).toBe(19967);
       expect(await charlie.getBalance("sat")).toBe(1675);
     }
   });
@@ -265,7 +265,7 @@ describe(`Test Wallet library`, () => {
         }
       );
       expect(await bob.getBalance("sat")).toBe(1000);
-      expect(await charlie.getBalance("sat")).toBe(1779);
+      expect(await charlie.getBalance("sat")).toBe(1780);
     }
   });
 
