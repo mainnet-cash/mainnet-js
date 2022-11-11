@@ -2102,8 +2102,8 @@ components:
       - $ref: '#/components/schemas/SendRequestItem_anyOf'
     OpReturnData:
       anyOf:
-      - description: "OP_RETURN message in format ['OP_RETURN', 'MEMO\\x10LÖL\U0001f605\
-          '] or ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']"
+      - description: "OP_RETURN message in format ['OP_RETURN', 'MEMO\\x10LÖL😅']\
+          \ or ['OP_RETURNB64', 'TUVNTxBMw5ZM8J+YhQ==']"
         items:
           anyOf:
           - type: string
@@ -2116,7 +2116,7 @@ components:
         oneOf:
         - properties:
             dataString:
-              example: "MEMO\x10LÖL\U0001f605"
+              example: "MEMO\x10LÖL😅"
               type: string
           required:
           - dataString
@@ -2176,8 +2176,7 @@ components:
           default: send
           description: "In addition to `send`ing the built transaction, the built\
             \ transaction hex may be returned (without broadcasting) with `build`\
-            \ action, or the [`meep \U0001f517`](https://github.com/gcash/meep) debugger\
-            \ command."
+            \ action, or the [`meep 🔗`](https://github.com/gcash/meep) debugger command."
           enum:
           - build
           - send
@@ -2424,8 +2423,7 @@ components:
         action:
           description: "In addition to `send`ing the built transaction, the built\
             \ transaction hex may be returned (without broadcasting) with `build`\
-            \ action, or the [`meep \U0001f517`](https://github.com/gcash/meep) debugger\
-            \ command"
+            \ action, or the [`meep 🔗`](https://github.com/gcash/meep) debugger command"
           enum:
           - build
           - send

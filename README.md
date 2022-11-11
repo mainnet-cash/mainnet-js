@@ -19,7 +19,6 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 - [Overview of packages](#overview-of-packages)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
-- [Demo app [WIP]](#demo-app-wip)
 
 # Before you begin
 
@@ -118,36 +117,3 @@ Additionally, a live version of the current REST api is available for viewing at
 # Contributing
 
 Please see the [contributing guide](./CONTRIBUTING.md) for more detailed information.
-
-# Demo app [WIP]
-
-A simple demo is available to demonstrate and test first-class high-level functions and to run unit testing of functions when called in a webapp.
-
-With the demo, concurrent unpublished dependencies are handled by `yarn workspaces`,
-so you should be able to use a version of mainnet-js (et al.) that has been transpiled but doesn't exist on npm.
-
-**However**, the following commands must be used from the root project directory.
-
-Running yarn in the root folder will build local dependencies of the demo.
-
-```
-yarn
-```
-
-Compiles and hot-reloads for development
-
-```
-yarn demo:serve
-```
-
-Compiles and minifies for production
-
-```
-yarn demo:build
-```
-
-Run Unit Tests
-
-```
-yarn demo:test
-```
