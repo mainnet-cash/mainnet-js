@@ -1,6 +1,7 @@
 import {
   base64ToBin,
   binToBase64,
+  CashAddressType,
   encodeCashAddress,
   hexToBin,
   instantiateSecp256k1,
@@ -70,8 +71,11 @@ export class SignedMessage implements SignedMessageI {
       privateKey,
       messageHash
     );
-    let sigDer = secp256k1.signMessageHashDER(privateKey, messageHash);
-    let sigSchnorr = secp256k1.signMessageHashSchnorr(privateKey, messageHash);
+    if (typeof rs === "string") {
+      throw new Error(rs);
+    }
+    let sigDer = secp256k1.signMessageHashDER(privateKey, messageHash) as Uint8Array;
+    let sigSchnorr = secp256k1.signMessageHashSchnorr(privateKey, messageHash) as Uint8Array;
     let electronEncoding = new Uint8Array([
       ...[31 + rs.recoveryId],
       ...rs.signature,
@@ -127,6 +131,9 @@ export class SignedMessage implements SignedMessageI {
         recoveryId as RecoveryId,
         messageHash
       );
+      if (typeof recoveredPk === "string") {
+        throw new Error(recoveredPk);
+      }
 
       pkh = await hash160(recoveredPk);
       signatureType = "recoverable";
@@ -138,7 +145,7 @@ export class SignedMessage implements SignedMessageI {
       if (cashaddr) {
         // Validate that the signature actually matches the provided cashaddr
         let prefix = derivePrefix(cashaddr);
-        let resultingCashaddr = encodeCashAddress(prefix, 0, pkh);
+        let resultingCashaddr = encodeCashAddress(prefix, CashAddressType.p2pkh, pkh);
         if (resultingCashaddr === cashaddr) {
           pkhMatch = true;
         }

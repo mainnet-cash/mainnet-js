@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@bitauth/libauth@^1.19.1":
-  version "1.19.1"
-  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-1.19.1.tgz#713751bbc09815b667f8fe00a1cc5b0f3bf45dd1"
-  integrity sha512-R524tD5VwOt3QRHr7N518nqTVR/HKgfWL4LypekcGuNQN8R4PWScvuRcRzrY39A28kLztMv+TJdiKuMNbkU1ug==
+"@bitauth/libauth@2.0.0-alpha.6":
+  version "2.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-2.0.0-alpha.6.tgz#92f951afa23ac0f29409d2d38409bc7584b002df"
+  integrity sha512-YyrTKr2svYNFZilsdIFru037aRiqDO5J/MrG7KpKHVi21B+Nu+u9oUWFM5GGVdYRb+SIkqryUm/UwgfxrSmKqw==
 
 "@types/node@*":
   version "16.9.1"

@@ -85,8 +85,8 @@ export class Util {
     }
 
     const result = decodeTransactionLibAuth(transactionBin);
-    if (result === TransactionDecodingError.invalidFormat) {
-      throw Error(TransactionDecodingError.invalidFormat);
+    if (typeof result === "string") {
+      throw Error(result);
     }
 
     const transaction = this.mapToElectrumRawTransaction(
@@ -148,7 +148,7 @@ export class Util {
             hex: binToHex(output.lockingBytecode),
           } as ElectrumRawTransactionVoutScriptPubKey,
           value:
-            Number(binToBigIntUint64LE(output.satoshis)) / bchParam.subUnits,
+            Number(output.valueSatoshis) / bchParam.subUnits,
         };
       }
     );

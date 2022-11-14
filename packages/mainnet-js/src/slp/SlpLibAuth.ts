@@ -3,8 +3,8 @@ import {
   bigIntToBinUint64LE,
   binToHex,
   hexToBin,
-  utf8ToBin,
-  validateAuthenticationTemplate,
+  importAuthenticationTemplate,
+  utf8ToBin
 } from "@bitauth/libauth";
 import { parseSLP } from "slp-parser";
 
@@ -83,7 +83,7 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
       })
   );
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  const template = importAuthenticationTemplate(SlpTxoTemplate);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -95,7 +95,7 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
 
   const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
-  let genesisTxoBytecode = compiler.generateBytecode("genesis_lock", {
+  let genesisTxoBytecode = compiler.generateBytecode({scriptId: "genesis_lock", data: {
     bytecode: {
       g_token_type: Uint8Array.from([...[0x01], ...[options.type]]),
       g_token_ticker: stringToBin(options.ticker),
@@ -109,7 +109,7 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
         ...bigIntToBinUint64BE(rawTokenAmount),
       ]),
     },
-  });
+  }});
   if (!genesisTxoBytecode.success) {
     throw new Error(genesisTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
@@ -160,7 +160,7 @@ export const SlpGetMintOutputs = async (
       })
   );
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  const template = importAuthenticationTemplate(SlpTxoTemplate);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -170,7 +170,7 @@ export const SlpGetMintOutputs = async (
 
   const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
-  let mintTxoBytecode = compiler.generateBytecode("mint_lock", {
+  let mintTxoBytecode = compiler.generateBytecode({scriptId: "mint_lock", data: {
     bytecode: {
       m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
       m_token_id: hexToBin(options.tokenId),
@@ -180,7 +180,7 @@ export const SlpGetMintOutputs = async (
         ...bigIntToBinUint64BE(BigInt(amount.toString())),
       ]),
     },
-  });
+  }});
   if (!mintTxoBytecode.success) {
     throw new Error(mintTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
@@ -249,7 +249,7 @@ export const SlpGetSendOutputs = async (
     }
   }
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  const template = importAuthenticationTemplate(SlpTxoTemplate);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -286,13 +286,13 @@ export const SlpGetSendOutputs = async (
     ]);
   }
 
-  let sendTxoBytecode = compiler.generateBytecode("send_lock", {
+  let sendTxoBytecode = compiler.generateBytecode({scriptId: "send_lock", data: {
     bytecode: {
       s_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
       s_token_id: hexToBin(tokenId!),
       s_token_output_quantities: result,
     },
-  });
+  }});
   if (!sendTxoBytecode.success) {
     throw new Error(sendTxoBytecode.errors.map((e) => e.error).join("\n"));
   }

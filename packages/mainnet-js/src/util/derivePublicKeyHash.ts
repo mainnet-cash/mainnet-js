@@ -1,4 +1,5 @@
 import {
+  CashAddressNetworkPrefix,
   decodeCashAddressFormat,
   decodeCashAddressFormatWithoutPrefix,
 } from "@bitauth/libauth";
@@ -35,7 +36,7 @@ export function derivePublicKeyHash(address: string): Uint8Array {
  *
  * @returns the address prefix
  */
-export function derivePrefix(address: string): string {
+export function derivePrefix(address: string): CashAddressNetworkPrefix {
   let result;
 
   if (address.includes(":")) {

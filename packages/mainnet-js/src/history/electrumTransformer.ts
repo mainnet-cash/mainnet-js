@@ -3,7 +3,6 @@ import {
   cashAddressToLockingBytecode,
   decodeTransaction,
   hexToBin,
-  binToBigIntUint64LE,
   Transaction,
   lockingBytecodeToCashAddress,
   Output,
@@ -146,7 +145,7 @@ async function getMatchingInputs(
               blockheight: height,
               txn: `${hash}`,
               txId: `${hash}:i:${idx}`,
-              value: -Number(binToBigIntUint64LE(output.satoshis)),
+              value: -Number(output.valueSatoshis),
               fee: 0,
             });
           }
@@ -165,7 +164,7 @@ async function getMatchingInputs(
               blockheight: height,
               txn: `${hash}`,
               txId: `${hash}:i:${idx}`,
-              value: -Number(binToBigIntUint64LE(output.satoshis)),
+              value: -Number(output.valueSatoshis),
               fee: fee,
             });
             txIds.push(`${hash}:i:${idx}`);
@@ -203,7 +202,7 @@ async function getMatchingInputs(
             blockheight: height,
             txn: `${hash}`,
             txId: `${hash}:o:${transaction.outputs.indexOf(output)}`,
-            value: Number(binToBigIntUint64LE(output.satoshis)),
+            value: Number(output.valueSatoshis),
           });
         }
       } else {
@@ -220,7 +219,7 @@ async function getMatchingInputs(
           blockheight: height,
           txn: `${hash}`,
           txId: `${hash}:o:${transaction.outputs.indexOf(output)}`,
-          value: Number(binToBigIntUint64LE(output.satoshis)),
+          value: Number(output.valueSatoshis),
           // incoming transactions pay no fee.
           fee: 0,
         });
@@ -256,12 +255,12 @@ function getFee(
   let inValues = 0;
   for (let outpoint of inputUtxos) {
     if (binToHex(outpoint.lockingBytecode)) {
-      inValues += Number(binToBigIntUint64LE(outpoint.satoshis));
+      inValues += Number(outpoint.valueSatoshis);
     }
   }
 
   const outValues = utxos
-    .map((utxo) => Number(binToBigIntUint64LE(utxo.satoshis)))
+    .map((utxo) => Number(utxo.valueSatoshis))
     .reduce((a: number, b: number) => a + b, 0);
 
   let fee = 0;

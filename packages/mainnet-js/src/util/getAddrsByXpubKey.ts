@@ -1,17 +1,20 @@
 import {
   deriveHdPublicNodeChild,
   decodeHdPublicKey,
-  encodeHdPublicKey,
   encodeCashAddress,
-  instantiateBIP32Crypto,
   deriveHdPath,
-  HdPublicNode,
-  HdKeyNetwork,
   binToHex,
+  ripemd160,
+  secp256k1,
+  sha256,
+  sha512,
+  CashAddressNetworkPrefix,
+  CashAddressType,
 } from "@bitauth/libauth";
-import path from "path";
 
 import { hash160 } from "./hash160";
+
+const crypto = { ripemd160, secp256k1, sha256, sha512 };
 
 export async function getAddrsByXpubKey(
   xpub: string,
@@ -47,15 +50,14 @@ export async function derivePublicNodeCashaddr(
   index: number,
   path?: string
 ) {
-  const crypto = await instantiateBIP32Crypto();
-  const publicParent = await decodeHdPublicKey(crypto, xpub);
+  const publicParent = decodeHdPublicKey(xpub, crypto);
 
   if (typeof publicParent === "string") {
     throw new Error(publicParent);
   }
-  let prefix = publicParent.network === "mainnet" ? "bitcoincash" : "bchtest";
+  let prefix = (publicParent.network === "mainnet" ? "bitcoincash" : "bchtest") as CashAddressNetworkPrefix;
 
-  let node = await deriveHdPublicNodeChild(crypto, publicParent.node, index);
+  let node = deriveHdPublicNodeChild(publicParent.node, index);
   if (typeof node === "string") {
     throw new Error(node);
   }
@@ -65,20 +67,19 @@ export async function derivePublicNodeCashaddr(
     if (path[0] !== "M") {
       throw Error("use M for public path derivation");
     }
-    let childNode = deriveHdPath(crypto, publicParent.node, path);
+    let childNode = deriveHdPath(publicParent.node, path, crypto);
     if (typeof childNode === "string") {
       throw new Error(childNode);
     } else {
       let childPkh = await hash160(childNode.publicKey);
-      cashaddr = encodeCashAddress(prefix, 0, childPkh);
+      cashaddr = encodeCashAddress(prefix, CashAddressType.p2pkh, childPkh);
     }
   }
   return cashaddr;
 }
 
 export async function getXpubKeyInfo(hdPublicKey) {
-  const crypto = await instantiateBIP32Crypto();
-  let node = decodeHdPublicKey(crypto, hdPublicKey);
+  let node = decodeHdPublicKey(hdPublicKey, crypto);
   if (typeof node === "string") {
     throw new Error(node);
   }

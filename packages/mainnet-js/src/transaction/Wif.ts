@@ -7,10 +7,10 @@ import {
   Compiler,
   encodeTransaction,
   generateTransaction,
-  validateAuthenticationTemplate,
-  TransactionContextCommon,
-  AnyCompilationEnvironment,
-  AuthenticationProgramStateBCH,
+  importAuthenticationTemplate,
+  AnyCompilerConfiguration,
+  AuthenticationProgramStateCommon,
+  CompilationContextBCH,
 } from "@bitauth/libauth";
 import { UtxoI } from "../interface";
 import { allocateFee } from "./allocateFee";
@@ -37,7 +37,7 @@ export async function buildP2pkhNonHdTransaction(
     throw new Error("Missing signing key when building transaction");
   }
 
-  const template = validateAuthenticationTemplate(
+  const template = importAuthenticationTemplate(
     authenticationTemplateP2pkhNonHd
   );
   if (typeof template === "string") {
@@ -63,9 +63,9 @@ export async function buildP2pkhNonHdTransaction(
           changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
         } else {
           // Get the change locking bytecode
-          changeLockingBytecode = compiler.generateBytecode("lock", {
+          changeLockingBytecode = compiler.generateBytecode({scriptId: "lock", data: {
             keys: { privateKeys: { key: signingKey } },
-          });
+          }});
         }
         if (typeof changeLockingBytecode === "string") {
           throw new Error(changeLockingBytecode);
@@ -92,11 +92,7 @@ export async function buildP2pkhNonHdTransaction(
 
 export function prepareInputs(
   inputs: UtxoI[],
-  compiler: Compiler<
-    TransactionContextCommon,
-    AnyCompilationEnvironment<TransactionContextCommon>,
-    AuthenticationProgramStateBCH
-  >,
+  compiler: Compiler<CompilationContextBCH, AnyCompilerConfiguration<CompilationContextBCH>, AuthenticationProgramStateCommon>,
   signingKey: Uint8Array
 ) {
   let signedInputs: any[] = [];
@@ -148,17 +144,7 @@ export async function prepareOutputs(
     }
 
     let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
-    if (
-      !outputLockingBytecode.hasOwnProperty("bytecode") ||
-      !outputLockingBytecode.hasOwnProperty("prefix")
-    ) {
-      throw new Error(outputLockingBytecode.toString());
-    }
-
-    outputLockingBytecode = outputLockingBytecode as {
-      bytecode: Uint8Array;
-      prefix: string;
-    };
+    if (typeof outputLockingBytecode === "string") throw new Error(outputLockingBytecode);
 
     let sendAmount = await amountInSatoshi(output.value, output.unit);
     if (sendAmount % 1 !== 0) {
