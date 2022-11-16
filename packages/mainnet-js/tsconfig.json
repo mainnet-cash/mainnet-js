@@ -10,7 +10,7 @@
     "downlevelIteration": true,
     "composite": true,
     "target": "es2020",
-    "module": "esnext",
+    "module": "commonjs",
     "outDir": "./dist/main",
     "moduleResolution": "node",
     "resolveJsonModule": true,

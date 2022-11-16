@@ -173,4 +173,4 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   }
 }
 
-await ExchangeRate.get("usd");
+setTimeout(() => ExchangeRate.get("usd"), 0);

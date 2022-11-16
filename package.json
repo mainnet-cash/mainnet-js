@@ -65,7 +65,7 @@
     "build:smartbch": "yarn workspace @mainnet-cash/smartbch run build",
     "postinstall": "yarn build",
     "demo": "yarn workspace mainnet-demo start",
-    "live": "npx reload --dir=jest/playwright ",
+    "live": "npx reload --dir=packages/mainnet-js/jest/playwright ",
     "reload": "yarn live"
   },
   "devDependencies": {
@@ -99,7 +99,7 @@
     "parse-database-url": "^0.3.0",
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.2.3",
-    "webpack": "^5.75.0",
+    "webpack": "5.53.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.7.2",
     "webpack-merge": "^5.8.0",
