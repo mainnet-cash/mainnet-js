@@ -12,7 +12,11 @@ import {
  * @returns a public key hash corresponding to the passed address
  */
 export function derivePublicKeyHash(address: string): Uint8Array {
-  let result;
+  let result: string | {
+    payload: Uint8Array;
+    prefix: string;
+    version: number;
+  };
 
   // If the address has a prefix decode it as is
   if (address.includes(":")) {
@@ -26,7 +30,7 @@ export function derivePublicKeyHash(address: string): Uint8Array {
   if (typeof result === "string") throw new Error(result);
 
   // return the public key hash
-  return result.hash;
+  return result.payload;
 }
 
 /**
@@ -37,7 +41,11 @@ export function derivePublicKeyHash(address: string): Uint8Array {
  * @returns the address prefix
  */
 export function derivePrefix(address: string): CashAddressNetworkPrefix {
-  let result;
+  let result: string | {
+    payload: Uint8Array;
+    prefix: string;
+    version: number;
+  };
 
   if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
@@ -48,5 +56,5 @@ export function derivePrefix(address: string): CashAddressNetworkPrefix {
   if (typeof result === "string") throw new Error(result);
 
   // TODO pass the network in and check it or raise Error
-  return result.prefix;
+  return result.prefix as CashAddressNetworkPrefix;
 }

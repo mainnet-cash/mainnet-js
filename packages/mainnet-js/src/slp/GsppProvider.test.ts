@@ -1,7 +1,7 @@
 import { Network, RegTestWallet, toCashAddress } from "..";
 import { GsppProvider } from "./GsppProvider";
 import { base64ToBin, binToBase64, binToHex, hexToBin } from "@bitauth/libauth";
-const cashaddrjs = require("cashaddrjs");
+import cashaddrjs from "cashaddrjs";
 
 const rotate = function (str) {
   return str

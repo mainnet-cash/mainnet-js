@@ -1,4 +1,4 @@
-var QRCode = require("qrcode-svg");
+import QRCode from "qrcode-svg";
 import { ImageI } from "./interface";
 import { btoa } from "../util/base64";
 

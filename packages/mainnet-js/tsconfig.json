@@ -9,12 +9,15 @@
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
     "composite": true,
-    "module": "commonjs",
+    "target": "es2020",
+    "module": "esnext",
     "outDir": "./dist/main",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "lib": ["es2017", "es2020.bigint", "dom"],
-    "typeRoots": ["node_modules/@types", "./src/types"]
+    "lib": ["es2020", "es2020.bigint", "dom"],
+    "typeRoots": ["node_modules/@types", "../../node_modules/@types", "./src/types"],
+    "types": ["node", "jest"],
+    "allowJs": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**", "src/**/*test.ts"],

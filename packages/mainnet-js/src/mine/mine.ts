@@ -1,4 +1,5 @@
 import { browserNotSupported } from "../util/browserNotSupported";
+import child_process from "child_process";
 /**
  * Mine blocks to a regtest address
  *
@@ -31,8 +32,8 @@ export async function mine({
     blocks,
     cashaddr,
   ];
-  const spawnSync = eval('require("child_process")').spawnSync;
-  const cli = await spawnSync(`docker`, generateArgs);
+  const spawnSync = child_process.spawnSync;
+  const cli = await spawnSync(`docker`, generateArgs as any);
   if (cli.stderr.length > 0) {
     return console.log("Mine Error: " + cli.stderr.toString());
   }

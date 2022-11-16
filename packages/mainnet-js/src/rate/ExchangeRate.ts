@@ -5,8 +5,7 @@ import {
 } from "../util/getRuntimePlatform";
 import ExchangeRateProvider from "../db/ExchangeRateProvider";
 import { indexedDbIsAvailable } from "../db/util";
-
-const axios = require("axios").default;
+import axios from "axios";
 
 export class ExchangeRate {
   symbol: string;
@@ -27,20 +26,20 @@ export class ExchangeRate {
   }
 
   static setupAxiosMock(mockUrl, responseData) {
-    if (!axios.interceptors.mocks) {
-      axios.interceptors.mocks = {};
+    if (!(axios.interceptors as any).mocks) {
+      (axios.interceptors as any).mocks = {};
 
       // install our interceptors
-      axios.interceptors.request.use((config) => {
+      (axios.interceptors as any).request.use((config) => {
         const url = config.url!;
 
-        if (axios.interceptors.mocks[url]) {
+        if ((axios.interceptors as any).mocks[url]) {
           // if we have set up a mocked response for this url, cancel the actual request with a cancelToken containing our mocked data
-          const mockedResponse = axios.interceptors.mocks[url];
+          const mockedResponse = (axios.interceptors as any).mocks[url];
           return {
             ...config,
             cancelToken: new axios.CancelToken((cancel) =>
-              cancel({ status: 200, data: mockedResponse })
+              cancel({ status: 200, data: mockedResponse } as any)
             ),
           };
         }
@@ -49,7 +48,7 @@ export class ExchangeRate {
         return config;
       });
 
-      axios.interceptors.response.use(
+      (axios.interceptors as any).response.use(
         function (response) {
           return response;
         },
@@ -65,11 +64,11 @@ export class ExchangeRate {
       );
     }
 
-    axios.interceptors.mocks[mockUrl] = responseData;
+    (axios.interceptors as any).mocks[mockUrl] = responseData;
   }
 
   static removeAxiosMock(mockUrl) {
-    delete (axios.interceptors.mocks || {})[mockUrl];
+    delete ((axios.interceptors as any).mocks || {})[mockUrl];
   }
 
   toString() {
@@ -174,4 +173,4 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   }
 }
 
-setTimeout(() => ExchangeRate.get("usd"), 0);
+await ExchangeRate.get("usd");

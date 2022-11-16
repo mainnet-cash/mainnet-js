@@ -1,7 +1,8 @@
 module.exports = {
-  rootDir: "./src",
+  preset: 'ts-jest/presets/default-esm',
+  rootDir: "./",
   collectCoverage: true,
-  collectCoverageFrom: ["**/*.{js,jsx,ts}", "!**/node_modules/**"],
+  collectCoverageFrom: ["./src/**/*.{js,jsx,ts}", "!**/node_modules/**"],
   coveragePathIgnorePatterns: [
     ".*/src/.*\\.d\\.ts",
     ".*/src/.*\\.test\\.{ts,js}",
@@ -12,11 +13,17 @@ module.exports = {
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
   ],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
   testEnvironment: "node",
-  globalSetup: "../../jest/node.setup.js",
-  globalTeardown: "../../jest/node.teardown.js",
+  setupFiles: ["fake-indexeddb/auto"],
+  globalSetup: "<rootDir>/jest/node.setup.cjs",
+  globalTeardown: "<rootDir>/jest/node.teardown.cjs",
   verbose: true,
   maxConcurrency: 1,
   testTimeout: 125000,

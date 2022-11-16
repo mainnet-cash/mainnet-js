@@ -43,6 +43,9 @@ test("Should calculate public key hash consistent with hash160", async () => {
   let pkh = derivePublicKeyHash(w.getDepositAddress());
   // manually from compressed public key
   let publicKeyCompressed = secp256k1.derivePublicKeyCompressed(w.privateKey!);
+  if (typeof publicKeyCompressed === "string") {
+    throw new Error(publicKeyCompressed);
+  }
   let pkh2 = ripemd160.hash(sha256.hash(publicKeyCompressed));
   let pkh3 = w.publicKeyHash!;
   expect(pkh2.length).toBe(20);

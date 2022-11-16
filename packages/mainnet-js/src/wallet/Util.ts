@@ -10,7 +10,6 @@ import {
   WifWallet,
 } from "../wallet/Wif";
 import {
-  binToBigIntUint64LE,
   binToHex,
   decodeTransaction as decodeTransactionLibAuth,
   hexToBin,

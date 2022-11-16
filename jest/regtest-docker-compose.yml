@@ -1,21 +1,21 @@
 version: "3.7"
 
 services:
-  smartbch-regtest:
-    image: mainnet/smartbch
-    entrypoint: init_regtest.sh
-    ports:
-      - "8545:8545"
-      - "9545:9545"
-    restart: always
-    volumes:
-      - smartbch_data:/root/.smartbchd
-      - ./docker/smartbch/test-keys.txt:/root/test-keys.txt
-      - ./docker/smartbch/init_regtest.sh:/build/init_regtest.sh
+  # smartbch-regtest:
+  #   image: mainnet/smartbch
+  #   entrypoint: init_regtest.sh
+  #   ports:
+  #     - "8545:8545"
+  #     - "9545:9545"
+  #   restart: always
+  #   volumes:
+  #     - smartbch_data:/root/.smartbchd
+  #     - ./docker/smartbch/test-keys.txt:/root/test-keys.txt
+  #     - ./docker/smartbch/init_regtest.sh:/build/init_regtest.sh
 
   bitcoind:
     image: mainnet/bitcoin-cash-node
-    command: bitcoind -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0.0.0.0/24 -rpcuser=alice -rpcpassword=password
+    command: bitcoind -upgrade9activationtime=1668419099 -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0/0 -rpcuser=alice -rpcpassword=password
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
       interval: 1m30s
@@ -62,71 +62,71 @@ services:
     ports:
       - 15432:5432
 
-  mongodb:
-    image: mongo:4.4.2-bionic
-    container_name: mongo-slpdb
-    # ports:
-    #   - "27017:27017"
-    # volumes:
-    #   - ./docker/data/mongodb:/data/db # uncomment to make persistent
-    command: mongod # --logpath=/dev/null # -- quiet
-    restart: always
-    networks:
-      - bitcoin
+  # mongodb:
+  #   image: mongo:4.4.2-bionic
+  #   container_name: mongo-slpdb
+  #   # ports:
+  #   #   - "27017:27017"
+  #   # volumes:
+  #   #   - ./docker/data/mongodb:/data/db # uncomment to make persistent
+  #   command: mongod # --logpath=/dev/null # -- quiet
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  slpdb:
-    image: mainnet/slpdb
-    container_name: slpdb
-    volumes:
-      - ./docker/slpdb/run-script.sh:/home/safeuser/config/run-script.sh
-      # - ./docker/data/leveldb:/home/safeuser/SLPDB/_leveldb # uncomment to make persistent
-    restart: always
-    networks:
-      - bitcoin
+  # slpdb:
+  #   image: mainnet/slpdb
+  #   container_name: slpdb
+  #   volumes:
+  #     - ./docker/slpdb/run-script.sh:/home/safeuser/config/run-script.sh
+  #     # - ./docker/data/leveldb:/home/safeuser/SLPDB/_leveldb # uncomment to make persistent
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  slpserve:
-    image: mainnet/slpserve
-    container_name: slpserve
-    volumes:
-      - ./docker/slpserve/env:/home/safeuser/slpserve/.env
-    ports:
-      - "12300:4000"
-    restart: always
-    networks:
-      - bitcoin
+  # slpserve:
+  #   image: mainnet/slpserve
+  #   container_name: slpserve
+  #   volumes:
+  #     - ./docker/slpserve/env:/home/safeuser/slpserve/.env
+  #   ports:
+  #     - "12300:4000"
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  slpsockserve:
-    image: mainnet/slpsockserve
-    container_name: slpsockserve
-    volumes:
-      - ./docker/slpsockserve/env:/home/safeuser/slpsockserve/.env
-    ports:
-      - "12301:4001"
-    restart: always
-    networks:
-      - bitcoin
+  # slpsockserve:
+  #   image: mainnet/slpsockserve
+  #   container_name: slpsockserve
+  #   volumes:
+  #     - ./docker/slpsockserve/env:/home/safeuser/slpsockserve/.env
+  #   ports:
+  #     - "12301:4001"
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  gspp:
-    image: mainnet/gspp
-    # build:
-    #   context: "./docker/gspp"
-    restart: always
-    command: "gs++ /data/config.toml"
-    expose:
-      - "50051"
-      - "28339"
-      - "8082"
-      - "12401"
-    ports:
-      # - "50051:50051" # grpc
-      # - "28339:28339" # zmq notifications
-      - "12400:8082" # grpc-rest gateway
-      - "12401:12401" # SSE notifications
-    volumes:
-      - ./docker/gspp/regtest.toml:/data/config.toml
-      # - ./docker/data/gspp:/tmp/gs++ # uncomment to make persistent
-    networks:
-      - bitcoin
+  # gspp:
+  #   image: mainnet/gspp
+  #   # build:
+  #   #   context: "./docker/gspp"
+  #   restart: always
+  #   command: "gs++ /data/config.toml"
+  #   expose:
+  #     - "50051"
+  #     - "28339"
+  #     - "8082"
+  #     - "12401"
+  #   ports:
+  #     # - "50051:50051" # grpc
+  #     # - "28339:28339" # zmq notifications
+  #     - "12400:8082" # grpc-rest gateway
+  #     - "12401:12401" # SSE notifications
+  #   volumes:
+  #     - ./docker/gspp/regtest.toml:/data/config.toml
+  #     # - ./docker/data/gspp:/tmp/gs++ # uncomment to make persistent
+  #   networks:
+  #     - bitcoin
 
 networks:
   bitcoin:

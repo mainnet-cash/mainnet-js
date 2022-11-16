@@ -584,11 +584,9 @@ describe(`Wallet subscriptions`, () => {
           },
         ],
         { awaitTransactionPropagation: false }
-      )
-      .then(async () => {
-        newBalance = await aliceWallet.getBalance("sat");
-        expect(balance).toBe(newBalance);
-      });
+      );
+    newBalance = await aliceWallet.getBalance("sat");
+    expect(balance).toBe(newBalance);
 
     await delay(1500);
 

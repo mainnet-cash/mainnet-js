@@ -22,6 +22,7 @@ const baseConfig = {
     mangleWasmImports: true,
     usedExports: true,
   },
+  experiments: { topLevelAwait: true },
 };
 
 const prodConfig = {

@@ -2,10 +2,10 @@ import { SignedMessage, hash_message } from "./signed";
 import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
 import { binToBase64, binToHex } from "@bitauth/libauth";
 
-const fs = require("fs").promises;
+import fs from "fs";
 
 async function loadLargeMessage() {
-  const data = await fs.readFile("./jest/data/bitcoin.tex", "utf-8");
+  const data = await fs.promises.readFile("./jest/data/bitcoin.tex", "utf-8");
   return data;
 }
 

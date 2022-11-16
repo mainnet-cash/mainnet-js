@@ -1,7 +1,7 @@
 import SqlProvider from "../db/SqlProvider";
 import { TxI } from "../interface";
 
-const axios = require("axios").default;
+import axios from "axios";
 
 export enum WebhookType {
   transactionIn = "transaction:in",

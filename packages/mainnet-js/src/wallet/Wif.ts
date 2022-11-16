@@ -4,10 +4,6 @@ import {
   encodeHdPublicKey,
   HdKeyNetwork,
   instantiateSecp256k1,
-  ripemd160,
-  secp256k1,
-  sha256,
-  sha512,
 } from "@bitauth/libauth";
 
 // Unstable?
@@ -106,8 +102,6 @@ import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
 
 import { TransactionHistoryI } from "../history/interface";
 import { getAddressHistory } from "../history/electrumTransformer";
-
-const crypto = { ripemd160, secp256k1, sha256, sha512 };
 
 //#endregion Imports
 
@@ -349,12 +343,12 @@ export class Wallet extends BaseWallet {
       network
     );
 
-    let hdNode = deriveHdPrivateNodeFromSeed(seed, undefined, crypto);
+    let hdNode = deriveHdPrivateNodeFromSeed(seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
 
-    let zerothChild = deriveHdPath(hdNode, this.derivationPath, crypto);
+    let zerothChild = deriveHdPath(hdNode, this.derivationPath);
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
@@ -402,7 +396,7 @@ export class Wallet extends BaseWallet {
       throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
-    let hdNode = deriveHdPrivateNodeFromSeed(seed, undefined, crypto);
+    let hdNode = deriveHdPrivateNodeFromSeed(seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
@@ -416,7 +410,7 @@ export class Wallet extends BaseWallet {
       }
     }
 
-    let zerothChild = deriveHdPath(hdNode, this.derivationPath, crypto);
+    let zerothChild = deriveHdPath(hdNode, this.derivationPath);
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
@@ -440,7 +434,7 @@ export class Wallet extends BaseWallet {
       throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic!);
     checkForEmptySeed(seed);
-    let hdNode = deriveHdPrivateNodeFromSeed(seed, undefined, crypto);
+    let hdNode = deriveHdPrivateNodeFromSeed(seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
@@ -453,18 +447,18 @@ export class Wallet extends BaseWallet {
           "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
         );
       }
-      let childNode = deriveHdPath(hdNode, path, crypto);
+      let childNode = deriveHdPath(hdNode, path);
       if (typeof childNode === "string") {
         throw Error(childNode);
       }
-      let node = deriveHdPublicNode(childNode, crypto);
+      let node = deriveHdPublicNode(childNode);
       if (typeof node === "string") {
         throw Error(node);
       }
       let xPubKey = encodeHdPublicKey({
         network: this.network as HdKeyNetwork,
         node: node,
-      }, crypto);
+      });
       let key = new XPubKey({
         path: path,
         xPubKey: xPubKey,
@@ -508,7 +502,7 @@ export class Wallet extends BaseWallet {
   protected async fromWIF(secret: string): Promise<this> {
     checkWifNetwork(secret, this.network);
 
-    let wifResult = decodePrivateKeyWif(secret, crypto.sha256);
+    let wifResult = decodePrivateKeyWif(secret);
 
     if (typeof wifResult === "string") {
       throw Error(wifResult as string);
@@ -1194,12 +1188,13 @@ export class Wallet extends BaseWallet {
 
   //#region Private implementation details
   private async deriveInfo() {
-    const publicKey = crypto.secp256k1.derivePublicKeyUncompressed(this.privateKey!);
+    const secp256k1 = await instantiateSecp256k1();
+    const publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
     if (typeof publicKey === "string") {
       throw new Error(publicKey);
     }
     this.publicKey = publicKey;
-    const publicKeyCompressed = crypto.secp256k1.derivePublicKeyCompressed(
+    const publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
       this.privateKey!
     );
     if (typeof publicKeyCompressed === "string") {
@@ -1210,8 +1205,7 @@ export class Wallet extends BaseWallet {
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
     this.privateKeyWif = encodePrivateKeyWif(
       this.privateKey!,
-      networkType,
-      crypto.sha256
+      networkType
     );
     checkWifNetwork(this.privateKeyWif, this.network);
 

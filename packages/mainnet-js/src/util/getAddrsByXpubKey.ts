@@ -4,17 +4,11 @@ import {
   encodeCashAddress,
   deriveHdPath,
   binToHex,
-  ripemd160,
-  secp256k1,
-  sha256,
-  sha512,
   CashAddressNetworkPrefix,
   CashAddressType,
 } from "@bitauth/libauth";
 
 import { hash160 } from "./hash160";
-
-const crypto = { ripemd160, secp256k1, sha256, sha512 };
 
 export async function getAddrsByXpubKey(
   xpub: string,
@@ -50,7 +44,7 @@ export async function derivePublicNodeCashaddr(
   index: number,
   path?: string
 ) {
-  const publicParent = decodeHdPublicKey(xpub, crypto);
+  const publicParent = decodeHdPublicKey(xpub);
 
   if (typeof publicParent === "string") {
     throw new Error(publicParent);
@@ -67,7 +61,7 @@ export async function derivePublicNodeCashaddr(
     if (path[0] !== "M") {
       throw Error("use M for public path derivation");
     }
-    let childNode = deriveHdPath(publicParent.node, path, crypto);
+    let childNode = deriveHdPath(publicParent.node, path);
     if (typeof childNode === "string") {
       throw new Error(childNode);
     } else {
@@ -79,7 +73,7 @@ export async function derivePublicNodeCashaddr(
 }
 
 export async function getXpubKeyInfo(hdPublicKey) {
-  let node = decodeHdPublicKey(hdPublicKey, crypto);
+  let node = decodeHdPublicKey(hdPublicKey);
   if (typeof node === "string") {
     throw new Error(node);
   }
