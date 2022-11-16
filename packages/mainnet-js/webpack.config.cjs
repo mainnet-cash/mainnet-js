@@ -37,14 +37,14 @@ const prodConfig = {
 
 const browserConfig = {
   target: "web",
-  entry: {
-    mainnet: {
-      import: "./src/index.ts",
-      library: {
-        type: "global",
-      },
-    },
-  },
+  // entry: {
+  //   mainnet: {
+  //     import: "./src/index.ts",
+  //     library: {
+  //       type: "global",
+  //     },
+  //   },
+  // },
   output: {
     filename: `[name]-${packageJson.version}.js`,
     path: __dirname + "/dist",

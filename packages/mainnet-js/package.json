@@ -31,7 +31,7 @@
     "build": "yarn clean && yarn build:main && yarn build:module  && yarn build:browser",
     "build:main": "tsc",
     "build:module": "tsc -p tsconfig.browser.json",
-    "build:browser": "NODE_OPTIONS=--openssl-legacy-provider npx webpack",
+    "build:browser": "npx webpack",
     "demo": "npx reload --dir=demo/",
     "publish:public": "yarn publish --access public",
     "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand  --config jest.config.cjs  --logHeapUsage  --forceExit",
