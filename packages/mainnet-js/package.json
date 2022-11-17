@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "test": "jest",
   "license": "MIT",
   "repository": {

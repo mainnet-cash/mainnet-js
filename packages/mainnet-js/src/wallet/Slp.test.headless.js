@@ -1,6 +1,6 @@
-const { default: BigNumber } = require("bignumber.js");
-const playwright = require("playwright");
-// const { GsppProvider } = require("../slp");
+import BigNumber from "bignumber.js";
+import playwright from "playwright";
+
 const PAGE_URL = "http://localhost:8080";
 
 describe.skip(`Wallet should function in the browser`, () => {

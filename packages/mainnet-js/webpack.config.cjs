@@ -6,6 +6,7 @@ const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const __basedir = require("path").resolve(__dirname, "../../");
+const webpack = require('webpack');
 
 const baseConfig = {
   mode: "development",
@@ -68,6 +69,9 @@ const browserConfig = {
     new InjectBodyPlugin({
       content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>'
     }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
+    })
   ],
   resolve: {
     alias: {
@@ -76,12 +80,12 @@ const browserConfig = {
       "@ethersproject/contracts$": require.resolve(
         "@ethersproject/contracts/lib/index.js"
       ),
-      bip39: require.resolve("./polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -96,7 +100,6 @@ const browserConfig = {
       "pg-native": false,
       solc: false,
       tls: false,
-      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },
@@ -115,13 +118,12 @@ const webWorkerConfig = {
   },
   resolve: {
     alias: {
-      bip39: require.resolve("./polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
-      eventsource: require.resolve("./polyfill/eventsource.js"),
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -136,7 +138,6 @@ const webWorkerConfig = {
       "pg-native": false,
       solc: false,
       tls: false,
-      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },

@@ -24,6 +24,7 @@
         if (!n[i]) {
           if (!e[i]) {
             var c = "function" == typeof require && require;
+            // @ts-ignore
             if (!f && c) return c(i, !0);
             if (u) return u(i, !0);
             var a = new Error("Cannot find module '" + i + "'");

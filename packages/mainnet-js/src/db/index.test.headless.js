@@ -1,4 +1,4 @@
-const playwright = require("playwright");
+import playwright from "playwright";
 const PAGE_URL = "http://localhost:8080";
 
 describe(`WalletDatabase should handle indexeddb `, () => {
