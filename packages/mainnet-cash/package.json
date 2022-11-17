@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node cluster.js",
-    "test": "npx jest --detectOpenHandles --runInBand --forceExit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles --runInBand --forceExit",
     "publish:public": "echo 'noop'"
   },
   "keywords": [

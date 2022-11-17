@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>The Empty Mainnet App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"><script defer src="mainnet.js"></script></head>
-  <body>
+  <meta name="viewport" content="width=device-width, initial-scale=1"><script defer src="main.js"></script></head>
+  <body><script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>
   </body>
 </html>

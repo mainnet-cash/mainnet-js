@@ -2,21 +2,13 @@ const { merge } = require("webpack-merge");
 const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const __basedir = require("path").resolve(__dirname, "../../");
 
 const baseConfig = {
   mode: "development",
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
-      },
-    ],
-  },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
   },
@@ -40,20 +32,41 @@ const browserConfig = {
   // entry: {
   //   mainnet: {
   //     import: "./src/index.ts",
-  //     library: {
-  //       type: "global",
-  //     },
+  //     // library: {
+  //     //   type: "global",
+  //     // },
   //   },
   // },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: [{
+          loader: 'ts-loader',
+          options: {
+              configFile: "tsconfig.browser.json"
+          },
+        }],
+        exclude: [/node_modules/],
+      },
+    ],
+  },
   output: {
     filename: `[name]-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
+    library: {
+      name: '__mainnetPromise',
+      type: 'global',
+    },
   },
   plugins: [
     //new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
       title: "The Empty Mainnet App",
+    }),
+    new InjectBodyPlugin({
+      content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>'
     }),
   ],
   resolve: {

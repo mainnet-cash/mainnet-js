@@ -33,7 +33,7 @@ module.exports = async function globalSetup(globalConfig) {
   if (global.moduleServer === undefined) {
     console.log("Starting html server");
     let npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    global.moduleServer = spawn(npx, ["reload", "--dir=jest/playwright/"], {
+    global.moduleServer = spawn(npx, ["reload", "--dir=dist/"], {
       shell: false,
       detached: false,
     });
