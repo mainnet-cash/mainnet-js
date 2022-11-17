@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-var mainnet = require("mainnet-js");
-var smartbch = require("@mainnet-cash/smartbch");
-var config  = require('../config');
-const cluster = require('cluster');
-const { ethers } = require('ethers');
-const BigNumber = require("bignumber.js");
+import Service from './Service.js';
+import config  from '../config.js';
+import * as mainnet from "mainnet-js";
+import * as smartbch from "@mainnet-cash/smartbch";
+import cluster from 'cluster';
+import { ethers } from 'ethers';
+import BigNumber from "bignumber.js";
 
 const assertFaucetAvailable = () => {
   if ([config.FAUCET_CASHADDR, config.FAUCET_WIF, config.FAUCET_SLP_CASHADDR, config.FAUCET_SLP_WIF,
@@ -15,7 +15,7 @@ const assertFaucetAvailable = () => {
 }
 
 if (cluster.isMaster) {
-  worker = async () => {
+  const worker = async () => {
     const db = new mainnet.SqlProvider();
 
     const wallet = await smartbch.TestNetSmartBchWallet.fromPrivateKey(config.FAUCET_SBCH_PRIVKEY);
@@ -237,7 +237,7 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   getAddresses,
   getTestnetBch,
   getTestnetSlp,

@@ -1,4 +1,4 @@
-import { SlpTokenBalance, SlpTokenInfo, SlpTxI, SlpUtxoI } from "./interface";
+import { SlpTokenBalance, SlpTokenInfo, SlpTxI, SlpUtxoI } from "./interface.js";
 import BigNumber from "bignumber.js";
 
 export type SlpWatchTransactionCallback = (tx: SlpTxI) => void;

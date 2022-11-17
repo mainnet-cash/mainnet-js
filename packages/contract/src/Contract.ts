@@ -23,12 +23,12 @@ import {
   CashscriptTransactionI,
   ContractResponseI,
   ContractInfoResponseI,
-} from "./interface";
+} from "./interface.js";
 import {
   castConstructorParametersFromArtifact,
   castStringArgumentsFromArtifact,
   transformContractToRequests,
-} from "./util";
+} from "./util.js";
 
 /**
  * Class that manages the Contract source, network, parameters, CashScript artifact and calls

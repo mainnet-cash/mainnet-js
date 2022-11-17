@@ -1,13 +1,13 @@
-import { default as NetworkProvider } from "./NetworkProvider";
+import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   getNetworkProvider,
   setGlobalProvider,
   getGlobalProvider,
   removeGlobalProvider,
-} from "./default";
-import { Network } from "../interface";
-import { networkTickerMap } from "./constant";
-import { prefixFromNetworkMap } from "../enum";
+} from "./default.js";
+import { Network } from "../interface.js";
+import { networkTickerMap } from "./constant.js";
+import { prefixFromNetworkMap } from "../enum.js";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
 async function initProvider(network: Network) {

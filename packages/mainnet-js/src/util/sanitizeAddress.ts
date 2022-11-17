@@ -1,4 +1,4 @@
-import { derivePrefix } from "./derivePublicKeyHash";
+import { derivePrefix } from "./derivePublicKeyHash.js";
 
 // Assure address is prefixed.
 export function sanitizeAddress(address: string) {

@@ -4,17 +4,15 @@ import {
   RequestResponse,
   ConnectionStatus,
 } from "electrum-cash";
-import { default as NetworkProvider } from "./NetworkProvider";
-import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface";
-import { Network } from "../interface";
-import { delay } from "../util/delay";
-import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
+import { default as NetworkProvider } from "./NetworkProvider.js";
+import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface.js";
+import { Network } from "../interface.js";
+import { delay } from "../util/delay.js";
+import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
 import { Mutex } from "async-mutex";
-import { Util } from "../wallet/Util";
-import { CancelWatchFn } from "../wallet/interface";
-import { resolve } from "path";
-import { rejects } from "assert";
+import { Util } from "../wallet/Util.js";
+import { CancelWatchFn } from "../wallet/interface.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;

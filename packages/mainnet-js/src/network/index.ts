@@ -1,2 +1,2 @@
-export { getNetworkProvider } from "./default";
-export { Connection, initProviders, disconnectProviders } from "./Connection";
+export { getNetworkProvider } from "./default.js";
+export { Connection, initProviders, disconnectProviders } from "./Connection.js";

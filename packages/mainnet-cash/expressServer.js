@@ -1,24 +1,30 @@
 // const { Middleware } = require('swagger-express-middleware');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const swaggerUI = require('swagger-ui-express');
-const jsYaml = require('js-yaml');
-const express = require('express');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const { OpenApiValidator } = require('express-openapi-validator');
-const logger = require('./logger');
-const timeout = require('connect-timeout');
-const config = require('./config');
-const mainnet = require('mainnet-js');
-const setupRateLimits = require('./rateLimits');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import swaggerUI from 'swagger-ui-express';
+import jsYaml from 'js-yaml';
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import { OpenApiValidator } from 'express-openapi-validator';
+import logger from './logger.js';
+import timeout from 'connect-timeout';
+import config from './config.js';
+import * as mainnet from 'mainnet-js';
+import setupRateLimits from './rateLimits.js';
 
-const makeWsServer = require('./wsServer');
+import makeWsServer from './wsServer.js';
+import esmresolver from './esmresolver.js';
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 
-class ExpressServer {
+export default class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
     this.port = port;
     this.app = express();
@@ -28,6 +34,7 @@ class ExpressServer {
       this.schema = jsYaml.safeLoad(fs.readFileSync(openApiYaml));
       this.docSchema = jsYaml.safeLoad(fs.readFileSync(docYaml).toString());
     } catch (e) {
+      console.trace(e)
       logger.error('failed to start Express Server', e.message);
     }
     this.setupMiddleware();
@@ -36,13 +43,13 @@ class ExpressServer {
   setupMiddleware() {
     // this.setupAllowedMedia();
     this.app.use(cors());
-    const module_path = require.resolve("mainnet-js").replace("main/index.js", "");
-    const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
-    this.app.use('/scripts/mainnet.js', express.static(module_path + latest));
-    const smartBchModulePath = require.resolve("@mainnet-cash/smartbch").replace("main/index.js", "");
-    const smartBchLatest = fs.readdirSync(smartBchModulePath).filter(val => val.match(/smartbch-\d+\.\d+.\d+.js$/)).pop();
-    this.app.use('/scripts/@mainnet-cash/smartbch.js', express.static(smartBchModulePath + smartBchLatest));
-    this.app.use(express.static(__dirname + '/static'));
+    // const module_path = require.resolve("mainnet-js").replace("main/index.js", "");
+    // const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
+    // this.app.use('/scripts/mainnet.js', express.static(module_path + latest));
+    // const smartBchModulePath = require.resolve("@mainnet-cash/smartbch").replace("main/index.js", "");
+    // const smartBchLatest = fs.readdirSync(smartBchModulePath).filter(val => val.match(/smartbch-\d+\.\d+.\d+.js$/)).pop();
+    // this.app.use('/scripts/@mainnet-cash/smartbch.js', express.static(smartBchModulePath + smartBchLatest));
+    // this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
     this.app.use(timeout(`${config.TIMEOUT}s`));
@@ -60,6 +67,34 @@ class ExpressServer {
       res.redirect(301, '/api-docs');
     });
 
+    // this.app.use(new OpenApiValidator({
+    //   apiSpec: this.openApiPath,
+    //   // operationHandlers: path.join(__dirname),
+    //   operationHandlers: {
+    //     basePath: fileURLToPath(new URL('.', import.meta.url)),
+    //     resolver: esmresolver,
+    //   },
+    //   fileUploader: { dest: config.FILE_UPLOAD_PATH },
+    //   validateSecurity: config.API_KEY ? {
+    //     handlers: {
+    //       bearerAuth: (req, scopes, schema) => {
+    //         if (!req.headers.authorization || req.headers.authorization.split(" ")[0].toLowerCase() != "bearer") {
+    //           throw { status: 401, message: 'No bearer authorization header provided' };
+    //         }
+
+    //         // Splitting on "earer" makes authorization name case insensitive.
+    //         const token = req.headers.authorization.split("earer ")[1];
+
+    //         if (config.API_KEY !== token) {
+    //           throw { status: 403, message: 'forbidden' };
+    //         }
+
+    //         return true;
+    //       }
+    //     }
+    //   } : false
+    // }));
+
     this.app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(this.docSchema));
     this.app.get("/timeout", (req, res) => {});
     this.app.get('/login-redirect', (req, res) => {
@@ -76,7 +111,11 @@ class ExpressServer {
   async launch() {
     return new OpenApiValidator({
       apiSpec: this.openApiPath,
-      operationHandlers: path.join(__dirname),
+      // operationHandlers: path.join(__dirname),
+      operationHandlers: {
+        basePath: fileURLToPath(new URL('.', import.meta.url)),
+        resolver: esmresolver,
+      },
       fileUploader: { dest: config.FILE_UPLOAD_PATH },
       validateSecurity: config.API_KEY ? {
         handlers: {
@@ -97,11 +136,12 @@ class ExpressServer {
         }
       } : false
     }).install(this.app)
-      .catch(e => console.log(e))
+      .catch(e => console.trace(e))
       .then(async () => {
         // eslint-disable-next-line no-unused-vars
         this.app.use((err, req, res, next) => {
           // format errors
+          console.trace(err)
           res.status(err.status || 500).json({
             message: err.message || err.error,
             errors: err.errors || '',
@@ -124,8 +164,9 @@ class ExpressServer {
         server.app = this.app;
         this.server = server;
         return server;
-      }).catch(error => {
-         console.warn(error)
+      })
+      .catch(error => {
+         console.trace(error)
       });
   }
 
@@ -137,5 +178,3 @@ class ExpressServer {
     }
   }
 }
-
-module.exports = ExpressServer;

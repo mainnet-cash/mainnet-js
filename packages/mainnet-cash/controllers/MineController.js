@@ -6,13 +6,10 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/MineService');
-const mine = async (request, response) => {
+import Controller from './Controller.js';
+import service from '../services/MineService.js';
+
+export const mine = async (request, response) => {
   await Controller.handleRequest(request, response, service.mine);
 };
 
-
-module.exports = {
-  mine,
-};

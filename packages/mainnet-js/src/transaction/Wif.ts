@@ -11,15 +11,15 @@ import {
   AuthenticationProgramStateCommon,
   CompilationContextBCH,
 } from "@bitauth/libauth";
-import { UtxoI } from "../interface";
-import { allocateFee } from "./allocateFee";
+import { UtxoI } from "../interface.js";
+import { allocateFee } from "./allocateFee.js";
 
-import { DUST_UTXO_THRESHOLD } from "../constant";
-import { OpReturnData, SendRequest } from "../wallet/model";
-import { amountInSatoshi } from "../util/amountInSatoshi";
-import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
-import { sumUtxoValue } from "../util/sumUtxoValue";
-import { FeePaidByEnum } from "../wallet/enum";
+import { DUST_UTXO_THRESHOLD } from "../constant.js";
+import { OpReturnData, SendRequest } from "../wallet/model.js";
+import { amountInSatoshi } from "../util/amountInSatoshi.js";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
+import { sumUtxoValue } from "../util/sumUtxoValue.js";
+import { FeePaidByEnum } from "../wallet/enum.js";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(

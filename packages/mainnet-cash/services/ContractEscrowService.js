@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
-const _contract = require("@mainnet-cash/contract");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
+import * as _contract from "@mainnet-cash/contract";
 
 
 /**
@@ -104,7 +104,7 @@ const escrowUtxos = ({escrowContract}) => new Promise(
 );
 
 
-module.exports = {
+export default {
   createEscrow,
   escrowFn,
   escrowInfo,

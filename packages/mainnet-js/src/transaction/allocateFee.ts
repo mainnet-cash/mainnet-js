@@ -1,6 +1,6 @@
-import { OpReturnData, SendRequest } from "../wallet/model";
-import { FeePaidByEnum } from "../wallet/enum";
-import { DUST_UTXO_THRESHOLD } from "../constant";
+import { OpReturnData, SendRequest } from "../wallet/model.js";
+import { FeePaidByEnum } from "../wallet/enum.js";
+import { DUST_UTXO_THRESHOLD } from "../constant.js";
 
 export function checkFeeForDust(value: number) {
   if (value < DUST_UTXO_THRESHOLD) {

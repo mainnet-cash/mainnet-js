@@ -5,7 +5,7 @@ import {
   CashAddressType,
 } from "@bitauth/libauth";
 
-import { hash160 } from "./hash160";
+import { hash160 } from "./hash160.js";
 
 export async function deriveCashaddr(
   privateKey: Uint8Array,

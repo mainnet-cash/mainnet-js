@@ -1,8 +1,8 @@
-import { bchParam } from "../chain";
-import { UnitEnum } from "../enum";
-import { floor } from "./floor";
-import { ExchangeRate } from "../rate/ExchangeRate";
-import { sanitizeUnit } from "./sanitizeUnit";
+import { bchParam } from "../chain.js";
+import { UnitEnum } from "../enum.js";
+import { floor } from "./floor.js";
+import { ExchangeRate } from "../rate/ExchangeRate.js";
+import { sanitizeUnit } from "./sanitizeUnit.js";
 
 export class BalanceResponse {
   bch?: number;

@@ -1,5 +1,5 @@
-import SqlProvider from "../db/SqlProvider";
-import { TxI } from "../interface";
+import SqlProvider from "../db/SqlProvider.js";
+import { TxI } from "../interface.js";
 
 import axios from "axios";
 

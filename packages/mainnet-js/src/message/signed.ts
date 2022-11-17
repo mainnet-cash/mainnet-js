@@ -10,13 +10,13 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 
-import { derivePrefix } from "../util/derivePublicKeyHash";
-import { hash160 } from "../util/hash160";
+import { derivePrefix } from "../util/derivePublicKeyHash.js";
+import { hash160 } from "../util/hash160.js";
 import {
   SignedMessageI,
   SignedMessageResponseI,
   VerifyMessageResponseI,
-} from "./interface";
+} from "./interface.js";
 
 /**
  * message_magic - Add "Magic", per standard bitcoin message signing.

@@ -6,9 +6,9 @@ import {
   EscrowArguments,
   EscrowContractResponseI,
   EscrowInfoResponseI,
-} from "./interface";
+} from "./interface.js";
 
-import { Contract } from "../Contract";
+import { Contract } from "../Contract.js";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;

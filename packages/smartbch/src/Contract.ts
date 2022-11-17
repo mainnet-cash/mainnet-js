@@ -2,7 +2,7 @@ import { binToHex } from "@bitauth/libauth";
 
 import { ContractFactory, ethers } from "ethers";
 import { XMLHttpRequest } from "xmlhttprequest-ssl";
-import { SmartBchWallet } from "./SmartBchWallet";
+import { SmartBchWallet } from "./SmartBchWallet.js";
 import fs from "fs";
 
 import {
@@ -13,9 +13,9 @@ import {
   WalletTypeEnum,
 } from "mainnet-js";
 
-import { getNetworkProvider } from "./Network";
+import { getNetworkProvider } from "./Network.js";
 //import solc from "solc";
-import solc from "../polyfill/solc";
+import solc from "../polyfill/solc.js";
 
 import {
   Argument,

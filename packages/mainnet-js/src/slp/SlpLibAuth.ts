@@ -8,19 +8,19 @@ import {
 } from "@bitauth/libauth";
 import { parseSLP } from "slp-parser";
 
-import { SendRequest } from "../wallet/model";
+import { SendRequest } from "../wallet/model.js";
 import {
   SlpGenesisOptions,
   SlpMintOptions,
   SlpSendRequest,
   SlpTokenType,
   SlpUtxoI,
-} from "../slp/interface";
+} from "../slp/interface.js";
 
 import BigNumber from "bignumber.js";
-import { DUST_UTXO_THRESHOLD } from "../constant";
-import { UnitEnum } from "../enum";
-import { isValidAddress, toCashAddress } from "../util/bchaddr";
+import { DUST_UTXO_THRESHOLD } from "../constant.js";
+import { UnitEnum } from "../enum.js";
+import { isValidAddress, toCashAddress } from "../util/bchaddr.js";
 
 export const bigIntToBinUint64BE = (value) => {
   return bigIntToBinUint64LE(value).reverse();

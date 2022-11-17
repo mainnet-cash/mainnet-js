@@ -8,7 +8,7 @@ import {
   Wallet,
   WatchWallet,
   WifWallet,
-} from "../wallet/Wif";
+} from "../wallet/Wif.js";
 import {
   binToHex,
   decodeTransaction as decodeTransactionLibAuth,
@@ -24,8 +24,8 @@ import {
   ElectrumRawTransactionVinScriptSig,
   ElectrumRawTransactionVout,
   ElectrumRawTransactionVoutScriptPubKey,
-} from "../network/interface";
-import { bchParam } from "../chain";
+} from "../network/interface.js";
+import { bchParam } from "../chain.js";
 
 let sha256;
 

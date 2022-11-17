@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/SmartbchWalletService');
+import Controller from './Controller.js';
+import service from '../services/SmartbchWalletService.js';
 const smartbchBalance = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchBalance);
 };
@@ -45,7 +45,7 @@ const smartbchSignedMessageVerify = async (request, response) => {
 };
 
 
-module.exports = {
+export default {
   smartbchBalance,
   smartbchCreateWallet,
   smartbchDepositAddress,

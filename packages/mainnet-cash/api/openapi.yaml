@@ -4948,8 +4948,7 @@ components:
         \ array of either."
     getAddrsByXpubKeyResponse_inner:
       anyOf:
-      - format: cashaddr
-        type: string
+      - type: string
     MaxAmountToSendRequest_options:
       example:
         slpAware: true

@@ -19,22 +19,22 @@ import {
 } from "@bitauth/libauth";
 
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
-import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum";
+import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 
-import { Network, HeaderI, TxI } from "../interface";
+import { Network, HeaderI, TxI } from "../interface.js";
 
-import { networkPrefixMap } from "../enum";
-import { PrivateKeyI, UtxoI } from "../interface";
+import { networkPrefixMap } from "../enum.js";
+import { PrivateKeyI, UtxoI } from "../interface.js";
 
-import { BaseWallet } from "./Base";
-import { FeePaidByEnum, WalletTypeEnum } from "./enum";
+import { BaseWallet } from "./Base.js";
+import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 import {
   CancelWatchFn,
   SendRequestOptionsI,
   WaitForTransactionOptions,
   WaitForTransactionResponse,
   WalletInfoI,
-} from "./interface";
+} from "./interface.js";
 
 import {
   OpReturnData,
@@ -44,29 +44,29 @@ import {
   UtxoItem,
   UtxoResponse,
   XPubKey,
-} from "./model";
+} from "./model.js";
 
 import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
-} from "../transaction/Wif";
+} from "../transaction/Wif.js";
 
-import { asSendRequestObject } from "../util/asSendRequestObject";
+import { asSendRequestObject } from "../util/asSendRequestObject.js";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
-} from "../util/balanceObjectFromSatoshi";
-import { checkWifNetwork } from "../util/checkWifNetwork";
-import { deriveCashaddr } from "../util/deriveCashaddr";
-import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash";
-import { checkForEmptySeed } from "../util/checkForEmptySeed";
-import { sanitizeUnit } from "../util/sanitizeUnit";
-import { sumUtxoValue } from "../util/sumUtxoValue";
-import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
-import { ElectrumRawTransaction } from "../network/interface";
-import { getRelayFeeCache } from "../network/getRelayFeeCache";
+} from "../util/balanceObjectFromSatoshi.js";
+import { checkWifNetwork } from "../util/checkWifNetwork.js";
+import { deriveCashaddr } from "../util/deriveCashaddr.js";
+import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash.js";
+import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
+import { sanitizeUnit } from "../util/sanitizeUnit.js";
+import { sumUtxoValue } from "../util/sumUtxoValue.js";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
 import {
   RegTestSlp,
   RegTestWatchSlp,
@@ -77,10 +77,10 @@ import {
   TestNetWifSlp,
   WatchSlp,
   WifSlp,
-} from "./Slp";
+} from "./Slp.js";
 import axios from "axios";
-import { SlpSendResponse } from "../slp/interface";
-import { toCashAddress } from "../util/bchaddr";
+import { SlpSendResponse } from "../slp/interface.js";
+import { toCashAddress } from "../util/bchaddr.js";
 import {
   RegTestUtil,
   RegTestWatchUtil,
@@ -91,17 +91,17 @@ import {
   Util,
   WatchUtil,
   WifUtil,
-} from "./Util";
-import { getNetworkProvider } from "../network/index";
-import { generateRandomBytes } from "../util/randomBytes";
-import { SignedMessageI, SignedMessage } from "../message";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
-import { amountInSatoshi } from "../util/amountInSatoshi";
-import { getXPubKey } from "../util/getXPubKey";
-import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
+} from "./Util.js";
+import { getNetworkProvider } from "../network/index.js";
+import { generateRandomBytes } from "../util/randomBytes.js";
+import { SignedMessageI, SignedMessage } from "../message/index.js";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
+import { amountInSatoshi } from "../util/amountInSatoshi.js";
+import { getXPubKey } from "../util/getXPubKey.js";
+import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant.js";
 
-import { TransactionHistoryI } from "../history/interface";
-import { getAddressHistory } from "../history/electrumTransformer";
+import { TransactionHistoryI } from "../history/interface.js";
+import { getAddressHistory } from "../history/electrumTransformer.js";
 
 //#endregion Imports
 

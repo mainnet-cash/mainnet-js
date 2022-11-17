@@ -1,12 +1,12 @@
-import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
+import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
 import { ElectrumCluster, ElectrumClient } from "electrum-cash";
-import { default as NetworkProvider } from "./NetworkProvider";
-import { defaultServers, getConfidence, getUserAgent } from "./configuration";
-import { parseElectrumUrl } from "./util";
-import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
-import { Network } from "../interface";
-import { networkTickerMap, clusterParams } from "./constant";
-import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant";
+import { default as NetworkProvider } from "./NetworkProvider.js";
+import { defaultServers, getConfidence, getUserAgent } from "./configuration.js";
+import { parseElectrumUrl } from "./util.js";
+import { ElectrumHostParams, ElectrumClusterParams } from "./interface.js";
+import { Network } from "../interface.js";
+import { networkTickerMap, clusterParams } from "./constant.js";
+import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant.js";
 
 export function setGlobalProvider(
   network: Network,

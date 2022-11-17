@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
 
 /**
 * Get total balance for wallet
@@ -329,7 +329,7 @@ const xpubkeys = ({ xPubKeyRequest }) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   balance,
   createWallet,
   depositAddress,

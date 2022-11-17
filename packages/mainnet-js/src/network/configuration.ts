@@ -1,5 +1,5 @@
-import { getRuntimePlatform } from "../util/index";
-import * as primary from "./constant";
+import { getRuntimePlatform } from "../util/index.js";
+import * as primary from "./constant.js";
 
 let mainnetServers: string[],
   testnetServers: string[],

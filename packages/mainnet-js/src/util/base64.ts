@@ -1,4 +1,4 @@
-import { getRuntimePlatform } from "./getRuntimePlatform";
+import { getRuntimePlatform } from "./getRuntimePlatform.js";
 
 export function btoa(data: string) {
   if (getRuntimePlatform() !== "node") {

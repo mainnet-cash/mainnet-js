@@ -1,8 +1,8 @@
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-import { sanitizeUnit } from "../util/sanitizeUnit";
-import { UnitEnum } from "../enum";
-import { UtxoI } from "../interface";
-import { DELIMITER } from "../constant";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
+import { sanitizeUnit } from "../util/sanitizeUnit.js";
+import { UnitEnum } from "../enum.js";
+import { UtxoI } from "../interface.js";
+import { DELIMITER } from "../constant.js";
 import { utf8ToBin } from "@bitauth/libauth";
 
 // These are the minimal models used to provide types for the express server

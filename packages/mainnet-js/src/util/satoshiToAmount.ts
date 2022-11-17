@@ -1,7 +1,7 @@
-import { bchParam } from "../chain";
-import { UnitEnum } from "../enum";
-import { ExchangeRate } from "../rate/ExchangeRate";
-import { sanitizeUnit } from "../util/sanitizeUnit";
+import { bchParam } from "../chain.js";
+import { UnitEnum } from "../enum.js";
+import { ExchangeRate } from "../rate/ExchangeRate.js";
+import { sanitizeUnit } from "../util/sanitizeUnit.js";
 
 /**
  * converts given value and unit from satoshi

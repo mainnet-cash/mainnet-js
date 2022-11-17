@@ -1,12 +1,12 @@
-import { GsppTx, SlpDbTx, SlpTxI } from "../slp";
+import { GsppTx, SlpDbTx, SlpTxI } from "../slp/index.js";
 import {
   SlpCancelWatchFn,
   SlpWatchTransactionCallback,
-} from "../slp/SlpProvider";
-import { toSlpAddress } from "../util/bchaddr";
-import { Wallet } from "../wallet/Wif";
-import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
-import WebhookWorker from "./WebhookWorker";
+} from "../slp/SlpProvider.js";
+import { toSlpAddress } from "../util/bchaddr.js";
+import { Wallet } from "../wallet/Wif.js";
+import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
+import WebhookWorker from "./WebhookWorker.js";
 
 export class WebhookSlp extends Webhook {
   callback!: SlpWatchTransactionCallback;

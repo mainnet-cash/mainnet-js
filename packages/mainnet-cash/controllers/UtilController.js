@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/UtilService');
+import Controller from './Controller.js';
+import service from '../services/UtilService.js';
 const convert = async (request, response) => {
   await Controller.handleRequest(request, response, service.convert);
 };
@@ -21,7 +21,7 @@ const getXpubKeyInfo = async (request, response) => {
 };
 
 
-module.exports = {
+export default {
   convert,
   getAddrsByXpubKey,
   getXpubKeyInfo,

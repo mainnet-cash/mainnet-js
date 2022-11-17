@@ -1,8 +1,8 @@
-import { StorageProvider } from ".";
-import { getRuntimePlatform } from "../util/index";
-import { default as IndexedDBProvider } from "./IndexedDBProvider";
-import { default as SqlProvider } from "./SqlProvider";
-import { sslConfigI } from "./interface";
+import { StorageProvider } from "./index.js";
+import { getRuntimePlatform } from "../util/index.js";
+import { default as IndexedDBProvider } from "./IndexedDBProvider.js";
+import { default as SqlProvider } from "./SqlProvider.js";
+import { sslConfigI } from "./interface.js";
 
 export function getStorageProvider(
   dbName: string

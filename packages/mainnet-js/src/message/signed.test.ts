@@ -1,5 +1,5 @@
-import { SignedMessage, hash_message } from "./signed";
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif";
+import { SignedMessage, hash_message } from "./signed.js";
+import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif.js";
 import { binToBase64, binToHex } from "@bitauth/libauth";
 
 import fs from "fs";

@@ -1,6 +1,6 @@
-const config = require('./config');
-const cluster = require('cluster');
-const app = require("./index")
+import config from './config';
+import cluster from 'cluster';
+import app from "./index";
 
 
 if (cluster.isMaster) {

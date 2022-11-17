@@ -1,6 +1,6 @@
-var server = require("../")
+import server from "../"
 import { RegTestWallet } from "mainnet-js";
-var request = require("supertest");
+import request from "supertest";
 
 
 var app;

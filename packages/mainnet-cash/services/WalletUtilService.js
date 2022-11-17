@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
 
 /**
 * Decode a bitcoin transaction. Accepts both transaction hash or raw transaction in hex format.
@@ -23,6 +23,6 @@ const utilDecodeTransaction = ({ utilDecodeTransactionRequest }) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   utilDecodeTransaction,
 };

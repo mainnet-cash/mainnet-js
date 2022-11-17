@@ -1,4 +1,4 @@
-import { UnitEnum } from "../enum";
+import { UnitEnum } from "../enum.js";
 
 export function sanitizeUnit(rawUnit: any): UnitEnum {
   if (rawUnit) {

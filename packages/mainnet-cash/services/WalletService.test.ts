@@ -1,9 +1,9 @@
 import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 
-var server = require("../")
-var request = require("supertest");
-const mainnet = require("mainnet-js");
+import server from "../index.js";
+import request from "supertest";
+import * as mainnet from "mainnet-js";
 
 var app;
 
@@ -593,7 +593,7 @@ describe("Test Wallet Endpoints", () => {
         value: 1
       }]
     });
-    if (initialResp.statusCode !== 200) {
+    if (initialResp.error) {
       console.log(initialResp.error.text);
     }
     let resp = await request(app)
@@ -603,7 +603,7 @@ describe("Test Wallet Endpoints", () => {
         cashaddr: process.env.ADDRESS as string,
       });
     const body = resp.body;
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toBe(200);

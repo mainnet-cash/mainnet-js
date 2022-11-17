@@ -1,4 +1,4 @@
-import { getRuntimePlatform } from "./getRuntimePlatform";
+import { getRuntimePlatform } from "./getRuntimePlatform.js";
 
 import {default as ES} from "eventsource"
 

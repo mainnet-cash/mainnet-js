@@ -1,3 +1,3 @@
-export { default as IndexedDBProvider } from "./IndexedDBProvider";
-export { default as SqlProvider } from "./SqlProvider";
-export { default as StorageProvider } from "./StorageProvider";
+export { default as IndexedDBProvider } from "./IndexedDBProvider.js";
+export { default as SqlProvider } from "./SqlProvider.js";
+export { default as StorageProvider } from "./StorageProvider.js";

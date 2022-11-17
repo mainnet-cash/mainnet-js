@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/FaucetService');
+import Controller from './Controller.js';
+import service from '../services/FaucetService.js';
 const getAddresses = async (request, response) => {
   await Controller.handleRequest(request, response, service.getAddresses);
 };
@@ -29,7 +29,7 @@ const getTestnetSlp = async (request, response) => {
 };
 
 
-module.exports = {
+export default {
   getAddresses,
   getTestnetBch,
   getTestnetSbch,

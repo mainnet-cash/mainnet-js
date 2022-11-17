@@ -1,5 +1,5 @@
-import { OpReturnData, SendRequest } from "../wallet/model";
-import { amountInSatoshi } from "./amountInSatoshi";
+import { OpReturnData, SendRequest } from "../wallet/model.js";
+import { amountInSatoshi } from "./amountInSatoshi.js";
 
 // This function sums a list of send request objects
 export async function sumSendRequestAmounts(

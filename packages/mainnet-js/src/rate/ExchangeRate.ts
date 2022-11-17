@@ -1,10 +1,10 @@
-import { EXCHANGE_RATE_TTL } from "../constant";
+import { EXCHANGE_RATE_TTL } from "../constant.js";
 import {
   RuntimePlatform,
   getRuntimePlatform,
-} from "../util/getRuntimePlatform";
-import ExchangeRateProvider from "../db/ExchangeRateProvider";
-import { indexedDbIsAvailable } from "../db/util";
+} from "../util/getRuntimePlatform.js";
+import ExchangeRateProvider from "../db/ExchangeRateProvider.js";
+import { indexedDbIsAvailable } from "../db/util.js";
 import axios from "axios";
 
 export class ExchangeRate {

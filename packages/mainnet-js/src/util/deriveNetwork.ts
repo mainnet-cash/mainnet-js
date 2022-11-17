@@ -1,5 +1,5 @@
-import { derivePrefix } from "./derivePublicKeyHash";
-import { networkPrefixMap } from "../enum";
+import { derivePrefix } from "./derivePublicKeyHash.js";
+import { networkPrefixMap } from "../enum.js";
 
 // This function if for assuring that a list of addresses are on the name network
 // for a single address use: networkPrefixMap[derivePrefix(address)]

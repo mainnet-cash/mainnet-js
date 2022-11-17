@@ -8,7 +8,7 @@ import {
   WatchWallet,
   TestNetWatchWallet,
   RegTestWatchWallet,
-} from "../wallet/Wif";
+} from "../wallet/Wif.js";
 import {
   SlpFormattedUtxo,
   SlpGenesisOptions,
@@ -22,38 +22,38 @@ import {
   SlpTokenType,
   SlpTxI,
   SlpUtxoI,
-} from "../slp/interface";
-import { SlpDbProvider } from "../slp/SlpDbProvider";
-import { ImageI } from "../qr/interface";
-import { qrAddress } from "../qr/Qr";
-import { TxI, UtxoI } from "../interface";
-import { ElectrumRawTransaction } from "../network/interface";
+} from "../slp/interface.js";
+import { SlpDbProvider } from "../slp/SlpDbProvider.js";
+import { ImageI } from "../qr/interface.js";
+import { qrAddress } from "../qr/Qr.js";
+import { TxI, UtxoI } from "../interface.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
 import BigNumber from "bignumber.js";
-import { getRelayFeeCache } from "../network/getRelayFeeCache";
+import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
 import {
   buildEncodedTransaction,
   getFeeAmount,
   getSuitableUtxos,
-} from "../transaction/Wif";
+} from "../transaction/Wif.js";
 import {
   SlpGetGenesisOutputs,
   SlpGetMintOutputs,
   SlpGetSendOutputs,
-} from "../slp/SlpLibAuth";
+} from "../slp/SlpLibAuth.js";
 import { binToHex } from "@bitauth/libauth";
-import { SendRequest } from "./model";
+import { SendRequest } from "./model.js";
 import {
   SlpCancelWatchFn,
   SlpProvider,
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
-} from "../slp/SlpProvider";
-import { toCashAddress, toSlpAddress } from "../util/bchaddr";
-import { GsppProvider } from "../slp/GsppProvider";
-import { delay } from "../util/delay";
-import { Util } from "./Util";
-import { Mainnet } from "../index";
-import { FeePaidByEnum } from "./enum";
+} from "../slp/SlpProvider.js";
+import { toCashAddress, toSlpAddress } from "../util/bchaddr.js";
+import { GsppProvider } from "../slp/GsppProvider.js";
+import { delay } from "../util/delay.js";
+import { Util } from "./Util.js";
+import { Mainnet } from "../index.js";
+import { FeePaidByEnum } from "./enum.js";
 
 /**
  * Class to manage an slp enabled wallet.

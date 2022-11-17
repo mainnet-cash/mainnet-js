@@ -7,13 +7,13 @@ import {
   lockingBytecodeToCashAddress,
   Output,
 } from "@bitauth/libauth";
-import { UnitEnum } from "../enum";
-import NetworkProvider from "../network/NetworkProvider";
-import { derivePrefix } from "../util/derivePublicKeyHash";
-import { convert } from "../util/convert";
-import { bchParam } from "../chain";
-import { floor } from "../util/floor";
-import { TransactionHistoryI, TransactionHistoryItemI } from "./interface";
+import { UnitEnum } from "../enum.js";
+import NetworkProvider from "../network/NetworkProvider.js";
+import { derivePrefix } from "../util/derivePublicKeyHash.js";
+import { convert } from "../util/convert.js";
+import { bchParam } from "../chain.js";
+import { floor } from "../util/floor.js";
+import { TransactionHistoryI, TransactionHistoryItemI } from "./interface.js";
 
 export async function getAddressHistory(
   cashaddr: string,

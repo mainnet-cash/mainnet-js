@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/WalletService');
+import Controller from './Controller.js';
+import service from '../services/WalletService.js';
 const balance = async (request, response) => {
   await Controller.handleRequest(request, response, service.balance);
 };
@@ -69,7 +69,7 @@ const xpubkeys = async (request, response) => {
 };
 
 
-module.exports = {
+export default {
   balance,
   createWallet,
   depositAddress,

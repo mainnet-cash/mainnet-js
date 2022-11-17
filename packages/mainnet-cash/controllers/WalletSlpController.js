@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/WalletSlpService');
+import Controller from './Controller.js';
+import service from '../services/WalletSlpService.js';
 const nftChildGenesis = async (request, response) => {
   await Controller.handleRequest(request, response, service.nftChildGenesis);
 };
@@ -65,7 +65,7 @@ const slpUtxos = async (request, response) => {
 };
 
 
-module.exports = {
+export default {
   nftChildGenesis,
   nftParentGenesis,
   slpAllBalances,

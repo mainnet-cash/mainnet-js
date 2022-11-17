@@ -1,30 +1,30 @@
-export { amountInSatoshi } from "./amountInSatoshi";
-export { asSendRequestObject } from "./asSendRequestObject";
-export { atob, btoa } from "./base64";
+export { amountInSatoshi } from "./amountInSatoshi.js";
+export { asSendRequestObject } from "./asSendRequestObject.js";
+export { atob, btoa } from "./base64.js";
 export { binToHex, hexToBin } from "@bitauth/libauth";
-export { convert, convertObject } from "./convert";
-export { delay } from "./delay";
-export { derivedNetwork } from "./deriveNetwork";
-export { derivePublicKeyHash } from "./derivePublicKeyHash";
+export { convert, convertObject } from "./convert.js";
+export { delay } from "./delay.js";
+export { derivedNetwork } from "./deriveNetwork.js";
+export { derivePublicKeyHash } from "./derivePublicKeyHash.js";
 export {
   getAddrsByXpubKey,
   getAddrsByXpubKeyObject,
   getXpubKeyInfo,
   getXpubKeyInfoObject,
-} from "../util/getAddrsByXpubKey";
-export { getRuntimePlatform, RuntimePlatform } from "./getRuntimePlatform";
-export { getUsdRate } from "./getUsdRate";
-export { hash160 } from "./hash160";
-export { ExchangeRate } from "../rate/ExchangeRate";
-export { sanitizeAddress } from "./sanitizeAddress";
-export { sanitizeUnit } from "./sanitizeUnit";
-export { getRandomInt } from "./randomInt";
-export { getXPubKey } from "../util/getXPubKey";
-import * as randomValues from "./randomValues";
+} from "../util/getAddrsByXpubKey.js";
+export { getRuntimePlatform, RuntimePlatform } from "./getRuntimePlatform.js";
+export { getUsdRate } from "./getUsdRate.js";
+export { hash160 } from "./hash160.js";
+export { ExchangeRate } from "../rate/ExchangeRate.js";
+export { sanitizeAddress } from "./sanitizeAddress.js";
+export { sanitizeUnit } from "./sanitizeUnit.js";
+export { getRandomInt } from "./randomInt.js";
+export { getXPubKey } from "../util/getXPubKey.js";
+import * as randomValues from "./randomValues.js";
 export { randomValues };
-export { sumUtxoValue } from "./sumUtxoValue";
+export { sumUtxoValue } from "./sumUtxoValue.js";
 export {
   BalanceResponse,
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
-} from "./balanceObjectFromSatoshi";
+} from "./balanceObjectFromSatoshi.js";

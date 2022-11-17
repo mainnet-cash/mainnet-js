@@ -1,4 +1,4 @@
-import { getRuntimePlatform } from "./getRuntimePlatform";
+import { getRuntimePlatform } from "./getRuntimePlatform.js";
 import crypto from "crypto";
 
 export function generateRandomBytes(len = 32) {

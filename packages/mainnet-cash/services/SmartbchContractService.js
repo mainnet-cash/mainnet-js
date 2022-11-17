@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const _smartbch = require("@mainnet-cash/smartbch");
+import Service from './Service.js';
+import * as _smartbch from "@mainnet-cash/smartbch";
 
 /**
 * Call a SmartBch contract function
@@ -96,7 +96,7 @@ const smartBchContractEstimateGas = ({ smartBchContractEstimateGasRequest }) => 
       const walletId = smartBchContractEstimateGasRequest.walletId;
       const contractId = smartBchContractEstimateGasRequest.contractId;
       const functionName = smartBchContractEstimateGasRequest.function;
-      const arguments = smartBchContractEstimateGasRequest.arguments || [];
+      const args = smartBchContractEstimateGasRequest.arguments || [];
       const overrides = smartBchContractEstimateGasRequest.overrides || {};
 
       const contract = _smartbch.Contract.fromId(contractId);
@@ -106,7 +106,7 @@ const smartBchContractEstimateGas = ({ smartBchContractEstimateGasRequest }) => 
         contract.setSigner(signer);
       }
 
-      const response = await contract.estimateGas(functionName, ...arguments, overrides);
+      const response = await contract.estimateGas(functionName, ...args, overrides);
       resolve(Service.successResponse({ gas: response }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -140,7 +140,7 @@ const smartBchContractInfo = ({ smartBchContractInfoRequest }) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   smartBchContractCall,
   smartBchContractCreate,
   smartBchContractDeploy,

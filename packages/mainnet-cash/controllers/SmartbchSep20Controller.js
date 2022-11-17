@@ -6,8 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/SmartbchSep20Service');
+import Controller from './Controller.js';
+import service from '../services/SmartbchSep20Service.js';
 const smartBchSep20AllBalances = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartBchSep20AllBalances);
 };
@@ -45,7 +45,7 @@ const smartBchSep20TokenInfo = async (request, response) => {
 };
 
 
-module.exports = {
+export default {
   smartBchSep20AllBalances,
   smartBchSep20Balance,
   smartBchSep20DepositAddress,

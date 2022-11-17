@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const _contract = require("@mainnet-cash/contract");
+import Service from "./Service.js";
+import * as _contract from "@mainnet-cash/contract";
 
 /**
 * Create a cashscript contract
@@ -101,7 +101,7 @@ const contractUtxos = ({contract}) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   createContract,
   contractFn,
   contractInfo,

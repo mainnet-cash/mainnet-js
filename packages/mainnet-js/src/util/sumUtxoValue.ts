@@ -1,4 +1,4 @@
-import { UtxoI } from "../interface";
+import { UtxoI } from "../interface.js";
 
 export async function sumUtxoValue(utxos: UtxoI[]) {
   if (utxos.length > 0) {

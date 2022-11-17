@@ -1,8 +1,8 @@
-import { WalletTypeEnum, FeePaidByEnum } from "./enum";
-import { NetworkEnum } from "../enum";
-import { ImageI } from "../qr/interface";
-import { ElectrumRawTransaction } from "../network/interface";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
+import { WalletTypeEnum, FeePaidByEnum } from "./enum.js";
+import { NetworkEnum } from "../enum.js";
+import { ImageI } from "../qr/interface.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
 
 export interface WalletRequestI {
   name?: string;

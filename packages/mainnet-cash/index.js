@@ -1,16 +1,19 @@
-const config = require('./config');
-const logger = require('./logger');
-const ExpressServer = require('./expressServer');
-const mainnet = require("mainnet-js");
+import config from './config.js';
+import logger from './logger.js';
+import ExpressServer from './expressServer.js';
+import * as mainnet from "mainnet-js";
+
+let expressServer;
 const launchServer = async () => {
   try {
-    this.expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
-    this.expressServer.launch();
+    expressServer = new ExpressServer(config.URL_PORT, config.OPENAPI_YAML, config.DOC_YAML);
+    expressServer.launch();
     logger.info(`Express server running at ${config.URL_PATH}:${config.URL_PORT}`);
-    return this.expressServer;
+    return expressServer;
   } catch (error) {
+    console.trace(error)
     logger.error('Express Server failure', error.message, error.stack, error);
-    await this.close();
+    await expressServer?.close();
   }
 };
 
@@ -24,7 +27,10 @@ const  killElectrum =  async () => {
 }
 
 function startServer() {
-  launchServer().catch(e => logger.error(e));
+  launchServer().catch(e => {
+    console.trace(e);
+    logger.error(e)
+  });
 }
 
-module.exports = { startServer , getServer , killElectrum};
+export default { startServer , getServer , killElectrum};

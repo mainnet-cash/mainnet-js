@@ -1,4 +1,4 @@
-import { browserNotSupported } from "../util/browserNotSupported";
+import { browserNotSupported } from "../util/browserNotSupported.js";
 import child_process from "child_process";
 /**
  * Mine blocks to a regtest address
