@@ -8,76 +8,58 @@
 
 import Controller from './Controller.js';
 import service from '../services/WalletSlpService.js';
-const nftChildGenesis = async (request, response) => {
+export const nftChildGenesis = async (request, response) => {
   await Controller.handleRequest(request, response, service.nftChildGenesis);
 };
 
-const nftParentGenesis = async (request, response) => {
+export const nftParentGenesis = async (request, response) => {
   await Controller.handleRequest(request, response, service.nftParentGenesis);
 };
 
-const slpAllBalances = async (request, response) => {
+export const slpAllBalances = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpAllBalances);
 };
 
-const slpBalance = async (request, response) => {
+export const slpBalance = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpBalance);
 };
 
-const slpCreateWallet = async (request, response) => {
+export const slpCreateWallet = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpCreateWallet);
 };
 
-const slpDepositAddress = async (request, response) => {
+export const slpDepositAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpDepositAddress);
 };
 
-const slpDepositQr = async (request, response) => {
+export const slpDepositQr = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpDepositQr);
 };
 
-const slpGenesis = async (request, response) => {
+export const slpGenesis = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpGenesis);
 };
 
-const slpMint = async (request, response) => {
+export const slpMint = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpMint);
 };
 
-const slpOutpoints = async (request, response) => {
+export const slpOutpoints = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpOutpoints);
 };
 
-const slpSend = async (request, response) => {
+export const slpSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpSend);
 };
 
-const slpSendMax = async (request, response) => {
+export const slpSendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpSendMax);
 };
 
-const slpTokenInfo = async (request, response) => {
+export const slpTokenInfo = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpTokenInfo);
 };
 
-const slpUtxos = async (request, response) => {
+export const slpUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.slpUtxos);
-};
-
-
-export default {
-  nftChildGenesis,
-  nftParentGenesis,
-  slpAllBalances,
-  slpBalance,
-  slpCreateWallet,
-  slpDepositAddress,
-  slpDepositQr,
-  slpGenesis,
-  slpMint,
-  slpOutpoints,
-  slpSend,
-  slpSendMax,
-  slpTokenInfo,
-  slpUtxos,
 };

@@ -13,7 +13,7 @@
     "outDir": "./dist/main",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "lib": ["es2017", "es2020.bigint", "dom"],
+    "lib": ["es2020", "es2020.bigint", "dom"],
     "typeRoots": ["node_modules/@types", "./src/types"]
   },
   "include": ["src/**/*.ts"],

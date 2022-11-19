@@ -8,11 +8,6 @@
 
 import Controller from './Controller.js';
 import service from '../services/WebhookService.js';
-const watchAddress = async (request, response) => {
+export const watchAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.watchAddress);
-};
-
-
-export default {
-  watchAddress,
 };

@@ -1,5 +1,6 @@
 module.exports = {
   preset: 'ts-jest/presets/default-esm',
+  resolver: "ts-jest-resolver",
   rootDir: "./",
   collectCoverage: true,
   collectCoverageFrom: ["./src/**/*.{js,jsx,ts}", "!**/node_modules/**"],

@@ -16,7 +16,7 @@ import * as mainnet from 'mainnet-js';
 import setupRateLimits from './rateLimits.js';
 
 import makeWsServer from './wsServer.js';
-import esmresolver from './esmresolver.js';
+import esmresolver, { handlersCache } from './esmresolver.js';
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -67,34 +67,6 @@ export default class ExpressServer {
       res.redirect(301, '/api-docs');
     });
 
-    // this.app.use(new OpenApiValidator({
-    //   apiSpec: this.openApiPath,
-    //   // operationHandlers: path.join(__dirname),
-    //   operationHandlers: {
-    //     basePath: fileURLToPath(new URL('.', import.meta.url)),
-    //     resolver: esmresolver,
-    //   },
-    //   fileUploader: { dest: config.FILE_UPLOAD_PATH },
-    //   validateSecurity: config.API_KEY ? {
-    //     handlers: {
-    //       bearerAuth: (req, scopes, schema) => {
-    //         if (!req.headers.authorization || req.headers.authorization.split(" ")[0].toLowerCase() != "bearer") {
-    //           throw { status: 401, message: 'No bearer authorization header provided' };
-    //         }
-
-    //         // Splitting on "earer" makes authorization name case insensitive.
-    //         const token = req.headers.authorization.split("earer ")[1];
-
-    //         if (config.API_KEY !== token) {
-    //           throw { status: 403, message: 'forbidden' };
-    //         }
-
-    //         return true;
-    //       }
-    //     }
-    //   } : false
-    // }));
-
     this.app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(this.docSchema));
     this.app.get("/timeout", (req, res) => {});
     this.app.get('/login-redirect', (req, res) => {
@@ -141,7 +113,7 @@ export default class ExpressServer {
         // eslint-disable-next-line no-unused-vars
         this.app.use((err, req, res, next) => {
           // format errors
-          console.trace(err)
+          console.error(err)
           res.status(err.status || 500).json({
             message: err.message || err.error,
             errors: err.errors || '',

@@ -1,5 +1,6 @@
 import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { SignatureTemplate } from "cashscript";
+import cashscript from "cashscript";
+const { SignatureTemplate } = cashscript;
 
 import { CONST, Mainnet, Network, UtxoItem } from "mainnet-js";
 import {

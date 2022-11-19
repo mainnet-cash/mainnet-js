@@ -8,31 +8,22 @@
 
 import Controller from './Controller.js';
 import service from '../services/FaucetService.js';
-const getAddresses = async (request, response) => {
+export const getAddresses = async (request, response) => {
   await Controller.handleRequest(request, response, service.getAddresses);
 };
 
-const getTestnetBch = async (request, response) => {
+export const getTestnetBch = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetBch);
 };
 
-const getTestnetSbch = async (request, response) => {
+export const getTestnetSbch = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetSbch);
 };
 
-const getTestnetSep20 = async (request, response) => {
+export const getTestnetSep20 = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetSep20);
 };
 
-const getTestnetSlp = async (request, response) => {
+export const getTestnetSlp = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetSlp);
-};
-
-
-export default {
-  getAddresses,
-  getTestnetBch,
-  getTestnetSbch,
-  getTestnetSep20,
-  getTestnetSlp,
 };

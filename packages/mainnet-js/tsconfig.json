@@ -9,7 +9,7 @@
     "downlevelIteration": true,
     "composite": true,
     "target": "esnext",
-    "module": "commonjs",
+    "module": "esnext",
     "outDir": "./dist/main",
     "moduleResolution": "node",
     "resolveJsonModule": true,

@@ -20,6 +20,9 @@ const baseConfig = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
   },
   optimization: {
     minimize: false,
@@ -42,19 +45,19 @@ const browserConfig = {
     smartbch: {
       import: "./src/index.ts",
       library: {
-        type: "window",
+        type: "global",
       },
     },
     contract: {
       import: "@mainnet-cash/contract",
       library: {
-        type: "window",
+        type: "global",
       },
     },
     mainnet: {
       import: "mainnet-js",
       library: {
-        type: "window",
+        type: "global",
       },
     },
   },
@@ -72,7 +75,6 @@ const browserConfig = {
   ],
   resolve: {
     alias: {
-      bip39: require.resolve("../mainnet-js/polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
@@ -82,7 +84,7 @@ const browserConfig = {
       "@ethersproject/contracts$": require.resolve(
         "@ethersproject/contracts/lib/index.js"
       ),
-      eventsource: require.resolve("../mainnet-js/polyfill/eventsource.js"),
+      eventsource: false,
       events: require.resolve("events/"),
       fs: false,
       http: false,
@@ -99,7 +101,6 @@ const browserConfig = {
       solc: require.resolve("./polyfill/solc.js"),
       stream: false,
       tls: false,
-      util: require.resolve("../mainnet-js/polyfill/util.js"),
       url: false,
       zlib: false,
     },

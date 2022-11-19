@@ -8,51 +8,39 @@
 
 import Controller from './Controller.js';
 import service from '../services/SmartbchWalletService.js';
-const smartbchBalance = async (request, response) => {
+export const smartbchBalance = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchBalance);
 };
 
-const smartbchCreateWallet = async (request, response) => {
+export const smartbchCreateWallet = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchCreateWallet);
 };
 
-const smartbchDepositAddress = async (request, response) => {
+export const smartbchDepositAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchDepositAddress);
 };
 
-const smartbchDepositQr = async (request, response) => {
+export const smartbchDepositQr = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchDepositQr);
 };
 
-const smartbchMaxAmountToSend = async (request, response) => {
+export const smartbchMaxAmountToSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchMaxAmountToSend);
 };
 
-const smartbchSend = async (request, response) => {
+export const smartbchSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchSend);
 };
 
-const smartbchSendMax = async (request, response) => {
+export const smartbchSendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchSendMax);
 };
 
-const smartbchSignedMessageSign = async (request, response) => {
+export const smartbchSignedMessageSign = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchSignedMessageSign);
 };
 
-const smartbchSignedMessageVerify = async (request, response) => {
+export const smartbchSignedMessageVerify = async (request, response) => {
   await Controller.handleRequest(request, response, service.smartbchSignedMessageVerify);
 };
 
-
-export default {
-  smartbchBalance,
-  smartbchCreateWallet,
-  smartbchDepositAddress,
-  smartbchDepositQr,
-  smartbchMaxAmountToSend,
-  smartbchSend,
-  smartbchSendMax,
-  smartbchSignedMessageSign,
-  smartbchSignedMessageVerify,
-};

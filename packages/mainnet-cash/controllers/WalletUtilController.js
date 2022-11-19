@@ -8,11 +8,6 @@
 
 import Controller from './Controller.js';
 import service from '../services/WalletUtilService.js';
-const utilDecodeTransaction = async (request, response) => {
+export const utilDecodeTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.utilDecodeTransaction);
-};
-
-
-export default {
-  utilDecodeTransaction,
 };

@@ -1,8 +1,8 @@
 import path from 'path';
 
-const handlersCache = {};
+export const handlersCache = {};
 
-export default async function resolver(handlersPath, route, apiDoc) {
+export default function resolver(handlersPath, route, apiDoc) {
   // console.log(JSON.stringify(route, null, 2))
   const { basePath, schema, expressRoute, openApiRoute, method } = route;
   // const pathKey = openApiRoute.substring(basePath.length);
@@ -24,11 +24,11 @@ export default async function resolver(handlersPath, route, apiDoc) {
 
   const modulePath = path.join(handlersPath, `${baseName}.js`);
 
-  if (!handlersCache[modulePath]) {
-    handlersCache[modulePath] = import(modulePath);
-  }
-
   return (req, res, next) => {
+    if (!handlersCache[modulePath]) {
+      handlersCache[modulePath] = import(modulePath);
+    }
+
     handlersCache[modulePath]
       .then((module) => {
         if (!module[oId]) {

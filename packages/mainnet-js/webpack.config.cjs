@@ -12,6 +12,9 @@ const baseConfig = {
   mode: "development",
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
   },
   optimization: {
     minimize: false,
@@ -30,14 +33,14 @@ const prodConfig = {
 
 const browserConfig = {
   target: "web",
-  // entry: {
-  //   mainnet: {
-  //     import: "./src/index.ts",
-  //     // library: {
-  //     //   type: "global",
-  //     // },
-  //   },
-  // },
+  entry: {
+    mainnet: {
+      import: "./src/index.ts",
+      library: {
+        type: "global",
+      },
+    },
+  },
   module: {
     rules: [
       {

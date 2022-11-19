@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import Service from "./Service.js";
-import * as _contract from "@mainnet-cash/contract";
+import { Contract } from "@mainnet-cash/contract";
 
 /**
 * Create a cashscript contract
@@ -11,10 +11,10 @@ import * as _contract from "@mainnet-cash/contract";
 const createContract = ({ contractRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await _contract.Contract.contractRespFromJsonRequest(contractRequest);
+      const resp = await Contract.contractRespFromJsonRequest(contractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.log(JSON.stringify(e))
+      console.trace(JSON.stringify(e))
       reject(Service.rejectResponse(
         e,
         e.status || 405,
@@ -34,9 +34,9 @@ const createContract = ({ contractRequest }) => new Promise(
 const contractFn = ({ contractFnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await _contract.Contract.fromId(contractFnRequest.contractId);
-      resp = await contract.runFunctionFromStrings(contractFnRequest)
-      let marshaledResponse = {contractId: contractFnRequest.contractId}
+      const contract = await Contract.fromId(contractFnRequest.contractId);
+      const resp = await contract.runFunctionFromStrings(contractFnRequest)
+      const marshaledResponse = {contractId: contractFnRequest.contractId}
       if(typeof resp === 'string' || resp instanceof String){
         if(contractFnRequest.action === "meep"){
           marshaledResponse.debug = resp
@@ -46,7 +46,7 @@ const contractFn = ({ contractFnRequest }) => new Promise(
       }else{
         marshaledResponse.txId = resp.txid
         marshaledResponse.hex = resp.hex
-      }      
+      }
       resolve(Service.successResponse({... marshaledResponse}));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -67,9 +67,8 @@ const contractFn = ({ contractFnRequest }) => new Promise(
 const contractInfo = ( {contractInfoRequest } ) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await _contract.Contract.fromId(contractInfoRequest.contractId);    
-      
-      let resp = contract.info();
+      const contract = Contract.fromId(contractInfoRequest.contractId);    
+      const resp = contract.info();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
@@ -90,8 +89,8 @@ const contractInfo = ( {contractInfoRequest } ) => new Promise(
 const contractUtxos = ({contract}) => new Promise(
   async (resolve, reject) => {
     try {
-      let c = await _contract.Contract.fromId(contract.contractId);
-      let resp = await c.getUtxos();
+      const _contract = Contract.fromId(contract.contractId);
+      const resp = await _contract.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(

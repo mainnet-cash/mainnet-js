@@ -8,26 +8,18 @@
 
 import Controller from './Controller.js';
 import service from '../services/ContractEscrowService.js';
-const createEscrow = async (request, response) => {
+export const createEscrow = async (request, response) => {
   await Controller.handleRequest(request, response, service.createEscrow);
 };
 
-const escrowFn = async (request, response) => {
+export const escrowFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowFn);
 };
 
-const escrowInfo = async (request, response) => {
+export const escrowInfo = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowInfo);
 };
 
-const escrowUtxos = async (request, response) => {
+export const escrowUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowUtxos);
-};
-
-
-export default {
-  createEscrow,
-  escrowFn,
-  escrowInfo,
-  escrowUtxos,
 };

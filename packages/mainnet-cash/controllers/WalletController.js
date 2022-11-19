@@ -8,81 +8,62 @@
 
 import Controller from './Controller.js';
 import service from '../services/WalletService.js';
-const balance = async (request, response) => {
+export const balance = async (request, response) => {
   await Controller.handleRequest(request, response, service.balance);
 };
 
-const createWallet = async (request, response) => {
+export const createWallet = async (request, response) => {
   await Controller.handleRequest(request, response, service.createWallet);
 };
 
-const depositAddress = async (request, response) => {
+export const depositAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.depositAddress);
 };
 
-const depositQr = async (request, response) => {
+export const depositQr = async (request, response) => {
   await Controller.handleRequest(request, response, service.depositQr);
 };
 
-const encodeTransaction = async (request, response) => {
+export const encodeTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.encodeTransaction);
 };
 
-const getHistory = async (request, response) => {
+export const getHistory = async (request, response) => {
   await Controller.handleRequest(request, response, service.getHistory);
 };
 
-const info = async (request, response) => {
+export const info = async (request, response) => {
   await Controller.handleRequest(request, response, service.info);
 };
 
-const maxAmountToSend = async (request, response) => {
+export const maxAmountToSend = async (request, response) => {
   await Controller.handleRequest(request, response, service.maxAmountToSend);
 };
 
-const namedExists = async (request, response) => {
+export const namedExists = async (request, response) => {
   await Controller.handleRequest(request, response, service.namedExists);
 };
 
-const replaceNamed = async (request, response) => {
+export const replaceNamed = async (request, response) => {
   await Controller.handleRequest(request, response, service.replaceNamed);
 };
 
-const send = async (request, response) => {
+export const send = async (request, response) => {
   await Controller.handleRequest(request, response, service.send);
 };
 
-const sendMax = async (request, response) => {
+export const sendMax = async (request, response) => {
   await Controller.handleRequest(request, response, service.sendMax);
 };
 
-const submitTransaction = async (request, response) => {
+export const submitTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.submitTransaction);
 };
 
-const utxos = async (request, response) => {
+export const utxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.utxos);
 };
 
-const xpubkeys = async (request, response) => {
+export const xpubkeys = async (request, response) => {
   await Controller.handleRequest(request, response, service.xpubkeys);
-};
-
-
-export default {
-  balance,
-  createWallet,
-  depositAddress,
-  depositQr,
-  encodeTransaction,
-  getHistory,
-  info,
-  maxAmountToSend,
-  namedExists,
-  replaceNamed,
-  send,
-  sendMax,
-  submitTransaction,
-  utxos,
-  xpubkeys,
 };

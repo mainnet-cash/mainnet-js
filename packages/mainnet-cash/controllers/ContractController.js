@@ -8,26 +8,18 @@
 
 import Controller from'./Controller.js';
 import service from'../services/ContractService.js';
-const contractFn = async (request, response) => {
+export const contractFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractFn);
 };
 
-const contractInfo = async (request, response) => {
+export const contractInfo = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractInfo);
 };
 
-const contractUtxos = async (request, response) => {
+export const contractUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractUtxos);
 };
 
-const createContract = async (request, response) => {
+export const createContract = async (request, response) => {
   await Controller.handleRequest(request, response, service.createContract);
-};
-
-
-export default {
-  contractFn,
-  contractInfo,
-  contractUtxos,
-  createContract,
 };

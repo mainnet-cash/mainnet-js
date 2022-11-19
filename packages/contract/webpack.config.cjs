@@ -2,10 +2,13 @@ const { merge } = require("webpack-merge");
 const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const nodeExternals = require("webpack-node-externals");
 const __basedir = require("path").resolve(__dirname, "../../");
+const CircularDependencyPlugin = require('circular-dependency-plugin')
+const webpack = require('webpack');
 
 const baseConfig = {
   mode: "development",
@@ -19,7 +22,10 @@ const baseConfig = {
     ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensions: [".ts", ".tsx", ".js", ".wasm"],
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
   },
   optimization: {
     minimize: false,
@@ -39,34 +45,62 @@ const prodConfig = {
 const browserConfig = {
   target: "web",
   entry: {
+    mainnet: ["mainnet-js"],
+    // contract: "./src/index.ts",
     contract: {
       import: "./src/index.ts",
-      library: {
-        type: "global",
-      },
+      // library: {
+      //   name: '__contractPromise',
+      //   type: "global",
+      // },
+      dependOn: ['mainnet'],
     },
-    mainnet: ["mainnet-js"],
   },
   output: {
-    filename: `[name]-${packageJson.version}.js`,
-    path: __dirname + "/dist",
-    crossOriginLoading: "anonymous",
-    libraryTarget: "umd",
+    // filename: `[name]-${packageJson.version}.js`,
+    // path: __dirname + "/dist",
+    // crossOriginLoading: "anonymous",
+    // libraryTarget: "umd",
+    // // library: {
+    // //   name: '__contractPromise',
+    // //   type: 'global',
+    // // },
+		// library: ["MyLibrary", "contract", "mainnet"],
+    filename: "MyLibrary.[name].js",
+		library: ["MyLibrary", "[name]"],
+		libraryTarget: "umd"
   },
   plugins: [
     //new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
       title: "The Empty Mainnet App",
     }),
+    new InjectBodyPlugin({
+      content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __contractPromise))</script>'
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
+    }),
+    new CircularDependencyPlugin({
+      include: /src/,
+      // exclude detection of files based on a RegExp
+      exclude: /node_modules|mainnet-js/,
+      // add errors to webpack instead of warnings
+      failOnError: false,
+      // allow import cycles that include an asyncronous import,
+      // e.g. via import(/* webpackMode: "weak" */ './file.js')
+      allowAsyncCycles: false,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
+    })
   ],
   resolve: {
     alias: {
-      bip39: require.resolve("../mainnet-js/polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
-      eventsource: require.resolve("../mainnet-js/polyfill/eventsource.js"),
+      eventsource: false,
       events: require.resolve("events/"),
       fs: false,
       http: false,
@@ -81,14 +115,13 @@ const browserConfig = {
       "pg-format": false,
       "pg-native": false,
       solc: false,
-      stream: false,
+      stream: require.resolve("stream-browserify"),
       tls: false,
-      util: require.resolve("../mainnet-js/polyfill/util.js"),
       url: false,
       zlib: false,
     },
     fallback: {
-      stream: require.resolve("stream-browserify"),
+      // stream: require.resolve("stream-browserify"),
     },
   },
 };

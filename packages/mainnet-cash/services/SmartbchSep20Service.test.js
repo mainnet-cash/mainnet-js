@@ -1,6 +1,5 @@
-var server = require("../")
-var request = require("supertest");
-var BigNumber = require("bignumber.js").BigNumber;
+import server from "../";
+import request from "supertest";
 
 var app;
 
@@ -10,7 +9,7 @@ function checkStatus(resp) {;
   }
 }
 
-describe("Test Wallet SmartBch Sep20 Endpoints", () => {
+describe.skip("Test Wallet SmartBch Sep20 Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });

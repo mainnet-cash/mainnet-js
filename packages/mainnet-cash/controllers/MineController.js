@@ -12,4 +12,3 @@ import service from '../services/MineService.js';
 export const mine = async (request, response) => {
   await Controller.handleRequest(request, response, service.mine);
 };
-

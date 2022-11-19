@@ -4,7 +4,7 @@ import server from "../index.js";
 import request from "supertest";
 var app;
 
-describe("Test Wallet Slp Endpoints", () => {
+describe.skip("Test Wallet Slp Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });
@@ -295,7 +295,7 @@ describe("Test Wallet Slp Endpoints", () => {
         value: 3000
       }]
     });
-    if (initialResp.statusCode !== 200) {
+    if (initialResp.error) {
       console.log(initialResp.error.text);
     }
 
@@ -307,7 +307,7 @@ describe("Test Wallet Slp Endpoints", () => {
         value: 10
       }]
     });
-    if (initialSlpResp.statusCode !== 200) {
+    if (initialSlpResp.error) {
       console.log(initialSlpResp.error.text);
     }
 
@@ -319,7 +319,7 @@ describe("Test Wallet Slp Endpoints", () => {
         tokenId: tokenId
       });
     const slpBody = slpResp.body;
-    if (slpResp.statusCode !== 200) {
+    if (slpResp.error) {
       console.log(slpResp.error.text);
     }
 
@@ -334,7 +334,7 @@ describe("Test Wallet Slp Endpoints", () => {
         cashaddr: process.env.ADDRESS,
       });
     const body = resp.body;
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toBe(200);

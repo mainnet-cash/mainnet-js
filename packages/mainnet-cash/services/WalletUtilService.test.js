@@ -1,7 +1,6 @@
 
-var mainnet = require("mainnet-js");
-var server = require("../")
-var request = require("supertest");
+import server from "../";
+import request from "supertest";
 var app;
 
 describe("Test Wallet Slp Endpoints", () => {

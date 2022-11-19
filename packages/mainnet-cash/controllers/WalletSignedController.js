@@ -8,16 +8,10 @@
 
 import Controller from './Controller.js';
 import service from '../services/WalletSignedService.js';
-const signedMessageSign = async (request, response) => {
+export const signedMessageSign = async (request, response) => {
   await Controller.handleRequest(request, response, service.signedMessageSign);
 };
 
-const signedMessageVerify = async (request, response) => {
+export const signedMessageVerify = async (request, response) => {
   await Controller.handleRequest(request, response, service.signedMessageVerify);
-};
-
-
-export default {
-  signedMessageSign,
-  signedMessageVerify,
 };

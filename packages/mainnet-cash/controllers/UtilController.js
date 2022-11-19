@@ -8,21 +8,14 @@
 
 import Controller from './Controller.js';
 import service from '../services/UtilService.js';
-const convert = async (request, response) => {
+export const convert = async (request, response) => {
   await Controller.handleRequest(request, response, service.convert);
 };
 
-const getAddrsByXpubKey = async (request, response) => {
+export const getAddrsByXpubKey = async (request, response) => {
   await Controller.handleRequest(request, response, service.getAddrsByXpubKey);
 };
 
-const getXpubKeyInfo = async (request, response) => {
+export const getXpubKeyInfo = async (request, response) => {
   await Controller.handleRequest(request, response, service.getXpubKeyInfo);
-};
-
-
-export default {
-  convert,
-  getAddrsByXpubKey,
-  getXpubKeyInfo,
 };

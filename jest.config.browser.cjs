@@ -1,9 +1,10 @@
 module.exports = {
   verbose: true,
   rootDir: "./",
+  preset: "jest-playwright-preset",
   roots: [
-    "<rootDir>/packages/mainnet-js/src",
-    // "<rootDir>/packages/contract/src",
+    // "<rootDir>/packages/mainnet-js/src",
+    "<rootDir>/packages/contract/src",
     // "<rootDir>/packages/smartbch/src",
   ],
   preset: "jest-playwright-preset",
@@ -21,9 +22,14 @@ module.exports = {
     },
   },
   transform: {
-    "^.+\\.ts?$": "ts-jest",
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
-  globalSetup: "<rootDir>/jest/browser.setup.js",
-  globalTeardown: "<rootDir>/jest/browser.teardown.js",
+  globalSetup: "<rootDir>/jest/browser.setup.cjs",
+  globalTeardown: "<rootDir>/jest/browser.teardown.cjs",
   testTimeout: 95000,
 };

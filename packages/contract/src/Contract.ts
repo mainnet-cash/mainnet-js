@@ -1,12 +1,10 @@
 import { binToHex } from "@bitauth/libauth";
-import {
+import cashscript, {
   Argument,
   Artifact,
   Contract as CashScriptContract,
-  SignatureTemplate,
   NetworkProvider,
 } from "cashscript";
-import { ContractFunction } from "cashscript/dist/module/Contract";
 import { compileString, compileFile } from "cashc";
 
 import {
@@ -335,9 +333,9 @@ export class Contract implements ContractI {
     }
   }
   public async estimateFee(
-    func: ContractFunction,
+    func: any,//ContractFunction, FIXME
     publicKey: Uint8Array,
-    sig: SignatureTemplate,
+    sig: cashscript.SignatureTemplate,
     outputAddress: string,
     utxos: UtxoI[]
   ) {
