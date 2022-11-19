@@ -21,7 +21,7 @@ const baseConfig = {
     mangleWasmImports: true,
     usedExports: true,
   },
-  experiments: { topLevelAwait: true },
+  experiments: { topLevelAwait: true, outputModule: true },
 };
 
 const prodConfig = {
@@ -37,7 +37,8 @@ const browserConfig = {
     mainnet: {
       import: "./src/index.ts",
       library: {
-        type: "global",
+        name: '__mainnetPromise',
+        type: 'global',
       },
     },
   },
@@ -59,10 +60,6 @@ const browserConfig = {
     filename: `[name]-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
-    library: {
-      name: '__mainnetPromise',
-      type: 'global',
-    },
   },
   plugins: [
     //new BundleAnalyzerPlugin(),

@@ -109,7 +109,7 @@ export class Contract implements ContractI {
    */
   private getParameterList(): any[] {
     return this.parameters.map((x) =>
-      ArrayBuffer.isView(x) ? binToHex(x) : x
+      ArrayBuffer.isView(x) ? binToHex(new Uint8Array(x.buffer)) : x
     );
   }
 

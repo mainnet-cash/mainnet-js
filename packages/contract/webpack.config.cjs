@@ -16,8 +16,13 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        use: [{
+          loader: 'ts-loader',
+          options: {
+              configFile: "tsconfig.browser.json"
+          },
+        }],
+        exclude: [/node_modules/],
       },
     ],
   },
@@ -45,30 +50,19 @@ const prodConfig = {
 const browserConfig = {
   target: "web",
   entry: {
-    mainnet: ["mainnet-js"],
-    // contract: "./src/index.ts",
     contract: {
       import: "./src/index.ts",
-      // library: {
-      //   name: '__contractPromise',
-      //   type: "global",
-      // },
-      dependOn: ['mainnet'],
+      library: {
+        name: '__contractPromise',
+        type: "global",
+      },
     },
   },
   output: {
-    // filename: `[name]-${packageJson.version}.js`,
-    // path: __dirname + "/dist",
-    // crossOriginLoading: "anonymous",
-    // libraryTarget: "umd",
-    // // library: {
-    // //   name: '__contractPromise',
-    // //   type: 'global',
-    // // },
-		// library: ["MyLibrary", "contract", "mainnet"],
-    filename: "MyLibrary.[name].js",
-		library: ["MyLibrary", "[name]"],
-		libraryTarget: "umd"
+    filename: `[name]-${packageJson.version}.js`,
+    path: __dirname + "/dist",
+    crossOriginLoading: "anonymous",
+    libraryTarget: "umd",
   },
   plugins: [
     //new BundleAnalyzerPlugin(),
@@ -80,6 +74,9 @@ const browserConfig = {
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer']
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG)
     }),
     new CircularDependencyPlugin({
       include: /src/,
@@ -121,7 +118,7 @@ const browserConfig = {
       zlib: false,
     },
     fallback: {
-      // stream: require.resolve("stream-browserify"),
+      stream: require.resolve("stream-browserify"),
     },
   },
 };
