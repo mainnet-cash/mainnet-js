@@ -68,8 +68,12 @@ export class Webhook {
   //#region debug
   public static debug = class {
     static setupAxiosMocks() {
-      axios.interceptors.request.use((config) => {
+      this.interceptorId = axios.interceptors.request.use((config) => {
         const url = config.url!;
+        if (!url.startsWith("http://example.com")) {
+          return config;
+        }
+
         let response;
         if (url === "http://example.com/fail") {
           response = { status: 503 };
@@ -93,9 +97,11 @@ export class Webhook {
 
     static reset() {
       this.responses = {};
+      axios.interceptors.request.eject(this.interceptorId);
     }
 
     static responses: any = {};
+    static interceptorId: number;
   };
   //#endregion
 }
