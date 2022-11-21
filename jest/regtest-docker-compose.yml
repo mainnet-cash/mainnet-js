@@ -14,7 +14,7 @@ services:
       - ./docker/smartbch/init_regtest.sh:/build/init_regtest.sh
 
   bitcoind:
-    image: mainnet/bitcoin-cash-node
+    image: mainnet/bitcoin-cash-node:v24.99.0
     command: bitcoind -upgrade9activationtime=1668419099 -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0/0 -rpcuser=alice -rpcpassword=password
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
@@ -32,7 +32,7 @@ services:
     networks:
       - bitcoin
   bitcoin-mine:
-    image: mainnet/bitcoin-cash-node
+    image: mainnet/bitcoin-cash-node:v24.99.0
     entrypoint: ["/entrypoint.sh"]
     command: /bin/sh -c "/bin/sleep 10 && bitcoin-cli -regtest -rpcconnect=bitcoind  -rpcuser=alice -rpcpassword=password -rpcport=18443 generatetoaddress 215 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 1> /dev/null"
     networks:
