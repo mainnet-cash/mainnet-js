@@ -3,7 +3,7 @@
   "name": "@mainnet-cash/smartbch",
   "version": "0.5.9",
   "module": "dist/module/index.js",
-  "types": "dist/main/index.d.ts",
+  "types": "dist/module/index.d.ts",
   "exports": {
     "import": "./dist/module/index.js"
   },
