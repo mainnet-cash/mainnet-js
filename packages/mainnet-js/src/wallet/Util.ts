@@ -13,10 +13,8 @@ import {
   binToHex,
   decodeTransaction as decodeTransactionLibAuth,
   hexToBin,
-  instantiateSha256,
   lockingBytecodeToCashAddress,
   Transaction as LibAuthTransaction,
-  TransactionDecodingError,
 } from "@bitauth/libauth";
 import {
   ElectrumRawTransaction,
@@ -26,8 +24,7 @@ import {
   ElectrumRawTransactionVoutScriptPubKey,
 } from "../network/interface.js";
 import { bchParam } from "../chain.js";
-
-let sha256;
+import { getTransactionHash } from "../util/transaction.js";
 
 /**
  * Class with various wallet utilities.
@@ -48,19 +45,13 @@ export class Util {
   }
 
   public async getTransactionHash(rawTransactionHex: string): Promise<string> {
-    const transactionBin = hexToBin(rawTransactionHex);
-
-    if (!sha256) {
-      sha256 = await instantiateSha256();
-    }
-    // transaction hash is a double sha256 of a raw transaction data, reversed byte order
-    return binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
+    return getTransactionHash(rawTransactionHex);
   }
 
   public static async getTransactionHash(
     rawTransactionHex: string
   ): Promise<string> {
-    return new this.walletType().util.getTransactionHash(rawTransactionHex);
+    return getTransactionHash(rawTransactionHex);
   }
 
   public async decodeTransaction(

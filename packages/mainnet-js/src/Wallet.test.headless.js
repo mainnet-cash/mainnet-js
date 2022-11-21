@@ -1,4 +1,4 @@
-import playwright from "playwright";
+const playwright = require("playwright");
 const PAGE_URL = "http://localhost:8080";
 
 describe(`Wallet should function in the browser`, () => {
@@ -352,10 +352,10 @@ describe(`Wallet should function in the browser`, () => {
 
       //! mining not supported in browser
       // await mine({ cashaddr: alice.cashaddr, blocks: 1 });
-      // await delay(1000);
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
       // await mine({ cashaddr: alice.cashaddr, blocks: 1 });
 
-      await delay(5000);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       expect(waitTxResult).toBe(true);
       expect(waitBalanceResult).toBe(true);
       // expect(aliceWatchResult).toBe(true);

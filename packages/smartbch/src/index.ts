@@ -1,7 +1,7 @@
 export * from "./interface.js";
-export * from "./createWallet.js";
 export * from "./SmartBchWallet.js";
 export * from "./Sep20.js";
+export * from "./createWallet.js";
 export * from "./Contract.js";
 export * from "./FaucetContract.js";
 

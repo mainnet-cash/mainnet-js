@@ -52,8 +52,8 @@ import { toCashAddress, toSlpAddress } from "../util/bchaddr.js";
 import { GsppProvider } from "../slp/GsppProvider.js";
 import { delay } from "../util/delay.js";
 import { Util } from "./Util.js";
-import { Mainnet } from "../index.js";
 import { FeePaidByEnum } from "./enum.js";
+import { getRuntimePlatform, RuntimePlatform } from "../util/getRuntimePlatform.js";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -82,7 +82,7 @@ export class Slp {
 
     let provider = Slp.defaultProvider;
     if (
-      Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node &&
+      getRuntimePlatform() === RuntimePlatform.node &&
       process.env.SLP_PROVIDER
     )
       provider = process.env.SLP_PROVIDER!;

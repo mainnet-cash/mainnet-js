@@ -8,7 +8,8 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "outDir": "./dist/main",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -20,9 +21,6 @@
   "references": [
     {
       "path": "../mainnet-js/"
-    },
-    {
-      "path": "../contract/"
     }
   ],
   "compileOnSave": false

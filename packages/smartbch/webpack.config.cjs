@@ -2,9 +2,10 @@ const { merge } = require("webpack-merge");
 const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const { library } = require("webpack");
+const CircularDependencyPlugin = require('circular-dependency-plugin')
 const __basedir = require("path").resolve(__dirname, "../../");
 
 const baseConfig = {
@@ -13,13 +14,18 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        use: [{
+          loader: 'ts-loader',
+          options: {
+              configFile: "tsconfig.browser.json"
+          },
+        }],
+        exclude: [/node_modules/],
       },
     ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensions: [".ts", ".tsx", ".js", ".wasm"],
     extensionAlias: {
       '.js': ['.ts', '.js'],
     },
@@ -43,20 +49,9 @@ const browserConfig = {
   target: "web",
   entry: {
     smartbch: {
-      import: "./src/index.ts",
+      import: "./src/index.web.ts",
       library: {
-        type: "global",
-      },
-    },
-    contract: {
-      import: "@mainnet-cash/contract",
-      library: {
-        type: "global",
-      },
-    },
-    mainnet: {
-      import: "mainnet-js",
-      library: {
+        name: '__smartbchPromise',
         type: "global",
       },
     },
@@ -65,6 +60,7 @@ const browserConfig = {
     filename: `[name]-${packageJson.version}.js`,
     path: __dirname + "/dist",
     crossOriginLoading: "anonymous",
+    libraryTarget: "umd",
   },
 
   plugins: [
@@ -72,6 +68,21 @@ const browserConfig = {
     new HtmlWebpackPlugin({
       title: "The Empty Mainnet App",
     }),
+    new InjectBodyPlugin({
+      content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __smartbchPromise))</script>'
+    }),
+    new CircularDependencyPlugin({
+      include: /src/,
+      // exclude detection of files based on a RegExp
+      exclude: /node_modules|mainnet-zjs/,
+      // add errors to webpack instead of warnings
+      failOnError: false,
+      // allow import cycles that include an asyncronous import,
+      // e.g. via import(/* webpackMode: "weak" */ './file.js')
+      allowAsyncCycles: false,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
+    })
   ],
   resolve: {
     alias: {

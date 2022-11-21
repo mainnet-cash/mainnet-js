@@ -1,5 +1,4 @@
-import BigNumber from "bignumber.js";
-import playwright from "playwright";
+const playwright = require("playwright");
 
 const PAGE_URL = "http://localhost:8080";
 
@@ -96,7 +95,6 @@ describe.skip(`Wallet should function in the browser`, () => {
         // // FIXME: we do not have gspp testnet yet
         // if (wallet.slp.provider instanceof GsppProvider) {
         //   console.warn("we do not have gspp testnet yet");
-        //   return { value: new BigNumber(1) };
         // }
 
         const bobWallet = await TestNetWallet.newRandom();

@@ -51,7 +51,7 @@ const browserConfig = {
   target: "web",
   entry: {
     contract: {
-      import: "./src/index.ts",
+      import: "./src/index.web.ts",
       library: {
         name: '__contractPromise',
         type: "global",

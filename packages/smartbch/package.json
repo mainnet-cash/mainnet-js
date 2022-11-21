@@ -13,7 +13,6 @@
   "author": "readcash",
   "dependencies": {
     "mainnet-js": "0.5.9",
-    "@mainnet-cash/contract": "0.5.9",
     "@openzeppelin/contracts": "^4.2.0",
     "cashc": "^0.6.5",
     "cashscript": "^0.6.5",

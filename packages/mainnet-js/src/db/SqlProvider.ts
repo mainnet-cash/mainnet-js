@@ -2,8 +2,6 @@ import StorageProvider from "./StorageProvider.js";
 import { sslConfigI, WalletI, FaucetQueueItemI } from "./interface.js";
 import { TxI } from "../interface.js";
 import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook.js";
-import { WebhookBch } from "../webhook/WebhookBch.js";
-import { WebhookSlp } from "../webhook/WebhookSlp.js";
 import { RegisterWebhookParams } from "../webhook/interface.js";
 import { isCashAddress } from "../util/bchaddr.js";
 import { getSslConfig } from "./util.js";
@@ -151,8 +149,10 @@ export default class SqlProvider implements StorageProvider {
     delete (hook as any).token_id;
 
     if (hook.type.indexOf("slp") === 0) {
+      const { WebhookSlp } = await import("../webhook/WebhookSlp.js");
       return new WebhookSlp(hook);
     } else if (isCashAddress(hook.cashaddr)) {
+      const { WebhookBch } = await import("../webhook/WebhookBch.js");
       return new WebhookBch(hook);
     }
 

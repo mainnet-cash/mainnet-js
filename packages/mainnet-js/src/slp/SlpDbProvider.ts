@@ -35,7 +35,7 @@ import { btoa } from "../util/base64.js";
 //import EventSource from "../../polyfill/eventsource.js";
 import EventSource from "../util/eventsource.js";
 
-import { Mainnet } from "../index.js";
+import { getRuntimePlatform, RuntimePlatform } from "../util/getRuntimePlatform.js";
 
 export class SlpDbProvider implements SlpProvider {
   public static defaultServers = {
@@ -58,7 +58,7 @@ export class SlpDbProvider implements SlpProvider {
   public caching: boolean = false;
 
   constructor(public network: Network = Network.MAINNET) {
-    if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node) {
+    if (getRuntimePlatform() === RuntimePlatform.node) {
       if (process.env.SLPDB_MAINNET_DATA)
         this.servers.mainnet.dataSource = process.env.SLPDB_MAINNET_DATA;
       if (process.env.SLPDB_MAINNET_EVENTS)

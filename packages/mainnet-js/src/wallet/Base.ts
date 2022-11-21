@@ -1,4 +1,4 @@
-import { getStorageProvider } from "../db/util.js";
+import { getStorageProvider } from "../db/getStorageProvider.js";
 import { MnemonicI, WalletI } from "./interface.js";
 import { NetworkType } from "../enum.js";
 import { StorageProvider } from "../db/index.js";

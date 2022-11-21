@@ -13,6 +13,7 @@ import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util.js";
 import { CancelWatchFn } from "../wallet/interface.js";
+import { getTransactionHash } from "../util/transaction.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -143,7 +144,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     awaitPropagation: boolean = true
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      let txHash = await Util.getTransactionHash(txHex);
+      let txHash = await getTransactionHash(txHex);
       if (!awaitPropagation) {
         this.performRequest("blockchain.transaction.broadcast", txHex);
         resolve(txHash);
