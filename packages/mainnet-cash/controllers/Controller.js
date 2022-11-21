@@ -112,7 +112,7 @@ class Controller {
       const serviceResponse = await serviceOperation(this.collectRequestParams(request));
       Controller.sendResponse(response, serviceResponse);
     } catch (error) {
-      console.trace(error);
+      // console.trace(error);
       Controller.sendError(response, error);
     }
   }

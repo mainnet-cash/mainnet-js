@@ -113,7 +113,7 @@ export default class ExpressServer {
         // eslint-disable-next-line no-unused-vars
         this.app.use((err, req, res, next) => {
           // format errors
-          console.error(err)
+          // console.error(err)
           res.status(err.status || 500).json({
             message: err.message || err.error,
             errors: err.errors || '',
