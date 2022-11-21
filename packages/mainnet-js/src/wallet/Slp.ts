@@ -53,7 +53,10 @@ import { GsppProvider } from "../slp/GsppProvider.js";
 import { delay } from "../util/delay.js";
 import { Util } from "./Util.js";
 import { FeePaidByEnum } from "./enum.js";
-import { getRuntimePlatform, RuntimePlatform } from "../util/getRuntimePlatform.js";
+import {
+  getRuntimePlatform,
+  RuntimePlatform,
+} from "../util/getRuntimePlatform.js";
 
 /**
  * Class to manage an slp enabled wallet.

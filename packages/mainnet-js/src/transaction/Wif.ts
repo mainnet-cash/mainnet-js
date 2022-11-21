@@ -62,9 +62,12 @@ export async function buildP2pkhNonHdTransaction(
           changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
         } else {
           // Get the change locking bytecode
-          changeLockingBytecode = compiler.generateBytecode({scriptId: "lock", data: {
-            keys: { privateKeys: { key: signingKey } },
-          }});
+          changeLockingBytecode = compiler.generateBytecode({
+            scriptId: "lock",
+            data: {
+              keys: { privateKeys: { key: signingKey } },
+            },
+          });
         }
         if (typeof changeLockingBytecode === "string") {
           throw new Error(changeLockingBytecode);
@@ -91,7 +94,11 @@ export async function buildP2pkhNonHdTransaction(
 
 export function prepareInputs(
   inputs: UtxoI[],
-  compiler: Compiler<CompilationContextBCH, AnyCompilerConfiguration<CompilationContextBCH>, AuthenticationProgramStateCommon>,
+  compiler: Compiler<
+    CompilationContextBCH,
+    AnyCompilerConfiguration<CompilationContextBCH>,
+    AuthenticationProgramStateCommon
+  >,
   signingKey: Uint8Array
 ) {
   let signedInputs: any[] = [];
@@ -143,7 +150,8 @@ export async function prepareOutputs(
     }
 
     let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
-    if (typeof outputLockingBytecode === "string") throw new Error(outputLockingBytecode);
+    if (typeof outputLockingBytecode === "string")
+      throw new Error(outputLockingBytecode);
 
     let sendAmount = await amountInSatoshi(output.value, output.unit);
     if (sendAmount % 1 !== 0) {

@@ -7,7 +7,11 @@ export let defaultServers = {
     "https://smartbch.fountainhead.cash/mainnet",
     "https://smartbch.greyh.at",
   ],
-  testnet: ["http://35.220.203.194:8545", "https://rpc-testnet.smartbch.org", "https://moeing.tech:9545"],
+  testnet: [
+    "http://35.220.203.194:8545",
+    "https://rpc-testnet.smartbch.org",
+    "https://moeing.tech:9545",
+  ],
   regtest: ["http://127.0.0.1:8545"],
 };
 

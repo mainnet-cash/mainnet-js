@@ -19,7 +19,10 @@ import { btoa } from "../util/base64.js";
 
 //import EventSource from "../../polyfill/eventsource.js";
 import EventSource from "../util/eventsource.js";
-import { getRuntimePlatform, RuntimePlatform } from "../util/getRuntimePlatform.js";
+import {
+  getRuntimePlatform,
+  RuntimePlatform,
+} from "../util/getRuntimePlatform.js";
 
 export class GsppProvider implements SlpProvider {
   public static defaultServers = {

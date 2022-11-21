@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { SmartBchWallet } from "./SmartBchWallet.js";
-import { Contract } from "./Contract.js"
+import { Contract } from "./Contract.js";
 import { NetworkType } from "mainnet-js";
 
 export class FaucetContract extends Contract {

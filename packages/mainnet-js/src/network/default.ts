@@ -1,7 +1,11 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
 import { ElectrumCluster, ElectrumClient } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
-import { defaultServers, getConfidence, getUserAgent } from "./configuration.js";
+import {
+  defaultServers,
+  getConfidence,
+  getUserAgent,
+} from "./configuration.js";
 import { parseElectrumUrl } from "./util.js";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface.js";
 import { Network } from "../interface.js";

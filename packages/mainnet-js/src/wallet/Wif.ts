@@ -60,7 +60,10 @@ import {
 } from "../util/balanceObjectFromSatoshi.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
 import { deriveCashaddr } from "../util/deriveCashaddr.js";
-import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash.js";
+import {
+  derivePrefix,
+  derivePublicKeyHash,
+} from "../util/derivePublicKeyHash.js";
 import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
 import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
@@ -1203,10 +1206,7 @@ export class Wallet extends BaseWallet {
     this.publicKeyCompressed = publicKeyCompressed;
     const networkType =
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
-    this.privateKeyWif = encodePrivateKeyWif(
-      this.privateKey!,
-      networkType
-    );
+    this.privateKeyWif = encodePrivateKeyWif(this.privateKey!, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
     this.cashaddr = (await deriveCashaddr(

@@ -1,4 +1,3 @@
-
 import { getRuntimePlatform } from "../util/getRuntimePlatform.js";
 import IndexedDBProvider from "./IndexedDBProvider.js";
 import SqlProvider from "./SqlProvider.js";

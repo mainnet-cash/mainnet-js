@@ -74,8 +74,14 @@ export class SignedMessage implements SignedMessageI {
     if (typeof rs === "string") {
       throw new Error(rs);
     }
-    let sigDer = secp256k1.signMessageHashDER(privateKey, messageHash) as Uint8Array;
-    let sigSchnorr = secp256k1.signMessageHashSchnorr(privateKey, messageHash) as Uint8Array;
+    let sigDer = secp256k1.signMessageHashDER(
+      privateKey,
+      messageHash
+    ) as Uint8Array;
+    let sigSchnorr = secp256k1.signMessageHashSchnorr(
+      privateKey,
+      messageHash
+    ) as Uint8Array;
     let electronEncoding = new Uint8Array([
       ...[31 + rs.recoveryId],
       ...rs.signature,
@@ -145,7 +151,11 @@ export class SignedMessage implements SignedMessageI {
       if (cashaddr) {
         // Validate that the signature actually matches the provided cashaddr
         let prefix = derivePrefix(cashaddr);
-        let resultingCashaddr = encodeCashAddress(prefix, CashAddressType.p2pkh, pkh);
+        let resultingCashaddr = encodeCashAddress(
+          prefix,
+          CashAddressType.p2pkh,
+          pkh
+        );
         if (resultingCashaddr === cashaddr) {
           pkhMatch = true;
         }

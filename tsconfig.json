@@ -46,7 +46,7 @@
     "types": ["node", "jest"],
     "allowJs": false,
     "noEmit": false,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": ["packages/*/src/**/*.ts"],
   "exclude": ["node_modules/**", "dist"],

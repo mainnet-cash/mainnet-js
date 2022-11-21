@@ -7,8 +7,8 @@ const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const nodeExternals = require("webpack-node-externals");
 const __basedir = require("path").resolve(__dirname, "../../");
-const CircularDependencyPlugin = require('circular-dependency-plugin')
-const webpack = require('webpack');
+const CircularDependencyPlugin = require("circular-dependency-plugin");
+const webpack = require("webpack");
 
 const baseConfig = {
   mode: "development",
@@ -16,12 +16,14 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [{
-          loader: 'ts-loader',
-          options: {
-              configFile: "tsconfig.browser.json"
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.browser.json",
+            },
           },
-        }],
+        ],
         exclude: [/node_modules/],
       },
     ],
@@ -29,7 +31,7 @@ const baseConfig = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".wasm"],
     extensionAlias: {
-      '.js': ['.ts', '.js'],
+      ".js": [".ts", ".js"],
     },
   },
   optimization: {
@@ -53,7 +55,7 @@ const browserConfig = {
     contract: {
       import: "./src/index.web.ts",
       library: {
-        name: '__contractPromise',
+        name: "__contractPromise",
         type: "global",
       },
     },
@@ -70,13 +72,14 @@ const browserConfig = {
       title: "The Empty Mainnet App",
     }),
     new InjectBodyPlugin({
-      content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __contractPromise))</script>'
+      content:
+        '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __contractPromise))</script>',
     }),
     new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer']
+      Buffer: ["buffer", "Buffer"],
     }),
     new webpack.DefinePlugin({
-      'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG)
+      "process.env.NODE_DEBUG": JSON.stringify(process.env.NODE_DEBUG),
     }),
     new CircularDependencyPlugin({
       include: /src/,
@@ -89,7 +92,7 @@ const browserConfig = {
       allowAsyncCycles: false,
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
-    })
+    }),
   ],
   resolve: {
     alias: {

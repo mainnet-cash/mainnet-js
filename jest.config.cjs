@@ -1,6 +1,6 @@
 module.exports = {
   rootDir: "./",
-  preset: 'ts-jest/presets/default-esm',
+  preset: "ts-jest/presets/default-esm",
   resolver: "ts-jest-resolver",
   collectCoverage: true,
   collectCoverageFrom: [
@@ -23,8 +23,8 @@ module.exports = {
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
   ],
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
+    "^.+\\.tsx?$": [
+      "ts-jest",
       {
         useESM: true,
       },

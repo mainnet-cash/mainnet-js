@@ -4,7 +4,7 @@ import {
   binToHex,
   hexToBin,
   importAuthenticationTemplate,
-  utf8ToBin
+  utf8ToBin,
 } from "@bitauth/libauth";
 import { parseSLP } from "slp-parser";
 
@@ -95,21 +95,24 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
 
   const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
-  let genesisTxoBytecode = compiler.generateBytecode({scriptId: "genesis_lock", data: {
-    bytecode: {
-      g_token_type: Uint8Array.from([...[0x01], ...[options.type]]),
-      g_token_ticker: stringToBin(options.ticker),
-      g_token_name: stringToBin(options.name),
-      g_token_document_url: stringToBin(options.documentUrl),
-      g_token_document_hash: stringToBin(options.documentHash, true),
-      g_decimals: Uint8Array.from([...[0x01], ...[options.decimals]]),
-      g_mint_baton_vout: Uint8Array.from(batonVout),
-      g_initial_token_mint_quantity: Uint8Array.from([
-        ...[0x08],
-        ...bigIntToBinUint64BE(rawTokenAmount),
-      ]),
+  let genesisTxoBytecode = compiler.generateBytecode({
+    scriptId: "genesis_lock",
+    data: {
+      bytecode: {
+        g_token_type: Uint8Array.from([...[0x01], ...[options.type]]),
+        g_token_ticker: stringToBin(options.ticker),
+        g_token_name: stringToBin(options.name),
+        g_token_document_url: stringToBin(options.documentUrl),
+        g_token_document_hash: stringToBin(options.documentHash, true),
+        g_decimals: Uint8Array.from([...[0x01], ...[options.decimals]]),
+        g_mint_baton_vout: Uint8Array.from(batonVout),
+        g_initial_token_mint_quantity: Uint8Array.from([
+          ...[0x08],
+          ...bigIntToBinUint64BE(rawTokenAmount),
+        ]),
+      },
     },
-  }});
+  });
   if (!genesisTxoBytecode.success) {
     throw new Error(genesisTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
@@ -170,17 +173,20 @@ export const SlpGetMintOutputs = async (
 
   const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
-  let mintTxoBytecode = compiler.generateBytecode({scriptId: "mint_lock", data: {
-    bytecode: {
-      m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
-      m_token_id: hexToBin(options.tokenId),
-      m_mint_baton_vout: Uint8Array.from(batonVout),
-      m_additional_token_quantity: Uint8Array.from([
-        ...[0x08],
-        ...bigIntToBinUint64BE(BigInt(amount.toString())),
-      ]),
+  let mintTxoBytecode = compiler.generateBytecode({
+    scriptId: "mint_lock",
+    data: {
+      bytecode: {
+        m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
+        m_token_id: hexToBin(options.tokenId),
+        m_mint_baton_vout: Uint8Array.from(batonVout),
+        m_additional_token_quantity: Uint8Array.from([
+          ...[0x08],
+          ...bigIntToBinUint64BE(BigInt(amount.toString())),
+        ]),
+      },
     },
-  }});
+  });
   if (!mintTxoBytecode.success) {
     throw new Error(mintTxoBytecode.errors.map((e) => e.error).join("\n"));
   }
@@ -286,13 +292,16 @@ export const SlpGetSendOutputs = async (
     ]);
   }
 
-  let sendTxoBytecode = compiler.generateBytecode({scriptId: "send_lock", data: {
-    bytecode: {
-      s_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
-      s_token_id: hexToBin(tokenId!),
-      s_token_output_quantities: result,
+  let sendTxoBytecode = compiler.generateBytecode({
+    scriptId: "send_lock",
+    data: {
+      bytecode: {
+        s_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
+        s_token_id: hexToBin(tokenId!),
+        s_token_output_quantities: result,
+      },
     },
-  }});
+  });
   if (!sendTxoBytecode.success) {
     throw new Error(sendTxoBytecode.errors.map((e) => e.error).join("\n"));
   }

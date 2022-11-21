@@ -574,17 +574,16 @@ describe(`Wallet subscriptions`, () => {
     let balance, newBalance;
     balance = await aliceWallet.getBalance("sat");
 
-    aliceWallet
-      .send(
-        [
-          {
-            cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
-          },
-        ],
-        { awaitTransactionPropagation: false }
-      );
+    aliceWallet.send(
+      [
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ],
+      { awaitTransactionPropagation: false }
+    );
     newBalance = await aliceWallet.getBalance("sat");
     expect(balance).toBe(newBalance);
 

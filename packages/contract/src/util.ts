@@ -10,7 +10,9 @@ import cashscript, {
 } from "cashscript";
 
 // FIXME Jest is complaining about SignatureTemplate not exported
-const { SignatureTemplate } = cashscript || {SignatureTemplate: (await import("cashscript"))["SignatureTemplate"]};
+const { SignatureTemplate } = cashscript || {
+  SignatureTemplate: (await import("cashscript"))["SignatureTemplate"],
+};
 
 /**
  * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input

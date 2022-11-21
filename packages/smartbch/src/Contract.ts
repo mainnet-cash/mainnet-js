@@ -434,7 +434,8 @@ export class Contract {
       },
     };
 
-    const compiled = JSON.parse("{}"
+    const compiled = JSON.parse(
+      "{}"
       // await solc.compile(JSON.stringify(input), {
       //   import: Contract.findImports,
       // })

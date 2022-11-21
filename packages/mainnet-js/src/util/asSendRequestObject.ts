@@ -1,6 +1,10 @@
 import { base64ToBin } from "@bitauth/libauth";
 import { UnitEnum } from "../enum.js";
-import { OpReturnData, SendRequest, SendRequestArray } from "../wallet/model.js";
+import {
+  OpReturnData,
+  SendRequest,
+  SendRequestArray,
+} from "../wallet/model.js";
 
 export function asSendRequestObject(
   requests:

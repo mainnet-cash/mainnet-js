@@ -1,5 +1,5 @@
 import { getRuntimePlatform } from "./getRuntimePlatform.js";
-import crypto from 'crypto';
+import crypto from "crypto";
 
 if (getRuntimePlatform() === "node") {
   if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {

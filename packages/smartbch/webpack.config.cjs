@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const CircularDependencyPlugin = require('circular-dependency-plugin')
+const CircularDependencyPlugin = require("circular-dependency-plugin");
 const __basedir = require("path").resolve(__dirname, "../../");
 
 const baseConfig = {
@@ -14,12 +14,14 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [{
-          loader: 'ts-loader',
-          options: {
-              configFile: "tsconfig.browser.json"
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.browser.json",
+            },
           },
-        }],
+        ],
         exclude: [/node_modules/],
       },
     ],
@@ -27,7 +29,7 @@ const baseConfig = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".wasm"],
     extensionAlias: {
-      '.js': ['.ts', '.js'],
+      ".js": [".ts", ".js"],
     },
   },
   optimization: {
@@ -51,7 +53,7 @@ const browserConfig = {
     smartbch: {
       import: "./src/index.web.ts",
       library: {
-        name: '__smartbchPromise',
+        name: "__smartbchPromise",
         type: "global",
       },
     },
@@ -69,7 +71,8 @@ const browserConfig = {
       title: "The Empty Mainnet App",
     }),
     new InjectBodyPlugin({
-      content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __smartbchPromise))</script>'
+      content:
+        '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __smartbchPromise))</script>',
     }),
     new CircularDependencyPlugin({
       include: /src/,
@@ -82,7 +85,7 @@ const browserConfig = {
       allowAsyncCycles: false,
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
-    })
+    }),
   ],
   resolve: {
     alias: {

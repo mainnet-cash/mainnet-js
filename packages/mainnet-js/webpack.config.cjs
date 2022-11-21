@@ -5,17 +5,17 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-  const CircularDependencyPlugin = require('circular-dependency-plugin')
+const CircularDependencyPlugin = require("circular-dependency-plugin");
 const __basedir = require("path").resolve(__dirname, "../../");
 
-const webpack = require('webpack');
+const webpack = require("webpack");
 
 const baseConfig = {
   mode: "development",
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
     extensionAlias: {
-      '.js': ['.ts', '.js'],
+      ".js": [".ts", ".js"],
     },
   },
   optimization: {
@@ -39,8 +39,8 @@ const browserConfig = {
     mainnet: {
       import: "./src/index.ts",
       library: {
-        name: '__mainnetPromise',
-        type: 'global',
+        name: "__mainnetPromise",
+        type: "global",
       },
     },
   },
@@ -48,12 +48,14 @@ const browserConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [{
-          loader: 'ts-loader',
-          options: {
-              configFile: "tsconfig.browser.json"
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.browser.json",
+            },
           },
-        }],
+        ],
         exclude: [/node_modules/],
       },
     ],
@@ -69,10 +71,11 @@ const browserConfig = {
       title: "The Empty Mainnet App",
     }),
     new InjectBodyPlugin({
-      content: '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>'
+      content:
+        '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>',
     }),
     new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer']
+      Buffer: ["buffer", "Buffer"],
     }),
     new CircularDependencyPlugin({
       include: /src/,
@@ -85,7 +88,7 @@ const browserConfig = {
       allowAsyncCycles: false,
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
-    })
+    }),
   ],
   resolve: {
     alias: {

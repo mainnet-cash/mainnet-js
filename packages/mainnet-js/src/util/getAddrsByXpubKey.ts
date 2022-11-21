@@ -49,7 +49,9 @@ export async function derivePublicNodeCashaddr(
   if (typeof publicParent === "string") {
     throw new Error(publicParent);
   }
-  let prefix = (publicParent.network === "mainnet" ? "bitcoincash" : "bchtest") as CashAddressNetworkPrefix;
+  let prefix = (
+    publicParent.network === "mainnet" ? "bitcoincash" : "bchtest"
+  ) as CashAddressNetworkPrefix;
 
   let node = deriveHdPublicNodeChild(publicParent.node, index);
   if (typeof node === "string") {
