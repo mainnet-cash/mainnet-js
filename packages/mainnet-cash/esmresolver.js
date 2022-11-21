@@ -3,10 +3,7 @@ import path from 'path';
 export const handlersCache = {};
 
 export default function resolver(handlersPath, route, apiDoc) {
-  // console.log(JSON.stringify(route, null, 2))
-  const { basePath, schema, expressRoute, openApiRoute, method } = route;
-  // const pathKey = openApiRoute.substring(basePath.length);
-  // const schema = apiDoc.paths[pathKey][method.toLowerCase()];
+  const { schema, expressRoute, method } = route;
   const oId = schema['x-eov-operation-id'] || schema['operationId'];
   const baseName = schema['x-eov-operation-handler'];
 
