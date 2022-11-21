@@ -11,7 +11,7 @@
   "name": "mainnet-js",
   "version": "0.5.9",
   "homepage": "https://mainnet.cash",
-  "main": "dist/main/index.js",
+  "main": "dist/module/index.js",
   "module": "dist/module/index.js",
   "browser": {
     "http": false,
@@ -21,7 +21,6 @@
   },
   "types": "dist/main/index.d.ts",
   "exports": {
-    "require": "./dist/main/index.js",
     "import": "./dist/module/index.js"
   },
   "scripts": {
@@ -29,9 +28,8 @@
     "cli": "npx ts-node src/cli.ts",
     "lint": "eslint . --ext .ts",
     "prebuild": "yarn install",
-    "build": "yarn clean && yarn build:main && yarn build:module  && yarn build:browser",
-    "build:main": "tsc",
-    "build:module": "tsc -p tsconfig.browser.json",
+    "build": "yarn clean && yarn build:module  && yarn build:browser",
+    "build:module": "tsc",
     "build:browser": "npx webpack",
     "demo": "npx reload --dir=demo/",
     "publish:public": "yarn publish --access public",

@@ -11,7 +11,7 @@
     "composite": true,
     "module": "esnext",
     "target": "esnext",
-    "outDir": "./dist/main",
+    "outDir": "./dist/module",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "lib": ["es2020", "es2020.bigint", "dom"],
