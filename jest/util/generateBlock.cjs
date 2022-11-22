@@ -58,9 +58,9 @@ function pingBchn(user, password, port) {
     `exec`,
     `bitcoind`,
     `bitcoin-cli`,
-    `-rpcuser=${user || 'alice'}`,
-    `-rpcpassword=${password || 'password'}`,
-    `-rpcport=${port || '18443'}`,
+    `-rpcuser=${user || "alice"}`,
+    `-rpcpassword=${password || "password"}`,
+    `-rpcport=${port || "18443"}`,
     `-rpcconnect=bitcoind`,
     "getblockchaininfo",
   ];
