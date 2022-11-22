@@ -6,7 +6,6 @@ import cashscript, {
   Argument,
   Artifact,
   Recipient as CashscriptReceipt,
-  // SignatureTemplate
 } from "cashscript";
 
 // FIXME Jest is complaining about SignatureTemplate not exported
