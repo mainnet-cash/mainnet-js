@@ -333,7 +333,7 @@ export class Contract implements ContractI {
     }
   }
   public async estimateFee(
-    func: any, //ContractFunction, FIXME
+    func: any, //ContractFunction, FIXME https://github.com/rkalis/cashscript/pull/135
     publicKey: Uint8Array,
     sig: cashscript.SignatureTemplate,
     outputAddress: string,
