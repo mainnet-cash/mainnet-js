@@ -8,7 +8,9 @@ async function getRegtestUtxos(address) {
       "Mainnet Regtest Client",
       "1.4.1",
       1,
-      2
+      2,
+      electron.ClusterOrder.RANDOM,
+      1000
     );
     spv.addServer(
       "127.0.0.1",
@@ -24,7 +26,7 @@ async function getRegtestUtxos(address) {
       //console.log(e);
       return 0;
     }
-    return reg.getUtxos(address);
+    return (await reg.getUtxos(address)).length;
   } catch (e) {
     console.log("Error getting block height" + e);
     return 0;
@@ -54,12 +56,12 @@ function generateBlock(user, password, port, numberOfBlocks, address) {
 function pingBchn(user, password, port) {
   const readinessArgs = [
     `exec`,
-    `-it`,
-    `regtest`,
+    `bitcoind`,
     `bitcoin-cli`,
-    `--rpcuser=${user}`,
-    `--rpcpassword=${password}`,
-    `--rpcport=${port}`,
+    `-rpcuser=${user || 'alice'}`,
+    `-rpcpassword=${password || 'password'}`,
+    `-rpcport=${port || '18443'}`,
+    `-rpcconnect=bitcoind`,
     "getblockchaininfo",
   ];
   let response = spawnSync(`docker`, readinessArgs);

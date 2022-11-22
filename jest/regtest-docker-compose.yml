@@ -5,8 +5,8 @@ services:
     image: mainnet/smartbch
     entrypoint: init_regtest.sh
     ports:
-      - "8545:8545"
-      - "9545:9545"
+      - "127.0.0.1:8545:8545"
+      - "127.0.0.1:9545:9545"
     restart: always
     volumes:
       - smartbch_data:/root/.smartbchd
@@ -41,8 +41,8 @@ services:
     image: cculianu/fulcrum
     command: /bin/sh -c "/bin/sleep 10 && Fulcrum /tmp/fulcrum.conf"
     ports:
-      - "60001:60001"
-      - "60003:60003"
+      - "127.0.0.1:60001:60001"
+      - "127.0.0.1:60003:60003"
     expose: [60001, 60003]
     depends_on:
       - bitcoin-mine
@@ -60,7 +60,7 @@ services:
     volumes:
       - "sql-data:/var/lib/postgresql/data"
     ports:
-      - 15432:5432
+      - 127.0.0.1:15432:5432
 
   # mongodb:
   #   image: mongo:4.4.2-bionic
