@@ -10,11 +10,11 @@ import {
 
 import { hash160 } from "./hash160.js";
 
-export async function getAddrsByXpubKey(
+export function getAddrsByXpubKey(
   xpub: string,
   path: string,
   count: number
-) {
+): Array<string> {
   let pathComponents = path.split("/");
   let rootStr = pathComponents.shift()!;
   let root: number;
@@ -22,7 +22,7 @@ export async function getAddrsByXpubKey(
     rootStr = pathComponents.shift()!;
   }
   root = parseInt(rootStr);
-  let result: any = [];
+  let result: Array<string> = [];
 
   const start = parseInt(pathComponents.pop()!);
   const end = start + count;
@@ -30,20 +30,18 @@ export async function getAddrsByXpubKey(
     let childPath = ["M", root, ...pathComponents, curr].join("/");
     result.push(derivePublicNodeCashaddr(xpub, root, childPath));
   }
-  return await Promise.all(result).then((result) => {
-    return result;
-  });
+  return result;
 }
 
-export async function getAddrsByXpubKeyObject(obj) {
-  return await getAddrsByXpubKey(obj.xpubkey, obj.path, obj.count);
+export function getAddrsByXpubKeyObject(obj): Array<string> {
+  return getAddrsByXpubKey(obj.xpubkey, obj.path, obj.count);
 }
 
-export async function derivePublicNodeCashaddr(
+export function derivePublicNodeCashaddr(
   xpub,
   index: number,
   path?: string
-) {
+): string {
   const publicParent = decodeHdPublicKey(xpub);
 
   if (typeof publicParent === "string") {
@@ -67,14 +65,14 @@ export async function derivePublicNodeCashaddr(
     if (typeof childNode === "string") {
       throw new Error(childNode);
     } else {
-      let childPkh = await hash160(childNode.publicKey);
+      let childPkh = hash160(childNode.publicKey);
       cashaddr = encodeCashAddress(prefix, CashAddressType.p2pkh, childPkh);
     }
   }
   return cashaddr;
 }
 
-export async function getXpubKeyInfo(hdPublicKey) {
+export function getXpubKeyInfo(hdPublicKey: string) {
   let node = decodeHdPublicKey(hdPublicKey);
   if (typeof node === "string") {
     throw new Error(node);
@@ -86,10 +84,10 @@ export async function getXpubKeyInfo(hdPublicKey) {
     childNumber: node.node.childIndex,
     chain: binToHex(node.node.chainCode),
     data: binToHex(node.node.publicKey),
-    fingerprint: binToHex((await hash160(node.node.publicKey)).slice(0, 4)),
+    fingerprint: binToHex(hash160(node.node.publicKey).slice(0, 4)),
   };
 }
 
 export async function getXpubKeyInfoObject(obj) {
-  return await getXpubKeyInfo(obj.xpubkey);
+  return getXpubKeyInfo(obj.xpubkey);
 }

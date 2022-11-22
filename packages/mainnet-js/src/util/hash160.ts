@@ -1,4 +1,4 @@
-import { instantiateSha256, instantiateRipemd160 } from "@bitauth/libauth";
+import { ripemd160, sha256 } from "@bitauth/libauth";
 
 /**
  * hash160 - Calculate the sha256, ripemd160 hash of a value
@@ -7,8 +7,6 @@ import { instantiateSha256, instantiateRipemd160 } from "@bitauth/libauth";
  *
  * @returns a promise to the hash160 value of the input
  */
-export async function hash160(message: Uint8Array) {
-  const ripemd160 = await instantiateRipemd160();
-  const sha256 = await instantiateSha256();
+export function hash160(message: Uint8Array) {
   return ripemd160.hash(sha256.hash(message));
 }

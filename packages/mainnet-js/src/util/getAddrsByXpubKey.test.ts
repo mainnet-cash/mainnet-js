@@ -7,7 +7,7 @@ import {
 test("Should decode xpubInfo", async () => {
   let xpub =
     "xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj";
-  let xpubInfo = await getXpubKeyInfo(xpub);
+  let xpubInfo = getXpubKeyInfo(xpub);
   expect(xpubInfo.version).toBe("mainnet");
   expect(xpubInfo.depth).toBe(3);
   expect(xpubInfo.parentFingerprint).toBe("155bca59");
@@ -57,7 +57,7 @@ test("Should derive list of cashaddrs from m/44'/0'/0' given xpub path, & limit"
   ];
 
   // M/44'/0'/0'/0/i
-  const cashaddrs = await getAddrsByXpubKey(xpub, "0/0", 3);
+  const cashaddrs = getAddrsByXpubKey(xpub, "0/0", 3);
   expect(cashaddrs).toStrictEqual(vectors);
 });
 
@@ -76,7 +76,7 @@ test("Should derive list of change cashaddrs from m/44'/0'/0' given xpub path, &
   ];
 
   // M/44'/0'/0'/0/i
-  const cashaddrs = await getAddrsByXpubKey(xpub, "1/0", 3);
+  const cashaddrs = getAddrsByXpubKey(xpub, "1/0", 3);
   expect(cashaddrs).toStrictEqual(vectors);
 });
 
@@ -94,7 +94,7 @@ test("Should derive list of cashaddrs from M/44'/145'/0' given xpub, path and li
     "bitcoincash:qqkuy34ntrye9a2h4xpdstcu4aq5wfrwscjtaphenr",
   ];
 
-  const cashaddrs = await getAddrsByXpubKey(xpub, "0/0", 3);
+  const cashaddrs = getAddrsByXpubKey(xpub, "0/0", 3);
   expect(cashaddrs).toStrictEqual(vectors);
 });
 test("Should derive list of change cashaddrs from M/44'/145'/0' given xpub, path and limit", async () => {
@@ -110,6 +110,6 @@ test("Should derive list of change cashaddrs from M/44'/145'/0' given xpub, path
     //  M/44'/145'/0'/1/2
     "bitcoincash:qp57cex47jtyhedphe2c63gpzsx3zs0ryvejxly47d",
   ];
-  const cashaddrs = await getAddrsByXpubKey(xpub, "1/0", 3);
+  const cashaddrs = getAddrsByXpubKey(xpub, "1/0", 3);
   expect(cashaddrs).toStrictEqual(vectors);
 });
