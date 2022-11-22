@@ -1,10 +1,6 @@
 //#region Imports
 // Stable
-import {
-  encodeHdPublicKey,
-  HdKeyNetwork,
-  secp256k1,
-} from "@bitauth/libauth";
+import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
 
 // Unstable?
 import {
