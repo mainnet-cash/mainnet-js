@@ -7,7 +7,7 @@ import {
   hexToBin,
 } from "@bitauth/libauth";
 
-export async function getXPubKey(
+export function getXPubKey(
   seed: Uint8Array | string,
   derivationPath: string,
   network: string
