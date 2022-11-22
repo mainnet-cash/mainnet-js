@@ -3,7 +3,7 @@
 import {
   encodeHdPublicKey,
   HdKeyNetwork,
-  instantiateSecp256k1,
+  secp256k1,
 } from "@bitauth/libauth";
 
 // Unstable?
@@ -1191,7 +1191,6 @@ export class Wallet extends BaseWallet {
 
   //#region Private implementation details
   private async deriveInfo() {
-    const secp256k1 = await instantiateSecp256k1();
     const publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
     if (typeof publicKey === "string") {
       throw new Error(publicKey);
