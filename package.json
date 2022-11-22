@@ -23,8 +23,8 @@
   "version": "0.5.9",
   "homepage": "https://mainnet.cash",
   "scripts": {
-    "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli validate -i /local/swagger/v1/api.yml",
-    "api:build:server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/packages/mainnet-cash",
+    "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
+    "api:build:server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 generate -i /local/swagger/v1/api.yml -g nodejs-express-server -o /local/packages/mainnet-cash",
     "api:build:client": "node swagger/generate.js",
     "api:serve:install": "yarn install --production=true --cwd packages/mainnet-cash/ --prefix packages/mainnet-cash/",
     "api:serve:test": "yarn workspace mainnet-cash run test",
