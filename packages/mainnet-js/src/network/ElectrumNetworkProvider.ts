@@ -5,7 +5,7 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
-import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface.js";
+import { HeaderI, TxI, UtxoI, ElectrumBalanceI, TokenI } from "../interface.js";
 import { Network } from "../interface.js";
 import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
@@ -14,6 +14,7 @@ import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util.js";
 import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
+import { binToHex, decodeTransactionBCH, hexToBin, TransactionBCH } from "@bitauth/libauth";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -74,12 +75,31 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       cashaddr
     )) as ElectrumUtxo[];
 
-    const utxos = result.map((utxo) => ({
-      txid: utxo.tx_hash,
-      vout: utxo.tx_pos,
-      satoshis: utxo.value,
-      height: utxo.height,
-    }));
+    const uniqueTransactionHashes = result.filter((value, index, array) => array.indexOf(value) === index);
+    const transactionMap: {[hash: string]: TransactionBCH} = {}
+    for (let {tx_hash} of uniqueTransactionHashes) {
+      const decoded = decodeTransactionBCH(hexToBin(await this.getRawTransaction(tx_hash, false)));
+      if (typeof decoded === "string") {
+        throw new Error(decoded);
+      }
+      transactionMap[tx_hash] = decoded;
+    }
+
+    const utxos = result.map((utxo) => {
+      const output = transactionMap[utxo.tx_hash].outputs[utxo.tx_pos];
+      return {
+        txid: utxo.tx_hash,
+        vout: utxo.tx_pos,
+        satoshis: utxo.value,
+        height: utxo.height,
+        token: output.token && {
+          amount: output.token.amount,
+          tokenId: binToHex(output.token.category),
+          capability: output.token.nft?.capability,
+          commitment: output.token.nft?.commitment && binToHex(output.token.nft?.commitment),
+        } as TokenI,
+      } as UtxoI
+    });
 
     return utxos;
   }
