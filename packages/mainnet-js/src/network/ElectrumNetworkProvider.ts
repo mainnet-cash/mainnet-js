@@ -49,7 +49,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
             await this.connectCluster();
           } catch (e) {
             console.warn(
-              `Unable to connect to one or more electrum-cash hosts: ${e}`
+              `Unable to connect to one or more electrum-cash hosts: ${JSON.stringify(e)}`
             );
           }
           resolve(await this.readyCluster());
@@ -69,20 +69,29 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     clearTimeout(timeoutHandle);
   }
 
+  private static utxoTxCache = {};
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
       cashaddr
     )) as ElectrumUtxo[];
 
+    // a workaround until Fulcrum returns token info
     const uniqueTransactionHashes = result.filter((value, index, array) => array.indexOf(value) === index);
     const transactionMap: {[hash: string]: TransactionBCH} = {}
     for (let {tx_hash} of uniqueTransactionHashes) {
+      // check cache
+      if (ElectrumNetworkProvider.utxoTxCache[tx_hash]) {
+        transactionMap[tx_hash] = ElectrumNetworkProvider.utxoTxCache[tx_hash];
+        continue;
+      }
+      // download and decode tx from Fulcrum
       const decoded = decodeTransactionBCH(hexToBin(await this.getRawTransaction(tx_hash, false)));
       if (typeof decoded === "string") {
         throw new Error(decoded);
       }
       transactionMap[tx_hash] = decoded;
+      ElectrumNetworkProvider.utxoTxCache[tx_hash] = decoded;
     }
 
     const utxos = result.map((utxo) => {
@@ -93,7 +102,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         satoshis: utxo.value,
         height: utxo.height,
         token: output.token && {
-          amount: output.token.amount,
+          amount: Number(output.token.amount),
           tokenId: binToHex(output.token.category),
           capability: output.token.nft?.capability,
           commitment: output.token.nft?.commitment && binToHex(output.token.nft?.commitment),
@@ -126,16 +135,26 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.blockHeight;
   }
 
+  static rawTransactionCache = {}
   async getRawTransaction(
     txHash: string,
     verbose: boolean = false
   ): Promise<string> {
+    const key = `${txHash}-${verbose}`;
+    if (ElectrumNetworkProvider.rawTransactionCache[key]) {
+      return ElectrumNetworkProvider.rawTransactionCache[key];
+    }
+
     try {
-      return (await this.performRequest(
+      const result = await this.performRequest(
         "blockchain.transaction.get",
         txHash,
         verbose
-      )) as string;
+      );
+
+      ElectrumNetworkProvider.rawTransactionCache[key] = result;
+
+      return result as any;
     } catch (error: any) {
       if (
         (error.message as string).indexOf(

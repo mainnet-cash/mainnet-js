@@ -4,18 +4,20 @@ import {
   OpReturnData,
   SendRequest,
   SendRequestArray,
+  TokenSendRequest,
 } from "../wallet/model.js";
 
 export function asSendRequestObject(
   requests:
     | SendRequest
+    | TokenSendRequest
     | OpReturnData
-    | Array<SendRequest | OpReturnData>
+    | Array<SendRequest | TokenSendRequest | OpReturnData>
     | Array<SendRequestArray>
-): Array<SendRequest | OpReturnData> {
-  let resp: Array<SendRequest | OpReturnData> = [];
+): Array<SendRequest | TokenSendRequest | OpReturnData> {
+  let resp: Array<SendRequest | TokenSendRequest | OpReturnData> = [];
   if (Array.isArray(requests)) {
-    requests.forEach((r: SendRequest | OpReturnData | SendRequestArray) => {
+    requests.forEach((r: SendRequest | TokenSendRequest | OpReturnData | SendRequestArray) => {
       // the SendRequestArray[] case
       if (Array.isArray(r)) {
         if (r[0] === "OP_RETURN") {
@@ -36,20 +38,22 @@ export function asSendRequestObject(
           );
         }
       } else {
-        // SendRequest | OpReturnRequest case
+        // SendRequest | TokenSendRequest | OpReturnRequest case
         resp.push(convertToClass(r));
       }
     });
   } else {
     // the SendRequest | OpReturnData object case
-    resp.push(convertToClass(requests as SendRequest | OpReturnData));
+    resp.push(convertToClass(requests as SendRequest | TokenSendRequest | OpReturnData));
   }
   return resp;
 }
 
-function convertToClass(object: SendRequest | OpReturnData) {
-  if (object.hasOwnProperty("cashaddr")) {
+function convertToClass(object: SendRequest | TokenSendRequest | OpReturnData) {
+  if (object.hasOwnProperty("unit")) {
     return new SendRequest(object as SendRequest);
+  } else if (object.hasOwnProperty("tokenId")) {
+    return new TokenSendRequest(object as TokenSendRequest);
   } else if (object.hasOwnProperty("buffer")) {
     return OpReturnData.fromBuffer((object as OpReturnData).buffer);
   }

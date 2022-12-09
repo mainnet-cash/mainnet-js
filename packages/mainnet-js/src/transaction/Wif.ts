@@ -10,12 +10,15 @@ import {
   AnyCompilerConfiguration,
   AuthenticationProgramStateCommon,
   CompilationContextBCH,
+  Output,
+  hexToBin,
+  binToHex,
 } from "@bitauth/libauth";
-import { UtxoI } from "../interface.js";
+import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
 
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
-import { OpReturnData, SendRequest } from "../wallet/model.js";
+import { OpReturnData, SendRequest, SendRequestType, TokenSendRequest } from "../wallet/model.js";
 import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
@@ -24,7 +27,7 @@ import { FeePaidByEnum } from "../wallet/enum.js";
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction(
   inputs: UtxoI[],
-  outputs: Array<SendRequest | OpReturnData>,
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
   signingKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
@@ -48,48 +51,44 @@ export async function buildP2pkhNonHdTransaction(
 
   const sendAmount = await sumSendRequestAmounts(outputs);
 
-  try {
-    const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
+  const changeAmount = BigInt(inputAmount) - BigInt(sendAmount) - BigInt(fee);
 
-    outputs = allocateFee(outputs, fee, feePaidBy, changeAmount);
+  outputs = allocateFee(outputs, fee, feePaidBy, changeAmount);
 
-    let lockedOutputs = await prepareOutputs(outputs);
+  let lockedOutputs = await prepareOutputs(outputs, inputs);
 
-    if (discardChange !== true) {
-      if (changeAmount > DUST_UTXO_THRESHOLD) {
-        let changeLockingBytecode;
-        if (changeAddress) {
-          changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
-        } else {
-          // Get the change locking bytecode
-          changeLockingBytecode = compiler.generateBytecode({
-            scriptId: "lock",
-            data: {
-              keys: { privateKeys: { key: signingKey } },
-            },
-          });
-        }
-        if (typeof changeLockingBytecode === "string") {
-          throw new Error(changeLockingBytecode);
-        }
-        lockedOutputs.push({
-          lockingBytecode: changeLockingBytecode.bytecode,
-          valueSatoshis: BigInt(changeAmount),
+  if (discardChange !== true) {
+    if (changeAmount > DUST_UTXO_THRESHOLD) {
+      let changeLockingBytecode;
+      if (changeAddress) {
+        changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
+      } else {
+        // Get the change locking bytecode
+        changeLockingBytecode = compiler.generateBytecode({
+          scriptId: "lock",
+          data: {
+            keys: { privateKeys: { key: signingKey } },
+          },
         });
       }
+      if (typeof changeLockingBytecode === "string") {
+        throw new Error(changeLockingBytecode);
+      }
+      lockedOutputs.push({
+        lockingBytecode: changeLockingBytecode.bytecode,
+        valueSatoshis: BigInt(changeAmount),
+      });
     }
-
-    let signedInputs = prepareInputs(inputs, compiler, signingKey);
-    const result = generateTransaction({
-      inputs: signedInputs,
-      locktime: 0,
-      outputs: [...slpOutputs, ...lockedOutputs],
-      version: 2,
-    });
-    return result;
-  } catch (error: any) {
-    throw Error(error.toString());
   }
+
+  let signedInputs = prepareInputs(inputs, compiler, signingKey);
+  const result = generateTransaction({
+    inputs: signedInputs,
+    locktime: 0,
+    outputs: [...slpOutputs, ...lockedOutputs],
+    version: 2,
+  });
+  return result;
 }
 
 export function prepareInputs(
@@ -114,6 +113,15 @@ export function prepareInputs(
     if (!utxoOutpointTransactionHash || utxoIndex === undefined) {
       throw new Error("Missing unspent outpoint when building transaction");
     }
+
+    const libAuthToken = i.token && {
+      amount: BigInt(i.token.amount),
+      category: hexToBin(i.token.tokenId),
+      nft: (i.token.capability || i.token.commitment) ? {
+        capability: i.token.capability,
+        commitment: i.token.commitment && hexToBin(i.token.commitment!)
+      } : undefined
+    }
     let newInput = {
       outpointIndex: utxoIndex,
       outpointTransactionHash: utxoOutpointTransactionHash,
@@ -125,6 +133,7 @@ export function prepareInputs(
         },
         valueSatoshis: BigInt(utxoTxnValue),
         script: "unlock",
+        token: libAuthToken
       },
     };
     signedInputs.push(newInput);
@@ -140,26 +149,32 @@ export function prepareInputs(
  * @returns A promise to a list of unspent outputs
  */
 export async function prepareOutputs(
-  outputs: Array<SendRequest | OpReturnData>
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  inputs: UtxoI[],
 ) {
-  let lockedOutputs: any[] = [];
+  let lockedOutputs: Output[] = [];
   for (const output of outputs) {
+    if (output instanceof TokenSendRequest) {
+      lockedOutputs.push(prepareTokenOutputs(output, inputs));
+      continue;
+    }
+
     if (output instanceof OpReturnData) {
       lockedOutputs.push(prepareOpReturnOutput(output));
       continue;
     }
 
-    let outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
+    const outputLockingBytecode = cashAddressToLockingBytecode(output.cashaddr);
     if (typeof outputLockingBytecode === "string")
       throw new Error(outputLockingBytecode);
 
-    let sendAmount = await amountInSatoshi(output.value, output.unit);
+    const sendAmount = await amountInSatoshi(output.value, output.unit);
     if (sendAmount % 1 !== 0) {
       throw Error(
         `Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`
       );
     }
-    let lockedOutput = {
+    const lockedOutput: Output = {
       lockingBytecode: outputLockingBytecode.bytecode,
       valueSatoshis: BigInt(sendAmount),
     };
@@ -173,11 +188,67 @@ export async function prepareOutputs(
  *
  * @returns A promise to a list of unspent outputs
  */
-export function prepareOpReturnOutput(request: OpReturnData) {
+export function prepareOpReturnOutput(request: OpReturnData): Output {
   return {
     lockingBytecode: request.buffer,
     valueSatoshis: BigInt(0),
   };
+}
+
+/**
+ * prepareOpReturnOutput - create an output for token data
+ *
+ * @returns A libauth Output
+ */
+ export function prepareTokenOutputs(request: TokenSendRequest, inputs: UtxoI[]): Output {
+  const token: TokenI = request;
+  const isGenesis = !request.tokenId || (request as any)._isGenesis;
+  let satValue = 0;
+  if (isGenesis) {
+    const genesisInputs = inputs.filter(val => val.vout === 0)
+    if (genesisInputs.length === 0) {
+      throw new Error("No suitable inputs with vout=0 available for new token genesis");
+    }
+    token.tokenId = genesisInputs[0].txid;
+    satValue = request.value || 1000;
+    (request as any)._isGenesis = true;
+  } else {
+    const tokenInputs = inputs.filter(val => val.token?.tokenId === request.tokenId);
+    if (!tokenInputs.length) {
+      throw new Error(`No token utxos available to send ${request.tokenId}`);
+    }
+    if (!token.capability && tokenInputs[0].token?.capability) {
+      token.capability = tokenInputs[0].token!.capability;
+    }
+    if (!token.commitment && tokenInputs[0].token?.commitment) {
+      token.commitment = tokenInputs[0].token!.commitment;
+    }
+
+    if (token.capability === NFTCapability.none && token.commitment !== tokenInputs[0].token?.commitment) {
+      throw new Error("Can not change the commitment of an immutable token");
+    }
+
+    satValue = request.value || tokenInputs[0].satoshis;
+  }
+
+  let outputLockingBytecode = cashAddressToLockingBytecode(request.cashaddr);
+  if (typeof outputLockingBytecode === "string")
+    throw new Error(outputLockingBytecode);
+
+  const libAuthToken = {
+    amount: BigInt(token.amount),
+    category: hexToBin(token.tokenId),
+    nft: (token.capability || token.commitment) ? {
+      capability: token.capability,
+      commitment: token.commitment && hexToBin(token.commitment!)
+    } : undefined
+  }
+
+  return {
+    lockingBytecode: outputLockingBytecode.bytecode,
+    valueSatoshis: BigInt(satValue),
+    token: libAuthToken,
+  } as Output;
 }
 
 /**
@@ -190,14 +261,49 @@ export function prepareOpReturnOutput(request: OpReturnData) {
  * @returns A promise to a list of unspent outputs
  */
 export async function getSuitableUtxos(
-  unspentOutputs: UtxoI[],
+  inputs: UtxoI[],
   amountRequired: BigInt | undefined,
   bestHeight: number,
-  feePaidBy: FeePaidByEnum
+  feePaidBy: FeePaidByEnum,
+  requests: SendRequestType[],
 ): Promise<UtxoI[]> {
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = BigInt(0);
-  for (const u of unspentOutputs) {
+  const tokenAmountsRequired: any[] = [];
+  const tokenRequests = requests.filter(val => val instanceof TokenSendRequest) as TokenSendRequest[];
+  const tokenIds = tokenRequests
+    .map(val => val.tokenId)
+    .filter((value, index, array) => array.indexOf(value) === index);
+  for (let tokenId of tokenIds) {
+    const requiredAmount = tokenRequests.map(val => val.amount).reduce((prev, cur) => prev + cur, 0);
+    tokenAmountsRequired.push({tokenId, requiredAmount});
+  }
+
+  let filteredInputs = inputs.slice(0);
+
+  // find suitable token inputs first
+  for (const {tokenId, requiredAmount} of tokenAmountsRequired) {
+    let tokenAmountAvailable = 0;
+    for (const input of inputs) {
+      if (input.token?.tokenId === tokenId) {
+        suitableUtxos.push(input);
+        const inputIndex = filteredInputs.indexOf(input);
+        filteredInputs = filteredInputs.filter((_, index) => inputIndex !== index);
+        tokenAmountAvailable += input.token!.amount;
+        amountAvailable += BigInt(input.satoshis);
+        if (tokenAmountAvailable >= requiredAmount) {
+          break;
+        }
+      }
+    }
+  }
+
+  // find plain outputs
+  for (const u of filteredInputs) {
+    if (u.token) {
+      // continue;
+    }
+
     if (u.coinbase && u.height && bestHeight) {
       let age = bestHeight - u.height;
       if (age > 100) {
@@ -245,7 +351,7 @@ export async function getFeeAmount({
   feePaidBy,
 }: {
   utxos: UtxoI[];
-  sendRequests: Array<SendRequest | OpReturnData>;
+  sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
   slpOutputs: any[];
@@ -275,7 +381,7 @@ export async function getFeeAmount({
 // Build encoded transaction
 export async function buildEncodedTransaction(
   fundingUtxos: UtxoI[],
-  sendRequests: Array<SendRequest | OpReturnData>,
+  sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>,
   privateKey: Uint8Array,
   fee: number = 0,
   discardChange = false,

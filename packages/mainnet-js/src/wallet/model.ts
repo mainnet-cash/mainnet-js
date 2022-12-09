@@ -1,14 +1,22 @@
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
 import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { UnitEnum } from "../enum.js";
-import { UtxoI } from "../interface.js";
+import { NFTCapability, UtxoI } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import { utf8ToBin } from "@bitauth/libauth";
+import { buffer } from "stream/consumers";
 
 // These are the minimal models used to provide types for the express server
 //
 // This file will be deprecated auto-generated file in the future
 // Any business logic contained here should be moved elsewhere in src/
+
+export type SendRequestType =
+    SendRequest
+  | TokenSendRequest
+  | OpReturnData
+  | Array<SendRequest | TokenSendRequest | OpReturnData>
+  | SendRequestArray[];
 
 export class SendRequest {
   cashaddr: string;
@@ -30,10 +38,67 @@ export class SendRequest {
   }
 }
 
+export class TokenSendRequest {
+  cashaddr: string;
+  value?: number; // satoshi value
+  amount: number; // fungible token amount
+  tokenId: string;
+  capability?: NFTCapability;
+  commitment?: string;
+
+  constructor({
+    cashaddr,
+    value,
+    amount,
+    tokenId,
+    capability,
+    commitment,
+  }: {
+    cashaddr: string;
+    value?: number;
+    amount?: number;
+    tokenId: string;
+    capability?: NFTCapability;
+    commitment?: string;
+  }) {
+    this.cashaddr = cashaddr;
+    this.value = value;
+    this.amount = amount || 0;
+    this.tokenId = tokenId;
+    this.capability = capability;
+    this.commitment = commitment;
+  }
+}
+
+export class TokenMintRequest {
+  capability?: NFTCapability;
+  commitment?: string;
+  cashaddr?: string;
+  value?: number;
+
+  constructor({
+    capability,
+    commitment,
+    cashaddr,
+    value,
+  }: {
+    capability?: NFTCapability;
+    commitment?: string;
+    cashaddr?: string;
+    value?: number;
+  }) {
+    // be explicit about minting capability for new NFTs
+    this.capability = capability || NFTCapability.none;
+    this.commitment = commitment;
+    this.cashaddr = cashaddr;
+    this.value = value;
+  }
+}
+
 export class OpReturnData {
   buffer: Buffer;
 
-  private constructor(buffer: Buffer) {
+  public constructor(buffer: Buffer) {
     this.buffer = Buffer.from(buffer);
   }
 
@@ -45,13 +110,7 @@ export class OpReturnData {
    * @returns class instance
    */
   public static from(data: string | Buffer) {
-    if (data instanceof Buffer) {
-      return this.fromBuffer(data as Buffer);
-    } else if (typeof data === "string") {
-      return this.fromString(data as string);
-    }
-
-    throw new Error(`Unsupported data type ${typeof data}`);
+    return this.fromArray([data]);
   }
 
   /**
@@ -62,10 +121,7 @@ export class OpReturnData {
    * @returns class instance
    */
   public static fromString(string: string) {
-    const length = new TextEncoder().encode(string).length;
-    return new this(
-      Buffer.from([...[0x6a, 0x4c, length], ...utf8ToBin(string)])
-    );
+    return this.fromArray([string]);
   }
 
   /**
@@ -78,9 +134,50 @@ export class OpReturnData {
    */
   public static fromBuffer(buffer: Buffer) {
     if (buffer[0] !== 0x6a) {
-      return new this(Buffer.from([...[0x6a, 0x4c, buffer.length], ...buffer]));
+      return this.fromArray([buffer]);
     }
     return new this(buffer);
+  }
+
+  /**
+   * fromArray - Accept array of data
+   *
+   * @param array   Array of Buffer or UTF-8 encoded string messages to be converted to OP_RETURN data
+   *
+   * @returns class instance
+   */
+   public static fromArray(array: Array<string | Buffer>) {
+    let data: Buffer = Buffer.from([0x6a]); // OP_RETURN
+    for (const element of array) {
+      let length: number;
+      let elementData: Uint8Array | Buffer;
+      let lengthData: any;
+      if (typeof element === "string") {
+        elementData = utf8ToBin(element);
+        length = elementData.length;
+      } else if (element instanceof Buffer) {
+        elementData = element;
+        length = elementData.length;
+      } else {
+        throw new Error("Wrong data array element");
+      }
+
+      if (length < 75) {
+        lengthData = [length];
+      } else if (length < 220 ) {
+        lengthData = [0x4c, length];
+      } else {
+        throw new Error("OP_RETURN data can not exceed 220 bytes in size");
+      }
+
+      data = Buffer.from([...data, ...[lengthData], ...elementData]);
+    }
+
+    if (data.length > 220) {
+      throw new Error("OP_RETURN data can not exceed 220 bytes in size");
+    }
+
+    return new this(data);
   }
 }
 
@@ -144,6 +241,7 @@ export class SendResponse {
   txId?: string;
   balance?: BalanceResponse;
   explorerUrl?: string;
+  tokenIds?: string[];
 
   constructor({
     txId,

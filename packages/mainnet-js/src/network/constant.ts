@@ -12,7 +12,7 @@ export const mainnetServers = [
   "wss://bch.imaginary.cash:50004",
   //"wss://blackie.c3-soft.com:50004",
   "wss://electrum.imaginary.cash:50004",
-  "wss://fulcrum.fountainhead.cash",
+  // "wss://fulcrum.fountainhead.cash",
 ];
 
 export const testnetServers = [
@@ -27,6 +27,11 @@ export const testnetServers = [
 //   //"wss://t4fork.c3-soft.com:61004",
 //   "wss://testnet4.imaginary.cash:50004",
 //   //,"wss://unavailable.invalid:50004"
+// ];
+
+// // chipnet
+// export const testnetServers = [
+//   "https://chipnet.imaginary.cash:50002",
 // ];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];
