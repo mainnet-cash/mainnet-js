@@ -1,9 +1,9 @@
 
-import server from "../";
+import server from "..";
 import request from "supertest";
 var app;
 
-describe("Test Wallet Slp Endpoints", () => {
+describe("Test Wallet Util Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });

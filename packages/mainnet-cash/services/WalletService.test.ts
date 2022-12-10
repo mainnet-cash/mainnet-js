@@ -3,7 +3,7 @@ import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 import server from "../index.js";
 import request from "supertest";
-import * as mainnet from "mainnet-js";
+import { getNetworkProvider } from "mainnet-js";
 
 var app;
 
@@ -832,7 +832,7 @@ describe("Test Wallet Endpoints", () => {
    * send, OP_RETURN
    */
    it("Should send funds and OP_RETURN data", async () => {
-    const provider = mainnet.getNetworkProvider('regtest');
+    const provider = getNetworkProvider('regtest');
     let result, transaction;
     result = await request(app).post("/wallet/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
@@ -854,9 +854,9 @@ describe("Test Wallet Endpoints", () => {
     expect(result.statusCode).toBe(200);
     transaction = await provider.getRawTransactionObject(result.body.txId!);
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
-    expect(transaction.vout[0].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+    expect(transaction.vout[0].scriptPubKey.hex.slice(4)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
-    expect(transaction.vout[1].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+    expect(transaction.vout[1].scriptPubKey.hex.slice(4)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
 
 
     result = await request(app).post("/wallet/send").send({
@@ -870,7 +870,7 @@ describe("Test Wallet Endpoints", () => {
     expect(result.statusCode).toBe(200);
     transaction = await provider.getRawTransactionObject(result.body.txId!);
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
-    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(6))]).toStrictEqual([0x00, 0x01, 0x02]);
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(4))]).toStrictEqual([0x00, 0x01, 0x02]);
 
 
     result = await request(app).post("/wallet/send").send({
@@ -884,9 +884,9 @@ describe("Test Wallet Endpoints", () => {
     expect(result.statusCode).toBe(200);
     transaction = await provider.getRawTransactionObject(result.body.txId!);
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
-    expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
+    expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x00]);
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
-    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x00]);
   });
 
   /**

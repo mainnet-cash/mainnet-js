@@ -1,5 +1,6 @@
-import server from "../";
+import server from "..";
 import request from "supertest";
+import { HttpError } from "express-openapi-validator/dist/framework/types";
 
 var app;
 
@@ -36,7 +37,7 @@ describe.skip("Test Wallet SmartBch Sep20 Endpoints", () => {
         overrides: overrides
       });
 
-    expect(watchOnlyResponce.error.text).toMatch("Cannot deploy contracts with Watch-Only wallets");
+    expect((watchOnlyResponce.error as any).text).toMatch("Cannot deploy contracts with Watch-Only wallets");
 
     const resp = await request(app)
       .post("/smartbch/sep20/genesis")
@@ -290,7 +291,7 @@ describe.skip("Test Wallet SmartBch Sep20 Endpoints", () => {
         tokenReceiverAddress: process.env.SBCH_ALICE_ADDRESS,
         overrides: overrides
     });
-    expect(mintFailResponse.error.text).toMatch("is not allowed to mint or minting is not supported by the contract");
+    expect((mintFailResponse.error as any).text).toMatch("is not allowed to mint or minting is not supported by the contract");
   });
 
   test("SEP20 mint disabled (baton ended)", async () => {
@@ -331,6 +332,6 @@ describe.skip("Test Wallet SmartBch Sep20 Endpoints", () => {
         tokenReceiverAddress: process.env.SBCH_ALICE_ADDRESS,
         overrides: overrides
     });
-    expect(mintFailResponse.error.text).toMatch("is not allowed to mint or minting is not supported by the contract");
+    expect((mintFailResponse.error as any).text).toMatch("is not allowed to mint or minting is not supported by the contract");
   });
 });

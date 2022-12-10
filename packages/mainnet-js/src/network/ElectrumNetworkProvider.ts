@@ -76,7 +76,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     clearTimeout(timeoutHandle);
   }
 
-  private static utxoTxCache = {};
+  static utxoTxCache = {};
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
@@ -89,9 +89,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     );
     const transactionMap: { [hash: string]: TransactionBCH } = {};
     for (let { tx_hash } of uniqueTransactionHashes) {
+      const key = `${this.network}-${tx_hash};`
+
       // check cache
-      if (ElectrumNetworkProvider.utxoTxCache[tx_hash]) {
-        transactionMap[tx_hash] = ElectrumNetworkProvider.utxoTxCache[tx_hash];
+      if (ElectrumNetworkProvider.utxoTxCache[key]) {
+        transactionMap[tx_hash] = ElectrumNetworkProvider.utxoTxCache[key];
         continue;
       }
       // download and decode tx from Fulcrum
@@ -102,7 +104,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         throw new Error(decoded);
       }
       transactionMap[tx_hash] = decoded;
-      ElectrumNetworkProvider.utxoTxCache[tx_hash] = decoded;
+      ElectrumNetworkProvider.utxoTxCache[key] = decoded;
     }
 
     const utxos = result.map((utxo) => {
@@ -155,7 +157,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     txHash: string,
     verbose: boolean = false
   ): Promise<string> {
-    const key = `${txHash}-${verbose}`;
+    const key = `${this.network}-${txHash}-${verbose}`;
     if (ElectrumNetworkProvider.rawTransactionCache[key]) {
       return ElectrumNetworkProvider.rawTransactionCache[key];
     }

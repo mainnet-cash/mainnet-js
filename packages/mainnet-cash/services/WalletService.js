@@ -254,7 +254,7 @@ const encodeTransaction = ( { encodeTransactionRequest } ) => new Promise(
         throw Error("Could not derive wallet");
       }
 
-      const encodedTransaction = await wallet.encodeTransaction(encodeTransactionRequest.to, encodeTransactionRequest.discardChange, encodeTransactionRequest.options);
+      const { encodedTransaction } = await wallet.encodeTransaction(encodeTransactionRequest.to, encodeTransactionRequest.discardChange, encodeTransactionRequest.options);
       const txHex = mainnet.Mainnet.binToHex(encodedTransaction)
       resolve(Service.successResponse({ transactionHex: txHex }));
     } catch (e) {
