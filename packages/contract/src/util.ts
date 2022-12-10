@@ -2,16 +2,17 @@ import { hexToBin } from "@bitauth/libauth";
 
 import { Mainnet, SendRequest, walletFromId } from "mainnet-js";
 
-import cashscript, {
+import {
   Argument,
   Artifact,
   Recipient as CashscriptReceipt,
+  SignatureTemplate
 } from "cashscript";
 
-// FIXME Jest is complaining about SignatureTemplate not exported
-const { SignatureTemplate } = cashscript || {
-  SignatureTemplate: (await import("cashscript"))["SignatureTemplate"],
-};
+// // FIXME Jest is complaining about SignatureTemplate not exported
+// const { SignatureTemplate } = cashscript || {
+//   SignatureTemplate: (await import("cashscript"))["SignatureTemplate"],
+// };
 
 /**
  * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input

@@ -2,9 +2,10 @@
 # yarn lockfile v1
 
 
-"@bitauth/libauth@https://github.com/mainnet-pat/libauth.git#v2_build":
-  version "2.0.0-alpha.6"
-  resolved "https://github.com/mainnet-pat/libauth.git#bdf724c5a14830cc7292991a82b86ad5a8b181a3"
+"@bitauth/libauth@=v2.0.0-alpha.7":
+  version "2.0.0-alpha.7"
+  resolved "https://registry.yarnpkg.com/@bitauth/libauth/-/libauth-2.0.0-alpha.7.tgz#cbdf5d52c74a023ed6ece3bf01e546feb1cd5fb9"
+  integrity sha512-FI05AGI/OBX1VaUYibRmULQGRU0U/2M9lsOsFlpGPuqx//vMXasQoBOa463y4rgua5hCTVCtt8LyAd0Y+uXz1A==
 
 "@types/node@*":
   version "16.9.1"
