@@ -4,7 +4,7 @@
  * including a protocol prefix – e.g. `https://` or `ipfs://`., Clients are only
  * required to support `https` and `ipfs` URIs, but any scheme may be specified.
  */
- export type URIs = {
+export type URIs = {
   [identifier: string]: string;
 };
 
@@ -387,16 +387,16 @@ export type IdentitySnapshot = {
           encoding:
             | {
                 type:
-                  | 'binary'
-                  | 'boolean'
-                  | 'hex'
-                  | 'https-url'
-                  | 'ipfs-cid'
+                  | "binary"
+                  | "boolean"
+                  | "hex"
+                  | "https-url"
+                  | "ipfs-cid"
                   | `locktime`
-                  | 'utf8';
+                  | "utf8";
               }
             | {
-                type: 'number';
+                type: "number";
                 /**
                  * The `aggregate` property indicates that aggregating this
                  * field from multiple NFTs is desirable in user interfaces. For
@@ -412,7 +412,7 @@ export type IdentitySnapshot = {
                  * bitwise AND, bitwise OR, and bitwise XOR, etc. – only `add`
                  * is currently supported.
                  */
-                aggregate?: 'add';
+                aggregate?: "add";
                 /**
                  * An integer between `0` and `18` (inclusive) indicating the
                  * divisibility of the primary unit of this token field.
@@ -567,7 +567,7 @@ export type IdentitySnapshot = {
    * if the burned identity represented a token type – consider burning any
    * remaining tokens of that category to reclaim funds from those outputs.
    */
-  status?: 'active' | 'inactive' | 'burned';
+  status?: "active" | "inactive" | "burned";
 
   /**
    * A mapping of identifiers to URIs associated with this identity. URI

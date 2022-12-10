@@ -35,22 +35,23 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(100);
     const tokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(tokenUtxos.length).toBe(1);
-    const response = await alice.send([new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      amount: 25,
-      tokenId: tokenId
-    }),
+    const response = await alice.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 25,
+        tokenId: tokenId,
+      }),
       new TokenSendRequest({
         cashaddr: alice.cashaddr!,
         amount: 25,
-        tokenId: tokenId
-      })
+        tokenId: tokenId,
+      }),
     ]);
     const newTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(newTokenUtxos.length).toBe(2);
     expect(await alice.getTokenBalance(tokenId)).toBe(75);
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
-  })
+  });
 
   test("Test NFT cashtoken genesis and sending", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
@@ -66,10 +67,11 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(0);
     const tokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(tokenUtxos.length).toBe(1);
-    const response = await alice.send([new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      tokenId: tokenId,
-    })
+    const response = await alice.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+      }),
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const newTokenUtxos = await bob.getTokenUtxos(alice.cashaddr!, tokenId);
@@ -95,12 +97,15 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(0);
     const tokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(tokenUtxos.length).toBe(1);
-    await expect(alice.send([new TokenSendRequest({
-      cashaddr: alice.cashaddr!,
-      tokenId: tokenId,
-      commitment: "abcd02"
-    })
-    ])).rejects.toThrow("Can not change the commitment of an immutable token");
+    await expect(
+      alice.send([
+        new TokenSendRequest({
+          cashaddr: alice.cashaddr!,
+          tokenId: tokenId,
+          commitment: "abcd02",
+        }),
+      ])
+    ).rejects.toThrow("Can not change the commitment of an immutable token");
   });
 
   test("Test mutable NFT cashtoken genesis and mutation", async () => {
@@ -116,11 +121,12 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(0);
     const tokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(tokenUtxos.length).toBe(1);
-    const response = await alice.send([new TokenSendRequest({
-      cashaddr: alice.cashaddr!,
-      tokenId: tokenId,
-      commitment: "abcd02"
-    })
+    const response = await alice.send([
+      new TokenSendRequest({
+        cashaddr: alice.cashaddr!,
+        tokenId: tokenId,
+        commitment: "abcd02",
+      }),
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const newTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
@@ -142,11 +148,13 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(0);
     const tokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(tokenUtxos.length).toBe(1);
-    const response = await alice.mint(tokenId, [new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    }), new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    })
+    const response = await alice.mint(tokenId, [
+      new TokenMintRequest({
+        cashaddr: alice.cashaddr!,
+      }),
+      new TokenMintRequest({
+        cashaddr: alice.cashaddr!,
+      }),
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const newTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
@@ -170,11 +178,13 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos.length).toBe(1);
 
     // mint 2 NFTs, defaults to amount reducing
-    const response = await alice.mint(tokenId, [new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    }), new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    })
+    const response = await alice.mint(tokenId, [
+      new TokenMintRequest({
+        cashaddr: alice.cashaddr!,
+      }),
+      new TokenMintRequest({
+        cashaddr: alice.cashaddr!,
+      }),
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(2);
     const newTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
@@ -182,12 +192,18 @@ describe(`Test cashtokens`, () => {
     expect(tokenId).toEqual(response.tokenIds![0]);
 
     // mint 2 more NFTs without amount reducing
-    const ftResponse = await alice.mint(tokenId, [new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    }), new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    })
-    ], false);
+    const ftResponse = await alice.mint(
+      tokenId,
+      [
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+      ],
+      false
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(2);
     const ftTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(ftTokenUtxos.length).toBe(5);
@@ -195,14 +211,21 @@ describe(`Test cashtokens`, () => {
 
     // we are going to hit amount -1, when minting 3 more NFTs
     // check that it will stop at 0
-    const ft2Response = await alice.mint(tokenId, [new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    }), new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    }), new TokenMintRequest({
-      cashaddr: alice.cashaddr!,
-    })
-    ], true);
+    const ft2Response = await alice.mint(
+      tokenId,
+      [
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+      ],
+      true
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const ft2TokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(ft2TokenUtxos.length).toBe(8);
@@ -223,15 +246,20 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos.length).toBe(1);
 
     // burn 5 FT
-    const response = await alice.burn({
-      tokenId: tokenId,
-      amount: 5,
-    }, "burn");
+    const response = await alice.burn(
+      {
+        tokenId: tokenId,
+        amount: 5,
+      },
+      "burn"
+    );
 
     const rawTx = await alice.provider!.getRawTransaction(response.txId, true);
     expect(rawTx!.vout.length).toEqual(3);
     expect(rawTx!.vout[0].scriptPubKey.type).toEqual("nulldata");
-    expect(rawTx!.vout[0].scriptPubKey.hex).toContain(binToHex(utf8ToBin("burn")));
+    expect(rawTx!.vout[0].scriptPubKey.hex).toContain(
+      binToHex(utf8ToBin("burn"))
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const newTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(newTokenUtxos.length).toBe(0);
@@ -254,40 +282,51 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos.length).toBe(1);
 
     // burn 1 FT
-    const response = await alice.burn({
-      tokenId: tokenId,
-      amount: 1,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
-    }, "burn");
+    const response = await alice.burn(
+      {
+        tokenId: tokenId,
+        amount: 1,
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
+      "burn"
+    );
 
     const rawTx = await alice.provider!.getRawTransaction(response.txId, true);
     expect(rawTx!.vout.length).toEqual(3);
     expect(rawTx!.vout[0].scriptPubKey.type).toEqual("nulldata");
-    expect(rawTx!.vout[0].scriptPubKey.hex).toContain(binToHex(utf8ToBin("burn")));
+    expect(rawTx!.vout[0].scriptPubKey.hex).toContain(
+      binToHex(utf8ToBin("burn"))
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(3);
     const newTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(newTokenUtxos.length).toBe(1);
     expect(tokenId).toEqual(response.tokenIds![0]);
 
     // burn the rest FTs
-    const ftResponse = await alice.burn({
-      tokenId: tokenId,
-      amount: 5,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
-    }, "burn");
+    const ftResponse = await alice.burn(
+      {
+        tokenId: tokenId,
+        amount: 5,
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
+      "burn"
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const ftTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(ftTokenUtxos.length).toBe(1);
     expect(tokenId).toEqual(ftResponse.tokenIds![0]);
 
     // burn the NFT too
-    const nftResponse = await alice.burn({
-      tokenId: tokenId,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
-    }, "burn");
+    const nftResponse = await alice.burn(
+      {
+        tokenId: tokenId,
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
+      "burn"
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
     const nftTokenUtxos = await alice.getTokenUtxos(alice.cashaddr!, tokenId);
     expect(nftTokenUtxos.length).toBe(0);
@@ -311,12 +350,13 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos[0].satoshis).toBe(7000);
 
     // lower the token satoshi value
-    const response = await bob.send([new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      amount: 100,
-      tokenId: tokenId,
-      value: 1500
-    }),
+    const response = await bob.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 100,
+        tokenId: tokenId,
+        value: 1500,
+      }),
     ]);
     let newTokenUtxos = await bob.getTokenUtxos(bob.cashaddr!, tokenId);
     expect(newTokenUtxos.length).toBe(1);
@@ -328,12 +368,13 @@ describe(`Test cashtokens`, () => {
     expect(bobUtxos[1].satoshis).toBe(5245);
 
     // raise the token satoshi value
-    await bob.send([new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      amount: 100,
-      tokenId: tokenId,
-      value: 3000
-    }),
+    await bob.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 100,
+        tokenId: tokenId,
+        value: 3000,
+      }),
     ]);
     newTokenUtxos = await bob.getTokenUtxos(bob.cashaddr!, tokenId);
     expect(newTokenUtxos.length).toBe(1);
@@ -343,7 +384,7 @@ describe(`Test cashtokens`, () => {
     expect(bobUtxos.length).toBe(2);
     expect(bobUtxos[0].satoshis).toBe(3000);
     expect(bobUtxos[1].satoshis).toBe(3349);
-  })
+  });
 
   test("Test cashtoken waiting and watching balance", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
@@ -363,13 +404,18 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos[0].satoshis).toBe(5000);
 
     let seenBalance = 0;
-    setTimeout(() => alice.send([new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      amount: 100,
-      tokenId: tokenId,
-      value: 1500
-    }),
-    ]), 0);
+    setTimeout(
+      () =>
+        alice.send([
+          new TokenSendRequest({
+            cashaddr: bob.cashaddr!,
+            amount: 100,
+            tokenId: tokenId,
+            value: 1500,
+          }),
+        ]),
+      0
+    );
 
     const cancel = bob.watchTokenBalance(tokenId, (balance) => {
       seenBalance = balance;
@@ -380,5 +426,5 @@ describe(`Test cashtokens`, () => {
     expect(seenBalance).toBe(100);
     await cancel();
     await delay(500);
-  })
+  });
 });

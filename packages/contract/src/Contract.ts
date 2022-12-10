@@ -5,7 +5,7 @@ import {
   Contract as CashScriptContract,
   ContractFunction,
   NetworkProvider,
-  SignatureTemplate
+  SignatureTemplate,
 } from "cashscript";
 import { compileString, compileFile } from "cashc";
 

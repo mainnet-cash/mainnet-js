@@ -696,7 +696,7 @@ export class Slp {
       BigInt(bchSpendAmount) + BigInt(feeEstimate),
       bestHeight,
       FeePaidByEnum.change,
-      slpOutputsResult.BchSendRequests,
+      slpOutputsResult.BchSendRequests
     );
 
     if (fundingUtxos.length === 0) {

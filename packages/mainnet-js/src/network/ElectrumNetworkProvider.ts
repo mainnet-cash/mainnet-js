@@ -14,7 +14,12 @@ import { Mutex } from "async-mutex";
 import { Util } from "../wallet/Util.js";
 import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
-import { binToHex, decodeTransactionBCH, hexToBin, TransactionBCH } from "@bitauth/libauth";
+import {
+  binToHex,
+  decodeTransactionBCH,
+  hexToBin,
+  TransactionBCH,
+} from "@bitauth/libauth";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -49,7 +54,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
             await this.connectCluster();
           } catch (e) {
             console.warn(
-              `Unable to connect to one or more electrum-cash hosts: ${JSON.stringify(e)}`
+              `Unable to connect to one or more electrum-cash hosts: ${JSON.stringify(
+                e
+              )}`
             );
           }
           resolve(await this.readyCluster());
@@ -77,16 +84,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     )) as ElectrumUtxo[];
 
     // a workaround until Fulcrum returns token info
-    const uniqueTransactionHashes = result.filter((value, index, array) => array.indexOf(value) === index);
-    const transactionMap: {[hash: string]: TransactionBCH} = {}
-    for (let {tx_hash} of uniqueTransactionHashes) {
+    const uniqueTransactionHashes = result.filter(
+      (value, index, array) => array.indexOf(value) === index
+    );
+    const transactionMap: { [hash: string]: TransactionBCH } = {};
+    for (let { tx_hash } of uniqueTransactionHashes) {
       // check cache
       if (ElectrumNetworkProvider.utxoTxCache[tx_hash]) {
         transactionMap[tx_hash] = ElectrumNetworkProvider.utxoTxCache[tx_hash];
         continue;
       }
       // download and decode tx from Fulcrum
-      const decoded = decodeTransactionBCH(hexToBin(await this.getRawTransaction(tx_hash, false)));
+      const decoded = decodeTransactionBCH(
+        hexToBin(await this.getRawTransaction(tx_hash, false))
+      );
       if (typeof decoded === "string") {
         throw new Error(decoded);
       }
@@ -101,13 +112,17 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         vout: utxo.tx_pos,
         satoshis: utxo.value,
         height: utxo.height,
-        token: output.token && {
-          amount: Number(output.token.amount),
-          tokenId: binToHex(output.token.category),
-          capability: output.token.nft?.capability,
-          commitment: output.token.nft?.commitment && binToHex(output.token.nft?.commitment),
-        } as TokenI,
-      } as UtxoI
+        token:
+          output.token &&
+          ({
+            amount: Number(output.token.amount),
+            tokenId: binToHex(output.token.category),
+            capability: output.token.nft?.capability,
+            commitment:
+              output.token.nft?.commitment &&
+              binToHex(output.token.nft?.commitment),
+          } as TokenI),
+      } as UtxoI;
     });
 
     return utxos;
@@ -135,7 +150,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.blockHeight;
   }
 
-  static rawTransactionCache = {}
+  static rawTransactionCache = {};
   async getRawTransaction(
     txHash: string,
     verbose: boolean = false

@@ -1,4 +1,8 @@
-import { OpReturnData, SendRequest, TokenSendRequest } from "../wallet/model.js";
+import {
+  OpReturnData,
+  SendRequest,
+  TokenSendRequest,
+} from "../wallet/model.js";
 import { amountInSatoshi } from "./amountInSatoshi.js";
 
 // This function sums a list of send request objects
@@ -11,7 +15,7 @@ export async function sumSendRequestAmounts(
         if (r instanceof SendRequest) {
           return BigInt(await amountInSatoshi(r.value, r.unit));
         } else if (r instanceof TokenSendRequest) {
-          return BigInt(r.value || 1000)
+          return BigInt(r.value || 1000);
         } else return BigInt(0);
       })
     );

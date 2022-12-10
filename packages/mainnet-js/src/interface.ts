@@ -41,10 +41,10 @@ export interface HeaderI {
 }
 
 export interface TokenI {
-  amount: number,
-  tokenId: string,
-  capability?: NFTCapability,
-  commitment?: string,
+  amount: number;
+  tokenId: string;
+  capability?: NFTCapability;
+  commitment?: string;
 }
 
 export const NFTCapability = {

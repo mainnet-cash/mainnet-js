@@ -1,4 +1,8 @@
-import { OpReturnData, SendRequest, TokenSendRequest } from "../wallet/model.js";
+import {
+  OpReturnData,
+  SendRequest,
+  TokenSendRequest,
+} from "../wallet/model.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
 
@@ -60,7 +64,10 @@ function distributeFees(requests: Array<SendRequest>, fee: number) {
   return requests.filter((r) => r.value >= DUST_UTXO_THRESHOLD);
 }
 
-function firstPays(requests: Array<SendRequest | TokenSendRequest | OpReturnData>, fee: number) {
+function firstPays(
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  fee: number
+) {
   let payer = requests.shift()!;
   payer = checkForNonStandardSendRequest(payer);
   payer.value = payer.value! - fee;
@@ -68,7 +75,10 @@ function firstPays(requests: Array<SendRequest | TokenSendRequest | OpReturnData
   requests.unshift(payer);
   return requests;
 }
-function lastPays(requests: Array<SendRequest | TokenSendRequest | OpReturnData>, fee: number) {
+function lastPays(
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  fee: number
+) {
   let payer = requests.pop()!;
   payer = checkForNonStandardSendRequest(payer);
   payer.value = payer.value! - fee;
@@ -76,7 +86,10 @@ function lastPays(requests: Array<SendRequest | TokenSendRequest | OpReturnData>
   requests.push(payer);
   return requests;
 }
-function anyPays(requests: Array<SendRequest | TokenSendRequest | OpReturnData>, fee: number) {
+function anyPays(
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  fee: number
+) {
   for (let r of requests) {
     checkForNonStandardSendRequest(r);
   }

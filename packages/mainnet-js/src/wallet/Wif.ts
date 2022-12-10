@@ -1,10 +1,6 @@
 //#region Imports
 // Stable
-import {
-  encodeHdPublicKey,
-  HdKeyNetwork,
-  secp256k1,
-} from "@bitauth/libauth";
+import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -617,9 +613,14 @@ export class Wallet extends BaseWallet {
    * utxos Get unspent token outputs for the wallet
    * will return utxos only for the specified token if `tokenId` provided
    */
-  public async getTokenUtxos(address: string, tokenId?: string): Promise<UtxoI[]> {
+  public async getTokenUtxos(
+    address: string,
+    tokenId?: string
+  ): Promise<UtxoI[]> {
     const utxos = await this.getAddressUtxos(address);
-    return utxos.filter(val => tokenId ? val.token?.tokenId === tokenId : val.token);
+    return utxos.filter((val) =>
+      tokenId ? val.token?.tokenId === tokenId : val.token
+    );
   }
 
   /**
@@ -787,7 +788,8 @@ export class Wallet extends BaseWallet {
 
   // sets up a callback to be called upon wallet's token balance change
   // can be cancelled by calling the function returned from this one
-  public watchTokenBalance(tokenId: string,
+  public watchTokenBalance(
+    tokenId: string,
     callback: (balance: number) => void
   ): CancelWatchFn {
     let previous: number | undefined = undefined;
@@ -807,10 +809,11 @@ export class Wallet extends BaseWallet {
   // this call halts the execution
   public async waitForTokenBalance(
     tokenId: string,
-    amount: number,
+    amount: number
   ): Promise<number> {
     return new Promise(async (resolve) => {
-      const watchCancel = this.watchTokenBalance(tokenId,
+      const watchCancel = this.watchTokenBalance(
+        tokenId,
         async (balance: number) => {
           if (balance >= amount) {
             await watchCancel();
@@ -821,7 +824,9 @@ export class Wallet extends BaseWallet {
     });
   }
 
-  public async getTokenInfo(tokenId: string): Promise<IdentitySnapshot | undefined> {
+  public async getTokenInfo(
+    tokenId: string
+  ): Promise<IdentitySnapshot | undefined> {
     return BCMR.getTokenInfo(tokenId);
   }
 
@@ -863,7 +868,9 @@ export class Wallet extends BaseWallet {
         UtxoItem.fromId(utxoId).asElectrum()
       );
     } else {
-      utxos = (await this.getAddressUtxos(this.cashaddr)).filter(utxo => !utxo.token);
+      utxos = (await this.getAddressUtxos(this.cashaddr)).filter(
+        (utxo) => !utxo.token
+      );
     }
 
     // Get current height to assure recently mined coins are not spent.
@@ -922,7 +929,7 @@ export class Wallet extends BaseWallet {
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let {encodedTransaction, tokenIds} = await this.encodeTransaction(
+    let { encodedTransaction, tokenIds } = await this.encodeTransaction(
       requests,
       undefined,
       options
@@ -1075,42 +1082,63 @@ export class Wallet extends BaseWallet {
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
       utxos = options.utxoIds.map((utxoId) =>
-        typeof utxoId === "string" ? UtxoItem.fromId(utxoId).asElectrum() : utxoId
+        typeof utxoId === "string"
+          ? UtxoItem.fromId(utxoId).asElectrum()
+          : utxoId
       );
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);
     }
 
-    const addTokenChangeOutputs = (inputs: UtxoI[], outputs: SendRequestType[]) => {
+    const addTokenChangeOutputs = (
+      inputs: UtxoI[],
+      outputs: SendRequestType[]
+    ) => {
       // allow for implicit token burn if the total amount sent is less than user had
       // allow for token genesis, creating more tokens than we had before (0)
       if (!checkTokenQuantities) {
         return;
       }
-      const allTokenInputs = inputs.filter(val => val.token);
-      const allTokenOutputs = outputs.filter(val => val instanceof TokenSendRequest) as TokenSendRequest[];
-      const tokenIds = allTokenOutputs.map(val => val.tokenId).filter((val, idx, arr) => arr.indexOf(val) === idx);
+      const allTokenInputs = inputs.filter((val) => val.token);
+      const allTokenOutputs = outputs.filter(
+        (val) => val instanceof TokenSendRequest
+      ) as TokenSendRequest[];
+      const tokenIds = allTokenOutputs
+        .map((val) => val.tokenId)
+        .filter((val, idx, arr) => arr.indexOf(val) === idx);
       for (let tokenId of tokenIds) {
-        const tokenInputs = allTokenInputs.filter(val => val.token?.tokenId === tokenId);
-        const inputAmountSum = tokenInputs.reduce((prev, cur) => prev + cur.token!.amount, 0);
-        const tokenOutputs = allTokenOutputs.filter(val => val.tokenId === tokenId);
-        const outputAmountSum = tokenOutputs.reduce((prev, cur) => prev + cur.amount, 0);
+        const tokenInputs = allTokenInputs.filter(
+          (val) => val.token?.tokenId === tokenId
+        );
+        const inputAmountSum = tokenInputs.reduce(
+          (prev, cur) => prev + cur.token!.amount,
+          0
+        );
+        const tokenOutputs = allTokenOutputs.filter(
+          (val) => val.tokenId === tokenId
+        );
+        const outputAmountSum = tokenOutputs.reduce(
+          (prev, cur) => prev + cur.amount,
+          0
+        );
         const change = inputAmountSum - outputAmountSum;
         if (change < 0) {
           throw new Error("Not enough token amount to send");
         }
         if (change > 0) {
-          outputs.push(new TokenSendRequest({
-            cashaddr: changeAddress || this.cashaddr,
-            amount: change,
-            tokenId: tokenId,
-            commitment: tokenOutputs[0].commitment,
-            capability: tokenOutputs[0].capability,
-            value: tokenOutputs[0].value,
-          }));
+          outputs.push(
+            new TokenSendRequest({
+              cashaddr: changeAddress || this.cashaddr,
+              amount: change,
+              tokenId: tokenId,
+              commitment: tokenOutputs[0].commitment,
+              capability: tokenOutputs[0].capability,
+              value: tokenOutputs[0].value,
+            })
+          );
         }
       }
-    }
+    };
     addTokenChangeOutputs(utxos, sendRequests);
 
     const bestHeight = await this.provider!.getBlockHeight()!;
@@ -1138,7 +1166,7 @@ export class Wallet extends BaseWallet {
       BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight,
       feePaidBy,
-      sendRequests,
+      sendRequests
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1165,11 +1193,15 @@ export class Wallet extends BaseWallet {
     );
 
     const tokenIds = [
-      ...fundingUtxos.filter(val => val.token?.tokenId).map(val => val.token!.tokenId),
-      ...sendRequests.filter(val => val instanceof TokenSendRequest).map(val => (val as TokenSendRequest).tokenId)
-    ].filter(((value, index, array) => array.indexOf(value) === index));
+      ...fundingUtxos
+        .filter((val) => val.token?.tokenId)
+        .map((val) => val.token!.tokenId),
+      ...sendRequests
+        .filter((val) => val instanceof TokenSendRequest)
+        .map((val) => (val as TokenSendRequest).tokenId),
+    ].filter((value, index, array) => array.indexOf(value) === index);
 
-    return { encodedTransaction, tokenIds: tokenIds};
+    return { encodedTransaction, tokenIds: tokenIds };
   }
 
   /**
@@ -1188,17 +1220,20 @@ export class Wallet extends BaseWallet {
     cashaddr?: string;
     value?: number;
   }) {
-    return this.send(new TokenSendRequest({
-      cashaddr: options.cashaddr || this.cashaddr!,
-      amount: options.amount,
-      tokenId: "",
-      value: options.value,
-      capability: options.capability,
-      commitment: options.commitment,
-    }), {
-      checkTokenQuantities: false,
-      queryBalance: false
-    });
+    return this.send(
+      new TokenSendRequest({
+        cashaddr: options.cashaddr || this.cashaddr!,
+        amount: options.amount,
+        tokenId: "",
+        value: options.value,
+        capability: options.capability,
+        commitment: options.commitment,
+      }),
+      {
+        checkTokenQuantities: false,
+        queryBalance: false,
+      }
+    );
   }
 
   /**
@@ -1208,17 +1243,30 @@ export class Wallet extends BaseWallet {
    * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
    * @param  {boolean} deduceTokenAmount if minting token contains fungible amount, deduce from it by amount of minted tokens
    */
-   public async mint(tokenId: string, mintRequests: TokenMintRequest | Array<TokenMintRequest>, deduceTokenAmount: boolean = true) {
+  public async mint(
+    tokenId: string,
+    mintRequests: TokenMintRequest | Array<TokenMintRequest>,
+    deduceTokenAmount: boolean = true
+  ) {
     if (!Array.isArray(mintRequests)) {
       mintRequests = [mintRequests];
     }
 
     const utxos = await this.getAddressUtxos(this.cashaddr!);
-    const nftUtxos = utxos.filter(val => val.token?.tokenId === tokenId && val.token?.capability != NFTCapability.none);
+    const nftUtxos = utxos.filter(
+      (val) =>
+        val.token?.tokenId === tokenId &&
+        val.token?.capability != NFTCapability.none
+    );
     if (!nftUtxos.length) {
-      throw new Error("You do not have any token UTXOs with minting capability for specified tokenId");
+      throw new Error(
+        "You do not have any token UTXOs with minting capability for specified tokenId"
+      );
     }
-    const newAmount = (deduceTokenAmount && nftUtxos[0].token!.amount > 0) ? nftUtxos[0].token!.amount - mintRequests.length : nftUtxos[0].token!.amount;
+    const newAmount =
+      deduceTokenAmount && nftUtxos[0].token!.amount > 0
+        ? nftUtxos[0].token!.amount - mintRequests.length
+        : nftUtxos[0].token!.amount;
     const safeNewAmount = Math.max(0, newAmount);
     const mintingInput = new TokenSendRequest({
       cashaddr: this.cashaddr!,
@@ -1227,18 +1275,27 @@ export class Wallet extends BaseWallet {
       commitment: nftUtxos[0].token!.commitment,
       amount: safeNewAmount,
       value: nftUtxos[0].satoshis,
-    })
-    return this.send([mintingInput, ...mintRequests.map(val => new TokenSendRequest({
-      cashaddr: val.cashaddr || this.cashaddr!,
-      amount: 0,
-      tokenId: tokenId,
-      value: val.value,
-      capability: val.capability,
-      commitment: val.commitment,
-    }))], {
-      checkTokenQuantities: false,
-      queryBalance: false,
     });
+    return this.send(
+      [
+        mintingInput,
+        ...mintRequests.map(
+          (val) =>
+            new TokenSendRequest({
+              cashaddr: val.cashaddr || this.cashaddr!,
+              amount: 0,
+              tokenId: tokenId,
+              value: val.value,
+              capability: val.capability,
+              commitment: val.commitment,
+            })
+        ),
+      ],
+      {
+        checkTokenQuantities: false,
+        queryBalance: false,
+      }
+    );
   }
 
   /**
@@ -1256,25 +1313,35 @@ export class Wallet extends BaseWallet {
    * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
    * @param  {string?} message optional message to include in OP_RETURN
    */
-   public async burn(burnRequest: {
-    tokenId: string;
-    capability?: NFTCapability;
-    commitment?: string;
-    amount?: number;
-    cashaddr?: string;
-   }, message?: string) {
+  public async burn(
+    burnRequest: {
+      tokenId: string;
+      capability?: NFTCapability;
+      commitment?: string;
+      amount?: number;
+      cashaddr?: string;
+    },
+    message?: string
+  ) {
     const utxos = await this.getAddressUtxos(this.cashaddr!);
-    const tokenUtxos = utxos.filter(val => val.token?.tokenId === burnRequest.tokenId &&
-      val.token?.capability === burnRequest.capability &&
-      val.token?.commitment === burnRequest.commitment &&
-      val.token?.capability === burnRequest.capability);
+    const tokenUtxos = utxos.filter(
+      (val) =>
+        val.token?.tokenId === burnRequest.tokenId &&
+        val.token?.capability === burnRequest.capability &&
+        val.token?.commitment === burnRequest.commitment &&
+        val.token?.capability === burnRequest.capability
+    );
 
     if (!tokenUtxos.length) {
       throw new Error("You do not have suitable token UTXOs to perform burn");
     }
 
-    const totalFungibleAmount = tokenUtxos.reduce((prev, cur) => prev + (cur.token?.amount || 0), 0);
-    const fungibleBurnAmount = (burnRequest.amount && burnRequest.amount > 0) ? burnRequest.amount! : 0;
+    const totalFungibleAmount = tokenUtxos.reduce(
+      (prev, cur) => prev + (cur.token?.amount || 0),
+      0
+    );
+    const fungibleBurnAmount =
+      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0;
     const destroyFT = totalFungibleAmount === fungibleBurnAmount;
     const hasNFT = burnRequest.capability || burnRequest.commitment;
 
@@ -1289,14 +1356,16 @@ export class Wallet extends BaseWallet {
         // if there are FT, reduce their amount
         const newAmount = totalFungibleAmount - fungibleBurnAmount;
         const safeNewAmount = Math.max(0, newAmount);
-        changeSendRequests = [new TokenSendRequest({
-          cashaddr: burnRequest.cashaddr || this.cashaddr!,
-          tokenId: burnRequest.tokenId,
-          capability: burnRequest.capability,
-          commitment: burnRequest.commitment,
-          amount: safeNewAmount,
-          value: tokenUtxos[0].satoshis,
-        })];
+        changeSendRequests = [
+          new TokenSendRequest({
+            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            tokenId: burnRequest.tokenId,
+            capability: burnRequest.capability,
+            commitment: burnRequest.commitment,
+            amount: safeNewAmount,
+            value: tokenUtxos[0].satoshis,
+          }),
+        ];
       }
     } else {
       // if we are burning last fughible tokens, let us destroy the token completely
@@ -1307,12 +1376,14 @@ export class Wallet extends BaseWallet {
         // reduce the FT amount
         const newAmount = totalFungibleAmount - fungibleBurnAmount;
         const safeNewAmount = Math.max(0, newAmount);
-        changeSendRequests = [new TokenSendRequest({
-          cashaddr: burnRequest.cashaddr || this.cashaddr!,
-          tokenId: burnRequest.tokenId,
-          amount: safeNewAmount,
-          value: tokenUtxos[0].satoshis,
-        })];
+        changeSendRequests = [
+          new TokenSendRequest({
+            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            tokenId: burnRequest.tokenId,
+            amount: safeNewAmount,
+            value: tokenUtxos[0].satoshis,
+          }),
+        ];
       }
     }
 

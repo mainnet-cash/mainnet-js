@@ -1,4 +1,14 @@
-import { binToHex, binToNumberUint16LE, binToNumberUint32LE, binToUtf8, decodeTransaction, hexToBin, sha256, Transaction, utf8ToBin } from "@bitauth/libauth";
+import {
+  binToHex,
+  binToNumberUint16LE,
+  binToNumberUint32LE,
+  binToUtf8,
+  decodeTransaction,
+  hexToBin,
+  sha256,
+  Transaction,
+  utf8ToBin,
+} from "@bitauth/libauth";
 import axios from "axios";
 import { Network, TxI } from "../interface.js";
 import { getGlobalProvider } from "../network/default.js";
@@ -29,14 +39,24 @@ export class BCMR {
    *
    * @returns {Registry} resolved registry
    */
-  public static async fetchMetadataRegistry(uri: string, contentHash?: string): Promise<Registry> {
+  public static async fetchMetadataRegistry(
+    uri: string,
+    contentHash?: string
+  ): Promise<Registry> {
     // content hashes HTTPS Publication Outputs per spec
     if (contentHash) {
       // request as text and verify hash
-      const response = await axios.get(uri, { responseType: "text", transformResponse: (val) => {return val}});
+      const response = await axios.get(uri, {
+        responseType: "text",
+        transformResponse: (val) => {
+          return val;
+        },
+      });
       const hash = binToHex(sha256.hash(utf8ToBin(response.data as string)));
       if (contentHash != hash) {
-        throw new Error(`Content hash mismatch for URI: ${uri}\nreceived: ${hash}\nrequired: ${contentHash}`);
+        throw new Error(
+          `Content hash mismatch for URI: ${uri}\nreceived: ${hash}\nrequired: ${contentHash}`
+        );
       }
 
       return JSON.parse(response.data) as Registry;
@@ -56,9 +76,16 @@ export class BCMR {
    * Yields an error upon mismatch.
    *
    */
-  public static async addMetadataRegistry(uri: string, contentHash?: string): Promise<void> {
+  public static async addMetadataRegistry(
+    uri: string,
+    contentHash?: string
+  ): Promise<void> {
     const registry = await this.fetchMetadataRegistry(uri, contentHash);
-    if (this.metadataRegistries.some(val => JSON.stringify(val) === JSON.stringify(registry))) {
+    if (
+      this.metadataRegistries.some(
+        (val) => JSON.stringify(val) === JSON.stringify(registry)
+      )
+    ) {
       return;
     }
     this.metadataRegistries.push(registry);
@@ -77,7 +104,14 @@ export class BCMR {
    *
    * @returns {AuthChain} returns the resolved authchain
    */
-  public static async buildAuthChain(options: { transactionHash: string, network?: Network, resolveBase?: boolean, followToHead?: boolean, rawTx?: ElectrumRawTransaction, historyCache?: TxI[] }): Promise<AuthChain> {
+  public static async buildAuthChain(options: {
+    transactionHash: string;
+    network?: Network;
+    resolveBase?: boolean;
+    followToHead?: boolean;
+    rawTx?: ElectrumRawTransaction;
+    historyCache?: TxI[];
+  }): Promise<AuthChain> {
     if (options.network === undefined) {
       options.network = Network.MAINNET;
     }
@@ -90,31 +124,43 @@ export class BCMR {
       options.resolveBase = false;
     }
 
-    const provider = getGlobalProvider(options.network) as ElectrumNetworkProvider;
+    const provider = getGlobalProvider(
+      options.network
+    ) as ElectrumNetworkProvider;
     if (!options.rawTx) {
-      options.rawTx = await provider.getRawTransactionObject(options.transactionHash);
+      options.rawTx = await provider.getRawTransactionObject(
+        options.transactionHash
+      );
     }
 
     // helper function to enforce the constraints on the 0th output, decode the BCMR's OP_RETURN data
     // returns resolved AuthChainElement
-    const makeAuthChainElement = (rawTx: ElectrumRawTransaction | Transaction, hash: string): AuthChainElement => {
+    const makeAuthChainElement = (
+      rawTx: ElectrumRawTransaction | Transaction,
+      hash: string
+    ): AuthChainElement => {
       let opReturns: string[];
       let spends0thOutput = false;
       if (rawTx.hasOwnProperty("vout")) {
         const electrumTransaction = rawTx as ElectrumRawTransaction;
-        opReturns = electrumTransaction.vout.filter(val => val.scriptPubKey.type === "nulldata").map(val => val.scriptPubKey.hex);
+        opReturns = electrumTransaction.vout
+          .filter((val) => val.scriptPubKey.type === "nulldata")
+          .map((val) => val.scriptPubKey.hex);
         spends0thOutput = electrumTransaction.vin[0].vout === 0;
       } else {
         const libauthTransaction = rawTx as Transaction;
-        opReturns = libauthTransaction.outputs.map(val => binToHex(val.lockingBytecode)).filter(val => val.indexOf("6a") === 0);
+        opReturns = libauthTransaction.outputs
+          .map((val) => binToHex(val.lockingBytecode))
+          .filter((val) => val.indexOf("6a") === 0);
         spends0thOutput = libauthTransaction.inputs[0].outpointIndex === 0;
       }
 
-      const bcmrOpReturns = opReturns.filter(val =>
-        val.indexOf("6a0442434d52") === 0 ||
-        val.indexOf("6a4c0442434d52") === 0 ||
-        val.indexOf("6a4d040042434d52") === 0 ||
-        val.indexOf("6ade0400000042434d52") === 0
+      const bcmrOpReturns = opReturns.filter(
+        (val) =>
+          val.indexOf("6a0442434d52") === 0 ||
+          val.indexOf("6a4c0442434d52") === 0 ||
+          val.indexOf("6a4d040042434d52") === 0 ||
+          val.indexOf("6ade0400000042434d52") === 0
       );
 
       if (bcmrOpReturns.length === 0) {
@@ -122,7 +168,9 @@ export class BCMR {
       }
 
       if (!spends0thOutput) {
-        throw new Error("Invalid authchain transaction (does not spend 0th output of previous transaction)");
+        throw new Error(
+          "Invalid authchain transaction (does not spend 0th output of previous transaction)"
+        );
       }
 
       const opReturnHex = opReturns[0];
@@ -138,14 +186,16 @@ export class BCMR {
           length = opReturn[position + 1];
           position += 2;
         } else if (opReturn[position] === 0x4d) {
-          length = binToNumberUint16LE(opReturn.slice(position + 1, position + 3));
+          length = binToNumberUint16LE(
+            opReturn.slice(position + 1, position + 3)
+          );
           position += 3;
         } else {
           length = opReturn[position];
           position += 1;
         }
 
-        chunks.push(opReturn.slice(position, position+length));
+        chunks.push(opReturn.slice(position, position + length));
         position += length;
       }
 
@@ -156,7 +206,7 @@ export class BCMR {
       const result: AuthChainElement = {
         txHash: hash,
         contentHash: "",
-        uri: ""
+        uri: "",
       };
 
       if (chunks.length === 2) {
@@ -171,31 +221,45 @@ export class BCMR {
         result.uri = binToUtf8(chunks[2]);
       }
       return result;
-    }
+    };
 
     // make authchain element and combine with the rest obtained
-    const element: AuthChainElement = makeAuthChainElement(options.rawTx, options.rawTx.hash);
+    const element: AuthChainElement = makeAuthChainElement(
+      options.rawTx,
+      options.rawTx.hash
+    );
 
     let chainBase: AuthChain = [];
     if (options.resolveBase) {
       // check for accelerated path if "authchain" extension is in registry
-      const registry: Registry = await this.fetchMetadataRegistry(element.uri, element.contentHash);
-      if (registry.extensions && registry.extensions["authchain"] && (registry.extensions["authchain"] as string[]).length) {
+      const registry: Registry = await this.fetchMetadataRegistry(
+        element.uri,
+        element.contentHash
+      );
+      if (
+        registry.extensions &&
+        registry.extensions["authchain"] &&
+        (registry.extensions["authchain"] as string[]).length
+      ) {
         const chainTxArray = registry.extensions!["authchain"] as string[];
 
-        chainBase = chainTxArray.map(tx => {
-          const transactionBin = hexToBin(tx);
-          const decoded = decodeTransaction(transactionBin);
-          if (typeof decoded === "string") {
-            throw new Error(`Error decoding transaction ${tx}`);
-          }
-          const hash = binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
-          return {decoded, hash};
-        }).map(({decoded, hash}) => makeAuthChainElement(decoded, hash));
+        chainBase = chainTxArray
+          .map((tx) => {
+            const transactionBin = hexToBin(tx);
+            const decoded = decodeTransaction(transactionBin);
+            if (typeof decoded === "string") {
+              throw new Error(`Error decoding transaction ${tx}`);
+            }
+            const hash = binToHex(
+              sha256.hash(sha256.hash(transactionBin)).reverse()
+            );
+            return { decoded, hash };
+          })
+          .map(({ decoded, hash }) => makeAuthChainElement(decoded, hash));
       } else {
         // simply go back in history towards authhead
         let stop = false;
-        let tx: ElectrumRawTransaction = {...options.rawTx!};
+        let tx: ElectrumRawTransaction = { ...options.rawTx! };
         while (stop == false) {
           tx = await provider.getRawTransactionObject(tx.vin[0].txid);
           try {
@@ -212,17 +276,35 @@ export class BCMR {
     // and repeat the building process recursively
     if (options.followToHead) {
       // let's figure out the autchain by moving towards authhead
-      const history = options.historyCache || await provider.getHistory(options.rawTx.vout[0].scriptPubKey.addresses[0]);
-      const thisTx = history.find(val => val.tx_hash === options.transactionHash);
-      let filteredHistory = history.filter(val => val.height > 0 ? (val.height >= thisTx!.height || val.height <= 0) : val.height <= 0 && val.tx_hash !== thisTx!.tx_hash);
+      const history =
+        options.historyCache ||
+        (await provider.getHistory(
+          options.rawTx.vout[0].scriptPubKey.addresses[0]
+        ));
+      const thisTx = history.find(
+        (val) => val.tx_hash === options.transactionHash
+      );
+      let filteredHistory = history.filter((val) =>
+        val.height > 0
+          ? val.height >= thisTx!.height || val.height <= 0
+          : val.height <= 0 && val.tx_hash !== thisTx!.tx_hash
+      );
 
       for (const historyTx of filteredHistory) {
-        const historyRawTx = await provider.getRawTransactionObject(historyTx.tx_hash);
-        const authChainVin = historyRawTx.vin.find(val => val.txid === options.transactionHash && val.vout === 0);
+        const historyRawTx = await provider.getRawTransactionObject(
+          historyTx.tx_hash
+        );
+        const authChainVin = historyRawTx.vin.find(
+          (val) => val.txid === options.transactionHash && val.vout === 0
+        );
         // if we've found continuation of authchain, we shall recurse into it
         if (authChainVin) {
           // reuse queried address history if the next element in chain is the same address
-          const historyCache = options.rawTx.vout[0].scriptPubKey.addresses[0] === historyRawTx.vout[0].scriptPubKey.addresses[0] ? filteredHistory : undefined;
+          const historyCache =
+            options.rawTx.vout[0].scriptPubKey.addresses[0] ===
+            historyRawTx.vout[0].scriptPubKey.addresses[0]
+              ? filteredHistory
+              : undefined;
           // query next chain element
           const chainHead = await BCMR.buildAuthChain({
             transactionHash: historyRawTx.hash,
@@ -253,11 +335,25 @@ export class BCMR {
    *
    * @returns {AuthChain} returns the resolved authchain
    */
-  public static async addMetadataRegistryAuthChain(options: { transactionHash: string, network?: Network, followToHead?: boolean, rawTx?: ElectrumRawTransaction }): Promise<AuthChain> {
-    const authChain = await this.buildAuthChain({...options, resolveBase: false });
-    const registry = await this.fetchMetadataRegistry(authChain.reverse()[0].uri);
+  public static async addMetadataRegistryAuthChain(options: {
+    transactionHash: string;
+    network?: Network;
+    followToHead?: boolean;
+    rawTx?: ElectrumRawTransaction;
+  }): Promise<AuthChain> {
+    const authChain = await this.buildAuthChain({
+      ...options,
+      resolveBase: false,
+    });
+    const registry = await this.fetchMetadataRegistry(
+      authChain.reverse()[0].uri
+    );
 
-    if (this.metadataRegistries.some(val => JSON.stringify(val) === JSON.stringify(registry))) {
+    if (
+      this.metadataRegistries.some(
+        (val) => JSON.stringify(val) === JSON.stringify(registry)
+      )
+    ) {
       return [];
     }
     this.metadataRegistries.push(registry);
@@ -272,9 +368,11 @@ export class BCMR {
    * @returns {IdentitySnapshot?} return the info for the token found, otherwise undefined
    */
   public static getTokenInfo(tokenId: string): IdentitySnapshot | undefined {
-    return this.metadataRegistries.slice(0).reverse()
-      .filter(val => typeof val.registryIdentity !== "string")
-      .map(val => val.registryIdentity as IdentitySnapshot)
-      .filter(val => val.token?.category === tokenId)?.[0];
+    return this.metadataRegistries
+      .slice(0)
+      .reverse()
+      .filter((val) => typeof val.registryIdentity !== "string")
+      .map((val) => val.registryIdentity as IdentitySnapshot)
+      .filter((val) => val.token?.category === tokenId)?.[0];
   }
 }

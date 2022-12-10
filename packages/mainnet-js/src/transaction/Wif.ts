@@ -18,7 +18,12 @@ import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
 
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
-import { OpReturnData, SendRequest, SendRequestType, TokenSendRequest } from "../wallet/model.js";
+import {
+  OpReturnData,
+  SendRequest,
+  SendRequestType,
+  TokenSendRequest,
+} from "../wallet/model.js";
 import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
@@ -117,11 +122,14 @@ export function prepareInputs(
     const libAuthToken = i.token && {
       amount: BigInt(i.token.amount),
       category: hexToBin(i.token.tokenId),
-      nft: (i.token.capability || i.token.commitment) ? {
-        capability: i.token.capability,
-        commitment: i.token.commitment && hexToBin(i.token.commitment!)
-      } : undefined
-    }
+      nft:
+        i.token.capability || i.token.commitment
+          ? {
+              capability: i.token.capability,
+              commitment: i.token.commitment && hexToBin(i.token.commitment!),
+            }
+          : undefined,
+    };
     let newInput = {
       outpointIndex: utxoIndex,
       outpointTransactionHash: utxoOutpointTransactionHash,
@@ -133,7 +141,7 @@ export function prepareInputs(
         },
         valueSatoshis: BigInt(utxoTxnValue),
         script: "unlock",
-        token: libAuthToken
+        token: libAuthToken,
       },
     };
     signedInputs.push(newInput);
@@ -150,7 +158,7 @@ export function prepareInputs(
  */
 export async function prepareOutputs(
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  inputs: UtxoI[],
+  inputs: UtxoI[]
 ) {
   let lockedOutputs: Output[] = [];
   for (const output of outputs) {
@@ -200,20 +208,27 @@ export function prepareOpReturnOutput(request: OpReturnData): Output {
  *
  * @returns A libauth Output
  */
- export function prepareTokenOutputs(request: TokenSendRequest, inputs: UtxoI[]): Output {
+export function prepareTokenOutputs(
+  request: TokenSendRequest,
+  inputs: UtxoI[]
+): Output {
   const token: TokenI = request;
   const isGenesis = !request.tokenId || (request as any)._isGenesis;
   let satValue = 0;
   if (isGenesis) {
-    const genesisInputs = inputs.filter(val => val.vout === 0)
+    const genesisInputs = inputs.filter((val) => val.vout === 0);
     if (genesisInputs.length === 0) {
-      throw new Error("No suitable inputs with vout=0 available for new token genesis");
+      throw new Error(
+        "No suitable inputs with vout=0 available for new token genesis"
+      );
     }
     token.tokenId = genesisInputs[0].txid;
     satValue = request.value || 1000;
     (request as any)._isGenesis = true;
   } else {
-    const tokenInputs = inputs.filter(val => val.token?.tokenId === request.tokenId);
+    const tokenInputs = inputs.filter(
+      (val) => val.token?.tokenId === request.tokenId
+    );
     if (!tokenInputs.length) {
       throw new Error(`No token utxos available to send ${request.tokenId}`);
     }
@@ -224,7 +239,10 @@ export function prepareOpReturnOutput(request: OpReturnData): Output {
       token.commitment = tokenInputs[0].token!.commitment;
     }
 
-    if (token.capability === NFTCapability.none && token.commitment !== tokenInputs[0].token?.commitment) {
+    if (
+      token.capability === NFTCapability.none &&
+      token.commitment !== tokenInputs[0].token?.commitment
+    ) {
       throw new Error("Can not change the commitment of an immutable token");
     }
 
@@ -238,11 +256,14 @@ export function prepareOpReturnOutput(request: OpReturnData): Output {
   const libAuthToken = {
     amount: BigInt(token.amount),
     category: hexToBin(token.tokenId),
-    nft: (token.capability || token.commitment) ? {
-      capability: token.capability,
-      commitment: token.commitment && hexToBin(token.commitment!)
-    } : undefined
-  }
+    nft:
+      token.capability || token.commitment
+        ? {
+            capability: token.capability,
+            commitment: token.commitment && hexToBin(token.commitment!),
+          }
+        : undefined,
+  };
 
   return {
     lockingBytecode: outputLockingBytecode.bytecode,
@@ -265,30 +286,36 @@ export async function getSuitableUtxos(
   amountRequired: BigInt | undefined,
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
-  requests: SendRequestType[],
+  requests: SendRequestType[]
 ): Promise<UtxoI[]> {
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = BigInt(0);
   const tokenAmountsRequired: any[] = [];
-  const tokenRequests = requests.filter(val => val instanceof TokenSendRequest) as TokenSendRequest[];
+  const tokenRequests = requests.filter(
+    (val) => val instanceof TokenSendRequest
+  ) as TokenSendRequest[];
   const tokenIds = tokenRequests
-    .map(val => val.tokenId)
+    .map((val) => val.tokenId)
     .filter((value, index, array) => array.indexOf(value) === index);
   for (let tokenId of tokenIds) {
-    const requiredAmount = tokenRequests.map(val => val.amount).reduce((prev, cur) => prev + cur, 0);
-    tokenAmountsRequired.push({tokenId, requiredAmount});
+    const requiredAmount = tokenRequests
+      .map((val) => val.amount)
+      .reduce((prev, cur) => prev + cur, 0);
+    tokenAmountsRequired.push({ tokenId, requiredAmount });
   }
 
   let filteredInputs = inputs.slice(0);
 
   // find suitable token inputs first
-  for (const {tokenId, requiredAmount} of tokenAmountsRequired) {
+  for (const { tokenId, requiredAmount } of tokenAmountsRequired) {
     let tokenAmountAvailable = 0;
     for (const input of inputs) {
       if (input.token?.tokenId === tokenId) {
         suitableUtxos.push(input);
         const inputIndex = filteredInputs.indexOf(input);
-        filteredInputs = filteredInputs.filter((_, index) => inputIndex !== index);
+        filteredInputs = filteredInputs.filter(
+          (_, index) => inputIndex !== index
+        );
         tokenAmountAvailable += input.token!.amount;
         amountAvailable += BigInt(input.satoshis);
         if (tokenAmountAvailable >= requiredAmount) {

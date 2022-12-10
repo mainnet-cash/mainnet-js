@@ -12,7 +12,7 @@ import { buffer } from "stream/consumers";
 // Any business logic contained here should be moved elsewhere in src/
 
 export type SendRequestType =
-    SendRequest
+  | SendRequest
   | TokenSendRequest
   | OpReturnData
   | Array<SendRequest | TokenSendRequest | OpReturnData>
@@ -146,7 +146,7 @@ export class OpReturnData {
    *
    * @returns class instance
    */
-   public static fromArray(array: Array<string | Buffer>) {
+  public static fromArray(array: Array<string | Buffer>) {
     let data: Buffer = Buffer.from([0x6a]); // OP_RETURN
     for (const element of array) {
       let length: number;
@@ -164,7 +164,7 @@ export class OpReturnData {
 
       if (length < 75) {
         lengthData = [length];
-      } else if (length < 220 ) {
+      } else if (length < 220) {
         lengthData = [0x4c, length];
       } else {
         throw new Error("OP_RETURN data can not exceed 220 bytes in size");
