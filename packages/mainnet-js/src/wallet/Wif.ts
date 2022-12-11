@@ -38,6 +38,8 @@ import {
   SendRequestArray,
   SendRequestType,
   SendResponse,
+  TokenBurnRequest,
+  TokenGenesisRequest,
   TokenMintRequest,
   TokenSendRequest,
   UtxoItem,
@@ -1207,27 +1209,21 @@ export class Wallet extends BaseWallet {
   /**
    * Create new cashtoken, both funglible and non-fungible (NFT)
    * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {number} options.amount amount of *fungible* tokens to create
-   * @param  {NFTCapability?} options.capability capability of new NFT
-   * @param  {string?} options.commitment NFT commitment message
-   * @param  {string?} options.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} options.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
+   * @param  {number} genesisRequest.amount amount of *fungible* tokens to create
+   * @param  {NFTCapability?} genesisRequest.capability capability of new NFT
+   * @param  {string?} genesisRequest.commitment NFT commitment message
+   * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
+   * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
    */
-  public async genesis(options: {
-    amount?: number;
-    capability?: NFTCapability;
-    commitment?: string;
-    cashaddr?: string;
-    value?: number;
-  }) {
+  public async genesis(genesisRequest: TokenGenesisRequest) {
     return this.send(
       new TokenSendRequest({
-        cashaddr: options.cashaddr || this.cashaddr!,
-        amount: options.amount,
+        cashaddr: genesisRequest.cashaddr || this.cashaddr!,
+        amount: genesisRequest.amount,
+        value: genesisRequest.value,
+        capability: genesisRequest.capability,
+        commitment: genesisRequest.commitment,
         tokenId: "",
-        value: options.value,
-        capability: options.capability,
-        commitment: options.commitment,
       }),
       {
         checkTokenQuantities: false,
@@ -1241,6 +1237,10 @@ export class Wallet extends BaseWallet {
    * Refer to spec https://github.com/bitjson/cashtokens
    * @param  {string} tokenId tokenId of an NFT to mint
    * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
+   * @param  {NFTCapability?} mintRequest.capability capability of new NFT
+   * @param  {string?} mintRequest.commitment NFT commitment message
+   * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
+   * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
    * @param  {boolean} deduceTokenAmount if minting token contains fungible amount, deduce from it by amount of minted tokens
    */
   public async mint(
@@ -1314,13 +1314,7 @@ export class Wallet extends BaseWallet {
    * @param  {string?} message optional message to include in OP_RETURN
    */
   public async burn(
-    burnRequest: {
-      tokenId: string;
-      capability?: NFTCapability;
-      commitment?: string;
-      amount?: number;
-      cashaddr?: string;
-    },
+    burnRequest: TokenBurnRequest,
     message?: string
   ) {
     const utxos = await this.getAddressUtxos(this.cashaddr!);

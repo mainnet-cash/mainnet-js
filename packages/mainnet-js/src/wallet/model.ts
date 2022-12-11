@@ -37,6 +37,63 @@ export class SendRequest {
   }
 }
 
+export class TokenGenesisRequest {
+  amount?: number; // fungible token amount
+  capability?: NFTCapability;
+  commitment?: string;
+  cashaddr?: string;
+  value?: number; // satoshi value
+
+
+  constructor({
+    amount,
+    capability,
+    commitment,
+    cashaddr,
+    value,
+  }: {
+    amount?: number;
+    capability?: NFTCapability;
+    commitment?: string;
+    cashaddr?: string;
+    value?: number;
+  }) {
+    this.amount = amount;
+    this.capability = capability;
+    this.commitment = commitment;
+    this.cashaddr = cashaddr;
+    this.value = value;
+  }
+}
+
+export class TokenBurnRequest {
+  tokenId: string;
+  capability?: NFTCapability;
+  commitment?: string;
+  amount?: number; // fungible token amount
+  cashaddr?: string;
+
+  constructor({
+    tokenId,
+    capability,
+    commitment,
+    amount,
+    cashaddr,
+  }: {
+    tokenId: string;
+    capability?: NFTCapability;
+    commitment?: string;
+    amount?: number;
+    cashaddr?: string;
+  }) {
+    this.tokenId = tokenId;
+    this.capability = capability;
+    this.commitment = commitment;
+    this.amount = amount;
+    this.cashaddr = cashaddr;
+  }
+}
+
 export class TokenSendRequest {
   cashaddr: string;
   value?: number; // satoshi value
