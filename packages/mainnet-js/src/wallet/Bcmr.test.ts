@@ -4,12 +4,7 @@ import { BCMR } from "./Bcmr.js";
 import { Registry } from "./bcmr-v1.schema.js";
 import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
-import {
-  binToHex,
-  hexToBin,
-  sha256,
-  utf8ToBin,
-} from "@bitauth/libauth";
+import { binToHex, hexToBin, sha256, utf8ToBin } from "@bitauth/libauth";
 import { mine } from "../mine";
 import { Network } from "../interface";
 
@@ -269,9 +264,9 @@ describe(`Test BCMR support`, () => {
     const bob = await RegTestWallet.newRandom();
 
     const opreturnData = OpReturnData.fromUint8Array(
-        hexToBin(
-          "6a0442434d524c20e073b89a80c77c533ad364692db15df01adb9df404592f608d2c0cdd8960ed0e4d440068747470733a2f2f6d61696e6e65742e636173682f2e77656c6c2d6b6e6f776e2f626974636f696e2d636173682d6d657461646174612d72656769737472792e6a736f6e"
-        )
+      hexToBin(
+        "6a0442434d524c20e073b89a80c77c533ad364692db15df01adb9df404592f608d2c0cdd8960ed0e4d440068747470733a2f2f6d61696e6e65742e636173682f2e77656c6c2d6b6e6f776e2f626974636f696e2d636173682d6d657461646174612d72656769737472792e6a736f6e"
+      )
     );
     const response = await alice.send([
       new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),

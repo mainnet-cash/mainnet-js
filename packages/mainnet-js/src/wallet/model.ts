@@ -44,7 +44,6 @@ export class TokenGenesisRequest {
   cashaddr?: string;
   value?: number; // satoshi value
 
-
   constructor({
     amount,
     capability,
@@ -203,7 +202,7 @@ export class OpReturnData {
    *
    * @returns class instance
    */
-   public static fromUint8Array(uint8Array: Uint8Array) {
+  public static fromUint8Array(uint8Array: Uint8Array) {
     if (uint8Array[0] !== 0x6a) {
       return this.fromArray([uint8Array]);
     }

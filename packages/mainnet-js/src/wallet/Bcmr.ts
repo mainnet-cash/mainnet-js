@@ -72,9 +72,7 @@ export class BCMR {
    * @param  {Registry} registry Registry object per schema specification, see https://raw.githubusercontent.com/bitjson/chip-bcmr/master/bcmr-v1.schema.json
    *
    */
-   public static addMetadataRegistry(
-    registry: Registry
-  ): void {
+  public static addMetadataRegistry(registry: Registry): void {
     if (
       this.metadataRegistries.some(
         (val) => JSON.stringify(val) === JSON.stringify(registry)

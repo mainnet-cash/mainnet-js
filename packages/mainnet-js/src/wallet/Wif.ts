@@ -1370,7 +1370,9 @@ export class Wallet extends BaseWallet {
    * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
    * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
    */
-   public async tokenGenesis(genesisRequest: TokenGenesisRequest): Promise<SendResponse> {
+  public async tokenGenesis(
+    genesisRequest: TokenGenesisRequest
+  ): Promise<SendResponse> {
     return this.send(
       new TokenSendRequest({
         cashaddr: genesisRequest.cashaddr || this.cashaddr!,
@@ -1549,9 +1551,7 @@ export class Wallet extends BaseWallet {
    * @param  {string?} tokenId tokenId (category) to filter utxos by, if not set will return utxos from all tokens
    * @returns  {UtxoI[]} token utxos
    */
-   public async getTokenUtxos(
-    tokenId?: string
-  ): Promise<UtxoI[]> {
+  public async getTokenUtxos(tokenId?: string): Promise<UtxoI[]> {
     const utxos = await this.getAddressUtxos(this.address!);
     return utxos.filter((val) =>
       tokenId ? val.token?.tokenId === tokenId : val.token
@@ -1570,7 +1570,7 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particula tokenId 
+   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particula tokenId
    * disregards fungible token balances
    * for fungible token balance see @ref getTokenBalance
    * @param  {string} tokenId tokenId to get balance for
@@ -1601,7 +1601,7 @@ export class Wallet extends BaseWallet {
    * getAllNftTokenBalances Gets all non-fungible token (NFT) balances in this wallet
    * @returns  {Object} a map [tokenId => balance] for all NFTs in this wallet
    */
-   public async getAllNftTokenBalances(): Promise<Object> {
+  public async getAllNftTokenBalances(): Promise<Object> {
     const result = {};
     const utxos = await this.getTokenUtxos();
     for (const utxo of utxos) {
