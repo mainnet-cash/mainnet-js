@@ -6,14 +6,12 @@ import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
 import {
   binToHex,
-  binToUtf8,
   hexToBin,
   sha256,
   utf8ToBin,
 } from "@bitauth/libauth";
 import { mine } from "../mine";
 import { Network } from "../interface";
-import axios from "axios";
 
 beforeAll(async () => {
   await initProviders();
@@ -48,6 +46,25 @@ describe(`Test BCMR support`, () => {
     .slice()
     .reverse();
 
+  test("Add metadata registry and get token info", async () => {
+    expect(
+      BCMR.getTokenInfo(
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      )
+    ).toBe(undefined);
+    BCMR.addMetadataRegistry(registry);
+    const tokenInfo = BCMR.getTokenInfo(
+      "0000000000000000000000000000000000000000000000000000000000000000"
+    );
+    expect(tokenInfo?.token?.symbol).toBe("TOK");
+    expect(tokenInfo?.token?.decimals).toBe(8);
+
+    // check adding the same registry does not produce a duplicate
+    expect(BCMR.metadataRegistries.length).toBe(1);
+    BCMR.addMetadataRegistry(registry);
+    expect(BCMR.metadataRegistries.length).toBe(1);
+  });
+
   test("Add metadata from uri and get token info", async () => {
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
@@ -58,20 +75,19 @@ describe(`Test BCMR support`, () => {
       BCMR.getTokenInfo(
         "0000000000000000000000000000000000000000000000000000000000000000"
       )
-    ).toBeUndefined();
-    await BCMR.addMetadataRegistry(
+    ).toBe(undefined);
+    await BCMR.addMetadataRegistryFromUri(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     const tokenInfo = BCMR.getTokenInfo(
       "0000000000000000000000000000000000000000000000000000000000000000"
     );
-    expect(tokenInfo).toBeDefined();
     expect(tokenInfo?.token?.symbol).toBe("TOK");
     expect(tokenInfo?.token?.decimals).toBe(8);
 
     // check adding the same registry does not produce a duplicate
     expect(BCMR.metadataRegistries.length).toBe(1);
-    await BCMR.addMetadataRegistry(
+    await BCMR.addMetadataRegistryFromUri(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     expect(BCMR.metadataRegistries.length).toBe(1);
@@ -91,21 +107,20 @@ describe(`Test BCMR support`, () => {
       BCMR.getTokenInfo(
         "0000000000000000000000000000000000000000000000000000000000000000"
       )
-    ).toBeUndefined();
+    ).toBe(undefined);
     await expect(
-      BCMR.addMetadataRegistry(
+      BCMR.addMetadataRegistryFromUri(
         "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
         "00"
       )
     ).rejects.toThrow("mismatch");
-    await BCMR.addMetadataRegistry(
+    await BCMR.addMetadataRegistryFromUri(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       registryContentHash
     );
     const tokenInfo = BCMR.getTokenInfo(
       "0000000000000000000000000000000000000000000000000000000000000000"
     );
-    expect(tokenInfo).toBeDefined();
     expect(tokenInfo?.token?.symbol).toBe("TOK");
     expect(tokenInfo?.token?.decimals).toBe(8);
 
@@ -201,7 +216,7 @@ describe(`Test BCMR support`, () => {
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
     const chunks = [
       "BCMR",
-      Buffer.from(contentHashBin.slice().reverse()),
+      contentHashBin.slice().reverse(),
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
@@ -230,7 +245,7 @@ describe(`Test BCMR support`, () => {
 
     const chunks = [
       "BCMR",
-      Buffer.from(sha256.hash(utf8ToBin("registry_contents"))),
+      sha256.hash(utf8ToBin("registry_contents")),
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       "something else",
     ];
@@ -253,12 +268,10 @@ describe(`Test BCMR support`, () => {
     );
     const bob = await RegTestWallet.newRandom();
 
-    const opreturnData = OpReturnData.fromBuffer(
-      Buffer.from(
+    const opreturnData = OpReturnData.fromUint8Array(
         hexToBin(
           "6a0442434d524c20e073b89a80c77c533ad364692db15df01adb9df404592f608d2c0cdd8960ed0e4d440068747470733a2f2f6d61696e6e65742e636173682f2e77656c6c2d6b6e6f776e2f626974636f696e2d636173682d6d657461646174612d72656769737472792e6a736f6e"
         )
-      )
     );
     const response = await alice.send([
       new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
@@ -278,7 +291,7 @@ describe(`Test BCMR support`, () => {
 
     let chunks = [
       "BCMR",
-      Buffer.from(registryContentHashBinBitcoinByteOrder),
+      registryContentHashBinBitcoinByteOrder,
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
@@ -296,7 +309,7 @@ describe(`Test BCMR support`, () => {
       BCMR.getTokenInfo(
         "0000000000000000000000000000000000000000000000000000000000000000"
       )
-    ).toBeUndefined();
+    ).toBe(undefined);
     const chain = await BCMR.addMetadataRegistryAuthChain({
       transactionHash: response.txId!,
       network: Network.REGTEST,
@@ -310,7 +323,6 @@ describe(`Test BCMR support`, () => {
     const tokenInfo = BCMR.getTokenInfo(
       "0000000000000000000000000000000000000000000000000000000000000000"
     );
-    expect(tokenInfo).toBeDefined();
     expect(tokenInfo?.token?.symbol).toBe("TOK");
     expect(tokenInfo?.token?.decimals).toBe(8);
 
@@ -320,7 +332,7 @@ describe(`Test BCMR support`, () => {
       transactionHash: response.txId!,
       network: Network.REGTEST,
     });
-    expect(otherChain.length).toBe(0);
+    expect(otherChain.length).toBe(1);
     expect(BCMR.metadataRegistries.length).toBe(1);
 
     removeAxiosMock(
@@ -349,7 +361,7 @@ describe(`Test BCMR support`, () => {
 
       let chunks = [
         "BCMR",
-        Buffer.from(registryContentHashBinBitcoinByteOrder),
+        registryContentHashBinBitcoinByteOrder,
         "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       ];
       const opreturnData = OpReturnData.fromArray(chunks);
@@ -452,7 +464,7 @@ describe(`Test BCMR support`, () => {
     );
     let chunks = [
       "BCMR",
-      Buffer.from(contentHash_v1),
+      contentHash_v1,
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
@@ -474,7 +486,7 @@ describe(`Test BCMR support`, () => {
     );
     chunks = [
       "BCMR",
-      Buffer.from(contentHash_v2),
+      contentHash_v2,
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
     ];
     const opreturnData2 = OpReturnData.fromArray(chunks);
@@ -499,7 +511,7 @@ describe(`Test BCMR support`, () => {
     );
     chunks = [
       "BCMR",
-      Buffer.from(contentHash_v3),
+      contentHash_v3,
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
     ];
     const opreturnData3 = OpReturnData.fromArray(chunks);
@@ -519,7 +531,7 @@ describe(`Test BCMR support`, () => {
     );
     chunks = [
       "BCMR",
-      Buffer.from(contentHash_v4),
+      contentHash_v4,
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
     ];
     const opreturnData4 = OpReturnData.fromArray(chunks);

@@ -1,7 +1,6 @@
 import {
   binToHex,
   binToNumberUint16LE,
-  binToNumberUint32LE,
   binToUtf8,
   decodeTransaction,
   hexToBin,
@@ -68,19 +67,14 @@ export class BCMR {
   }
 
   /**
-   * fetchMetadataRegistry Add the Fetch metadata registry by fetching a JSON file from a remote URI, optionally verifying its content hash
+   * addMetadataRegistry Add the metadata registry to the list of tracked registries
    *
-   * @param  {string} uri URI of the registry to fetch from
-   * @param  {string?} contentHash SHA256 hash of the resource the `uri` parameter points at.
-   * If specified, calculates the hash of the data fetched from `uri` and matches it with provided one.
-   * Yields an error upon mismatch.
+   * @param  {Registry} registry Registry object per schema specification, see https://raw.githubusercontent.com/bitjson/chip-bcmr/master/bcmr-v1.schema.json
    *
    */
-  public static async addMetadataRegistry(
-    uri: string,
-    contentHash?: string
-  ): Promise<void> {
-    const registry = await this.fetchMetadataRegistry(uri, contentHash);
+   public static addMetadataRegistry(
+    registry: Registry
+  ): void {
     if (
       this.metadataRegistries.some(
         (val) => JSON.stringify(val) === JSON.stringify(registry)
@@ -89,6 +83,23 @@ export class BCMR {
       return;
     }
     this.metadataRegistries.push(registry);
+  }
+
+  /**
+   * addMetadataRegistryFromUri Add the metadata registry by fetching a JSON file from a remote URI, optionally verifying its content hash
+   *
+   * @param  {string} uri URI of the registry to fetch from
+   * @param  {string?} contentHash SHA256 hash of the resource the `uri` parameter points at.
+   * If specified, calculates the hash of the data fetched from `uri` and matches it with provided one.
+   * Yields an error upon mismatch.
+   *
+   */
+  public static async addMetadataRegistryFromUri(
+    uri: string,
+    contentHash?: string
+  ): Promise<void> {
+    const registry = await this.fetchMetadataRegistry(uri, contentHash);
+    this.addMetadataRegistry(registry);
   }
 
   /**
@@ -349,14 +360,7 @@ export class BCMR {
       authChain.reverse()[0].uri
     );
 
-    if (
-      this.metadataRegistries.some(
-        (val) => JSON.stringify(val) === JSON.stringify(registry)
-      )
-    ) {
-      return [];
-    }
-    this.metadataRegistries.push(registry);
+    this.addMetadataRegistry(registry);
     return authChain;
   }
 

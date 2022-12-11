@@ -89,7 +89,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     );
     const transactionMap: { [hash: string]: TransactionBCH } = {};
     for (let { tx_hash } of uniqueTransactionHashes) {
-      const key = `${this.network}-${tx_hash};`
+      const key = `${this.network}-${tx_hash};`;
 
       // check cache
       if (ElectrumNetworkProvider.utxoTxCache[key]) {

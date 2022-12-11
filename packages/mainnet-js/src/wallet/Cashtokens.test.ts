@@ -13,16 +13,6 @@ afterAll(async () => {
 });
 
 describe(`Test cashtokens`, () => {
-  // test("Get utxos from chipnet", async () => {
-  //   let w = await TestNetWallet.watchOnly("bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4");
-  //   console.log(await w.getAddressUtxos("bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4"));
-  // })
-
-  // test("Get transaction from chipnet", async () => {
-  //   let w = await TestNetWallet.watchOnly("bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4");
-  //   console.log(await w.provider!.getRawTransaction("b84debf788680257285e8a67e3a52592bc17089f1dce997c0f8255b4e9608c41"));
-  // })
-
   test("Test fungible cashtoken genesis and sending", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();

@@ -4,7 +4,6 @@ import { UnitEnum } from "../enum.js";
 import { NFTCapability, UtxoI } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import { utf8ToBin } from "@bitauth/libauth";
-import { buffer } from "stream/consumers";
 
 // These are the minimal models used to provide types for the express server
 //
@@ -109,7 +108,7 @@ export class OpReturnData {
    *
    * @returns class instance
    */
-  public static from(data: string | Buffer) {
+  public static from(data: string | Buffer | Uint8Array) {
     return this.fromArray([data]);
   }
 
@@ -140,13 +139,28 @@ export class OpReturnData {
   }
 
   /**
+   * buffer - Accept OP_RETURN data as a binary buffer.
+   * If buffer lacks the OP_RETURN and OP_PUSHDATA opcodes, they will be prepended.
+   *
+   * @param buffer   Data buffer to be assigned to the OP_RETURN outpit
+   *
+   * @returns class instance
+   */
+   public static fromUint8Array(uint8Array: Uint8Array) {
+    if (uint8Array[0] !== 0x6a) {
+      return this.fromArray([uint8Array]);
+    }
+    return new this(Buffer.from(uint8Array));
+  }
+
+  /**
    * fromArray - Accept array of data
    *
    * @param array   Array of Buffer or UTF-8 encoded string messages to be converted to OP_RETURN data
    *
    * @returns class instance
    */
-  public static fromArray(array: Array<string | Buffer>) {
+  public static fromArray(array: Array<string | Buffer | Uint8Array>) {
     let data: Buffer = Buffer.from([0x6a]); // OP_RETURN
     for (const element of array) {
       let length: number;
@@ -157,6 +171,9 @@ export class OpReturnData {
         length = elementData.length;
       } else if (element instanceof Buffer) {
         elementData = element;
+        length = elementData.length;
+      } else if (element instanceof Uint8Array) {
+        elementData = Buffer.from(element);
         length = elementData.length;
       } else {
         throw new Error("Wrong data array element");
