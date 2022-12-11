@@ -582,10 +582,6 @@ export class Wallet extends BaseWallet {
   //#region Funds
   //
   public async getAddressUtxos(address?: string): Promise<UtxoI[]> {
-    if (!this.provider) {
-      throw Error("Attempting to get utxos from wallet without a client");
-    }
-
     if (!address) {
       address = this.cashaddr!;
     }
@@ -609,20 +605,6 @@ export class Wallet extends BaseWallet {
     } else {
       return await this.provider!.getUtxos(address);
     }
-  }
-
-  /**
-   * utxos Get unspent token outputs for the wallet
-   * will return utxos only for the specified token if `tokenId` provided
-   */
-  public async getTokenUtxos(
-    address: string,
-    tokenId?: string
-  ): Promise<UtxoI[]> {
-    const utxos = await this.getAddressUtxos(address);
-    return utxos.filter((val) =>
-      tokenId ? val.token?.tokenId === tokenId : val.token
-    );
   }
 
   /**
@@ -661,25 +643,6 @@ export class Wallet extends BaseWallet {
         usdPriceCache
       );
     }
-  }
-
-  // gets wallet fungible token balance
-  // for nft balance use getTokenUtxos
-  public async getTokenBalance(tokenId: string): Promise<number> {
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    return sumTokenAmounts(utxos, tokenId);
-  }
-
-  public async getAllTokenBalances(): Promise<Object> {
-    const result = {};
-    const utxos = await this.getTokenUtxos(this.cashaddr!);
-    for (const utxo of utxos) {
-      if (!result[utxo.token!.tokenId]) {
-        result[utxo.token!.tokenId] = 0;
-      }
-      result[utxo.token!.tokenId] += utxo.token!.amount;
-    }
-    return result;
   }
 
   // Gets balance by summing value in all utxos in stats
@@ -1206,189 +1169,6 @@ export class Wallet extends BaseWallet {
     return { encodedTransaction, tokenIds: tokenIds };
   }
 
-  /**
-   * Create new cashtoken, both funglible and non-fungible (NFT)
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {number} genesisRequest.amount amount of *fungible* tokens to create
-   * @param  {NFTCapability?} genesisRequest.capability capability of new NFT
-   * @param  {string?} genesisRequest.commitment NFT commitment message
-   * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   */
-  public async genesis(genesisRequest: TokenGenesisRequest) {
-    return this.send(
-      new TokenSendRequest({
-        cashaddr: genesisRequest.cashaddr || this.cashaddr!,
-        amount: genesisRequest.amount,
-        value: genesisRequest.value,
-        capability: genesisRequest.capability,
-        commitment: genesisRequest.commitment,
-        tokenId: "",
-      }),
-      {
-        checkTokenQuantities: false,
-        queryBalance: false,
-      }
-    );
-  }
-
-  /**
-   * Mint new NFT cashtoken using an existing minting token
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} tokenId tokenId of an NFT to mint
-   * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
-   * @param  {NFTCapability?} mintRequest.capability capability of new NFT
-   * @param  {string?} mintRequest.commitment NFT commitment message
-   * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   * @param  {boolean} deduceTokenAmount if minting token contains fungible amount, deduce from it by amount of minted tokens
-   */
-  public async mint(
-    tokenId: string,
-    mintRequests: TokenMintRequest | Array<TokenMintRequest>,
-    deduceTokenAmount: boolean = true
-  ) {
-    if (!Array.isArray(mintRequests)) {
-      mintRequests = [mintRequests];
-    }
-
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    const nftUtxos = utxos.filter(
-      (val) =>
-        val.token?.tokenId === tokenId &&
-        val.token?.capability != NFTCapability.none
-    );
-    if (!nftUtxos.length) {
-      throw new Error(
-        "You do not have any token UTXOs with minting capability for specified tokenId"
-      );
-    }
-    const newAmount =
-      deduceTokenAmount && nftUtxos[0].token!.amount > 0
-        ? nftUtxos[0].token!.amount - mintRequests.length
-        : nftUtxos[0].token!.amount;
-    const safeNewAmount = Math.max(0, newAmount);
-    const mintingInput = new TokenSendRequest({
-      cashaddr: this.cashaddr!,
-      tokenId: tokenId,
-      capability: nftUtxos[0].token!.capability,
-      commitment: nftUtxos[0].token!.commitment,
-      amount: safeNewAmount,
-      value: nftUtxos[0].satoshis,
-    });
-    return this.send(
-      [
-        mintingInput,
-        ...mintRequests.map(
-          (val) =>
-            new TokenSendRequest({
-              cashaddr: val.cashaddr || this.cashaddr!,
-              amount: 0,
-              tokenId: tokenId,
-              value: val.value,
-              capability: val.capability,
-              commitment: val.commitment,
-            })
-        ),
-      ],
-      {
-        checkTokenQuantities: false,
-        queryBalance: false,
-      }
-    );
-  }
-
-  /**
-   * Perform an explicit token burning by spending a token utxo to an OP_RETURN
-   *
-   * Behaves differently for fungible and non-fungible tokens:
-   *  * NFTs are always "destroyed"
-   *  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
-   *
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} burnRequest.tokenId tokenId of a token to burn
-   * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
-   * @param  {string} burnRequest.commitment commitment of the NFT token to select, optional
-   * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
-   * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
-   * @param  {string?} message optional message to include in OP_RETURN
-   */
-  public async burn(
-    burnRequest: TokenBurnRequest,
-    message?: string
-  ) {
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    const tokenUtxos = utxos.filter(
-      (val) =>
-        val.token?.tokenId === burnRequest.tokenId &&
-        val.token?.capability === burnRequest.capability &&
-        val.token?.commitment === burnRequest.commitment &&
-        val.token?.capability === burnRequest.capability
-    );
-
-    if (!tokenUtxos.length) {
-      throw new Error("You do not have suitable token UTXOs to perform burn");
-    }
-
-    const totalFungibleAmount = tokenUtxos.reduce(
-      (prev, cur) => prev + (cur.token?.amount || 0),
-      0
-    );
-    const fungibleBurnAmount =
-      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0;
-    const destroyFT = totalFungibleAmount === fungibleBurnAmount;
-    const hasNFT = burnRequest.capability || burnRequest.commitment;
-
-    let utxoIds: UtxoI[] = [];
-    let changeSendRequests;
-    if (hasNFT) {
-      // does not have FT tokens, let us destroy the token completely
-      if (totalFungibleAmount === 0) {
-        changeSendRequests = [];
-        utxoIds.push(tokenUtxos[0]);
-      } else {
-        // if there are FT, reduce their amount
-        const newAmount = totalFungibleAmount - fungibleBurnAmount;
-        const safeNewAmount = Math.max(0, newAmount);
-        changeSendRequests = [
-          new TokenSendRequest({
-            cashaddr: burnRequest.cashaddr || this.cashaddr!,
-            tokenId: burnRequest.tokenId,
-            capability: burnRequest.capability,
-            commitment: burnRequest.commitment,
-            amount: safeNewAmount,
-            value: tokenUtxos[0].satoshis,
-          }),
-        ];
-      }
-    } else {
-      // if we are burning last fughible tokens, let us destroy the token completely
-      if (totalFungibleAmount === fungibleBurnAmount) {
-        changeSendRequests = [];
-        utxoIds.push(tokenUtxos[0]);
-      } else {
-        // reduce the FT amount
-        const newAmount = totalFungibleAmount - fungibleBurnAmount;
-        const safeNewAmount = Math.max(0, newAmount);
-        changeSendRequests = [
-          new TokenSendRequest({
-            cashaddr: burnRequest.cashaddr || this.cashaddr!,
-            tokenId: burnRequest.tokenId,
-            amount: safeNewAmount,
-            value: tokenUtxos[0].satoshis,
-          }),
-        ];
-      }
-    }
-
-    const opReturn = OpReturnData.fromString(message || "");
-    return this.send([opReturn, ...changeSendRequests], {
-      checkTokenQuantities: false,
-      queryBalance: false,
-      utxoIds: utxoIds.length > 0 ? utxoIds : undefined,
-    });
-  }
-
   // Submit a raw transaction
   public async submitTransaction(
     transaction: Uint8Array,
@@ -1579,6 +1359,260 @@ export class Wallet extends BaseWallet {
     );
   }
   //#endregion Signing
+
+  //#region Cashtokens
+  /**
+   * Create new cashtoken, both funglible and/or non-fungible (NFT)
+   * Refer to spec https://github.com/bitjson/cashtokens
+   * @param  {number} genesisRequest.amount amount of *fungible* tokens to create
+   * @param  {NFTCapability?} genesisRequest.capability capability of new NFT
+   * @param  {string?} genesisRequest.commitment NFT commitment message
+   * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
+   * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
+   */
+   public async tokenGenesis(genesisRequest: TokenGenesisRequest): Promise<SendResponse> {
+    return this.send(
+      new TokenSendRequest({
+        cashaddr: genesisRequest.cashaddr || this.cashaddr!,
+        amount: genesisRequest.amount,
+        value: genesisRequest.value,
+        capability: genesisRequest.capability,
+        commitment: genesisRequest.commitment,
+        tokenId: "",
+      }),
+      {
+        checkTokenQuantities: false,
+        queryBalance: false,
+      }
+    );
+  }
+
+  /**
+   * Mint new NFT cashtokens using an existing minting token
+   * Refer to spec https://github.com/bitjson/cashtokens
+   * @param  {string} tokenId tokenId of an NFT to mint
+   * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
+   * @param  {NFTCapability?} mintRequest.capability capability of new NFT
+   * @param  {string?} mintRequest.commitment NFT commitment message
+   * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
+   * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
+   * @param  {boolean} deduceTokenAmount if minting token contains fungible amount, deduce from it by amount of minted tokens
+   */
+  public async tokenMint(
+    tokenId: string,
+    mintRequests: TokenMintRequest | Array<TokenMintRequest>,
+    deduceTokenAmount: boolean = true
+  ): Promise<SendResponse> {
+    if (!Array.isArray(mintRequests)) {
+      mintRequests = [mintRequests];
+    }
+
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    const nftUtxos = utxos.filter(
+      (val) =>
+        val.token?.tokenId === tokenId &&
+        val.token?.capability != NFTCapability.none
+    );
+    if (!nftUtxos.length) {
+      throw new Error(
+        "You do not have any token UTXOs with minting capability for specified tokenId"
+      );
+    }
+    const newAmount =
+      deduceTokenAmount && nftUtxos[0].token!.amount > 0
+        ? nftUtxos[0].token!.amount - mintRequests.length
+        : nftUtxos[0].token!.amount;
+    const safeNewAmount = Math.max(0, newAmount);
+    const mintingInput = new TokenSendRequest({
+      cashaddr: this.cashaddr!,
+      tokenId: tokenId,
+      capability: nftUtxos[0].token!.capability,
+      commitment: nftUtxos[0].token!.commitment,
+      amount: safeNewAmount,
+      value: nftUtxos[0].satoshis,
+    });
+    return this.send(
+      [
+        mintingInput,
+        ...mintRequests.map(
+          (val) =>
+            new TokenSendRequest({
+              cashaddr: val.cashaddr || this.cashaddr!,
+              amount: 0,
+              tokenId: tokenId,
+              value: val.value,
+              capability: val.capability,
+              commitment: val.commitment,
+            })
+        ),
+      ],
+      {
+        checkTokenQuantities: false,
+        queryBalance: false,
+      }
+    );
+  }
+
+  /**
+   * Perform an explicit token burning by spending a token utxo to an OP_RETURN
+   *
+   * Behaves differently for fungible and non-fungible tokens:
+   *  * NFTs are always "destroyed"
+   *  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
+   *
+   * Refer to spec https://github.com/bitjson/cashtokens
+   * @param  {string} burnRequest.tokenId tokenId of a token to burn
+   * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
+   * @param  {string} burnRequest.commitment commitment of the NFT token to select, optional
+   * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
+   * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
+   * @param  {string?} message optional message to include in OP_RETURN
+   */
+  public async tokenBurn(
+    burnRequest: TokenBurnRequest,
+    message?: string
+  ): Promise<SendResponse> {
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    const tokenUtxos = utxos.filter(
+      (val) =>
+        val.token?.tokenId === burnRequest.tokenId &&
+        val.token?.capability === burnRequest.capability &&
+        val.token?.commitment === burnRequest.commitment &&
+        val.token?.capability === burnRequest.capability
+    );
+
+    if (!tokenUtxos.length) {
+      throw new Error("You do not have suitable token UTXOs to perform burn");
+    }
+
+    const totalFungibleAmount = tokenUtxos.reduce(
+      (prev, cur) => prev + (cur.token?.amount || 0),
+      0
+    );
+    const fungibleBurnAmount =
+      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0;
+    const hasNFT = burnRequest.capability || burnRequest.commitment;
+
+    let utxoIds: UtxoI[] = [];
+    let changeSendRequests: TokenSendRequest[];
+    if (hasNFT) {
+      // does not have FT tokens, let us destroy the token completely
+      if (totalFungibleAmount === 0) {
+        changeSendRequests = [];
+        utxoIds.push(tokenUtxos[0]);
+      } else {
+        // if there are FT, reduce their amount
+        const newAmount = totalFungibleAmount - fungibleBurnAmount;
+        const safeNewAmount = Math.max(0, newAmount);
+        changeSendRequests = [
+          new TokenSendRequest({
+            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            tokenId: burnRequest.tokenId,
+            capability: burnRequest.capability,
+            commitment: burnRequest.commitment,
+            amount: safeNewAmount,
+            value: tokenUtxos[0].satoshis,
+          }),
+        ];
+      }
+    } else {
+      // if we are burning last fughible tokens, let us destroy the token completely
+      if (totalFungibleAmount === fungibleBurnAmount) {
+        changeSendRequests = [];
+        utxoIds.push(tokenUtxos[0]);
+      } else {
+        // reduce the FT amount
+        const newAmount = totalFungibleAmount - fungibleBurnAmount;
+        const safeNewAmount = Math.max(0, newAmount);
+        changeSendRequests = [
+          new TokenSendRequest({
+            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            tokenId: burnRequest.tokenId,
+            amount: safeNewAmount,
+            value: tokenUtxos[0].satoshis,
+          }),
+        ];
+      }
+    }
+
+    const opReturn = OpReturnData.fromString(message || "");
+    return this.send([opReturn, ...changeSendRequests], {
+      checkTokenQuantities: false,
+      queryBalance: false,
+      utxoIds: utxoIds.length > 0 ? utxoIds : undefined,
+    });
+  }
+
+  /**
+   * getTokenUtxos Get unspent token outputs for the wallet
+   * will return utxos only for the specified token if `tokenId` provided
+   * @param  {string?} tokenId tokenId (category) to filter utxos by, if not set will return utxos from all tokens
+   * @returns  {UtxoI[]} token utxos
+   */
+   public async getTokenUtxos(
+    tokenId?: string
+  ): Promise<UtxoI[]> {
+    const utxos = await this.getAddressUtxos(this.address!);
+    return utxos.filter((val) =>
+      tokenId ? val.token?.tokenId === tokenId : val.token
+    );
+  }
+
+  /**
+   * getTokenBalance Gets fungible token balance
+   * for NFT token balance see @ref getNftTokenBalance
+   * @param  {string} tokenId tokenId to get balance for
+   * @returns  {number} fungible token balance
+   */
+  public async getTokenBalance(tokenId: string): Promise<number> {
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    return sumTokenAmounts(utxos, tokenId);
+  }
+
+  /**
+   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particula tokenId 
+   * disregards fungible token balances
+   * for fungible token balance see @ref getTokenBalance
+   * @param  {string} tokenId tokenId to get balance for
+   * @returns  {number} non-fungible token balance
+   */
+  public async getNftTokenBalance(tokenId: string): Promise<number> {
+    const utxos = await this.getTokenUtxos(tokenId);
+    return utxos.length;
+  }
+
+  /**
+   * getAllTokenBalances Gets all fungible token balances in this wallet
+   * @returns  {Object} a map [tokenId => balance] for all tokens in this wallet
+   */
+  public async getAllTokenBalances(): Promise<Object> {
+    const result = {};
+    const utxos = await this.getTokenUtxos();
+    for (const utxo of utxos) {
+      if (!result[utxo.token!.tokenId]) {
+        result[utxo.token!.tokenId] = 0;
+      }
+      result[utxo.token!.tokenId] += utxo.token!.amount;
+    }
+    return result;
+  }
+
+  /**
+   * getAllNftTokenBalances Gets all non-fungible token (NFT) balances in this wallet
+   * @returns  {Object} a map [tokenId => balance] for all NFTs in this wallet
+   */
+   public async getAllNftTokenBalances(): Promise<Object> {
+    const result = {};
+    const utxos = await this.getTokenUtxos();
+    for (const utxo of utxos) {
+      if (!result[utxo.token!.tokenId]) {
+        result[utxo.token!.tokenId] = 0;
+      }
+      result[utxo.token!.tokenId] += 1;
+    }
+    return result;
+  }
+  //#endregion Cashtokens
 }
 
 /**
