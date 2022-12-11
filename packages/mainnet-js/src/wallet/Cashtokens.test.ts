@@ -175,7 +175,7 @@ describe(`Test cashtokens`, () => {
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
       }),
-    ]);
+    ], true);
     expect(await alice.getTokenBalance(tokenId)).toBe(2);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(3);

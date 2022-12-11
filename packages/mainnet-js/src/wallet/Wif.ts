@@ -1398,12 +1398,12 @@ export class Wallet extends BaseWallet {
    * @param  {string?} mintRequest.commitment NFT commitment message
    * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
    * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   * @param  {boolean} deduceTokenAmount if minting token contains fungible amount, deduce from it by amount of minted tokens
+   * @param  {boolean?} deductTokenAmount if minting token contains fungible amount, deduct from it by amount of minted tokens
    */
   public async tokenMint(
     tokenId: string,
     mintRequests: TokenMintRequest | Array<TokenMintRequest>,
-    deduceTokenAmount: boolean = true
+    deductTokenAmount: boolean = false
   ): Promise<SendResponse> {
     if (!Array.isArray(mintRequests)) {
       mintRequests = [mintRequests];
@@ -1421,7 +1421,7 @@ export class Wallet extends BaseWallet {
       );
     }
     const newAmount =
-      deduceTokenAmount && nftUtxos[0].token!.amount > 0
+      deductTokenAmount && nftUtxos[0].token!.amount > 0
         ? nftUtxos[0].token!.amount - mintRequests.length
         : nftUtxos[0].token!.amount;
     const safeNewAmount = Math.max(0, newAmount);
@@ -1465,7 +1465,7 @@ export class Wallet extends BaseWallet {
    * Refer to spec https://github.com/bitjson/cashtokens
    * @param  {string} burnRequest.tokenId tokenId of a token to burn
    * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
-   * @param  {string} burnRequest.commitment commitment of the NFT token to select, optional
+   * @param  {string?} burnRequest.commitment commitment of the NFT token to select, optional
    * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
    * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
    * @param  {string?} message optional message to include in OP_RETURN
