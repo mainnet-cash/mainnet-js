@@ -167,7 +167,7 @@ describe(`Test cashtokens`, () => {
     const tokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
 
-    // mint 2 NFTs, defaults to amount reducing
+    // mint 2 NFTs, amount reducing
     const response = await alice.tokenMint(tokenId, [
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,

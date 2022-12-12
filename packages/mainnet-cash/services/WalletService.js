@@ -328,6 +328,174 @@ const xpubkeys = ({ xPubKeyRequest }) => new Promise(
     }
   },
 );
+/**
+* Perform an explicit token burn
+*
+* tokenBurnRequest TokenBurnRequest Perform an explicit token burning by spending a token utxo to an OP_RETURN Behaves differently for fungible and non-fungible tokens:  * NFTs are always \"destroyed\"  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is \"destroyed\" Refer to spec https://github.com/bitjson/cashtokens 
+* returns SendResponse
+* */
+const tokenBurn = ({ tokenBurnRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(tokenBurnRequest.walletId);
+      const resp = await wallet.tokenBurn(tokenBurnRequest, tokenBurnRequest.message);
+
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Create new token category
+*
+* tokenGenesisRequest TokenGenesisRequest Create new cashtoken, both funglible and/or non-fungible (NFT) Refer to spec https://github.com/bitjson/cashtokens Newly created token identifier can be found in `tokenIds` field. 
+* returns SendResponse
+* */
+const tokenGenesis = ({ tokenGenesisRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(tokenGenesisRequest.walletId);
+      const resp = await wallet.tokenGenesis(tokenGenesisRequest);
+
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Mint new non-fungible tokens
+*
+* tokenMintRequest TokenMintRequest Mint new NFT cashtokens using an existing minting token Refer to spec https://github.com/bitjson/cashtokens Newly minted tokens will retain the parent's `tokenId`. 
+* returns SendResponse
+* */
+const tokenMint = ({ tokenMintRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(tokenMintRequest.walletId);
+      const resp = await wallet.tokenMint(tokenMintRequest.tokenId, tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
+
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get non-fungible token balance
+*
+* getTokenBalanceRequest GetTokenBalanceRequest Gets non-fungible token (NFT) balance for a particula tokenId disregards fungible token balances for fungible token balance see @ref getTokenBalance 
+* returns getNftTokenBalance_200_response
+* */
+const getNftTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
+      const resp = await wallet.getNftTokenBalance(getTokenBalanceRequest.tokenId);
+
+      resolve(Service.successResponse({ balance: resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get fungible token balance
+*
+* getTokenBalanceRequest GetTokenBalanceRequest Gets fungible token balance for NFT token balance see @ref getNftTokenBalance 
+* returns getTokenBalance_200_response
+* */
+const getTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
+      const resp = await wallet.getTokenBalance(getTokenBalanceRequest.tokenId);
+
+      resolve(Service.successResponse({ balance: resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get token utxos
+*
+* getTokenUtxosRequest GetTokenUtxosRequest Get unspent token outputs for the wallet will return utxos only for the specified token if `tokenId` provided 
+* returns UtxoResponse
+* */
+const getTokenUtxos = ({ getTokenUtxosRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(getTokenUtxosRequest.walletId);
+      const resp = await wallet.getTokenUtxos(getTokenUtxosRequest.tokenId);
+
+      resolve(Service.successResponse({ utxos: resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get non-fungible token balance
+*
+* getAllTokenBalancesRequest GetAllTokenBalancesRequest Gets all non-fungible token (NFT) balances in this wallet 
+* returns Map
+* */
+const getAllNftTokenBalances = ({ getAllTokenBalancesRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(getAllTokenBalancesRequest.walletId);
+      const resp = await wallet.getAllNftTokenBalances();
+
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Get non-fungible token balance
+*
+* getAllTokenBalancesRequest GetAllTokenBalancesRequest Gets all fungible token balances in this wallet 
+* returns Map
+* */
+const getAllTokenBalances = ({ getAllTokenBalancesRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(getAllTokenBalancesRequest.walletId);
+      const resp = await wallet.getAllTokenBalances();
+
+      resolve(Service.successResponse(resp));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
 
 export default {
   balance,
@@ -344,5 +512,13 @@ export default {
   encodeTransaction,
   submitTransaction,
   utxos,
-  xpubkeys
+  xpubkeys,
+  tokenGenesis,
+  tokenMint,
+  tokenBurn,
+  getTokenBalance,
+  getNftTokenBalance,
+  getAllTokenBalances,
+  getAllNftTokenBalances,
+  getTokenUtxos
 };

@@ -1510,6 +1510,42 @@ paths:
         transaction in hex format.
       tags:
         - wallet/util
+  /wallet/util/get_raw_transaction:
+    post:
+      operationId: utilGetRawTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                txHash:
+                  type: string
+                  description: Hex encoded transaction hash
+                verbose:
+                  type: boolean
+                  description: If 'verbose' flag is true, will return an object, otherwise - transaction hex
+                  default: false
+              required:
+                - txHash
+        description: |
+          Request to decode a transaction
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - properties:
+                      txHex:
+                        type: string
+                        description: Hex encoded raw transaction
+                  - $ref: '#/components/schemas/ElectrumRawTransaction'
+          description: successful operation
+      summary: >-
+        Get bitcoin raw transaction
+      tags:
+        - wallet/util
   /webhook/watch_address:
     post:
       operationId: watchAddress
@@ -2363,24 +2399,29 @@ components:
           description: >-
             Token unique hexadecimal identifier, also the id of the token
             creation transaction
-        capability:
-          type: string
-          enum:
-            - none
-            - mutable
-            - minting
-          description: Capability of the new NFT
-        commitment:
-          type: string
-          maxLength: 80
-          description: Token commitment message, hexadecimal encoded, 40 bytes max length
-        cashaddr:
-          type: string
-          description: Cashaddress to send tokens to
-        value:
-          type: number
-          description: Satoshi value to send alongside with tokens
-          default: 1000
+        requests:
+          type: array
+          items:
+            type: object
+            properties:
+              capability:
+                type: string
+                enum:
+                  - none
+                  - mutable
+                  - minting
+                description: Capability of the new NFT
+              commitment:
+                type: string
+                maxLength: 80
+                description: Token commitment message, hexadecimal encoded, 40 bytes max length
+              cashaddr:
+                type: string
+                description: Cashaddress to send tokens to
+              value:
+                type: number
+                description: Satoshi value to send alongside with tokens
+                default: 1000
         deductTokenAmount:
           type: boolean
           description: if minting token contains fungible amount, deduct from it by amount of minted tokens
@@ -2415,7 +2456,7 @@ components:
           description: amount of fungible tokens to burn
         cashaddr:
           type: string
-          description: address to return token and satoshi change to, defailt to the sender's cashaddr
+          description: address to return token and satoshi change to, default to the sender's cashaddr
         message:
           type: string
           description: optional message to include in OP_RETURN
