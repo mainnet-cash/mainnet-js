@@ -55,15 +55,20 @@ describe(`Test cashtokens`, () => {
     const tokenId = genesisResponse.tokenIds![0];
     const tokenBalance = await alice.getTokenBalance(tokenId);
     expect(tokenBalance).toBe(0);
+    const nftTokenBalance = await alice.getNftTokenBalance(tokenId);
+    expect(nftTokenBalance).toBe(1);
     const tokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
     const response = await alice.send([
-      new TokenSendRequest({
+      {
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
-      }),
+        // value: 1000,
+        // amount: 0,
+      } as any,
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
+    expect(await alice.getNftTokenBalance(tokenId)).toBe(0);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(0);
 

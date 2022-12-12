@@ -3,7 +3,6 @@ import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 import server from "../index.js";
 import request from "supertest";
-import { getNetworkProvider } from "mainnet-js";
 
 var app;
 
@@ -832,7 +831,6 @@ describe("Test Wallet Endpoints", () => {
    * send, OP_RETURN
    */
    it("Should send funds and OP_RETURN data", async () => {
-    const provider = getNetworkProvider('regtest');
     let result, transaction;
     result = await request(app).post("/wallet/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
@@ -852,7 +850,11 @@ describe("Test Wallet Endpoints", () => {
     });
 
     expect(result.statusCode).toBe(200);
-    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    transaction = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: result.body.txId!,
+      network: "regtest",
+      verbose: true,
+    })).body;
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect(transaction.vout[0].scriptPubKey.hex.slice(4)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
@@ -868,7 +870,11 @@ describe("Test Wallet Endpoints", () => {
     });
 
     expect(result.statusCode).toBe(200);
-    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    transaction = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: result.body.txId!,
+      network: "regtest",
+      verbose: true,
+    })).body;
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
     expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(4))]).toStrictEqual([0x00, 0x01, 0x02]);
 
@@ -882,7 +888,11 @@ describe("Test Wallet Endpoints", () => {
     });
 
     expect(result.statusCode).toBe(200);
-    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    transaction = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: result.body.txId!,
+      network: "regtest",
+      verbose: true,
+    })).body;
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x00]);
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");

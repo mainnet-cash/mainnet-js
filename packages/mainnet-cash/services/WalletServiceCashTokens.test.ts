@@ -1,6 +1,6 @@
 import server from "../index.js";
 import request from "supertest";
-import { binToHex, getNetworkProvider, NFTCapability, utf8ToBin } from "mainnet-js";
+import { binToHex, NFTCapability, utf8ToBin } from "mainnet-js";
 
 var app;
 
@@ -79,6 +79,7 @@ describe("Test Wallet Endpoints", () => {
     const bobCashaddr = bobResp.cashaddr;
 
     const tokenId = (await request(app).post("/wallet/token_genesis").send({
+      walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
       capability: NFTCapability.mutable,
       commitment: "abcd",
@@ -89,6 +90,12 @@ describe("Test Wallet Endpoints", () => {
       tokenId: tokenId,
     })).body.balance;
     expect(tokenBalance).toBe(0);
+    const nftTokenBalance = (await request(app).post("/wallet/get_nft_token_balance").send({
+      walletId: aliceId,
+      tokenId: tokenId,
+    })).body.balance;
+    expect(nftTokenBalance).toBe(1);
+
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -102,6 +109,10 @@ describe("Test Wallet Endpoints", () => {
       }]
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
+      walletId: aliceId,
+      tokenId: tokenId,
+    })).body.balance).toBe(0);
+    expect((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance).toBe(0);
@@ -151,7 +162,7 @@ describe("Test Wallet Endpoints", () => {
         commitment: "abcd02",
       }]
     })).body;
-    expect(response.body.error).toContain("Can not change the commitment of an immutable token");
+    expect(response.message).toContain("Can not change the commitment of an immutable token");
   });
 
   test("Test mutable NFT cashtoken genesis and mutation", async () => {
@@ -215,7 +226,7 @@ describe("Test Wallet Endpoints", () => {
     expect(tokenUtxos.length).toBe(1);
     const response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId,
+      tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
       }, {
@@ -258,7 +269,7 @@ describe("Test Wallet Endpoints", () => {
     // mint 2 NFTs, amount reducing
     const response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId,
+      tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
       }, {
@@ -281,7 +292,7 @@ describe("Test Wallet Endpoints", () => {
     // mint 2 more NFTs without amount reducing
     const ftResponse = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId,
+      tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
       }, {
@@ -304,7 +315,7 @@ describe("Test Wallet Endpoints", () => {
     // check that it will stop at 0
     const ft2Response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId,
+      tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
       }, {
@@ -355,6 +366,7 @@ describe("Test Wallet Endpoints", () => {
 
     const rawTx = (await request(app).post("/wallet/util/get_raw_transaction").send({
       txHash: response.txId,
+      network: "regtest",
       verbose: true,
     })).body;
 
@@ -408,6 +420,7 @@ describe("Test Wallet Endpoints", () => {
 
     const rawTx = (await request(app).post("/wallet/util/get_raw_transaction").send({
       txHash: response.txId,
+      network: "regtest",
       verbose: true,
     })).body;
     expect(rawTx!.vout.length).toEqual(3);
@@ -539,8 +552,8 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobId,
     })).body.utxos;
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(1500);
-    expect(bobUtxos[1].satoshis).toBe(5245);
+    expect(bobUtxos[0].value).toBe(1500);
+    expect(bobUtxos[1].value).toBe(5245);
 
     // raise the token satoshi value
     await request(app).post("/wallet/send").send({
@@ -566,7 +579,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobId,
     })).body.utxos;
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(3000);
-    expect(bobUtxos[1].satoshis).toBe(3349);
+    expect(bobUtxos[0].value).toBe(3000);
+    expect(bobUtxos[1].value).toBe(3349);
   });
 });

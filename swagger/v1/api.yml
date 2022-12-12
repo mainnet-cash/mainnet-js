@@ -1525,10 +1525,12 @@ paths:
                   type: boolean
                   description: If 'verbose' flag is true, will return an object, otherwise - transaction hex
                   default: false
+              allOf:
+                - $ref: '#/components/schemas/NetworkEnum'
               required:
                 - txHash
         description: |
-          Request to decode a transaction
+          Request to get raw transaction
         required: true
       responses:
         '200':
@@ -2353,7 +2355,6 @@ components:
           description: Token commitment message, hexadecimal encoded, 40 bytes max length
       required:
         - cashaddr
-        - amount
         - tokenId
       example:
         slpaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
