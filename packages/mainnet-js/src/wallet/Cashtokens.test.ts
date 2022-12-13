@@ -173,14 +173,18 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos.length).toBe(1);
 
     // mint 2 NFTs, amount reducing
-    const response = await alice.tokenMint(tokenId, [
-      new TokenMintRequest({
-        cashaddr: alice.cashaddr!,
-      }),
-      new TokenMintRequest({
-        cashaddr: alice.cashaddr!,
-      }),
-    ], true);
+    const response = await alice.tokenMint(
+      tokenId,
+      [
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+        new TokenMintRequest({
+          cashaddr: alice.cashaddr!,
+        }),
+      ],
+      true
+    );
     expect(await alice.getTokenBalance(tokenId)).toBe(2);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(3);

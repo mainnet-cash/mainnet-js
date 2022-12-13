@@ -265,7 +265,9 @@ export class BCMR {
             const transactionBin = hexToBin(tx);
             const decoded = decodeTransaction(transactionBin);
             if (typeof decoded === "string") {
-              throw new Error(`Error decoding transaction ${JSON.stringify(tx)}, ${decoded}`);
+              throw new Error(
+                `Error decoding transaction ${JSON.stringify(tx)}, ${decoded}`
+              );
             }
             const hash = binToHex(
               sha256.hash(sha256.hash(transactionBin)).reverse()
