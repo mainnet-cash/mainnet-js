@@ -28,6 +28,14 @@ export class BCMR {
   // List of tracked registries
   public static metadataRegistries: Registry[] = [];
 
+  public static getRegistries(): Registry[] {
+    return this.metadataRegistries;
+  }
+
+  public static resetRegistries(): void {
+    this.metadataRegistries = [];
+  }
+
   /**
    * fetchMetadataRegistry Fetch the BCMR registry JSON file from a remote URI, optionally verifying its content hash
    *
@@ -106,10 +114,10 @@ export class BCMR {
    *
    * @param  {string} options.transactionHash (required) transaction hash from which to build the auth chain
    * @param  {Network?} options.network (default=mainnet) network to query the data from
-   * @param  {boolean?} options.resolveBase (default=false) boolean flag to indicate that autchain building should resolve elements back to base or be stopped at this exact chain element
+   * @param  {boolean?} options.resolveBase (default=false) boolean flag to indicate that autchain building should resolve and verify elements back to base or be stopped at this exact chain element
    * @param  {boolean?} options.followToHead (default=true) boolean flag to indicate that autchain building should progress to head or be stopped at this exact chain element
    * @param  {ElectrumRawTransaction?} options.rawTx cached raw transaction obtained previously, spares a Fulcrum call
-   * @param  {TxI[]?} options.historyCache cached address history to be reused if authchain building proceeds with the same address, spares a Fulcrum call
+   * @param  {TxI[]?} options.historyCache cached address history to be reused if authchain building proceeds with the same address, spares a flurry of Fulcrum calls
    *
    * @returns {AuthChain} returns the resolved authchain
    */
@@ -257,7 +265,7 @@ export class BCMR {
             const transactionBin = hexToBin(tx);
             const decoded = decodeTransaction(transactionBin);
             if (typeof decoded === "string") {
-              throw new Error(`Error decoding transaction ${tx}`);
+              throw new Error(`Error decoding transaction ${JSON.stringify(tx)}, ${decoded}`);
             }
             const hash = binToHex(
               sha256.hash(sha256.hash(transactionBin)).reverse()
@@ -339,7 +347,7 @@ export class BCMR {
    *
    * @param  {string} options.transactionHash (required) transaction hash from which to build the auth chain
    * @param  {Network?} options.network (default=mainnet) network to query the data from
-   * @param  {boolean?} options.followToHead (default=true) boolean flag to indicate tha autchain building should progress to head or be stopped at this exact chain element
+   * @param  {boolean?} options.followToHead (default=true) boolean flag to indicate that autchain building should progress to head (most recent registry version) or be stopped at this exact chain element
    * @param  {ElectrumRawTransaction?} options.rawTx cached raw transaction obtained previously, spares a Fulcrum call
    *
    * @returns {AuthChain} returns the resolved authchain

@@ -68,7 +68,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Add metadata from uri and get token info`, async () => {
     await page.evaluate(
       async ([id, registry]) => {
-        BCMR.metadataRegistries = [];
+        BCMR.resetRegistries();
 
         setupAxiosMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
@@ -107,7 +107,7 @@ describe(`Wallet should function in the browser`, () => {
   test("Auth chain with 1 element, add resolved registry", async () => {
     await page.evaluate(
       async ([id, registry]) => {
-        BCMR.metadataRegistries = [];
+        BCMR.resetRegistries();
 
         const alice = await RegTestWallet.fromId(id);
         const bob = await RegTestWallet.newRandom();
@@ -179,7 +179,7 @@ describe(`Wallet should function in the browser`, () => {
   test("Authchain tail resolution info in registry acceleration path", async () => {
     await page.evaluate(
       async ([id, registry]) => {
-        BCMR.metadataRegistries = [];
+        BCMR.resetRegistries();
 
         const alice = await RegTestWallet.fromId(id);
         const bob = await RegTestWallet.newRandom();

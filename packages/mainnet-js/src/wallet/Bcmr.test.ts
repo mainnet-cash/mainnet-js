@@ -15,7 +15,7 @@ afterAll(async () => {
   await disconnectProviders();
 });
 afterEach(async () => {
-  BCMR.metadataRegistries = [];
+  BCMR.resetRegistries();
 });
 
 describe(`Test BCMR support`, () => {

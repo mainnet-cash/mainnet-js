@@ -54,6 +54,11 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
   name: wallet
+- description: Interact with BitcoinCash Metadata Registries (BCMR)
+  externalDocs:
+    description: Find out more
+    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/bcmr
+  name: wallet/bcmr
 - description: Sign and verify messages
   externalDocs:
     description: Find out more
@@ -1097,6 +1102,166 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/bcmr/get_registries:
+    post:
+      operationId: bcmrGetRegistries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+        description: |
+          Get tracked BCMR registries.
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                type: array
+          description: successful operation
+      summary: Get tracked BCMR registries
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
+  /wallet/bcmr/reset_registries:
+    post:
+      operationId: bcmrResetRegistries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+        description: |
+          Reset tracked BCMR registries, dropping all token info.
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: successful operation
+      summary: Reset tracked BCMR registries
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
+  /wallet/bcmr/add_registry:
+    post:
+      operationId: bcmrAddRegistry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+        description: |
+          Add a BCMR registry to the list of tracked, allowing for token info lookup
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: successful operation
+      summary: Add BCMR registry from parameter
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
+  /wallet/bcmr/add_registry_from_uri:
+    post:
+      operationId: bcmrAddRegistryFromUri
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bcmrAddRegistryFromUri_request'
+        description: |
+          Add a BCMR registry from remote URI to the list of tracked, allowing for token info lookup
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: successful operation
+      summary: Reset tracked BCMR registries
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
+  /wallet/bcmr/add_registry_authchain:
+    post:
+      operationId: bcmrAddMetadataRegistryAuthChain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bcmrAddMetadataRegistryAuthChain_request'
+        description: |
+          Add BCMR metadata registry by resolving an authchain, allowing for token info lookup
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthChain'
+          description: successful operation
+      summary: "Add BCMR metadata registry from autchain, returning the built chain"
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
+  /wallet/bcmr/build_authchain:
+    post:
+      operationId: bcmrBuildAuthChain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bcmrBuildAuthChain_request'
+        description: |
+          Build an authchain - Zeroth-Descendant Transaction Chain, refer to https://github.com/bitjson/chip-bcmr#zeroth-descendant-transaction-chains
+          The authchain in this implementation is specific to resolve to a valid metadata registy
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthChain'
+          description: successful operation
+      summary: Build a BCMR authchain
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
+  /wallet/bcmr/get_token_info:
+    post:
+      operationId: bcmrGetTokenInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bcmrGetTokenInfo_request'
+        description: |
+          Return the token info (the identity snapshot as per BCMR spec)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bcmrGetTokenInfo_200_response'
+          description: successful operation
+      summary: Get token info
+      tags:
+      - wallet/bcmr
+      x-eov-operation-handler: controllers/WalletBcmrController
   /wallet/signed/sign:
     post:
       operationId: signedMessageSign
@@ -5301,6 +5466,26 @@ components:
           type: string
         receipt:
           $ref: '#/components/schemas/SmartBchTransactionReceipt'
+    AuthChainElement:
+      example:
+        txHash: txHash
+        uri: uri
+        contentHash: contentHash
+      properties:
+        txHash:
+          description: Hex encoded transaction hash
+          type: string
+        contentHash:
+          description: "Content hash of the remote registry, either a SHA256 hash\
+            \ of an HTTPS Publication output or an IPFS CID"
+          type: string
+        uri:
+          description: URI to fetch the registry from
+          type: string
+    AuthChain:
+      items:
+        $ref: '#/components/schemas/AuthChainElement'
+      type: array
     getTokenUtxos_request:
       properties:
         walletId:
@@ -5352,6 +5537,78 @@ components:
       required:
       - walletId
       type: object
+    bcmrAddRegistryFromUri_request:
+      properties:
+        uri:
+          description: URI of the registry to fetch from
+          type: string
+        contentHash:
+          description: |
+            Hex encoded SHA256 hash of the resource the `uri` parameter points at.
+            If specified, calculates the hash of the data fetched from `uri` and matches it with provided one.
+            Yields an error upon mismatch.
+          type: string
+      required:
+      - uri
+    bcmrAddMetadataRegistryAuthChain_request:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      properties:
+        transactionHash:
+          description: Hex encoded transaction hash to lookup
+          type: string
+        followToHead:
+          default: true
+          description: |
+            Boolean flag to indicate that autchain building should progress to head (most recent registry version) or be stopped at this exact chain element
+          type: boolean
+        rawTx:
+          $ref: '#/components/schemas/ElectrumRawTransaction'
+      required:
+      - transactionHash
+    bcmrBuildAuthChain_request:
+      allOf:
+      - $ref: '#/components/schemas/NetworkEnum'
+      properties:
+        transactionHash:
+          description: Hex encoded transaction hash to lookup
+          type: string
+        resolveBase:
+          default: false
+          description: boolean flag to indicate that autchain building should resolve
+            and verify elements back to base or be stopped at this exact chain element
+          type: boolean
+        followToHead:
+          default: true
+          description: |
+            Boolean flag to indicate that autchain building should progress to head (most recent registry version) or be stopped at this exact chain element
+          type: boolean
+        rawTx:
+          $ref: '#/components/schemas/ElectrumRawTransaction'
+        historyCache:
+          description: "cached address history to be reused if authchain building\
+            \ proceeds with the same address, spares a flurry of Fulcrum calls"
+          items:
+            $ref: '#/components/schemas/TransactionHistoryItem'
+          type: array
+      required:
+      - transactionHash
+    bcmrGetTokenInfo_request:
+      properties:
+        tokenId:
+          description: TokenId to lookup
+          type: string
+      required:
+      - tokenId
+    bcmrGetTokenInfo_200_response:
+      example:
+        tokenInfo:
+          key: ""
+      properties:
+        tokenInfo:
+          additionalProperties: true
+          nullable: true
+          type: object
     utilGetRawTransaction_request:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
