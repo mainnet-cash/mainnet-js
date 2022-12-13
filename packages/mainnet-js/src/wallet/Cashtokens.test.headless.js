@@ -192,14 +192,18 @@ describe(`Wallet should function in the browser`, () => {
       expect(tokenUtxos.length).toBe(1);
 
       // mint 2 NFTs, defaults to amount reducing
-      const response = await alice.tokenMint(tokenId, [
-        new TokenMintRequest({
-          cashaddr: alice.cashaddr,
-        }),
-        new TokenMintRequest({
-          cashaddr: alice.cashaddr,
-        }),
-      ], true);
+      const response = await alice.tokenMint(
+        tokenId,
+        [
+          new TokenMintRequest({
+            cashaddr: alice.cashaddr,
+          }),
+          new TokenMintRequest({
+            cashaddr: alice.cashaddr,
+          }),
+        ],
+        true
+      );
       expect(await alice.getTokenBalance(tokenId)).toBe(2);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(3);
@@ -451,7 +455,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const [balance, _] = await Promise.all([
         bob.waitForTokenBalance(tokenId, 100),
-        delay(1000)
+        delay(1000),
       ]);
 
       expect(balance).toBe(100);
