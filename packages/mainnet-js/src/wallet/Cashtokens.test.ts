@@ -63,8 +63,6 @@ describe(`Test cashtokens`, () => {
       {
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
-        // value: 1000,
-        // amount: 0,
       } as any,
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(0);

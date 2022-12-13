@@ -199,7 +199,7 @@ describe(`Wallet should function in the browser`, () => {
         new TokenMintRequest({
           cashaddr: alice.cashaddr,
         }),
-      ]);
+      ], true);
       expect(await alice.getTokenBalance(tokenId)).toBe(2);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(3);
@@ -449,13 +449,15 @@ describe(`Wallet should function in the browser`, () => {
         seenBalance = balance;
       });
 
-      const balance = await bob.waitForTokenBalance(tokenId, 100);
+      const [balance, _] = await Promise.all([
+        bob.waitForTokenBalance(tokenId, 100),
+        delay(1000)
+      ]);
+
       expect(balance).toBe(100);
       expect(seenBalance).toBe(100);
-      // throw Error(`${balance}, ${seenBalance}, ${tokenId}`)
 
-      await cancel();
-      await delay(1500);
+      await Promise.all([cancel(), delay(1000)]);
     }, process.env.ALICE_ID);
   });
 });
