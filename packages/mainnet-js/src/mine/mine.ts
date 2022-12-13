@@ -31,7 +31,10 @@ export async function mine({
     blocks,
     cashaddr,
   ];
-  const cli = (await import('child_process')).spawnSync(`docker`, generateArgs as any);
+  const cli = (await import("child_process")).spawnSync(
+    `docker`,
+    generateArgs as any
+  );
   if (cli.stderr.length > 0) {
     return console.log("Mine Error: " + cli.stderr.toString());
   }
