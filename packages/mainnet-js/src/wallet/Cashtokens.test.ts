@@ -1,6 +1,6 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
-import { TokenMintRequest, TokenSendRequest } from "./model";
+import { SendRequest, TokenMintRequest, TokenSendRequest } from "./model";
 import { Network, NFTCapability } from "../interface";
 import { binToHex, utf8ToBin } from "@bitauth/libauth";
 import { delay } from "../util";
@@ -13,6 +13,46 @@ afterAll(async () => {
 });
 
 describe(`Test cashtokens`, () => {
+  test("Test tokens will not be burned when sending bch value", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+    const genesisResponse = await alice.tokenGenesis({
+      amount: 100,
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+    const tokenBalance = await alice.getTokenBalance(tokenId);
+    expect(tokenBalance).toBe(100);
+    const tokenUtxos = await alice.getTokenUtxos(tokenId);
+    expect(tokenUtxos.length).toBe(1);
+    await alice.send([
+      new SendRequest({
+        cashaddr: bob.cashaddr!,
+        value: 5000,
+        unit: "sat",
+      }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 25,
+        tokenId: tokenId,
+      })
+    ]);
+    expect(await bob.getTokenBalance(tokenId)).toBe(25);
+    expect(await bob.getBalance("sat")).toBe(5000);
+
+    await bob.send(new SendRequest({
+      cashaddr: alice.cashaddr!,
+      value: 1000,
+      unit: "sat",
+    }));
+    expect(await bob.getTokenBalance(tokenId)).toBe(25);
+    expect(await bob.getBalance("sat")).toBe(3780);
+
+    await bob.sendMax(alice.cashaddr!);
+    expect(await bob.getTokenBalance(tokenId)).toBe(25);
+    expect(await bob.getBalance("sat")).toBe(0);
+  });
+
   test("Test fungible cashtoken genesis and sending", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();

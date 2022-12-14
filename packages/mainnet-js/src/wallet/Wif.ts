@@ -690,7 +690,7 @@ export class Wallet extends BaseWallet {
 
   // Gets balance by summing value in all utxos in stats
   public async getBalanceFromUtxos(): Promise<number> {
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    const utxos = (await this.getAddressUtxos(this.cashaddr!)).filter(val => val.token === undefined);
     return sumUtxoValue(utxos);
   }
 
@@ -838,7 +838,7 @@ export class Wallet extends BaseWallet {
     return BCMR.getTokenInfo(tokenId);
   }
 
-  public async getMaxAmountToSend(
+  private async _getMaxAmountToSend(
     params: {
       outputCount?: number;
       options?: SendRequestOptionsI;
@@ -846,7 +846,7 @@ export class Wallet extends BaseWallet {
       outputCount: 1,
       options: {},
     }
-  ): Promise<BalanceResponse> {
+  ): Promise<{value: number, utxos: UtxoI[]}> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
@@ -916,6 +916,20 @@ export class Wallet extends BaseWallet {
     if (result < 0) {
       result = 0;
     }
+
+    return { value: result, utxos: fundingUtxos };
+  }
+
+  public async getMaxAmountToSend(
+    params: {
+      outputCount?: number;
+      options?: SendRequestOptionsI;
+    } = {
+      outputCount: 1,
+      options: {},
+    }
+  ): Promise<BalanceResponse> {
+    const { value: result } = await this._getMaxAmountToSend(params);
 
     return await balanceResponseFromSatoshi(result);
   }
@@ -1001,16 +1015,20 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<string> {
-    let maxSpendableAmount = await this.getMaxAmountToSend({
+    let { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend({
       outputCount: 1,
       options: options,
     });
-    if (maxSpendableAmount.sat === undefined) {
-      throw Error("no Max amount to send");
+
+    if (!options) {
+      options = {};
     }
+
+    options.utxoIds = utxos;
+
     let sendRequest = new SendRequest({
       cashaddr: cashaddr,
-      value: maxSpendableAmount.sat,
+      value: maxSpendableAmount,
       unit: "sat",
     });
 
