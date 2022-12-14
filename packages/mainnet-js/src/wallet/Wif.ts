@@ -183,7 +183,7 @@ export class Wallet extends BaseWallet {
    *
    * @returns The cashtoken aware deposit address as a string
    */
-   public getTokenDepositAddress(): string {
+  public getTokenDepositAddress(): string {
     return this.tokenaddr!;
   }
 
@@ -326,7 +326,7 @@ export class Wallet extends BaseWallet {
    *
    * @returns instantiated wallet
    */
-   public static async fromTokenaddr<T extends typeof Wallet>(
+  public static async fromTokenaddr<T extends typeof Wallet>(
     this: T,
     address: string
   ): Promise<InstanceType<T>> {
@@ -1376,10 +1376,7 @@ export class Wallet extends BaseWallet {
     this.privateKeyWif = encodePrivateKeyWif(this.privateKey!, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
-    this.cashaddr = deriveCashaddr(
-      this.privateKey!,
-      this.networkPrefix
-    );
+    this.cashaddr = deriveCashaddr(this.privateKey!, this.networkPrefix);
     this.tokenaddr = deriveTokenaddr(this.privateKey!, this.networkPrefix);
     this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);

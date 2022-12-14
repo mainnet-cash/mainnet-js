@@ -51,11 +51,18 @@ export function deriveTokenaddr(
     throw new Error("Unsupported type of key");
   }
 
-  return encodeCashAddress(networkPrefix, CashAddressType.p2pkhWithTokens, publicKeyHash);
+  return encodeCashAddress(
+    networkPrefix,
+    CashAddressType.p2pkhWithTokens,
+    publicKeyHash
+  );
 }
 
 export function toCashaddr(tokenaddr: string): string {
-  let result: string | { payload: Uint8Array; prefix: string; version: number; } | undefined;
+  let result:
+    | string
+    | { payload: Uint8Array; prefix: string; version: number }
+    | undefined;
 
   // If the address has a prefix decode it as is
   if (tokenaddr.includes(":")) {
@@ -68,11 +75,18 @@ export function toCashaddr(tokenaddr: string): string {
 
   if (typeof result === "string") throw new Error(result);
 
-  return encodeCashAddress(result.prefix as CashAddressNetworkPrefix, CashAddressType.p2pkh, result.payload);
+  return encodeCashAddress(
+    result.prefix as CashAddressNetworkPrefix,
+    CashAddressType.p2pkh,
+    result.payload
+  );
 }
 
 export function toTokenaddr(cashaddr: string): string {
-  let result: string | { payload: Uint8Array; prefix: string; version: number; } | undefined;
+  let result:
+    | string
+    | { payload: Uint8Array; prefix: string; version: number }
+    | undefined;
 
   // If the address has a prefix decode it as is
   if (cashaddr.includes(":")) {
@@ -85,11 +99,18 @@ export function toTokenaddr(cashaddr: string): string {
 
   if (typeof result === "string") throw new Error(result);
 
-  return encodeCashAddress(result.prefix as CashAddressNetworkPrefix, CashAddressType.p2pkhWithTokens, result.payload);
+  return encodeCashAddress(
+    result.prefix as CashAddressNetworkPrefix,
+    CashAddressType.p2pkhWithTokens,
+    result.payload
+  );
 }
 
 export function isTokenaddr(address: string): boolean {
-  let result: string | { payload: Uint8Array; prefix: string; version: number; } | undefined;
+  let result:
+    | string
+    | { payload: Uint8Array; prefix: string; version: number }
+    | undefined;
 
   // If the address has a prefix decode it as is
   if (address.includes(":")) {
@@ -102,5 +123,11 @@ export function isTokenaddr(address: string): boolean {
 
   if (typeof result === "string") throw new Error(result);
 
-  return [CashAddressVersionByte.p2pkhWithTokens, CashAddressVersionByte.p2sh20WithTokens, CashAddressVersionByte.p2sh32WithTokens].indexOf(result.version) !== -1;
+  return (
+    [
+      CashAddressVersionByte.p2pkhWithTokens,
+      CashAddressVersionByte.p2sh20WithTokens,
+      CashAddressVersionByte.p2sh32WithTokens,
+    ].indexOf(result.version) !== -1
+  );
 }
