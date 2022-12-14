@@ -54,7 +54,7 @@ export class BaseWallet implements WalletI {
    *
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositQr|/wallet/deposit_qr} for REST endpoint
    *
-   * @returns The qrcode for the slp address
+   * @returns The qrcode for the address
    */
   public getDepositQr(): ImageI {
     return qrAddress(this.getDepositAddress() as string);
@@ -85,7 +85,7 @@ export class BaseWallet implements WalletI {
    * @throws {Error} if called on BaseWallet
    */
   constructor(
-    name = "",
+    name: string = "",
     network = NetworkType.Mainnet,
     walletType = WalletTypeEnum.Seed
   ) {
@@ -153,7 +153,7 @@ export class BaseWallet implements WalletI {
    * such kind of wallet does not have a private key and is unable to spend any funds
    * however it still allows to use many utility functions such as getting and watching balance, etc.
    *
-   * @param address   cashaddress or slpaddress of a wallet
+   * @param address   cashaddress, token aware cashaddress or slpaddress of a wallet
    *
    * @returns instantiated wallet
    */

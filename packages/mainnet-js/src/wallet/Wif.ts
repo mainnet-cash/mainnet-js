@@ -60,7 +60,7 @@ import {
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
-import { deriveCashaddr } from "../util/deriveCashaddr.js";
+import { deriveCashaddr, deriveTokenaddr } from "../util/deriveCashaddr.js";
 import {
   derivePrefix,
   derivePublicKeyHash,
@@ -108,6 +108,8 @@ import { TransactionHistoryI } from "../history/interface.js";
 import { getAddressHistory } from "../history/electrumTransformer.js";
 import { IdentitySnapshot, Registry } from "./bcmr-v1.schema.js";
 import { BCMR } from "./Bcmr.js";
+import { qrAddress } from "../qr/Qr.js";
+import { ImageI } from "../qr/interface.js";
 
 //#endregion Imports
 
@@ -116,6 +118,7 @@ import { BCMR } from "./Bcmr.js";
  */
 export class Wallet extends BaseWallet {
   cashaddr?: string;
+  tokenaddr?: string;
   derivationPath: string = "m/44'/0'/0'/0/0";
   parentDerivationPath: string = "m/44'/0'/0'";
   parentXPubKey?: string;
@@ -173,6 +176,24 @@ export class Wallet extends BaseWallet {
 
   public getNetworkProvider(network: Network = Network.MAINNET) {
     return getNetworkProvider(network);
+  }
+
+  /**
+   * getTokenDepositAddress - get a cashtoken aware wallet deposit address
+   *
+   * @returns The cashtoken aware deposit address as a string
+   */
+   public getTokenDepositAddress(): string {
+    return this.tokenaddr!;
+  }
+
+  /**
+   * getDepositQr - get an address qrcode, encoded for display on the web
+   *
+   * @returns The qrcode for the token aware address
+   */
+  public getTokenDepositQr(): ImageI {
+    return qrAddress(this.getTokenDepositAddress());
   }
 
   /**
@@ -285,6 +306,27 @@ export class Wallet extends BaseWallet {
    * @returns instantiated wallet
    */
   public static async fromCashaddr<T extends typeof Wallet>(
+    this: T,
+    address: string
+  ): Promise<InstanceType<T>> {
+    const prefix = derivePrefix(address);
+    const networkType = networkPrefixMap[prefix] as NetworkType;
+    return new this("", networkType, WalletTypeEnum.Watch).watchOnly(
+      address
+    ) as InstanceType<T>;
+  }
+
+  /**
+   * fromTokenaddr - create a watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   token aware cashaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+   public static async fromTokenaddr<T extends typeof Wallet>(
     this: T,
     address: string
   ): Promise<InstanceType<T>> {
@@ -500,6 +542,7 @@ export class Wallet extends BaseWallet {
     this.cashaddr = `${addressPrefix}:${addressBase}`;
     this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
+    this.tokenaddr = deriveTokenaddr(this.publicKeyHash, this.networkPrefix);
 
     return this;
   }
@@ -1333,10 +1376,11 @@ export class Wallet extends BaseWallet {
     this.privateKeyWif = encodePrivateKeyWif(this.privateKey!, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
-    this.cashaddr = (await deriveCashaddr(
+    this.cashaddr = deriveCashaddr(
       this.privateKey!,
       this.networkPrefix
-    )) as string;
+    );
+    this.tokenaddr = deriveTokenaddr(this.privateKey!, this.networkPrefix);
     this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     return this;
