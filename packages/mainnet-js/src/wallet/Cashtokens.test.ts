@@ -35,16 +35,18 @@ describe(`Test cashtokens`, () => {
         cashaddr: bob.cashaddr!,
         amount: 25,
         tokenId: tokenId,
-      })
+      }),
     ]);
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
     expect(await bob.getBalance("sat")).toBe(5000);
 
-    await bob.send(new SendRequest({
-      cashaddr: alice.cashaddr!,
-      value: 1000,
-      unit: "sat",
-    }));
+    await bob.send(
+      new SendRequest({
+        cashaddr: alice.cashaddr!,
+        value: 1000,
+        unit: "sat",
+      })
+    );
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
     expect(await bob.getBalance("sat")).toBe(3780);
 

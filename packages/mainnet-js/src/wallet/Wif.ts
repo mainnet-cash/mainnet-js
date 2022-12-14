@@ -690,7 +690,9 @@ export class Wallet extends BaseWallet {
 
   // Gets balance by summing value in all utxos in stats
   public async getBalanceFromUtxos(): Promise<number> {
-    const utxos = (await this.getAddressUtxos(this.cashaddr!)).filter(val => val.token === undefined);
+    const utxos = (await this.getAddressUtxos(this.cashaddr!)).filter(
+      (val) => val.token === undefined
+    );
     return sumUtxoValue(utxos);
   }
 
@@ -846,7 +848,7 @@ export class Wallet extends BaseWallet {
       outputCount: 1,
       options: {},
     }
-  ): Promise<{value: number, utxos: UtxoI[]}> {
+  ): Promise<{ value: number; utxos: UtxoI[] }> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
