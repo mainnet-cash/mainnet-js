@@ -26,7 +26,7 @@ export { Mainnet };
 export * from "./util/index.js";
 
 // qr
-export * from "./qr/Qr.js"
+export * from "./qr/Qr.js";
 
 // constants
 import * as CONST from "./constant.js";
