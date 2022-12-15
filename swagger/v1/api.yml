@@ -3479,6 +3479,8 @@ components:
       properties:
         cashaddr:
           type: string
+        tokenaddr:
+          type: string
         isTestnet:
           description: >-
             Whether the agreed value of the network is zero. True for all
@@ -3507,6 +3509,7 @@ components:
         - $ref: '#/components/schemas/NetworkEnum'
       example:
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf
+        tokenaddr: bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu
         isTestnet: true
         name: ''
         network: testnet

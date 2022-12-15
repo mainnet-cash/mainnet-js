@@ -216,6 +216,7 @@ export class Wallet extends BaseWallet {
   public getInfo(): WalletInfoI {
     return {
       cashaddr: this.cashaddr,
+      tokenaddr: this.tokenaddr,
       isTestnet: this.isTestnet,
       name: this.name,
       network: this.network as any,

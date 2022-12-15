@@ -751,6 +751,7 @@ describe("Test Wallet Endpoints", () => {
       expect(resp.statusCode).toBe(200);
       let expectedResult = {
         "cashaddr":"bchreg:qzghep5tpvpsu35j4mdv8xpycr6fujlxmvhm50wzu2",
+        "tokenaddr":"bchreg:zzghep5tpvpsu35j4mdv8xpycr6fujlxmvs383qyre",
         "isTestnet":true,
         "name":"",
         "network":"regtest",

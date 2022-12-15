@@ -546,7 +546,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         return await (this.electrum as ElectrumClient).connect();
       } catch (e) {
         console.warn(
-          `Warning: Failed to connect to client on ${this.network}.`
+          `Warning: Failed to connect to client on ${this.network} at ${(this.electrum as ElectrumClient).connection.host}.`
         );
         return;
       }

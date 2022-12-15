@@ -29,6 +29,7 @@ export interface WalletResponseI {
 
 export interface WalletInfoI {
   cashaddr?: string;
+  tokenaddr?: string;
   isTestnet?: boolean;
   name?: string;
   network: NetworkEnum;
