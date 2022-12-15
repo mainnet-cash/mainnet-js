@@ -78,6 +78,26 @@ const depositAddress = ({ serializedWallet }) =>
     }
   });
 /**
+* Get a token aware deposit address in cash address format
+*
+* serializedWallet SerializedWallet Request for a token aware deposit address given a wallet 
+* returns DepositAddressResponse
+* */
+const tokenDepositAddress = ({ serializedWallet }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      const wallet = await mainnet.walletFromId(serializedWallet.walletId);
+      const address = await wallet.getTokenDepositAddress();
+      resolve(Service.successResponse({ cashaddr: address }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
 * Get receiving cash address as a qrcode
 *
 * serializedWallet SerializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 
@@ -97,6 +117,29 @@ const depositQr = ({ serializedWallet }) =>
       );
     }
   });
+
+/**
+* Get receiving token aware cash address as a qrcode
+*
+* serializedWallet SerializedWallet Request for a token aware deposit cash address as a Quick Response code (qrcode) 
+* returns ScalableVectorGraphic
+* */
+const tokenDepositQr = ({ serializedWallet }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
+      let args = serializedWallet;
+      delete args.walletId;
+      let resp = await wallet.getTokenDepositQr(args);
+      resolve(Service.successResponse({ ...resp }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
 
 /**
 * Get wallet history
@@ -501,7 +544,9 @@ export default {
   balance,
   createWallet,
   depositAddress,
+  tokenDepositAddress,
   depositQr,
+  tokenDepositQr,
   getHistory,
   info,
   namedExists,

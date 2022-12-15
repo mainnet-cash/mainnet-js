@@ -735,6 +735,27 @@ paths:
       summary: Get a deposit address in cash address format
       tags:
         - wallet
+  /wallet/token_deposit_address:
+    post:
+      operationId: tokenDepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a token aware deposit address given a wallet
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositAddressResponse'
+          description: successful operation
+      summary: Get a token aware deposit address in cash address format
+      tags:
+        - wallet
   /wallet/deposit_qr:
     post:
       operationId: depositQr
@@ -757,6 +778,30 @@ paths:
             inclusion in html using:
                - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
+      tags:
+        - wallet
+  /wallet/token_deposit_qr:
+    post:
+      operationId: tokenDepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a token aware deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScalableVectorGraphic'
+          description: >
+            A Qr code image data encoded string in the src field suitable for
+            inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get receiving token aware cash address as a qrcode
       tags:
         - wallet
   /wallet/send:

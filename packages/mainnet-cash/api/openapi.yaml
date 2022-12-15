@@ -736,6 +736,28 @@ paths:
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
+  /wallet/token_deposit_address:
+    post:
+      operationId: tokenDepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a token aware deposit address given a wallet
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositAddressResponse'
+          description: successful operation
+      summary: Get a token aware deposit address in cash address format
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
   /wallet/deposit_qr:
     post:
       operationId: depositQr
@@ -757,6 +779,30 @@ paths:
             A Qr code image data encoded string in the src field suitable for inclusion in html using:
                - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
+      tags:
+      - wallet
+      x-eov-operation-handler: controllers/WalletController
+  /wallet/token_deposit_qr:
+    post:
+      operationId: tokenDepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a token aware deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScalableVectorGraphic'
+          description: |
+            A Qr code image data encoded string in the src field suitable for inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get receiving token aware cash address as a qrcode
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -3495,6 +3541,7 @@ components:
       - $ref: '#/components/schemas/NetworkEnum'
       example:
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf
+        tokenaddr: bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu
         isTestnet: true
         name: ""
         network: testnet
@@ -3511,6 +3558,8 @@ components:
           erupt joy vague illegal angle:m/44'/0'/0'/0/0
       properties:
         cashaddr:
+          type: string
+        tokenaddr:
           type: string
         isTestnet:
           description: Whether the agreed value of the network is zero. True for all

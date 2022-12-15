@@ -149,6 +149,15 @@ describe("Test Wallet Endpoints", () => {
     expect(resp.body.cashaddr).toBe(
       "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
     );
+
+    resp = await request(app).post("/wallet/token_deposit_address").send({
+      walletId:
+        "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
+    });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body.cashaddr).toBe(
+      "bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu"
+    );
   });
 
   /**
@@ -159,12 +168,25 @@ describe("Test Wallet Endpoints", () => {
       walletId:
         `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
-    const body = resp.body;
+    let body = resp.body;
 
     expect(resp.statusCode).toBe(200);
     expect(
       body!.src!.slice(0,36)
     ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
+    expect(body!.title).toBe("bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0")
+
+    resp = await request(app).post("/wallet/token_deposit_qr").send({
+      walletId:
+        `wif:regtest:${process.env.PRIVATE_WIF}`,
+    });
+    body = resp.body;
+
+    expect(resp.statusCode).toBe(200);
+    expect(
+      body!.src!.slice(0,36)
+    ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
+    expect(body!.title).toBe("bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu")
   });
 
   /**
