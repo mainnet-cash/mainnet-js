@@ -12,20 +12,20 @@ describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
     mainnet.Webhook.debug.setupAxiosMocks();
-    // const genesisOptions = {
-    //   name: "Webhook REST Service Token",
-    //   ticker: "WHTR",
-    //   decimals: 2,
-    //   initialAmount: 10000,
-    //   documentUrl: "https://mainnet.cash",
-    //   documentHash:
-    //     "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-    // };
-    // mainnet.SlpDbProvider.defaultServers.testnet = mainnet.SlpDbProvider.defaultServers.regtest;
-    // mainnet.GsppProvider.defaultServers.testnet = mainnet.GsppProvider.defaultServers.regtest;
-    // const aliceWallet = await mainnet.RegTestWallet.slp.fromId(`wif:regtest:${process.env.PRIVATE_WIF!}`);
-    // const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
-    // tokenId = genesisResult.tokenId;
+    const genesisOptions = {
+      name: "Webhook REST Service Token",
+      ticker: "WHTR",
+      decimals: 2,
+      initialAmount: 10000,
+      documentUrl: "https://mainnet.cash",
+      documentHash:
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    };
+    mainnet.SlpDbProvider.defaultServers.testnet = mainnet.SlpDbProvider.defaultServers.regtest;
+    mainnet.GsppProvider.defaultServers.testnet = mainnet.GsppProvider.defaultServers.regtest;
+    const aliceWallet = await mainnet.RegTestWallet.slp.fromId(`wif:regtest:${process.env.PRIVATE_WIF!}`);
+    const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
+    tokenId = genesisResult.tokenId;
   });
 
   beforeEach(function () {
