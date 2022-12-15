@@ -4,6 +4,7 @@ import {
   binToHex,
   hexToBin,
   importAuthenticationTemplate,
+  Output,
   utf8ToBin,
 } from "@bitauth/libauth";
 import { parseSLP } from "slp-parser";
@@ -121,8 +122,8 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
     SlpOutputs: [
       {
         lockingBytecode: genesisTxoBytecode.bytecode,
-        satoshis: bigIntToBinUint64LE(BigInt(0)),
-      },
+        valueSatoshis: 0n,
+      } as Output,
     ],
     FundingSlpUtxos: [],
     BchSendRequests: bchSendRequests,
@@ -195,8 +196,8 @@ export const SlpGetMintOutputs = async (
     SlpOutputs: [
       {
         lockingBytecode: mintTxoBytecode.bytecode,
-        satoshis: bigIntToBinUint64LE(BigInt(0)),
-      },
+        valueSatoshis: 0n,
+      } as Output,
     ],
     FundingSlpUtxos: slpBatonUtxos,
     BchSendRequests: bchSendRequests,
@@ -313,8 +314,8 @@ export const SlpGetSendOutputs = async (
     SlpOutputs: [
       {
         lockingBytecode: sendTxoBytecode.bytecode,
-        satoshis: bigIntToBinUint64LE(BigInt(0)),
-      },
+        valueSatoshis: 0n,
+      } as Output,
     ],
     FundingSlpUtxos: fundingSlpUtxos,
     BchSendRequests: bchSendRequests,

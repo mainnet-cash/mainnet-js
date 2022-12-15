@@ -113,7 +113,7 @@ describe("Test Webhook Endpoints", () => {
   /**
    * slpbalance
    */
-   it.skip("Should register an SLP balance watch webhook", async () => {
+   it("Should register an SLP balance watch webhook", async () => {
     let bobWallet = await mainnet.RegTestWallet.newRandom();
 
     const resp = await request(app)
@@ -147,7 +147,7 @@ describe("Test Webhook Endpoints", () => {
     expect(mainnet.Webhook.debug.responses["http://example.com/slpbalance"].length).toBe(1);
   });
 
-  it.skip("Should register an SLP transaction watch webhook", async () => {
+  it("Should register an SLP transaction watch webhook", async () => {
     let bobWallet = await mainnet.RegTestWallet.newRandom();
 
     const resp = await request(app)

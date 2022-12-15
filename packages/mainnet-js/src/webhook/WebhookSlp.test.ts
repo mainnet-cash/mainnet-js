@@ -15,7 +15,7 @@ const serversGspp = { ...{}, ...GsppProvider.defaultServers };
 /**
  * @jest-environment jsdom
  */
-describe.skip("Webhook worker tests", () => {
+describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
       if (process.env.PRIVATE_WIF) {

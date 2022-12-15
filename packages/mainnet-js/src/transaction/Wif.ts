@@ -36,7 +36,7 @@ export async function buildP2pkhNonHdTransaction(
   signingKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
-  slpOutputs: any[] = [],
+  slpOutputs: Output[] = [],
   feePaidBy: FeePaidByEnum = FeePaidByEnum.change,
   changeAddress: string = ""
 ) {
@@ -381,7 +381,7 @@ export async function getFeeAmount({
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
   privateKey: Uint8Array;
   relayFeePerByteInSatoshi: number;
-  slpOutputs: any[];
+  slpOutputs: Output[];
   feePaidBy: FeePaidByEnum;
 }) {
   // build transaction
@@ -412,7 +412,7 @@ export async function buildEncodedTransaction(
   privateKey: Uint8Array,
   fee: number = 0,
   discardChange = false,
-  slpOutputs: any[] = [],
+  slpOutputs: Output[] = [],
   feePaidBy: FeePaidByEnum = FeePaidByEnum.change,
   changeAddress: string = ""
 ) {
