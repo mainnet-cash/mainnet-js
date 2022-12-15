@@ -173,6 +173,7 @@ describe(`Mnemonic wallet creation`, () => {
     expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
     const info = {
       cashaddr: "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59",
+      tokenaddr: "bitcoincash:zrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gu65wp6tk",
       isTestnet: false,
       name: "",
       network: "mainnet",
@@ -408,6 +409,7 @@ describe(`Watch only Wallets`, () => {
     );
     expect(w.getInfo()).toStrictEqual({
       cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      tokenaddr: "bchtest:zppr9h7whx9pzucgqukhtlj8lvgvjlgr3gzzm4cx4e",
       derivationPath: undefined,
       isTestnet: true,
       name: "",
