@@ -4,7 +4,7 @@ import server from "../index.js";
 import request from "supertest";
 var app;
 
-describe("Test Wallet Slp Endpoints", () => {
+describe.skip("Test Wallet Slp Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });

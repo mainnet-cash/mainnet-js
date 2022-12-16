@@ -15,7 +15,7 @@ import { GsppProvider } from "../slp/GsppProvider";
 import { createSlpWallet, walletFromId } from "./createWallet";
 import { WalletTypeEnum } from "./enum";
 
-describe("Slp wallet tests", () => {
+describe.skip("Slp wallet tests", () => {
   beforeAll(async () => {
     await initProviders([Network.MAINNET, Network.REGTEST]);
   });

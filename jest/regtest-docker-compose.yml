@@ -62,49 +62,49 @@ services:
     ports:
       - 127.0.0.1:15432:5432
 
-  mongodb:
-    image: mongo:4.4.2-bionic
-    container_name: mongo-slpdb
-    # ports:
-    #   - "27017:27017"
-    # volumes:
-    #   - ./docker/data/mongodb:/data/db # uncomment to make persistent
-    command: mongod # --logpath=/dev/null # -- quiet
-    restart: always
-    networks:
-      - bitcoin
+  # mongodb:
+  #   image: mongo:4.4.2-bionic
+  #   container_name: mongo-slpdb
+  #   # ports:
+  #   #   - "27017:27017"
+  #   # volumes:
+  #   #   - ./docker/data/mongodb:/data/db # uncomment to make persistent
+  #   command: mongod # --logpath=/dev/null # -- quiet
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  slpdb:
-    image: mainnet/slpdb
-    container_name: slpdb
-    volumes:
-      - ./docker/slpdb/run-script.sh:/home/safeuser/config/run-script.sh
-      # - ./docker/data/leveldb:/home/safeuser/SLPDB/_leveldb # uncomment to make persistent
-    restart: always
-    networks:
-      - bitcoin
+  # slpdb:
+  #   image: mainnet/slpdb
+  #   container_name: slpdb
+  #   volumes:
+  #     - ./docker/slpdb/run-script.sh:/home/safeuser/config/run-script.sh
+  #     # - ./docker/data/leveldb:/home/safeuser/SLPDB/_leveldb # uncomment to make persistent
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  slpserve:
-    image: mainnet/slpserve
-    container_name: slpserve
-    volumes:
-      - ./docker/slpserve/env:/home/safeuser/slpserve/.env
-    ports:
-      - "12300:4000"
-    restart: always
-    networks:
-      - bitcoin
+  # slpserve:
+  #   image: mainnet/slpserve
+  #   container_name: slpserve
+  #   volumes:
+  #     - ./docker/slpserve/env:/home/safeuser/slpserve/.env
+  #   ports:
+  #     - "12300:4000"
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
-  slpsockserve:
-    image: mainnet/slpsockserve
-    container_name: slpsockserve
-    volumes:
-      - ./docker/slpsockserve/env:/home/safeuser/slpsockserve/.env
-    ports:
-      - "12301:4001"
-    restart: always
-    networks:
-      - bitcoin
+  # slpsockserve:
+  #   image: mainnet/slpsockserve
+  #   container_name: slpsockserve
+  #   volumes:
+  #     - ./docker/slpsockserve/env:/home/safeuser/slpsockserve/.env
+  #   ports:
+  #     - "12301:4001"
+  #   restart: always
+  #   networks:
+  #     - bitcoin
 
   # gspp:
   #   image: mainnet/gspp

@@ -2,7 +2,7 @@ const playwright = require("playwright");
 
 const PAGE_URL = "http://localhost:8080";
 
-describe(`Wallet should function in the browser`, () => {
+describe.skip(`Wallet should function in the browser`, () => {
   let browser = null;
   let page = null;
 
