@@ -1,6 +1,6 @@
-const rateLimit = require("express-rate-limit");
+import rateLimit from "express-rate-limit";
 
-function setupRateLimits(app) {
+export default function setupRateLimits(app) {
   if (process.env.JEST_WORKER_ID !== undefined)
     return;
   const message = '{"message":"Too many requests, please try again later","code":429}'
@@ -30,5 +30,3 @@ function setupRateLimits(app) {
   });
   app.use("/faucet/get_testnet_*/", limiter50ph);
 }
-
-module.exports = setupRateLimits;

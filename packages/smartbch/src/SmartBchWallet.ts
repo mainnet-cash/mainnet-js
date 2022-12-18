@@ -15,8 +15,8 @@ import {
   WaitForTransactionOptions,
   WaitForTransactionResponse,
   Sep20SendResponse,
-} from "./interface";
-import { SendRequestOptionsI } from "./interface";
+} from "./interface.js";
+import { SendRequestOptionsI } from "./interface.js";
 
 import {
   Sep20,
@@ -27,10 +27,10 @@ import {
   TestNetPrivKeySep20,
   TestNetWatchSep20,
   WatchSep20,
-} from "./Sep20";
+} from "./Sep20.js";
 import { SignedMessageResponseI, VerifyMessageResponseI } from "mainnet-js";
-import { getNetworkProvider } from "./Network";
-import { Network } from "./index";
+import { getNetworkProvider } from "./Network.js";
+import { Network } from "./index.js";
 import {
   asSendRequestObject,
   satToWei,
@@ -40,7 +40,7 @@ import {
   watchBlocks,
   weiToSat,
   zeroAddress,
-} from "./Utils";
+} from "./Utils.js";
 
 import axios from "axios";
 

@@ -1,4 +1,4 @@
-import WebhookWorker from "../webhook/WebhookWorker";
+import WebhookWorker from "./WebhookWorker";
 import { RegTestWallet } from "../wallet/Wif";
 import { mine } from "../mine/mine";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
@@ -15,7 +15,7 @@ const serversGspp = { ...{}, ...GsppProvider.defaultServers };
 /**
  * @jest-environment jsdom
  */
-describe("Webhook worker tests", () => {
+describe.skip("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
       if (process.env.PRIVATE_WIF) {

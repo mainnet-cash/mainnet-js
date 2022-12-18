@@ -6,28 +6,20 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/ContractEscrowService');
-const createEscrow = async (request, response) => {
+import Controller from './Controller.js';
+import service from '../services/ContractEscrowService.js';
+export const createEscrow = async (request, response) => {
   await Controller.handleRequest(request, response, service.createEscrow);
 };
 
-const escrowFn = async (request, response) => {
+export const escrowFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowFn);
 };
 
-const escrowInfo = async (request, response) => {
+export const escrowInfo = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowInfo);
 };
 
-const escrowUtxos = async (request, response) => {
+export const escrowUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.escrowUtxos);
-};
-
-
-module.exports = {
-  createEscrow,
-  escrowFn,
-  escrowInfo,
-  escrowUtxos,
 };

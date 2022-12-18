@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
-const _contract = require("@mainnet-cash/contract");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
+import { EscrowContract } from "@mainnet-cash/contract";
 
 
 /**
@@ -14,7 +14,7 @@ const createEscrow = ({ escrowRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       escrowRequest.type = 'escrow'
-      let resp = await _contract.EscrowContract.escrowContractFromJsonRequest(escrowRequest);
+      const resp = await EscrowContract.escrowContractFromJsonRequest(escrowRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       console.log(JSON.stringify(e))
@@ -35,8 +35,8 @@ const createEscrow = ({ escrowRequest }) => new Promise(
 const escrowInfo = ({ escrowInfoRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await _contract.EscrowContract.fromId(escrowInfoRequest.escrowContractId);
-      resp = contract.info()
+      const contract = await EscrowContract.fromId(escrowInfoRequest.escrowContractId);
+      const resp = contract.info()
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -58,9 +58,9 @@ const escrowInfo = ({ escrowInfoRequest }) => new Promise(
 const escrowFn = ( {escrowFnRequest} ) => new Promise(
   async (resolve, reject) => {
     try {
-      let contract = await _contract.EscrowContract.fromId(escrowFnRequest.escrowContractId);
-      let wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
-      let resp = await contract._sendMax(
+      const contract = await EscrowContract.fromId(escrowFnRequest.escrowContractId);
+      const wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
+      const resp = await contract._sendMax(
         wallet.privateKeyWif,
         escrowFnRequest.function, 
         escrowFnRequest.to,
@@ -92,8 +92,8 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
 const escrowUtxos = ({escrowContract}) => new Promise(
   async (resolve, reject) => {
     try {
-      let c = await _contract.EscrowContract.fromId(escrowContract.escrowContractId);
-      let resp = await c.getUtxos();
+      const contract = await EscrowContract.fromId(escrowContract.escrowContractId);
+      const resp = await contract.getUtxos();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(
@@ -103,8 +103,7 @@ const escrowUtxos = ({escrowContract}) => new Promise(
   },
 );
 
-
-module.exports = {
+export default {
   createEscrow,
   escrowFn,
   escrowInfo,

@@ -1,6 +1,6 @@
-const config = require('./config');
-const cluster = require('cluster');
-const app = require("./index")
+import config from './config.js';
+import cluster from 'cluster';
+import app from "./index.js";
 
 
 if (cluster.isMaster) {
@@ -19,5 +19,3 @@ else {
     console.log(`Worker ${process.pid} started`);
     app.startServer()
 }
-
-

@@ -1,4 +1,4 @@
-import { WalletI } from "./interface";
+import { WalletI } from "./interface.js";
 
 export default interface StorageProvider {
   /**

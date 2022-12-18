@@ -1,7 +1,7 @@
 import { Network, RegTestWallet, toCashAddress } from "..";
 import { GsppProvider } from "./GsppProvider";
 import { base64ToBin, binToBase64, binToHex, hexToBin } from "@bitauth/libauth";
-const cashaddrjs = require("cashaddrjs");
+import cashaddrjs from "cashaddrjs";
 
 const rotate = function (str) {
   return str
@@ -21,7 +21,7 @@ const addressToScriptpubkey = (address) => {
   ).toString("base64");
 };
 
-describe("Gspp Provider tests", () => {
+describe.skip("Gspp Provider tests", () => {
   // other GsppProvider tests are covered in the Slp.test.ts integration test suite
 
   test("Test graphsearch methods", async () => {

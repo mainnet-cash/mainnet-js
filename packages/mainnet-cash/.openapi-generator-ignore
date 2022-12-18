@@ -23,7 +23,10 @@
 #!docs/README.md
 
 services/*.js
+controllers/*.js
 services/*.test.ts
+logger.js
+utils/openapiRouter.js
 #!services/WalletService.js
 #!services/WalletSlpService.js
 #!services/WalletUtilService.js
@@ -33,6 +36,8 @@ services/*.test.ts
 #!services/SmartbchSep20Service.js
 #!services/FaucetService.js
 controllers/Controller.js
+# !controllers/WalletBcmrController.js
+# !services/WalletBcmrService.js
 package.json
 index.js
 config.js

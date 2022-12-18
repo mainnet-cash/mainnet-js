@@ -1,6 +1,6 @@
-var QRCode = require("qrcode-svg");
-import { ImageI } from "./interface";
-import { btoa } from "../util/base64";
+import QRCode from "qrcode-svg";
+import { ImageI } from "./interface.js";
+import { btoa } from "../util/base64.js";
 
 /**
  * qrAddress returns a qr code for a given cashaddress as raw utf-8 svg

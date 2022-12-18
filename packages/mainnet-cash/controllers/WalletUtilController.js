@@ -6,13 +6,11 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/WalletUtilService');
-const utilDecodeTransaction = async (request, response) => {
+import Controller from './Controller.js';
+import service from '../services/WalletUtilService.js';
+export const utilDecodeTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.utilDecodeTransaction);
 };
-
-
-module.exports = {
-  utilDecodeTransaction,
+export const utilGetRawTransaction = async (request, response) => {
+  await Controller.handleRequest(request, response, service.utilGetRawTransaction);
 };

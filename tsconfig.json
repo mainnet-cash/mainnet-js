@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "esnext",
     "moduleResolution": "node",
-    "module": "esNext",
+    "module": "esnext",
     "declaration": true,
     "declarationMap": false,
     "sourceMap": true,
@@ -24,9 +24,10 @@
     "noUnusedParameters": true /* Report errors on unused parameters. */,
     "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
     "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+    "useDefineForClassFields": false,
 
     /* Debugging Options */
-    //"traceResolution": true /* Report module resolution log messages. */,
+    "traceResolution": false /* Report module resolution log messages. */,
     "listEmittedFiles": false /* Print names of generated files part of the compilation. */,
     "listFiles": false /* Print names of files part of the compilation. */,
     "pretty": true /* Stylize errors and messages using color and context. */,
@@ -35,8 +36,17 @@
     // "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
     // "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
 
-    "lib": ["es2017", "es2020.bigint", "dom"],
-    "typeRoots": ["node_modules/@types", "src/types"]
+    "lib": ["es2020", "es2020.bigint", "dom"],
+    "typeRoots": ["node_modules/@types", "src/types"],
+
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "downlevelIteration": true,
+    "composite": true,
+    "types": ["node", "jest"],
+    "allowJs": false,
+    "noEmit": false,
+    "skipLibCheck": true
   },
   "include": ["packages/*/src/**/*.ts"],
   "exclude": ["node_modules/**", "dist"],

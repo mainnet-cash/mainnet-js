@@ -1,27 +1,29 @@
 const { merge } = require("webpack-merge");
+const path = require("path");
 const packageJson = require("./package.json");
-const NpmDtsPlugin = require("npm-dts-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const CircularDependencyPlugin = require("circular-dependency-plugin");
+const __basedir = require("path").resolve(__dirname, "../../");
+
+const webpack = require("webpack");
 
 const baseConfig = {
-  entry: "./src/index.ts",
   mode: "development",
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
-      },
-    ],
-  },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensionAlias: {
+      ".js": [".ts", ".js"],
+    },
   },
   optimization: {
     minimize: false,
     mangleWasmImports: true,
     usedExports: true,
   },
+  experiments: { topLevelAwait: true, outputModule: true },
 };
 
 const prodConfig = {
@@ -31,18 +33,61 @@ const prodConfig = {
   },
 };
 
-const nodeConfig = {
-  target: "node",
+const browserConfig = {
+  target: "web",
+  entry: {
+    mainnet: {
+      import: "./src/index.ts",
+      library: {
+        name: "__mainnetPromise",
+        type: "global",
+      },
+    },
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.browser.json",
+            },
+          },
+        ],
+        exclude: [/node_modules/],
+      },
+    ],
+  },
   output: {
-    filename: `mainnet-node-${packageJson.version}.js`,
+    filename: `[name]-${packageJson.version}.js`,
     path: __dirname + "/dist",
     libraryTarget: "umd",
-    library: "mainnet",
   },
   plugins: [
-    new NpmDtsPlugin({
-      entry: "src/index.d.ts",
-      output: "dist/index.d.ts",
+    //new BundleAnalyzerPlugin(),
+    new HtmlWebpackPlugin({
+      title: "The Empty Mainnet App",
+    }),
+    new InjectBodyPlugin({
+      content:
+        '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>',
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
+    new CircularDependencyPlugin({
+      include: /src/,
+      // exclude detection of files based on a RegExp
+      exclude: /node_modules/,
+      // add errors to webpack instead of warnings
+      failOnError: false,
+      // allow import cycles that include an asyncronous import,
+      // e.g. via import(/* webpackMode: "weak" */ './file.js')
+      allowAsyncCycles: false,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
     }),
   ],
   resolve: {
@@ -52,30 +97,12 @@ const nodeConfig = {
       "@ethersproject/contracts$": require.resolve(
         "@ethersproject/contracts/lib/index.js"
       ),
-      // "@ethersproject/providers$": require.resolve("@ethersproject/providers/lib/index.js"),
-      // "@ethersproject/wallet$": require.resolve("@ethersproject/wallet/lib/index.js"),
-      // "@ethersproject/bytes$": require.resolve("@ethersproject/bytes/lib/index.js"),
-      // "@ethersproject/transactions$": require.resolve("@ethersproject/transactions/lib/index.js"),
-      // "@ethersproject/logger$": require.resolve("@ethersproject/logger/lib/index.js"),
-    },
-  },
-};
-
-const browserConfig = {
-  target: "web",
-  output: {
-    filename: `mainnet-${packageJson.version}.js`,
-    path: __dirname + "/dist",
-    libraryTarget: "umd",
-  },
-  resolve: {
-    alias: {
-      bip39: require.resolve("./polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -90,7 +117,6 @@ const browserConfig = {
       "pg-native": false,
       solc: false,
       tls: false,
-      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },
@@ -109,12 +135,12 @@ const webWorkerConfig = {
   },
   resolve: {
     alias: {
-      bip39: require.resolve("./polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
       events: require.resolve("events/"),
+      eventsource: false,
       fs: false,
       http: false,
       https: false,
@@ -129,7 +155,6 @@ const webWorkerConfig = {
       "pg-native": false,
       solc: false,
       tls: false,
-      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },
@@ -141,8 +166,8 @@ const webWorkerConfig = {
 
 const browserTestDiff = {
   output: {
-    filename: `mainnet.js`,
-    path: __dirname + "/jest/playwright",
+    filename: `[name].js`,
+    path: __basedir + "/jest/playwright/",
   },
 };
 
@@ -156,9 +181,6 @@ if (process.env.NODE_ENV == "production") {
 }
 
 // Join configurations with the base configuration
-module.exports = [
-  nodeConfig,
-  browserConfig,
-  browserTestConfig,
-  webWorkerConfig,
-].map((c) => merge(config, c));
+module.exports = [browserConfig, browserTestConfig].map((c) =>
+  merge(config, c)
+);

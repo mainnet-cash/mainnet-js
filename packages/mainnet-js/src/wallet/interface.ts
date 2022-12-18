@@ -1,8 +1,9 @@
-import { WalletTypeEnum, FeePaidByEnum } from "./enum";
-import { NetworkEnum } from "../enum";
-import { ImageI } from "../qr/interface";
-import { ElectrumRawTransaction } from "../network/interface";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
+import { WalletTypeEnum, FeePaidByEnum } from "./enum.js";
+import { NetworkEnum } from "../enum.js";
+import { ImageI } from "../qr/interface.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
+import { UtxoI } from "../interface.js";
 
 export interface WalletRequestI {
   name?: string;
@@ -28,6 +29,7 @@ export interface WalletResponseI {
 
 export interface WalletInfoI {
   cashaddr?: string;
+  tokenaddr?: string;
   isTestnet?: boolean;
   name?: string;
   network: NetworkEnum;
@@ -44,13 +46,14 @@ export interface WalletInfoI {
 }
 
 export interface SendRequestOptionsI {
-  utxoIds?: string[];
+  utxoIds?: string[] | UtxoI[];
   changeAddress?: string;
   slpAware?: boolean; // a flag which activates utxo checking against an external slp indexer
   slpSemiAware?: boolean; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
   queryBalance?: boolean;
   awaitTransactionPropagation?: boolean;
   feePaidBy?: FeePaidByEnum;
+  checkTokenQuantities?: boolean; // true
 }
 
 export interface MnemonicI {

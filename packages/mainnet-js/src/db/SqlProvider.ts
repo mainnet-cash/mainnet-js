@@ -1,12 +1,13 @@
-import StorageProvider from "./StorageProvider";
-import { sslConfigI, WalletI, FaucetQueueItemI } from "./interface";
-import { TxI } from "../interface";
-import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook";
-import { WebhookBch } from "../webhook/WebhookBch";
-import { WebhookSlp } from "../webhook/WebhookSlp";
-import { RegisterWebhookParams } from "../webhook/interface";
-import { isCashAddress } from "../util/bchaddr";
-import { getSslConfig } from "./util";
+import StorageProvider from "./StorageProvider.js";
+import { sslConfigI, WalletI, FaucetQueueItemI } from "./interface.js";
+import { TxI } from "../interface.js";
+import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook.js";
+import { RegisterWebhookParams } from "../webhook/interface.js";
+import { isCashAddress } from "../util/bchaddr.js";
+import { getSslConfig } from "./util.js";
+import parseDbUrl from "parse-database-url";
+import pg from "pg";
+import format from "pg-format";
 
 export default class SqlProvider implements StorageProvider {
   private db;
@@ -25,7 +26,6 @@ export default class SqlProvider implements StorageProvider {
         "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
       );
     }
-    const parseDbUrl = eval("require")("parse-database-url");
     let dbConfig = parseDbUrl(process.env.DATABASE_URL);
     let ssl = getSslConfig();
     if (ssl) {
@@ -33,9 +33,9 @@ export default class SqlProvider implements StorageProvider {
     }
     this.config = dbConfig;
 
-    const Pool = eval("require")("pg").Pool;
+    const Pool = pg.Pool;
     this.db = new Pool(dbConfig);
-    this.formatter = eval("require")("pg-format");
+    this.formatter = format;
   }
 
   public getConfig() {
@@ -149,8 +149,10 @@ export default class SqlProvider implements StorageProvider {
     delete (hook as any).token_id;
 
     if (hook.type.indexOf("slp") === 0) {
+      const { WebhookSlp } = await import("../webhook/WebhookSlp.js");
       return new WebhookSlp(hook);
     } else if (isCashAddress(hook.cashaddr)) {
+      const { WebhookBch } = await import("../webhook/WebhookBch.js");
       return new WebhookBch(hook);
     }
 

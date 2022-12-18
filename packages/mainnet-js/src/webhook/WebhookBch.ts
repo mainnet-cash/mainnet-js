@@ -1,10 +1,10 @@
-import SqlProvider from "../db/SqlProvider";
-import { TxI } from "../interface";
-import { ElectrumRawTransaction } from "../network/interface";
-import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi";
-import { Wallet } from "../wallet/Wif";
-import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
-import WebhookWorker from "./WebhookWorker";
+import SqlProvider from "../db/SqlProvider.js";
+import { TxI } from "../interface.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi.js";
+import { Wallet } from "../wallet/Wif.js";
+import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
+import WebhookWorker from "./WebhookWorker.js";
 
 export class WebhookBch extends Webhook {
   callback!: (data: any | string | Array<string>) => void;

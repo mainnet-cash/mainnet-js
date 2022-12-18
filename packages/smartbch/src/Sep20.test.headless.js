@@ -74,7 +74,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
     ).rejects.toThrow("sending a transaction requires a signer");
   });
 
-  test("ERC20 genesis throws on watchOnly", async () => {
+  test.skip("ERC20 genesis throws on watchOnly", async () => {
     await expect(
       page.evaluate(async () => {
         const watchWallet = await SmartBchWallet.watchOnly(
@@ -86,7 +86,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
     ).rejects.toThrow("Cannot deploy contracts with Watch-Only wallets");
   });
 
-  test("ERC20 genesis and info", async () => {
+  test.skip("ERC20 genesis and info", async () => {
     await expect(
       page.evaluate(async (SBCH_ALICE_ID) => {
         const options = {
@@ -181,7 +181,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
     ).rejects.toThrow("Contract deployment is not yet supported in browser");
   });
 
-  test("ERC20 genesis with token receiver and baton receiver", async () => {
+  test.skip("ERC20 genesis with token receiver and baton receiver", async () => {
     await expect(
       page.evaluate(async (SBCH_ALICE_ID) => {
         const wallet = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
@@ -243,7 +243,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
     ).rejects.toThrow("Contract deployment is not yet supported in browser");
   });
 
-  test("ERC20 mint disabled (baton ended)", async () => {
+  test.skip("ERC20 mint disabled (baton ended)", async () => {
     await expect(
       page.evaluate(async (SBCH_ALICE_ID) => {
         const wallet = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);

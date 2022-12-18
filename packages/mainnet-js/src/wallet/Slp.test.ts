@@ -1,4 +1,4 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
+import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 
 import { Network } from "..";
 import { disconnectProviders, initProviders } from "../network";
@@ -15,7 +15,7 @@ import { GsppProvider } from "../slp/GsppProvider";
 import { createSlpWallet, walletFromId } from "./createWallet";
 import { WalletTypeEnum } from "./enum";
 
-describe("Slp wallet tests", () => {
+describe.skip("Slp wallet tests", () => {
   beforeAll(async () => {
     await initProviders([Network.MAINNET, Network.REGTEST]);
   });

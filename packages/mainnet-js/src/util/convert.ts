@@ -1,5 +1,5 @@
-import { amountInSatoshi } from "./amountInSatoshi";
-import { satoshiToAmount } from "./satoshiToAmount";
+import { amountInSatoshi } from "./amountInSatoshi.js";
+import { satoshiToAmount } from "./satoshiToAmount.js";
 
 /**
  * convert transforms unit of measurement for some monetary value

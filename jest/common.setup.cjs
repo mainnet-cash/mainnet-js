@@ -3,7 +3,7 @@ require("dotenv").config({ path: ".env.regtest" });
 require("dotenv").config({ path: ".env.testnet" });
 
 const { spawnSync } = require("child_process");
-const { pingBchn, getRegtestUtxos } = require("./util/generateBlock");
+const { pingBchn, getRegtestUtxos } = require("./util/generateBlock.cjs");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,6 +56,6 @@ module.exports = async function (cwd) {
     console.log("Waiting for blocks to be mined");
     await delay(2000);
   }
-  console.log("utxos: " + (await getRegtestUtxos(process.env.ADDRESS)).length);
+  console.log("utxos: " + (await getRegtestUtxos(process.env.ADDRESS)));
   console.log("proceeding...");
 };

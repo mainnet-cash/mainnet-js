@@ -6,13 +6,8 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/WebhookService');
-const watchAddress = async (request, response) => {
+import Controller from './Controller.js';
+import service from '../services/WebhookService.js';
+export const watchAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.watchAddress);
-};
-
-
-module.exports = {
-  watchAddress,
 };

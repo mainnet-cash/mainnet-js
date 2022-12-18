@@ -8,10 +8,10 @@ import {
   WatchWallet,
   TestNetWatchWallet,
   RegTestWatchWallet,
-} from "./Wif";
-import { getNamedWalletId } from "./Base";
-import { WalletRequestI, WalletResponseI } from "./interface";
-import { prefixFromNetworkMap } from "../enum";
+} from "./Wif.js";
+import { getNamedWalletId } from "./Base.js";
+import { WalletRequestI, WalletResponseI } from "./interface.js";
+import { prefixFromNetworkMap } from "../enum.js";
 
 // Convenience map to access classes by types and network
 export const walletClassMap = {

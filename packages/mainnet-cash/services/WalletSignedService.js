@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
-const { base64ToBin } = require('@bitauth/libauth');
-  
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
+import { base64ToBin } from '@bitauth/libauth';
+
 /**
 * Sign a message string
 *
@@ -57,7 +57,7 @@ new Promise(async (resolve, reject) => {
 });
 
 
-module.exports = {
+export default {
   signedMessageSign,
   signedMessageVerify
 };

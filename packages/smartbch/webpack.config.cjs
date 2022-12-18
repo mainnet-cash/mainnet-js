@@ -2,9 +2,10 @@ const { merge } = require("webpack-merge");
 const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const nodeExternals = require("webpack-node-externals");
+const CircularDependencyPlugin = require("circular-dependency-plugin");
 const __basedir = require("path").resolve(__dirname, "../../");
 
 const baseConfig = {
@@ -13,19 +14,30 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.browser.json",
+            },
+          },
+        ],
+        exclude: [/node_modules/],
       },
     ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensions: [".ts", ".tsx", ".js", ".wasm"],
+    extensionAlias: {
+      ".js": [".ts", ".js"],
+    },
   },
   optimization: {
     minimize: false,
     mangleWasmImports: true,
     usedExports: true,
   },
+  experiments: { topLevelAwait: true },
 };
 
 const prodConfig = {
@@ -38,13 +50,13 @@ const prodConfig = {
 const browserConfig = {
   target: "web",
   entry: {
-    contract: {
-      import: "./src/index.ts",
+    smartbch: {
+      import: "./src/index.web.ts",
       library: {
+        name: "__smartbchPromise",
         type: "global",
       },
     },
-    mainnet: ["mainnet-js"],
   },
   output: {
     filename: `[name]-${packageJson.version}.js`,
@@ -52,20 +64,41 @@ const browserConfig = {
     crossOriginLoading: "anonymous",
     libraryTarget: "umd",
   },
+
   plugins: [
     //new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
       title: "The Empty Mainnet App",
     }),
+    new InjectBodyPlugin({
+      content:
+        '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __smartbchPromise))</script>',
+    }),
+    new CircularDependencyPlugin({
+      include: /src/,
+      // exclude detection of files based on a RegExp
+      exclude: /node_modules|mainnet-zjs/,
+      // add errors to webpack instead of warnings
+      failOnError: false,
+      // allow import cycles that include an asyncronous import,
+      // e.g. via import(/* webpackMode: "weak" */ './file.js')
+      allowAsyncCycles: false,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
+    }),
   ],
   resolve: {
     alias: {
-      bip39: require.resolve("../mainnet-js/polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
-      eventsource: require.resolve("../mainnet-js/polyfill/eventsource.js"),
+      ethers$: require.resolve("ethers/lib/index.js"),
+      "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
+      "@ethersproject/contracts$": require.resolve(
+        "@ethersproject/contracts/lib/index.js"
+      ),
+      eventsource: false,
       events: require.resolve("events/"),
       fs: false,
       http: false,
@@ -79,15 +112,11 @@ const browserConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      solc: false,
+      solc: require.resolve("./polyfill/solc.js"),
       stream: false,
       tls: false,
-      util: require.resolve("../mainnet-js/polyfill/util.js"),
       url: false,
       zlib: false,
-    },
-    fallback: {
-      stream: require.resolve("stream-browserify"),
     },
   },
 };
@@ -95,7 +124,7 @@ const browserConfig = {
 const browserTestDiff = {
   output: {
     filename: "[name].js",
-    path: __basedir + "/jest/playwright/contract/",
+    path: __basedir + "/jest/playwright/smartbch/",
   },
 };
 

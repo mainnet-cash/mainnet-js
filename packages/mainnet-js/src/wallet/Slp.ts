@@ -8,7 +8,7 @@ import {
   WatchWallet,
   TestNetWatchWallet,
   RegTestWatchWallet,
-} from "../wallet/Wif";
+} from "../wallet/Wif.js";
 import {
   SlpFormattedUtxo,
   SlpGenesisOptions,
@@ -22,38 +22,41 @@ import {
   SlpTokenType,
   SlpTxI,
   SlpUtxoI,
-} from "../slp/interface";
-import { SlpDbProvider } from "../slp/SlpDbProvider";
-import { ImageI } from "../qr/interface";
-import { qrAddress } from "../qr/Qr";
-import { TxI, UtxoI } from "../interface";
-import { ElectrumRawTransaction } from "../network/interface";
+} from "../slp/interface.js";
+import { SlpDbProvider } from "../slp/SlpDbProvider.js";
+import { ImageI } from "../qr/interface.js";
+import { qrAddress } from "../qr/Qr.js";
+import { TxI, UtxoI } from "../interface.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
 import BigNumber from "bignumber.js";
-import { getRelayFeeCache } from "../network/getRelayFeeCache";
+import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
 import {
   buildEncodedTransaction,
   getFeeAmount,
   getSuitableUtxos,
-} from "../transaction/Wif";
+} from "../transaction/Wif.js";
 import {
   SlpGetGenesisOutputs,
   SlpGetMintOutputs,
   SlpGetSendOutputs,
-} from "../slp/SlpLibAuth";
-import { binToHex } from "@bitauth/libauth";
-import { SendRequest } from "./model";
+} from "../slp/SlpLibAuth.js";
+import { binToHex, Output } from "@bitauth/libauth";
+import { SendRequest } from "./model.js";
 import {
   SlpCancelWatchFn,
   SlpProvider,
   SlpWatchBalanceCallback,
   SlpWatchTransactionCallback,
-} from "../slp/SlpProvider";
-import { toCashAddress, toSlpAddress } from "../util/bchaddr";
-import { GsppProvider } from "../slp/GsppProvider";
-import { delay } from "../util/delay";
-import { Util } from "./Util";
-import { Mainnet } from "../index";
-import { FeePaidByEnum } from "./enum";
+} from "../slp/SlpProvider.js";
+import { toCashAddress, toSlpAddress } from "../util/bchaddr.js";
+import { GsppProvider } from "../slp/GsppProvider.js";
+import { delay } from "../util/delay.js";
+import { Util } from "./Util.js";
+import { FeePaidByEnum } from "./enum.js";
+import {
+  getRuntimePlatform,
+  RuntimePlatform,
+} from "../util/getRuntimePlatform.js";
 
 /**
  * Class to manage an slp enabled wallet.
@@ -82,7 +85,7 @@ export class Slp {
 
     let provider = Slp.defaultProvider;
     if (
-      Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node &&
+      getRuntimePlatform() === RuntimePlatform.node &&
       process.env.SLP_PROVIDER
     )
       provider = process.env.SLP_PROVIDER!;
@@ -653,7 +656,7 @@ export class Slp {
   private async processSlpTransaction(
     fundingBchUtxos: UtxoI[],
     slpOutputsResult: {
-      SlpOutputs: { lockingBytecode: Uint8Array; satoshis: Uint8Array }[];
+      SlpOutputs: Output[];
       FundingSlpUtxos: SlpUtxoI[];
       BchSendRequests: SendRequest[];
     },
@@ -692,7 +695,8 @@ export class Slp {
       fundingBchUtxos,
       BigInt(bchSpendAmount) + BigInt(feeEstimate),
       bestHeight,
-      FeePaidByEnum.change
+      FeePaidByEnum.change,
+      slpOutputsResult.BchSendRequests
     );
 
     if (fundingUtxos.length === 0) {

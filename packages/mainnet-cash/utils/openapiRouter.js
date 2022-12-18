@@ -57,7 +57,7 @@ function openApiRouter() {
         await apiController[controllerOperation](request, response, next);
       }
     } catch (error) {
-      console.error(error);
+      console.trace(error);
       const err = { code: 500, error: error.message };
       handleError(err, request, response, next);
     }

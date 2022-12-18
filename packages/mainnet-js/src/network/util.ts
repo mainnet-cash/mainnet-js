@@ -1,5 +1,5 @@
 import { ElectrumTransport, TransportScheme } from "electrum-cash";
-import { ElectrumHostParams } from "./interface";
+import { ElectrumHostParams } from "./interface.js";
 
 export function parseElectrumUrl(givenUrl: string): ElectrumHostParams {
   let url = new URL(givenUrl);

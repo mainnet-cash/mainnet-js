@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
 
 /**
 * Get all slp balances of the wallet
@@ -329,7 +329,7 @@ const slpOutpoints = ({ serializedWallet }) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   slpAllBalances,
   slpBalance,
   slpCreateWallet,

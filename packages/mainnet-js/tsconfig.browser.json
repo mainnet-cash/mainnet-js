@@ -1,9 +1,6 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "target": "es2020",
-    "outDir": "./dist/module",
-    "module": "esnext",
     "baseUrl": "src",
     "paths": {
       "pg": ["false*"]

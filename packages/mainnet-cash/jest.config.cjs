@@ -1,6 +1,7 @@
 module.exports = {
   rootDir: "./",
   collectCoverage: true,
+  preset: 'ts-jest/presets/default-esm',
 
   collectCoverageFrom: [
     "services/*.{js}",
@@ -17,12 +18,11 @@ module.exports = {
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
   ],
-  transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
-  },
+  transformIgnorePatterns: ['node_modules/(?!@bitauth/libauth)'],
+  extensionsToTreatAsEsm: [".ts"],
   testEnvironment: "node",
-  globalSetup: "<rootDir>/jest/node.setup.js",
-  globalTeardown: "<rootDir>/jest/node.teardown.js",
+  globalSetup: "<rootDir>/jest/node.setup.cjs",
+  globalTeardown: "<rootDir>/jest/node.teardown.cjs",
   verbose: true,
   maxConcurrency: 1,
   testTimeout: 130000,

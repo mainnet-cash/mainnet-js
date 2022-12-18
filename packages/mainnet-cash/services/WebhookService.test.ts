@@ -1,6 +1,6 @@
-var mainnet = require("mainnet-js");
-var server = require("../")
-var request = require("supertest");
+import * as mainnet from "mainnet-js";
+import server from "../";
+import request from "supertest";
 
 var app;
 let tokenId;
@@ -11,25 +11,21 @@ const serversGspp = { ...{}, ...mainnet.GsppProvider.defaultServers };
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
-
     mainnet.Webhook.debug.setupAxiosMocks();
-
-    const genesisOptions = {
-      name: "Webhook REST Service Token",
-      ticker: "WHTR",
-      decimals: 2,
-      initialAmount: 10000,
-      documentUrl: "https://mainnet.cash",
-      documentHash:
-        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-    };
-
-    mainnet.SlpDbProvider.defaultServers.testnet = mainnet.SlpDbProvider.defaultServers.regtest;
-    mainnet.GsppProvider.defaultServers.testnet = mainnet.GsppProvider.defaultServers.regtest;
-
-    const aliceWallet = await mainnet.RegTestWallet.slp.fromId(`wif:regtest:${process.env.PRIVATE_WIF!}`);
-    const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
-    tokenId = genesisResult.tokenId;
+    // const genesisOptions = {
+    //   name: "Webhook REST Service Token",
+    //   ticker: "WHTR",
+    //   decimals: 2,
+    //   initialAmount: 10000,
+    //   documentUrl: "https://mainnet.cash",
+    //   documentHash:
+    //     "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    // };
+    // mainnet.SlpDbProvider.defaultServers.testnet = mainnet.SlpDbProvider.defaultServers.regtest;
+    // mainnet.GsppProvider.defaultServers.testnet = mainnet.GsppProvider.defaultServers.regtest;
+    // const aliceWallet = await mainnet.RegTestWallet.slp.fromId(`wif:regtest:${process.env.PRIVATE_WIF!}`);
+    // const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
+    // tokenId = genesisResult.tokenId;
   });
 
   beforeEach(function () {
@@ -57,9 +53,10 @@ describe("Test Webhook Endpoints", () => {
         url: 'http://example.com/balance',
         type: 'balance'
       });
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
+
     expect(resp.statusCode).toEqual(200);
     expect(resp.body!.id).toBeGreaterThan(0);
 
@@ -90,7 +87,7 @@ describe("Test Webhook Endpoints", () => {
         url: 'http://example.com/transaction',
         type: 'transaction:in'
       });
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toEqual(200);
@@ -116,7 +113,7 @@ describe("Test Webhook Endpoints", () => {
   /**
    * slpbalance
    */
-   it("Should register an SLP balance watch webhook", async () => {
+   it.skip("Should register an SLP balance watch webhook", async () => {
     let bobWallet = await mainnet.RegTestWallet.newRandom();
 
     const resp = await request(app)
@@ -127,7 +124,7 @@ describe("Test Webhook Endpoints", () => {
         type: 'slpbalance',
         tokenId: tokenId
       });
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toEqual(200);
@@ -150,7 +147,7 @@ describe("Test Webhook Endpoints", () => {
     expect(mainnet.Webhook.debug.responses["http://example.com/slpbalance"].length).toBe(1);
   });
 
-  it("Should register an SLP transaction watch webhook", async () => {
+  it.skip("Should register an SLP transaction watch webhook", async () => {
     let bobWallet = await mainnet.RegTestWallet.newRandom();
 
     const resp = await request(app)
@@ -161,7 +158,7 @@ describe("Test Webhook Endpoints", () => {
         type: 'slptransaction:in',
         tokenId: tokenId
       });
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toEqual(200);

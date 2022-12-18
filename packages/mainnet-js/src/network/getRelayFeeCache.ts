@@ -1,6 +1,6 @@
-import { bchParam } from "../chain";
-import { networkTickerMap } from "./constant";
-import { default as NetworkProvider } from "./NetworkProvider";
+import { bchParam } from "../chain.js";
+import { networkTickerMap } from "./constant.js";
+import { default as NetworkProvider } from "./NetworkProvider.js";
 
 export async function getRelayFeeCache(provider: NetworkProvider) {
   let relayFeePerKbInCoins;

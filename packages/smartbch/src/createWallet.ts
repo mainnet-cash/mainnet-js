@@ -9,7 +9,7 @@ import {
   TestNetSmartBchWallet,
   TestNetWatchSmartBchWallet,
   WatchSmartBchWallet,
-} from "./SmartBchWallet";
+} from "./SmartBchWallet.js";
 
 type platform = "bch" | "smartbch";
 

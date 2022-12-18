@@ -1,9 +1,8 @@
 import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 
-var server = require("../")
-var request = require("supertest");
-const mainnet = require("mainnet-js");
+import server from "../index.js";
+import request from "supertest";
 
 var app;
 
@@ -150,6 +149,15 @@ describe("Test Wallet Endpoints", () => {
     expect(resp.body.cashaddr).toBe(
       "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
     );
+
+    resp = await request(app).post("/wallet/token_deposit_address").send({
+      walletId:
+        "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
+    });
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body.cashaddr).toBe(
+      "bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu"
+    );
   });
 
   /**
@@ -160,12 +168,25 @@ describe("Test Wallet Endpoints", () => {
       walletId:
         `wif:regtest:${process.env.PRIVATE_WIF}`,
     });
-    const body = resp.body;
+    let body = resp.body;
 
     expect(resp.statusCode).toBe(200);
     expect(
       body!.src!.slice(0,36)
     ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
+    expect(body!.title).toBe("bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0")
+
+    resp = await request(app).post("/wallet/token_deposit_qr").send({
+      walletId:
+        `wif:regtest:${process.env.PRIVATE_WIF}`,
+    });
+    body = resp.body;
+
+    expect(resp.statusCode).toBe(200);
+    expect(
+      body!.src!.slice(0,36)
+    ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
+    expect(body!.title).toBe("bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu")
   });
 
   /**
@@ -593,7 +614,7 @@ describe("Test Wallet Endpoints", () => {
         value: 1
       }]
     });
-    if (initialResp.statusCode !== 200) {
+    if (initialResp.error) {
       console.log(initialResp.error.text);
     }
     let resp = await request(app)
@@ -603,7 +624,7 @@ describe("Test Wallet Endpoints", () => {
         cashaddr: process.env.ADDRESS as string,
       });
     const body = resp.body;
-    if (resp.statusCode !== 200) {
+    if (resp.error) {
       console.log(resp.error.text);
     }
     expect(resp.statusCode).toBe(200);
@@ -752,6 +773,7 @@ describe("Test Wallet Endpoints", () => {
       expect(resp.statusCode).toBe(200);
       let expectedResult = {
         "cashaddr":"bchreg:qzghep5tpvpsu35j4mdv8xpycr6fujlxmvhm50wzu2",
+        "tokenaddr":"bchreg:zzghep5tpvpsu35j4mdv8xpycr6fujlxmvs383qyre",
         "isTestnet":true,
         "name":"",
         "network":"regtest",
@@ -832,7 +854,6 @@ describe("Test Wallet Endpoints", () => {
    * send, OP_RETURN
    */
    it("Should send funds and OP_RETURN data", async () => {
-    const provider = mainnet.getNetworkProvider('regtest');
     let result, transaction;
     result = await request(app).post("/wallet/send").send({
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
@@ -852,11 +873,15 @@ describe("Test Wallet Endpoints", () => {
     });
 
     expect(result.statusCode).toBe(200);
-    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    transaction = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: result.body.txId!,
+      network: "regtest",
+      verbose: true,
+    })).body;
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
-    expect(transaction.vout[0].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+    expect(transaction.vout[0].scriptPubKey.hex.slice(4)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
-    expect(transaction.vout[1].scriptPubKey.hex.slice(6)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
+    expect(transaction.vout[1].scriptPubKey.hex.slice(4)).toBe(binToHex(utf8ToBin("MEMO\x10LÖL😅")));
 
 
     result = await request(app).post("/wallet/send").send({
@@ -868,9 +893,13 @@ describe("Test Wallet Endpoints", () => {
     });
 
     expect(result.statusCode).toBe(200);
-    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    transaction = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: result.body.txId!,
+      network: "regtest",
+      verbose: true,
+    })).body;
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
-    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(6))]).toStrictEqual([0x00, 0x01, 0x02]);
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(4))]).toStrictEqual([0x00, 0x01, 0x02]);
 
 
     result = await request(app).post("/wallet/send").send({
@@ -882,11 +911,15 @@ describe("Test Wallet Endpoints", () => {
     });
 
     expect(result.statusCode).toBe(200);
-    transaction = await provider.getRawTransactionObject(result.body.txId!);
+    transaction = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: result.body.txId!,
+      network: "regtest",
+      verbose: true,
+    })).body;
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
-    expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
+    expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x00]);
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
-    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x4c, 0x00]);
+    expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([0x6a, 0x00]);
   });
 
   /**

@@ -1,23 +1,20 @@
 import {
   deriveHdPublicNodeChild,
   decodeHdPublicKey,
-  encodeHdPublicKey,
   encodeCashAddress,
-  instantiateBIP32Crypto,
   deriveHdPath,
-  HdPublicNode,
-  HdKeyNetwork,
   binToHex,
+  CashAddressNetworkPrefix,
+  CashAddressType,
 } from "@bitauth/libauth";
-import path from "path";
 
-import { hash160 } from "./hash160";
+import { hash160 } from "./hash160.js";
 
-export async function getAddrsByXpubKey(
+export function getAddrsByXpubKey(
   xpub: string,
   path: string,
   count: number
-) {
+): Array<string> {
   let pathComponents = path.split("/");
   let rootStr = pathComponents.shift()!;
   let root: number;
@@ -25,7 +22,7 @@ export async function getAddrsByXpubKey(
     rootStr = pathComponents.shift()!;
   }
   root = parseInt(rootStr);
-  let result: any = [];
+  let result: Array<string> = [];
 
   const start = parseInt(pathComponents.pop()!);
   const end = start + count;
@@ -33,29 +30,28 @@ export async function getAddrsByXpubKey(
     let childPath = ["M", root, ...pathComponents, curr].join("/");
     result.push(derivePublicNodeCashaddr(xpub, root, childPath));
   }
-  return await Promise.all(result).then((result) => {
-    return result;
-  });
+  return result;
 }
 
-export async function getAddrsByXpubKeyObject(obj) {
-  return await getAddrsByXpubKey(obj.xpubkey, obj.path, obj.count);
+export function getAddrsByXpubKeyObject(obj): Array<string> {
+  return getAddrsByXpubKey(obj.xpubkey, obj.path, obj.count);
 }
 
-export async function derivePublicNodeCashaddr(
+export function derivePublicNodeCashaddr(
   xpub,
   index: number,
   path?: string
-) {
-  const crypto = await instantiateBIP32Crypto();
-  const publicParent = await decodeHdPublicKey(crypto, xpub);
+): string {
+  const publicParent = decodeHdPublicKey(xpub);
 
   if (typeof publicParent === "string") {
     throw new Error(publicParent);
   }
-  let prefix = publicParent.network === "mainnet" ? "bitcoincash" : "bchtest";
+  let prefix = (
+    publicParent.network === "mainnet" ? "bitcoincash" : "bchtest"
+  ) as CashAddressNetworkPrefix;
 
-  let node = await deriveHdPublicNodeChild(crypto, publicParent.node, index);
+  let node = deriveHdPublicNodeChild(publicParent.node, index);
   if (typeof node === "string") {
     throw new Error(node);
   }
@@ -65,20 +61,19 @@ export async function derivePublicNodeCashaddr(
     if (path[0] !== "M") {
       throw Error("use M for public path derivation");
     }
-    let childNode = deriveHdPath(crypto, publicParent.node, path);
+    let childNode = deriveHdPath(publicParent.node, path);
     if (typeof childNode === "string") {
       throw new Error(childNode);
     } else {
-      let childPkh = await hash160(childNode.publicKey);
-      cashaddr = encodeCashAddress(prefix, 0, childPkh);
+      let childPkh = hash160(childNode.publicKey);
+      cashaddr = encodeCashAddress(prefix, CashAddressType.p2pkh, childPkh);
     }
   }
   return cashaddr;
 }
 
-export async function getXpubKeyInfo(hdPublicKey) {
-  const crypto = await instantiateBIP32Crypto();
-  let node = decodeHdPublicKey(crypto, hdPublicKey);
+export function getXpubKeyInfo(hdPublicKey: string) {
+  let node = decodeHdPublicKey(hdPublicKey);
   if (typeof node === "string") {
     throw new Error(node);
   }
@@ -89,10 +84,10 @@ export async function getXpubKeyInfo(hdPublicKey) {
     childNumber: node.node.childIndex,
     chain: binToHex(node.node.chainCode),
     data: binToHex(node.node.publicKey),
-    fingerprint: binToHex((await hash160(node.node.publicKey)).slice(0, 4)),
+    fingerprint: binToHex(hash160(node.node.publicKey).slice(0, 4)),
   };
 }
 
 export async function getXpubKeyInfoObject(obj) {
-  return await getXpubKeyInfo(obj.xpubkey);
+  return getXpubKeyInfo(obj.xpubkey);
 }

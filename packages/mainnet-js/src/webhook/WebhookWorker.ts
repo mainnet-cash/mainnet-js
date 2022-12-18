@@ -1,5 +1,5 @@
-import SqlProvider from "../db/SqlProvider";
-import { RegisterWebhookParams } from "./interface";
+import SqlProvider from "../db/SqlProvider.js";
+import { RegisterWebhookParams } from "./interface.js";
 
 import { Webhook } from "./Webhook";
 

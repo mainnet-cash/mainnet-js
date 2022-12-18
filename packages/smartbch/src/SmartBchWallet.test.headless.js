@@ -79,7 +79,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
   test("Test waiting and watching", async () => {
     await page.evaluate(async (SBCH_ALICE_ID) => {
       // let all transactions in previous blocks be settled
-      await delay(7000);
+      await new Promise((resolve) => setTimeout(resolve, 7000));
 
       const alice = await RegTestSmartBchWallet.fromId(SBCH_ALICE_ID);
 
@@ -158,7 +158,7 @@ describe(`SmartBchWallet should function in the browser`, () => {
       );
 
       // lets wait for 2 more blocks to be mined
-      await delay(15000);
+      await new Promise((resolve) => setTimeout(resolve, 15000));
       expect(waitTxResult).toBe(true);
       expect(waitBalanceResult).toBe(true);
       expect(aliceWatchResult).toBe(true);

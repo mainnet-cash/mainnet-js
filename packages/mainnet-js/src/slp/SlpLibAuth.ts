@@ -3,24 +3,25 @@ import {
   bigIntToBinUint64LE,
   binToHex,
   hexToBin,
+  importAuthenticationTemplate,
+  Output,
   utf8ToBin,
-  validateAuthenticationTemplate,
 } from "@bitauth/libauth";
 import { parseSLP } from "slp-parser";
 
-import { SendRequest } from "../wallet/model";
+import { SendRequest } from "../wallet/model.js";
 import {
   SlpGenesisOptions,
   SlpMintOptions,
   SlpSendRequest,
   SlpTokenType,
   SlpUtxoI,
-} from "../slp/interface";
+} from "../slp/interface.js";
 
 import BigNumber from "bignumber.js";
-import { DUST_UTXO_THRESHOLD } from "../constant";
-import { UnitEnum } from "../enum";
-import { isValidAddress, toCashAddress } from "../util/bchaddr";
+import { DUST_UTXO_THRESHOLD } from "../constant.js";
+import { UnitEnum } from "../enum.js";
+import { isValidAddress, toCashAddress } from "../util/bchaddr.js";
 
 export const bigIntToBinUint64BE = (value) => {
   return bigIntToBinUint64LE(value).reverse();
@@ -83,7 +84,7 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
       })
   );
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  const template = importAuthenticationTemplate(SlpTxoTemplate);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -95,19 +96,22 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
 
   const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
-  let genesisTxoBytecode = compiler.generateBytecode("genesis_lock", {
-    bytecode: {
-      g_token_type: Uint8Array.from([...[0x01], ...[options.type]]),
-      g_token_ticker: stringToBin(options.ticker),
-      g_token_name: stringToBin(options.name),
-      g_token_document_url: stringToBin(options.documentUrl),
-      g_token_document_hash: stringToBin(options.documentHash, true),
-      g_decimals: Uint8Array.from([...[0x01], ...[options.decimals]]),
-      g_mint_baton_vout: Uint8Array.from(batonVout),
-      g_initial_token_mint_quantity: Uint8Array.from([
-        ...[0x08],
-        ...bigIntToBinUint64BE(rawTokenAmount),
-      ]),
+  let genesisTxoBytecode = compiler.generateBytecode({
+    scriptId: "genesis_lock",
+    data: {
+      bytecode: {
+        g_token_type: Uint8Array.from([...[0x01], ...[options.type]]),
+        g_token_ticker: stringToBin(options.ticker),
+        g_token_name: stringToBin(options.name),
+        g_token_document_url: stringToBin(options.documentUrl),
+        g_token_document_hash: stringToBin(options.documentHash, true),
+        g_decimals: Uint8Array.from([...[0x01], ...[options.decimals]]),
+        g_mint_baton_vout: Uint8Array.from(batonVout),
+        g_initial_token_mint_quantity: Uint8Array.from([
+          ...[0x08],
+          ...bigIntToBinUint64BE(rawTokenAmount),
+        ]),
+      },
     },
   });
   if (!genesisTxoBytecode.success) {
@@ -118,8 +122,8 @@ export const SlpGetGenesisOutputs = async (options: SlpGenesisOptions) => {
     SlpOutputs: [
       {
         lockingBytecode: genesisTxoBytecode.bytecode,
-        satoshis: bigIntToBinUint64LE(BigInt(0)),
-      },
+        valueSatoshis: 0n,
+      } as Output,
     ],
     FundingSlpUtxos: [],
     BchSendRequests: bchSendRequests,
@@ -160,7 +164,7 @@ export const SlpGetMintOutputs = async (
       })
   );
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  const template = importAuthenticationTemplate(SlpTxoTemplate);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -170,15 +174,18 @@ export const SlpGetMintOutputs = async (
 
   const batonVout = options.endBaton ? [0x4c, 0x00] : [0x01, 0x02];
 
-  let mintTxoBytecode = compiler.generateBytecode("mint_lock", {
-    bytecode: {
-      m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
-      m_token_id: hexToBin(options.tokenId),
-      m_mint_baton_vout: Uint8Array.from(batonVout),
-      m_additional_token_quantity: Uint8Array.from([
-        ...[0x08],
-        ...bigIntToBinUint64BE(BigInt(amount.toString())),
-      ]),
+  let mintTxoBytecode = compiler.generateBytecode({
+    scriptId: "mint_lock",
+    data: {
+      bytecode: {
+        m_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
+        m_token_id: hexToBin(options.tokenId),
+        m_mint_baton_vout: Uint8Array.from(batonVout),
+        m_additional_token_quantity: Uint8Array.from([
+          ...[0x08],
+          ...bigIntToBinUint64BE(BigInt(amount.toString())),
+        ]),
+      },
     },
   });
   if (!mintTxoBytecode.success) {
@@ -189,8 +196,8 @@ export const SlpGetMintOutputs = async (
     SlpOutputs: [
       {
         lockingBytecode: mintTxoBytecode.bytecode,
-        satoshis: bigIntToBinUint64LE(BigInt(0)),
-      },
+        valueSatoshis: 0n,
+      } as Output,
     ],
     FundingSlpUtxos: slpBatonUtxos,
     BchSendRequests: bchSendRequests,
@@ -249,7 +256,7 @@ export const SlpGetSendOutputs = async (
     }
   }
 
-  const template = validateAuthenticationTemplate(SlpTxoTemplate);
+  const template = importAuthenticationTemplate(SlpTxoTemplate);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -286,11 +293,14 @@ export const SlpGetSendOutputs = async (
     ]);
   }
 
-  let sendTxoBytecode = compiler.generateBytecode("send_lock", {
-    bytecode: {
-      s_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
-      s_token_id: hexToBin(tokenId!),
-      s_token_output_quantities: result,
+  let sendTxoBytecode = compiler.generateBytecode({
+    scriptId: "send_lock",
+    data: {
+      bytecode: {
+        s_token_type: Uint8Array.from([...[0x01], ...[tokenType]]),
+        s_token_id: hexToBin(tokenId!),
+        s_token_output_quantities: result,
+      },
     },
   });
   if (!sendTxoBytecode.success) {
@@ -304,8 +314,8 @@ export const SlpGetSendOutputs = async (
     SlpOutputs: [
       {
         lockingBytecode: sendTxoBytecode.bytecode,
-        satoshis: bigIntToBinUint64LE(BigInt(0)),
-      },
+        valueSatoshis: 0n,
+      } as Output,
     ],
     FundingSlpUtxos: fundingSlpUtxos,
     BchSendRequests: bchSendRequests,

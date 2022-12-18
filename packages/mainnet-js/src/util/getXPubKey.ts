@@ -4,11 +4,10 @@ import {
   deriveHdPublicNode,
   encodeHdPublicKey,
   HdKeyNetwork,
-  instantiateBIP32Crypto,
   hexToBin,
 } from "@bitauth/libauth";
 
-export async function getXPubKey(
+export function getXPubKey(
   seed: Uint8Array | string,
   derivationPath: string,
   network: string
@@ -16,19 +15,18 @@ export async function getXPubKey(
   if (typeof seed === "string") {
     seed = hexToBin(seed);
   }
-  const crypto = await instantiateBIP32Crypto();
-  let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+  let hdNode = deriveHdPrivateNodeFromSeed(seed);
   if (!hdNode.valid) {
     throw Error("Invalid private key derived from mnemonic seed");
   }
 
-  let node = deriveHdPath(crypto, hdNode, derivationPath);
+  let node = deriveHdPath(hdNode, derivationPath);
   if (typeof node === "string") {
     throw node;
   }
-  let parentPublicNode = deriveHdPublicNode(crypto, node);
+  let parentPublicNode = deriveHdPublicNode(node);
 
-  let xPubKey = encodeHdPublicKey(crypto, {
+  let xPubKey = encodeHdPublicKey({
     network: network as HdKeyNetwork,
     node: parentPublicNode,
   });

@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 0.5.9
+  version: 1.0.0-rc.3
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -52,6 +52,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/
+  - name: wallet/bcmr
+    description: Interact with BitcoinCash Metadata Registries (BCMR)
+    externalDocs:
+      description: Find out more
+      url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/bcmr
   - name: wallet/signed
     description: Sign and verify messages
     externalDocs:
@@ -730,6 +735,27 @@ paths:
       summary: Get a deposit address in cash address format
       tags:
         - wallet
+  /wallet/token_deposit_address:
+    post:
+      operationId: tokenDepositAddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a token aware deposit address given a wallet
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositAddressResponse'
+          description: successful operation
+      summary: Get a token aware deposit address in cash address format
+      tags:
+        - wallet
   /wallet/deposit_qr:
     post:
       operationId: depositQr
@@ -752,6 +778,30 @@ paths:
             inclusion in html using:
                - \<img src\=\"{response.src}"\>
       summary: Get receiving cash address as a qrcode
+      tags:
+        - wallet
+  /wallet/token_deposit_qr:
+    post:
+      operationId: tokenDepositQr
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerializedWallet'
+        description: |
+          Request for a token aware deposit cash address as a Quick Response code (qrcode)
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScalableVectorGraphic'
+          description: >
+            A Qr code image data encoded string in the src field suitable for
+            inclusion in html using:
+               - \<img src\=\"{response.src}"\>
+      summary: Get receiving token aware cash address as a qrcode
       tags:
         - wallet
   /wallet/send:
@@ -899,6 +949,456 @@ paths:
       summary: A set of xpubkeys and paths for the wallet.
       tags:
         - wallet
+  /wallet/token_genesis:
+    post:
+      operationId: tokenGenesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenGenesisRequest'
+        description: |
+          Create new cashtoken, both funglible and/or non-fungible (NFT)
+          Refer to spec https://github.com/bitjson/cashtokens
+          Newly created token identifier can be found in `tokenIds` field.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendResponse'
+          description: successful operation
+      summary: Create new token category
+      tags:
+        - wallet
+  /wallet/token_mint:
+    post:
+      operationId: tokenMint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenMintRequest'
+        description: |
+          Mint new NFT cashtokens using an existing minting token
+          Refer to spec https://github.com/bitjson/cashtokens
+          Newly minted tokens will retain the parent's `tokenId`.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendResponse'
+          description: successful operation
+      summary: Mint new non-fungible tokens
+      tags:
+        - wallet
+  /wallet/token_burn:
+    post:
+      operationId: tokenBurn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenBurnRequest'
+        description: |
+          Perform an explicit token burning by spending a token utxo to an OP_RETURN
+          Behaves differently for fungible and non-fungible tokens:
+           * NFTs are always "destroyed"
+           * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
+          Refer to spec https://github.com/bitjson/cashtokens
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendResponse'
+          description: successful operation
+      summary: Perform an explicit token burn
+      tags:
+        - wallet
+  /wallet/get_token_utxos:
+    post:
+      operationId: getTokenUtxos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                walletId:
+                  type: string
+                  example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+                  description: The walletId to make a request to.
+                tokenId:
+                  type: string
+                  description: tokenId (category) to filter utxos by, if not set will return utxos from all tokens
+              required:
+                - walletId
+              type: object
+        description: |
+          Get unspent token outputs for the wallet
+          will return utxos only for the specified token if `tokenId` provided
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtxoResponse'
+          description: successful operation
+      summary: Get token utxos
+      tags:
+        - wallet
+  /wallet/get_token_balance:
+    post:
+      operationId: getTokenBalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                walletId:
+                  type: string
+                  example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+                  description: The walletId to make a request to.
+                tokenId:
+                  type: string
+                  description: tokenId to get balance for
+              required:
+                - walletId
+                - tokenId
+              type: object
+        description: |
+          Gets fungible token balance
+          for NFT token balance see @ref getNftTokenBalance
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  balance:
+                    type: number
+                    format: integer
+                    description: Fungible token balance
+          description: successful operation
+      summary: Get fungible token balance
+      tags:
+        - wallet
+  /wallet/get_nft_token_balance:
+    post:
+      operationId: getNftTokenBalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                walletId:
+                  type: string
+                  example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+                  description: The walletId to make a request to.
+                tokenId:
+                  type: string
+                  description: tokenId to get balance for
+              required:
+                - walletId
+                - tokenId
+              type: object
+        description: |
+          Gets non-fungible token (NFT) balance for a particula tokenId
+          disregards fungible token balances
+          for fungible token balance see @ref getTokenBalance
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  balance:
+                    type: number
+                    format: integer
+                    description: Non-fungible token balance
+          description: successful operation
+      summary: Get non-fungible token balance
+      tags:
+        - wallet
+  /wallet/get_all_token_balances:
+    post:
+      operationId: getAllTokenBalances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                walletId:
+                  type: string
+                  example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+                  description: The walletId to make a request to.
+              required:
+                - walletId
+              type: object
+        description: |
+          Gets all fungible token balances in this wallet
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: number
+          description: successful operation
+      summary: Get non-fungible token balance
+      tags:
+        - wallet
+  /wallet/get_all_nft_token_balances:
+    post:
+      operationId: getAllNftTokenBalances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                walletId:
+                  type: string
+                  example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
+                  description: The walletId to make a request to.
+              required:
+                - walletId
+              type: object
+        description: |
+          Gets all non-fungible token (NFT) balances in this wallet
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: number
+          description: successful operation
+      summary: Get non-fungible token balance
+      tags:
+        - wallet
+  /wallet/bcmr/get_registries:
+    post:
+      operationId: bcmrGetRegistries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+        description: |
+          Get tracked BCMR registries.
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+          description: successful operation
+      summary: Get tracked BCMR registries
+      tags:
+        - wallet/bcmr
+  /wallet/bcmr/reset_registries:
+    post:
+      operationId: bcmrResetRegistries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+        description: |
+          Reset tracked BCMR registries, dropping all token info.
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: successful operation
+      summary: Reset tracked BCMR registries
+      tags:
+        - wallet/bcmr
+  /wallet/bcmr/add_registry:
+    post:
+      operationId: bcmrAddRegistry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+        description: |
+          Add a BCMR registry to the list of tracked, allowing for token info lookup
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: successful operation
+      summary: Add BCMR registry from parameter
+      tags:
+        - wallet/bcmr
+  /wallet/bcmr/add_registry_from_uri:
+    post:
+      operationId: bcmrAddRegistryFromUri
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                uri:
+                  type: string
+                  description: URI of the registry to fetch from
+                contentHash:
+                  type: string
+                  description: |
+                    Hex encoded SHA256 hash of the resource the `uri` parameter points at.
+                    If specified, calculates the hash of the data fetched from `uri` and matches it with provided one.
+                    Yields an error upon mismatch.
+              required:
+                - uri
+        description: |
+          Add a BCMR registry from remote URI to the list of tracked, allowing for token info lookup
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: successful operation
+      summary: Reset tracked BCMR registries
+      tags:
+        - wallet/bcmr
+  /wallet/bcmr/add_registry_authchain:
+    post:
+      operationId: bcmrAddMetadataRegistryAuthChain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                transactionHash:
+                  type: string
+                  description: Hex encoded transaction hash to lookup
+                followToHead:
+                  type: boolean
+                  description: |
+                    Boolean flag to indicate that autchain building should progress to head (most recent registry version) or be stopped at this exact chain element
+                  default: true
+                rawTx:
+                  $ref: '#/components/schemas/ElectrumRawTransaction'
+                  description: cached raw transaction obtained previously, spares a Fulcrum call
+              allOf:
+                - $ref: '#/components/schemas/NetworkEnum'
+              required:
+                - transactionHash
+        description: |
+          Add BCMR metadata registry by resolving an authchain, allowing for token info lookup
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthChain'
+          description: successful operation
+      summary: Add BCMR metadata registry from autchain, returning the built chain
+      tags:
+        - wallet/bcmr
+  /wallet/bcmr/build_authchain:
+    post:
+      operationId: bcmrBuildAuthChain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                transactionHash:
+                  type: string
+                  description: Hex encoded transaction hash to lookup
+                resolveBase:
+                  type: boolean
+                  description: boolean flag to indicate that autchain building should resolve and verify elements back to base or be stopped at this exact chain element
+                  default: false
+                followToHead:
+                  type: boolean
+                  description: |
+                    Boolean flag to indicate that autchain building should progress to head (most recent registry version) or be stopped at this exact chain element
+                  default: true
+                rawTx:
+                  $ref: '#/components/schemas/ElectrumRawTransaction'
+                  description: cached raw transaction obtained previously, spares a Fulcrum call
+                historyCache:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TransactionHistoryItem'
+                  description: cached address history to be reused if authchain building proceeds with the same address, spares a flurry of Fulcrum calls
+              allOf:
+                - $ref: '#/components/schemas/NetworkEnum'
+              required:
+                - transactionHash
+        description: |
+          Build an authchain - Zeroth-Descendant Transaction Chain, refer to https://github.com/bitjson/chip-bcmr#zeroth-descendant-transaction-chains
+          The authchain in this implementation is specific to resolve to a valid metadata registy
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthChain'
+          description: successful operation
+      summary: Build a BCMR authchain
+      tags:
+        - wallet/bcmr
+  /wallet/bcmr/get_token_info:
+    post:
+      operationId: bcmrGetTokenInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                tokenId:
+                  type: string
+                  description: TokenId to lookup
+              required:
+                - tokenId
+        description: |
+          Return the token info (the identity snapshot as per BCMR spec)
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  tokenInfo:
+                    nullable: true
+                    type: object
+                    additionalProperties: true
+          description: successful operation
+      summary: Get token info
+      tags:
+        - wallet/bcmr
   /wallet/signed/sign:
     post:
       operationId: signedMessageSign
@@ -1270,6 +1770,44 @@ paths:
       summary: >-
         Decode a bitcoin transaction. Accepts both transaction hash or raw
         transaction in hex format.
+      tags:
+        - wallet/util
+  /wallet/util/get_raw_transaction:
+    post:
+      operationId: utilGetRawTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                txHash:
+                  type: string
+                  description: Hex encoded transaction hash
+                verbose:
+                  type: boolean
+                  description: If 'verbose' flag is true, will return an object, otherwise - transaction hex
+                  default: false
+              allOf:
+                - $ref: '#/components/schemas/NetworkEnum'
+              required:
+                - txHash
+        description: |
+          Request to get raw transaction
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - properties:
+                      txHex:
+                        type: string
+                        description: Hex encoded raw transaction
+                  - $ref: '#/components/schemas/ElectrumRawTransaction'
+          description: successful operation
+      summary: >-
+        Get bitcoin raw transaction
       tags:
         - wallet/util
   /webhook/watch_address:
@@ -2002,7 +2540,7 @@ components:
           description: cashaddr of the receiving cash address.
         from: 
           type: string
-          description: cashadd of the sending cash address.
+          description: cashaddr of the sending cash address.
         unit: 
           $ref: '#/components/schemas/UnitType'
         index: 
@@ -2049,6 +2587,146 @@ components:
             - value
             - unit
           type: object
+    TokenSendRequest:
+      properties:
+        cashaddr:
+          type: string
+          description: Cashaddress to send tokens to
+        value:
+          type: number
+          description: Satoshi value to send alongside with tokens
+          default: 1000
+        amount:
+          type: number
+          description: Fungible token amount to send
+        tokenId:
+          type: string
+          description: >-
+            Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+        capability:
+          type: string
+          enum:
+            - none
+            - mutable
+            - minting
+          description: Capability of the NFT
+        commitment:
+          type: string
+          maxLength: 80
+          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+      required:
+        - cashaddr
+        - tokenId
+      example:
+        slpaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        amount: 100
+        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+      type: object
+    TokenGenesisRequest:
+      properties:
+        walletId:
+          type: string
+          description: The walletId to make a request to.
+        amount:
+          type: number
+          description: amount of *fungible* tokens to create
+        capability:
+          type: string
+          enum:
+            - none
+            - mutable
+            - minting
+          description: Capability of the new NFT
+        commitment:
+          type: string
+          maxLength: 80
+          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+        cashaddr:
+          type: string
+          description: Cashaddress to send tokens to
+        value:
+          type: number
+          description: Satoshi value to send alongside with tokens
+          default: 1000
+      required:
+        - walletId
+      type: object
+    TokenMintRequest:
+      properties:
+        walletId:
+          type: string
+          description: The walletId to make a request to.
+        tokenId:
+          type: string
+          description: >-
+            Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+        requests:
+          type: array
+          items:
+            type: object
+            properties:
+              capability:
+                type: string
+                enum:
+                  - none
+                  - mutable
+                  - minting
+                description: Capability of the new NFT
+              commitment:
+                type: string
+                maxLength: 80
+                description: Token commitment message, hexadecimal encoded, 40 bytes max length
+              cashaddr:
+                type: string
+                description: Cashaddress to send tokens to
+              value:
+                type: number
+                description: Satoshi value to send alongside with tokens
+                default: 1000
+        deductTokenAmount:
+          type: boolean
+          description: if minting token contains fungible amount, deduct from it by amount of minted tokens
+          default: false
+      required:
+        - walletId
+        - tokenId
+      type: object
+    TokenBurnRequest:
+      properties:
+        walletId:
+          type: string
+          description: The walletId to make a request to.
+        tokenId:
+          type: string
+          description: >-
+            Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+        capability:
+          type: string
+          enum:
+            - none
+            - mutable
+            - minting
+          description: Capability of the new NFT
+        commitment:
+          type: string
+          maxLength: 80
+          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+        amount:
+          type: number
+          description: amount of fungible tokens to burn
+        cashaddr:
+          type: string
+          description: address to return token and satoshi change to, default to the sender's cashaddr
+        message:
+          type: string
+          description: optional message to include in OP_RETURN
+      required:
+        - walletId
+        - tokenId
+      type: object
     OpReturnData:
       anyOf:
         - type: array
@@ -2085,6 +2763,7 @@ components:
       items:
         anyOf:
           - $ref: '#/components/schemas/SendRequestItem'
+          - $ref: '#/components/schemas/TokenSendRequest'
           - $ref: '#/components/schemas/OpReturnData'
     CashscriptReceipt:
       properties:
@@ -2682,7 +3361,6 @@ components:
       items:
         anyOf:
           - type: string
-            format: cashaddr
     getXpubKeyInfoRequest:
       example:
         xpubkey: >-
@@ -2846,6 +3524,8 @@ components:
       properties:
         cashaddr:
           type: string
+        tokenaddr:
+          type: string
         isTestnet:
           description: >-
             Whether the agreed value of the network is zero. True for all
@@ -2874,6 +3554,7 @@ components:
         - $ref: '#/components/schemas/NetworkEnum'
       example:
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys0d2lessf
+        tokenaddr: bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu
         isTestnet: true
         name: ''
         network: testnet
@@ -3035,6 +3716,11 @@ components:
               * `changeThenFirst` - Use change then first output or error.
               * `changeThenLast` - Use change then last output or error.
               * `changeThenAny` - Use change then any output stragety or error.
+        checkTokenQuantities:
+          type: boolean
+          default: true
+          description: >
+            Check that sum of input amounts and output amount for each token category matches. Prevents accidental burns.
     SendRequest:
       properties:
         walletId:
@@ -3046,6 +3732,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/SendRequestItem'
             - $ref: '#/components/schemas/SendRequestArray'
+            - $ref: '#/components/schemas/TokenSendRequest'
             - $ref: '#/components/schemas/OpReturnData'
         options:
           $ref: '#/components/schemas/SendRequestOptions'
@@ -3069,6 +3756,12 @@ components:
           example: >-
             https://www.blockchain.com/bch-testnet/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           description: Web url to a transaction on a block explorer
+        tokenIds:
+          type: array
+          items:
+            type: string
+            description: a list of tokens involved in this transaction
+            example: ["132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"]
       type: object
     SendMaxRequest:
       properties:
@@ -4425,5 +5118,20 @@ components:
           description: The hash of a transaction
         receipt:
           $ref: '#/components/schemas/SmartBchTransactionReceipt'
+    AuthChainElement:
+      properties:
+        txHash:
+          type: string
+          description: Hex encoded transaction hash
+        contentHash:
+          type: string
+          description: Content hash of the remote registry, either a SHA256 hash of an HTTPS Publication output or an IPFS CID
+        uri:
+          type: string
+          description: URI to fetch the registry from
+    AuthChain:
+      type: array
+      items:
+        $ref: '#/components/schemas/AuthChainElement'
 security:
   - bearerAuth: []
