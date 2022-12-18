@@ -2,8 +2,8 @@ import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js
 import { ElectrumCluster, ElectrumClient } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
-  defaultServers,
   getConfidence,
+  getDefaultServers,
   getUserAgent,
 } from "./configuration.js";
 import { parseElectrumUrl } from "./util.js";
@@ -54,8 +54,7 @@ export function getNetworkProvider(
   manualConnectionManagement = manualConnectionManagement
     ? manualConnectionManagement
     : false;
-  servers = servers ? servers : defaultServers[network];
-
+  servers = servers ? servers : getDefaultServers(network);
   // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {
     servers = [servers as string];

@@ -13,6 +13,9 @@ export { BaseWallet } from "./wallet/Base.js";
 export * from "./wallet/Wif.js";
 export * from "./wallet/createWallet.js";
 
+// provider
+export { DefaultProvider } from "./network/configuration.js";
+
 // Enum
 export { NetworkType, UnitEnum } from "./enum.js";
 export { WalletTypeEnum } from "./wallet/enum.js";
