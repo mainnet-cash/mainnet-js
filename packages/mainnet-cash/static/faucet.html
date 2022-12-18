@@ -2,8 +2,8 @@
   <head>
     <meta charset="utf-8">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
-    <script src="/scripts/mainnet.js"></script>
-    <script src="/scripts/@mainnet-cash/smartbch.js"></script>
+    <script defer src="/scripts/mainnet.js"></script>
+    <script defer src="/scripts/@mainnet-cash/smartbch.js"></script>
     <script src="https://unpkg.com/buefy/dist/components/input"></script>
     <script src="https://unpkg.com/buefy/dist/components/button"></script>
     <script src="https://unpkg.com/buefy/dist/components/field"></script>
@@ -13,6 +13,10 @@
 
   </head>
   <body>
+    <!-- <script>document.addEventListener("DOMContentLoaded", async (event) => {
+      Object.assign(globalThis, await __mainnetPromise);
+      Object.assign(globalThis, await __smartbchPromise);
+    })</script> -->
     <div id="app">
     </div>
   </body>
@@ -33,6 +37,7 @@
       faucetSbchAddress: "",
       faucetSbchContractAddress: "",
       faucetSbchTokenId: "",
+      metamaskError: false,
     },
 
     template: `
@@ -60,6 +65,7 @@
           </div>
         </div>
         <div class="box">
+          <p v-if="metamaskError" :style="{color: 'red'}">Metamask or another Web3 browser extension is not installed. <a target="_blank" href="https://metamask.io">Download it here.</a></p>
           <h2 class="title is-4" style="margin-bottom:20px"> SmartBCH testnet</h2>
           <b-field style="width:50%;"" label="Your address">
             <b-input v-model="address"></b-input>
@@ -156,10 +162,7 @@
                 this.address = wallet.getDepositAddress();
               } catch (error) {
                 if (error.message.indexOf("Metamask or another Web3 browser") === 0) {
-                  if (window.confirm("Metamask or another Web3 browser extension is not installed. Click OK to download Metamask.")) {
-                    window.location.assign("http://metamask.io");
-                    return;
-                  }
+                  this.metamaskError = true;
                 } else {
                   alert(error);
                 }
@@ -206,10 +209,15 @@
     },
 
     mounted: async function () {
-      (await TestNetSmartBchWallet.newRandom()).provider.on('block', async (blockNumber) => {
-        await this.update();
+      document.addEventListener("DOMContentLoaded", async (event) => {
+        Object.assign(globalThis, await __mainnetPromise);
+        Object.assign(globalThis, await __smartbchPromise);
+
+        (await TestNetSmartBchWallet.newRandom()).provider.on('block', async (blockNumber) => {
+          await this.update();
+        });
+        this.update(true);
       });
-      this.update(true);
     }
   });
   </script>

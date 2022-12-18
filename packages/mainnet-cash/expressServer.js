@@ -23,7 +23,6 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-
 export default class ExpressServer {
   constructor(port, openApiYaml, docYaml) {
     this.port = port;
@@ -43,13 +42,13 @@ export default class ExpressServer {
   setupMiddleware() {
     // this.setupAllowedMedia();
     this.app.use(cors());
-    // const module_path = require.resolve("mainnet-js").replace("main/index.js", "");
-    // const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
-    // this.app.use('/scripts/mainnet.js', express.static(module_path + latest));
-    // const smartBchModulePath = require.resolve("@mainnet-cash/smartbch").replace("main/index.js", "");
-    // const smartBchLatest = fs.readdirSync(smartBchModulePath).filter(val => val.match(/smartbch-\d+\.\d+.\d+.js$/)).pop();
-    // this.app.use('/scripts/@mainnet-cash/smartbch.js', express.static(smartBchModulePath + smartBchLatest));
-    // this.app.use(express.static(__dirname + '/static'));
+    const module_path = `${__dirname}/node_modules/mainnet-js/dist/`;
+    const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
+    this.app.use('/scripts/mainnet.js', express.static(module_path + latest));
+    const smartBchModulePath = `${__dirname}/node_modules/@mainnet-cash/smartbch/dist/`;
+    const smartBchLatest = fs.readdirSync(smartBchModulePath).filter(val => val.match(/smartbch-\d+\.\d+.\d+.js$/)).pop();
+    this.app.use('/scripts/@mainnet-cash/smartbch.js', express.static(smartBchModulePath + smartBchLatest));
+    this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
     this.app.use(timeout(`${config.TIMEOUT}s`));
