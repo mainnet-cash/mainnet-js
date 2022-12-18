@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/smartbch",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0-rc.1",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "1.0.0-rc.0",
+    "mainnet-js": "1.0.0-rc.1",
     "@openzeppelin/contracts": "^4.2.0",
     "cashc": "^0.6.5",
     "cashscript": "^0.6.5",
@@ -27,6 +27,7 @@
     "build": "yarn build:module && yarn build:browser && cp -r polyfill dist",
     "build:module": "tsc",
     "build:browser": "npx webpack",
+    "build:production": "yarn build:module && NODE_ENV=production yarn build:browser && cp -r polyfill dist",
     "publish:public": "yarn publish --access public",
     "test": "jest"
   },

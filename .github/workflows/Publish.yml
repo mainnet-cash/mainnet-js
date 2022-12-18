@@ -124,7 +124,7 @@ jobs:
         with:
           node-version: 18
       - run: yarn
-      - run: NODE_ENV=production yarn build
+      - run: yarn build
 
       # Setup environment
       - name: Check if NPM_TOKEN is set
@@ -159,7 +159,7 @@ jobs:
         with:
           node-version: 18
       - run: yarn
-      - run: NODE_ENV=production yarn build
+      - run: yarn build:production
 
       # Setup environment
       - name: Check if CDN_FTP_UPLOAD is set
@@ -185,7 +185,7 @@ jobs:
           localDir: "packages/mainnet-js/dist"
       - if: env.HAS_CDN_FTP_UPLOAD
         name: Publish @mainnet-cash/contract to bunny cdn
-        uses: sebastianpopp/ftp-action@releases/v2        
+        uses: sebastianpopp/ftp-action@releases/v2
         with:
           host: storage.bunnycdn.com
           user: mainnet-js
@@ -194,7 +194,7 @@ jobs:
           remoteDir: "contract"
       - if: env.HAS_CDN_FTP_UPLOAD
         name: Publish @mainnet-cash/smartbch to bunny cdn
-        uses: sebastianpopp/ftp-action@releases/v2        
+        uses: sebastianpopp/ftp-action@releases/v2
         with:
           host: storage.bunnycdn.com
           user: mainnet-js

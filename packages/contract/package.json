@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/contract",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0-rc.1",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "1.0.0-rc.0",
+    "mainnet-js": "1.0.0-rc.1",
     "cashc": "0.7.4",
     "cashscript": "0.7.4"
   },
@@ -19,10 +19,11 @@
   },
   "scripts": {
     "prebuild": "yarn install",
-    "build": "yarn build:main && yarn build:module && yarn build:browser",
+    "build": "yarn build:module && yarn build:browser",
     "build:main": "tsc",
     "build:module": "tsc -p tsconfig.browser.json",
     "build:browser": "npx webpack",
+    "build:production": "yarn build:module && NODE_ENV=production yarn build:browser",
     "test": "jest",
     "publish:public": "yarn publish --access public"
   },

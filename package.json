@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0-rc.1",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
@@ -63,6 +63,7 @@
     "build:mainnet-js": "yarn workspace mainnet-js run build",
     "build:contract": "yarn workspace @mainnet-cash/contract run build",
     "build:smartbch": "yarn workspace @mainnet-cash/smartbch run build",
+    "build:production": "yarn workspace mainnet-js run build:production && yarn workspace @mainnet-cash/contract run build:production && yarn workspace @mainnet-cash/smartbch run build:production",
     "link:mainnet-js": "yarn workspace mainnet-js link && yarn workspace @mainnet-cash/contract link mainnet-js && yarn workspace @mainnet-cash/smartbch link mainnet-js && yarn workspace mainnet-cash link mainnet-js",
     "link:contract": "yarn workspace @mainnet-cash/contract link && yarn workspace mainnet-cash link @mainnet-cash/contract",
     "link:smartbch": "yarn workspace @mainnet-cash/smartbch link && yarn workspace mainnet-cash link @mainnet-cash/smartbch",
