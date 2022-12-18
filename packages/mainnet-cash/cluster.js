@@ -1,6 +1,6 @@
-import config from './config';
+import config from './config.js';
 import cluster from 'cluster';
-import app from "./index";
+import app from "./index.js";
 
 
 if (cluster.isMaster) {
@@ -19,5 +19,3 @@ else {
     console.log(`Worker ${process.pid} started`);
     app.startServer()
 }
-
-

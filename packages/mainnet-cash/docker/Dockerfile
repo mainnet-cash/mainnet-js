@@ -6,18 +6,21 @@ FROM $BASE_IMAGE
 ARG GIT_REPO=https://github.com/mainnet-cash/mainnet-js
 ARG GIT_COMMIT=master
 
-ARG MAINNET_TAG=0.1.1
+ARG MAINNET_TAG=0.5.9
 
-RUN apt-get update \
+RUN set -ex \
+  && apt-get update \
   && apt-get install -y --no-install-recommends --no-install-suggests \
      letsencrypt nginx supervisor cron vim gettext \
   && cd opt \
   && git clone ${GIT_REPO} mainnet-js \
   && cd mainnet-js && git checkout ${GIT_COMMIT} \
-  && yarn install --production \
-  && cd packages/mainnet-cash \
-  && yarn add mainnet-js@${MAINNET_TAG} \
-  && yarn install --production
+  && yarn install --production --ignore-scripts && yarn patch-package \
+  && yarn workspace mainnet-cash install --production
+  # && yarn workspace mainnet-cash add \
+  #   mainnet-js@${MAINNET_TAG} \
+  #   @mainnet-cash/contract@${MAINNET_TAG} \
+  #   @mainnet-cash/smartbch@${MAINNET_TAG}
 
 COPY ./entrypoint.sh ./http.conf ./https.conf ./https.le.conf.tpl ./supervisor.conf /opt/
 

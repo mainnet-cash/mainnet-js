@@ -46,22 +46,22 @@ if (semver.valid(process.argv[2])) {
 console.log("New root package version:", newVersion);
 
 function updatePackageFile(file) {
-  let package = require(file);
-  package.version = newVersion;
-  console.log(`Updated ${package.name} to version: ${newVersion}`);
+  let pckg = require(file);
+  pckg.version = newVersion;
+  console.log(`Updated ${pckg.name} to version: ${newVersion}`);
 
   for (const p of workspacePackages) {
-    if (p in package.dependencies) {
-      package.dependencies[p] = newVersion;
-      console.log(`Updated ${package.name}.dependency ${p} to ${newVersion}`);
+    if (p in pckg.dependencies) {
+      pckg.dependencies[p] = newVersion;
+      console.log(`Updated ${pckg.name}.dependency ${p} to ${newVersion}`);
     }
-    if (p in package.devDependencies) {
-      package.dependencies[p] = newVersion;
-      console.log(`Updated ${package.name}.dependency ${p} to ${newVersion}`);
+    if (p in pckg.devDependencies) {
+      pckg.dependencies[p] = newVersion;
+      console.log(`Updated ${pckg.name}.dependency ${p} to ${newVersion}`);
     }
   }
 
-  fs.writeFileSync(file, JSON.stringify(package, null, 2) + "\n");
+  fs.writeFileSync(file, JSON.stringify(pckg, null, 2) + "\n");
 }
 
 updatePackageFile(rootPackageFile);
