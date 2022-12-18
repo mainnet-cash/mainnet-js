@@ -82,6 +82,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       "blockchain.address.listunspent",
       cashaddr
     )) as ElectrumUtxo[];
+    if (this.network === Network.MAINNET) {
+      return result.map((utxo) => ({
+        txid: utxo.tx_hash,
+        vout: utxo.tx_pos,
+        satoshis: utxo.value,
+        height: utxo.height,
+      }));
+    }
 
     // a workaround until Fulcrum returns token info
     const uniqueTransactionHashes = result.filter(
