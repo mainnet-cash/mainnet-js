@@ -31,7 +31,7 @@ export const testnetServers = [
 
 // // chipnet
 // export const testnetServers = [
-//   "https://chipnet.imaginary.cash:50002",
+//   "wss://chipnet.imaginary.cash:50004",
 // ];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];

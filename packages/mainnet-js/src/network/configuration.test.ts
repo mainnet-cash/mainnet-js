@@ -1,8 +1,6 @@
 import { Network } from "../interface";
-import { Wallet } from "../wallet/Wif";
 import * as config from "./configuration";
 import * as primary from "./constant";
-import { removeGlobalProvider } from "./default";
 
 test("Should get electrum settings from defaults", async () => {
   expect(config.getDefaultServers(Network.MAINNET)).toBe(
