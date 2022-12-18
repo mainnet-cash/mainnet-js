@@ -11,7 +11,7 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "./packages/*"
+      "packages/*"
     ],
     "nohoist": [
       "**/ts-jest/**",
@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "0.5.9",
+  "version": "1.0.0-rc.3",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
@@ -30,7 +30,7 @@
     "api:serve:test": "yarn workspace mainnet-cash run test",
     "api:serve:cluster": "yarn workspace mainnet-cash run start",
     "api:serve": "node --trace-warnings packages/mainnet-cash/serve.js",
-    "bump": "node bump_version.js",
+    "bump": "node bump_version.cjs",
     "cli": "yarn workspace mainnet-js run cli",
     "coverage": "rm -rf ./node_modules/.cache && rm -rf coverage/ && rm -rf .nyc_output/ && NODE_ENV=test LOG_LEVEL=silent yarn run cover",
     "cover": "yarn run cover:core && yarn run cover:report",
@@ -46,7 +46,7 @@
     "docs": "npx typedoc",
     "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --config jest.config.cjs --logHeapUsage  --forceExit",
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
-    "test:rest": "yarn workspace mainnet-cash run test",
+    "test:rest": "yarn patch-package && yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",
     "test:browser": "npx jest --config jest.config.browser.cjs --detectOpenHandles --forceExit",
     "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
@@ -60,9 +60,10 @@
     "remove:packages": "rm -fr packages/*/node_modules && rm -fr packages/*/dist",
     "remove:demo": "rm -fr demo/*/node_modules && rm -fr demo/*/dist",
     "build": "yarn build:mainnet-js && yarn build:contract && yarn build:smartbch",
-    "build:mainnet-js": "yarn workspace mainnet-js run build ",
+    "build:mainnet-js": "yarn workspace mainnet-js run build",
     "build:contract": "yarn workspace @mainnet-cash/contract run build",
     "build:smartbch": "yarn workspace @mainnet-cash/smartbch run build",
+    "build:production": "yarn workspace mainnet-js run build:production && yarn workspace @mainnet-cash/contract run build:production && yarn workspace @mainnet-cash/smartbch run build:production",
     "link:mainnet-js": "yarn workspace mainnet-js link && yarn workspace @mainnet-cash/contract link mainnet-js && yarn workspace @mainnet-cash/smartbch link mainnet-js && yarn workspace mainnet-cash link mainnet-js",
     "link:contract": "yarn workspace @mainnet-cash/contract link && yarn workspace mainnet-cash link @mainnet-cash/contract",
     "link:smartbch": "yarn workspace @mainnet-cash/smartbch link && yarn workspace mainnet-cash link @mainnet-cash/smartbch",

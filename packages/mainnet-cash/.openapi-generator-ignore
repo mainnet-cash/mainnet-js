@@ -36,6 +36,8 @@ utils/openapiRouter.js
 #!services/SmartbchSep20Service.js
 #!services/FaucetService.js
 controllers/Controller.js
+# !controllers/WalletBcmrController.js
+# !services/WalletBcmrService.js
 package.json
 index.js
 config.js

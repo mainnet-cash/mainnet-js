@@ -40,7 +40,7 @@ import {
   SlpGetMintOutputs,
   SlpGetSendOutputs,
 } from "../slp/SlpLibAuth.js";
-import { binToHex } from "@bitauth/libauth";
+import { binToHex, Output } from "@bitauth/libauth";
 import { SendRequest } from "./model.js";
 import {
   SlpCancelWatchFn,
@@ -656,7 +656,7 @@ export class Slp {
   private async processSlpTransaction(
     fundingBchUtxos: UtxoI[],
     slpOutputsResult: {
-      SlpOutputs: { lockingBytecode: Uint8Array; satoshis: Uint8Array }[];
+      SlpOutputs: Output[];
       FundingSlpUtxos: SlpUtxoI[];
       BchSendRequests: SendRequest[];
     },
@@ -695,7 +695,8 @@ export class Slp {
       fundingBchUtxos,
       BigInt(bchSpendAmount) + BigInt(feeEstimate),
       bestHeight,
-      FeePaidByEnum.change
+      FeePaidByEnum.change,
+      slpOutputsResult.BchSendRequests
     );
 
     if (fundingUtxos.length === 0) {

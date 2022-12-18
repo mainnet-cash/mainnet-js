@@ -1,7 +1,13 @@
 export { amountInSatoshi } from "./amountInSatoshi.js";
 export { asSendRequestObject } from "./asSendRequestObject.js";
 export { atob, btoa } from "./base64.js";
-export { binToHex, hexToBin } from "@bitauth/libauth";
+export {
+  binToHex,
+  hexToBin,
+  utf8ToBin,
+  binToBase64,
+  sha256,
+} from "@bitauth/libauth";
 export { convert, convertObject } from "./convert.js";
 export { delay } from "./delay.js";
 export { derivedNetwork } from "./deriveNetwork.js";

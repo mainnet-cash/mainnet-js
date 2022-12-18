@@ -21,6 +21,7 @@ export interface UtxoI {
   satoshis: number;
   height?: number;
   coinbase?: boolean;
+  token?: TokenI;
 }
 
 export interface ElectrumBalanceI {
@@ -38,3 +39,17 @@ export interface HeaderI {
   height: number;
   hex: string;
 }
+
+export interface TokenI {
+  amount: number;
+  tokenId: string;
+  capability?: NFTCapability;
+  commitment?: string;
+}
+
+export const NFTCapability = {
+  none: literal("none"),
+  mutable: literal("mutable"),
+  minting: literal("minting"),
+};
+export type NFTCapability = typeof NFTCapability[keyof typeof NFTCapability];

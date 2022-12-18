@@ -1,4 +1,4 @@
-import server from "../";
+import server from "..";
 import request from "supertest";
 import { BigNumber } from "@ethersproject/bignumber";
 

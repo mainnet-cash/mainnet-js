@@ -1,12 +1,6 @@
 import { instantiateSecp256k1 } from "@bitauth/libauth";
 import { CONST, Mainnet, Network, UtxoItem } from "mainnet-js";
 
-import cashscript from "cashscript";
-// FIXME Jest is complaining about SignatureTemplate not exported
-const { SignatureTemplate } = cashscript || {
-  SignatureTemplate: (await import("cashscript"))["SignatureTemplate"],
-};
-
 import {
   EscrowArguments,
   EscrowContractResponseI,
@@ -14,6 +8,7 @@ import {
 } from "./interface.js";
 
 import { Contract } from "../Contract.js";
+import { SignatureTemplate } from "cashscript";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;

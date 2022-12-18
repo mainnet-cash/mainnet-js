@@ -1,31 +1,12 @@
-import { getRuntimePlatform } from "./getRuntimePlatform.js";
+import { base64ToBin, binToBase64, isBase64 } from "@bitauth/libauth";
 
 export function btoa(data: string) {
-  if (getRuntimePlatform() !== "node") {
-    return globalThis.btoa(data);
-  } else {
-    const btoa = (str: any) => {
-      var buffer;
-
-      if (str instanceof Buffer) {
-        buffer = str;
-      } else {
-        buffer = Buffer.from(str.toString(), "binary");
-      }
-
-      return buffer.toString("base64");
-    };
-    return btoa(data);
-  }
+  return binToBase64(new TextEncoder().encode(data));
 }
 
 export function atob(data: string) {
-  if (getRuntimePlatform() !== "node") {
-    return globalThis.atob(data);
-  } else {
-    const atob = (str: string) => {
-      return Buffer.from(str, "base64").toString("binary");
-    };
-    return atob(data);
+  if (!isBase64(data)) {
+    throw new Error("Provided data is not a valid base64");
   }
+  return String.fromCharCode(...base64ToBin(data));
 }

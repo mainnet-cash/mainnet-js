@@ -7,6 +7,13 @@ export function expect(expected) {
         );
       }
     },
+    toEqual: function (received) {
+      if (!(expected === received)) {
+        throw new Error(
+          `assertion failed: expected ${expected} is not equal to received ${received}`
+        );
+      }
+    },
     toBeGreaterThan: function (received) {
       if (!(expected > received)) {
         throw new Error(
@@ -27,6 +34,26 @@ export function expect(expected) {
           `assertion failed: expected ${expected} is not StrictEqual to received ${received}`
         );
       }
+    },
+    toContain: function (received) {
+      if (!(expected as String).includes(received)) {
+        throw new Error(
+          `assertion failed: expected ${expected} does not Contain received ${received}`
+        );
+      }
+    },
+    rejects: {
+      toThrow: async function (message: string): Promise<void> {
+        try {
+          await expected;
+        } catch (e: any) {
+          if (!(e.message as String).includes(message)) {
+            throw new Error(
+              `assertion failed: expected function to throw with message ${message}, but it did not.`
+            );
+          }
+        }
+      },
     },
   };
 }

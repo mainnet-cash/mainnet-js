@@ -1,3 +1,4 @@
+import { Network } from "../interface.js";
 import { getRuntimePlatform } from "../util/index.js";
 import * as primary from "./constant.js";
 
@@ -5,27 +6,43 @@ let mainnetServers: string[],
   testnetServers: string[],
   regtestServers: string[];
 
-export function getDefaultServers() {
+export class DefaultProvider {
+  static servers: { [name: string]: string[] } = {
+    mainnet: [] as string[],
+    testnet: [] as string[],
+    regtest: [] as string[],
+  };
+}
+
+export function getDefaultServers(network: Network) {
+  let env: any;
   if (getRuntimePlatform() == "node") {
-    mainnetServers = process.env.ELECTRUM
-      ? process.env.ELECTRUM.split(",")
-      : primary.mainnetServers;
-    testnetServers = process.env.ELECTRUM_TESTNET
-      ? process.env.ELECTRUM_TESTNET.split(",")
-      : primary.testnetServers;
-    regtestServers = process.env.ELECTRUM_REGTEST
-      ? process.env.ELECTRUM_REGTEST.split(",")
-      : primary.regtestServers;
+    env = process.env;
   } else {
-    mainnetServers = primary.mainnetServers;
-    testnetServers = primary.testnetServers;
-    regtestServers = primary.regtestServers;
+    env = {};
   }
+
+  mainnetServers = DefaultProvider.servers.mainnet.length
+    ? DefaultProvider.servers.mainnet
+    : env.ELECTRUM
+    ? env.ELECTRUM.split(",")
+    : primary.mainnetServers;
+  testnetServers = DefaultProvider.servers.testnet.length
+    ? DefaultProvider.servers.testnet
+    : env.ELECTRUM_TESTNET
+    ? env.ELECTRUM_TESTNET.split(",")
+    : primary.testnetServers;
+  regtestServers = DefaultProvider.servers.regtest.length
+    ? DefaultProvider.servers.regtest
+    : env.ELECTRUM_REGTEST
+    ? env.ELECTRUM_REGTEST.split(",")
+    : primary.regtestServers;
+
   return {
     mainnet: mainnetServers,
     testnet: testnetServers,
     regtest: regtestServers,
-  };
+  }[network];
 }
 
 export function getUserAgent() {
@@ -53,5 +70,3 @@ export function getConfidence() {
   }
   return confidence;
 }
-
-export const defaultServers = getDefaultServers();

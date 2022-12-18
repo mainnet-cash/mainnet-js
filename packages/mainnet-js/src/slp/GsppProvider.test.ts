@@ -21,7 +21,7 @@ const addressToScriptpubkey = (address) => {
   ).toString("base64");
 };
 
-describe("Gspp Provider tests", () => {
+describe.skip("Gspp Provider tests", () => {
   // other GsppProvider tests are covered in the Slp.test.ts integration test suite
 
   test("Test graphsearch methods", async () => {

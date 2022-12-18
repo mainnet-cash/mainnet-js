@@ -3,7 +3,7 @@ import { disconnectProviders, initProviders } from "../network";
 import { SlpDbProvider } from "./SlpDbProvider";
 import axios from "axios";
 
-describe("Slp tests", () => {
+describe.skip("Slp tests", () => {
   beforeAll(async () => {
     await initProviders([Network.MAINNET]);
   });

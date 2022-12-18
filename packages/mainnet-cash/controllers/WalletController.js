@@ -20,8 +20,16 @@ export const depositAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.depositAddress);
 };
 
+export const tokenDepositAddress = async (request, response) => {
+  await Controller.handleRequest(request, response, service.tokenDepositAddress);
+};
+
 export const depositQr = async (request, response) => {
   await Controller.handleRequest(request, response, service.depositQr);
+};
+
+export const tokenDepositQr = async (request, response) => {
+  await Controller.handleRequest(request, response, service.tokenDepositQr);
 };
 
 export const encodeTransaction = async (request, response) => {
@@ -66,4 +74,36 @@ export const utxos = async (request, response) => {
 
 export const xpubkeys = async (request, response) => {
   await Controller.handleRequest(request, response, service.xpubkeys);
+};
+
+export const tokenBurn = async (request, response) => {
+  await Controller.handleRequest(request, response, service.tokenBurn);
+};
+
+export const tokenGenesis = async (request, response) => {
+  await Controller.handleRequest(request, response, service.tokenGenesis);
+};
+
+export const tokenMint = async (request, response) => {
+  await Controller.handleRequest(request, response, service.tokenMint);
+};
+
+export const getNftTokenBalance = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getNftTokenBalance);
+};
+
+export const getTokenBalance = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getTokenBalance);
+};
+
+export const getTokenUtxos = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getTokenUtxos);
+};
+
+export const getAllNftTokenBalances = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getAllNftTokenBalances);
+};
+
+export const getAllTokenBalances = async (request, response) => {
+  await Controller.handleRequest(request, response, service.getAllTokenBalances);
 };

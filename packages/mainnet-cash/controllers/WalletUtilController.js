@@ -11,3 +11,6 @@ import service from '../services/WalletUtilService.js';
 export const utilDecodeTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.utilDecodeTransaction);
 };
+export const utilGetRawTransaction = async (request, response) => {
+  await Controller.handleRequest(request, response, service.utilGetRawTransaction);
+};

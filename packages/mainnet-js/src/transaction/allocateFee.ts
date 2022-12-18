@@ -1,4 +1,8 @@
-import { OpReturnData, SendRequest } from "../wallet/model.js";
+import {
+  OpReturnData,
+  SendRequest,
+  TokenSendRequest,
+} from "../wallet/model.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
 
@@ -20,12 +24,17 @@ export function checkSatsAvailable(
   }
 }
 
-export function checkForOpReturn(
-  output: SendRequest | OpReturnData
+export function checkForNonStandardSendRequest(
+  output: SendRequest | TokenSendRequest | OpReturnData
 ): SendRequest {
+  if (output instanceof TokenSendRequest) {
+    throw Error("Cannot specify fee to be paid by TokenSendRequest");
+  }
+
   if (output instanceof OpReturnData) {
     throw Error("Cannot specify fee to be paid by OpReturnData");
   }
+
   return output;
 }
 
@@ -40,7 +49,7 @@ function distributeFees(requests: Array<SendRequest>, fee: number) {
   fee = Number(fee);
   for (let r = 0; r < requests.length; r++) {
     if (fee > 0) {
-      checkForOpReturn(requests[r]);
+      checkForNonStandardSendRequest(requests[r]);
       let perRequestFee = Math.floor(fee / (requests.length - r));
       perRequestFee += fee % (requests.length - r);
       if (requests[r].value - perRequestFee < DUST_UTXO_THRESHOLD) {
@@ -55,25 +64,34 @@ function distributeFees(requests: Array<SendRequest>, fee: number) {
   return requests.filter((r) => r.value >= DUST_UTXO_THRESHOLD);
 }
 
-function firstPays(requests: Array<SendRequest | OpReturnData>, fee: number) {
+function firstPays(
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  fee: number
+) {
   let payer = requests.shift()!;
-  payer = checkForOpReturn(payer);
+  payer = checkForNonStandardSendRequest(payer);
   payer.value = payer.value! - fee;
   checkFeeForDust(payer.value);
   requests.unshift(payer);
   return requests;
 }
-function lastPays(requests: Array<SendRequest | OpReturnData>, fee: number) {
+function lastPays(
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  fee: number
+) {
   let payer = requests.pop()!;
-  payer = checkForOpReturn(payer);
+  payer = checkForNonStandardSendRequest(payer);
   payer.value = payer.value! - fee;
   checkFeeForDust(payer.value);
   requests.push(payer);
   return requests;
 }
-function anyPays(requests: Array<SendRequest | OpReturnData>, fee: number) {
+function anyPays(
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  fee: number
+) {
   for (let r of requests) {
-    checkForOpReturn(r);
+    checkForNonStandardSendRequest(r);
   }
   requests = sortSendRequests(requests as Array<SendRequest>);
   requests = distributeFees(requests as Array<SendRequest>, fee);
@@ -81,7 +99,7 @@ function anyPays(requests: Array<SendRequest | OpReturnData>, fee: number) {
 }
 
 function changeThenFallback(
-  requests: Array<SendRequest | OpReturnData>,
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
   fee: number,
   change: bigint,
   fallbackFn: Function
@@ -94,7 +112,7 @@ function changeThenFallback(
 }
 
 export function allocateFee(
-  requests: Array<SendRequest | OpReturnData>,
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
   fee: number,
   feePaidBy: FeePaidByEnum,
   change: bigint
