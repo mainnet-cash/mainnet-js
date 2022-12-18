@@ -44,7 +44,7 @@ describe(`Test Ethereum functions`, () => {
     ).rejects.toThrow("sending a transaction requires a signer");
   });
 
-  test("ERC20 genesis and info", async () => {
+  test.skip("ERC20 genesis and info", async () => {
     const watchWallet = await SmartBchWallet.watchOnly(
       "0x227F0226499E308769478669669CbdCf4E7dA002"
     );
@@ -150,7 +150,7 @@ describe(`Test Ethereum functions`, () => {
     );
   });
 
-  test("ERC20 genesis with token receiver and baton receiver", async () => {
+  test.skip("ERC20 genesis with token receiver and baton receiver", async () => {
     const aliceWallet = await RegTestSmartBchWallet.fromId(
       process.env.SBCH_ALICE_ID!
     );
@@ -210,7 +210,7 @@ describe(`Test Ethereum functions`, () => {
     );
   });
 
-  test("ERC20 mint disabled (baton ended)", async () => {
+  test.skip("ERC20 mint disabled (baton ended)", async () => {
     const aliceWallet = await RegTestSmartBchWallet.fromId(
       process.env.SBCH_ALICE_ID!
     );

@@ -15,7 +15,7 @@ import { RegTestWallet } from "../wallet/Wif";
 import { SlpUtxoI } from "./interface";
 import BigNumber from "bignumber.js";
 
-test("Test SLP genesis txo bytecode per SLP Spec", async () => {
+test.skip("Test SLP genesis txo bytecode per SLP Spec", async () => {
   const wallet = await RegTestWallet.newRandom();
 
   const genesisOptions: SlpGenesisOptions = {

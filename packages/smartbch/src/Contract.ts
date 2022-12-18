@@ -1,8 +1,8 @@
 import { binToHex } from "@bitauth/libauth";
 
 import { ContractFactory, ethers } from "ethers";
-import { XMLHttpRequest } from "xmlhttprequest-ssl";
-import { SmartBchWallet } from "./SmartBchWallet";
+import XMLHttpRequest from "xmlhttprequest-ssl";
+import { SmartBchWallet } from "./SmartBchWallet.js";
 import fs from "fs";
 
 import {
@@ -13,9 +13,12 @@ import {
   WalletTypeEnum,
 } from "mainnet-js";
 
-import { getNetworkProvider } from "./Network";
+import { getNetworkProvider } from "./Network.js";
 //import solc from "solc";
-import solc from "../polyfill/solc";
+// import solc from "../polyfill/solc.js";
+// const solc = {
+//   compile: async function (_input, _options) {},
+// }
 
 import {
   Argument,
@@ -432,9 +435,10 @@ export class Contract {
     };
 
     const compiled = JSON.parse(
-      await solc.compile(JSON.stringify(input), {
-        import: Contract.findImports,
-      })
+      "{}"
+      // await solc.compile(JSON.stringify(input), {
+      //   import: Contract.findImports,
+      // })
     );
     const errors = (compiled.errors || []).filter(
       (error: any) => error.severity === "error"

@@ -1,2 +1,2 @@
-export * from "./escrow";
-export * from "./Contract";
+export * from "./escrow/index.js";
+export * from "./Contract.js";

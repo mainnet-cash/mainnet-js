@@ -1,13 +1,19 @@
-const path = require('path');
+import path from 'path';
+import dotenv from "dotenv";
 
-if (process.env.USE_DOTENV) {
-  require("dotenv").config({ path: ".env.regtest" });
-  require("dotenv").config({ path: ".env.testnet" });
-  require("dotenv").config({ path: "../../.env.regtest" });
-  require("dotenv").config({ path: "../../.env.testnet" });
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+if (process.env.USE_DOTENV || true) {
+  dotenv.config({ path: ".env.regtest" });
+  dotenv.config({ path: ".env.testnet" });
+  dotenv.config({ path: "../../.env.regtest" });
+  dotenv.config({ path: "../../.env.testnet" });
 }
 
-const config = {
+ const config = {
   ROOT_DIR: __dirname,
   URL_PORT: process.env.PORT ? parseInt(process.env.PORT) : 3000,
   URL_PATH: process.env.URL_PATH ? process.env.URL_PATH : "http://localhost",
@@ -31,4 +37,4 @@ config.DOC_YAML = path.join(config.ROOT_DIR, "../../swagger/v1/", "api.yml");
 config.FULL_PATH = `${config.URL_PATH}:${config.URL_PORT}/${config.BASE_VERSION}`;
 config.FILE_UPLOAD_PATH = path.join(config.PROJECT_DIR, 'uploaded_files');
 
-module.exports = config;
+export default config

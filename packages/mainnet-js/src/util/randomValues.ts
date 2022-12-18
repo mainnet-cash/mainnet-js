@@ -1,13 +1,13 @@
-import { getRuntimePlatform } from "./getRuntimePlatform";
+import { getRuntimePlatform } from "./getRuntimePlatform.js";
+import crypto from "crypto";
 
 if (getRuntimePlatform() === "node") {
   if (!globalThis.crypto || !globalThis.crypto.getRandomValues) {
-    const crypto = require("crypto");
-    globalThis.crypto = crypto;
-    (globalThis.crypto as any).getRandomValues = (buf: Uint8Array) => {
-      const bytes = crypto.randomBytes(buf.length);
-      buf.set(bytes);
-      return buf;
-    };
+    (globalThis as any).crypto = crypto;
+    // (globalThis.crypto as any).getRandomValues = (buf: Uint8Array) => {
+    //   const bytes = crypto.randomBytes(buf.length);
+    //   buf.set(bytes);
+    //   return buf;
+    // };
   }
 }

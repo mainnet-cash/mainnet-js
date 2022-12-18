@@ -1,4 +1,4 @@
-import { Network, TxI } from "../interface";
+import { Network, TxI } from "../interface.js";
 import {
   SlpDbResponse,
   SlpDbTx,
@@ -6,7 +6,7 @@ import {
   SlpTokenInfo,
   SlpTxI,
   SlpUtxoI,
-} from "./interface";
+} from "./interface.js";
 import {
   SlpAllUtxosTemplate,
   SlpAddressTransactionHistoryTemplate,
@@ -17,7 +17,7 @@ import {
   SlpAllTokenBalancesTemplate,
   SlpTokenBalanceTemplate,
   SlpAllOutpointsTemplate,
-} from "./SlpDbTemplates";
+} from "./SlpDbTemplates.js";
 import BigNumber from "bignumber.js";
 import {
   SlpCancelWatchFn,
@@ -28,14 +28,17 @@ import {
   _convertSlpTokenInfo,
   _convertUtxoBigNumbers,
   _emptyTokenBalance,
-} from "./SlpProvider";
+} from "./SlpProvider.js";
 import axios from "axios";
-import { btoa } from "../util/base64";
+import { btoa } from "../util/base64.js";
 
-//import EventSource from "../../polyfill/eventsource";
-import EventSource from "../util/eventsource";
+//import EventSource from "../../polyfill/eventsource.js";
+import EventSource from "../util/eventsource.js";
 
-import { Mainnet } from "../index";
+import {
+  getRuntimePlatform,
+  RuntimePlatform,
+} from "../util/getRuntimePlatform.js";
 
 export class SlpDbProvider implements SlpProvider {
   public static defaultServers = {
@@ -58,7 +61,7 @@ export class SlpDbProvider implements SlpProvider {
   public caching: boolean = false;
 
   constructor(public network: Network = Network.MAINNET) {
-    if (Mainnet.getRuntimePlatform() === Mainnet.RuntimePlatform.node) {
+    if (getRuntimePlatform() === RuntimePlatform.node) {
       if (process.env.SLPDB_MAINNET_DATA)
         this.servers.mainnet.dataSource = process.env.SLPDB_MAINNET_DATA;
       if (process.env.SLPDB_MAINNET_EVENTS)

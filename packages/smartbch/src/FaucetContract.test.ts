@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { RegTestSmartBchWallet, TestNetSmartBchWallet, Utils } from ".";
-import { delay } from "mainnet-js";
 import { FaucetContract } from "./FaucetContract";
 
 test.skip("Test deploying faucet contract with tokens", async () => {

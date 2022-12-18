@@ -1,14 +1,14 @@
 import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { SignatureTemplate } from "cashscript";
-
 import { CONST, Mainnet, Network, UtxoItem } from "mainnet-js";
+
 import {
   EscrowArguments,
   EscrowContractResponseI,
   EscrowInfoResponseI,
-} from "./interface";
+} from "./interface.js";
 
-import { Contract } from "../Contract";
+import { Contract } from "../Contract.js";
+import { SignatureTemplate } from "cashscript";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;

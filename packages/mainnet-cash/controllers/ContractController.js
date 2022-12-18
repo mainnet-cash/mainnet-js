@@ -6,28 +6,20 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/ContractService');
-const contractFn = async (request, response) => {
+import Controller from'./Controller.js';
+import service from'../services/ContractService.js';
+export const contractFn = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractFn);
 };
 
-const contractInfo = async (request, response) => {
+export const contractInfo = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractInfo);
 };
 
-const contractUtxos = async (request, response) => {
+export const contractUtxos = async (request, response) => {
   await Controller.handleRequest(request, response, service.contractUtxos);
 };
 
-const createContract = async (request, response) => {
+export const createContract = async (request, response) => {
   await Controller.handleRequest(request, response, service.createContract);
-};
-
-
-module.exports = {
-  contractFn,
-  contractInfo,
-  contractUtxos,
-  createContract,
 };

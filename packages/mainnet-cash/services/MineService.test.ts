@@ -1,13 +1,14 @@
-var server = require("../")
+import server from "../index.js";
 
-var request = require("supertest");
+import request from "supertest";
 
 var app;
+var express;
 
 describe("Test Mine Endpoints", () => {
 
   beforeAll(async function () {
-    app = await server.getServer().launch();  
+    app = await server.getServer().launch();
   });
   afterAll(async function () {
     await server.killElectrum()
@@ -23,10 +24,10 @@ describe("Test Mine Endpoints", () => {
       network: "regtest",
     });
 
-    const bobsCashaddr = bobsWalletResp.body.cashaddr;
+    const bobsCashaddr = "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0";
     const resp = await request(app).post("/mine").send({
       cashaddr: bobsCashaddr,
-      blocks: 15,
+      blocks: 1,
     });
 
     await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -35,7 +36,6 @@ describe("Test Mine Endpoints", () => {
     });
 
     expect(resp.statusCode).toEqual(200);
-    expect(resp.body.length).toEqual(15);
-    
+    expect(resp.body.length).toEqual(1);
   });
 });

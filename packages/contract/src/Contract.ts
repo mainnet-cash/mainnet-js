@@ -3,10 +3,10 @@ import {
   Argument,
   Artifact,
   Contract as CashScriptContract,
-  SignatureTemplate,
+  ContractFunction,
   NetworkProvider,
+  SignatureTemplate,
 } from "cashscript";
-import { ContractFunction } from "cashscript/dist/module/Contract";
 import { compileString, compileFile } from "cashc";
 
 import {
@@ -23,12 +23,12 @@ import {
   CashscriptTransactionI,
   ContractResponseI,
   ContractInfoResponseI,
-} from "./interface";
+} from "./interface.js";
 import {
   castConstructorParametersFromArtifact,
   castStringArgumentsFromArtifact,
   transformContractToRequests,
-} from "./util";
+} from "./util.js";
 
 /**
  * Class that manages the Contract source, network, parameters, CashScript artifact and calls
@@ -111,7 +111,7 @@ export class Contract implements ContractI {
    */
   private getParameterList(): any[] {
     return this.parameters.map((x) =>
-      ArrayBuffer.isView(x) ? binToHex(x) : x
+      ArrayBuffer.isView(x) ? binToHex(new Uint8Array(x.buffer)) : x
     );
   }
 

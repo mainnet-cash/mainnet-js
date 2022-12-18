@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
 
 /**
 * convert value base units
@@ -48,7 +48,7 @@ const getXpubKeyInfo = ({getXpubKeyInfoRequest})=> new Promise(
 );
 
 
-module.exports = {
+export default {
   convert,
   getAddrsByXpubKey,
   getXpubKeyInfo

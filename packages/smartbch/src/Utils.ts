@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { UnitEnum } from "mainnet-js";
-import { CancelWatchFn, SendRequest, SendRequestArray } from "./interface";
+import { CancelWatchFn, SendRequest, SendRequestArray } from "./interface.js";
 
 export function zeroAddress() {
   return "0x0000000000000000000000000000000000000000";

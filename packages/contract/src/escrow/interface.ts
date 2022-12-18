@@ -1,4 +1,4 @@
-import { ContractInfoResponseI, ContractResponseI } from "../interface";
+import { ContractInfoResponseI, ContractResponseI } from "../interface.js";
 
 export interface EscrowArguments {
   sellerAddr: string;

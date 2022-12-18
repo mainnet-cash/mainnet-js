@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { delay } from "mainnet-js";
+import { Mainnet } from "mainnet-js";
 import {
   RegTestSmartBchWallet,
   SmartBchWallet,
@@ -7,6 +7,8 @@ import {
   BalanceResponse,
 } from "./";
 import { JsonRpcProvider } from "@ethersproject/providers";
+
+const delay = Mainnet.delay;
 
 describe(`Test Ethereum functions`, () => {
   test.skip("Filter logs", async () => {

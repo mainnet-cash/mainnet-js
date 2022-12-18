@@ -1,7 +1,7 @@
-import SqlProvider from "../db/SqlProvider";
-import { TxI } from "../interface";
+import SqlProvider from "../db/SqlProvider.js";
+import { TxI } from "../interface.js";
 
-const axios = require("axios").default;
+import axios from "axios";
 
 export enum WebhookType {
   transactionIn = "transaction:in",
@@ -70,6 +70,10 @@ export class Webhook {
     static setupAxiosMocks() {
       axios.interceptors.request.use((config) => {
         const url = config.url!;
+        if (!url.startsWith("http://example.com")) {
+          return config;
+        }
+
         let response;
         if (url === "http://example.com/fail") {
           response = { status: 503 };

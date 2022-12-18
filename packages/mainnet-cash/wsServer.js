@@ -1,8 +1,8 @@
-const ws = require('ws');
+import ws from 'ws';
 
-const mainnet = require("mainnet-js");
+import * as mainnet from "mainnet-js";
 
-makeWsServer = (server) => {
+const makeWsServer = (server) => {
   const wsServer = new ws.Server({ noServer: true, path: '/wallet' });
   wsServer.on('connection', socket => {
     socket.unsubscribeFunctions = [];
@@ -107,17 +107,17 @@ makeWsServer = (server) => {
   return wsServer;
 };
 
-getSlpWallet = async (addr) => {
+const getSlpWallet = async (addr) => {
   return process.env.JEST_WORKER_ID === undefined ?
     mainnet.Wallet.fromSlpaddr(addr) :
     new mainnet.RegTestWallet().watchOnly(addr);
 };
 
-getProvider = async () => {
+const getProvider = async () => {
   let w = process.env.JEST_WORKER_ID === undefined ?
     new mainnet.Wallet() :
     new mainnet.RegTestWallet();
   return w.provider;
 };
 
-module.exports = makeWsServer;
+export default makeWsServer;

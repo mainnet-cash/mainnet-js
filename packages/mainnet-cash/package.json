@@ -1,11 +1,13 @@
 {
+  "type": "module",
   "name": "mainnet-cash",
-  "version": "0.5.9",
+  "version": "1.0.0",
   "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development ",
-  "main": "index.js",
+  "module": "index.js",
   "scripts": {
+    "prebuild": "yarn install",
     "start": "node cluster.js",
-    "test": "npx jest --detectOpenHandles --runInBand --forceExit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles --runInBand --forceExit",
     "publish:public": "echo 'noop'"
   },
   "keywords": [
@@ -15,9 +17,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "mainnet-js": "0.5.9",
-    "@mainnet-cash/contract": "0.5.9",
-    "@mainnet-cash/smartbch": "0.5.9",
+    "mainnet-js": "1.0.0",
+    "@mainnet-cash/contract": "1.0.0",
+    "@mainnet-cash/smartbch": "1.0.0",
     "@ethersproject/bignumber": "^5.4.1",
     "bchaddrjs-slp": "^0.2.11",
     "bignumber.js": "^9.0.1",
@@ -27,11 +29,12 @@
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "express": "^4.16.4",
-    "express-openapi-validator": "^3.9.1",
+    "express-openapi-validator": "3.17.2",
     "express-rate-limit": "^5.2.3",
     "js-yaml": "^3.3.0",
     "ono": "^5.0.1",
     "openapi-sampler": "^1.0.0-beta.15",
+    "patch-package": "^6.5.0",
     "swagger-ui-express": "^4.0.2",
     "winston": "^3.2.1"
   },

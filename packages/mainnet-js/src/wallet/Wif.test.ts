@@ -7,7 +7,7 @@ import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
 import { delay } from "../util/delay";
 import { OpReturnData, SendResponse } from "./model";
 import { ElectrumRawTransaction } from "../network/interface";
-import { binToHex, binToUtf8, hexToBin, utf8ToBin } from "@bitauth/libauth";
+import { binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 import { mine } from "../mine";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 
@@ -173,6 +173,7 @@ describe(`Mnemonic wallet creation`, () => {
     expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
     const info = {
       cashaddr: "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59",
+      tokenaddr: "bitcoincash:zrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gu65wp6tk",
       isTestnet: false,
       name: "",
       network: "mainnet",
@@ -408,6 +409,7 @@ describe(`Watch only Wallets`, () => {
     );
     expect(w.getInfo()).toStrictEqual({
       cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      tokenaddr: "bchtest:zppr9h7whx9pzucgqukhtlj8lvgvjlgr3gzzm4cx4e",
       derivationPath: undefined,
       isTestnet: true,
       name: "",
@@ -506,7 +508,7 @@ describe(`Watch only Wallets`, () => {
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
 
-    const encodedTransaction = await aliceWallet.encodeTransaction([
+    const { encodedTransaction } = await aliceWallet.encodeTransaction([
       {
         cashaddr: bobWallet.cashaddr!,
         value: 2000,
@@ -574,21 +576,18 @@ describe(`Wallet subscriptions`, () => {
     let balance, newBalance;
     balance = await aliceWallet.getBalance("sat");
 
-    aliceWallet
-      .send(
-        [
-          {
-            cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
-          },
-        ],
-        { awaitTransactionPropagation: false }
-      )
-      .then(async () => {
-        newBalance = await aliceWallet.getBalance("sat");
-        expect(balance).toBe(newBalance);
-      });
+    aliceWallet.send(
+      [
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "satoshis",
+        },
+      ],
+      { awaitTransactionPropagation: false }
+    );
+    newBalance = await aliceWallet.getBalance("sat");
+    expect(balance).toBe(newBalance);
 
     await delay(1500);
 
@@ -1058,7 +1057,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       result.txId!
     )) as ElectrumRawTransaction;
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
-    expect(transaction.vout[0].scriptPubKey.hex.slice(6)).toBe(
+    expect(transaction.vout[0].scriptPubKey.hex.slice(4)).toBe(
       binToHex(utf8ToBin("MEMO\x10LÖL😅"))
     );
 
@@ -1071,7 +1070,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     )) as ElectrumRawTransaction;
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
     expect([
-      ...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(6)),
+      ...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(4)),
     ]).toStrictEqual([0x00, 0x01, 0x02]);
 
     result = await wallet.send([
@@ -1083,11 +1082,11 @@ describe(`Wallet extrema behavior regression testing`, () => {
     )) as ElectrumRawTransaction;
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([
-      0x6a, 0x4c, 0x00,
+      0x6a, 0x00,
     ]);
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
     expect([...hexToBin(transaction.vout[1].scriptPubKey.hex)]).toStrictEqual([
-      0x6a, 0x4c, 0x00,
+      0x6a, 0x00,
     ]);
   });
 

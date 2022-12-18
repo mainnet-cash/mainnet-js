@@ -62,6 +62,7 @@ describe(`Named Wallets`, () => {
     );
     expect(w.getInfo()).toStrictEqual({
       cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
+      tokenaddr: "bchtest:zppr9h7whx9pzucgqukhtlj8lvgvjlgr3gzzm4cx4e",
       derivationPath: undefined,
       isTestnet: true,
       name: "",

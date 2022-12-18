@@ -1,15 +1,15 @@
-import { getServer , killElectrum} from "../index";
-var request = require("supertest");
+import server from "../index.js";
+import request from "supertest";
 
 var app;
 
 describe("Post Endpoints", () => {
   beforeAll(async function () {
-    app = await getServer().launch();
+    app = await server.getServer().launch();
   });
   afterAll(async function () {
+    await server.killElectrum()
     app.close();
-    await killElectrum()
   });
 
   /**

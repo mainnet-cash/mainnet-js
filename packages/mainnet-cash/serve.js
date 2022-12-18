@@ -1,6 +1,6 @@
+import app from "./index.js";
 try {
-  const app = require("./index");
   app.startServer();
 } catch (error) {
-  console.warn(error);
+  console.trace(error);
 }

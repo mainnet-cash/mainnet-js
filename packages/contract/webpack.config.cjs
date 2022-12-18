@@ -2,9 +2,13 @@ const { merge } = require("webpack-merge");
 const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const nodeExternals = require("webpack-node-externals");
 const __basedir = require("path").resolve(__dirname, "../../");
+const CircularDependencyPlugin = require("circular-dependency-plugin");
+const webpack = require("webpack");
 
 const baseConfig = {
   mode: "development",
@@ -12,19 +16,30 @@ const baseConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.browser.json",
+            },
+          },
+        ],
+        exclude: [/node_modules/],
       },
     ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".wasm"],
+    extensions: [".ts", ".tsx", ".js", ".wasm"],
+    extensionAlias: {
+      ".js": [".ts", ".js"],
+    },
   },
   optimization: {
     minimize: false,
     mangleWasmImports: true,
     usedExports: true,
   },
+  experiments: { topLevelAwait: true },
 };
 
 const prodConfig = {
@@ -37,9 +52,10 @@ const prodConfig = {
 const browserConfig = {
   target: "web",
   entry: {
-    mainnet: {
-      import: "./src/index.ts",
+    contract: {
+      import: "./src/index.web.ts",
       library: {
+        name: "__contractPromise",
         type: "global",
       },
     },
@@ -47,6 +63,7 @@ const browserConfig = {
   output: {
     filename: `[name]-${packageJson.version}.js`,
     path: __dirname + "/dist",
+    crossOriginLoading: "anonymous",
     libraryTarget: "umd",
   },
   plugins: [
@@ -54,19 +71,36 @@ const browserConfig = {
     new HtmlWebpackPlugin({
       title: "The Empty Mainnet App",
     }),
+    new InjectBodyPlugin({
+      content:
+        '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __contractPromise))</script>',
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
+    new webpack.DefinePlugin({
+      "process.env.NODE_DEBUG": JSON.stringify(process.env.NODE_DEBUG),
+    }),
+    new CircularDependencyPlugin({
+      include: /src/,
+      // exclude detection of files based on a RegExp
+      exclude: /node_modules|mainnet-js/,
+      // add errors to webpack instead of warnings
+      failOnError: false,
+      // allow import cycles that include an asyncronous import,
+      // e.g. via import(/* webpackMode: "weak" */ './file.js')
+      allowAsyncCycles: false,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
+    }),
   ],
   resolve: {
     alias: {
-      ethers$: require.resolve("ethers/lib/index.js"),
-      "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
-      "@ethersproject/contracts$": require.resolve(
-        "@ethersproject/contracts/lib/index.js"
-      ),
-      bip39: require.resolve("./polyfill/bip39.browser.js"),
       bufferutil: false,
       child_process: false,
       crypto: false,
       dns: false,
+      eventsource: false,
       events: require.resolve("events/"),
       fs: false,
       http: false,
@@ -81,48 +115,8 @@ const browserConfig = {
       "pg-format": false,
       "pg-native": false,
       solc: false,
-      tls: false,
-      util: require.resolve("./polyfill/util.js"),
-      url: false,
-      zlib: false,
-    },
-    fallback: {
       stream: require.resolve("stream-browserify"),
-    },
-  },
-};
-
-const webWorkerConfig = {
-  target: "webworker",
-  output: {
-    filename: `mainnet-webworker-${packageJson.version}.js`,
-    path: __dirname + "/dist",
-    libraryTarget: "umd",
-  },
-  resolve: {
-    alias: {
-      bip39: require.resolve("./polyfill/bip39.browser.js"),
-      bufferutil: false,
-      child_process: false,
-      crypto: false,
-      dns: false,
-      eventsource: require.resolve("./polyfill/eventsource.js"),
-      events: require.resolve("events/"),
-      fs: false,
-      http: false,
-      https: false,
-      libpq: false,
-      module: false,
-      net: false,
-      os: false,
-      "parse-database-url": false,
-      path: false,
-      pg: false,
-      "pg-format": false,
-      "pg-native": false,
-      solc: false,
       tls: false,
-      util: require.resolve("./polyfill/util.js"),
       url: false,
       zlib: false,
     },
@@ -134,8 +128,8 @@ const webWorkerConfig = {
 
 const browserTestDiff = {
   output: {
-    filename: `[name].js`,
-    path: __basedir + "/jest/playwright/",
+    filename: "[name].js",
+    path: __basedir + "/jest/playwright/contract/",
   },
 };
 

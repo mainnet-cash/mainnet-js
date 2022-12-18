@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "test": "jest",
   "license": "MIT",
   "repository": {
@@ -8,9 +9,8 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "0.5.9",
+  "version": "1.0.0",
   "homepage": "https://mainnet.cash",
-  "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "browser": {
     "http": false,
@@ -18,9 +18,8 @@
     "fs": false,
     "url": false
   },
-  "types": "dist/main/index.d.ts",
+  "types": "dist/module/index.d.ts",
   "exports": {
-    "require": "./dist/main/index.js",
     "import": "./dist/module/index.js"
   },
   "scripts": {
@@ -28,17 +27,18 @@
     "cli": "npx ts-node src/cli.ts",
     "lint": "eslint . --ext .ts",
     "prebuild": "yarn install",
-    "build": "yarn clean && yarn build:main && yarn build:module  && yarn build:browser",
-    "build:main": "tsc",
-    "build:module": "tsc -p tsconfig.browser.json",
+    "build": "yarn clean && yarn build:module && yarn build:browser",
+    "build:module": "tsc",
     "build:browser": "npx webpack",
+    "build:production": "yarn clean && yarn build:module && NODE_ENV=production yarn build:browser",
     "demo": "npx reload --dir=demo/",
     "publish:public": "yarn publish --access public",
-    "test": "npx jest --runInBand  --logHeapUsage --forceExit",
+    "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand  --config jest.config.cjs  --logHeapUsage  --forceExit",
+    "test:browser": "PW_EXPERIMENTAL_TS_ESM=1 NODE_OPTIONS=\"--experimental-vm-modules\" node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand --config jest.config.browser.cjs --detectOpenHandles",
     "reload": "npx reload --dir=../../jest/playwright "
   },
   "dependencies": {
-    "@bitauth/libauth": "^1.19.1",
+    "@bitauth/libauth": "=v2.0.0-alpha.7",
     "async-mutex": "^0.3.1",
     "axios": "^0.21.1",
     "bchaddrjs-slp": "^0.2.12",

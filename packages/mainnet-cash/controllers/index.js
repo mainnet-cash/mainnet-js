@@ -1,18 +1,18 @@
-const ContractController = require('./ContractController');
-const ContractEscrowController = require('./ContractEscrowController');
-const FaucetController = require('./FaucetController');
-const MineController = require('./MineController');
-const SmartbchContractController = require('./SmartbchContractController');
-const SmartbchSep20Controller = require('./SmartbchSep20Controller');
-const SmartbchWalletController = require('./SmartbchWalletController');
-const UtilController = require('./UtilController');
-const WalletController = require('./WalletController');
-const WalletSignedController = require('./WalletSignedController');
-const WalletSlpController = require('./WalletSlpController');
-const WalletUtilController = require('./WalletUtilController');
-const WebhookController = require('./WebhookController');
+import ContractController from './ContractController.js';
+import ContractEscrowController from './ContractEscrowController.js';
+import FaucetController from './FaucetController.js';
+import MineController from './MineController.js';
+import SmartbchContractController from './SmartbchContractController.js';
+import SmartbchSep20Controller from './SmartbchSep20Controller.js';
+import SmartbchWalletController from './SmartbchWalletController.js';
+import UtilController from './UtilController.js';
+import WalletController from './WalletController.js';
+import WalletSignedController from './WalletSignedController.js';
+import WalletSlpController from './WalletSlpController.js';
+import WalletUtilController from './WalletUtilController.js';
+import WebhookController from './WebhookController.js';
 
-module.exports = {
+export default {
   ContractController,
   ContractEscrowController,
   FaucetController,

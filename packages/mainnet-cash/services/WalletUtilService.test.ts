@@ -1,10 +1,9 @@
 
-var mainnet = require("mainnet-js");
-var server = require("../")
-var request = require("supertest");
+import server from "..";
+import request from "supertest";
 var app;
 
-describe("Test Wallet Slp Endpoints", () => {
+describe("Test Wallet Util Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
   });

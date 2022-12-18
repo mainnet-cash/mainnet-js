@@ -6,18 +6,12 @@
  * parameters are extracted and sent to the service, and where response is handled.
  */
 
-const Controller = require('./Controller');
-const service = require('../services/WalletSignedService');
-const signedMessageSign = async (request, response) => {
+import Controller from './Controller.js';
+import service from '../services/WalletSignedService.js';
+export const signedMessageSign = async (request, response) => {
   await Controller.handleRequest(request, response, service.signedMessageSign);
 };
 
-const signedMessageVerify = async (request, response) => {
+export const signedMessageVerify = async (request, response) => {
   await Controller.handleRequest(request, response, service.signedMessageVerify);
-};
-
-
-module.exports = {
-  signedMessageSign,
-  signedMessageVerify,
 };

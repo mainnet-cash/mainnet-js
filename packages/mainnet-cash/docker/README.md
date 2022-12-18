@@ -90,7 +90,7 @@ Postgresql is required if you plan to use named (persistent) wallets and webhook
 Example would be:
 
 ```bash
-sudo docker run -d --env DATABASE_URL=postgres://postgres:trusted@localhost:15432/wallet -p 3000:80 mainnet/mainnet-rest
+sudo docker run -d --env DATABASE_URL=postgres://postgres:trusted@127.0.0.1:15432/wallet -p 3000:80 mainnet/mainnet-rest
 ```
 
 ## Webhooks

@@ -1,4 +1,4 @@
-import { TxI, UtxoI, Network, HeaderI } from "../interface";
+import { TxI, UtxoI, Network, HeaderI } from "../interface.js";
 
 export default interface NetworkProvider {
   /**

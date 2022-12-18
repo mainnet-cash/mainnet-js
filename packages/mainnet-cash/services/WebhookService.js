@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const mainnet = require("mainnet-js");
+import Service from './Service.js';
+import * as mainnet from "mainnet-js";
 
 /**
 * Create a webhook to watch cashaddress balance and transactions. 
@@ -25,6 +25,6 @@ const watchAddress = ({ watchAddressRequest }) => new Promise(
   },
 );
 
-module.exports = {
+export default {
   watchAddress,
 };

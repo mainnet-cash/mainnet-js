@@ -1,1 +1,1 @@
-export { EscrowContract } from "./EscrowContract";
+export { EscrowContract } from "./EscrowContract.js";

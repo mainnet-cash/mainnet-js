@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const _smartbch = require("@mainnet-cash/smartbch");
+import Service from './Service.js';
+import * as _smartbch from "@mainnet-cash/smartbch";
 
 /**
 * Get total balance for wallet
@@ -204,7 +204,7 @@ const smartbchSignedMessageVerify = ({ verifySignedMessageRequest }) =>
     }
   });
 
-module.exports = {
+export default {
   smartbchBalance,
   smartbchCreateWallet,
   smartbchDepositAddress,

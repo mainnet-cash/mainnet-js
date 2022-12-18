@@ -8,16 +8,13 @@ import {
   Wallet,
   WatchWallet,
   WifWallet,
-} from "../wallet/Wif";
+} from "../wallet/Wif.js";
 import {
-  binToBigIntUint64LE,
   binToHex,
   decodeTransaction as decodeTransactionLibAuth,
   hexToBin,
-  instantiateSha256,
   lockingBytecodeToCashAddress,
   Transaction as LibAuthTransaction,
-  TransactionDecodingError,
 } from "@bitauth/libauth";
 import {
   ElectrumRawTransaction,
@@ -25,10 +22,9 @@ import {
   ElectrumRawTransactionVinScriptSig,
   ElectrumRawTransactionVout,
   ElectrumRawTransactionVoutScriptPubKey,
-} from "../network/interface";
-import { bchParam } from "../chain";
-
-let sha256;
+} from "../network/interface.js";
+import { bchParam } from "../chain.js";
+import { getTransactionHash } from "../util/transaction.js";
 
 /**
  * Class with various wallet utilities.
@@ -49,19 +45,13 @@ export class Util {
   }
 
   public async getTransactionHash(rawTransactionHex: string): Promise<string> {
-    const transactionBin = hexToBin(rawTransactionHex);
-
-    if (!sha256) {
-      sha256 = await instantiateSha256();
-    }
-    // transaction hash is a double sha256 of a raw transaction data, reversed byte order
-    return binToHex(sha256.hash(sha256.hash(transactionBin)).reverse());
+    return getTransactionHash(rawTransactionHex);
   }
 
   public static async getTransactionHash(
     rawTransactionHex: string
   ): Promise<string> {
-    return new this.walletType().util.getTransactionHash(rawTransactionHex);
+    return getTransactionHash(rawTransactionHex);
   }
 
   public async decodeTransaction(
@@ -85,8 +75,8 @@ export class Util {
     }
 
     const result = decodeTransactionLibAuth(transactionBin);
-    if (result === TransactionDecodingError.invalidFormat) {
-      throw Error(TransactionDecodingError.invalidFormat);
+    if (typeof result === "string") {
+      throw Error(result);
     }
 
     const transaction = this.mapToElectrumRawTransaction(
@@ -147,8 +137,7 @@ export class Util {
             ],
             hex: binToHex(output.lockingBytecode),
           } as ElectrumRawTransactionVoutScriptPubKey,
-          value:
-            Number(binToBigIntUint64LE(output.satoshis)) / bchParam.subUnits,
+          value: Number(output.valueSatoshis) / bchParam.subUnits,
         };
       }
     );

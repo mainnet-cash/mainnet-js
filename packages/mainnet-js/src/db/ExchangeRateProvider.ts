@@ -1,5 +1,5 @@
 import Dexie from "dexie";
-import { ExchangeRateI } from "./interface";
+import { ExchangeRateI } from "./interface.js";
 
 export default class ExchangeRateProvider extends Dexie {
   private fx: Dexie.Table<ExchangeRateI, number>;

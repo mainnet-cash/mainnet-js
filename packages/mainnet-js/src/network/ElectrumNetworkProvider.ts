@@ -4,17 +4,22 @@ import {
   RequestResponse,
   ConnectionStatus,
 } from "electrum-cash";
-import { default as NetworkProvider } from "./NetworkProvider";
-import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface";
-import { Network } from "../interface";
-import { delay } from "../util/delay";
-import { BlockHeader, ElectrumRawTransaction, ElectrumUtxo } from "./interface";
+import { default as NetworkProvider } from "./NetworkProvider.js";
+import { HeaderI, TxI, UtxoI, ElectrumBalanceI, TokenI } from "../interface.js";
+import { Network } from "../interface.js";
+import { delay } from "../util/delay.js";
+import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
 import { Mutex } from "async-mutex";
-import { Util } from "../wallet/Util";
-import { CancelWatchFn } from "../wallet/interface";
-import { resolve } from "path";
-import { rejects } from "assert";
+import { Util } from "../wallet/Util.js";
+import { CancelWatchFn } from "../wallet/interface.js";
+import { getTransactionHash } from "../util/transaction.js";
+import {
+  binToHex,
+  decodeTransactionBCH,
+  hexToBin,
+  TransactionBCH,
+} from "@bitauth/libauth";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -49,7 +54,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
             await this.connectCluster();
           } catch (e) {
             console.warn(
-              `Unable to connect to one or more electrum-cash hosts: ${e}`
+              `Unable to connect to one or more electrum-cash hosts: ${JSON.stringify(
+                e
+              )}`
             );
           }
           resolve(await this.readyCluster());
@@ -69,18 +76,64 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     clearTimeout(timeoutHandle);
   }
 
+  static utxoTxCache = {};
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
       cashaddr
     )) as ElectrumUtxo[];
+    if (this.network === Network.MAINNET) {
+      return result.map((utxo) => ({
+        txid: utxo.tx_hash,
+        vout: utxo.tx_pos,
+        satoshis: utxo.value,
+        height: utxo.height,
+      }));
+    }
 
-    const utxos = result.map((utxo) => ({
-      txid: utxo.tx_hash,
-      vout: utxo.tx_pos,
-      satoshis: utxo.value,
-      height: utxo.height,
-    }));
+    // a workaround until Fulcrum returns token info
+    const uniqueTransactionHashes = result.filter(
+      (value, index, array) => array.indexOf(value) === index
+    );
+    const transactionMap: { [hash: string]: TransactionBCH } = {};
+    for (let { tx_hash } of uniqueTransactionHashes) {
+      const key = `${this.network}-${tx_hash};`;
+
+      // check cache
+      if (ElectrumNetworkProvider.utxoTxCache[key]) {
+        transactionMap[tx_hash] = ElectrumNetworkProvider.utxoTxCache[key];
+        continue;
+      }
+      // download and decode tx from Fulcrum
+      const decoded = decodeTransactionBCH(
+        hexToBin(await this.getRawTransaction(tx_hash, false))
+      );
+      if (typeof decoded === "string") {
+        throw new Error(decoded);
+      }
+      transactionMap[tx_hash] = decoded;
+      ElectrumNetworkProvider.utxoTxCache[key] = decoded;
+    }
+
+    const utxos = result.map((utxo) => {
+      const output = transactionMap[utxo.tx_hash].outputs[utxo.tx_pos];
+      return {
+        txid: utxo.tx_hash,
+        vout: utxo.tx_pos,
+        satoshis: utxo.value,
+        height: utxo.height,
+        token:
+          output.token &&
+          ({
+            amount: Number(output.token.amount),
+            tokenId: binToHex(output.token.category),
+            capability: output.token.nft?.capability,
+            commitment:
+              output.token.nft?.commitment &&
+              binToHex(output.token.nft?.commitment),
+          } as TokenI),
+      } as UtxoI;
+    });
 
     return utxos;
   }
@@ -107,16 +160,26 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.blockHeight;
   }
 
+  static rawTransactionCache = {};
   async getRawTransaction(
     txHash: string,
     verbose: boolean = false
   ): Promise<string> {
+    const key = `${this.network}-${txHash}-${verbose}`;
+    if (ElectrumNetworkProvider.rawTransactionCache[key]) {
+      return ElectrumNetworkProvider.rawTransactionCache[key];
+    }
+
     try {
-      return (await this.performRequest(
+      const result = await this.performRequest(
         "blockchain.transaction.get",
         txHash,
         verbose
-      )) as string;
+      );
+
+      ElectrumNetworkProvider.rawTransactionCache[key] = result;
+
+      return result as any;
     } catch (error: any) {
       if (
         (error.message as string).indexOf(
@@ -145,7 +208,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     awaitPropagation: boolean = true
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      let txHash = await Util.getTransactionHash(txHex);
+      let txHash = await getTransactionHash(txHex);
       if (!awaitPropagation) {
         this.performRequest("blockchain.transaction.broadcast", txHex);
         resolve(txHash);
@@ -491,7 +554,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         return await (this.electrum as ElectrumClient).connect();
       } catch (e) {
         console.warn(
-          `Warning: Failed to connect to client on ${this.network}.`
+          `Warning: Failed to connect to client on ${this.network} at ${
+            (this.electrum as ElectrumClient).connection.host
+          }.`
         );
         return;
       }

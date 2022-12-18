@@ -1,12 +1,6 @@
 //#region Imports
 // Stable
-import {
-  deriveHdPublicNodeIdentifier,
-  encodeHdPublicKey,
-  HdKeyNetwork,
-  instantiateSecp256k1,
-  instantiateSha256,
-} from "@bitauth/libauth";
+import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -18,59 +12,65 @@ import {
   deriveHdPrivateNodeFromSeed,
   deriveHdPath,
   generatePrivateKey,
-  HdPrivateNodeValid,
-  instantiateBIP32Crypto,
 } from "@bitauth/libauth";
 
 import { mnemonicToSeedSync, generateMnemonic } from "bip39";
-import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum";
+import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 
-import { Network, HeaderI, TxI } from "../interface";
+import { Network, HeaderI, TxI, NFTCapability } from "../interface.js";
 
-import { networkPrefixMap } from "../enum";
-import { PrivateKeyI, UtxoI } from "../interface";
+import { networkPrefixMap } from "../enum.js";
+import { PrivateKeyI, UtxoI } from "../interface.js";
 
-import { BaseWallet } from "./Base";
-import { FeePaidByEnum, WalletTypeEnum } from "./enum";
+import { BaseWallet } from "./Base.js";
+import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 import {
   CancelWatchFn,
   SendRequestOptionsI,
   WaitForTransactionOptions,
   WaitForTransactionResponse,
   WalletInfoI,
-} from "./interface";
+} from "./interface.js";
 
 import {
   OpReturnData,
   SendRequest,
   SendRequestArray,
+  SendRequestType,
   SendResponse,
+  TokenBurnRequest,
+  TokenGenesisRequest,
+  TokenMintRequest,
+  TokenSendRequest,
   UtxoItem,
   UtxoResponse,
   XPubKey,
-} from "./model";
+} from "./model.js";
 
 import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
-} from "../transaction/Wif";
+} from "../transaction/Wif.js";
 
-import { asSendRequestObject } from "../util/asSendRequestObject";
+import { asSendRequestObject } from "../util/asSendRequestObject.js";
 import {
   balanceFromSatoshi,
   balanceResponseFromSatoshi,
   BalanceResponse,
-} from "../util/balanceObjectFromSatoshi";
-import { checkWifNetwork } from "../util/checkWifNetwork";
-import { deriveCashaddr } from "../util/deriveCashaddr";
-import { derivePrefix, derivePublicKeyHash } from "../util/derivePublicKeyHash";
-import { checkForEmptySeed } from "../util/checkForEmptySeed";
-import { sanitizeUnit } from "../util/sanitizeUnit";
-import { sumUtxoValue } from "../util/sumUtxoValue";
-import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts";
-import { ElectrumRawTransaction } from "../network/interface";
-import { getRelayFeeCache } from "../network/getRelayFeeCache";
+} from "../util/balanceObjectFromSatoshi.js";
+import { checkWifNetwork } from "../util/checkWifNetwork.js";
+import { deriveCashaddr, deriveTokenaddr } from "../util/deriveCashaddr.js";
+import {
+  derivePrefix,
+  derivePublicKeyHash,
+} from "../util/derivePublicKeyHash.js";
+import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
+import { sanitizeUnit } from "../util/sanitizeUnit.js";
+import { sumTokenAmounts, sumUtxoValue } from "../util/sumUtxoValue.js";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
 import {
   RegTestSlp,
   RegTestWatchSlp,
@@ -81,10 +81,10 @@ import {
   TestNetWifSlp,
   WatchSlp,
   WifSlp,
-} from "./Slp";
+} from "./Slp.js";
 import axios from "axios";
-import { SlpSendResponse } from "../slp/interface";
-import { toCashAddress } from "../util/bchaddr";
+import { SlpSendResponse } from "../slp/interface.js";
+import { toCashAddress } from "../util/bchaddr.js";
 import {
   RegTestUtil,
   RegTestWatchUtil,
@@ -95,28 +95,30 @@ import {
   Util,
   WatchUtil,
   WifUtil,
-} from "./Util";
-import { getNetworkProvider } from "../network/index";
-import { generateRandomBytes } from "../util/randomBytes";
-import { SignedMessageI, SignedMessage } from "../message";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
-import { amountInSatoshi } from "../util/amountInSatoshi";
-import { getXPubKey } from "../util/getXPubKey";
-import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant";
+} from "./Util.js";
+import { getNetworkProvider } from "../network/index.js";
+import { generateRandomBytes } from "../util/randomBytes.js";
+import { SignedMessageI, SignedMessage } from "../message/index.js";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
+import { amountInSatoshi } from "../util/amountInSatoshi.js";
+import { getXPubKey } from "../util/getXPubKey.js";
+import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant.js";
 
-import { TransactionHistoryI } from "../history/interface";
-import { getAddressHistory } from "../history/electrumTransformer";
+import { TransactionHistoryI } from "../history/interface.js";
+import { getAddressHistory } from "../history/electrumTransformer.js";
+import { IdentitySnapshot, Registry } from "./bcmr-v1.schema.js";
+import { BCMR } from "./Bcmr.js";
+import { qrAddress } from "../qr/Qr.js";
+import { ImageI } from "../qr/interface.js";
 
 //#endregion Imports
-
-const secp256k1Promise = instantiateSecp256k1();
-const sha256Promise = instantiateSha256();
 
 /**
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends BaseWallet {
   cashaddr?: string;
+  tokenaddr?: string;
   derivationPath: string = "m/44'/0'/0'/0/0";
   parentDerivationPath: string = "m/44'/0'/0'";
   parentXPubKey?: string;
@@ -177,6 +179,24 @@ export class Wallet extends BaseWallet {
   }
 
   /**
+   * getTokenDepositAddress - get a cashtoken aware wallet deposit address
+   *
+   * @returns The cashtoken aware deposit address as a string
+   */
+  public getTokenDepositAddress(): string {
+    return this.tokenaddr!;
+  }
+
+  /**
+   * getDepositQr - get an address qrcode, encoded for display on the web
+   *
+   * @returns The qrcode for the token aware address
+   */
+  public getTokenDepositQr(): ImageI {
+    return qrAddress(this.getTokenDepositAddress());
+  }
+
+  /**
    *  explorerUrl   Web url to a transaction on a block explorer
    *
    * @param txId   transaction Id
@@ -196,6 +216,7 @@ export class Wallet extends BaseWallet {
   public getInfo(): WalletInfoI {
     return {
       cashaddr: this.cashaddr,
+      tokenaddr: this.tokenaddr,
       isTestnet: this.isTestnet,
       name: this.name,
       network: this.network as any,
@@ -297,6 +318,27 @@ export class Wallet extends BaseWallet {
   }
 
   /**
+   * fromTokenaddr - create a watch-only wallet in the network derived from the address
+   *
+   * such kind of wallet does not have a private key and is unable to spend any funds
+   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   *
+   * @param address   token aware cashaddress of a wallet
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromTokenaddr<T extends typeof Wallet>(
+    this: T,
+    address: string
+  ): Promise<InstanceType<T>> {
+    const prefix = derivePrefix(address);
+    const networkType = networkPrefixMap[prefix] as NetworkType;
+    return new this("", networkType, WalletTypeEnum.Watch).watchOnly(
+      address
+    ) as InstanceType<T>;
+  }
+
+  /**
    * fromSlpaddr - create an SLP aware watch-only wallet in the network derived from the address
    *
    * such kind of wallet does not have a private key and is unable to spend any funds
@@ -350,13 +392,12 @@ export class Wallet extends BaseWallet {
       network
     );
 
-    const crypto = await instantiateBIP32Crypto();
-    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    let hdNode = deriveHdPrivateNodeFromSeed(seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
 
-    let zerothChild = deriveHdPath(crypto, hdNode, this.derivationPath);
+    let zerothChild = deriveHdPath(hdNode, this.derivationPath);
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
@@ -400,12 +441,11 @@ export class Wallet extends BaseWallet {
   ): Promise<this> {
     this.mnemonic = mnemonic;
 
-    const crypto = await instantiateBIP32Crypto();
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
-    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    let hdNode = deriveHdPrivateNodeFromSeed(seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
@@ -419,7 +459,7 @@ export class Wallet extends BaseWallet {
       }
     }
 
-    let zerothChild = deriveHdPath(crypto, hdNode, this.derivationPath);
+    let zerothChild = deriveHdPath(hdNode, this.derivationPath);
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
@@ -439,12 +479,11 @@ export class Wallet extends BaseWallet {
 
   // Get common xpub paths from zerothChild privateKey
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
-    const crypto = await instantiateBIP32Crypto();
     if (!this.mnemonic)
       throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic!);
     checkForEmptySeed(seed);
-    let hdNode = deriveHdPrivateNodeFromSeed(crypto, seed);
+    let hdNode = deriveHdPrivateNodeFromSeed(seed);
     if (!hdNode.valid) {
       throw Error("Invalid private key derived from mnemonic seed");
     }
@@ -457,15 +496,15 @@ export class Wallet extends BaseWallet {
           "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
         );
       }
-      let childNode = deriveHdPath(crypto, hdNode, path);
+      let childNode = deriveHdPath(hdNode, path);
       if (typeof childNode === "string") {
         throw Error(childNode);
       }
-      let node = deriveHdPublicNode(crypto, childNode);
+      let node = deriveHdPublicNode(childNode);
       if (typeof node === "string") {
         throw Error(node);
       }
-      let xPubKey = encodeHdPublicKey(crypto, {
+      let xPubKey = encodeHdPublicKey({
         network: this.network as HdKeyNetwork,
         node: node,
       });
@@ -504,6 +543,7 @@ export class Wallet extends BaseWallet {
     this.cashaddr = `${addressPrefix}:${addressBase}`;
     this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
+    this.tokenaddr = deriveTokenaddr(this.publicKeyHash, this.networkPrefix);
 
     return this;
   }
@@ -512,8 +552,7 @@ export class Wallet extends BaseWallet {
   protected async fromWIF(secret: string): Promise<this> {
     checkWifNetwork(secret, this.network);
 
-    const sha256 = await sha256Promise;
-    let wifResult = decodePrivateKeyWif(sha256, secret);
+    let wifResult = decodePrivateKeyWif(secret);
 
     if (typeof wifResult === "string") {
       throw Error(wifResult as string);
@@ -586,9 +625,9 @@ export class Wallet extends BaseWallet {
 
   //#region Funds
   //
-  public async getAddressUtxos(address: string): Promise<UtxoI[]> {
-    if (!this.provider) {
-      throw Error("Attempting to get utxos from wallet without a client");
+  public async getAddressUtxos(address?: string): Promise<UtxoI[]> {
+    if (!address) {
+      address = this.cashaddr!;
     }
 
     if (this._slpAware) {
@@ -652,18 +691,24 @@ export class Wallet extends BaseWallet {
 
   // Gets balance by summing value in all utxos in stats
   public async getBalanceFromUtxos(): Promise<number> {
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    return await sumUtxoValue(utxos);
+    const utxos = (await this.getAddressUtxos(this.cashaddr!)).filter(
+      (val) => val.token === undefined
+    );
+    return sumUtxoValue(utxos);
   }
 
   // Gets balance from fulcrum
   public async getBalanceFromProvider(): Promise<number> {
-    // TODO not sure why getting the balance from a provider doesn't work
-    if (this._slpAware || this._slpSemiAware) {
-      return await this.getBalanceFromUtxos();
-    } else {
-      return await this.provider!.getBalance(this.cashaddr!);
-    }
+    // Fulcrum reports balance of all utxos, including tokens, which is undesirable
+    // // TODO not sure why getting the balance from a provider doesn't work
+    // if (this._slpAware || this._slpSemiAware) {
+    //   return await this.getBalanceFromUtxos();
+    // } else {
+    //   return await this.provider!.getBalance(this.cashaddr!);
+    // }
+
+    // FIXME
+    return this.getBalanceFromUtxos();
   }
 
   // // waiting for any transaction hash of this wallet
@@ -752,7 +797,51 @@ export class Wallet extends BaseWallet {
     });
   }
 
-  public async getMaxAmountToSend(
+  // sets up a callback to be called upon wallet's token balance change
+  // can be cancelled by calling the function returned from this one
+  public watchTokenBalance(
+    tokenId: string,
+    callback: (balance: number) => void
+  ): CancelWatchFn {
+    let previous: number | undefined = undefined;
+    return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(
+      this.getDepositAddress(),
+      async (_status: string) => {
+        const balance = await this.getTokenBalance(tokenId);
+        if (previous != balance) {
+          callback(balance);
+        }
+        previous = balance;
+      }
+    );
+  }
+
+  // waits for address token balance to be greater than or equal to the target amount
+  // this call halts the execution
+  public async waitForTokenBalance(
+    tokenId: string,
+    amount: number
+  ): Promise<number> {
+    return new Promise(async (resolve) => {
+      const watchCancel = this.watchTokenBalance(
+        tokenId,
+        async (balance: number) => {
+          if (balance >= amount) {
+            await watchCancel();
+            resolve(balance);
+          }
+        }
+      );
+    });
+  }
+
+  public async getTokenInfo(
+    tokenId: string
+  ): Promise<IdentitySnapshot | undefined> {
+    return BCMR.getTokenInfo(tokenId);
+  }
+
+  private async _getMaxAmountToSend(
     params: {
       outputCount?: number;
       options?: SendRequestOptionsI;
@@ -760,7 +849,7 @@ export class Wallet extends BaseWallet {
       outputCount: 1,
       options: {},
     }
-  ): Promise<BalanceResponse> {
+  ): Promise<{ value: number; utxos: UtxoI[] }> {
     if (!this.privateKey) {
       throw Error("Couldn't get network or private key for wallet.");
     }
@@ -790,7 +879,9 @@ export class Wallet extends BaseWallet {
         UtxoItem.fromId(utxoId).asElectrum()
       );
     } else {
-      utxos = await this.getAddressUtxos(this.cashaddr);
+      utxos = (await this.getAddressUtxos(this.cashaddr)).filter(
+        (utxo) => !utxo.token
+      );
     }
 
     // Get current height to assure recently mined coins are not spent.
@@ -810,7 +901,8 @@ export class Wallet extends BaseWallet {
       utxos,
       undefined,
       bestHeight,
-      feePaidBy
+      feePaidBy,
+      sendRequests
     );
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
     const fee = await getFeeAmount({
@@ -821,12 +913,26 @@ export class Wallet extends BaseWallet {
       slpOutputs: [],
       feePaidBy: feePaidBy,
     });
-    const spendableAmount = await sumUtxoValue(fundingUtxos);
+    const spendableAmount = sumUtxoValue(fundingUtxos);
 
     let result = spendableAmount - fee;
     if (result < 0) {
       result = 0;
     }
+
+    return { value: result, utxos: fundingUtxos };
+  }
+
+  public async getMaxAmountToSend(
+    params: {
+      outputCount?: number;
+      options?: SendRequestOptionsI;
+    } = {
+      outputCount: 1,
+      options: {},
+    }
+  ): Promise<BalanceResponse> {
+    const { value: result } = await this._getMaxAmountToSend(params);
 
     return await balanceResponseFromSatoshi(result);
   }
@@ -842,12 +948,13 @@ export class Wallet extends BaseWallet {
   public async send(
     requests:
       | SendRequest
+      | TokenSendRequest
       | OpReturnData
-      | Array<SendRequest | OpReturnData>
+      | Array<SendRequest | TokenSendRequest | OpReturnData>
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let encodedTransaction = await this.encodeTransaction(
+    let { encodedTransaction, tokenIds } = await this.encodeTransaction(
       requests,
       undefined,
       options
@@ -871,6 +978,7 @@ export class Wallet extends BaseWallet {
       resp.balance = (await this.getBalance()) as BalanceResponse;
     }
     resp.explorerUrl = this.explorerUrl(resp.txId);
+    resp.tokenIds = tokenIds;
     return resp;
   }
 
@@ -910,20 +1018,24 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<string> {
-    let maxSpendableAmount = await this.getMaxAmountToSend({
+    let { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend({
       outputCount: 1,
       options: options,
     });
-    if (maxSpendableAmount.sat === undefined) {
-      throw Error("no Max amount to send");
+
+    if (!options) {
+      options = {};
     }
+
+    options.utxoIds = utxos;
+
     let sendRequest = new SendRequest({
       cashaddr: cashaddr,
-      value: maxSpendableAmount.sat,
+      value: maxSpendableAmount,
       unit: "sat",
     });
 
-    const encodedTransaction = await this.encodeTransaction(
+    const { encodedTransaction } = await this.encodeTransaction(
       [sendRequest],
       true,
       options
@@ -950,8 +1062,9 @@ export class Wallet extends BaseWallet {
   public async encodeTransaction(
     requests:
       | SendRequest
+      | TokenSendRequest
       | OpReturnData
-      | Array<SendRequest | OpReturnData>
+      | Array<SendRequest | TokenSendRequest | OpReturnData>
       | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI
@@ -989,15 +1102,73 @@ export class Wallet extends BaseWallet {
       changeAddress = "";
     }
 
+    let checkTokenQuantities: boolean = true;
+    if (options && options.checkTokenQuantities === false) {
+      checkTokenQuantities = false;
+    }
+
     // get inputs from options or query all inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
       utxos = options.utxoIds.map((utxoId) =>
-        UtxoItem.fromId(utxoId).asElectrum()
+        typeof utxoId === "string"
+          ? UtxoItem.fromId(utxoId).asElectrum()
+          : utxoId
       );
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);
     }
+
+    const addTokenChangeOutputs = (
+      inputs: UtxoI[],
+      outputs: SendRequestType[]
+    ) => {
+      // allow for implicit token burn if the total amount sent is less than user had
+      // allow for token genesis, creating more tokens than we had before (0)
+      if (!checkTokenQuantities) {
+        return;
+      }
+      const allTokenInputs = inputs.filter((val) => val.token);
+      const allTokenOutputs = outputs.filter(
+        (val) => val instanceof TokenSendRequest
+      ) as TokenSendRequest[];
+      const tokenIds = allTokenOutputs
+        .map((val) => val.tokenId)
+        .filter((val, idx, arr) => arr.indexOf(val) === idx);
+      for (let tokenId of tokenIds) {
+        const tokenInputs = allTokenInputs.filter(
+          (val) => val.token?.tokenId === tokenId
+        );
+        const inputAmountSum = tokenInputs.reduce(
+          (prev, cur) => prev + cur.token!.amount,
+          0
+        );
+        const tokenOutputs = allTokenOutputs.filter(
+          (val) => val.tokenId === tokenId
+        );
+        const outputAmountSum = tokenOutputs.reduce(
+          (prev, cur) => prev + cur.amount,
+          0
+        );
+        const change = inputAmountSum - outputAmountSum;
+        if (change < 0) {
+          throw new Error("Not enough token amount to send");
+        }
+        if (change > 0) {
+          outputs.push(
+            new TokenSendRequest({
+              cashaddr: changeAddress || this.cashaddr,
+              amount: change,
+              tokenId: tokenId,
+              commitment: tokenOutputs[0].commitment,
+              capability: tokenOutputs[0].capability,
+              value: tokenOutputs[0].value,
+            })
+          );
+        }
+      }
+    };
+    addTokenChangeOutputs(utxos, sendRequests);
 
     const bestHeight = await this.provider!.getBlockHeight()!;
     const spendAmount = await sumSendRequestAmounts(sendRequests);
@@ -1023,7 +1194,8 @@ export class Wallet extends BaseWallet {
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight,
-      feePaidBy
+      feePaidBy,
+      sendRequests
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1049,7 +1221,16 @@ export class Wallet extends BaseWallet {
       changeAddress
     );
 
-    return encodedTransaction;
+    const tokenIds = [
+      ...fundingUtxos
+        .filter((val) => val.token?.tokenId)
+        .map((val) => val.token!.tokenId),
+      ...sendRequests
+        .filter((val) => val instanceof TokenSendRequest)
+        .map((val) => (val as TokenSendRequest).tokenId),
+    ].filter((value, index, array) => array.indexOf(value) === index);
+
+    return { encodedTransaction, tokenIds: tokenIds };
   }
 
   // Submit a raw transaction
@@ -1199,25 +1380,25 @@ export class Wallet extends BaseWallet {
 
   //#region Private implementation details
   private async deriveInfo() {
-    const sha256 = await sha256Promise;
-    const secp256k1 = await secp256k1Promise;
-    this.publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
-    this.publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
+    const publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
+    if (typeof publicKey === "string") {
+      throw new Error(publicKey);
+    }
+    this.publicKey = publicKey;
+    const publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
       this.privateKey!
     );
+    if (typeof publicKeyCompressed === "string") {
+      throw new Error(publicKeyCompressed);
+    }
+    this.publicKeyCompressed = publicKeyCompressed;
     const networkType =
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
-    this.privateKeyWif = encodePrivateKeyWif(
-      sha256,
-      this.privateKey!,
-      networkType
-    );
+    this.privateKeyWif = encodePrivateKeyWif(this.privateKey!, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
-    this.cashaddr = (await deriveCashaddr(
-      this.privateKey!,
-      this.networkPrefix
-    )) as string;
+    this.cashaddr = deriveCashaddr(this.privateKey!, this.networkPrefix);
+    this.tokenaddr = deriveTokenaddr(this.privateKey!, this.networkPrefix);
     this.address = this.cashaddr;
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
     return this;
@@ -1240,6 +1421,260 @@ export class Wallet extends BaseWallet {
     );
   }
   //#endregion Signing
+
+  //#region Cashtokens
+  /**
+   * Create new cashtoken, both funglible and/or non-fungible (NFT)
+   * Refer to spec https://github.com/bitjson/cashtokens
+   * @param  {number} genesisRequest.amount amount of *fungible* tokens to create
+   * @param  {NFTCapability?} genesisRequest.capability capability of new NFT
+   * @param  {string?} genesisRequest.commitment NFT commitment message
+   * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
+   * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
+   */
+  public async tokenGenesis(
+    genesisRequest: TokenGenesisRequest
+  ): Promise<SendResponse> {
+    return this.send(
+      new TokenSendRequest({
+        cashaddr: genesisRequest.cashaddr || this.cashaddr!,
+        amount: genesisRequest.amount,
+        value: genesisRequest.value,
+        capability: genesisRequest.capability,
+        commitment: genesisRequest.commitment,
+        tokenId: "",
+      }),
+      {
+        checkTokenQuantities: false,
+        queryBalance: false,
+      }
+    );
+  }
+
+  /**
+   * Mint new NFT cashtokens using an existing minting token
+   * Refer to spec https://github.com/bitjson/cashtokens
+   * @param  {string} tokenId tokenId of an NFT to mint
+   * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
+   * @param  {NFTCapability?} mintRequest.capability capability of new NFT
+   * @param  {string?} mintRequest.commitment NFT commitment message
+   * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
+   * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
+   * @param  {boolean?} deductTokenAmount if minting token contains fungible amount, deduct from it by amount of minted tokens
+   */
+  public async tokenMint(
+    tokenId: string,
+    mintRequests: TokenMintRequest | Array<TokenMintRequest>,
+    deductTokenAmount: boolean = false
+  ): Promise<SendResponse> {
+    if (!Array.isArray(mintRequests)) {
+      mintRequests = [mintRequests];
+    }
+
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    const nftUtxos = utxos.filter(
+      (val) =>
+        val.token?.tokenId === tokenId &&
+        val.token?.capability != NFTCapability.none
+    );
+    if (!nftUtxos.length) {
+      throw new Error(
+        "You do not have any token UTXOs with minting capability for specified tokenId"
+      );
+    }
+    const newAmount =
+      deductTokenAmount && nftUtxos[0].token!.amount > 0
+        ? nftUtxos[0].token!.amount - mintRequests.length
+        : nftUtxos[0].token!.amount;
+    const safeNewAmount = Math.max(0, newAmount);
+    const mintingInput = new TokenSendRequest({
+      cashaddr: this.cashaddr!,
+      tokenId: tokenId,
+      capability: nftUtxos[0].token!.capability,
+      commitment: nftUtxos[0].token!.commitment,
+      amount: safeNewAmount,
+      value: nftUtxos[0].satoshis,
+    });
+    return this.send(
+      [
+        mintingInput,
+        ...mintRequests.map(
+          (val) =>
+            new TokenSendRequest({
+              cashaddr: val.cashaddr || this.cashaddr!,
+              amount: 0,
+              tokenId: tokenId,
+              value: val.value,
+              capability: val.capability,
+              commitment: val.commitment,
+            })
+        ),
+      ],
+      {
+        checkTokenQuantities: false,
+        queryBalance: false,
+      }
+    );
+  }
+
+  /**
+   * Perform an explicit token burning by spending a token utxo to an OP_RETURN
+   *
+   * Behaves differently for fungible and non-fungible tokens:
+   *  * NFTs are always "destroyed"
+   *  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
+   *
+   * Refer to spec https://github.com/bitjson/cashtokens
+   * @param  {string} burnRequest.tokenId tokenId of a token to burn
+   * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
+   * @param  {string?} burnRequest.commitment commitment of the NFT token to select, optional
+   * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
+   * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
+   * @param  {string?} message optional message to include in OP_RETURN
+   */
+  public async tokenBurn(
+    burnRequest: TokenBurnRequest,
+    message?: string
+  ): Promise<SendResponse> {
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    const tokenUtxos = utxos.filter(
+      (val) =>
+        val.token?.tokenId === burnRequest.tokenId &&
+        val.token?.capability === burnRequest.capability &&
+        val.token?.commitment === burnRequest.commitment &&
+        val.token?.capability === burnRequest.capability
+    );
+
+    if (!tokenUtxos.length) {
+      throw new Error("You do not have suitable token UTXOs to perform burn");
+    }
+
+    const totalFungibleAmount = tokenUtxos.reduce(
+      (prev, cur) => prev + (cur.token?.amount || 0),
+      0
+    );
+    const fungibleBurnAmount =
+      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0;
+    const hasNFT = burnRequest.capability || burnRequest.commitment;
+
+    let utxoIds: UtxoI[] = [];
+    let changeSendRequests: TokenSendRequest[];
+    if (hasNFT) {
+      // does not have FT tokens, let us destroy the token completely
+      if (totalFungibleAmount === 0) {
+        changeSendRequests = [];
+        utxoIds.push(tokenUtxos[0]);
+      } else {
+        // if there are FT, reduce their amount
+        const newAmount = totalFungibleAmount - fungibleBurnAmount;
+        const safeNewAmount = Math.max(0, newAmount);
+        changeSendRequests = [
+          new TokenSendRequest({
+            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            tokenId: burnRequest.tokenId,
+            capability: burnRequest.capability,
+            commitment: burnRequest.commitment,
+            amount: safeNewAmount,
+            value: tokenUtxos[0].satoshis,
+          }),
+        ];
+      }
+    } else {
+      // if we are burning last fughible tokens, let us destroy the token completely
+      if (totalFungibleAmount === fungibleBurnAmount) {
+        changeSendRequests = [];
+        utxoIds.push(tokenUtxos[0]);
+      } else {
+        // reduce the FT amount
+        const newAmount = totalFungibleAmount - fungibleBurnAmount;
+        const safeNewAmount = Math.max(0, newAmount);
+        changeSendRequests = [
+          new TokenSendRequest({
+            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            tokenId: burnRequest.tokenId,
+            amount: safeNewAmount,
+            value: tokenUtxos[0].satoshis,
+          }),
+        ];
+      }
+    }
+
+    const opReturn = OpReturnData.fromString(message || "");
+    return this.send([opReturn, ...changeSendRequests], {
+      checkTokenQuantities: false,
+      queryBalance: false,
+      utxoIds: utxoIds.length > 0 ? utxoIds : undefined,
+    });
+  }
+
+  /**
+   * getTokenUtxos Get unspent token outputs for the wallet
+   * will return utxos only for the specified token if `tokenId` provided
+   * @param  {string?} tokenId tokenId (category) to filter utxos by, if not set will return utxos from all tokens
+   * @returns  {UtxoI[]} token utxos
+   */
+  public async getTokenUtxos(tokenId?: string): Promise<UtxoI[]> {
+    const utxos = await this.getAddressUtxos(this.address!);
+    return utxos.filter((val) =>
+      tokenId ? val.token?.tokenId === tokenId : val.token
+    );
+  }
+
+  /**
+   * getTokenBalance Gets fungible token balance
+   * for NFT token balance see @ref getNftTokenBalance
+   * @param  {string} tokenId tokenId to get balance for
+   * @returns  {number} fungible token balance
+   */
+  public async getTokenBalance(tokenId: string): Promise<number> {
+    const utxos = await this.getAddressUtxos(this.cashaddr!);
+    return sumTokenAmounts(utxos, tokenId);
+  }
+
+  /**
+   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particula tokenId
+   * disregards fungible token balances
+   * for fungible token balance see @ref getTokenBalance
+   * @param  {string} tokenId tokenId to get balance for
+   * @returns  {number} non-fungible token balance
+   */
+  public async getNftTokenBalance(tokenId: string): Promise<number> {
+    const utxos = await this.getTokenUtxos(tokenId);
+    return utxos.length;
+  }
+
+  /**
+   * getAllTokenBalances Gets all fungible token balances in this wallet
+   * @returns  {Object} a map [tokenId => balance] for all tokens in this wallet
+   */
+  public async getAllTokenBalances(): Promise<Object> {
+    const result = {};
+    const utxos = await this.getTokenUtxos();
+    for (const utxo of utxos) {
+      if (!result[utxo.token!.tokenId]) {
+        result[utxo.token!.tokenId] = 0;
+      }
+      result[utxo.token!.tokenId] += utxo.token!.amount;
+    }
+    return result;
+  }
+
+  /**
+   * getAllNftTokenBalances Gets all non-fungible token (NFT) balances in this wallet
+   * @returns  {Object} a map [tokenId => balance] for all NFTs in this wallet
+   */
+  public async getAllNftTokenBalances(): Promise<Object> {
+    const result = {};
+    const utxos = await this.getTokenUtxos();
+    for (const utxo of utxos) {
+      if (!result[utxo.token!.tokenId]) {
+        result[utxo.token!.tokenId] = 0;
+      }
+      result[utxo.token!.tokenId] += 1;
+    }
+    return result;
+  }
+  //#endregion Cashtokens
 }
 
 /**

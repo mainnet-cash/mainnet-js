@@ -70,8 +70,8 @@ describe(`Wallet should function in the browser`, () => {
         return await TestNetWallet.fromId(`wif:regtest:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
-      expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Network prefix regtest to a testnet wallet"
+      expect(e.message.split("\n")[0]).toContain(
+        "Error: Network prefix regtest to a testnet wallet"
       );
     }
   });
@@ -83,8 +83,8 @@ describe(`Wallet should function in the browser`, () => {
         return await TestNetWallet.fromId(`hd:testnet:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
-      expect(e.message.split("\n")[0]).toBe(
-        "page.evaluate: Evaluation failed: Error: Unknown wallet type 'hd'"
+      expect(e.message.split("\n")[0]).toContain(
+        "Error: Unknown wallet type 'hd'"
       );
     }
   });
@@ -352,10 +352,10 @@ describe(`Wallet should function in the browser`, () => {
 
       //! mining not supported in browser
       // await mine({ cashaddr: alice.cashaddr, blocks: 1 });
-      // await delay(1000);
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
       // await mine({ cashaddr: alice.cashaddr, blocks: 1 });
 
-      await delay(5000);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       expect(waitTxResult).toBe(true);
       expect(waitBalanceResult).toBe(true);
       // expect(aliceWatchResult).toBe(true);

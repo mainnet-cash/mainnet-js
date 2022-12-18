@@ -1,5 +1,7 @@
 module.exports = {
   rootDir: "./",
+  preset: "ts-jest/presets/default-esm",
+  resolver: "ts-jest-resolver",
   collectCoverage: true,
   collectCoverageFrom: [
     "**/*.{js,jsx,ts}",
@@ -21,12 +23,17 @@ module.exports = {
     "**/?(*.)+(spec|test).+(ts|tsx|js)",
   ],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        useESM: true,
+      },
+    ],
   },
   testEnvironment: "node",
   setupFiles: ["fake-indexeddb/auto"],
-  globalSetup: "<rootDir>/jest/node.setup.js",
-  globalTeardown: "<rootDir>/jest/node.teardown.js",
+  globalSetup: "<rootDir>/jest/node.setup.cjs",
+  globalTeardown: "<rootDir>/jest/node.teardown.cjs",
   verbose: true,
   maxConcurrency: 1,
   testTimeout: 125000,

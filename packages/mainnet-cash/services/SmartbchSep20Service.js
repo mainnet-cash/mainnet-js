@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Service = require('./Service');
-const _smartbch = require("@mainnet-cash/smartbch");
+import Service from './Service.js';
+import * as _smartbch from "@mainnet-cash/smartbch";
 
 /**
 * Get all SmartBch SEP20 balances of the wallet
@@ -205,7 +205,7 @@ const smartBchSep20TokenInfo = ({ smartBchSep20TokenInfoRequest }) => new Promis
   },
 );
 
-module.exports = {
+export default {
   smartBchSep20AllBalances,
   smartBchSep20Balance,
   smartBchSep20DepositAddress,

@@ -1,4 +1,4 @@
-import { NetworkType } from "../enum";
+import { NetworkType } from "../enum.js";
 
 export function checkWifNetwork(
   walletImportFormatString: string,

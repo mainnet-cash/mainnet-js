@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { UtxoI, TxI } from "../interface";
+import { UtxoI, TxI } from "../interface.js";
 
 export enum SlpTokenType {
   Type1 = 0x01,

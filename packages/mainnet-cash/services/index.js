@@ -1,10 +1,10 @@
-const ContractService = require('./ContractService');
-const MineService = require('./MineService');
-const UtilService = require('./UtilService');
-const WalletService = require('./WalletService');
-const WebhookService = require('./WebhookService');
+import ContractService from './ContractService.js';
+import MineService from './MineService.js';
+import UtilService from './UtilService.js';
+import WalletService from './WalletService.js';
+import WebhookService from './WebhookService.js';
 
-module.exports = {
+export default {
   ContractService,
   MineService,
   UtilService,

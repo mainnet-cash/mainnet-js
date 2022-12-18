@@ -1,12 +1,16 @@
-import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider";
+import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
 import { ElectrumCluster, ElectrumClient } from "electrum-cash";
-import { default as NetworkProvider } from "./NetworkProvider";
-import { defaultServers, getConfidence, getUserAgent } from "./configuration";
-import { parseElectrumUrl } from "./util";
-import { ElectrumHostParams, ElectrumClusterParams } from "./interface";
-import { Network } from "../interface";
-import { networkTickerMap, clusterParams } from "./constant";
-import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant";
+import { default as NetworkProvider } from "./NetworkProvider.js";
+import {
+  getConfidence,
+  getDefaultServers,
+  getUserAgent,
+} from "./configuration.js";
+import { parseElectrumUrl } from "./util.js";
+import { ElectrumHostParams, ElectrumClusterParams } from "./interface.js";
+import { Network } from "../interface.js";
+import { networkTickerMap, clusterParams } from "./constant.js";
+import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant.js";
 
 export function setGlobalProvider(
   network: Network,
@@ -50,8 +54,7 @@ export function getNetworkProvider(
   manualConnectionManagement = manualConnectionManagement
     ? manualConnectionManagement
     : false;
-  servers = servers ? servers : defaultServers[network];
-
+  servers = servers ? servers : getDefaultServers(network);
   // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {
     servers = [servers as string];

@@ -9,11 +9,11 @@ import {
   TestNetSmartBchWallet,
   TestNetWatchSmartBchWallet,
   WatchSmartBchWallet,
-} from "./SmartBchWallet";
+} from "./SmartBchWallet.js";
 import { ethers } from "ethers";
-import { Contract } from "./Contract";
+import { Contract } from "./Contract.js";
 import BigNumber from "bignumber.js";
-import { zeroAddress } from "./Utils";
+import { zeroAddress } from "./Utils.js";
 import {
   Sep20GenesisOptions,
   Sep20GenesisResult,
@@ -24,7 +24,7 @@ import {
   Sep20SendResponse,
   Sep20TokenBalance,
   Sep20TokenInfo,
-} from "./interface";
+} from "./interface.js";
 
 const _cache = {};
 
