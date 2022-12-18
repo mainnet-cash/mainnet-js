@@ -166,7 +166,7 @@ jobs:
         run: |
             if [ -n $CDN_FTP_UPLOAD ]; then HAS_CDN_FTP_UPLOAD='true' ; fi
             echo "HAS_CDN_FTP_UPLOAD=${HAS_CDN_FTP_UPLOAD}" >> $GITHUB_ENV
-      - name: Setup node 14
+      - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: 18
