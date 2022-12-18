@@ -46,7 +46,7 @@
     "docs": "npx typedoc",
     "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --config jest.config.cjs --logHeapUsage  --forceExit",
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
-    "test:rest": "yarn workspace mainnet-cash run test",
+    "test:rest": "yarn patch-package && yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",
     "test:browser": "npx jest --config jest.config.browser.cjs --detectOpenHandles --forceExit",
     "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
