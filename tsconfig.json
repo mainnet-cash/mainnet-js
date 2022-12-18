@@ -43,7 +43,7 @@
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
     "composite": true,
-    "types": ["node", "jest"],
+    "types": ["node"],
     "allowJs": false,
     "noEmit": false,
     "skipLibCheck": true
