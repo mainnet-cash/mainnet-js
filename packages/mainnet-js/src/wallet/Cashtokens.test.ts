@@ -14,7 +14,9 @@ afterAll(async () => {
 
 describe(`Test cashtokens`, () => {
   test("Test chipnet request", async () => {
-    const wallet = await TestNetWallet.watchOnly("bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4");
+    const wallet = await TestNetWallet.watchOnly(
+      "bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4"
+    );
     const utxos = await wallet.getTokenUtxos();
     expect(utxos[0].token?.tokenId).toBeDefined();
   });

@@ -72,7 +72,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
-      cashaddr,
+      cashaddr
     )) as ElectrumUtxo[];
     if (this.network === Network.MAINNET) {
       return result.map((utxo) => ({
@@ -88,12 +88,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       vout: utxo.tx_pos,
       satoshis: utxo.value,
       height: utxo.height,
-      token: utxo.token_data ? {
-        amount: Number(utxo.token_data.amount),
-        tokenId: utxo.token_data.category,
-        capability: utxo.token_data.nft?.capability,
-        commitment: utxo.token_data.nft?.commitment,
-      } : undefined
+      token: utxo.token_data
+        ? {
+            amount: Number(utxo.token_data.amount),
+            tokenId: utxo.token_data.category,
+            capability: utxo.token_data.nft?.capability,
+            commitment: utxo.token_data.nft?.commitment,
+          }
+        : undefined,
     }));
   }
 
@@ -515,7 +517,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         console.warn(
           `Warning: Failed to connect to client on ${this.network} at ${
             (this.electrum as ElectrumClient).connection.host
-          }.`, e
+          }.`,
+          e
         );
         return;
       }

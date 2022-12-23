@@ -9,7 +9,12 @@ import {
 import { parseElectrumUrl } from "./util.js";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface.js";
 import { Network } from "../interface.js";
-import { networkTickerMap, clusterParams, ELECTRUM_CASH_PROTOCOL_VERSION, ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET } from "./constant.js";
+import {
+  networkTickerMap,
+  clusterParams,
+  ELECTRUM_CASH_PROTOCOL_VERSION,
+  ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET,
+} from "./constant.js";
 
 export function setGlobalProvider(
   network: Network,
@@ -122,7 +127,9 @@ function getClient(servers: string[], network: Network) {
 function getElectrumCluster(params: ElectrumClusterParams, network: Network) {
   return new ElectrumCluster(
     getUserAgent(),
-    network === Network.MAINNET ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET : ELECTRUM_CASH_PROTOCOL_VERSION,
+    network === Network.MAINNET
+      ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET
+      : ELECTRUM_CASH_PROTOCOL_VERSION,
     params.confidence,
     params.distribution,
     params.order,
@@ -130,10 +137,16 @@ function getElectrumCluster(params: ElectrumClusterParams, network: Network) {
   );
 }
 
-function getElectrumClient(params: ElectrumHostParams, timeout: number, network: Network) {
+function getElectrumClient(
+  params: ElectrumHostParams,
+  timeout: number,
+  network: Network
+) {
   return new ElectrumClient(
     getUserAgent(),
-    network === Network.MAINNET ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET : ELECTRUM_CASH_PROTOCOL_VERSION,
+    network === Network.MAINNET
+      ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET
+      : ELECTRUM_CASH_PROTOCOL_VERSION,
     params.host,
     params.port,
     params.scheme,

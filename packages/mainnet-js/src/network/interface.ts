@@ -24,14 +24,18 @@ export interface ElectrumUtxo {
   value: number;
   tx_hash: string;
   height: number;
-  token_data: {
-    amount: string;
-    category: string;
-    nft: {
-      capability: NFTCapability | undefined;
-      commitment: string | undefined;
-    } | undefined;
-  } | undefined
+  token_data:
+    | {
+        amount: string;
+        category: string;
+        nft:
+          | {
+              capability: NFTCapability | undefined;
+              commitment: string | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
 }
 
 export interface ElectrumRawTransaction {
