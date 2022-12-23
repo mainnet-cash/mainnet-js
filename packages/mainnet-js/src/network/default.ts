@@ -9,8 +9,7 @@ import {
 import { parseElectrumUrl } from "./util.js";
 import { ElectrumHostParams, ElectrumClusterParams } from "./interface.js";
 import { Network } from "../interface.js";
-import { networkTickerMap, clusterParams } from "./constant.js";
-import { ELECTRUM_CASH_PROTOCOL_VERSION } from "./constant.js";
+import { networkTickerMap, clusterParams, ELECTRUM_CASH_PROTOCOL_VERSION, ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET } from "./constant.js";
 
 export function setGlobalProvider(
   network: Network,
@@ -75,11 +74,11 @@ export function getNetworkProvider(
       let clusterParam = clusterParams[network];
       clusterParam["confidence"] = getConfidence();
       clusterParam = Object.assign({}, clusterParam, options);
-      clusterOrClient = getCluster(servers, clusterParam);
+      clusterOrClient = getCluster(servers, clusterParam, network);
     }
     // The server is a single string in an array
     else {
-      clusterOrClient = getClient(servers);
+      clusterOrClient = getClient(servers, network);
     }
     let provider = new ElectrumNetworkProvider(
       clusterOrClient,
@@ -98,8 +97,8 @@ export function getNetworkProvider(
 }
 
 // Create a cluster give a list of servers and parameters
-function getCluster(servers: string[], params) {
-  let electrum = getElectrumCluster(params);
+function getCluster(servers: string[], params, network: Network) {
+  let electrum = getElectrumCluster(params, network);
 
   for (const s of servers) {
     let url = parseElectrumUrl(s);
@@ -115,15 +114,15 @@ function getCluster(servers: string[], params) {
 }
 
 // create a client with a list of servers
-function getClient(servers: string[]) {
+function getClient(servers: string[], network: Network) {
   let url = parseElectrumUrl(servers[0]);
-  return getElectrumClient(url, 120000);
+  return getElectrumClient(url, 120000, network);
 }
 
-function getElectrumCluster(params: ElectrumClusterParams) {
+function getElectrumCluster(params: ElectrumClusterParams, network: Network) {
   return new ElectrumCluster(
     getUserAgent(),
-    ELECTRUM_CASH_PROTOCOL_VERSION,
+    network === Network.MAINNET ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET : ELECTRUM_CASH_PROTOCOL_VERSION,
     params.confidence,
     params.distribution,
     params.order,
@@ -131,10 +130,10 @@ function getElectrumCluster(params: ElectrumClusterParams) {
   );
 }
 
-function getElectrumClient(params: ElectrumHostParams, timeout: number) {
+function getElectrumClient(params: ElectrumHostParams, timeout: number, network: Network) {
   return new ElectrumClient(
     getUserAgent(),
-    ELECTRUM_CASH_PROTOCOL_VERSION,
+    network === Network.MAINNET ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET : ELECTRUM_CASH_PROTOCOL_VERSION,
     params.host,
     params.port,
     params.scheme,

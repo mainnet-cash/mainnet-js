@@ -1,6 +1,8 @@
 import { ClusterOrder } from "electrum-cash";
 
-export const ELECTRUM_CASH_PROTOCOL_VERSION = "1.4.1";
+// Two different protocol versions are communicated, must converge to the same one after May23 upgrade
+export const ELECTRUM_CASH_PROTOCOL_VERSION = "1.5";
+export const ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET = "1.4.1";
 
 export const networkTickerMap = {
   mainnet: "BCH",
@@ -15,12 +17,12 @@ export const mainnetServers = [
   // "wss://fulcrum.fountainhead.cash",
 ];
 
-export const testnetServers = [
-  // "wss://tbch.loping.net:60004",
-  "wss://blackie.c3-soft.com:60004",
-  // "wss://testnet.bitcoincash.network:60004",
-  //,"wss://unavailable.invalid:50004"
-];
+// export const testnetServers = [
+//   // "wss://tbch.loping.net:60004",
+//   "wss://blackie.c3-soft.com:60004",
+//   // "wss://testnet.bitcoincash.network:60004",
+//   //,"wss://unavailable.invalid:50004"
+// ];
 
 // testnet4
 // export const testnetServers = [
@@ -29,10 +31,11 @@ export const testnetServers = [
 //   //,"wss://unavailable.invalid:50004"
 // ];
 
-// // chipnet
-// export const testnetServers = [
-//   "wss://chipnet.imaginary.cash:50004",
-// ];
+// chipnet
+export const testnetServers = [
+  // "wss://chipnet.imaginary.cash:50004",
+  "wss://blackie.c3-soft.com:64004", // chipnet with protocol 1.5.0
+];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];
 
