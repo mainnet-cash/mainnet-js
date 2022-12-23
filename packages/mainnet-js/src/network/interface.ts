@@ -1,4 +1,5 @@
 import { ClusterOrder } from "electrum-cash";
+import { NFTCapability } from "../interface";
 
 export interface BlockHeader {
   height: number;
@@ -23,6 +24,18 @@ export interface ElectrumUtxo {
   value: number;
   tx_hash: string;
   height: number;
+  token_data:
+    | {
+        amount: string;
+        category: string;
+        nft:
+          | {
+              capability: NFTCapability | undefined;
+              commitment: string | undefined;
+            }
+          | undefined;
+      }
+    | undefined;
 }
 
 export interface ElectrumRawTransaction {

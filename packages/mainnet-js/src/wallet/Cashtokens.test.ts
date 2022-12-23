@@ -6,13 +6,21 @@ import { binToHex, utf8ToBin } from "@bitauth/libauth";
 import { delay } from "../util";
 
 beforeAll(async () => {
-  await initProviders([Network.REGTEST]);
+  await initProviders();
 });
 afterAll(async () => {
-  await disconnectProviders([Network.REGTEST]);
+  await disconnectProviders();
 });
 
 describe(`Test cashtokens`, () => {
+  test("Test chipnet request", async () => {
+    const wallet = await TestNetWallet.watchOnly(
+      "bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4"
+    );
+    const utxos = await wallet.getTokenUtxos();
+    expect(utxos[0].token?.tokenId).toBeDefined();
+  });
+
   test("Test tokens will not be burned when sending bch value", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
