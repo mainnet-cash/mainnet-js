@@ -28,6 +28,10 @@ import * as Mainnet from "./util/index.js";
 export { Mainnet };
 export * from "./util/index.js";
 
+// libauth
+import * as libauth from "@bitauth/libauth";
+export { libauth };
+
 // qr
 export * from "./qr/Qr.js";
 
