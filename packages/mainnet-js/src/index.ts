@@ -29,10 +29,7 @@ export { Mainnet };
 export * from "./util/index.js";
 
 // libauth
-import { importAuthenticationTemplate, authenticationTemplateP2pkhNonHd, authenticationTemplateP2pkh, authenticationTemplateToCompilerBCH, cashAddressToLockingBytecode, hexToBin, generateTransaction, encodeTransaction } from "@bitauth/libauth";
-export declare module libauth {
-  export { importAuthenticationTemplate, authenticationTemplateP2pkhNonHd, authenticationTemplateP2pkh, authenticationTemplateToCompilerBCH, cashAddressToLockingBytecode, hexToBin, generateTransaction, encodeTransaction };
-}
+export * as libauth from "./libauth.js";
 
 // qr
 export * from "./qr/Qr.js";
