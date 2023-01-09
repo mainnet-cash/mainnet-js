@@ -99,7 +99,7 @@
   "optionalDependencies": {
     "assert": "^2.0.0",
     "deepmerge": "^4.2.2",
-    "dexie": "3.0.3",
+    "dexie": "3.2.2",
     "dotenv": "^10.0.0",
     "ethers": "^5.4.6",
     "eventsource": "^1.0.7",
