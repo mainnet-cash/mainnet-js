@@ -9,7 +9,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "homepage": "https://mainnet.cash",
   "module": "dist/module/index.js",
   "browser": {
@@ -61,7 +61,7 @@
     "@types/pg": "8.6.0",
     "@types/pg-format": "^1.0.1",
     "assert": "^2.0.0",
-    "dexie": "3.0.3",
+    "dexie": "3.2.2",
     "dotenv": "^10.0.0",
     "node-postgres": "^0.6.2",
     "parse-database-url": "^0.3.0",

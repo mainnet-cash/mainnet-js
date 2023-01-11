@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "1.0.6",
+  "version": "1.0.7",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
@@ -99,7 +99,7 @@
   "optionalDependencies": {
     "assert": "^2.0.0",
     "deepmerge": "^4.2.2",
-    "dexie": "3.0.3",
+    "dexie": "3.2.2",
     "dotenv": "^10.0.0",
     "ethers": "^5.4.6",
     "eventsource": "^1.0.7",
