@@ -100,6 +100,7 @@ export class Util {
           .vout.find((val) => val.n === input.vout)!;
         input.address = output.scriptPubKey.addresses[0];
         input.value = output.value;
+        input.tokenData = output.tokenData;
       });
     }
 

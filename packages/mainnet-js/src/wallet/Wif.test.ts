@@ -806,11 +806,11 @@ describe(`Wallet subscriptions`, () => {
     });
 
     let bobWatchResult = false;
-    const bobWatchCancel = (
-      bob.provider! as ElectrumNetworkProvider
-    ).watchAddressStatus(bob.getDepositAddress(), (_status) => {
+    let bobTransactionId = "";
+    const bobWatchCancel = bob.watchAddress((txHash) => {
       bobWatchCancel();
       bobWatchResult = true;
+      bobTransactionId = txHash;
     });
 
     let bobBalanceWatchResult = false;
@@ -847,7 +847,7 @@ describe(`Wallet subscriptions`, () => {
       blockNumberWaitResult = true;
     }, 0);
 
-    await alice.send({
+    const sendResponse = await alice.send({
       cashaddr: bob.getDepositAddress(),
       value: 0.001,
       unit: "bch",
@@ -862,6 +862,7 @@ describe(`Wallet subscriptions`, () => {
     expect(waitBalanceResult).toBe(true);
     expect(aliceWatchResult).toBe(true);
     expect(bobWatchResult).toBe(true);
+    expect(bobTransactionId).toBe(sendResponse.txId);
     expect(bobBalanceWatchResult).toBe(true);
     expect(blockWatchResult).toBe(true);
     expect(blockWaitResult).toBe(true);

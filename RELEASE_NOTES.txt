@@ -1,6 +1,28 @@
 Newest changes
 --------------
 
+1.0.8
+
+This release contains critical improvements to utxo selection preventing accidental token burns. Update to this version is highly advised.
+
+Other changes:
+- Use new elecrum method to get block height
+- Add `Config` object, add opt-in config option to force validate the tokenaddresses
+- Add new parameter `loadInputValues` to `getRawTransaction`
+- Add `watchAddressTokenTransactions`
+- Reimplement `watchAddress` and `watchAddressTransactions`
+- Expose cashaddr and tokenaddr utils
+- Update jest setup, update to BCHN v26.0.0
+
+1.0.7
+
+- Upgrade the Dexie IndexedDB wrapper to version 3.2.2 due to prototype pollution in Dexie.setByKeyPath() (dexie/Dexie.js@1d655a6)
+
+1.0.6
+
+- Export libauth
+- Allows mainnet-js users to build and encode a transaction using libauth
+
 1.0.0
 
 - Breaking release. Project is converted into ESM package to support our core dependency libauth v2.

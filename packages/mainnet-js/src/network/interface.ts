@@ -19,23 +19,21 @@ export interface ElectrumClusterParams {
   timeout: number;
 }
 
+export interface ElectrumTokenData {
+  amount: string;
+  category: string;
+  nft?: {
+    capability?: NFTCapability;
+    commitment?: string;
+  };
+}
+
 export interface ElectrumUtxo {
   tx_pos: number;
   value: number;
   tx_hash: string;
   height: number;
-  token_data:
-    | {
-        amount: string;
-        category: string;
-        nft:
-          | {
-              capability: NFTCapability | undefined;
-              commitment: string | undefined;
-            }
-          | undefined;
-      }
-    | undefined;
+  token_data?: ElectrumTokenData;
 }
 
 export interface ElectrumRawTransaction {
@@ -65,12 +63,14 @@ export interface ElectrumRawTransactionVin {
   vout: number;
   value?: number; // optional extention by mainnet.cash
   address?: string; // optional extension by mainnet.cash
+  tokenData?: ElectrumTokenData; // optional extension by mainnet.cash
 }
 
 export interface ElectrumRawTransactionVout {
   n: number;
   scriptPubKey: ElectrumRawTransactionVoutScriptPubKey;
   value: number;
+  tokenData?: ElectrumTokenData;
 }
 
 export interface ElectrumRawTransactionVoutScriptPubKey {

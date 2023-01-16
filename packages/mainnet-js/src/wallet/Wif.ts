@@ -711,25 +711,32 @@ export class Wallet extends BaseWallet {
     return this.getBalanceFromUtxos();
   }
 
-  // // waiting for any transaction hash of this wallet
-  // // commented out until fulcrum supports new method https://github.com/cculianu/Fulcrum/pull/89
-  // public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
-  //   return (this.provider! as ElectrumNetworkProvider).watchAddress(
-  //     this.getDepositAddress(),
-  //     callback
-  //   );
-  // }
+  // watching for any transaction hash of this wallet
+  public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchAddress(
+      this.getDepositAddress(),
+      callback
+    );
+  }
 
-  // // waiting for any transaction of this wallet
-  // // commented out until fulcrum supports new method https://github.com/cculianu/Fulcrum/pull/89
-  // public watchAddressTransactions(
-  //   callback: (tx: ElectrumRawTransaction) => void
-  // ): CancelWatchFn {
-  //   return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(
-  //     this.getDepositAddress(),
-  //     callback
-  //   );
-  // }
+  // watching for any transaction of this wallet
+  public watchAddressTransactions(
+    callback: (tx: ElectrumRawTransaction) => void
+  ): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(
+      this.getDepositAddress(),
+      callback
+    );
+  }
+
+  // watching for cashtoken transaction of this wallet
+  public watchAddressTokenTransactions(
+    callback: (tx: ElectrumRawTransaction) => void
+  ): CancelWatchFn {
+    return (
+      this.provider! as ElectrumNetworkProvider
+    ).watchAddressTokenTransactions(this.getDepositAddress(), callback);
+  }
 
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
@@ -1195,7 +1202,8 @@ export class Wallet extends BaseWallet {
       BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight,
       feePaidBy,
-      sendRequests
+      sendRequests,
+      options?.ensureUtxos || []
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1603,7 +1611,7 @@ export class Wallet extends BaseWallet {
     return this.send([opReturn, ...changeSendRequests], {
       checkTokenQuantities: false,
       queryBalance: false,
-      utxoIds: utxoIds.length > 0 ? utxoIds : undefined,
+      ensureUtxos: utxoIds.length > 0 ? utxoIds : undefined,
     });
   }
 
