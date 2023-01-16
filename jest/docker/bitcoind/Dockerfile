@@ -9,20 +9,19 @@ RUN set -ex \
   && apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget \
   && rm -rf /var/lib/apt/lists/*
 
-ENV BITCOIN_VERSION 25.0.0
-ENV BITCOIN_SHA256 0997b563715714d6727e35b66ccd0a6c4c4b772179d0efb82124b13e278fd72b
+ENV BITCOIN_VERSION 26.0.0
 
 # install bitcoin binaries
 RUN set -ex \
   && [ $TARGETPLATFORM = "linux/arm64" ] && platform="aarch64-linux-gnu" || platform="x86_64-linux-gnu" \
-  && export BITCOIN_URL=https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${BITCOIN_VERSION}/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
-  # && export BITCOIN_URL=https://download.bitcoincashnode.org/misc/builds/mr-1631-v24.99.0-v25-pre-rc1/linux/bitcoin-cash-node-24.99.0-${platform}.tar.gz \
-  && [ $TARGETPLATFORM = "linux/arm64" ] && sha256="947c44cf79c4b181111a9d1154217ec6eb71615cc5fde72aa3a38dd1d480cd93" || sha256="0997b563715714d6727e35b66ccd0a6c4c4b772179d0efb82124b13e278fd72b" \
+  # && export BITCOIN_URL=https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${BITCOIN_VERSION}/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
+  && export BITCOIN_URL=https://download.bitcoincashnode.org/releases/v${BITCOIN_VERSION}/linux/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
+  && [ $TARGETPLATFORM = "linux/arm64" ] && sha256="42d634c555e40fa8caea0469a0859f980a407151a4d41dfcd9f20a63243415db" || sha256="e32e05fd63161f6f1fe717fca789448d2ee48e2017d3d4c6686b4222fe69497e" \
   && export BITCOIN_SHA256="$sha256" \
   && echo "$TARGETPLATFORM" "$BITCOIN_SHA256" "$BITCOIN_URL" \
   && cd /tmp \
   && wget -qO bitcoin.tar.gz "$BITCOIN_URL" \
-  # && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
+  && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
   && tar -xzvf bitcoin.tar.gz -C /usr/local --strip-components=1 --exclude=*-qt \
   && rm -rf /tmp/*
 
