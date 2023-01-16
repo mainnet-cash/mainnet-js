@@ -1195,7 +1195,8 @@ export class Wallet extends BaseWallet {
       BigInt(spendAmount) + BigInt(feeEstimate),
       bestHeight,
       feePaidBy,
-      sendRequests
+      sendRequests,
+      options?.ensureUtxos || []
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1603,7 +1604,7 @@ export class Wallet extends BaseWallet {
     return this.send([opReturn, ...changeSendRequests], {
       checkTokenQuantities: false,
       queryBalance: false,
-      utxoIds: utxoIds.length > 0 ? utxoIds : undefined,
+      ensureUtxos: utxoIds.length > 0 ? utxoIds : undefined,
     });
   }
 

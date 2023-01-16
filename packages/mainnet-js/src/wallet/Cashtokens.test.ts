@@ -194,9 +194,11 @@ describe(`Test cashtokens`, () => {
     const response = await alice.tokenMint(tokenId, [
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
+        commitment: "test",
       }),
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
+        commitment: "test2",
       }),
     ]);
     expect(await alice.getTokenBalance(tokenId)).toBe(0);
@@ -313,7 +315,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenId).toEqual(response.tokenIds![0]);
   });
 
-  test("Test explicit burning of FT+NFT", async () => {
+  test("Test explicit burning of FT and NFT", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
@@ -479,5 +481,102 @@ describe(`Test cashtokens`, () => {
     expect(seenBalance).toBe(100);
     await cancel();
     await delay(500);
+  });
+
+  test("Test double genesis should not burn tokens", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    // prepare inputs for two token geneses
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      amount: 100,
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+    const tokenBalance = await bob.getTokenBalance(tokenId);
+
+    expect(tokenBalance).toBe(100);
+    const tokenUtxos = await bob.getTokenUtxos(tokenId);
+    expect(tokenUtxos.length).toBe(1);
+
+    const genesis2Response = await bob.tokenGenesis({
+      amount: 200,
+    });
+
+    const tokenId2 = genesis2Response.tokenIds![0];
+    const tokenBalance2 = await bob.getTokenBalance(tokenId2);
+    expect(tokenBalance2).toBe(200);
+    const tokenUtxos2 = await bob.getTokenUtxos(tokenId2);
+    expect(tokenUtxos2.length).toBe(1);
+
+    expect((await bob.getTokenUtxos()).length).toBe(2);
+  });
+
+  test("Test sending tokens should not burn tokens", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    // prepare inputs for two token geneses
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      amount: 100,
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+    const tokenBalance = await bob.getTokenBalance(tokenId);
+
+    expect(tokenBalance).toBe(100);
+    const tokenUtxos = await bob.getTokenUtxos(tokenId);
+    expect(tokenUtxos.length).toBe(1);
+
+    const genesis2Response = await bob.tokenGenesis({
+      amount: 200,
+    });
+
+    const tokenId2 = genesis2Response.tokenIds![0];
+    const tokenBalance2 = await bob.getTokenBalance(tokenId2);
+    expect(tokenBalance2).toBe(200);
+    const tokenUtxos2 = await bob.getTokenUtxos(tokenId2);
+    expect(tokenUtxos2.length).toBe(1);
+
+    expect((await bob.getTokenUtxos()).length).toBe(2);
+
+    const charlie = await RegTestWallet.newRandom();
+    await bob.send({ cashaddr: charlie.cashaddr!, tokenId: tokenId, amount: 50 });
+    expect((await bob.getTokenUtxos()).length).toBe(2);
+    expect((await charlie.getTokenUtxos()).length).toBe(1);
+    expect(await bob.getTokenBalance(tokenId)).toBe(50);
+    expect(await charlie.getTokenBalance(tokenId)).toBe(50);
+  });
+
+  test("Test sending bch should not burn tokens", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    // prepare inputs for two token geneses
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      amount: 100,
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+    const tokenBalance = await bob.getTokenBalance(tokenId);
+
+    expect(tokenBalance).toBe(100);
+    const tokenUtxos = await bob.getTokenUtxos(tokenId);
+    expect(tokenUtxos.length).toBe(1);
+
+    await bob.send({ cashaddr: alice.cashaddr!, value: 1000, unit: "sat" });
+
+    const tokenBalance2 = await bob.getTokenBalance(tokenId);
+    expect(tokenBalance2).toBe(100);
+    const tokenUtxos2 = await bob.getTokenUtxos(tokenId);
+    expect(tokenUtxos2.length).toBe(1);
   });
 });

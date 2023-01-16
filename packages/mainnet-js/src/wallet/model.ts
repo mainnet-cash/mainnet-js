@@ -142,8 +142,7 @@ export class TokenMintRequest {
     cashaddr?: string;
     value?: number;
   }) {
-    // be explicit about minting capability for new NFTs
-    this.capability = capability || NFTCapability.none;
+    this.capability = capability;
     this.commitment = commitment;
     this.cashaddr = cashaddr;
     this.value = value;

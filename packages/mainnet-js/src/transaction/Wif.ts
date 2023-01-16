@@ -286,7 +286,8 @@ export async function getSuitableUtxos(
   amountRequired: BigInt | undefined,
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
-  requests: SendRequestType[]
+  requests: SendRequestType[],
+  ensureUtxos: UtxoI[] = [],
 ): Promise<UtxoI[]> {
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = BigInt(0);
@@ -294,6 +295,11 @@ export async function getSuitableUtxos(
   const tokenRequests = requests.filter(
     (val) => val instanceof TokenSendRequest
   ) as TokenSendRequest[];
+
+  // if we do a new token genesis, we shall filter all token utxos out
+  const isTokenGenesis = tokenRequests.some(val => !val.tokenId || (val as any)._isGenesis);
+  const bchOnlyTransfer = tokenRequests.length === 0;
+  let filteredInputs = isTokenGenesis || bchOnlyTransfer ? inputs.slice(0).filter(val => !val.token) : inputs.slice();
   const tokenIds = tokenRequests
     .map((val) => val.tokenId)
     .filter((value, index, array) => array.indexOf(value) === index);
@@ -303,8 +309,6 @@ export async function getSuitableUtxos(
       .reduce((prev, cur) => prev + cur, 0);
     tokenAmountsRequired.push({ tokenId, requiredAmount });
   }
-
-  let filteredInputs = inputs.slice(0);
 
   // find suitable token inputs first
   for (const { tokenId, requiredAmount } of tokenAmountsRequired) {
@@ -325,10 +329,10 @@ export async function getSuitableUtxos(
     }
   }
 
-  // find plain outputs
+  // find plain bch outputs
   for (const u of filteredInputs) {
     if (u.token) {
-      // continue;
+      continue;
     }
 
     if (u.coinbase && u.height && bestHeight) {
@@ -347,14 +351,18 @@ export async function getSuitableUtxos(
     }
   }
 
+  const addEnsured = (suitableUtxos) => {
+    return [...suitableUtxos, ...ensureUtxos].filter((val, index, array) => array.indexOf(val) === index);
+  }
+
   // if the fee is split with a feePaidBy option, skip checking change.
   if (feePaidBy && feePaidBy != FeePaidByEnum.change) {
-    return suitableUtxos;
+    return addEnsured(suitableUtxos);
   }
 
   // If the amount needed is met, or no amount is given, return
   if (typeof amountRequired === "undefined") {
-    return suitableUtxos;
+    return addEnsured(suitableUtxos);
   } else if (amountAvailable < amountRequired) {
     let e = Error(
       `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
@@ -365,7 +373,7 @@ export async function getSuitableUtxos(
     };
     throw e;
   } else {
-    return suitableUtxos;
+    return addEnsured(suitableUtxos);
   }
 }
 
