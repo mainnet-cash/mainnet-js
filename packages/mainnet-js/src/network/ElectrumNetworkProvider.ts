@@ -117,7 +117,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async getBlockHeight(): Promise<number> {
     if (this.version !== ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET) {
-      return (await this.performRequest("blockchain.headers.get_tip") as any).height;
+      return ((await this.performRequest("blockchain.headers.get_tip")) as any)
+        .height;
     }
 
     // TODO: remove after enough elecrum servers upgrade to at least v 1.5.0
@@ -137,7 +138,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async getRawTransaction(
     txHash: string,
     verbose: boolean = false,
-    loadInputValues: boolean = false,
+    loadInputValues: boolean = false
   ): Promise<string> {
     const key = `${this.network}-${txHash}-${verbose}-${loadInputValues}`;
     if (ElectrumNetworkProvider.rawTransactionCache[key]) {
@@ -145,11 +146,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     try {
-      const transaction = await this.performRequest(
+      const transaction = (await this.performRequest(
         "blockchain.transaction.get",
         txHash,
         verbose
-      ) as ElectrumRawTransaction;
+      )) as ElectrumRawTransaction;
 
       ElectrumNetworkProvider.rawTransactionCache[key] = transaction;
 
@@ -272,16 +273,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     cashaddr: string,
     callback: (txHash: string) => void
   ): CancelWatchFn {
-    const historyMap: {[txid: string]: boolean} = {};
+    const historyMap: { [txid: string]: boolean } = {};
 
-    this.getHistory(cashaddr).then(history =>
-      history.forEach(val => historyMap[val.tx_hash] = true)
+    this.getHistory(cashaddr).then((history) =>
+      history.forEach((val) => (historyMap[val.tx_hash] = true))
     );
 
     const watchAddressStatusCallback = async () => {
       const newHistory = await this.getHistory(cashaddr);
       // sort history to put unconfirmed transactions in the beginning, then transactions in block height descenting order
-      const txHashes = newHistory.sort((a,b) => (a.height <= 0 || b.height <= 0) ? -1 : b.height - a.height).map(val => val.tx_hash);
+      const txHashes = newHistory
+        .sort((a, b) =>
+          a.height <= 0 || b.height <= 0 ? -1 : b.height - a.height
+        )
+        .map((val) => val.tx_hash);
       for (const hash of txHashes) {
         if (!(hash in historyMap)) {
           historyMap[hash] = true;
@@ -289,7 +294,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
           // exit early to prevent further map lookups
           break;
         }
-      };
+      }
     };
 
     return this.watchAddressStatus(cashaddr, watchAddressStatusCallback);
@@ -311,7 +316,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): CancelWatchFn {
     return this.watchAddress(cashaddr, async (txHash: string) => {
       const tx = await this.getRawTransactionObject(txHash, true);
-      if (tx.vin.some(val => val.tokenData) || tx.vout.some(val => val.tokenData)) {
+      if (
+        tx.vin.some((val) => val.tokenData) ||
+        tx.vout.some((val) => val.tokenData)
+      ) {
         callback(tx);
       }
     });

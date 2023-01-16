@@ -25,7 +25,7 @@ export interface ElectrumTokenData {
   nft?: {
     capability?: NFTCapability;
     commitment?: string;
-  }
+  };
 }
 
 export interface ElectrumUtxo {

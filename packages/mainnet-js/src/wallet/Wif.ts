@@ -733,10 +733,9 @@ export class Wallet extends BaseWallet {
   public watchAddressTokenTransactions(
     callback: (tx: ElectrumRawTransaction) => void
   ): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddressTokenTransactions(
-      this.getDepositAddress(),
-      callback
-    );
+    return (
+      this.provider! as ElectrumNetworkProvider
+    ).watchAddressTokenTransactions(this.getDepositAddress(), callback);
   }
 
   // sets up a callback to be called upon wallet's balance change

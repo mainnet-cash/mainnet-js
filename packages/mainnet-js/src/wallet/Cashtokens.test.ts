@@ -1,6 +1,11 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
-import { SendRequest, SendResponse, TokenMintRequest, TokenSendRequest } from "./model";
+import {
+  SendRequest,
+  SendResponse,
+  TokenMintRequest,
+  TokenSendRequest,
+} from "./model";
 import { Network, NFTCapability } from "../interface";
 import { binToHex, utf8ToBin } from "@bitauth/libauth";
 import { delay } from "../util";
@@ -465,14 +470,14 @@ describe(`Test cashtokens`, () => {
     let sendResponse: SendResponse = {};
     setTimeout(
       async () =>
-        sendResponse = await alice.send([
+        (sendResponse = await alice.send([
           new TokenSendRequest({
             cashaddr: bob.cashaddr!,
             amount: 100,
             tokenId: tokenId,
             value: 1500,
           }),
-        ]),
+        ])),
       0
     );
 
@@ -481,7 +486,7 @@ describe(`Test cashtokens`, () => {
     });
 
     let bobTxId = ".";
-    const txCancel = bob.watchAddressTokenTransactions(tx => {
+    const txCancel = bob.watchAddressTokenTransactions((tx) => {
       bobTxId = tx.txid;
     });
 
@@ -559,7 +564,11 @@ describe(`Test cashtokens`, () => {
     expect((await bob.getTokenUtxos()).length).toBe(2);
 
     const charlie = await RegTestWallet.newRandom();
-    await bob.send({ cashaddr: charlie.cashaddr!, tokenId: tokenId, amount: 50 });
+    await bob.send({
+      cashaddr: charlie.cashaddr!,
+      tokenId: tokenId,
+      amount: 50,
+    });
     expect((await bob.getTokenUtxos()).length).toBe(2);
     expect((await charlie.getTokenUtxos()).length).toBe(1);
     expect(await bob.getTokenBalance(tokenId)).toBe(50);
@@ -599,9 +608,9 @@ describe(`Test cashtokens`, () => {
 
     const wrap = (addr) => {
       return new Promise(() => {
-        return new TokenSendRequest({cashaddr: addr, tokenId: ""})
-      })
-    }
+        return new TokenSendRequest({ cashaddr: addr, tokenId: "" });
+      });
+    };
 
     Config.ValidateTokenAddresses = false;
     expect(wrap(bob.cashaddr)).resolves.not.toThrow();

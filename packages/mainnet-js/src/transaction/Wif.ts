@@ -287,7 +287,7 @@ export async function getSuitableUtxos(
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
   requests: SendRequestType[],
-  ensureUtxos: UtxoI[] = [],
+  ensureUtxos: UtxoI[] = []
 ): Promise<UtxoI[]> {
   let suitableUtxos: UtxoI[] = [];
   let amountAvailable = BigInt(0);
@@ -297,9 +297,14 @@ export async function getSuitableUtxos(
   ) as TokenSendRequest[];
 
   // if we do a new token genesis, we shall filter all token utxos out
-  const isTokenGenesis = tokenRequests.some(val => !val.tokenId || (val as any)._isGenesis);
+  const isTokenGenesis = tokenRequests.some(
+    (val) => !val.tokenId || (val as any)._isGenesis
+  );
   const bchOnlyTransfer = tokenRequests.length === 0;
-  let filteredInputs = isTokenGenesis || bchOnlyTransfer ? inputs.slice(0).filter(val => !val.token) : inputs.slice();
+  let filteredInputs =
+    isTokenGenesis || bchOnlyTransfer
+      ? inputs.slice(0).filter((val) => !val.token)
+      : inputs.slice();
   const tokenIds = tokenRequests
     .map((val) => val.tokenId)
     .filter((value, index, array) => array.indexOf(value) === index);
@@ -352,8 +357,10 @@ export async function getSuitableUtxos(
   }
 
   const addEnsured = (suitableUtxos) => {
-    return [...suitableUtxos, ...ensureUtxos].filter((val, index, array) => array.indexOf(val) === index);
-  }
+    return [...suitableUtxos, ...ensureUtxos].filter(
+      (val, index, array) => array.indexOf(val) === index
+    );
+  };
 
   // if the fee is split with a feePaidBy option, skip checking change.
   if (feePaidBy && feePaidBy != FeePaidByEnum.change) {
