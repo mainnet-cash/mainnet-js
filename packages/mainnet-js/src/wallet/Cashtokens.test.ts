@@ -1,6 +1,6 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
-import { SendRequest, TokenMintRequest, TokenSendRequest } from "./model";
+import { SendRequest, SendResponse, TokenMintRequest, TokenSendRequest } from "./model";
 import { Network, NFTCapability } from "../interface";
 import { binToHex, utf8ToBin } from "@bitauth/libauth";
 import { delay } from "../util";
@@ -442,13 +442,15 @@ describe(`Test cashtokens`, () => {
     expect(bobUtxos[1].satoshis).toBe(3349);
   });
 
-  test("Test cashtoken waiting and watching balance", async () => {
+  test("Test cashtoken waiting and watching", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
 
     const genesisResponse = await alice.tokenGenesis({
       amount: 100,
       value: 5000,
+      capability: NFTCapability.minting,
+      commitment: "test",
       cashaddr: alice.cashaddr!,
     });
 
@@ -460,9 +462,10 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos[0].satoshis).toBe(5000);
 
     let seenBalance = 0;
+    let sendResponse: SendResponse = {};
     setTimeout(
-      () =>
-        alice.send([
+      async () =>
+        sendResponse = await alice.send([
           new TokenSendRequest({
             cashaddr: bob.cashaddr!,
             amount: 100,
@@ -477,10 +480,18 @@ describe(`Test cashtokens`, () => {
       seenBalance = balance;
     });
 
+    let bobTxId = ".";
+    const txCancel = bob.watchAddressTokenTransactions(tx => {
+      bobTxId = tx.txid;
+    });
+
     const balance = await bob.waitForTokenBalance(tokenId, 100);
+    await delay(500);
     expect(balance).toBe(100);
     expect(seenBalance).toBe(100);
+    expect(sendResponse.txId).toBe(bobTxId);
     await cancel();
+    await txCancel();
     await delay(500);
   });
 

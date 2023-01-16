@@ -136,23 +136,43 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   static rawTransactionCache = {};
   async getRawTransaction(
     txHash: string,
-    verbose: boolean = false
+    verbose: boolean = false,
+    loadInputValues: boolean = false,
   ): Promise<string> {
-    const key = `${this.network}-${txHash}-${verbose}`;
+    const key = `${this.network}-${txHash}-${verbose}-${loadInputValues}`;
     if (ElectrumNetworkProvider.rawTransactionCache[key]) {
       return ElectrumNetworkProvider.rawTransactionCache[key];
     }
 
     try {
-      const result = await this.performRequest(
+      const transaction = await this.performRequest(
         "blockchain.transaction.get",
         txHash,
         verbose
-      );
+      ) as ElectrumRawTransaction;
 
-      ElectrumNetworkProvider.rawTransactionCache[key] = result;
+      ElectrumNetworkProvider.rawTransactionCache[key] = transaction;
 
-      return result as any;
+      if (verbose && loadInputValues) {
+        // get unique transaction hashes
+        const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
+        const transactions = await Promise.all(
+          hashes.map((hash) => this.getRawTransactionObject(hash, false))
+        );
+        const transactionMap = new Map<string, ElectrumRawTransaction>();
+        transactions.forEach((val) => transactionMap.set(val.hash, val));
+
+        transaction.vin.forEach((input) => {
+          const output = transactionMap
+            .get(input.txid)!
+            .vout.find((val) => val.n === input.vout)!;
+          input.address = output.scriptPubKey.addresses[0];
+          input.value = output.value;
+          input.tokenData = output.tokenData;
+        });
+      }
+
+      return transaction as any;
     } catch (error: any) {
       if (
         (error.message as string).indexOf(
@@ -168,11 +188,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   // gets the decoded transaction in human readable form
   async getRawTransactionObject(
-    txHash: string
+    txHash: string,
+    loadInputValues: boolean = false
   ): Promise<ElectrumRawTransaction> {
     return (await this.getRawTransaction(
       txHash,
-      true
+      true,
+      loadInputValues
     )) as unknown as ElectrumRawTransaction;
   }
 
@@ -246,48 +268,54 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     };
   }
 
-  // public watchAddress(
-  //   cashaddr: string,
-  //   callback: (txHash: string) => void
-  // ): CancelWatchFn {
-  //   const watchAddressCallback = async (data) => {
-  //     // subscription acknowledgement is the latest known status or null if no status is known
-  //     // status is an array: [ cashaddr, [tx_hashes] ]
-  //     if (data instanceof Array) {
-  //       let addr = data[0] as string;
-  //       if (addr !== cashaddr) {
-  //         return;
-  //       }
+  public watchAddress(
+    cashaddr: string,
+    callback: (txHash: string) => void
+  ): CancelWatchFn {
+    const historyMap: {[txid: string]: boolean} = {};
 
-  //       for (const txHash of data[1]) {
-  //         if (!txHash) {
-  //           // data[1] can be null eventually if there are no tx for this address
-  //           continue;
-  //         }
-  //         callback(txHash);
-  //       }
-  //     }
-  //   };
+    this.getHistory(cashaddr).then(history =>
+      history.forEach(val => historyMap[val.tx_hash] = true)
+    );
 
-  //   this.subscribeToAddressTransactions(cashaddr, watchAddressCallback);
+    const watchAddressStatusCallback = async () => {
+      const newHistory = await this.getHistory(cashaddr);
+      // sort history to put unconfirmed transactions in the beginning, then transactions in block height descenting order
+      const txHashes = newHistory.sort((a,b) => (a.height <= 0 || b.height <= 0) ? -1 : b.height - a.height).map(val => val.tx_hash);
+      for (const hash of txHashes) {
+        if (!(hash in historyMap)) {
+          historyMap[hash] = true;
+          callback(hash);
+          // exit early to prevent further map lookups
+          break;
+        }
+      };
+    };
 
-  //   return async () => {
-  //     await this.unsubscribeFromAddressTransactions(
-  //       cashaddr,
-  //       watchAddressCallback
-  //     );
-  //   };
-  // }
+    return this.watchAddressStatus(cashaddr, watchAddressStatusCallback);
+  }
 
-  // public watchAddressTransactions(
-  //   cashaddr: string,
-  //   callback: (tx: ElectrumRawTransaction) => void
-  // ): CancelWatchFn {
-  //   return this.watchAddress(cashaddr, async (txHash: string) => {
-  //     const tx = await this.getRawTransactionObject(txHash);
-  //     callback(tx);
-  //   });
-  // }
+  public watchAddressTransactions(
+    cashaddr: string,
+    callback: (tx: ElectrumRawTransaction) => void
+  ): CancelWatchFn {
+    return this.watchAddress(cashaddr, async (txHash: string) => {
+      const tx = await this.getRawTransactionObject(txHash);
+      callback(tx);
+    });
+  }
+
+  public watchAddressTokenTransactions(
+    cashaddr: string,
+    callback: (tx: ElectrumRawTransaction) => void
+  ): CancelWatchFn {
+    return this.watchAddress(cashaddr, async (txHash: string) => {
+      const tx = await this.getRawTransactionObject(txHash, true);
+      if (tx.vin.some(val => val.tokenData) || tx.vout.some(val => val.tokenData)) {
+        callback(tx);
+      }
+    });
+  }
 
   // Wait for the next block or a block at given blockchain height.
   public watchBlocks(callback: (header: HeaderI) => void): CancelWatchFn {
