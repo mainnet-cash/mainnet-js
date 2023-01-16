@@ -4,6 +4,7 @@ import { SendRequest, TokenMintRequest, TokenSendRequest } from "./model";
 import { Network, NFTCapability } from "../interface";
 import { binToHex, utf8ToBin } from "@bitauth/libauth";
 import { delay } from "../util";
+import { Config } from "../config";
 
 beforeAll(async () => {
   await initProviders();
@@ -578,5 +579,27 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance2).toBe(100);
     const tokenUtxos2 = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos2.length).toBe(1);
+  });
+
+  test("Test enforcing tokenaddresses", async () => {
+    const bob = await RegTestWallet.newRandom();
+
+    const previousValue = Config.ValidateTokenAddresses;
+
+    const wrap = (addr) => {
+      return new Promise(() => {
+        return new TokenSendRequest({cashaddr: addr, tokenId: ""})
+      })
+    }
+
+    Config.ValidateTokenAddresses = false;
+    expect(wrap(bob.cashaddr)).resolves.not.toThrow();
+    expect(wrap(bob.tokenaddr)).resolves.not.toThrow();
+
+    Config.ValidateTokenAddresses = true;
+    expect(wrap(bob.cashaddr)).rejects.toThrow();
+    expect(wrap(bob.tokenaddr)).resolves.not.toThrow();
+
+    Config.ValidateTokenAddresses = previousValue;
   });
 });

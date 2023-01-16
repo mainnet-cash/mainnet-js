@@ -131,3 +131,9 @@ export function isTokenaddr(address: string): boolean {
     ].indexOf(result.version) !== -1
   );
 }
+
+export function checkTokenAddr(cashaddr: string, enforce: boolean) {
+  if (enforce && !isTokenaddr(cashaddr)) {
+    throw new Error("Error trying to send to a non-tokenaware cash address");
+  }
+}

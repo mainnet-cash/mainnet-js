@@ -16,6 +16,9 @@ export * from "./wallet/createWallet.js";
 // provider
 export { DefaultProvider } from "./network/configuration.js";
 
+// config
+export { Config } from "./config.js";
+
 // Enum
 export { NetworkType, UnitEnum } from "./enum.js";
 export { WalletTypeEnum } from "./wallet/enum.js";

@@ -4,6 +4,8 @@ import { UnitEnum } from "../enum.js";
 import { NFTCapability, UtxoI } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import { utf8ToBin } from "@bitauth/libauth";
+import { Config } from "../config.js";
+import { checkTokenAddr } from "../util/deriveCashaddr.js";
 
 // These are the minimal models used to provide types for the express server
 //
@@ -116,6 +118,8 @@ export class TokenSendRequest {
     capability?: NFTCapability;
     commitment?: string;
   }) {
+    checkTokenAddr(cashaddr, Config.ValidateTokenAddresses);
+
     this.cashaddr = cashaddr;
     this.value = value;
     this.amount = amount || 0;
