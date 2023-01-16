@@ -54,6 +54,7 @@ export interface SendRequestOptionsI {
   awaitTransactionPropagation?: boolean;
   feePaidBy?: FeePaidByEnum;
   checkTokenQuantities?: boolean; // true
+  ensureUtxos?: UtxoI[]; // ensure these inputs will be consumed in the transaction
 }
 
 export interface MnemonicI {
