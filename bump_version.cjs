@@ -17,8 +17,11 @@ let rootPackageFile = "./package.json";
 
 // update package.json
 const workspacePackageFiles = [
-  "./demo/vue3/package.json",
   "./demo/min/package.json",
+  "./demo/react-next/package.json",
+  "./demo/vue-nuxt/package.json",
+  "./demo/vue-vite/package.json",
+  "./demo/vue3/package.json",
   "./packages/contract/package.json",
   "./packages/mainnet-cash/package.json",
   "./packages/mainnet-js/package.json",
@@ -55,7 +58,7 @@ function updatePackageFile(file) {
       pckg.dependencies[p] = newVersion;
       console.log(`Updated ${pckg.name}.dependency ${p} to ${newVersion}`);
     }
-    if (p in pckg.devDependencies) {
+    if (pckg.devDependencies && p in pckg.devDependencies) {
       pckg.dependencies[p] = newVersion;
       console.log(`Updated ${pckg.name}.dependency ${p} to ${newVersion}`);
     }

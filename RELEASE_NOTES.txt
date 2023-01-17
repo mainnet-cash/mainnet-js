@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+1.0.10
+
+Add example projects:
+- demo/react-next with webpack
+- demo/vue-nuxt with vite
+- demo/vue-vite
+
 1.0.9
 
 - mine.ts: rework child_process import for better shimming
