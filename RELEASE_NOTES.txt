@@ -8,6 +8,13 @@ Add example projects:
 - demo/vue-nuxt with vite
 - demo/vue-vite
 
+1.0.9
+
+- mine.ts: rework child_process import for better shimming
+- Rename Config's ValidateTokenAddresses to EnforceCashTokenReceiptAddresses
+- Token related methods use tokeanddr if cashaddr is undefined
+- Fix token commitment change error check
+
 1.0.8
 
 This release contains critical improvements to utxo selection preventing accidental token burns. Update to this version is highly advised.

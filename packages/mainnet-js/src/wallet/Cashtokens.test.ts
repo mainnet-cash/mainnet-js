@@ -201,7 +201,7 @@ describe(`Test cashtokens`, () => {
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
         commitment: "test",
-        capability: NFTCapability.none
+        capability: NFTCapability.none,
       }),
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
