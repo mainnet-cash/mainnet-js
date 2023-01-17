@@ -13,6 +13,7 @@
     "rollup-plugin-node-polyfills": "^0.2.1"
   },
   "dependencies": {
-    "mainnet-js": "^1.0.9"
-  }
+    "mainnet-js": "1.0.10"
+  },
+  "version": "1.0.10"
 }
