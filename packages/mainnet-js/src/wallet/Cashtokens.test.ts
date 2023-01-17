@@ -201,6 +201,7 @@ describe(`Test cashtokens`, () => {
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
         commitment: "test",
+        capability: NFTCapability.none
       }),
       new TokenMintRequest({
         cashaddr: alice.cashaddr!,
@@ -604,7 +605,7 @@ describe(`Test cashtokens`, () => {
   test("Test enforcing tokenaddresses", async () => {
     const bob = await RegTestWallet.newRandom();
 
-    const previousValue = Config.ValidateTokenAddresses;
+    const previousValue = Config.EnforceCashTokenReceiptAddresses;
 
     const wrap = (addr) => {
       return new Promise(() => {
@@ -612,14 +613,14 @@ describe(`Test cashtokens`, () => {
       });
     };
 
-    Config.ValidateTokenAddresses = false;
+    Config.EnforceCashTokenReceiptAddresses = false;
     expect(wrap(bob.cashaddr)).resolves.not.toThrow();
     expect(wrap(bob.tokenaddr)).resolves.not.toThrow();
 
-    Config.ValidateTokenAddresses = true;
+    Config.EnforceCashTokenReceiptAddresses = true;
     expect(wrap(bob.cashaddr)).rejects.toThrow();
     expect(wrap(bob.tokenaddr)).resolves.not.toThrow();
 
-    Config.ValidateTokenAddresses = previousValue;
+    Config.EnforceCashTokenReceiptAddresses = previousValue;
   });
 });

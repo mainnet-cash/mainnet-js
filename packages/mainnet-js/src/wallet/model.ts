@@ -96,7 +96,7 @@ export class TokenBurnRequest {
 }
 
 export class TokenSendRequest {
-  cashaddr: string;
+  cashaddr: string; // cashaddr or tokenaddr to send tokens to
   value?: number; // satoshi value
   amount: number; // fungible token amount
   tokenId: string;
@@ -118,7 +118,7 @@ export class TokenSendRequest {
     capability?: NFTCapability;
     commitment?: string;
   }) {
-    checkTokenaddr(cashaddr, Config.ValidateTokenAddresses);
+    checkTokenaddr(cashaddr, Config.EnforceCashTokenReceiptAddresses);
 
     this.cashaddr = cashaddr;
     this.value = value;

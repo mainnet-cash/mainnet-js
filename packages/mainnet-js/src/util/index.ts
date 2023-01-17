@@ -12,6 +12,7 @@ export { convert, convertObject } from "./convert.js";
 export { delay } from "./delay.js";
 export { derivedNetwork } from "./deriveNetwork.js";
 export { derivePublicKeyHash } from "./derivePublicKeyHash.js";
+export * from "./deriveCashaddr.js";
 export {
   getAddrsByXpubKey,
   getAddrsByXpubKeyObject,

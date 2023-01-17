@@ -240,8 +240,8 @@ export function prepareTokenOutputs(
     }
 
     if (
-      token.capability === NFTCapability.none &&
-      token.commitment !== tokenInputs[0].token?.commitment
+      tokenInputs[0].token?.capability === NFTCapability.none &&
+      tokenInputs[0].token?.commitment !== token.commitment
     ) {
       throw new Error("Can not change the commitment of an immutable token");
     }
