@@ -1164,7 +1164,7 @@ export class Wallet extends BaseWallet {
         if (change > 0) {
           outputs.push(
             new TokenSendRequest({
-              cashaddr: changeAddress || this.cashaddr,
+              cashaddr: changeAddress || this.tokenaddr!,
               amount: change,
               tokenId: tokenId,
               commitment: tokenOutputs[0].commitment,
@@ -1445,7 +1445,7 @@ export class Wallet extends BaseWallet {
   ): Promise<SendResponse> {
     return this.send(
       new TokenSendRequest({
-        cashaddr: genesisRequest.cashaddr || this.cashaddr!,
+        cashaddr: genesisRequest.cashaddr || this.tokenaddr!,
         amount: genesisRequest.amount,
         value: genesisRequest.value,
         capability: genesisRequest.capability,
@@ -1496,7 +1496,7 @@ export class Wallet extends BaseWallet {
         : nftUtxos[0].token!.amount;
     const safeNewAmount = Math.max(0, newAmount);
     const mintingInput = new TokenSendRequest({
-      cashaddr: this.cashaddr!,
+      cashaddr: this.tokenaddr!,
       tokenId: tokenId,
       capability: nftUtxos[0].token!.capability,
       commitment: nftUtxos[0].token!.commitment,
@@ -1509,7 +1509,7 @@ export class Wallet extends BaseWallet {
         ...mintRequests.map(
           (val) =>
             new TokenSendRequest({
-              cashaddr: val.cashaddr || this.cashaddr!,
+              cashaddr: val.cashaddr || this.tokenaddr!,
               amount: 0,
               tokenId: tokenId,
               value: val.value,
@@ -1578,7 +1578,7 @@ export class Wallet extends BaseWallet {
         const safeNewAmount = Math.max(0, newAmount);
         changeSendRequests = [
           new TokenSendRequest({
-            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            cashaddr: burnRequest.cashaddr || this.tokenaddr!,
             tokenId: burnRequest.tokenId,
             capability: burnRequest.capability,
             commitment: burnRequest.commitment,
@@ -1598,7 +1598,7 @@ export class Wallet extends BaseWallet {
         const safeNewAmount = Math.max(0, newAmount);
         changeSendRequests = [
           new TokenSendRequest({
-            cashaddr: burnRequest.cashaddr || this.cashaddr!,
+            cashaddr: burnRequest.cashaddr || this.tokenaddr!,
             tokenId: burnRequest.tokenId,
             amount: safeNewAmount,
             value: tokenUtxos[0].satoshis,

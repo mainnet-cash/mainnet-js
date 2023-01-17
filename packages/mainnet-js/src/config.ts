@@ -1,3 +1,4 @@
 export class Config {
-  static ValidateTokenAddresses = false;
+  // enforces all token-related methods to specify tokenaddr as recepient and change cashaddr
+  static EnforceCashTokenReceiptAddresses = false;
 }
