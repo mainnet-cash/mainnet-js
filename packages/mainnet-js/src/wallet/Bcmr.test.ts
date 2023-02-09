@@ -6,7 +6,8 @@ import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
 import { binToHex, hexToBin, sha256, utf8ToBin } from "@bitauth/libauth";
 import { mine } from "../mine";
-import { Network } from "../interface";
+import { NFTCapability, Network } from "../interface";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 
 beforeAll(async () => {
   await initProviders();
@@ -20,17 +21,35 @@ afterEach(async () => {
 
 describe(`Test BCMR support`, () => {
   const registry: Registry = {
-    version: { major: 1, minor: 0, patch: 0 },
-    latestRevision: Date.toString(),
+    version: {
+      major: 0,
+      minor: 1,
+      patch: 0,
+    },
+    latestRevision: "2023-01-26T18:51:35.115Z",
     registryIdentity: {
-      name: "Test token registry",
-      time: { begin: Date.now() },
-      token: {
-        category:
-          "0000000000000000000000000000000000000000000000000000000000000000",
-        symbol: "TOK",
-        decimals: 8,
+      name: "example bcmr",
+      description: "example bcmr for tokens on chipnet",
+      time: {
+        begin: "2023-01-26T18:51:35.115Z",
       },
+    },
+    identities: {
+      "0000000000000000000000000000000000000000000000000000000000000000": [
+        {
+          name: "test tokens",
+          description: "",
+          time: {
+            begin: "2023-01-26T18:51:35.115Z",
+          },
+          token: {
+            category:
+              "0000000000000000000000000000000000000000000000000000000000000000",
+            symbol: "TOK",
+            decimals: 8,
+          },
+        },
+      ],
     },
   };
 
@@ -606,5 +625,47 @@ describe(`Test BCMR support`, () => {
     removeAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
     );
+  });
+
+  test("Test NFT cashtoken genesis with BCMR output", async () => {
+    const chunks = ["BCMR", "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"];
+    const opreturnData = OpReturnData.fromArray(chunks);
+
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const genesisResponse = await alice.tokenGenesis(
+      {
+        cashaddr: alice.cashaddr!,
+        capability: NFTCapability.mutable,
+        commitment: "abcd",
+      },
+      opreturnData
+    );
+
+    const tokenId = genesisResponse.tokenIds![0];
+    const tokenBalance = await alice.getTokenBalance(tokenId);
+    expect(tokenBalance).toBe(0);
+    const nftTokenBalance = await alice.getNftTokenBalance(tokenId);
+    expect(nftTokenBalance).toBe(1);
+    const tokenUtxos = await alice.getTokenUtxos(tokenId);
+    expect(tokenUtxos.length).toBe(1);
+
+    const transaction = await (
+      alice.provider as ElectrumNetworkProvider
+    ).getRawTransactionObject(genesisResponse.txId!);
+    expect(transaction.vout[0].tokenData?.category).toBe(tokenId);
+    expect(transaction.vout[1].scriptPubKey.type).toBe("nulldata");
+
+    const chain = await BCMR.buildAuthChain({
+      transactionHash: genesisResponse.txId!,
+      network: Network.REGTEST,
+    });
+    expect(chain.length).toBe(1);
+    expect(chain[0].contentHash).toBe(
+      "516d62577247354173703569476d557751486f67534a47525832367a75526e754c575079745a66694c3735735a76"
+    );
+    expect(chain[0].uri).toBe(
+      "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].txHash).toBe(genesisResponse.txId);
   });
 });

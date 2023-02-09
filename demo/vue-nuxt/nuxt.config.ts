@@ -24,11 +24,6 @@ export default defineNuxtConfig({
     },
     resolve: {
       alias: {
-        ethers$: require.resolve("ethers/lib/index.js"),
-        "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
-        "@ethersproject/contracts$": require.resolve(
-          "@ethersproject/contracts/lib/index.js"
-        ),
         bufferutil: EMPTY_PATH,
         child_process: EMPTY_PATH,
         crypto: EMPTY_PATH,

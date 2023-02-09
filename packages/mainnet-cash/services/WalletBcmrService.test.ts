@@ -1,7 +1,7 @@
 import server from "../index.js";
 import request from "supertest";
-import { setupAxiosMock, removeAxiosMock } from "mainnet-js";
-import { sha256, binToBase64, utf8ToBin, OpReturnData } from "mainnet-js";
+import { setupAxiosMock, removeAxiosMock, binToHex } from "mainnet-js";
+import { sha256, binToBase64, utf8ToBin, OpReturnData, NFTCapability } from "mainnet-js";
 
 var app;
 
@@ -351,5 +351,64 @@ describe("Test Wallet BCMR Endpoints", () => {
     removeAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
     );
+  });
+
+
+  test("Test NFT cashtoken genesis with BCMR output", async () => {
+    const chunks = ["BCMR", "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"];
+    const opreturnData = OpReturnData.fromArray(chunks);
+
+    const aliceId = process.env.ALICE_ID!;
+    const genesisResponse = (await request(app).post("/wallet/token_genesis").send({
+      walletId: aliceId,
+      capability: NFTCapability.mutable,
+      commitment: "abcd",
+      sendRequests: {
+        dataBuffer: binToBase64(opreturnData.buffer)
+      }
+    })).body;
+
+    const tokenId = genesisResponse.tokenIds![0];
+    const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
+      walletId: aliceId,
+      tokenId: tokenId,
+    })).body.balance;
+    expect(tokenBalance).toBe(0);
+    const nftTokenBalance = (await request(app).post("/wallet/get_nft_token_balance").send({
+      walletId: aliceId,
+      tokenId: tokenId,
+    })).body.balance;
+    expect(nftTokenBalance).toBe(1);
+    const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
+      walletId: aliceId,
+      tokenId: tokenId,
+    })).body.utxos;
+    expect(tokenUtxos.length).toBe(1);
+
+    const rawTx = (await request(app).post("/wallet/util/get_raw_transaction").send({
+      txHash: genesisResponse.txId,
+      network: "regtest",
+      verbose: true,
+    })).body;
+
+    expect(rawTx.vout[0].tokenData?.category).toBe(tokenId);
+    expect(rawTx!.vout[1].scriptPubKey.type).toEqual("nulldata");
+    expect(rawTx!.vout[1].scriptPubKey.hex).toContain(
+      binToHex(utf8ToBin("BCMR"))
+    );
+
+    const chain = (await request(app).post("/wallet/bcmr/build_authchain").send({
+      transactionHash: genesisResponse.txId,
+      network: "regtest",
+    })).body;
+
+    expect(chain.length).toBe(1);
+    expect(chain[0].contentHash).toBe(
+      "516d62577247354173703569476d557751486f67534a47525832367a75526e754c575079745a66694c3735735a76"
+    );
+    expect(chain[0].uri).toBe(
+      "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].txHash).toBe(genesisResponse.txId);
   });
 });

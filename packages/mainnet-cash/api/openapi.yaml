@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 1.0.10
+  version: 1.0.11
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -2567,6 +2567,7 @@ components:
         cashaddr: cashaddr
         amount: 0.8008281904610115
         capability: none
+        sendRequests: null
         commitment: commitment
         value: 6.027456183070403
       properties:
@@ -2595,6 +2596,8 @@ components:
           default: 1000
           description: Satoshi value to send alongside with tokens
           type: number
+        sendRequests:
+          $ref: '#/components/schemas/TokenGenesisRequest_sendRequests'
       required:
       - walletId
       type: object
@@ -5696,6 +5699,14 @@ components:
       - value
       type: object
       example: null
+    TokenGenesisRequest_sendRequests:
+      anyOf:
+      - $ref: '#/components/schemas/SendRequestItem'
+      - $ref: '#/components/schemas/SendRequestArray'
+      - $ref: '#/components/schemas/TokenSendRequest'
+      - $ref: '#/components/schemas/OpReturnData'
+      description: "Single or an array of extra send requests (OP_RETURN, value transfer,\
+        \ etc.) to include in genesis transaction."
     TokenMintRequest_requests_inner:
       example:
         cashaddr: cashaddr

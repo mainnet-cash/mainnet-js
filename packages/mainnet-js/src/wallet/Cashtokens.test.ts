@@ -53,6 +53,8 @@ describe(`Test cashtokens`, () => {
     ]);
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
     expect(await bob.getBalance("sat")).toBe(5000);
+    console.log(await bob.getAddressUtxos());
+    console.log(await bob.getMaxAmountToSend());
 
     await bob.send(
       new SendRequest({

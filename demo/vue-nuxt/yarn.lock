@@ -3031,10 +3031,10 @@ magic-string@^0.27.0:
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.4.13"
 
-mainnet-js@^1.0.9:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/mainnet-js/-/mainnet-js-1.0.9.tgz#686c57dc5fdba08457cdd049cdefa16bb295c8a3"
-  integrity sha512-J9AajLmrWOBQLCgYynQOKFfp99r+a621C8Yu2tbYRqhHSSbpywirAPeKkIBNe7v0J5Jb0MAxF8Zxem1heq5QRA==
+mainnet-js@1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/mainnet-js/-/mainnet-js-1.0.10.tgz#4c37f19e191a8fe591d2fb3829ebaba607f2c15e"
+  integrity sha512-qe218tI349n4weKRVRiy0o9JdBe4lHyHXC3AGt33oAGike+u/7ThRFqovtUoGelX8PYAXo+PN3p5vRrqVwym+Q==
   dependencies:
     "@bitauth/libauth" "=v2.0.0-alpha.7"
     async-mutex "^0.3.1"
