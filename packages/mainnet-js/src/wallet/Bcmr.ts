@@ -380,11 +380,31 @@ export class BCMR {
    * @returns {IdentitySnapshot?} return the info for the token found, otherwise undefined
    */
   public static getTokenInfo(tokenId: string): IdentitySnapshot | undefined {
-    return this.metadataRegistries
-      .slice(0)
-      .reverse()
-      .filter((val) => typeof val.registryIdentity !== "string")
-      .map((val) => val.registryIdentity as IdentitySnapshot)
-      .filter((val) => val.token?.category === tokenId)?.[0];
+    for (const registry of this.metadataRegistries.slice().reverse()) {
+      // registry identity is an authbase string pointer
+      if (typeof registry.registryIdentity === "string") {
+        // enforce spec, ensure identites have this authbase
+        if (registry.identities?.[registry.registryIdentity]) {
+          // find the latest identity in history and add it to the list
+          const latestIdentityInHistory = registry.identities![tokenId][0];
+          if (latestIdentityInHistory) {
+            return latestIdentityInHistory;
+          }
+        }
+      } else {
+        // if the token identity is the registry identity and categories match, return it
+        if (registry.registryIdentity.token?.category === tokenId) {
+          return registry.registryIdentity;
+        }
+
+        // find the latest identity in history and add it to the list
+        const latestIdentityInHistory = registry.identities![tokenId][0];
+        if (latestIdentityInHistory) {
+          return latestIdentityInHistory;
+        }
+      }
+    }
+
+    return undefined;
   }
 }

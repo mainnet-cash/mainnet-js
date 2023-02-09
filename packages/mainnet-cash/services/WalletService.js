@@ -402,7 +402,7 @@ const tokenGenesis = ({ tokenGenesisRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(tokenGenesisRequest.walletId);
-      const resp = await wallet.tokenGenesis(tokenGenesisRequest);
+      const resp = await wallet.tokenGenesis(tokenGenesisRequest, tokenGenesisRequest.sendRequests);
 
       resolve(Service.successResponse(resp));
     } catch (e) {
