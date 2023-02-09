@@ -2649,6 +2649,13 @@ components:
           type: number
           description: Satoshi value to send alongside with tokens
           default: 1000
+        sendRequests:
+          description: Single or an array of extra send requests (OP_RETURN, value transfer, etc.) to include in genesis transaction.
+          anyOf:
+            - $ref: '#/components/schemas/SendRequestItem'
+            - $ref: '#/components/schemas/SendRequestArray'
+            - $ref: '#/components/schemas/TokenSendRequest'
+            - $ref: '#/components/schemas/OpReturnData'
       required:
         - walletId
       type: object
