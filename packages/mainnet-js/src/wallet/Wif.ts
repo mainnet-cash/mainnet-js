@@ -1440,7 +1440,7 @@ export class Wallet extends BaseWallet {
    * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
    * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
    * @param  {SendRequestType} sendRequests single or an array of extra send requests (OP_RETURN, value transfer, etc.) to include in genesis transaction
-  */
+   */
   public async tokenGenesis(
     genesisRequest: TokenGenesisRequest,
     sendRequests: SendRequestType | SendRequestType[] = []
@@ -1448,16 +1448,17 @@ export class Wallet extends BaseWallet {
     if (!Array.isArray(sendRequests)) {
       sendRequests = [sendRequests];
     }
-    return this.send([
-      new TokenSendRequest({
-        cashaddr: genesisRequest.cashaddr || this.tokenaddr!,
-        amount: genesisRequest.amount,
-        value: genesisRequest.value,
-        capability: genesisRequest.capability,
-        commitment: genesisRequest.commitment,
-        tokenId: "",
-      }),
-      ...sendRequests as any
+    return this.send(
+      [
+        new TokenSendRequest({
+          cashaddr: genesisRequest.cashaddr || this.tokenaddr!,
+          amount: genesisRequest.amount,
+          value: genesisRequest.value,
+          capability: genesisRequest.capability,
+          commitment: genesisRequest.commitment,
+          tokenId: "",
+        }),
+        ...(sendRequests as any),
       ],
       {
         checkTokenQuantities: false,

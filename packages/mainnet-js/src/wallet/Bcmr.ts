@@ -403,7 +403,7 @@ export class BCMR {
           return latestIdentityInHistory;
         }
       }
-    };
+    }
 
     return undefined;
   }

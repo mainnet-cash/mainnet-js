@@ -22,33 +22,36 @@ afterEach(async () => {
 describe(`Test BCMR support`, () => {
   const registry: Registry = {
     version: {
-        major: 0,
-        minor: 1,
-        patch: 0
-      },
+      major: 0,
+      minor: 1,
+      patch: 0,
+    },
     latestRevision: "2023-01-26T18:51:35.115Z",
     registryIdentity: {
       name: "example bcmr",
       description: "example bcmr for tokens on chipnet",
       time: {
-        begin: "2023-01-26T18:51:35.115Z"
-      }
-  },
+        begin: "2023-01-26T18:51:35.115Z",
+      },
+    },
     identities: {
-      "0000000000000000000000000000000000000000000000000000000000000000": [{
-        name: "test tokens",
-        description: "",
-        time: {
-          begin: "2023-01-26T18:51:35.115Z"
+      "0000000000000000000000000000000000000000000000000000000000000000": [
+        {
+          name: "test tokens",
+          description: "",
+          time: {
+            begin: "2023-01-26T18:51:35.115Z",
+          },
+          token: {
+            category:
+              "0000000000000000000000000000000000000000000000000000000000000000",
+            symbol: "TOK",
+            decimals: 8,
+          },
         },
-        token: {
-          category: "0000000000000000000000000000000000000000000000000000000000000000",
-          symbol: "TOK",
-          decimals: 8
-        }
-      }]
-    }
-  }
+      ],
+    },
+  };
 
   const registryContent = JSON.stringify(registry, null, 2);
   const registryContentHashBin = sha256.hash(utf8ToBin(registryContent));
@@ -628,13 +631,15 @@ describe(`Test BCMR support`, () => {
     const chunks = ["BCMR", "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"];
     const opreturnData = OpReturnData.fromArray(chunks);
 
-
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
-    const genesisResponse = await alice.tokenGenesis({
-      cashaddr: alice.cashaddr!,
-      capability: NFTCapability.mutable,
-      commitment: "abcd",
-    }, opreturnData);
+    const genesisResponse = await alice.tokenGenesis(
+      {
+        cashaddr: alice.cashaddr!,
+        capability: NFTCapability.mutable,
+        commitment: "abcd",
+      },
+      opreturnData
+    );
 
     const tokenId = genesisResponse.tokenIds![0];
     const tokenBalance = await alice.getTokenBalance(tokenId);
@@ -644,10 +649,11 @@ describe(`Test BCMR support`, () => {
     const tokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
 
-    const transaction = await (alice.provider as ElectrumNetworkProvider).getRawTransactionObject(genesisResponse.txId!);
+    const transaction = await (
+      alice.provider as ElectrumNetworkProvider
+    ).getRawTransactionObject(genesisResponse.txId!);
     expect(transaction.vout[0].tokenData?.category).toBe(tokenId);
     expect(transaction.vout[1].scriptPubKey.type).toBe("nulldata");
-
 
     const chain = await BCMR.buildAuthChain({
       transactionHash: genesisResponse.txId!,
