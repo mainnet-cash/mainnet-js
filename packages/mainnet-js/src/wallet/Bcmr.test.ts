@@ -20,19 +20,34 @@ afterEach(async () => {
 
 describe(`Test BCMR support`, () => {
   const registry: Registry = {
-    version: { major: 1, minor: 0, patch: 0 },
-    latestRevision: Date.toString(),
-    registryIdentity: {
-      name: "Test token registry",
-      time: { begin: Date.now() },
-      token: {
-        category:
-          "0000000000000000000000000000000000000000000000000000000000000000",
-        symbol: "TOK",
-        decimals: 8,
+    version: {
+        major: 0,
+        minor: 1,
+        patch: 0
       },
-    },
-  };
+    latestRevision: "2023-01-26T18:51:35.115Z",
+    registryIdentity: {
+      name: "example bcmr",
+      description: "example bcmr for tokens on chipnet",
+      time: {
+        begin: "2023-01-26T18:51:35.115Z"
+      }
+  },
+    identities: {
+      "0000000000000000000000000000000000000000000000000000000000000000": [{
+        name: "test tokens",
+        description: "",
+        time: {
+          begin: "2023-01-26T18:51:35.115Z"
+        },
+        token: {
+          category: "0000000000000000000000000000000000000000000000000000000000000000",
+          symbol: "TOK",
+          decimals: 8
+        }
+      }]
+    }
+  }
 
   const registryContent = JSON.stringify(registry, null, 2);
   const registryContentHashBin = sha256.hash(utf8ToBin(registryContent));
