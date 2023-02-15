@@ -77,6 +77,12 @@ describe(`Test BCMR support`, () => {
     expect(BCMR.metadataRegistries.length).toBe(1);
     BCMR.addMetadataRegistry(registry);
     expect(BCMR.metadataRegistries.length).toBe(1);
+
+    expect(
+      BCMR.getTokenInfo(
+        "1111111111111111111111111111111111111111111111111111111111111111"
+      )
+    ).toBe(undefined);
   });
 
   test("Add metadata from uri and get token info", async () => {

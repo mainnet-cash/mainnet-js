@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.0.12
+
+Fix edge-case bug in `getTokenInfo`
+
 1.0.11
 
 Address issues with BCMR support #170:

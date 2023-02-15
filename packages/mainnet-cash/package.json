@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "mainnet-cash",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A developer friendly bitcoin cash wallet api  This API is currently in active development, breaking changes may be made prior to official release of version 1.  **Important:** This library is in active development ",
   "module": "index.js",
   "scripts": {
@@ -17,9 +17,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "mainnet-js": "1.0.11",
-    "@mainnet-cash/contract": "1.0.11",
-    "@mainnet-cash/smartbch": "1.0.11",
+    "mainnet-js": "1.0.12",
+    "@mainnet-cash/contract": "1.0.12",
+    "@mainnet-cash/smartbch": "1.0.12",
     "@ethersproject/bignumber": "^5.4.1",
     "bchaddrjs-slp": "^0.2.11",
     "bignumber.js": "^9.0.1",

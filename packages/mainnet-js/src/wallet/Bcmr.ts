@@ -386,7 +386,7 @@ export class BCMR {
         // enforce spec, ensure identites have this authbase
         if (registry.identities?.[registry.registryIdentity]) {
           // find the latest identity in history and add it to the list
-          const latestIdentityInHistory = registry.identities![tokenId][0];
+          const latestIdentityInHistory = registry.identities![tokenId]?.[0];
           if (latestIdentityInHistory) {
             return latestIdentityInHistory;
           }
@@ -398,7 +398,7 @@ export class BCMR {
         }
 
         // find the latest identity in history and add it to the list
-        const latestIdentityInHistory = registry.identities![tokenId][0];
+        const latestIdentityInHistory = registry.identities![tokenId]?.[0];
         if (latestIdentityInHistory) {
           return latestIdentityInHistory;
         }
