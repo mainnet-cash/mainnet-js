@@ -69,7 +69,7 @@ export async function castStringArgumentsFromArtifact(
 ) {
   let abi = artifact.abi.filter((abi) => abi.name === funcName)[0];
   let result: any[] = [];
-  if(args){
+  if (args) {
     for (let i = 0; i < args.length; i++) {
       if (abi.inputs[i].type.startsWith("bytes")) {
         let uint = hexToBin(args[i] as string);
