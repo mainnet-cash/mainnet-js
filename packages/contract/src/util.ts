@@ -69,20 +69,22 @@ export async function castStringArgumentsFromArtifact(
 ) {
   let abi = artifact.abi.filter((abi) => abi.name === funcName)[0];
   let result: any[] = [];
-  for (let i = 0; i < args.length; i++) {
-    if (abi.inputs[i].type.startsWith("bytes")) {
-      let uint = hexToBin(args[i] as string);
-      result.push(uint);
-    } else if (abi.inputs[i].type === "int") {
-      result.push(args[i] as number);
-    } else if (abi.inputs[i].type === "boolean") {
-      result.push(Boolean(args[i]));
-    } else if (abi.inputs[i].type === "sig") {
-      let w = await walletFromId(args[i] as string);
-      let sig = getSignatureTemplate(w);
-      result.push(sig);
-    } else {
-      result.push(args[i]);
+  if (args) {
+    for (let i = 0; i < args.length; i++) {
+      if (abi.inputs[i].type.startsWith("bytes")) {
+        let uint = hexToBin(args[i] as string);
+        result.push(uint);
+      } else if (abi.inputs[i].type === "int") {
+        result.push(args[i] as number);
+      } else if (abi.inputs[i].type === "boolean") {
+        result.push(Boolean(args[i]));
+      } else if (abi.inputs[i].type === "sig") {
+        let w = await walletFromId(args[i] as string);
+        let sig = getSignatureTemplate(w);
+        result.push(sig);
+      } else {
+        result.push(args[i]);
+      }
     }
   }
   return result;
