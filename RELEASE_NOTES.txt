@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.0.14
+
+- Fixes a bug for handling arguments for CashScript function paths that don't take arguments
+
 1.0.13
 
 Address issues with BCMR support #170:
