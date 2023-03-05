@@ -1127,8 +1127,11 @@ export class Wallet extends BaseWallet {
     }
 
     // filter out token utxos if there are no token requests
-    if (checkTokenQuantities && !sendRequests.some((val) => val instanceof TokenSendRequest)) {
-      utxos = utxos.filter(val => !val.token);
+    if (
+      checkTokenQuantities &&
+      !sendRequests.some((val) => val instanceof TokenSendRequest)
+    ) {
+      utxos = utxos.filter((val) => !val.token);
     }
 
     const addTokenChangeOutputs = (

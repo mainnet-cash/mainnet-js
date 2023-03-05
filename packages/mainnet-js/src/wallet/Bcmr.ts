@@ -188,11 +188,11 @@ export class BCMR {
               : undefined;
 
           // combine the authchain element with the rest obtained
-          return {rawTx: historyRawTx, historyCache};
+          return { rawTx: historyRawTx, historyCache };
         }
       }
       return undefined;
-    }
+    };
 
     // helper function to enforce the constraints on the 0th output, decode the BCMR's OP_RETURN data
     // returns resolved AuthChainElement
@@ -290,15 +290,17 @@ export class BCMR {
     // make authchain element and combine with the rest obtained
     let element: AuthChainElement;
     try {
-      element = makeAuthChainElement(
-        options.rawTx,
-        options.rawTx.hash
-      );
+      element = makeAuthChainElement(options.rawTx, options.rawTx.hash);
     } catch (error) {
       // follow authchain to head and look for BCMR outputs
       const child = await getAuthChainChild();
       if (child) {
-        return await BCMR.buildAuthChain({...options, transactionHash: child.rawTx.hash, rawTx: child.rawTx, historyCache: child.historyCache});
+        return await BCMR.buildAuthChain({
+          ...options,
+          transactionHash: child.rawTx.hash,
+          rawTx: child.rawTx,
+          historyCache: child.historyCache,
+        });
       } else {
         throw error;
       }
@@ -354,17 +356,17 @@ export class BCMR {
     if (options.followToHead) {
       const child = await getAuthChainChild();
       if (child) {
-          const chainHead = await BCMR.buildAuthChain({
-            transactionHash: child.rawTx.hash,
-            network: options.network,
-            rawTx: child.rawTx,
-            historyCache: child.historyCache,
-            followToHead: options.followToHead,
-            resolveBase: false,
-          });
+        const chainHead = await BCMR.buildAuthChain({
+          transactionHash: child.rawTx.hash,
+          network: options.network,
+          rawTx: child.rawTx,
+          historyCache: child.historyCache,
+          followToHead: options.followToHead,
+          resolveBase: false,
+        });
 
-          // combine the authchain element with the rest obtained
-          return [...chainBase, element, ...chainHead];
+        // combine the authchain element with the rest obtained
+        return [...chainBase, element, ...chainHead];
       }
     }
 

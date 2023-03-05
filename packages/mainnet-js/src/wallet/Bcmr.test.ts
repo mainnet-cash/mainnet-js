@@ -87,9 +87,10 @@ describe(`Test BCMR support`, () => {
 
   test("kek", async () => {
     const authChain = await BCMR.addMetadataRegistryAuthChain({
-      transactionHash: "51094fb26daa7c9804cc7938716cd5b8d50d5c3df3a38c90d03931ce4e904e23",
+      transactionHash:
+        "51094fb26daa7c9804cc7938716cd5b8d50d5c3df3a38c90d03931ce4e904e23",
       followToHead: true,
-      network: Network.TESTNET
+      network: Network.TESTNET,
     });
   });
 
@@ -718,14 +719,28 @@ describe(`Test BCMR support`, () => {
     );
     expect(chain[0].txHash).toBe(response.txId);
 
-    const gapTxResponse = await alice.send([
-      new SendRequest({ cashaddr: alice.cashaddr!, value: 2000, unit: "sat" }),
-    ], { utxoIds: [`${response.txId}:0:3000`]});
+    const gapTxResponse = await alice.send(
+      [
+        new SendRequest({
+          cashaddr: alice.cashaddr!,
+          value: 2000,
+          unit: "sat",
+        }),
+      ],
+      { utxoIds: [`${response.txId}:0:3000`] }
+    );
 
-    const chainHeadResponse = await alice.send([
-      new SendRequest({ cashaddr: alice.cashaddr!, value: 1000, unit: "sat" }),
-      opreturnData,
-    ], { utxoIds: [`${gapTxResponse.txId}:0:2000`]});
+    const chainHeadResponse = await alice.send(
+      [
+        new SendRequest({
+          cashaddr: alice.cashaddr!,
+          value: 1000,
+          unit: "sat",
+        }),
+        opreturnData,
+      ],
+      { utxoIds: [`${gapTxResponse.txId}:0:2000`] }
+    );
 
     const gappedChain = await BCMR.buildAuthChain({
       transactionHash: response.txId!,
