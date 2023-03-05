@@ -919,7 +919,6 @@ export class Wallet extends BaseWallet {
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
       feePaidBy: feePaidBy,
-      discardChange: true,
     });
     const spendableAmount = sumUtxoValue(fundingUtxos);
 
