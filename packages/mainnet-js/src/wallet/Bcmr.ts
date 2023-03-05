@@ -50,6 +50,10 @@ export class BCMR {
     uri: string,
     contentHash?: string
   ): Promise<Registry> {
+    if (uri.indexOf("https://") < 0) {
+      uri = `https://${uri}`;
+    }
+
     // content hashes HTTPS Publication Outputs per spec
     if (contentHash) {
       // request as text and verify hash
@@ -110,7 +114,7 @@ export class BCMR {
 
   /**
    * buildAuthChain Build an authchain - Zeroth-Descendant Transaction Chain, refer to https://github.com/bitjson/chip-bcmr#zeroth-descendant-transaction-chains
-   * The authchain in this implementation is specific to resolve to a valid metadata registy
+   * The authchain in this implementation is specific to resolve to a valid metadata registry
    *
    * @param  {string} options.transactionHash (required) transaction hash from which to build the auth chain
    * @param  {Network?} options.network (default=mainnet) network to query the data from
@@ -144,11 +148,51 @@ export class BCMR {
     const provider = getGlobalProvider(
       options.network
     ) as ElectrumNetworkProvider;
-    if (!options.rawTx) {
+
+    if (options.rawTx === undefined) {
       options.rawTx = await provider.getRawTransactionObject(
         options.transactionHash
       );
     }
+
+    // figure out the autchain by moving towards authhead
+    const getAuthChainChild = async () => {
+      const history =
+        options.historyCache ||
+        (await provider.getHistory(
+          options.rawTx!.vout[0].scriptPubKey.addresses[0]
+        ));
+      const thisTx = history.find(
+        (val) => val.tx_hash === options.transactionHash
+      );
+      let filteredHistory = history.filter((val) =>
+        val.height > 0
+          ? val.height >= thisTx!.height || val.height <= 0
+          : val.height <= 0 && val.tx_hash !== thisTx!.tx_hash
+      );
+
+      for (const historyTx of filteredHistory) {
+        const historyRawTx = await provider.getRawTransactionObject(
+          historyTx.tx_hash
+        );
+        const authChainVin = historyRawTx.vin.find(
+          (val) => val.txid === options.transactionHash && val.vout === 0
+        );
+        // if we've found continuation of authchain, we shall recurse into it
+        if (authChainVin) {
+          // reuse queried address history if the next element in chain is the same address
+          const historyCache =
+            options.rawTx!.vout[0].scriptPubKey.addresses[0] ===
+            historyRawTx.vout[0].scriptPubKey.addresses[0]
+              ? filteredHistory
+              : undefined;
+
+          // combine the authchain element with the rest obtained
+          return { rawTx: historyRawTx, historyCache };
+        }
+      }
+      return undefined;
+    };
 
     // helper function to enforce the constraints on the 0th output, decode the BCMR's OP_RETURN data
     // returns resolved AuthChainElement
@@ -236,15 +280,31 @@ export class BCMR {
         // content hash is in OP_SHA256 byte order per spec
         result.contentHash = binToHex(chunks[1].slice().reverse());
         result.uri = binToUtf8(chunks[2]);
+        if (result.uri.indexOf("https://") < 0) {
+          result.uri = `https://${result.uri}`;
+        }
       }
       return result;
     };
 
     // make authchain element and combine with the rest obtained
-    const element: AuthChainElement = makeAuthChainElement(
-      options.rawTx,
-      options.rawTx.hash
-    );
+    let element: AuthChainElement;
+    try {
+      element = makeAuthChainElement(options.rawTx, options.rawTx.hash);
+    } catch (error) {
+      // follow authchain to head and look for BCMR outputs
+      const child = await getAuthChainChild();
+      if (child) {
+        return await BCMR.buildAuthChain({
+          ...options,
+          transactionHash: child.rawTx.hash,
+          rawTx: child.rawTx,
+          historyCache: child.historyCache,
+        });
+      } else {
+        throw error;
+      }
+    }
 
     let chainBase: AuthChain = [];
     if (options.resolveBase) {
@@ -294,49 +354,19 @@ export class BCMR {
     // if we follow to head, we need to locate the next transaction spending our 0th output
     // and repeat the building process recursively
     if (options.followToHead) {
-      // let's figure out the autchain by moving towards authhead
-      const history =
-        options.historyCache ||
-        (await provider.getHistory(
-          options.rawTx.vout[0].scriptPubKey.addresses[0]
-        ));
-      const thisTx = history.find(
-        (val) => val.tx_hash === options.transactionHash
-      );
-      let filteredHistory = history.filter((val) =>
-        val.height > 0
-          ? val.height >= thisTx!.height || val.height <= 0
-          : val.height <= 0 && val.tx_hash !== thisTx!.tx_hash
-      );
+      const child = await getAuthChainChild();
+      if (child) {
+        const chainHead = await BCMR.buildAuthChain({
+          transactionHash: child.rawTx.hash,
+          network: options.network,
+          rawTx: child.rawTx,
+          historyCache: child.historyCache,
+          followToHead: options.followToHead,
+          resolveBase: false,
+        });
 
-      for (const historyTx of filteredHistory) {
-        const historyRawTx = await provider.getRawTransactionObject(
-          historyTx.tx_hash
-        );
-        const authChainVin = historyRawTx.vin.find(
-          (val) => val.txid === options.transactionHash && val.vout === 0
-        );
-        // if we've found continuation of authchain, we shall recurse into it
-        if (authChainVin) {
-          // reuse queried address history if the next element in chain is the same address
-          const historyCache =
-            options.rawTx.vout[0].scriptPubKey.addresses[0] ===
-            historyRawTx.vout[0].scriptPubKey.addresses[0]
-              ? filteredHistory
-              : undefined;
-          // query next chain element
-          const chainHead = await BCMR.buildAuthChain({
-            transactionHash: historyRawTx.hash,
-            network: options.network,
-            rawTx: historyRawTx,
-            historyCache: historyCache,
-            followToHead: options.followToHead,
-            resolveBase: false,
-          });
-
-          // combine the authchain element with the rest obtained
-          return [...chainBase, element, ...chainHead];
-        }
+        // combine the authchain element with the rest obtained
+        return [...chainBase, element, ...chainHead];
       }
     }
 
@@ -383,7 +413,7 @@ export class BCMR {
     for (const registry of this.metadataRegistries.slice().reverse()) {
       // registry identity is an authbase string pointer
       if (typeof registry.registryIdentity === "string") {
-        // enforce spec, ensure identites have this authbase
+        // enforce spec, ensure identities have this authbase
         if (registry.identities?.[registry.registryIdentity]) {
           // find the latest identity in history and add it to the list
           const latestIdentityInHistory = registry.identities![tokenId]?.[0];

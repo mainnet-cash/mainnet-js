@@ -85,6 +85,15 @@ describe(`Test BCMR support`, () => {
     ).toBe(undefined);
   });
 
+  test("kek", async () => {
+    const authChain = await BCMR.addMetadataRegistryAuthChain({
+      transactionHash:
+        "51094fb26daa7c9804cc7938716cd5b8d50d5c3df3a38c90d03931ce4e904e23",
+      followToHead: true,
+      network: Network.TESTNET,
+    });
+  });
+
   test("Add metadata from uri and get token info", async () => {
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
@@ -361,8 +370,8 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain with 3 elements", async () => {
-    // tests autchchain of 3 elements with all possible confirmed and unfonfirmed transaction chains
-    // Also change of autchchain holding address is asessed
+    // tests authchain of 3 elements with all possible confirmed and unconfirmed transaction chains
+    // Also change of authchain holding address is assessed
     for (const [index, mineCombo] of [
       [0, 0, 0],
       [0, 0, 1],
@@ -673,5 +682,81 @@ describe(`Test BCMR support`, () => {
       "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
     );
     expect(chain[0].txHash).toBe(genesisResponse.txId);
+
+    const chainByTokenId = await BCMR.buildAuthChain({
+      transactionHash: tokenId,
+      network: Network.REGTEST,
+    });
+
+    expect(JSON.stringify(chain)).toBe(JSON.stringify(chainByTokenId));
+  });
+
+  test("Auth chain with forwards gaps", async () => {
+    const alice = await RegTestWallet.fromId(
+      `wif:regtest:${process.env.PRIVATE_WIF!}`
+    );
+
+    const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
+    const chunks = [
+      "BCMR",
+      contentHashBin.slice().reverse(),
+      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+    ];
+    const opreturnData = OpReturnData.fromArray(chunks);
+
+    const response = await alice.send([
+      new SendRequest({ cashaddr: alice.cashaddr!, value: 3000, unit: "sat" }),
+      opreturnData,
+    ]);
+    const chain = await BCMR.buildAuthChain({
+      transactionHash: response.txId!,
+      network: Network.REGTEST,
+    });
+    expect(chain.length).toBe(1);
+    expect(chain[0].contentHash).toBe(binToHex(contentHashBin));
+    expect(chain[0].uri).toBe(
+      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(chain[0].txHash).toBe(response.txId);
+
+    const gapTxResponse = await alice.send(
+      [
+        new SendRequest({
+          cashaddr: alice.cashaddr!,
+          value: 2000,
+          unit: "sat",
+        }),
+      ],
+      { utxoIds: [`${response.txId}:0:3000`] }
+    );
+
+    const chainHeadResponse = await alice.send(
+      [
+        new SendRequest({
+          cashaddr: alice.cashaddr!,
+          value: 1000,
+          unit: "sat",
+        }),
+        opreturnData,
+      ],
+      { utxoIds: [`${gapTxResponse.txId}:0:2000`] }
+    );
+
+    const gappedChain = await BCMR.buildAuthChain({
+      transactionHash: response.txId!,
+      network: Network.REGTEST,
+    });
+    expect(gappedChain.length).toBe(2);
+    expect(gappedChain[0].contentHash).toBe(binToHex(contentHashBin));
+    expect(gappedChain[0].uri).toBe(
+      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(gappedChain[0].txHash).toBe(response.txId);
+
+    expect(gappedChain[1].contentHash).toBe(binToHex(contentHashBin));
+    expect(gappedChain[1].uri).toBe(
+      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(gappedChain[1].txHash).toBe(chainHeadResponse.txId);
   });
 });

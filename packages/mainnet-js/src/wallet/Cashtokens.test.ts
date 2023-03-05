@@ -27,6 +27,19 @@ describe(`Test cashtokens`, () => {
     expect(utxos[0].token?.tokenId).toBeDefined();
   });
 
+  test("Test token genesis and max amount to send", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+    await alice.send([[bob.cashaddr!, 0.101, "bch"]]);
+    const genesisResponse = await bob.tokenGenesis({
+      amount: 100,
+    });
+
+    const maxAmountToSend = await bob.getMaxAmountToSend();
+    await bob.send([[alice.cashaddr!, maxAmountToSend.sat!, "sat"]]);
+    expect(await bob.getBalance("sat")).toBe(0);
+  });
+
   test("Test tokens will not be burned when sending bch value", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
@@ -53,8 +66,6 @@ describe(`Test cashtokens`, () => {
     ]);
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
     expect(await bob.getBalance("sat")).toBe(5000);
-    console.log(await bob.getAddressUtxos());
-    console.log(await bob.getMaxAmountToSend());
 
     await bob.send(
       new SendRequest({
@@ -604,7 +615,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos2.length).toBe(1);
   });
 
-  test("Test enforcing tokenaddresses", async () => {
+  test("Test enforcing token addresses", async () => {
     const bob = await RegTestWallet.newRandom();
 
     const previousValue = Config.EnforceCashTokenReceiptAddresses;
