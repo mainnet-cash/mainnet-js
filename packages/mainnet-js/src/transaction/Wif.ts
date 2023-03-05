@@ -12,7 +12,6 @@ import {
   CompilationContextBCH,
   Output,
   hexToBin,
-  binToHex,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
@@ -391,6 +390,7 @@ export async function getFeeAmount({
   relayFeePerByteInSatoshi,
   slpOutputs,
   feePaidBy,
+  discardChange,
 }: {
   utxos: UtxoI[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
@@ -398,6 +398,7 @@ export async function getFeeAmount({
   relayFeePerByteInSatoshi: number;
   slpOutputs: Output[];
   feePaidBy: FeePaidByEnum;
+  discardChange?: boolean;
 }) {
   // build transaction
   if (utxos) {
@@ -407,7 +408,7 @@ export async function getFeeAmount({
       sendRequests,
       privateKey,
       0, //DUST_UTXO_THRESHOLD
-      false,
+      discardChange ?? false,
       slpOutputs,
       feePaidBy
     );

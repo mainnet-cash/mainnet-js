@@ -1,6 +1,16 @@
 Newest changes
 --------------
 
+1.0.12
+
+Fix edge-case bug in `getTokenInfo`
+
+1.0.11
+
+Address issues with BCMR support #170:
+- More correct way to retreive bcmr metadata
+- Add extra outputs to token genesis call, add support in rest, add tests
+
 1.0.10
 
 Add example projects:

@@ -919,6 +919,7 @@ export class Wallet extends BaseWallet {
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
       feePaidBy: feePaidBy,
+      discardChange: true,
     });
     const spendableAmount = sumUtxoValue(fundingUtxos);
 
@@ -1124,6 +1125,11 @@ export class Wallet extends BaseWallet {
       );
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);
+    }
+
+    // filter out token utxos if there are no token requests
+    if (checkTokenQuantities && !sendRequests.some((val) => val instanceof TokenSendRequest)) {
+      utxos = utxos.filter(val => !val.token);
     }
 
     const addTokenChangeOutputs = (
