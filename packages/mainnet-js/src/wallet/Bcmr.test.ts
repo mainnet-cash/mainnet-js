@@ -85,15 +85,6 @@ describe(`Test BCMR support`, () => {
     ).toBe(undefined);
   });
 
-  test("kek", async () => {
-    const authChain = await BCMR.addMetadataRegistryAuthChain({
-      transactionHash:
-        "51094fb26daa7c9804cc7938716cd5b8d50d5c3df3a38c90d03931ce4e904e23",
-      followToHead: true,
-      network: Network.TESTNET,
-    });
-  });
-
   test("Add metadata from uri and get token info", async () => {
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
@@ -180,12 +171,12 @@ describe(`Test BCMR support`, () => {
       new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
       opreturnData,
     ]);
-    await expect(
-      BCMR.buildAuthChain({
-        transactionHash: response.txId!,
-        network: Network.REGTEST,
-      })
-    ).rejects.toThrow("No BCMR OP_RETURN outputs found in the transaction");
+    const authChain = await
+    BCMR.buildAuthChain({
+      transactionHash: response.txId!,
+      network: Network.REGTEST,
+    });
+    expect(authChain.length).toBe(0);
   });
 
   test("Auth chain: BCMR, no hash", async () => {
