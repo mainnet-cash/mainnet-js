@@ -289,7 +289,7 @@ You can add it manually:
     mnemonic: string,
     derivationPath?: string
   ): Promise<this> {
-    this.mnemonic = mnemonic;
+    this.mnemonic = mnemonic.trim().toLowerCase();
 
     if (derivationPath) {
       this.derivationPath = derivationPath;

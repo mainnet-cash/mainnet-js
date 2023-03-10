@@ -439,7 +439,7 @@ export class Wallet extends BaseWallet {
     mnemonic: string,
     derivationPath?: string
   ): Promise<this> {
-    this.mnemonic = mnemonic;
+    this.mnemonic = mnemonic.trim().toLowerCase();
 
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
