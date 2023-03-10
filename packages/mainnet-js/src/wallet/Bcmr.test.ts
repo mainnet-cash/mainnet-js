@@ -171,8 +171,7 @@ describe(`Test BCMR support`, () => {
       new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
       opreturnData,
     ]);
-    const authChain = await
-    BCMR.buildAuthChain({
+    const authChain = await BCMR.buildAuthChain({
       transactionHash: response.txId!,
       network: Network.REGTEST,
     });

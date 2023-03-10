@@ -207,13 +207,15 @@ export class BCMR {
         opReturns = electrumTransaction.vout
           .filter((val) => val.scriptPubKey.type === "nulldata")
           .map((val) => val.scriptPubKey.hex);
-        spends0thOutput = electrumTransaction.vin.some(val => val.vout === 0);
+        spends0thOutput = electrumTransaction.vin.some((val) => val.vout === 0);
       } else {
         const libauthTransaction = rawTx as Transaction;
         opReturns = libauthTransaction.outputs
           .map((val) => binToHex(val.lockingBytecode))
           .filter((val) => val.indexOf("6a") === 0);
-        spends0thOutput = libauthTransaction.inputs.some(val => val.outpointIndex === 0);
+        spends0thOutput = libauthTransaction.inputs.some(
+          (val) => val.outpointIndex === 0
+        );
       }
 
       if (!spends0thOutput) {
@@ -346,7 +348,7 @@ export class BCMR {
         let tx: ElectrumRawTransaction = { ...options.rawTx! };
         let maxElements = 10;
         while (stop == false || maxElements === 0) {
-          const vin = tx.vin.find(val => val.vout === 0);
+          const vin = tx.vin.find((val) => val.vout === 0);
           tx = await provider.getRawTransactionObject(vin!.txid);
           try {
             const pastElement = makeAuthChainElement(tx, tx.hash);
@@ -374,12 +376,14 @@ export class BCMR {
         });
 
         // combine the authchain element with the rest obtained
-        return [...chainBase, element, ...chainHead].filter(val => val.uri.length);
+        return [...chainBase, element, ...chainHead].filter(
+          (val) => val.uri.length
+        );
       }
     }
 
     // return the last chain element (or the only found in an edge case)
-    return [...chainBase, element].filter(val => val.uri.length);
+    return [...chainBase, element].filter((val) => val.uri.length);
   }
 
   /**
@@ -404,7 +408,13 @@ export class BCMR {
     });
 
     if (!authChain.length) {
-      throw new Error(`There were no BCMR entries in the resolved authchain ${JSON.stringify(authChain, null, 2)}`);
+      throw new Error(
+        `There were no BCMR entries in the resolved authchain ${JSON.stringify(
+          authChain,
+          null,
+          2
+        )}`
+      );
     }
 
     const registry = await this.fetchMetadataRegistry(
