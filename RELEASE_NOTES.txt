@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+1.0.15
+
+- When creating wallet from seed trim whitespace and transform to lowercase
+- Allow authchains to spend parent at vin != 0
+
 1.0.14
 
 - Fixes a bug for handling arguments for CashScript function paths that don't take arguments

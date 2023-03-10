@@ -207,13 +207,21 @@ export class BCMR {
         opReturns = electrumTransaction.vout
           .filter((val) => val.scriptPubKey.type === "nulldata")
           .map((val) => val.scriptPubKey.hex);
-        spends0thOutput = electrumTransaction.vin[0].vout === 0;
+        spends0thOutput = electrumTransaction.vin.some((val) => val.vout === 0);
       } else {
         const libauthTransaction = rawTx as Transaction;
         opReturns = libauthTransaction.outputs
           .map((val) => binToHex(val.lockingBytecode))
           .filter((val) => val.indexOf("6a") === 0);
-        spends0thOutput = libauthTransaction.inputs[0].outpointIndex === 0;
+        spends0thOutput = libauthTransaction.inputs.some(
+          (val) => val.outpointIndex === 0
+        );
+      }
+
+      if (!spends0thOutput) {
+        throw new Error(
+          "Invalid authchain transaction (does not spend 0th output of previous transaction)"
+        );
       }
 
       const bcmrOpReturns = opReturns.filter(
@@ -225,13 +233,11 @@ export class BCMR {
       );
 
       if (bcmrOpReturns.length === 0) {
-        throw new Error("No BCMR OP_RETURN outputs found in the transaction");
-      }
-
-      if (!spends0thOutput) {
-        throw new Error(
-          "Invalid authchain transaction (does not spend 0th output of previous transaction)"
-        );
+        return {
+          txHash: hash,
+          contentHash: "",
+          uri: "",
+        };
       }
 
       const opReturnHex = opReturns[0];
@@ -292,6 +298,7 @@ export class BCMR {
     try {
       element = makeAuthChainElement(options.rawTx, options.rawTx.hash);
     } catch (error) {
+      // special case for cashtoken authchain lookup by categoryId - allow to fail first lookup and inspect the genesis transaction
       // follow authchain to head and look for BCMR outputs
       const child = await getAuthChainChild();
       if (child) {
@@ -339,11 +346,14 @@ export class BCMR {
         // simply go back in history towards authhead
         let stop = false;
         let tx: ElectrumRawTransaction = { ...options.rawTx! };
-        while (stop == false) {
-          tx = await provider.getRawTransactionObject(tx.vin[0].txid);
+        let maxElements = 10;
+        while (stop == false || maxElements === 0) {
+          const vin = tx.vin.find((val) => val.vout === 0);
+          tx = await provider.getRawTransactionObject(vin!.txid);
           try {
             const pastElement = makeAuthChainElement(tx, tx.hash);
             chainBase.unshift(pastElement);
+            maxElements--;
           } catch {
             stop = true;
           }
@@ -366,12 +376,14 @@ export class BCMR {
         });
 
         // combine the authchain element with the rest obtained
-        return [...chainBase, element, ...chainHead];
+        return [...chainBase, element, ...chainHead].filter(
+          (val) => val.uri.length
+        );
       }
     }
 
     // return the last chain element (or the only found in an edge case)
-    return [...chainBase, element];
+    return [...chainBase, element].filter((val) => val.uri.length);
   }
 
   /**
@@ -394,6 +406,17 @@ export class BCMR {
       ...options,
       resolveBase: false,
     });
+
+    if (!authChain.length) {
+      throw new Error(
+        `There were no BCMR entries in the resolved authchain ${JSON.stringify(
+          authChain,
+          null,
+          2
+        )}`
+      );
+    }
+
     const registry = await this.fetchMetadataRegistry(
       authChain.reverse()[0].uri
     );
