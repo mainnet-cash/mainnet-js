@@ -238,15 +238,15 @@ export class OpReturnData {
         throw new Error("Wrong data array element");
       }
 
-      if (length < 75) {
+      if (length < 76) { // OP_PUSHDATA_1
         lengthData = [length];
-      } else if (length < 220) {
+      } else if (length < 223) { // default max `-datacarriersize`
         lengthData = [0x4c, length];
       } else {
         throw new Error("OP_RETURN data can not exceed 220 bytes in size");
       }
 
-      data = Buffer.from([...data, ...[lengthData], ...elementData]);
+      data = Buffer.from([...data, ...lengthData, ...elementData]);
     }
 
     if (data.length > 220) {
