@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.0.16
+
+- Fix encoding OP_PUSHDATA1-sized chunks in OP_RETURNS
+
 1.0.15
 
 - When creating wallet from seed trim whitespace and transform to lowercase
