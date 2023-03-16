@@ -3,7 +3,12 @@ import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { UnitEnum } from "../enum.js";
 import { NFTCapability, UtxoI } from "../interface.js";
 import { DELIMITER } from "../constant.js";
-import { binToNumberUint16LE, binToUtf8, hexToBin, utf8ToBin } from "@bitauth/libauth";
+import {
+  binToNumberUint16LE,
+  binToUtf8,
+  hexToBin,
+  utf8ToBin,
+} from "@bitauth/libauth";
 import { Config } from "../config.js";
 import { checkTokenaddr } from "../util/deriveCashaddr.js";
 
@@ -238,9 +243,11 @@ export class OpReturnData {
         throw new Error("Wrong data array element");
       }
 
-      if (length < 76) { // OP_PUSHDATA_1
+      if (length < 76) {
+        // OP_PUSHDATA_1
         lengthData = [length];
-      } else if (length < 223) { // default max `-datacarriersize`
+      } else if (length < 223) {
+        // default max `-datacarriersize`
         lengthData = [0x4c, length];
       } else {
         throw new Error("OP_RETURN data can not exceed 220 bytes in size");
@@ -299,7 +306,7 @@ export class OpReturnData {
    * @returns array of binary data chunks pushed, converted to utf8 strings
    */
   public static parse(opReturnHex: string): string[] {
-    return this.parseBinary(hexToBin(opReturnHex)).map(val => binToUtf8(val));
+    return this.parseBinary(hexToBin(opReturnHex)).map((val) => binToUtf8(val));
   }
 }
 
