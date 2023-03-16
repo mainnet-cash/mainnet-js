@@ -3,7 +3,7 @@ import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { UnitEnum } from "../enum.js";
 import { NFTCapability, UtxoI } from "../interface.js";
 import { DELIMITER } from "../constant.js";
-import { utf8ToBin } from "@bitauth/libauth";
+import { binToNumberUint16LE, binToUtf8, hexToBin, utf8ToBin } from "@bitauth/libauth";
 import { Config } from "../config.js";
 import { checkTokenaddr } from "../util/deriveCashaddr.js";
 
@@ -254,6 +254,52 @@ export class OpReturnData {
     }
 
     return new this(data);
+  }
+
+  /**
+   * parseBinary - parse OP_RETURN data and return pushed chunks of binary data
+   *
+   * @param opReturn   Raw OP_RETURN data
+   *
+   * @returns array of binary data chunks pushed
+   */
+  public static parseBinary(opReturn: Uint8Array): Uint8Array[] {
+    const chunks: Uint8Array[] = [];
+    let position = 1;
+
+    // handle direct push, OP_PUSHDATA1, OP_PUSHDATA2;
+    // OP_PUSHDATA4 is not supported in OP_RETURNs by consensus
+    while (opReturn[position]) {
+      let length = 0;
+      if (opReturn[position] === 0x4c) {
+        length = opReturn[position + 1];
+        position += 2;
+      } else if (opReturn[position] === 0x4d) {
+        length = binToNumberUint16LE(
+          opReturn.slice(position + 1, position + 3)
+        );
+        position += 3;
+      } else {
+        length = opReturn[position];
+        position += 1;
+      }
+
+      chunks.push(opReturn.slice(position, position + length));
+      position += length;
+    }
+
+    return chunks;
+  }
+
+  /**
+   * parse - parse OP_RETURN hex data and return pushed chunks of binary data, converted to utf8 strings
+   *
+   * @param opReturn   Raw OP_RETURN hex data
+   *
+   * @returns array of binary data chunks pushed, converted to utf8 strings
+   */
+  public static parse(opReturnHex: string): string[] {
+    return this.parseBinary(hexToBin(opReturnHex)).map(val => binToUtf8(val));
   }
 }
 
