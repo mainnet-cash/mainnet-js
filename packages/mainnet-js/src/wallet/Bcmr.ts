@@ -229,7 +229,7 @@ export class BCMR {
           val.indexOf("6a0442434d52") === 0 ||
           val.indexOf("6a4c0442434d52") === 0 ||
           val.indexOf("6a4d040042434d52") === 0 ||
-          val.indexOf("6ade0400000042434d52") === 0
+          val.indexOf("6a4e0400000042434d52") === 0
       );
 
       if (bcmrOpReturns.length === 0) {
