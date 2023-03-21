@@ -146,9 +146,9 @@ export class BCMR {
       options.resolveBase = false;
     }
 
-    const provider = await initProvider(
+    const provider = (await initProvider(
       options.network
-    )! as ElectrumNetworkProvider;
+    )!) as ElectrumNetworkProvider;
 
     if (options.rawTx === undefined) {
       options.rawTx = await provider.getRawTransactionObject(

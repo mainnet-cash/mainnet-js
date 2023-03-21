@@ -25,7 +25,9 @@ export function setGlobalProvider(
   return provider;
 }
 
-export function getGlobalProvider(network: Network): NetworkProvider | undefined {
+export function getGlobalProvider(
+  network: Network
+): NetworkProvider | undefined {
   const accessor = networkTickerMap[network];
   return globalThis[accessor];
 }
