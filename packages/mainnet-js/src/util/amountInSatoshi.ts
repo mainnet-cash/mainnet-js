@@ -19,7 +19,7 @@ export async function amountInSatoshi(
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
     case UnitEnum.BCH:
-      return value * bchParam.subUnits;
+      return Math.round(value * bchParam.subUnits);
     case UnitEnum.SATOSHI:
       return value;
     case UnitEnum.SAT:
