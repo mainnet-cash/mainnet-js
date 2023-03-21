@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+1.0.18
+
+- Fix BCMR not instantiating network provider whenever needed
+- Fix math precision errors when converting BCH to SAT
+
 1.0.17
 
 - Add 'parse' and 'parseBinary' methods to OpReturnData class
