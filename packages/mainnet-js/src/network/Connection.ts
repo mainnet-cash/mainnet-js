@@ -10,22 +10,14 @@ import { networkTickerMap } from "./constant.js";
 import { prefixFromNetworkMap } from "../enum.js";
 import { CashAddressNetworkPrefix } from "@bitauth/libauth";
 
-async function initProvider(network: Network) {
+export async function initProvider(network: Network) {
   if (!getGlobalProvider(network)) {
-    try {
-      const conn = new Connection(network);
-      const provider = (await conn.ready()).networkProvider;
-      setGlobalProvider(network, provider);
-      return provider;
-    } catch (e) {
-      throw `${network} ${e}`;
-    }
-  } else {
-    // console.warn(
-    //   `Ignoring attempt to reinitialize non-existent ${network} provider`
-    // );
-    return true;
+    const conn = new Connection(network);
+    const provider = (await conn.ready()).networkProvider;
+    setGlobalProvider(network, provider);
+    return provider;
   }
+  return getGlobalProvider(network);
 }
 
 export async function initProviders(networks?: Network[]) {

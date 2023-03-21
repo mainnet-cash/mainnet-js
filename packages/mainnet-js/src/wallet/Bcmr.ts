@@ -14,6 +14,7 @@ import { getGlobalProvider } from "../network/default.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
 import { IdentitySnapshot, Registry } from "./bcmr-v1.schema.js";
+import { initProvider } from "../network/Connection.js";
 
 export interface AuthChainElement {
   txHash: string;
@@ -145,9 +146,9 @@ export class BCMR {
       options.resolveBase = false;
     }
 
-    const provider = getGlobalProvider(
+    const provider = await initProvider(
       options.network
-    ) as ElectrumNetworkProvider;
+    )! as ElectrumNetworkProvider;
 
     if (options.rawTx === undefined) {
       options.rawTx = await provider.getRawTransactionObject(

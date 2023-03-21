@@ -25,12 +25,12 @@ export function setGlobalProvider(
   return provider;
 }
 
-export function getGlobalProvider(network: Network): NetworkProvider | void {
+export function getGlobalProvider(network: Network): NetworkProvider | undefined {
   const accessor = networkTickerMap[network];
   return globalThis[accessor];
 }
 
-export function removeGlobalProvider(network: Network): NetworkProvider | void {
+export function removeGlobalProvider(network: Network): void {
   const accessor = networkTickerMap[network];
   if (accessor in globalThis) {
     delete globalThis[accessor];
