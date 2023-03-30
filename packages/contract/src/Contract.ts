@@ -62,10 +62,14 @@ export class Contract implements ContractI {
     nonce?: number
   ) {
     this.script = script;
-    this.parameters = parameters.map(val => typeof val === "number" ? BigInt(val) : val);
+    this.parameters = parameters.map((val) =>
+      typeof val === "number" ? BigInt(val) : val
+    );
     this.network = network ? network : "mainnet";
     this.artifact = compileString(script);
-    this.provider = new WrappedProvider(getNetworkProvider(this.network) as any);
+    this.provider = new WrappedProvider(
+      getNetworkProvider(this.network) as any
+    );
     this.contract = this.getContractInstance();
     this.nonce = nonce ? nonce : Mainnet.getRandomInt(2147483647);
   }
@@ -149,7 +153,10 @@ export class Contract implements ContractI {
     const paramStrings = Mainnet.atob(serializedParams)
       .split(CONST.DELIMITER)
       .map((s) => Mainnet.atob(s));
-    const params = castConstructorParametersFromArtifact(paramStrings, artifact);
+    const params = castConstructorParametersFromArtifact(
+      paramStrings,
+      artifact
+    );
 
     return new Contract(script, params, network as Network, parseInt(nonce));
   }
@@ -206,7 +213,9 @@ export class Contract implements ContractI {
    * @returns A list of utxos on the contract
    */
   public async getUtxos(): Promise<UtxoI[]> {
-    return (await this.provider.getUtxos(this.getDepositAddress())).map(toMainnet);
+    return (await this.provider.getUtxos(this.getDepositAddress())).map(
+      toMainnet
+    );
   }
 
   /**
@@ -234,7 +243,7 @@ export class Contract implements ContractI {
       script: this.script,
       parameters: this.getParameterList()
         // map bigints to numbers for REST service.
-        .map(val => typeof val === "bigint" ? Number(val) : val),
+        .map((val) => (typeof val === "bigint" ? Number(val) : val)),
       nonce: this.nonce,
     };
   }
@@ -248,11 +257,10 @@ export class Contract implements ContractI {
    * @returns A CashScript Contract
    */
   private getContractInstance() {
-    return new CashScriptContract(
-      this.artifact,
-      this.parameters,
-      { provider: this.provider, addressType: "p2sh20" }
-    );
+    return new CashScriptContract(this.artifact, this.parameters, {
+      provider: this.provider,
+      addressType: "p2sh20",
+    });
   }
 
   /**
@@ -261,7 +269,10 @@ export class Contract implements ContractI {
    */
   public fromCashScript() {
     this.artifact = compileFile(this.script);
-    this.contract = new CashScriptContract(this.artifact, [], { provider: this.provider, addressType: "p2sh20" });
+    this.contract = new CashScriptContract(this.artifact, [], {
+      provider: this.provider,
+      addressType: "p2sh20",
+    });
     return this;
   }
 
@@ -301,7 +312,9 @@ export class Contract implements ContractI {
    * @param request Parameters for the transaction call, serialized as strings.
    * @returns A CashScript Transaction result
    */
-  public async runFunctionFromStrings(request: CashscriptTransactionI): Promise<any> {
+  public async runFunctionFromStrings(
+    request: CashscriptTransactionI
+  ): Promise<any> {
     const fn = this.getContractFunction(request.function);
     const arg = await castStringArgumentsFromArtifact(
       request.arguments,
@@ -337,9 +350,15 @@ export class Contract implements ContractI {
     }
 
     if (request.action === "getBitauthUri") {
-      return getBitauthUri(await buildTemplate({contract: this, transaction: func, manglePrivateKeys: false }));
+      return getBitauthUri(
+        await buildTemplate({
+          contract: this,
+          transaction: func,
+          manglePrivateKeys: false,
+        })
+      );
     } else if (request.action === "buildTemplate") {
-      return await buildTemplate({contract: this, transaction: func });
+      return await buildTemplate({ contract: this, transaction: func });
     }
 
     return await func[request.action]();

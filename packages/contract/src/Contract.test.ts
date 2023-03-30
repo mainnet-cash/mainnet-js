@@ -99,7 +99,9 @@ describe(`Create Contract Tests`, () => {
     const sig = getSignatureTemplate(bob);
     const publicKey = sig.getPublicKey();
     const fn = contract.getContractFunction("transfer");
-    const txn = await fn(publicKey, sig).to(bob.getDepositAddress(), 7000n).send();
+    const txn = await fn(publicKey, sig)
+      .to(bob.getDepositAddress(), 7000n)
+      .send();
     expect(txn.txid.length).toBe(64);
     expect(await bob.getBalance("sat")).toBe(7000);
   });

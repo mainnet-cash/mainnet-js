@@ -1,7 +1,14 @@
 import { Network, RegTestWallet, UtxoI, toUtxoId } from "mainnet-js";
 import { CashscriptTransactionI } from "./interface";
 import { Contract } from "./Contract";
-import { binToBigIntUintLE, hexToBin, AuthenticationTemplate, authenticationTemplateToCompilerConfiguration, createVirtualMachineBCHCHIPs, createCompiler } from "@bitauth/libauth";
+import {
+  binToBigIntUintLE,
+  hexToBin,
+  AuthenticationTemplate,
+  authenticationTemplateToCompilerConfiguration,
+  createVirtualMachineBCHCHIPs,
+  createCompiler,
+} from "@bitauth/libauth";
 import { getBitauthUri } from "./template";
 
 const evaluateTemplate = (template: AuthenticationTemplate) => {
@@ -13,10 +20,13 @@ const evaluateTemplate = (template: AuthenticationTemplate) => {
     debug: true,
     lockingScriptId: undefined,
     unlockingScriptId: "unlock_lock",
-    scenarioId: "evaluate_function"
+    scenarioId: "evaluate_function",
   });
 
-  if (typeof scenarioGeneration === "string" || typeof scenarioGeneration.scenario === "string") {
+  if (
+    typeof scenarioGeneration === "string" ||
+    typeof scenarioGeneration.scenario === "string"
+  ) {
     throw scenarioGeneration;
   }
 
@@ -26,7 +36,7 @@ const evaluateTemplate = (template: AuthenticationTemplate) => {
   }
 
   return verifyResult;
-}
+};
 
 describe(`Libauth template generation tests`, () => {
   test("Test transfer with timeout template", async () => {
@@ -68,7 +78,7 @@ describe(`Libauth template generation tests`, () => {
     ]);
 
     const contractUtxos = await contract.getUtxos();
-    const template = await contract.runFunctionFromStrings({
+    const template = (await contract.runFunctionFromStrings({
       action: "buildTemplate",
       function: "transfer",
       arguments: [charlie.getPublicKeyCompressed(), charlie.toString()],
@@ -78,12 +88,11 @@ describe(`Libauth template generation tests`, () => {
       },
       time: 215,
       utxoIds: contractUtxos.map(toUtxoId),
-    } as CashscriptTransactionI) as AuthenticationTemplate;
+    } as CashscriptTransactionI)) as AuthenticationTemplate;
 
     expect(evaluateTemplate(template)).toBe(true);
 
-
-    const failingTemplate = await contract.runFunctionFromStrings({
+    const failingTemplate = (await contract.runFunctionFromStrings({
       action: "buildTemplate",
       function: "transfer",
       arguments: [alice.getPublicKeyCompressed(), charlie.toString()],
@@ -93,7 +102,7 @@ describe(`Libauth template generation tests`, () => {
       },
       time: 215,
       utxoIds: contractUtxos.map(toUtxoId),
-    } as CashscriptTransactionI) as AuthenticationTemplate;
+    } as CashscriptTransactionI)) as AuthenticationTemplate;
 
     expect(() => evaluateTemplate(failingTemplate)).toThrow();
   });
@@ -273,11 +282,7 @@ describe(`Libauth template generation tests`, () => {
       "3ea6400b13805727419514241f54d0bf8553d987f07cd84230c562940b9636714ff9a39e4c4f8505cc2a21e24126999d21bbbea86fc82bb3ccf9d07896670aaf",
     ];
 
-    const contract = new Contract(
-      script,
-      contractParams,
-      Network.REGTEST
-    );
+    const contract = new Contract(script, contractParams, Network.REGTEST);
 
     // fund the contract
     await alice.send([
@@ -289,19 +294,22 @@ describe(`Libauth template generation tests`, () => {
     ]);
 
     const contractUtxos = await contract.getUtxos();
-    const template = await contract.runFunctionFromStrings({
+    const template = (await contract.runFunctionFromStrings({
       action: "buildTemplate",
       function: "payout",
       arguments: funcParams,
-      to: [{
-        to: "bitcoincash:qq2qjesqhy78k5xznl39tqkyjphegmn5hum4sckvhp",
-        amount: 5905205905n,
-      },{
-        to: "bitcoincash:qzfa4m2dcph4yxpn2dm5mqdhy6tj5yutpszpyhqe4s",
-        amount: 2402620943n,
-      }],
+      to: [
+        {
+          to: "bitcoincash:qq2qjesqhy78k5xznl39tqkyjphegmn5hum4sckvhp",
+          amount: 5905205905n,
+        },
+        {
+          to: "bitcoincash:qzfa4m2dcph4yxpn2dm5mqdhy6tj5yutpszpyhqe4s",
+          amount: 2402620943n,
+        },
+      ],
       utxoIds: [contractUtxos[0]].map(toUtxoId),
-    } as CashscriptTransactionI) as AuthenticationTemplate;
+    } as CashscriptTransactionI)) as AuthenticationTemplate;
     expect(evaluateTemplate(template)).toBe(true);
   });
 });

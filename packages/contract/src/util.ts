@@ -1,6 +1,12 @@
 import { hexToBin } from "@bitauth/libauth";
 
-import { Mainnet, SendRequest, TokenSendRequest, Wallet, walletFromId } from "mainnet-js";
+import {
+  Mainnet,
+  SendRequest,
+  TokenSendRequest,
+  Wallet,
+  walletFromId,
+} from "mainnet-js";
 
 import {
   Argument,
@@ -87,7 +93,13 @@ export async function castStringArgumentsFromArtifact(
 }
 
 export async function transformContractToRequests(
-  to: SendRequest | SendRequest[] | TokenSendRequest | TokenSendRequest[] | CashscriptReceipt | CashscriptReceipt[]
+  to:
+    | SendRequest
+    | SendRequest[]
+    | TokenSendRequest
+    | TokenSendRequest[]
+    | CashscriptReceipt
+    | CashscriptReceipt[]
 ): Promise<CashscriptReceipt[]> {
   if (Array.isArray(to)) {
     const result: CashscriptReceipt[] = [];
@@ -110,17 +122,23 @@ async function transformContractToRequestItems(
       token: {
         amount: to.amount ? BigInt(to.amount) : undefined,
         category: to.tokenId,
-        nft: to.capability || to.commitment ? {
-          capability: to.capability,
-          commitment: to.commitment
-        } as TokenDetails["nft"] : undefined,
-      }
+        nft:
+          to.capability || to.commitment
+            ? ({
+                capability: to.capability,
+                commitment: to.commitment,
+              } as TokenDetails["nft"])
+            : undefined,
+      },
     } as CashscriptReceipt;
   } else if ("unit" in to) {
     const sat = await Mainnet.amountInSatoshi(to.value, to.unit);
     return { to: to.cashaddr, amount: BigInt(sat) } as CashscriptReceipt;
   } else {
-    return { ...to, amount: typeof to.amount === "number" ? BigInt(to.amount) : to.amount };
+    return {
+      ...to,
+      amount: typeof to.amount === "number" ? BigInt(to.amount) : to.amount,
+    };
   }
 }
 

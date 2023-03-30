@@ -1,6 +1,11 @@
 import { EscrowContract } from "./EscrowContract";
 
-import { initProviders, disconnectProviders, RegTestWallet, toUtxoId } from "mainnet-js";
+import {
+  initProviders,
+  disconnectProviders,
+  RegTestWallet,
+  toUtxoId,
+} from "mainnet-js";
 import { TransactionDetails } from "cashscript/dist/module/interfaces";
 
 beforeAll(async () => {
@@ -125,7 +130,9 @@ describe(`Test Escrow Contracts`, () => {
     ]);
 
     expect(await escrow.getBalance()).toBeGreaterThan(18000);
-    const utxoIds: string[] = (await escrow.getUtxos()).slice(0, 2).map(toUtxoId);
+    const utxoIds: string[] = (await escrow.getUtxos())
+      .slice(0, 2)
+      .map(toUtxoId);
 
     // spend the escrow contract
     await escrow.call(buyer.privateKeyWif!, "spend", undefined, false, utxoIds);

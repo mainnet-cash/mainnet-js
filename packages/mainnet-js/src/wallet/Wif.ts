@@ -1110,9 +1110,7 @@ export class Wallet extends BaseWallet {
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
       utxos = options.utxoIds.map((utxoId: UtxoI | string) =>
-        typeof utxoId === "string"
-          ? fromUtxoId(utxoId)
-          : utxoId
+        typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
       );
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);

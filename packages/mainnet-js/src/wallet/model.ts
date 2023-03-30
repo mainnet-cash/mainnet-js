@@ -356,20 +356,33 @@ export class XPubKey {
 }
 
 export const fromUtxoId = (utxoId: string): UtxoI => {
-  const [txid, vout, satoshis, tokenId, amount, capability, commitment ] = utxoId.split(DELIMITER);
+  const [txid, vout, satoshis, tokenId, amount, capability, commitment] =
+    utxoId.split(DELIMITER);
   return {
     satoshis: satoshis ? parseInt(satoshis) : 0,
     vout: parseInt(vout),
     txid,
-    token: tokenId ? {
-      tokenId,
-      amount: parseInt(amount),
-      capability: capability || undefined,
-      commitment: commitment || undefined
-    } : undefined
+    token: tokenId
+      ? {
+          tokenId,
+          amount: parseInt(amount),
+          capability: capability || undefined,
+          commitment: commitment || undefined,
+        }
+      : undefined,
   } as UtxoI;
-}
+};
 
 export const toUtxoId = (utxo: UtxoI): string => {
-  return [utxo.txid, utxo.vout, utxo.satoshis, utxo.token?.tokenId, utxo.token?.amount, utxo.token?.capability, utxo.token?.commitment].join(DELIMITER).replace(/:+$/,"");
-}
+  return [
+    utxo.txid,
+    utxo.vout,
+    utxo.satoshis,
+    utxo.token?.tokenId,
+    utxo.token?.amount,
+    utxo.token?.capability,
+    utxo.token?.commitment,
+  ]
+    .join(DELIMITER)
+    .replace(/:+$/, "");
+};

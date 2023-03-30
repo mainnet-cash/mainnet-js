@@ -146,7 +146,12 @@ export class EscrowContract extends Contract {
    * @returns A list of serialized arguments
    */
   private getSerializedArguments() {
-    const args = [this.sellerAddr, this.buyerAddr, this.arbiterAddr, this.amount];
+    const args = [
+      this.sellerAddr,
+      this.buyerAddr,
+      this.arbiterAddr,
+      this.amount,
+    ];
     return Mainnet.btoa(
       args.map((a) => Mainnet.btoa(a.toString())).join(CONST.DELIMITER)
     );
@@ -277,7 +282,7 @@ export class EscrowContract extends Contract {
     // If no utxos were provided, automatically get them
     let utxos: UtxoI[];
     if (typeof utxoIds === "undefined") {
-      utxos = (await this.getUtxos());
+      utxos = await this.getUtxos();
     } else {
       utxos = utxoIds.map(fromUtxoId);
     }
@@ -299,7 +304,12 @@ export class EscrowContract extends Contract {
             `The contract amount (${this.amount}) could not be submitted for a tx fee (${fee}) with the available with contract balance (${balance})`
           );
         }
-        const transaction = func(publicKey, sig, BigInt(amount), BigInt(this.getNonce()))
+        const transaction = func(
+          publicKey,
+          sig,
+          BigInt(amount),
+          BigInt(this.getNonce())
+        )
           .withHardcodedFee(BigInt(fee))
           .from(utxos.map(toCashScript))
           .to(outputAddress, BigInt(amount));

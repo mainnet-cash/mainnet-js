@@ -204,7 +204,8 @@ describe(`Test Wallet library`, () => {
       expect(bobUtxos.length).toBe(4);
 
       // Filter the list to only odd value utxos
-      let oddUtxoIds = bobUtxos.filter((utxo) => utxo.satoshis % 2 == 1)
+      let oddUtxoIds = bobUtxos
+        .filter((utxo) => utxo.satoshis % 2 == 1)
         .map((utxo) => {
           return toUtxoId(utxo);
         });
@@ -306,7 +307,8 @@ describe(`Test Wallet library`, () => {
       expect(bobUtxos.length).toBe(3);
 
       // Filter the list to only odd value utxos
-      let oddUtxoIds = bobUtxos.filter((utxo) => utxo.satoshis % 2 == 1)
+      let oddUtxoIds = bobUtxos
+        .filter((utxo) => utxo.satoshis % 2 == 1)
         .map((utxo) => {
           return toUtxoId(utxo);
         });
