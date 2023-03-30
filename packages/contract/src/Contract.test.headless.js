@@ -33,7 +33,7 @@ describe(`Should handle contracts in the browser`, () => {
         require(hash160(signingPk) == recipientPkh);
         require(checkSig(s, signingPk));
       }
-
+  
       function timeout(pubkey signingPk, sig s) {
           require(hash160(signingPk) == senderPkh);
           require(checkSig(s, signingPk));
