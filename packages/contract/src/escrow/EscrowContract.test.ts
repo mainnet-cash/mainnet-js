@@ -1,6 +1,6 @@
 import { EscrowContract } from "./EscrowContract";
 
-import { initProviders, disconnectProviders, RegTestWallet } from "mainnet-js";
+import { initProviders, disconnectProviders, RegTestWallet, toUtxoId } from "mainnet-js";
 import { TransactionDetails } from "cashscript/dist/module/interfaces";
 
 beforeAll(async () => {
@@ -12,20 +12,20 @@ afterAll(async () => {
 
 describe(`Test Escrow Contracts`, () => {
   test("Should serialize and deserialize", async () => {
-    let escrowContractId =
-      "escrowContract:testnet:WW1Ob2RHVnpkRHB4ZWpBd2NHczViR1p6TUdzNVpqVjJaak5xT0dnMk5uRm1iWEZoWjJzNGJtTTFObVZzY1RSa2RqST06WW1Ob2RHVnpkRHB4Y201c2RYVm5aVFUyWVdoNGMzazJjSEJzY1RRemNuWmhOMnMyY3psa2EyNTFOSEExTWpjNFlXZz06WW1Ob2RHVnpkRHB4ZW5Od1kzbDNlRzF0TkdaeGFHWTVhMnB5YTI1eVl6Tm5jbk4yTW5aMWEyVnhlV3B4YkdFd2JuUT06TVRBd01EQT0=:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok1USTJNVEl6TVRVMk5nPT0=:cHJhZ21hIGNhc2hzY3JpcHQgXjAuNy4wOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczI1IGxvY2tpbmdDb2RlID0gbmV3IExvY2tpbmdCeXRlY29kZVAyUEtIKHNlbGxlclBraCk7CiAgICAgICAgICAgICAgICAgICAgYm9vbCBzZW5kc1RvU2VsbGVyID0gdHgub3V0cHV0c1swXS5sb2NraW5nQnl0ZWNvZGUgPT0gbG9ja2luZ0NvZGU7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZSh0eC5vdXRwdXRzWzBdLnZhbHVlID09IGFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShzZW5kc1RvU2VsbGVyKTsKICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICBmdW5jdGlvbiByZWZ1bmQocHVia2V5IHNpZ25pbmdQaywgc2lnIHMsIGludCBhbW91bnQsIGludCBub25jZSkgewogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IGFyYml0ZXJQa2h8fGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBzZWxsZXJQa2gpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocywgc2lnbmluZ1BrKSk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShhbW91bnQgPj0gY29udHJhY3RBbW91bnQpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUobm9uY2UgPT0gY29udHJhY3ROb25jZSk7CiAgICAgICAgICAgICAgICAgICAgYnl0ZXMyNSBsb2NraW5nQ29kZSA9IG5ldyBMb2NraW5nQnl0ZWNvZGVQMlBLSChidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgYm9vbCBzZW5kc1RvU2VsbGVyID0gdHgub3V0cHV0c1swXS5sb2NraW5nQnl0ZWNvZGUgPT0gbG9ja2luZ0NvZGU7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZSh0eC5vdXRwdXRzWzBdLnZhbHVlID09IGFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShzZW5kc1RvU2VsbGVyKTsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIA==:1261231566";
-    let e = EscrowContract.fromId(escrowContractId);
+    const escrowContractId =
+      "escrowContract:testnet:WW1Ob2RHVnpkRHB4ZWpBd2NHczViR1p6TUdzNVpqVjJaak5xT0dnMk5uRm1iWEZoWjJzNGJtTTFObVZzY1RSa2RqST06WW1Ob2RHVnpkRHB4Y201c2RYVm5aVFUyWVdoNGMzazJjSEJzY1RRemNuWmhOMnMyY3psa2EyNTFOSEExTWpjNFlXZz06WW1Ob2RHVnpkRHB4ZW5Od1kzbDNlRzF0TkdaeGFHWTVhMnB5YTI1eVl6Tm5jbk4yTW5aMWEyVnhlV3B4YkdFd2JuUT06TVRBd01EQT0=:TVRVNExESTBNQ3d5TVRZc01Ua3hMRGMyTERNeExEazRMREUyTml3eE5EQXNOellzTVRBd0xERXlNeXd5TXpVc05qUXNOemdzTVRrekxESXhNaXc0T0N3eU5ETXNNVGszOk1qTXhMREkxTkN3eE1UTXNNalVzTVRZMkxERTROeXd4TVRVc05qUXNNVFUwTERnc01USTJMREV3TERFNU5pd3hNRGdzTWpNNUxERTNNeXd4Tmpnc01qRXNNVGd5TERFMU9RPT06TVRZd0xESTRMREUzTERFNU9Dd3lNaklzTWpNMExERTBOQ3c1TXl3ek55d3hPREFzTVRNMUxERXdOU3d4TkRNc01UY3NOalFzTWpJMExERTVOeXcxTVN3eE5UQXNNakF3Ok1UQXdNREE9Ok1USTJNVEl6TVRVMk5nPT0=:cHJhZ21hIGNhc2hzY3JpcHQgXjAuOC4wOwogICAgICAgICAgICBjb250cmFjdCBlc2Nyb3coYnl0ZXMyMCBzZWxsZXJQa2gsIGJ5dGVzMjAgYnV5ZXJQa2gsIGJ5dGVzMjAgYXJiaXRlclBraCwgaW50IGNvbnRyYWN0QW1vdW50LCBpbnQgY29udHJhY3ROb25jZSkgewoKICAgICAgICAgICAgICAgIGZ1bmN0aW9uIHNwZW5kKHB1YmtleSBzaWduaW5nUGssIHNpZyBzLCBpbnQgYW1vdW50LCBpbnQgbm9uY2UpIHsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBhcmJpdGVyUGtoIHx8IGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgICAgICAgICAgICByZXF1aXJlKGFtb3VudCA+PSBjb250cmFjdEFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShub25jZSA9PSBjb250cmFjdE5vbmNlKTsKICAgICAgICAgICAgICAgICAgICBieXRlczI1IGxvY2tpbmdDb2RlID0gbmV3IExvY2tpbmdCeXRlY29kZVAyUEtIKHNlbGxlclBraCk7CiAgICAgICAgICAgICAgICAgICAgYm9vbCBzZW5kc1RvU2VsbGVyID0gdHgub3V0cHV0c1swXS5sb2NraW5nQnl0ZWNvZGUgPT0gbG9ja2luZ0NvZGU7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZSh0eC5vdXRwdXRzWzBdLnZhbHVlID09IGFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShzZW5kc1RvU2VsbGVyKTsKICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICBmdW5jdGlvbiByZWZ1bmQocHVia2V5IHNpZ25pbmdQaywgc2lnIHMsIGludCBhbW91bnQsIGludCBub25jZSkgewogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IGFyYml0ZXJQa2h8fGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBzZWxsZXJQa2gpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocywgc2lnbmluZ1BrKSk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShhbW91bnQgPj0gY29udHJhY3RBbW91bnQpOwogICAgICAgICAgICAgICAgICAgIHJlcXVpcmUobm9uY2UgPT0gY29udHJhY3ROb25jZSk7CiAgICAgICAgICAgICAgICAgICAgYnl0ZXMyNSBsb2NraW5nQ29kZSA9IG5ldyBMb2NraW5nQnl0ZWNvZGVQMlBLSChidXllclBraCk7CiAgICAgICAgICAgICAgICAgICAgYm9vbCBzZW5kc1RvU2VsbGVyID0gdHgub3V0cHV0c1swXS5sb2NraW5nQnl0ZWNvZGUgPT0gbG9ja2luZ0NvZGU7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZSh0eC5vdXRwdXRzWzBdLnZhbHVlID09IGFtb3VudCk7CiAgICAgICAgICAgICAgICAgICAgcmVxdWlyZShzZW5kc1RvU2VsbGVyKTsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIA==:1261231566";
+    const e = EscrowContract.fromId(escrowContractId);
     expect(e.toString()).toBe(escrowContractId);
   });
 
   test("Should serialize and deserialize", async () => {
-    let escrow = new EscrowContract({
+    const escrow = new EscrowContract({
       sellerAddr: "bchtest:qrmxnsr0g6kl7s3zkweedf5cvlqscatajgt62kpjtj",
       buyerAddr: "bchtest:qz74q2z3v6qakjwj9htgn62d6vn0uvag2u2qgz6fm6",
       arbiterAddr: "bchtest:qrzqzlnclmmrt4vujzz6nu9je99rv85kw5aa9hklev",
       amount: 19500,
     });
-    let escrow2 = new EscrowContract({
+    const escrow2 = new EscrowContract({
       sellerAddr: "bchtest:qrmxnsr0g6kl7s3zkweedf5cvlqscatajgt62kpjtj",
       buyerAddr: "bchtest:qz74q2z3v6qakjwj9htgn62d6vn0uvag2u2qgz6fm6",
       arbiterAddr: "bchtest:qrzqzlnclmmrt4vujzz6nu9je99rv85kw5aa9hklev",
@@ -34,18 +34,18 @@ describe(`Test Escrow Contracts`, () => {
     expect(escrow.toString().slice(0, 20)).toBe(
       escrow2.toString().slice(0, 20)
     );
-    let escrow3 = EscrowContract.fromId(escrow.toString());
+    const escrow3 = EscrowContract.fromId(escrow.toString());
     expect(escrow.getDepositAddress()).toBe(escrow3.getDepositAddress());
   });
 
   test("Should allow buyer to spend to seller", async () => {
-    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
-    let seller2 = await RegTestWallet.newRandom();
-    let escrow = new EscrowContract({
+    const arbiter = await RegTestWallet.newRandom();
+    const buyer = await RegTestWallet.newRandom();
+    const seller = await RegTestWallet.newRandom();
+    const seller2 = await RegTestWallet.newRandom();
+    const escrow = new EscrowContract({
       sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
@@ -88,13 +88,13 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow buyer to spend specific utxos to seller", async () => {
-    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
-    let seller2 = await RegTestWallet.newRandom();
-    let escrow = new EscrowContract({
+    const arbiter = await RegTestWallet.newRandom();
+    const buyer = await RegTestWallet.newRandom();
+    const seller = await RegTestWallet.newRandom();
+    const seller2 = await RegTestWallet.newRandom();
+    const escrow = new EscrowContract({
       sellerAddr: seller.getDepositAddress()!,
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
@@ -125,12 +125,10 @@ describe(`Test Escrow Contracts`, () => {
     ]);
 
     expect(await escrow.getBalance()).toBeGreaterThan(18000);
-    let utxos = (await escrow.getUtxos()).utxos.slice(0, 2).map((u) => {
-      return u.utxoId;
-    });
+    const utxoIds: string[] = (await escrow.getUtxos()).slice(0, 2).map(toUtxoId);
 
     // spend the escrow contract
-    await escrow.call(buyer.privateKeyWif!, "spend", undefined, false, utxos);
+    await escrow.call(buyer.privateKeyWif!, "spend", undefined, false, utxoIds);
     expect(await escrow.getBalance()).toBe(9400);
     expect(await seller.getBalance("sat")).toBeGreaterThan(9500);
 
@@ -140,12 +138,12 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow arbiter to spend to seller", async () => {
-    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
-    let seller2 = await RegTestWallet.newRandom();
+    const arbiter = await RegTestWallet.newRandom();
+    const buyer = await RegTestWallet.newRandom();
+    const seller = await RegTestWallet.newRandom();
+    const seller2 = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -155,7 +153,7 @@ describe(`Test Escrow Contracts`, () => {
       },
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
-    let escrow = new EscrowContract({
+    const escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
@@ -183,12 +181,12 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow seller to refund to buyer", async () => {
-    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let buyer2 = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
+    const arbiter = await RegTestWallet.newRandom();
+    const buyer = await RegTestWallet.newRandom();
+    const buyer2 = await RegTestWallet.newRandom();
+    const seller = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -198,7 +196,7 @@ describe(`Test Escrow Contracts`, () => {
       },
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
-    let escrow = new EscrowContract({
+    const escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
@@ -226,12 +224,12 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should allow arbiter to refund to buyer", async () => {
-    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let buyer2 = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
+    const arbiter = await RegTestWallet.newRandom();
+    const buyer = await RegTestWallet.newRandom();
+    const buyer2 = await RegTestWallet.newRandom();
+    const seller = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -241,7 +239,7 @@ describe(`Test Escrow Contracts`, () => {
       },
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
-    let escrow = new EscrowContract({
+    const escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
@@ -269,11 +267,11 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should return hex when getHexOnly is true", async () => {
-    let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+    const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-    let arbiter = await RegTestWallet.newRandom();
-    let buyer = await RegTestWallet.newRandom();
-    let seller = await RegTestWallet.newRandom();
+    const arbiter = await RegTestWallet.newRandom();
+    const buyer = await RegTestWallet.newRandom();
+    const seller = await RegTestWallet.newRandom();
 
     await funder.send([
       {
@@ -283,7 +281,7 @@ describe(`Test Escrow Contracts`, () => {
       },
     ]);
     expect(await buyer.getBalance("sat")).toBe(500000);
-    let escrow = new EscrowContract({
+    const escrow = new EscrowContract({
       arbiterAddr: arbiter.getDepositAddress()!,
       buyerAddr: buyer.getDepositAddress()!,
       sellerAddr: seller.getDepositAddress()!,
@@ -301,7 +299,7 @@ describe(`Test Escrow Contracts`, () => {
     expect(await escrow.getBalance()).toBe(450000);
 
     // refund the escrow contract
-    let hexOnly = await escrow.call(
+    const hexOnly = await escrow.call(
       arbiter.privateKeyWif!,
       "refund",
       undefined,
@@ -316,11 +314,11 @@ describe(`Test Escrow Contracts`, () => {
   test("Should fail on refund by buyer", async () => {
     expect.assertions(1);
     try {
-      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+      const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-      let arbiter = await RegTestWallet.newRandom();
-      let buyer = await RegTestWallet.newRandom();
-      let seller = await RegTestWallet.newRandom();
+      const arbiter = await RegTestWallet.newRandom();
+      const buyer = await RegTestWallet.newRandom();
+      const seller = await RegTestWallet.newRandom();
 
       await funder.send([
         {
@@ -329,7 +327,7 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
-      let escrow = new EscrowContract({
+      const escrow = new EscrowContract({
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
@@ -357,11 +355,11 @@ describe(`Test Escrow Contracts`, () => {
   test("Should throw error on insuffecent funds", async () => {
     expect.assertions(1);
     try {
-      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+      const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-      let arbiter = await RegTestWallet.newRandom();
-      let buyer = await RegTestWallet.newRandom();
-      let seller = await RegTestWallet.newRandom();
+      const arbiter = await RegTestWallet.newRandom();
+      const buyer = await RegTestWallet.newRandom();
+      const seller = await RegTestWallet.newRandom();
 
       await funder.send([
         {
@@ -370,7 +368,7 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
-      let escrow = new EscrowContract({
+      const escrow = new EscrowContract({
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
@@ -398,11 +396,11 @@ describe(`Test Escrow Contracts`, () => {
   test("Should throw error on spend by seller", async () => {
     expect.assertions(1);
     try {
-      let funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+      const funder = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
 
-      let arbiter = await RegTestWallet.newRandom();
-      let buyer = await RegTestWallet.newRandom();
-      let seller = await RegTestWallet.newRandom();
+      const arbiter = await RegTestWallet.newRandom();
+      const buyer = await RegTestWallet.newRandom();
+      const seller = await RegTestWallet.newRandom();
 
       await funder.send([
         {
@@ -411,7 +409,7 @@ describe(`Test Escrow Contracts`, () => {
           unit: "satoshis",
         },
       ]);
-      let escrow = new EscrowContract({
+      const escrow = new EscrowContract({
         arbiterAddr: arbiter.getDepositAddress()!,
         buyerAddr: buyer.getDepositAddress()!,
         sellerAddr: seller.getDepositAddress()!,
@@ -436,7 +434,7 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should create an escrow contract", async () => {
-    let contractResp = EscrowContract.escrowContractFromJsonRequest({
+    const contractResp = EscrowContract.escrowContractFromJsonRequest({
       type: "escrow",
       sellerAddr: "bchtest:qrmxnsr0g6kl7s3zkweedf5cvlqscatajgt62kpjtj",
       buyerAddr: "bchtest:qz74q2z3v6qakjwj9htgn62d6vn0uvag2u2qgz6fm6",
@@ -451,7 +449,7 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should create return a contract object", async () => {
-    let response = EscrowContract.escrowContractFromJsonRequest({
+    const response = EscrowContract.escrowContractFromJsonRequest({
       type: "escrow",
       sellerAddr: "bchtest:qrmxnsr0g6kl7s3zkweedf5cvlqscatajgt62kpjtj",
       buyerAddr: "bchtest:qz74q2z3v6qakjwj9htgn62d6vn0uvag2u2qgz6fm6",
@@ -465,7 +463,7 @@ describe(`Test Escrow Contracts`, () => {
   });
 
   test("Should create a contract from serialized id", async () => {
-    let createResponse = EscrowContract.escrowContractFromJsonRequest({
+    const createResponse = EscrowContract.escrowContractFromJsonRequest({
       type: "escrow",
       sellerAddr: "bchreg:qrc3vd0guh7mn9c9vl58rx6wcv92ld57aquqrre62e",
       buyerAddr: "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
@@ -473,7 +471,7 @@ describe(`Test Escrow Contracts`, () => {
       amount: 12000,
     });
 
-    let response = EscrowContract.fromId(createResponse.escrowContractId);
+    const response = EscrowContract.fromId(createResponse.escrowContractId);
     expect(response.getDepositAddress()).toBe(createResponse.cashaddr);
     expect(response.toString().slice(0, 201)).toBe(
       createResponse.escrowContractId.slice(0, 201)

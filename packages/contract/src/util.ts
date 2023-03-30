@@ -1,6 +1,6 @@
 import { hexToBin } from "@bitauth/libauth";
 
-import { Mainnet, SendRequest, walletFromId } from "mainnet-js";
+import { Mainnet, SendRequest, TokenSendRequest, Wallet, walletFromId } from "mainnet-js";
 
 import {
   Argument,
@@ -8,11 +8,7 @@ import {
   Recipient as CashscriptReceipt,
   SignatureTemplate,
 } from "cashscript";
-
-// // FIXME Jest is complaining about SignatureTemplate not exported
-// const { SignatureTemplate } = cashscript || {
-//   SignatureTemplate: (await import("cashscript"))["SignatureTemplate"],
-// };
+import { TokenDetails } from "cashscript/dist/interfaces";
 
 /**
  * castConstructorParametersFromArtifact - Cast string arguments to the appropriate cashscript contract constructor input
@@ -27,8 +23,8 @@ export function castConstructorParametersFromArtifact(
   parameters: string[],
   artifact: Artifact
 ) {
-  let result: any[] = [];
-  let inputs = artifact.constructorInputs;
+  const result: any[] = [];
+  const inputs = artifact.constructorInputs;
   parameters.forEach(function (value, i) {
     if (inputs[i].type.startsWith("bytes")) {
       if (typeof value === "string") {
@@ -45,7 +41,7 @@ export function castConstructorParametersFromArtifact(
         throw Error(`Couldn't parse ${value} from string to bytes`);
       }
     } else if (inputs[i].type === "int") {
-      result.push(parseInt(value));
+      result.push(BigInt(value));
     } else if (inputs[i].type === "boolean") {
       result.push(Boolean(value));
     } else {
@@ -67,20 +63,20 @@ export async function castStringArgumentsFromArtifact(
   artifact: Artifact,
   funcName: string
 ) {
-  let abi = artifact.abi.filter((abi) => abi.name === funcName)[0];
-  let result: any[] = [];
+  const abi = artifact.abi.filter((abi) => abi.name === funcName)[0];
+  const result: any[] = [];
   if (args) {
     for (let i = 0; i < args.length; i++) {
       if (abi.inputs[i].type.startsWith("bytes")) {
-        let uint = hexToBin(args[i] as string);
+        const uint = hexToBin(args[i] as string);
         result.push(uint);
       } else if (abi.inputs[i].type === "int") {
-        result.push(args[i] as number);
+        result.push(BigInt(args[i] as string));
       } else if (abi.inputs[i].type === "boolean") {
         result.push(Boolean(args[i]));
       } else if (abi.inputs[i].type === "sig") {
-        let w = await walletFromId(args[i] as string);
-        let sig = getSignatureTemplate(w);
+        const w = await walletFromId(args[i] as string);
+        const sig = getSignatureTemplate(w);
         result.push(sig);
       } else {
         result.push(args[i]);
@@ -91,11 +87,11 @@ export async function castStringArgumentsFromArtifact(
 }
 
 export async function transformContractToRequests(
-  to: SendRequest | SendRequest[] | CashscriptReceipt | CashscriptReceipt[]
+  to: SendRequest | SendRequest[] | TokenSendRequest | TokenSendRequest[] | CashscriptReceipt | CashscriptReceipt[]
 ): Promise<CashscriptReceipt[]> {
   if (Array.isArray(to)) {
-    let result: CashscriptReceipt[] = [];
-    for (let send of to) {
+    const result: CashscriptReceipt[] = [];
+    for (const send of to) {
       result.push(await transformContractToRequestItems(send));
     }
     return result;
@@ -105,17 +101,30 @@ export async function transformContractToRequests(
 }
 
 async function transformContractToRequestItems(
-  to: SendRequest | CashscriptReceipt
+  to: SendRequest | TokenSendRequest | CashscriptReceipt
 ): Promise<CashscriptReceipt> {
-  if ("unit" in to) {
-    let sat = await Mainnet.amountInSatoshi(to.value, to.unit);
-    return { to: to.cashaddr, amount: sat } as CashscriptReceipt;
+  if ("tokenId" in to) {
+    return {
+      to: to.cashaddr,
+      amount: BigInt(to.value ?? 1000),
+      token: {
+        amount: to.amount ? BigInt(to.amount) : undefined,
+        category: to.tokenId,
+        nft: to.capability || to.commitment ? {
+          capability: to.capability,
+          commitment: to.commitment
+        } as TokenDetails["nft"] : undefined,
+      }
+    } as CashscriptReceipt;
+  } else if ("unit" in to) {
+    const sat = await Mainnet.amountInSatoshi(to.value, to.unit);
+    return { to: to.cashaddr, amount: BigInt(sat) } as CashscriptReceipt;
   } else {
-    return to;
+    return { ...to, amount: typeof to.amount === "number" ? BigInt(to.amount) : to.amount };
   }
 }
 
 // get a cashscript signature
-export function getSignatureTemplate(wallet) {
+export function getSignatureTemplate(wallet: Wallet) {
   return new SignatureTemplate(wallet.privateKeyWif as string);
 }

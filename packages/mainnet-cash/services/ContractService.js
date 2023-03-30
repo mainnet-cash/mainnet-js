@@ -14,7 +14,7 @@ const createContract = ({ contractRequest }) => new Promise(
       const resp = await Contract.contractRespFromJsonRequest(contractRequest);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
-      console.trace(JSON.stringify(e))
+      console.trace(e)
       reject(Service.rejectResponse(
         e,
         e.status || 405,
@@ -44,7 +44,7 @@ const contractFn = ({ contractFnRequest }) => new Promise(
           marshaledResponse.hex = resp
         }
       }else{
-        marshaledResponse.txId = resp.txid
+        marshaledResponse.txid = resp.txid
         marshaledResponse.hex = resp.hex
       }
       resolve(Service.successResponse({... marshaledResponse}));
@@ -67,7 +67,7 @@ const contractFn = ({ contractFnRequest }) => new Promise(
 const contractInfo = ( {contractInfoRequest } ) => new Promise(
   async (resolve, reject) => {
     try {
-      const contract = Contract.fromId(contractInfoRequest.contractId);    
+      const contract = Contract.fromId(contractInfoRequest.contractId);
       const resp = contract.info();
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
@@ -83,7 +83,7 @@ const contractInfo = ( {contractInfoRequest } ) => new Promise(
 * List specific utxos in a contract
 * Returns all UTXOs that can be spent by the  contract. Both confirmed and unconfirmed UTXOs are included. 
 *
-* contract Contract 
+* contract Contract
 * returns UtxoResponse
 * */
 const contractUtxos = ({contract}) => new Promise(
@@ -91,7 +91,7 @@ const contractUtxos = ({contract}) => new Promise(
     try {
       const _contract = Contract.fromId(contract.contractId);
       const resp = await _contract.getUtxos();
-      resolve(Service.successResponse({ ...resp }));
+      resolve(Service.successResponse(resp));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)

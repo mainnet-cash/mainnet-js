@@ -11,11 +11,11 @@ import { compileString, compileFile } from "cashc";
 
 import {
   CONST,
+  fromUtxoId,
   getNetworkProvider,
   Mainnet,
   Network,
   UtxoI,
-  UtxoItem,
 } from "mainnet-js";
 
 import {
@@ -29,6 +29,8 @@ import {
   castStringArgumentsFromArtifact,
   transformContractToRequests,
 } from "./util.js";
+import WrappedProvider, { toCashScript, toMainnet } from "./WrappedProvider.js";
+import { buildTemplate, getBitauthUri } from "./template.js";
 
 /**
  * Class that manages the Contract source, network, parameters, CashScript artifact and calls
@@ -36,7 +38,7 @@ import {
 export class Contract implements ContractI {
   private script: string;
   public parameters: Argument[];
-  private artifact: Artifact;
+  public artifact: Artifact;
   private contract: CashScriptContract;
   private provider: NetworkProvider;
   public network: Network;
@@ -60,10 +62,10 @@ export class Contract implements ContractI {
     nonce?: number
   ) {
     this.script = script;
-    this.parameters = parameters;
+    this.parameters = parameters.map(val => typeof val === "number" ? BigInt(val) : val);
     this.network = network ? network : "mainnet";
     this.artifact = compileString(script);
-    this.provider = getNetworkProvider(this.network);
+    this.provider = new WrappedProvider(getNetworkProvider(this.network) as any);
     this.contract = this.getContractInstance();
     this.nonce = nonce ? nonce : Mainnet.getRandomInt(2147483647);
   }
@@ -140,14 +142,14 @@ export class Contract implements ContractI {
    * @returns A new contract
    */
   public static fromId(contractId: string) {
-    let [type, network, serializedParams, serializedScript, nonce] =
+    const [type, network, serializedParams, serializedScript, nonce] =
       contractId.split(CONST.DELIMITER);
-    let script = Mainnet.atob(serializedScript);
-    let artifact = compileString(script);
-    let paramStrings = Mainnet.atob(serializedParams)
+    const script = Mainnet.atob(serializedScript);
+    const artifact = compileString(script);
+    const paramStrings = Mainnet.atob(serializedParams)
       .split(CONST.DELIMITER)
       .map((s) => Mainnet.atob(s));
-    let params = castConstructorParametersFromArtifact(paramStrings, artifact);
+    const params = castConstructorParametersFromArtifact(paramStrings, artifact);
 
     return new Contract(script, params, network as Network, parseInt(nonce));
   }
@@ -164,10 +166,10 @@ export class Contract implements ContractI {
     script: string,
     parameters: string[],
     network: Network,
-    nonce?
-  ) {
-    let artifact = compileString(script);
-    let params = castConstructorParametersFromArtifact(parameters, artifact);
+    nonce?: number
+  ): Contract {
+    const artifact = compileString(script);
+    const params = castConstructorParametersFromArtifact(parameters, artifact);
     return new this(script, params, network, nonce);
   }
 
@@ -179,8 +181,20 @@ export class Contract implements ContractI {
    * @note For REST, the address is automatically returned from the create interface
    * @returns The address for a contract
    */
-  public getDepositAddress() {
+  public getDepositAddress(): string {
     return this.contract.address;
+  }
+
+  /**
+   * Get the unspent transaction outputs of the contract
+   *
+   * an intermediate function
+   *
+   * @note For REST, the address is automatically returned from the create interface
+   * @returns The address for a contract
+   */
+  public getTokenDepositAddress(): string {
+    return this.contract.tokenAddress;
   }
 
   /**
@@ -191,12 +205,8 @@ export class Contract implements ContractI {
    * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/contract/utxos} REST endpoint
    * @returns A list of utxos on the contract
    */
-  public async getUtxos() {
-    return {
-      utxos: (await this.contract.getUtxos()).map((u) => {
-        return UtxoItem.fromElectrum(u);
-      }),
-    };
+  public async getUtxos(): Promise<UtxoI[]> {
+    return (await this.provider.getUtxos(this.getDepositAddress())).map(toMainnet);
   }
 
   /**
@@ -204,8 +214,8 @@ export class Contract implements ContractI {
    *
    * @returns The balance in satoshi
    */
-  public getBalance() {
-    return this.contract.getBalance();
+  public async getBalance(): Promise<number> {
+    return Number(await this.contract.getBalance());
   }
 
   /**
@@ -220,8 +230,11 @@ export class Contract implements ContractI {
     return {
       contractId: this.toString(),
       cashaddr: this.contract.address,
+      tokenaddr: this.contract.tokenAddress,
       script: this.script,
-      parameters: this.getParameterList(),
+      parameters: this.getParameterList()
+        // map bigints to numbers for REST service.
+        .map(val => typeof val === "bigint" ? Number(val) : val),
       nonce: this.nonce,
     };
   }
@@ -238,7 +251,7 @@ export class Contract implements ContractI {
     return new CashScriptContract(
       this.artifact,
       this.parameters,
-      this.provider
+      { provider: this.provider, addressType: "p2sh20" }
     );
   }
 
@@ -248,7 +261,7 @@ export class Contract implements ContractI {
    */
   public fromCashScript() {
     this.artifact = compileFile(this.script);
-    this.contract = new CashScriptContract(this.artifact, [], this.provider);
+    this.contract = new CashScriptContract(this.artifact, [], { provider: this.provider, addressType: "p2sh20" });
     return this;
   }
 
@@ -288,9 +301,9 @@ export class Contract implements ContractI {
    * @param request Parameters for the transaction call, serialized as strings.
    * @returns A CashScript Transaction result
    */
-  public async runFunctionFromStrings(request: CashscriptTransactionI) {
-    let fn = this.getContractFunction(request.function);
-    let arg = await castStringArgumentsFromArtifact(
+  public async runFunctionFromStrings(request: CashscriptTransactionI): Promise<any> {
+    const fn = this.getContractFunction(request.function);
+    const arg = await castStringArgumentsFromArtifact(
       request.arguments,
       this.artifact,
       request.function
@@ -298,9 +311,7 @@ export class Contract implements ContractI {
     let func = fn(...arg);
     func = func.to(await transformContractToRequests(request.to));
     if (request.utxoIds) {
-      let utxos = request.utxoIds.map((u) => {
-        return UtxoItem.fromId(u).asElectrum();
-      });
+      const utxos = request.utxoIds.map(fromUtxoId).map(toCashScript);
       func = func.from(utxos);
     }
     if (request.opReturn) {
@@ -310,10 +321,10 @@ export class Contract implements ContractI {
       func = func.withFeePerByte(request.feePerByte);
     }
     if (request.hardcodedFee) {
-      func = func.withHardcodedFee(request.hardcodedFee);
+      func = func.withHardcodedFee(BigInt(request.hardcodedFee));
     }
     if (request.minChange) {
-      func = func.withMinChange(request.minChange);
+      func = func.withMinChange(BigInt(request.minChange));
     }
     if (request.withoutChange) {
       func = func.withoutChange();
@@ -324,6 +335,13 @@ export class Contract implements ContractI {
     if (request.time) {
       func = func.withTime(request.time);
     }
+
+    if (request.action === "getBitauthUri") {
+      return getBitauthUri(await buildTemplate({contract: this, transaction: func, manglePrivateKeys: false }));
+    } else if (request.action === "buildTemplate") {
+      return await buildTemplate({contract: this, transaction: func });
+    }
+
     return await func[request.action]();
   }
 
@@ -343,11 +361,11 @@ export class Contract implements ContractI {
   ) {
     const feePerByte = 1;
     // Create an estimate transaction with zero fees, sending nominal balance
-    const estimatorTransaction = func(publicKey, sig, 10, 2147483640)
-      .to([{ to: outputAddress, amount: 1000 }])
-      .from(utxos);
+    const estimatorTransaction = func(publicKey, sig, 10n, 2147483640n)
+      .to([{ to: outputAddress, amount: 1000n }])
+      .from(utxos.map(toCashScript));
     const estimatedTxHex = (await estimatorTransaction
-      .withHardcodedFee(500)
+      .withHardcodedFee(500n)
       ["build"]()) as string;
 
     // Use the feePerByte to get the fee for the transaction length
@@ -360,7 +378,7 @@ export class Contract implements ContractI {
    * @returns A new contract object
    */
   public static contractRespFromJsonRequest(request: any): ContractResponseI {
-    let contract = Contract._create(
+    const contract = Contract._create(
       request.script,
       request.parameters,
       request.network

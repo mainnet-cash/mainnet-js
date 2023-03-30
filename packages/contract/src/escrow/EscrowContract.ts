@@ -1,5 +1,4 @@
-import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { CONST, Mainnet, Network, UtxoItem } from "mainnet-js";
+import { CONST, Mainnet, Network, UtxoI, fromUtxoId } from "mainnet-js";
 
 import {
   EscrowArguments,
@@ -9,6 +8,7 @@ import {
 
 import { Contract } from "../Contract.js";
 import { SignatureTemplate } from "cashscript";
+import { toCashScript } from "../WrappedProvider.js";
 
 export class EscrowContract extends Contract {
   private sellerAddr: string;
@@ -37,13 +37,13 @@ export class EscrowContract extends Contract {
     nonce,
   }: EscrowArguments) {
     // Put the arguments in contract order
-    let addressArgs = [sellerAddr, buyerAddr, arbiterAddr];
+    const addressArgs = [sellerAddr, buyerAddr, arbiterAddr];
 
     // Derive the network from addresses given or throw error if not on same network
     const network = Mainnet.derivedNetwork(Object.values(addressArgs));
     const tmpNonce = nonce ? nonce : Mainnet.getRandomInt(2147483647);
     // Transform the arguments given to Public Key Hashes
-    let rawContractArgs = addressArgs.map((x) => {
+    const rawContractArgs = addressArgs.map((x) => {
       return Mainnet.derivePublicKeyHash(x);
     }) as any[];
     rawContractArgs.push(amount);
@@ -86,7 +86,7 @@ export class EscrowContract extends Contract {
    *
    * an high level function
    *
-   * @param wif Private key of the wallet signing the transaction
+   * @param wif Private key of the const signing the transaction
    * @param funcName Escrow function to call
    * @param outputAddress Destination cashaddr
    * @param getHexOnly Boolean to build the transaction without broadcasting
@@ -146,7 +146,7 @@ export class EscrowContract extends Contract {
    * @returns A list of serialized arguments
    */
   private getSerializedArguments() {
-    let args = [this.sellerAddr, this.buyerAddr, this.arbiterAddr, this.amount];
+    const args = [this.sellerAddr, this.buyerAddr, this.arbiterAddr, this.amount];
     return Mainnet.btoa(
       args.map((a) => Mainnet.btoa(a.toString())).join(CONST.DELIMITER)
     );
@@ -160,7 +160,7 @@ export class EscrowContract extends Contract {
    * @returns A new escrow contract
    */
   public static fromId(escrowContractId: string) {
-    let [
+    const [
       type,
       network,
       serializedArgs,
@@ -168,17 +168,17 @@ export class EscrowContract extends Contract {
       serializedScript,
       nonce,
     ] = escrowContractId.split(CONST.DELIMITER);
-    let [sellerAddr, buyerAddr, arbiterAddr, amount] = Mainnet.atob(
+    const [sellerAddr, buyerAddr, arbiterAddr, amount] = Mainnet.atob(
       serializedArgs
     )
       .split(CONST.DELIMITER)
       .map((s) => Mainnet.atob(s));
 
-    let script = Mainnet.atob(serializedScript);
-    let paramStrings = Mainnet.atob(serializedParams)
+    const script = Mainnet.atob(serializedScript);
+    const paramStrings = Mainnet.atob(serializedParams)
       .split(CONST.DELIMITER)
       .map((s) => Mainnet.atob(s));
-    let contract = new EscrowContract({
+    const contract = new EscrowContract({
       sellerAddr: sellerAddr,
       buyerAddr: buyerAddr,
       arbiterAddr: arbiterAddr,
@@ -197,7 +197,7 @@ export class EscrowContract extends Contract {
   public static escrowContractFromJsonRequest(
     request: any
   ): EscrowContractResponseI {
-    let contract = EscrowContract.create(request);
+    const contract = EscrowContract.create(request);
     if (contract) {
       return {
         escrowContractId: contract.toString(),
@@ -213,7 +213,7 @@ export class EscrowContract extends Contract {
    * @returns The contract text in CashScript
    */
   static getContractText(): string {
-    return `pragma cashscript ^0.7.0;
+    return `pragma cashscript ^0.8.0;
             contract escrow(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
 
                 function spend(pubkey signingPk, sig s, int amount, int nonce) {
@@ -268,23 +268,18 @@ export class EscrowContract extends Contract {
     utxoIds?: string[]
   ) {
     const sig = new SignatureTemplate(wif);
-    const secp256k1 = await instantiateSecp256k1();
-    let publicKey = sig.getPublicKey(secp256k1);
-    let func = this.getFunctionByName(funcName);
+    const publicKey = sig.getPublicKey();
+    const func = this.getFunctionByName(funcName);
 
     // If getHexOnly is true, just return the tx hex, otherwise submit to the network
     const method = getHexOnly ? "build" : "send";
 
     // If no utxos were provided, automatically get them
-    let utxos;
+    let utxos: UtxoI[];
     if (typeof utxoIds === "undefined") {
-      utxos = (await this.getUtxos()).utxos.map((u) => {
-        return u.asElectrum();
-      });
+      utxos = (await this.getUtxos());
     } else {
-      utxos = utxoIds.map((u) => {
-        return UtxoItem.fromId(u).asElectrum();
-      });
+      utxos = utxoIds.map(fromUtxoId);
     }
     if (utxos.length > 0) {
       try {
@@ -304,11 +299,11 @@ export class EscrowContract extends Contract {
             `The contract amount (${this.amount}) could not be submitted for a tx fee (${fee}) with the available with contract balance (${balance})`
           );
         }
-        let transaction = func(publicKey, sig, amount, this.getNonce())
-          .withHardcodedFee(fee)
-          .from(utxos)
-          .to(outputAddress, amount);
-        let txResult = await transaction[method]();
+        const transaction = func(publicKey, sig, BigInt(amount), BigInt(this.getNonce()))
+          .withHardcodedFee(BigInt(fee))
+          .from(utxos.map(toCashScript))
+          .to(outputAddress, BigInt(amount));
+        const txResult = await transaction[method]();
 
         if (getHexOnly) {
           return { hex: txResult };

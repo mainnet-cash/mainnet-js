@@ -2441,26 +2441,44 @@ components:
           BalanceRequest: '#/components/schemas/BalanceRequest'
     Utxo:
       properties:
-        index:
+        vout:
           type: number
-        txId:
+        txid:
           type: string
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           description: The hash of a transaction
-        value:
+        satoshis:
           type: number
           example: 100
-        utxoId:
-          type: string
-          example: >-
-            1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0:21005
-          description: serialized outpoint
-      allOf:
-        - $ref: '#/components/schemas/UnitType'
+        token:
+          type: object
+          nullable: true
+          properties:
+            amount:
+              type: number
+              description: Fungible token amount to send
+            tokenId:
+              type: string
+              description: >-
+                Token unique hexadecimal identifier, also the id of the token
+                creation transaction
+            capability:
+              type: string
+              nullable: true
+              enum:
+                - none
+                - mutable
+                - minting
+              description: Capability of the NFT
+            commitment:
+              type: string
+              nullable: true
+              maxLength: 80
+              description: Token commitment message, hexadecimal encoded, 40 bytes max length
       required:
-        - value
-        - txId
-        - utxoId
+        - satoshis
+        - txid
+        - vout
     BalanceRequest:
       properties:
         walletId:
@@ -3096,7 +3114,7 @@ components:
                     bytes34 output = new OutputP2PKH(bytes8(amount), buyerPkh);
                     require(hash256(output) == tx.hashOutputs);
                 }
-            }            
+            }
         parameters:
           description: Parameters passed when the contract was created
           type: array
@@ -3142,11 +3160,9 @@ components:
       required:
         - escrowContractId
     UtxoResponse:
-      properties:
-        utxos:
-          type: array
-          items:
-            $ref: '#/components/schemas/Utxo'
+      type: array
+      items:
+        $ref: '#/components/schemas/Utxo'
     ContractInfoRequest:
       properties:
         contractId:
@@ -3174,7 +3190,7 @@ components:
                     require(checkSig(senderSig, sender));
                     require(tx.time >= timeout);
                 }
-            }            
+            }
         parameters:
           description: Parameters passed when the contract was created
           type: array
@@ -3190,6 +3206,9 @@ components:
         cashaddr:
           type: string
           example: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        tokenaddr:
+          type: string
+          example: bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu
     Contract:
       properties:
         contractId:

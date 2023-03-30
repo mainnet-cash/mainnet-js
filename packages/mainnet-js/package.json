@@ -38,7 +38,7 @@
     "reload": "npx reload --dir=../../jest/playwright "
   },
   "dependencies": {
-    "@bitauth/libauth": "=v2.0.0-alpha.7",
+    "@bitauth/libauth": "^2.0.0-alpha.8",
     "async-mutex": "^0.3.1",
     "axios": "^0.21.1",
     "bchaddrjs-slp": "^0.2.12",

@@ -382,7 +382,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.utxos;
+    })).body;
     expect(tokenUtxos.length).toBe(1);
 
     const rawTx = (await request(app).post("/wallet/util/get_raw_transaction").send({

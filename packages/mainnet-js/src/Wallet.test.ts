@@ -6,6 +6,7 @@ import { createWallet } from "./wallet/createWallet";
 import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { ExchangeRate } from "./rate/ExchangeRate";
 import { initProviders, disconnectProviders } from "./network/Connection";
+import { toUtxoId } from "./wallet/model";
 
 beforeAll(async () => {
   await initProviders();
@@ -200,13 +201,12 @@ describe(`Test Wallet library`, () => {
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
       expect(bobBalance.sat).toBe(22003);
       let bobUtxos = await bob.getUtxos();
-      expect(bobUtxos.utxos!.length).toBe(4);
+      expect(bobUtxos.length).toBe(4);
 
       // Filter the list to only odd value utxos
-      let oddUtxoIds = bobUtxos
-        .utxos!.filter((utxo) => utxo.value % 2 == 1)
+      let oddUtxoIds = bobUtxos.filter((utxo) => utxo.satoshis % 2 == 1)
         .map((utxo) => {
-          return utxo.utxoId;
+          return toUtxoId(utxo);
         });
 
       // Build Bob's wallet from a public address, check his balance.
@@ -303,13 +303,12 @@ describe(`Test Wallet library`, () => {
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
       expect(bobBalance.sat).toBe(3002);
       let bobUtxos = await bob.getUtxos();
-      expect(bobUtxos.utxos!.length).toBe(3);
+      expect(bobUtxos.length).toBe(3);
 
       // Filter the list to only odd value utxos
-      let oddUtxoIds = bobUtxos
-        .utxos!.filter((utxo) => utxo.value % 2 == 1)
+      let oddUtxoIds = bobUtxos.filter((utxo) => utxo.satoshis % 2 == 1)
         .map((utxo) => {
-          return utxo.utxoId;
+          return toUtxoId(utxo);
         });
 
       // Build Bob's wallet from a public address, check his balance.

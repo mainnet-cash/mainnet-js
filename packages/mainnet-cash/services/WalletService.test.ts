@@ -3,6 +3,7 @@ import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 import server from "../index.js";
 import request from "supertest";
+import { toUtxoId } from "mainnet-js";
 
 var app;
 
@@ -438,9 +439,9 @@ describe("Test Wallet Endpoints", () => {
       expect(utxoResp.statusCode).toBe(200);
 
       // Filter utxoIds to a list of odd valued ones
-      let utxoIds = utxoResp.body.utxos!.filter((utxo) => utxo.value % 2 == 1)
+      let utxoIds = utxoResp.body.filter((utxo) => utxo.satoshis % 2 == 1)
       .map((utxo) => {
-        return utxo.utxoId;
+        return toUtxoId(utxo);
       });
 
       // create a random new wallet
@@ -465,14 +466,14 @@ describe("Test Wallet Endpoints", () => {
           options:{"utxoIds":utxoIds}
         });
         expect(finalSendResp.statusCode).toBe(200);
-        
+
         // Assure that bob now has 1 utxo
       const utxoResp2 = await request(app)
       .post("/wallet/utxo")
       .send({
         walletId: bobsWalletResp.body.walletId,
       });
-      expect(utxoResp2.body.utxos!.length).toBe(1);
+      expect(utxoResp2.body.length).toBe(1);
 
       // Assure that bob still has 1000 sat
       let bobBalanceResp2 = await request(app).post("/wallet/balance").send({
@@ -686,15 +687,15 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobsWalletResp.body.walletId,
     });
     expect(utxoResp.statusCode).toBe(200);
-    expect(utxoResp.body.utxos!.length).toBe(3);
+    expect(utxoResp.body.length).toBe(3);
 
     // filter to just even odd valued utxos
-    let utxoIds = utxoResp.body.utxos!.filter((utxo) => utxo.value % 2 == 1)
+    let utxoIds = utxoResp.body.filter((utxo) => utxo.satoshis % 2 == 1)
     .map((utxo) => {
-      return utxo.utxoId;
+      return toUtxoId(utxo);
     });
     expect(utxoIds!.length).toBe(2);
-    
+
     // create a random charlie wallet
     const charliesWalletResp = await request(app).post("/wallet/create").send({
       type: "wif",
@@ -724,8 +725,8 @@ describe("Test Wallet Endpoints", () => {
     });
 
     // Should only include the one even utxo
-    expect(utxoResp2.body.utxos!.length).toBe(1);
-    expect(utxoResp2.body.utxos[0].value).toBe(1000)
+    expect(utxoResp2.body.length).toBe(1);
+    expect(utxoResp2.body[0].satoshis).toBe(1000)
 
 
     // Should have the balance sent 
@@ -746,16 +747,16 @@ describe("Test Wallet Endpoints", () => {
       });
 
     const body = resp.body;
-    if (body.utxos) {
+    if (body) {
       const valueArray = await Promise.all(
-        body.utxos.map(async (b) => {
-          return b!.value || 0;
+        body.map(async (b) => {
+          return b!.satoshis || 0;
         })
       );
       const value = valueArray.reduce((a:any, b:any) => a + b, 0);
       expect(resp.statusCode).toBe(200);
       expect(value).toBeGreaterThan(490 * 100000000);
-      expect(body!.utxos!.length).toBeGreaterThan(100);
+      expect(body!.length).toBeGreaterThan(100);
     } else {
       throw Error("no utxos returned");
     }
