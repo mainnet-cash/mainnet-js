@@ -342,7 +342,7 @@ const utxos = ({ serializedWallet }) => new Promise(
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.getUtxos(args);
-      resolve(Service.successResponse({ ...resp }));
+      resolve(Service.successResponse(resp));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -488,7 +488,7 @@ const getTokenUtxos = ({ getTokenUtxosRequest }) => new Promise(
       const wallet = await mainnet.walletFromId(getTokenUtxosRequest.walletId);
       const resp = await wallet.getTokenUtxos(getTokenUtxosRequest.tokenId);
 
-      resolve(Service.successResponse({ utxos: resp }));
+      resolve(Service.successResponse(resp));
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',

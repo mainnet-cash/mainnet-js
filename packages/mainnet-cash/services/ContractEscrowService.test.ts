@@ -1,5 +1,5 @@
 import server from "../"
-import { RegTestWallet } from "mainnet-js";
+import { RegTestWallet, toUtxoId } from "mainnet-js";
 import request from "supertest";
 
 
@@ -131,7 +131,7 @@ describe("Test Escrow Contract Services", () => {
   });
 
   /**
-   * integration test for create and utxos 
+   * integration test for create and utxos
    */
   it("Should get utxos on a contract address", async () => {
     let buyerId = `wif:regtest:${process.env.PRIVATE_WIF}`
@@ -170,7 +170,7 @@ describe("Test Escrow Contract Services", () => {
       escrowContractId: escrowContractId,
     });
     expect(utxoResp.statusCode).toEqual(200);
-    expect(utxoResp.body.utxos[0].txId.length).toEqual(64);
+    expect(utxoResp.body[0].txid.length).toEqual(64);
   });
 
   /**
@@ -219,10 +219,10 @@ describe("Test Escrow Contract Services", () => {
     });
 
     expect(utxoResp.statusCode).toEqual(200);
-    expect(utxoResp.body.utxos[0].value).toEqual(21000);
-    expect(utxoResp.body.utxos[1].value).toEqual(21001);
+    expect(utxoResp.body[0].satoshis).toEqual(21000);
+    expect(utxoResp.body[1].satoshis).toEqual(21001);
 
-    let utxos = [utxoResp.body.utxos[0].utxoId]
+    let utxos = [toUtxoId(utxoResp.body[0])];
 
     const respSpend = await request(app).post("/contract/escrow/call").send({
       escrowContractId: escrowContractId,
@@ -249,6 +249,6 @@ describe("Test Escrow Contract Services", () => {
     });
 
     expect(utxo2Resp.statusCode).toEqual(200);
-    expect(utxo2Resp.body.utxos.length).toEqual(1);
+    expect(utxo2Resp.body.length).toEqual(1);
   });
 });

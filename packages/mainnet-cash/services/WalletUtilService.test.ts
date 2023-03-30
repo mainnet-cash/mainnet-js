@@ -22,7 +22,7 @@ describe("Test Wallet Util Endpoints", () => {
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       });
 
-    const utxo = utxoResponse.body.utxos[0];
+    const utxo = utxoResponse.body[0];
 
     const resp = await request(app)
       .post("/wallet/util/decode_transaction")
@@ -50,7 +50,7 @@ describe("Test Wallet Util Endpoints", () => {
     const fail2 = await request(app)
       .post("/wallet/util/decode_transaction")
       .send({
-        transactionHashOrHex: utxo.txId
+        transactionHashOrHex: utxo.txid
       });
 
     expect(fail2.status).toBe(405);

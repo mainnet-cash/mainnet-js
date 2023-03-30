@@ -1,5 +1,4 @@
-import { instantiateSecp256k1 } from "@bitauth/libauth";
-import { RegTestWallet, Network } from "mainnet-js";
+import { RegTestWallet, Network, UtxoI, toUtxoId } from "mainnet-js";
 
 import { CashscriptTransactionI } from "./interface";
 import { Contract } from "./Contract";
@@ -7,7 +6,7 @@ import { getSignatureTemplate } from "./util";
 
 describe(`Create Contract Tests`, () => {
   test("Should return info about a contract", async () => {
-    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+    const script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
       function transfer(pubkey signingPk, sig s) {
         require(hash160(signingPk) == recipientPkh);
         require(checkSig(s, signingPk));
@@ -26,14 +25,14 @@ describe(`Create Contract Tests`, () => {
 
     const now = 100;
 
-    let contract = new Contract(
+    const contract = new Contract(
       script,
       [alicePkh, alicePkh, now],
       Network.REGTEST,
       1
     );
 
-    let info = contract.info();
+    const info = contract.info();
     expect(contract.getSerializedScript()).toBe(
       "Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgIGZ1bmN0aW9uIHRyYW5zZmVyKHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgcmVxdWlyZShoYXNoMTYwKHNpZ25pbmdQaykgPT0gcmVjaXBpZW50UGtoKTsKICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICB9CgogICAgICBmdW5jdGlvbiB0aW1lb3V0KHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgICByZXF1aXJlKGhhc2gxNjAoc2lnbmluZ1BrKSA9PSBzZW5kZXJQa2gpOwogICAgICAgICAgcmVxdWlyZShjaGVja1NpZyhzLCBzaWduaW5nUGspKTsKICAgICAgICAgIHJlcXVpcmUodHgudGltZSA+PSB0aW1lb3V0KTsKICAgICAgfQogIH0="
     );
@@ -52,7 +51,7 @@ describe(`Create Contract Tests`, () => {
   });
 
   test("Should send a transfer with timeout script", async () => {
-    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+    const script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
       function transfer(pubkey signingPk, sig s) {
         require(hash160(signingPk) == recipientPkh);
         require(checkSig(s, signingPk));
@@ -75,7 +74,7 @@ describe(`Create Contract Tests`, () => {
 
     const now = 100;
 
-    let contract = new Contract(
+    const contract = new Contract(
       script,
       [alicePkh, bobPkh, now],
       Network.REGTEST,
@@ -98,16 +97,17 @@ describe(`Create Contract Tests`, () => {
     expect(contract.toString().slice(0, 17)).toBe("contract:regtest:");
 
     const sig = getSignatureTemplate(bob);
-    const secp256k1 = await instantiateSecp256k1();
-    let publicKey = sig.getPublicKey(secp256k1);
-    let fn = contract.getContractFunction("transfer");
-    let txn = await fn(publicKey, sig).to(bob.getDepositAddress(), 7000).send();
+    const publicKey = sig.getPublicKey();
+    const fn = contract.getContractFunction("transfer");
+    const txn = await fn(publicKey, sig)
+      .to(bob.getDepositAddress(), 7000n)
+      .send();
     expect(txn.txid.length).toBe(64);
     expect(await bob.getBalance("sat")).toBe(7000);
   });
 
   test("Should send a transfer with timeout script, using runFunction", async () => {
-    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+    const script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
       function transfer(pubkey signingPk, sig s) {
         require(checkSig(s, signingPk));
         require(hash160(signingPk) == recipientPkh);
@@ -128,7 +128,7 @@ describe(`Create Contract Tests`, () => {
 
     const now = 215;
 
-    let contract = new Contract(
+    const contract = new Contract(
       script,
       [alicePkh, charliePkh, now],
       Network.REGTEST,
@@ -145,7 +145,7 @@ describe(`Create Contract Tests`, () => {
     ]);
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString().slice(0, 17)).toBe("contract:regtest:");
-    let txn = await contract.runFunctionFromStrings({
+    const txn = await contract.runFunctionFromStrings({
       action: "build",
       function: "timeout",
       arguments: [alice.getPublicKeyCompressed(), alice.toString()],
@@ -163,7 +163,7 @@ describe(`Create Contract Tests`, () => {
   });
 
   test("Should send a transfer with timeout script, using runFunction", async () => {
-    let script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
+    const script = `contract TransferWithTimeout(bytes20 senderPkh, bytes20 recipientPkh, int timeout) {
       function transfer(pubkey signingPk, sig s) {
         require(checkSig(s, signingPk));
         require(hash160(signingPk) == recipientPkh);
@@ -184,7 +184,7 @@ describe(`Create Contract Tests`, () => {
 
     const now = 215;
 
-    let contract = new Contract(
+    const contract = new Contract(
       script,
       [alicePkh, charliePkh, now],
       Network.REGTEST,
@@ -205,31 +205,42 @@ describe(`Create Contract Tests`, () => {
       },
     ]);
 
-    let contractUtxos = await contract.getUtxos();
+    const contractUtxos = await contract.getUtxos();
     // Filter the list to only odd value utxos
-    let oddUtxoIds = contractUtxos
-      .utxos!.filter((utxo) => utxo.value % 2 == 1)
-      .map((utxo) => {
-        return utxo.utxoId;
+    const oddUtxoIds = contractUtxos
+      .filter((utxo: UtxoI) => utxo.satoshis % 2 == 1)
+      .map((utxo: UtxoI) => {
+        return toUtxoId(utxo);
       });
 
     expect(contract.toString().length).toBeGreaterThan(30);
     expect(contract.toString().slice(0, 17)).toBe("contract:regtest:");
-    let txn = await contract.runFunctionFromStrings({
+    const txn = await contract.runFunctionFromStrings({
       action: "build",
       function: "transfer",
       arguments: [charlie.getPublicKeyCompressed(), charlie.toString()],
       to: {
         to: charlie.getDepositAddress(),
-        amount: 7000,
+        amount: 7000n,
       },
       time: 215,
       utxoIds: oddUtxoIds,
     } as CashscriptTransactionI);
+    // const template = await contract.runFunctionFromStrings({
+    //   action: "getBitauthUri",
+    //   function: "transfer",
+    //   arguments: [charlie.getPublicKeyCompressed(), charlie.toString()],
+    //   to: {
+    //     to: charlie.getDepositAddress(),
+    //     amount: 7000n,
+    //   },
+    //   time: 215,
+    //   utxoIds: oddUtxoIds,
+    // } as CashscriptTransactionI) as any;
     expect(txn.length).toBeGreaterThan(500);
 
-    let contractUtxos2 = await contract.getUtxos();
-    expect(await contractUtxos2.utxos[0].value).toBe(10000);
+    const contractUtxos2 = await contract.getUtxos();
+    expect(await contractUtxos2[0].satoshis).toBe(10000);
     await charlie.provider!.sendRawTransaction(txn);
     expect(await contract.getBalance()).toBeGreaterThan(12690);
     expect(await charlie.getBalance("sat")).toBe(7000);

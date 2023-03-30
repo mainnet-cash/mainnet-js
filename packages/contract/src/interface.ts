@@ -1,5 +1,5 @@
 import { Argument, Recipient as CashscriptRecipientI } from "cashscript";
-import { SendRequest } from "mainnet-js";
+import { SendRequest, TokenSendRequest } from "mainnet-js";
 
 export interface ContractI {
   /**
@@ -35,6 +35,7 @@ export interface ContractResponseI {
 export interface ContractInfoResponseI {
   contractId: string;
   cashaddr: string;
+  tokenaddr: string;
   script: string;
   parameters: string[];
   nonce: number;
@@ -43,10 +44,12 @@ export interface ContractInfoResponseI {
 export interface CashscriptTransactionI {
   arguments: Argument[];
   function: string;
-  action: string;
+  action: "getBitauthUri" | "buildTemplate" | "send" | "build" | "meep";
   to:
     | SendRequest
     | SendRequest[]
+    | TokenSendRequest
+    | TokenSendRequest[]
     | CashscriptRecipientI
     | CashscriptRecipientI[];
   utxoIds?: string[];

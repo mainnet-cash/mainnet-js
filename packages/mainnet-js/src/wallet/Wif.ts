@@ -33,6 +33,7 @@ import {
 } from "./interface.js";
 
 import {
+  fromUtxoId,
   OpReturnData,
   SendRequest,
   SendRequestArray,
@@ -42,8 +43,6 @@ import {
   TokenGenesisRequest,
   TokenMintRequest,
   TokenSendRequest,
-  UtxoItem,
-  UtxoResponse,
   XPubKey,
 } from "./model.js";
 
@@ -659,14 +658,7 @@ export class Wallet extends BaseWallet {
     if (!this.cashaddr) {
       throw Error("Attempted to get utxos without an address");
     }
-    let utxos = await this.getAddressUtxos(this.cashaddr);
-    let resp = new UtxoResponse();
-    resp.utxos = await Promise.all(
-      utxos.map(async (o: UtxoI) => {
-        return UtxoItem.fromElectrum(o);
-      })
-    );
-    return resp;
+    return await this.getAddressUtxos(this.cashaddr);
   }
 
   // gets wallet balance in sats, bch and usd
@@ -882,8 +874,8 @@ export class Wallet extends BaseWallet {
     // get inputs
     let utxos: UtxoI[];
     if (params.options && params.options.utxoIds) {
-      utxos = params.options.utxoIds.map((utxoId) =>
-        UtxoItem.fromId(utxoId).asElectrum()
+      utxos = params.options.utxoIds.map((utxoId: UtxoI | string) =>
+        typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
       );
     } else {
       utxos = (await this.getAddressUtxos(this.cashaddr)).filter(
@@ -1117,10 +1109,8 @@ export class Wallet extends BaseWallet {
     // get inputs from options or query all inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
-      utxos = options.utxoIds.map((utxoId) =>
-        typeof utxoId === "string"
-          ? UtxoItem.fromId(utxoId).asElectrum()
-          : utxoId
+      utxos = options.utxoIds.map((utxoId: UtxoI | string) =>
+        typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
       );
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);
