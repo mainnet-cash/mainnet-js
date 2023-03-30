@@ -1,6 +1,42 @@
 Newest changes
 --------------
 
+1.1.0
+
+Upgrade @mainnet-cash/contract package with new libauth and cashscript, additionally bringing full support for cashtokens in contracts.
+
+Commit message:
+```
+Breaking: replace UtxoItem with UtxoI everywhere
+Upgrade contract package to use cashscript 0.8.0
+Upgrade libauth to 2.0.0-alpha.8
+Add libauth template generation from cashscript contracts
+```
+
+Upgrade notes:
+All methods returning utxos in form `{"utxos": UtxoItem[]}`:
+```
+{
+  "utxos": [
+    "txId": "abcd",
+    "index": 0,
+    "value": 1000
+  ]
+}
+```
+
+will now be returning `UtxoI[]`:
+```
+[
+  "txid": "abcd",
+  "vout": 0,
+  "satoshis": 1000
+]
+```
+This change is intended to unify interfaces and return type, and to eliminate unnecessary interfaces.
+
+To convert UtxoI <-> UtxoId use new `toUtxoId` and `fromUtxoId` methods.
+
 1.0.18
 
 - Fix BCMR not instantiating network provider whenever needed
