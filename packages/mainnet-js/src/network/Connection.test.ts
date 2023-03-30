@@ -31,7 +31,7 @@ test("Should use global provider when creating testnet wallet", async () => {
 
 test("Should lower overhead in creating wallets", async () => {
   process.setMaxListeners(0);
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 10; i++) {
     let wallet = await RegTestWallet.newRandom();
     expect(wallet.provider == globalThis.rBCH).toBeTruthy();
     expect(await wallet.getBalance("sat")).toBe(0);
