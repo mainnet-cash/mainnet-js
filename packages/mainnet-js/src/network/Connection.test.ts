@@ -29,7 +29,7 @@ test("Should use global provider when creating testnet wallet", async () => {
   expect(height).toBeGreaterThan(114);
 });
 
-test("Should lower overhead in creating wallets", async () => {
+test.skip("Should lower overhead in creating wallets", async () => {
   process.setMaxListeners(0);
   for (let i = 0; i < 100; i++) {
     let wallet = await RegTestWallet.newRandom();

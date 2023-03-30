@@ -62,14 +62,14 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
       const wallet = await mainnet.walletFromId(escrowFnRequest.walletId)
       const resp = await contract._sendMax(
         wallet.privateKeyWif,
-        escrowFnRequest.function, 
+        escrowFnRequest.function,
         escrowFnRequest.to,
-        escrowFnRequest.getHexOnly, 
+        escrowFnRequest.getHexOnly,
         escrowFnRequest.utxoIds
         );
 
       resolve(Service.successResponse({
-        escrowContractId: escrowFnRequest.escrowContractId, 
+        escrowContractId: escrowFnRequest.escrowContractId,
         txId: resp.txid,
         hex: resp.hex
       }));
@@ -86,7 +86,7 @@ const escrowFn = ( {escrowFnRequest} ) => new Promise(
 * List specific utxos in a contract
 * Returns all UTXOs that can be spent by the  contract. Both confirmed and unconfirmed UTXOs are included. 
 *
-* contract Contract 
+* contract Contract
 * returns UtxoResponse
 * */
 const escrowUtxos = ({escrowContract}) => new Promise(
@@ -94,7 +94,7 @@ const escrowUtxos = ({escrowContract}) => new Promise(
     try {
       const contract = await EscrowContract.fromId(escrowContract.escrowContractId);
       const resp = await contract.getUtxos();
-      resolve(Service.successResponse({ ...resp }));
+      resolve(Service.successResponse(resp));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)

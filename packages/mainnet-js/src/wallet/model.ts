@@ -312,60 +312,6 @@ export class OpReturnData {
 
 export type SendRequestArray = Array<string | number | UnitEnum | Buffer>;
 
-export class UtxoItem {
-  index: number;
-  value: number;
-  utxoId: string;
-  txId: string;
-
-  constructor({
-    index,
-    value,
-    txId,
-  }: {
-    index: number;
-    value: number;
-    txId: string;
-  }) {
-    this.value = value;
-    this.txId = txId;
-    this.index = index;
-    this.utxoId = this.toString();
-  }
-
-  public toString() {
-    return [this.txId, this.index, this.value].join(DELIMITER);
-  }
-
-  public static fromId(utxoId: string) {
-    let [txid, vout, satoshis] = utxoId.split(DELIMITER);
-    return new this({
-      txId: txid,
-      index: parseInt(vout),
-      value: parseInt(satoshis),
-    });
-  }
-  public static fromElectrum(u: UtxoI) {
-    return new this({
-      txId: u.txid,
-      index: u.vout,
-      value: u.satoshis,
-    });
-  }
-
-  public asElectrum(): UtxoI {
-    return {
-      txid: this.txId,
-      vout: this.index,
-      satoshis: this.value,
-    } as UtxoI;
-  }
-}
-
-export class UtxoResponse {
-  "utxos"?: Array<UtxoItem>;
-}
-
 export class SendResponse {
   txId?: string;
   balance?: BalanceResponse;
@@ -408,3 +354,35 @@ export class XPubKey {
     };
   }
 }
+
+export const fromUtxoId = (utxoId: string): UtxoI => {
+  const [txid, vout, satoshis, tokenId, amount, capability, commitment] =
+    utxoId.split(DELIMITER);
+  return {
+    satoshis: satoshis ? parseInt(satoshis) : 0,
+    vout: parseInt(vout),
+    txid,
+    token: tokenId
+      ? {
+          tokenId,
+          amount: parseInt(amount),
+          capability: capability || undefined,
+          commitment: commitment || undefined,
+        }
+      : undefined,
+  } as UtxoI;
+};
+
+export const toUtxoId = (utxo: UtxoI): string => {
+  return [
+    utxo.txid,
+    utxo.vout,
+    utxo.satoshis,
+    utxo.token?.tokenId,
+    utxo.token?.amount,
+    utxo.token?.capability,
+    utxo.token?.commitment,
+  ]
+    .join(DELIMITER)
+    .replace(/:+$/, "");
+};

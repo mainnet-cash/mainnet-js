@@ -295,7 +295,7 @@ const slpUtxos = ({ serializedWallet }) => new Promise(
       let args = serializedWallet;
       delete args.walletId;
       let resp = await wallet.slp.getSlpUtxos();
-      resolve(Service.successResponse({ utxos: resp }));
+      resolve(Service.successResponse(resp));
     } catch (e) {
       console.log(e);
       reject(Service.rejectResponse(

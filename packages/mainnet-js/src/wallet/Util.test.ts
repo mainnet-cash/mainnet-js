@@ -31,21 +31,21 @@ test("Should throw on non-existent transaction and invalid hash", async () => {
 
 test("Should get raw transaction", async () => {
   let wallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
-  const utxo = (await wallet.getUtxos()).utxos![0];
+  const utxo = (await wallet.getUtxos())[0];
   const transaction = (await wallet.provider!.getRawTransactionObject(
-    utxo.txId
+    utxo.txid
   )) as ElectrumRawTransaction;
   expect((await wallet.util.decodeTransaction(transaction.hash)).hash).toBe(
-    utxo.txId
+    utxo.txid
   );
   expect((await wallet.util.decodeTransaction(transaction.hex)).txid).toBe(
-    utxo.txId
+    utxo.txid
   );
 
   // test static accessor
   expect(
     (await RegTestWallet.util.decodeTransaction(transaction.hex)).txid
-  ).toBe(utxo.txId);
+  ).toBe(utxo.txid);
 });
 
 test("Should decode a transaction from fist block", async () => {

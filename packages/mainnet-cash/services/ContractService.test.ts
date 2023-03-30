@@ -67,7 +67,7 @@ describe("Test Contract Services", () => {
     });
 
     expect(utxoResp.statusCode).toEqual(200);
-    expect(utxoResp.body.utxos[0].value).toEqual(21000);
+    expect(utxoResp.body[0].satoshis).toEqual(21000);
 
     let respSpend = await request(app).post("/contract/call").send({
       contractId: contractId,
@@ -82,7 +82,7 @@ describe("Test Contract Services", () => {
     );
 
     expect(respSpend.statusCode).toEqual(200);
-    expect(respSpend.body.txId.length).toEqual(64);
+    expect(respSpend.body.txid.length).toEqual(64);
     expect(respSpend.body.hex.length).toBe(604);
   });
 

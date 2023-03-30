@@ -354,7 +354,7 @@ describe.skip("Test Wallet Slp Endpoints", () => {
 
     const body = resp.body;
     expect(resp.statusCode).toBe(200);
-    expect(body.utxos.length).toBeGreaterThan(0);
+    expect(body.length).toBeGreaterThan(0);
   });
 
   /**

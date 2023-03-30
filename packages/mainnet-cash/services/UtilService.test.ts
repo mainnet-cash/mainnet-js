@@ -6,7 +6,7 @@ var app;
 describe("Test Util Endpoints", () => {
 
   beforeAll(async function () {
-    app = await server.getServer().launch();  
+    app = await server.getServer().launch();
   });
   afterAll(async function () {
     await server.killElectrum()
