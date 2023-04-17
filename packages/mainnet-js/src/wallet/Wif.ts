@@ -1481,6 +1481,10 @@ export class Wallet extends BaseWallet {
     mintRequests: TokenMintRequest | Array<TokenMintRequest>,
     deductTokenAmount: boolean = false
   ): Promise<SendResponse> {
+    if (tokenId?.length !== 64) {
+      throw Error(`Invalid tokenId supplied: ${tokenId}`);
+    }
+
     if (!Array.isArray(mintRequests)) {
       mintRequests = [mintRequests];
     }
@@ -1550,6 +1554,10 @@ export class Wallet extends BaseWallet {
     burnRequest: TokenBurnRequest,
     message?: string
   ): Promise<SendResponse> {
+    if (burnRequest.tokenId?.length !== 64) {
+      throw Error(`Invalid tokenId supplied: ${burnRequest.tokenId}`);
+    }
+
     const utxos = await this.getAddressUtxos(this.cashaddr!);
     const tokenUtxos = utxos.filter(
       (val) =>
