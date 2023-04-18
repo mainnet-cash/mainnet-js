@@ -627,7 +627,7 @@ describe(`Test cashtokens`, () => {
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "minting",
-      commitment: ""
+      commitment: "",
     });
 
     const tokenId = genesisResponse.tokenIds![0];
@@ -645,7 +645,14 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
 
-    await bob.send(new TokenSendRequest({ tokenId: tokenId, capability: "none", commitment: "0a", cashaddr: charlie.cashaddr! }));
+    await bob.send(
+      new TokenSendRequest({
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0a",
+        cashaddr: charlie.cashaddr!,
+      })
+    );
     expect(await bob.getTokenBalance(tokenId)).toBe(0);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
@@ -665,7 +672,7 @@ describe(`Test cashtokens`, () => {
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "minting",
-      commitment: ""
+      commitment: "",
     });
 
     const tokenId = genesisResponse.tokenIds![0];
@@ -692,14 +699,24 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(tokenId)).toBe(3);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(3);
 
-
-    await bob.tokenBurn({ tokenId: tokenId, capability: "minting", commitment: "" });
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      capability: "minting",
+      commitment: "",
+    });
 
     expect(await bob.getTokenBalance(tokenId)).toBe(0);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
 
-    await bob.send(new TokenSendRequest({ tokenId: tokenId, capability: "none", commitment: "0a", cashaddr: charlie.cashaddr! }));
+    await bob.send(
+      new TokenSendRequest({
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0a",
+        cashaddr: charlie.cashaddr!,
+      })
+    );
     expect(await bob.getTokenBalance(tokenId)).toBe(0);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
@@ -708,8 +725,14 @@ describe(`Test cashtokens`, () => {
     expect(await charlie.getNftTokenBalance(tokenId)).toBe(1);
     expect((await charlie.getTokenUtxos(tokenId)).length).toBe(1);
 
-
-    await bob.send(new TokenSendRequest({ tokenId: tokenId, capability: "none", commitment: "0b", cashaddr: charlie.cashaddr! }));
+    await bob.send(
+      new TokenSendRequest({
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0b",
+        cashaddr: charlie.cashaddr!,
+      })
+    );
     expect(await bob.getTokenBalance(tokenId)).toBe(0);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(0);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(0);
@@ -729,7 +752,7 @@ describe(`Test cashtokens`, () => {
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "minting",
-      commitment: "00"
+      commitment: "00",
     });
 
     const tokenId = genesisResponse.tokenIds![0];
@@ -756,14 +779,28 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(tokenId)).toBe(3);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(3);
 
-
-    await bob.tokenBurn({ tokenId: tokenId, capability: "minting", commitment: "00" });
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      capability: "minting",
+      commitment: "00",
+    });
 
     expect(await bob.getTokenBalance(tokenId)).toBe(0);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
 
-    await expect(bob.send(new TokenSendRequest({ tokenId: tokenId, capability: "none", commitment: "", cashaddr: charlie.cashaddr! }))).rejects.toThrow("No suitable token utxos available to send token with id");
+    await expect(
+      bob.send(
+        new TokenSendRequest({
+          tokenId: tokenId,
+          capability: "none",
+          commitment: "",
+          cashaddr: charlie.cashaddr!,
+        })
+      )
+    ).rejects.toThrow(
+      "No suitable token utxos available to send token with id"
+    );
   });
 
   test("Test enforcing token addresses", async () => {

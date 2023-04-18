@@ -226,10 +226,18 @@ export function prepareTokenOutputs(
     (request as any)._isGenesis = true;
   } else {
     const tokenInputs = inputs.filter(
-      (val) => val.token?.tokenId && val.token?.tokenId === request.tokenId && (val.token?.capability === "none" ? (val.token.capability === request.capability && val.token?.commitment === request.commitment) : true)
+      (val) =>
+        val.token?.tokenId &&
+        val.token?.tokenId === request.tokenId &&
+        (val.token?.capability === "none"
+          ? val.token.capability === request.capability &&
+            val.token?.commitment === request.commitment
+          : true)
     );
     if (!tokenInputs.length) {
-      throw new Error(`No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`);
+      throw new Error(
+        `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
+      );
     }
     if (!token.capability && tokenInputs[0].token?.capability) {
       token.capability = tokenInputs[0].token!.capability;

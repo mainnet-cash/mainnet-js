@@ -1649,7 +1649,9 @@ export class Wallet extends BaseWallet {
    * @returns  {number} fungible token balance
    */
   public async getTokenBalance(tokenId: string): Promise<number> {
-    const utxos = (await this.getTokenUtxos(tokenId)).filter(val => val.token?.amount);
+    const utxos = (await this.getTokenUtxos(tokenId)).filter(
+      (val) => val.token?.amount
+    );
     return sumTokenAmounts(utxos, tokenId);
   }
 
@@ -1661,7 +1663,9 @@ export class Wallet extends BaseWallet {
    * @returns  {number} non-fungible token balance
    */
   public async getNftTokenBalance(tokenId: string): Promise<number> {
-    const utxos = (await this.getTokenUtxos(tokenId)).filter(val => val.token?.commitment !== undefined);
+    const utxos = (await this.getTokenUtxos(tokenId)).filter(
+      (val) => val.token?.commitment !== undefined
+    );
     return utxos.length;
   }
 
@@ -1669,9 +1673,11 @@ export class Wallet extends BaseWallet {
    * getAllTokenBalances Gets all fungible token balances in this wallet
    * @returns  {Object} a map [tokenId => balance] for all tokens in this wallet
    */
-  public async getAllTokenBalances(): Promise<{[tokenId: string] : number}> {
+  public async getAllTokenBalances(): Promise<{ [tokenId: string]: number }> {
     const result = {};
-    const utxos = (await this.getTokenUtxos()).filter(val => val.token?.amount);
+    const utxos = (await this.getTokenUtxos()).filter(
+      (val) => val.token?.amount
+    );
     for (const utxo of utxos) {
       if (!result[utxo.token!.tokenId]) {
         result[utxo.token!.tokenId] = 0;
@@ -1685,9 +1691,13 @@ export class Wallet extends BaseWallet {
    * getAllNftTokenBalances Gets all non-fungible token (NFT) balances in this wallet
    * @returns  {Object} a map [tokenId => balance] for all NFTs in this wallet
    */
-  public async getAllNftTokenBalances(): Promise<{[tokenId: string] : number}> {
+  public async getAllNftTokenBalances(): Promise<{
+    [tokenId: string]: number;
+  }> {
     const result = {};
-    const utxos = (await this.getTokenUtxos()).filter(val => val.token?.commitment !== undefined);
+    const utxos = (await this.getTokenUtxos()).filter(
+      (val) => val.token?.commitment !== undefined
+    );
     for (const utxo of utxos) {
       if (!result[utxo.token!.tokenId]) {
         result[utxo.token!.tokenId] = 0;
