@@ -110,6 +110,8 @@ describe(`Test cashtokens`, () => {
     expect(newTokenUtxos.length).toBe(2);
     expect(await alice.getTokenBalance(tokenId)).toBe(75);
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(0);
+    expect((await bob.getAllNftTokenBalances())[tokenId] || 0).toBe(0);
   });
 
   test("Test NFT cashtoken genesis and sending", async () => {
@@ -167,7 +169,7 @@ describe(`Test cashtokens`, () => {
           commitment: "abcd02",
         }),
       ])
-    ).rejects.toThrow("Can not change the commitment of an immutable token");
+    ).rejects.toThrow("No suitable token utxos available to send token");
   });
 
   test("Test mutable NFT cashtoken genesis and mutation", async () => {
@@ -613,6 +615,192 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance2).toBe(100);
     const tokenUtxos2 = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos2.length).toBe(1);
+  });
+
+  test("Test minting NFTs not burn tokens", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+    const charlie = await RegTestWallet.newRandom();
+
+    // prepare inputs for two token geneses
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      capability: "minting",
+      commitment: "",
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+
+    await bob.tokenMint(tokenId, {
+      capability: "none",
+      commitment: "0a",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+
+    await bob.send(
+      new TokenSendRequest({
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0a",
+        cashaddr: charlie.cashaddr!,
+      })
+    );
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+
+    expect(await charlie.getTokenBalance(tokenId)).toBe(0);
+    expect(await charlie.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await charlie.getTokenUtxos(tokenId)).length).toBe(1);
+  });
+
+  test("Test sending NFTs after burning minting token", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+    const charlie = await RegTestWallet.newRandom();
+
+    // prepare inputs for two token geneses
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      capability: "minting",
+      commitment: "",
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+
+    await bob.tokenMint(tokenId, {
+      capability: "none",
+      commitment: "0a",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+
+    await bob.tokenMint(tokenId, {
+      capability: "none",
+      commitment: "0b",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(3);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(3);
+
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      capability: "minting",
+      commitment: "",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+
+    await bob.send(
+      new TokenSendRequest({
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0a",
+        cashaddr: charlie.cashaddr!,
+      })
+    );
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+
+    expect(await charlie.getTokenBalance(tokenId)).toBe(0);
+    expect(await charlie.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await charlie.getTokenUtxos(tokenId)).length).toBe(1);
+
+    await bob.send(
+      new TokenSendRequest({
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0b",
+        cashaddr: charlie.cashaddr!,
+      })
+    );
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(0);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(0);
+
+    expect(await charlie.getTokenBalance(tokenId)).toBe(0);
+    expect(await charlie.getNftTokenBalance(tokenId)).toBe(2);
+    expect((await charlie.getTokenUtxos(tokenId)).length).toBe(2);
+  });
+
+  test("Test sending NFTs with empty commitment", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+    const charlie = await RegTestWallet.newRandom();
+
+    // prepare inputs for two token geneses
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      capability: "minting",
+      commitment: "00",
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+
+    await bob.tokenMint(tokenId, {
+      capability: "none",
+      commitment: "0a",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+
+    await bob.tokenMint(tokenId, {
+      capability: "none",
+      commitment: "0b",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(3);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(3);
+
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      capability: "minting",
+      commitment: "00",
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(2);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+
+    await expect(
+      bob.send(
+        new TokenSendRequest({
+          tokenId: tokenId,
+          capability: "none",
+          commitment: "",
+          cashaddr: charlie.cashaddr!,
+        })
+      )
+    ).rejects.toThrow(
+      "No suitable token utxos available to send token with id"
+    );
   });
 
   test("Test enforcing token addresses", async () => {

@@ -162,7 +162,7 @@ describe("Test Wallet Endpoints", () => {
         commitment: "abcd02",
       }]
     })).body;
-    expect(response.message).toContain("Can not change the commitment of an immutable token");
+    expect(response.message).toContain("No suitable token utxos available to send token with id");
   });
 
   test("Test mutable NFT cashtoken genesis and mutation", async () => {

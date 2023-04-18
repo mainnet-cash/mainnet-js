@@ -34,7 +34,7 @@ export const toMainnet = (utxo: Utxo) =>
     vout: utxo.vout,
     token: utxo.token
       ? ({
-          amount: Number(utxo.token?.amount),
+          amount: utxo.token?.amount ? Number(utxo.token?.amount) : undefined,
           tokenId: utxo.token?.category,
           capability: utxo.token?.nft?.capability as any,
           commitment: utxo.token?.nft?.commitment,

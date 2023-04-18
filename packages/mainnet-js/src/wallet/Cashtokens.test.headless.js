@@ -113,7 +113,7 @@ describe(`Wallet should function in the browser`, () => {
             commitment: "abcd02",
           }),
         ])
-      ).rejects.toThrow("Can not change the commitment of an immutable token");
+      ).rejects.toThrow("No suitable token utxos available to send token");
     }, process.env.ALICE_ID);
   });
 

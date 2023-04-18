@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+1.1.1
+
+* Add stricter token utxo selection, add 3 more cashtoken regression tests
+* Fix counting FT and NFT token balances, fixes #175
+* Add safeguarding check against malformed tokenIds supplied to token mint and burn functions
+* Fix contract exports, fix conversion utils
+
 1.1.0
 
 Upgrade @mainnet-cash/contract package with new libauth and cashscript, additionally bringing full support for cashtokens in contracts.

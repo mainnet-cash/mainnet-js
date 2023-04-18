@@ -18,23 +18,12 @@ import {
   AuthenticationTemplateScenarioTransactionOutput,
   binToBase64,
   utf8ToBin,
-  decodeCashAddress,
-  Transaction as LibauthTransaction,
-  generateDefaultScenarioDefinition,
   AuthenticationTemplateScenario,
-  cashAddressToLockingBytecode,
-  AuthenticationTemplateScenarioOutput,
-  Output as LibAuthOutput,
   AuthenticationTemplateScenarioSourceOutput,
   decodeTransaction,
-  LockingBytecodeType,
-  addressContentsToLockingBytecode,
-  numberToBinUint16LE,
   binToHex,
   AuthenticationTemplate,
   AuthenticationTemplateScenarioInput,
-  AuthenticationTemplateVariable,
-  AuthenticationTemplateScenarioData,
 } from "@bitauth/libauth";
 import { deflate } from "pako";
 import { Network } from "mainnet-js";
