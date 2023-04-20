@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.4
+
+* Fix token genesis using wrong input
+
 1.1.3
 
 * Fix token genesis not filtering out token inputs

@@ -1492,13 +1492,13 @@ export class Wallet extends BaseWallet {
       value: genesisRequest.value || 1000,
       capability: genesisRequest.capability,
       commitment: genesisRequest.commitment,
-      tokenId: utxos[0].txid,
+      tokenId: genesisInputs[0].txid,
     });
 
     return this.send([genesisSendRequest, ...(sendRequests as any)], {
       ...options,
       utxoIds: utxos,
-      ensureUtxos: [utxos[0]],
+      ensureUtxos: [genesisInputs[0]],
       checkTokenQuantities: false,
       queryBalance: false,
       tokenOperation: "genesis",
