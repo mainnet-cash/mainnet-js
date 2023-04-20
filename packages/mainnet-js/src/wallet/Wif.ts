@@ -849,7 +849,7 @@ export class Wallet extends BaseWallet {
       options: {},
     }
   ): Promise<{ value: number; utxos: UtxoI[] }> {
-    if (!this.privateKey) {
+    if (!this.privateKey && params.options?.buildUnsigned !== true) {
       throw Error("Couldn't get network or private key for wallet.");
     }
     if (!this.cashaddr) {
@@ -907,7 +907,8 @@ export class Wallet extends BaseWallet {
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
-      privateKey: this.privateKey,
+      privateKey: this.privateKey ?? Uint8Array.from([]),
+      sourceAddress: this.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
       feePaidBy: feePaidBy,
@@ -953,31 +954,33 @@ export class Wallet extends BaseWallet {
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    let { encodedTransaction, tokenIds } = await this.encodeTransaction(
-      requests,
-      undefined,
-      options
-    );
+    const { encodedTransaction, tokenIds, sourceOutputs } =
+      await this.encodeTransaction(requests, undefined, options);
 
-    const awaitTransactionPropagation =
-      !options ||
-      options.awaitTransactionPropagation === undefined ||
-      options.awaitTransactionPropagation;
-
-    const txId = await this.submitTransaction(
-      encodedTransaction,
-      awaitTransactionPropagation
-    );
-
-    let resp = new SendResponse({});
-    resp.txId = txId;
-    const queryBalance =
-      !options || options.queryBalance === undefined || options.queryBalance;
-    if (queryBalance) {
-      resp.balance = (await this.getBalance()) as BalanceResponse;
-    }
-    resp.explorerUrl = this.explorerUrl(resp.txId);
+    const resp = new SendResponse({});
     resp.tokenIds = tokenIds;
+
+    if (options?.buildUnsigned !== true) {
+      const txId = await this.submitTransaction(
+        encodedTransaction,
+        options?.awaitTransactionPropagation === undefined ||
+          options?.awaitTransactionPropagation === true
+      );
+
+      resp.txId = txId;
+      resp.explorerUrl = this.explorerUrl(resp.txId);
+
+      if (
+        options?.queryBalance === undefined ||
+        options?.queryBalance === true
+      ) {
+        resp.balance = (await this.getBalance()) as BalanceResponse;
+      }
+    } else {
+      resp.unsignedTransaction = binToHex(encodedTransaction);
+      resp.sourceOutputs = sourceOutputs;
+    }
+
     return resp;
   }
 
@@ -993,16 +996,7 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    const txId = await this.sendMaxRaw(cashaddr, options);
-    const queryBalance =
-      !options || options.queryBalance === undefined || options.queryBalance;
-    return {
-      txId: txId,
-      balance: queryBalance
-        ? ((await this.getBalance()) as BalanceResponse)
-        : undefined,
-      explorerUrl: this.explorerUrl(txId),
-    };
+    return await this.sendMaxRaw(cashaddr, options);
   }
 
   /**
@@ -1016,11 +1010,13 @@ export class Wallet extends BaseWallet {
   private async sendMaxRaw(
     cashaddr: string,
     options?: SendRequestOptionsI
-  ): Promise<string> {
-    let { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend({
-      outputCount: 1,
-      options: options,
-    });
+  ): Promise<SendResponse> {
+    const { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend(
+      {
+        outputCount: 1,
+        options: options,
+      }
+    );
 
     if (!options) {
       options = {};
@@ -1028,28 +1024,40 @@ export class Wallet extends BaseWallet {
 
     options.utxoIds = utxos;
 
-    let sendRequest = new SendRequest({
+    const sendRequest = new SendRequest({
       cashaddr: cashaddr,
       value: maxSpendableAmount,
       unit: "sat",
     });
 
-    const { encodedTransaction } = await this.encodeTransaction(
-      [sendRequest],
-      true,
-      options
-    );
-    const awaitTransactionPropagation =
-      !options ||
-      options.awaitTransactionPropagation === undefined ||
-      options.awaitTransactionPropagation;
+    const { encodedTransaction, tokenIds, sourceOutputs } =
+      await this.encodeTransaction([sendRequest], true, options);
 
-    const txId = await this.submitTransaction(
-      encodedTransaction,
-      awaitTransactionPropagation
-    );
+    const resp = new SendResponse({});
+    resp.tokenIds = tokenIds;
 
-    return txId;
+    if (options?.buildUnsigned !== true) {
+      const txId = await this.submitTransaction(
+        encodedTransaction,
+        options?.awaitTransactionPropagation === undefined ||
+          options?.awaitTransactionPropagation === true
+      );
+
+      resp.txId = txId;
+      resp.explorerUrl = this.explorerUrl(resp.txId);
+
+      if (
+        options?.queryBalance === undefined ||
+        options?.queryBalance === true
+      ) {
+        resp.balance = (await this.getBalance()) as BalanceResponse;
+      }
+    } else {
+      resp.unsignedTransaction = binToHex(encodedTransaction);
+      resp.sourceOutputs = sourceOutputs;
+    }
+
+    return resp;
   }
 
   /**
@@ -1070,7 +1078,7 @@ export class Wallet extends BaseWallet {
   ) {
     let sendRequests = asSendRequestObject(requests);
 
-    if (!this.privateKey) {
+    if (!this.privateKey && options?.buildUnsigned !== true) {
       throw new Error(
         `Wallet ${this.name} is missing either a network or private key`
       );
@@ -1123,6 +1131,13 @@ export class Wallet extends BaseWallet {
     ) {
       utxos = utxos.filter((val) => !val.token);
     }
+
+    // let tokenOp: "send" | "genesis" | "mint" | "burn" | undefined = undefined;
+    // if (options?.ensureUtxos?.every(val => !val.token) && sendRequests.some(val => (val as TokenSendRequest).tokenId)) {
+    //   tokenOp = "genesis";
+    // } else if (options?.ensureUtxos?.length === 1 && options?.ensureUtxos?.[0].token?.capability === NFTCapability.minting && ) {
+
+    // }
 
     const addTokenChangeOutputs = (
       inputs: UtxoI[],
@@ -1189,7 +1204,8 @@ export class Wallet extends BaseWallet {
     const feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
-      privateKey: this.privateKey,
+      privateKey: this.privateKey ?? Uint8Array.from([]),
+      sourceAddress: this.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
       feePaidBy: feePaidBy,
@@ -1201,7 +1217,8 @@ export class Wallet extends BaseWallet {
       bestHeight,
       feePaidBy,
       sendRequests,
-      options?.ensureUtxos || []
+      options?.ensureUtxos || [],
+      options?.tokenOperation
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1211,20 +1228,24 @@ export class Wallet extends BaseWallet {
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
-      privateKey: this.privateKey,
+      privateKey: this.privateKey ?? Uint8Array.from([]),
+      sourceAddress: this.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: [],
       feePaidBy: feePaidBy,
     });
-    const encodedTransaction = await buildEncodedTransaction(
-      fundingUtxos,
-      sendRequests,
-      this.privateKey,
-      fee,
-      discardChange,
-      [],
-      feePaidBy,
-      changeAddress
+    const { encodedTransaction, sourceOutputs } = await buildEncodedTransaction(
+      {
+        inputs: fundingUtxos,
+        outputs: sendRequests,
+        signingKey: this.privateKey ?? Uint8Array.from([]),
+        sourceAddress: this.cashaddr!,
+        fee,
+        discardChange,
+        slpOutputs: [],
+        feePaidBy,
+        changeAddress,
+      }
     );
 
     const tokenIds = [
@@ -1236,7 +1257,7 @@ export class Wallet extends BaseWallet {
         .map((val) => (val as TokenSendRequest).tokenId),
     ].filter((value, index, array) => array.indexOf(value) === index);
 
-    return { encodedTransaction, tokenIds: tokenIds };
+    return { encodedTransaction, tokenIds, sourceOutputs };
   }
 
   // Submit a raw transaction
@@ -1437,32 +1458,52 @@ export class Wallet extends BaseWallet {
    * @param  {string?} genesisRequest.commitment NFT commitment message
    * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
    * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   * @param  {SendRequestType} sendRequests single or an array of extra send requests (OP_RETURN, value transfer, etc.) to include in genesis transaction
+   * @param  {SendRequestType | SendRequestType[]} sendRequests single or an array of extra send requests (OP_RETURN, value transfer, etc.) to include in genesis transaction
+   * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenGenesis(
     genesisRequest: TokenGenesisRequest,
-    sendRequests: SendRequestType | SendRequestType[] = []
+    sendRequests: SendRequestType | SendRequestType[] = [],
+    options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     if (!Array.isArray(sendRequests)) {
       sendRequests = [sendRequests];
     }
-    return this.send(
-      [
-        new TokenSendRequest({
-          cashaddr: genesisRequest.cashaddr || this.tokenaddr!,
-          amount: genesisRequest.amount,
-          value: genesisRequest.value,
-          capability: genesisRequest.capability,
-          commitment: genesisRequest.commitment,
-          tokenId: "",
-        }),
-        ...(sendRequests as any),
-      ],
-      {
-        checkTokenQuantities: false,
-        queryBalance: false,
-      }
-    );
+
+    let utxos: UtxoI[];
+    if (options && options.utxoIds) {
+      utxos = options.utxoIds.map((utxoId: UtxoI | string) =>
+        typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
+      );
+    } else {
+      utxos = await this.getAddressUtxos(this.cashaddr);
+    }
+
+    const genesisInputs = utxos.filter((val) => val.vout === 0);
+    if (genesisInputs.length === 0) {
+      throw new Error(
+        "No suitable inputs with vout=0 available for new token genesis"
+      );
+    }
+
+    const genesisSendRequest = new TokenSendRequest({
+      cashaddr: genesisRequest.cashaddr || this.tokenaddr!,
+      amount: genesisRequest.amount,
+      value: genesisRequest.value || 1000,
+      capability: genesisRequest.capability,
+      commitment: genesisRequest.commitment,
+      tokenId: utxos[0].txid,
+    });
+    // TODO: remove
+    (genesisSendRequest as any)._isGenesis = true;
+    return this.send([genesisSendRequest, ...(sendRequests as any)], {
+      ...options,
+      utxoIds: utxos,
+      ensureUtxos: [utxos[0]],
+      checkTokenQuantities: false,
+      queryBalance: false,
+      tokenOperation: "genesis",
+    });
   }
 
   /**
@@ -1475,11 +1516,13 @@ export class Wallet extends BaseWallet {
    * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
    * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
    * @param  {boolean?} deductTokenAmount if minting token contains fungible amount, deduct from it by amount of minted tokens
+   * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenMint(
     tokenId: string,
     mintRequests: TokenMintRequest | Array<TokenMintRequest>,
-    deductTokenAmount: boolean = false
+    deductTokenAmount: boolean = false,
+    options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     if (tokenId?.length !== 64) {
       throw Error(`Invalid tokenId supplied: ${tokenId}`);
@@ -1493,7 +1536,7 @@ export class Wallet extends BaseWallet {
     const nftUtxos = utxos.filter(
       (val) =>
         val.token?.tokenId === tokenId &&
-        val.token?.capability != NFTCapability.none
+        val.token?.capability === NFTCapability.minting
     );
     if (!nftUtxos.length) {
       throw new Error(
@@ -1529,8 +1572,11 @@ export class Wallet extends BaseWallet {
         ),
       ],
       {
+        ...options,
+        ensureUtxos: [nftUtxos[0]],
         checkTokenQuantities: false,
         queryBalance: false,
+        tokenOperation: "mint",
       }
     );
   }
@@ -1549,10 +1595,12 @@ export class Wallet extends BaseWallet {
    * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
    * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
    * @param  {string?} message optional message to include in OP_RETURN
+   * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenBurn(
     burnRequest: TokenBurnRequest,
-    message?: string
+    message?: string,
+    options?: SendRequestOptionsI
   ): Promise<SendResponse> {
     if (burnRequest.tokenId?.length !== 64) {
       throw Error(`Invalid tokenId supplied: ${burnRequest.tokenId}`);
@@ -1563,8 +1611,7 @@ export class Wallet extends BaseWallet {
       (val) =>
         val.token?.tokenId === burnRequest.tokenId &&
         val.token?.capability === burnRequest.capability &&
-        val.token?.commitment === burnRequest.commitment &&
-        val.token?.capability === burnRequest.capability
+        val.token?.commitment === burnRequest.commitment
     );
 
     if (!tokenUtxos.length) {
@@ -1587,6 +1634,16 @@ export class Wallet extends BaseWallet {
         changeSendRequests = [];
         utxoIds.push(tokenUtxos[0]);
       } else {
+        // add utxos to spend from
+        let available = 0;
+        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
+          utxoIds.push(token);
+          available += token.token?.amount!;
+          if (available >= fungibleBurnAmount) {
+            break;
+          }
+        }
+
         // if there are FT, reduce their amount
         const newAmount = totalFungibleAmount - fungibleBurnAmount;
         const safeNewAmount = Math.max(0, newAmount);
@@ -1607,6 +1664,16 @@ export class Wallet extends BaseWallet {
         changeSendRequests = [];
         utxoIds.push(tokenUtxos[0]);
       } else {
+        // add utxos to spend from
+        let available = 0;
+        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
+          utxoIds.push(token);
+          available += token.token?.amount!;
+          if (available >= fungibleBurnAmount) {
+            break;
+          }
+        }
+
         // reduce the FT amount
         const newAmount = totalFungibleAmount - fungibleBurnAmount;
         const safeNewAmount = Math.max(0, newAmount);
@@ -1623,9 +1690,11 @@ export class Wallet extends BaseWallet {
 
     const opReturn = OpReturnData.fromString(message || "");
     return this.send([opReturn, ...changeSendRequests], {
+      ...options,
       checkTokenQuantities: false,
       queryBalance: false,
       ensureUtxos: utxoIds.length > 0 ? utxoIds : undefined,
+      tokenOperation: "burn",
     });
   }
 

@@ -12,6 +12,7 @@ import {
   CompilationContextBCH,
   Output,
   hexToBin,
+  verifyTransactionTokens,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
@@ -29,16 +30,27 @@ import { sumUtxoValue } from "../util/sumUtxoValue.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
-export async function buildP2pkhNonHdTransaction(
-  inputs: UtxoI[],
-  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  signingKey: Uint8Array,
-  fee: number = 0,
+export async function buildP2pkhNonHdTransaction({
+  inputs,
+  outputs,
+  signingKey,
+  sourceAddress,
+  fee = 0,
   discardChange = false,
-  slpOutputs: Output[] = [],
-  feePaidBy: FeePaidByEnum = FeePaidByEnum.change,
-  changeAddress: string = ""
-) {
+  slpOutputs = [],
+  feePaidBy = FeePaidByEnum.change,
+  changeAddress = "",
+}: {
+  inputs: UtxoI[];
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
+  signingKey: Uint8Array;
+  sourceAddress: string;
+  fee?: number;
+  discardChange?: boolean;
+  slpOutputs?: Output[];
+  feePaidBy?: FeePaidByEnum;
+  changeAddress?: string;
+}) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
   }
@@ -59,7 +71,7 @@ export async function buildP2pkhNonHdTransaction(
 
   outputs = allocateFee(outputs, fee, feePaidBy, changeAmount);
 
-  let lockedOutputs = await prepareOutputs(outputs, inputs);
+  const lockedOutputs = await prepareOutputs(outputs);
 
   if (discardChange !== true) {
     if (changeAmount > DUST_UTXO_THRESHOLD) {
@@ -85,31 +97,56 @@ export async function buildP2pkhNonHdTransaction(
     }
   }
 
-  let signedInputs = prepareInputs(inputs, compiler, signingKey);
+  const { preparedInputs, sourceOutputs } = prepareInputs({
+    inputs,
+    compiler,
+    signingKey,
+    sourceAddress,
+  });
   const result = generateTransaction({
-    inputs: signedInputs,
+    inputs: preparedInputs,
     locktime: 0,
     outputs: [...slpOutputs, ...lockedOutputs],
     version: 2,
   });
-  return result;
+
+  if (!result.success) {
+    throw Error("Error building transaction with fee");
+  }
+
+  const tokenValidationResult = verifyTransactionTokens(
+    result.transaction,
+    sourceOutputs
+  );
+  if (tokenValidationResult !== true && fee > 0) {
+    throw tokenValidationResult;
+  }
+
+  return { transaction: result.transaction, sourceOutputs: sourceOutputs };
 }
 
-export function prepareInputs(
-  inputs: UtxoI[],
+export function prepareInputs({
+  inputs,
+  compiler,
+  signingKey,
+  sourceAddress,
+}: {
+  inputs: UtxoI[];
   compiler: Compiler<
     CompilationContextBCH,
     AnyCompilerConfiguration<CompilationContextBCH>,
     AuthenticationProgramStateCommon
-  >,
-  signingKey: Uint8Array
-) {
-  let signedInputs: any[] = [];
+  >;
+  signingKey: Uint8Array;
+  sourceAddress: string;
+}) {
+  const preparedInputs: any[] = [];
+  const sourceOutputs: any[] = [];
   for (const i of inputs) {
     const utxoTxnValue = i.satoshis;
     const utxoIndex = i.vout;
     // slice will create a clone of the array
-    let utxoOutpointTransactionHash = new Uint8Array(
+    const utxoOutpointTransactionHash = new Uint8Array(
       i.txid.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
     );
     // reverse the cloned copy
@@ -122,30 +159,51 @@ export function prepareInputs(
       amount: BigInt(i.token.amount),
       category: hexToBin(i.token.tokenId),
       nft:
-        i.token.capability || i.token.commitment
+        i.token.capability !== undefined || i.token.commitment !== undefined
           ? {
               capability: i.token.capability,
-              commitment: i.token.commitment && hexToBin(i.token.commitment!),
+              commitment:
+                i.token.commitment !== undefined &&
+                hexToBin(i.token.commitment!),
             }
           : undefined,
     };
-    let newInput = {
+    const newInput = signingKey?.length
+      ? {
+          outpointIndex: utxoIndex,
+          outpointTransactionHash: utxoOutpointTransactionHash,
+          sequenceNumber: 0,
+          unlockingBytecode: {
+            compiler,
+            data: {
+              keys: { privateKeys: { key: signingKey } },
+            },
+            valueSatoshis: BigInt(utxoTxnValue),
+            script: "unlock",
+            token: libAuthToken,
+          },
+        }
+      : {
+          outpointIndex: utxoIndex,
+          outpointTransactionHash: utxoOutpointTransactionHash,
+          sequenceNumber: 0,
+          unlockingBytecode: Uint8Array.from([]),
+        };
+
+    preparedInputs.push(newInput);
+    sourceOutputs.push({
       outpointIndex: utxoIndex,
       outpointTransactionHash: utxoOutpointTransactionHash,
       sequenceNumber: 0,
-      unlockingBytecode: {
-        compiler,
-        data: {
-          keys: { privateKeys: { key: signingKey } },
-        },
-        valueSatoshis: BigInt(utxoTxnValue),
-        script: "unlock",
-        token: libAuthToken,
-      },
-    };
-    signedInputs.push(newInput);
+      unlockingBytecode: Uint8Array.from([]),
+
+      // additional info for sourceOutputs
+      lockingBytecode: cashAddressToLockingBytecode(sourceAddress),
+      valueSatoshis: BigInt(utxoTxnValue),
+      token: libAuthToken,
+    });
   }
-  return signedInputs;
+  return { preparedInputs, sourceOutputs };
 }
 
 /**
@@ -156,13 +214,12 @@ export function prepareInputs(
  * @returns A promise to a list of unspent outputs
  */
 export async function prepareOutputs(
-  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  inputs: UtxoI[]
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>
 ) {
-  let lockedOutputs: Output[] = [];
+  const lockedOutputs: Output[] = [];
   for (const output of outputs) {
     if (output instanceof TokenSendRequest) {
-      lockedOutputs.push(prepareTokenOutputs(output, inputs));
+      lockedOutputs.push(prepareTokenOutputs(output));
       continue;
     }
 
@@ -207,49 +264,9 @@ export function prepareOpReturnOutput(request: OpReturnData): Output {
  *
  * @returns A libauth Output
  */
-export function prepareTokenOutputs(
-  request: TokenSendRequest,
-  inputs: UtxoI[]
-): Output {
+export function prepareTokenOutputs(request: TokenSendRequest): Output {
   const token: TokenI = request;
-  const isGenesis = !request.tokenId || (request as any)._isGenesis;
-  let satValue = 0;
-  if (isGenesis) {
-    const genesisInputs = inputs.filter((val) => val.vout === 0);
-    if (genesisInputs.length === 0) {
-      throw new Error(
-        "No suitable inputs with vout=0 available for new token genesis"
-      );
-    }
-    token.tokenId = genesisInputs[0].txid;
-    satValue = request.value || 1000;
-    (request as any)._isGenesis = true;
-  } else {
-    const tokenInputs = inputs.filter(
-      (val) =>
-        val.token?.tokenId &&
-        val.token?.tokenId === request.tokenId &&
-        (val.token?.capability === "none"
-          ? val.token.capability === request.capability &&
-            val.token?.commitment === request.commitment
-          : true)
-    );
-    if (!tokenInputs.length) {
-      throw new Error(
-        `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
-      );
-    }
-    if (!token.capability && tokenInputs[0].token?.capability) {
-      token.capability = tokenInputs[0].token!.capability;
-    }
-    if (!token.commitment && tokenInputs[0].token?.commitment) {
-      token.commitment = tokenInputs[0].token!.commitment;
-    }
-
-    satValue = request.value || tokenInputs[0].satoshis;
-  }
-
-  let outputLockingBytecode = cashAddressToLockingBytecode(request.cashaddr);
+  const outputLockingBytecode = cashAddressToLockingBytecode(request.cashaddr);
   if (typeof outputLockingBytecode === "string")
     throw new Error(outputLockingBytecode);
 
@@ -257,17 +274,18 @@ export function prepareTokenOutputs(
     amount: BigInt(token.amount),
     category: hexToBin(token.tokenId),
     nft:
-      token.capability || token.commitment
+      token.capability !== undefined || token.commitment !== undefined
         ? {
             capability: token.capability,
-            commitment: token.commitment && hexToBin(token.commitment!),
+            commitment:
+              token.commitment !== undefined && hexToBin(token.commitment!),
           }
         : undefined,
   };
 
   return {
     lockingBytecode: outputLockingBytecode.bytecode,
-    valueSatoshis: BigInt(satValue),
+    valueSatoshis: BigInt(request.value || 1000),
     token: libAuthToken,
   } as Output;
 }
@@ -287,61 +305,72 @@ export async function getSuitableUtxos(
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
   requests: SendRequestType[],
-  ensureUtxos: UtxoI[] = []
+  ensureUtxos: UtxoI[] = [],
+  tokenOperation: "send" | "genesis" | "mint" | "burn" = "send"
 ): Promise<UtxoI[]> {
-  let suitableUtxos: UtxoI[] = [];
+  const suitableUtxos: UtxoI[] = [...ensureUtxos];
   let amountAvailable = BigInt(0);
-  const tokenAmountsRequired: any[] = [];
   const tokenRequests = requests.filter(
     (val) => val instanceof TokenSendRequest
   ) as TokenSendRequest[];
 
-  // if we do a new token genesis, we shall filter all token utxos out
-  const isTokenGenesis = tokenRequests.some(
-    (val) => !val.tokenId || (val as any)._isGenesis
-  );
-  const bchOnlyTransfer = tokenRequests.length === 0;
-  let filteredInputs =
-    isTokenGenesis || bchOnlyTransfer
-      ? inputs.slice(0).filter((val) => !val.token)
-      : inputs.slice();
-  const tokenIds = tokenRequests
-    .map((val) => val.tokenId)
-    .filter((value, index, array) => array.indexOf(value) === index);
-  for (let tokenId of tokenIds) {
-    const requiredAmount = tokenRequests
-      .map((val) => val.amount)
-      .reduce((prev, cur) => prev + cur, 0);
-    tokenAmountsRequired.push({ tokenId, requiredAmount });
-  }
+  const availableInputs = inputs.slice();
 
-  // find suitable token inputs first
-  for (const { tokenId, requiredAmount } of tokenAmountsRequired) {
-    let tokenAmountAvailable = 0;
-    for (const input of inputs) {
-      if (input.token?.tokenId === tokenId) {
-        suitableUtxos.push(input);
-        const inputIndex = filteredInputs.indexOf(input);
-        filteredInputs = filteredInputs.filter(
-          (_, index) => inputIndex !== index
-        );
-        tokenAmountAvailable += input.token!.amount;
-        amountAvailable += BigInt(input.satoshis);
-        if (tokenAmountAvailable >= requiredAmount) {
-          break;
+  // find matching utxos for token transfers
+  if (tokenOperation === "send") {
+    for (const request of tokenRequests) {
+      const tokenInputs = availableInputs.filter(
+        (val) => val.token?.tokenId === request.tokenId
+      );
+      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs].filter(
+        (val) =>
+          val.token?.capability === request.capability &&
+          val.token?.commitment === request.commitment
+      );
+      if (sameCommitmentTokens.length) {
+        const input = sameCommitmentTokens[0];
+        const index = availableInputs.indexOf(input);
+        if (index !== -1) {
+          suitableUtxos.push(input);
+          availableInputs.splice(index, 1);
+          amountAvailable += BigInt(input.satoshis);
+        }
+
+        continue;
+      }
+
+      if (
+        request.capability === NFTCapability.minting ||
+        request.capability === NFTCapability.mutable
+      ) {
+        const changeCommitmentTokens = [
+          ...suitableUtxos,
+          ...tokenInputs,
+        ].filter((val) => val.token?.capability === request.capability);
+        if (changeCommitmentTokens.length) {
+          const input = changeCommitmentTokens[0];
+          const index = availableInputs.indexOf(input);
+          if (index !== -1) {
+            suitableUtxos.push(input);
+            availableInputs.splice(index, 1);
+            amountAvailable += BigInt(input.satoshis);
+          }
+          continue;
         }
       }
+      throw Error(
+        `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
+      );
     }
   }
-
   // find plain bch outputs
-  for (const u of filteredInputs) {
+  for (const u of availableInputs) {
     if (u.token) {
       continue;
     }
 
     if (u.coinbase && u.height && bestHeight) {
-      let age = bestHeight - u.height;
+      const age = bestHeight - u.height;
       if (age > 100) {
         suitableUtxos.push(u);
         amountAvailable += BigInt(u.satoshis);
@@ -357,8 +386,11 @@ export async function getSuitableUtxos(
   }
 
   const addEnsured = (suitableUtxos) => {
-    return [...suitableUtxos, ...ensureUtxos].filter(
-      (val, index, array) => array.indexOf(val) === index
+    return [...ensureUtxos, ...suitableUtxos].filter(
+      (val, index, array) =>
+        array.findIndex(
+          (other) => other.txid === val.txid && other.vout === val.vout
+        ) === index
     );
   };
 
@@ -371,7 +403,7 @@ export async function getSuitableUtxos(
   if (typeof amountRequired === "undefined") {
     return addEnsured(suitableUtxos);
   } else if (amountAvailable < amountRequired) {
-    let e = Error(
+    const e = Error(
       `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
     );
     e["data"] = {
@@ -388,6 +420,7 @@ export async function getFeeAmount({
   utxos,
   sendRequests,
   privateKey,
+  sourceAddress,
   relayFeePerByteInSatoshi,
   slpOutputs,
   feePaidBy,
@@ -396,6 +429,7 @@ export async function getFeeAmount({
   utxos: UtxoI[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
   privateKey: Uint8Array;
+  sourceAddress: string;
   relayFeePerByteInSatoshi: number;
   slpOutputs: Output[];
   feePaidBy: FeePaidByEnum;
@@ -404,15 +438,18 @@ export async function getFeeAmount({
   // build transaction
   if (utxos) {
     // Build the transaction to get the approximate size
-    let draftTransaction = await buildEncodedTransaction(
-      utxos,
-      sendRequests,
-      privateKey,
-      0, //DUST_UTXO_THRESHOLD
-      discardChange ?? false,
-      slpOutputs,
-      feePaidBy
-    );
+    const { encodedTransaction: draftTransaction } =
+      await buildEncodedTransaction({
+        inputs: utxos,
+        outputs: sendRequests,
+        signingKey: privateKey,
+        sourceAddress,
+        fee: 0, //DUST_UTXO_THRESHOLD
+        discardChange: discardChange ?? false,
+        slpOutputs,
+        feePaidBy,
+        changeAddress: "",
+      });
 
     return draftTransaction.length * relayFeePerByteInSatoshi + 1;
   } else {
@@ -423,30 +460,38 @@ export async function getFeeAmount({
 }
 
 // Build encoded transaction
-export async function buildEncodedTransaction(
-  fundingUtxos: UtxoI[],
-  sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  privateKey: Uint8Array,
-  fee: number = 0,
+export async function buildEncodedTransaction({
+  inputs,
+  outputs,
+  signingKey,
+  sourceAddress,
+  fee = 0,
   discardChange = false,
-  slpOutputs: Output[] = [],
-  feePaidBy: FeePaidByEnum = FeePaidByEnum.change,
-  changeAddress: string = ""
-) {
-  let txn = await buildP2pkhNonHdTransaction(
-    fundingUtxos,
-    sendRequests,
-    privateKey,
+  slpOutputs = [],
+  feePaidBy = FeePaidByEnum.change,
+  changeAddress = "",
+}: {
+  inputs: UtxoI[];
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
+  signingKey: Uint8Array;
+  sourceAddress: string;
+  fee?: number;
+  discardChange?: boolean;
+  slpOutputs?: Output[];
+  feePaidBy?: FeePaidByEnum;
+  changeAddress?: string;
+}) {
+  const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
+    inputs,
+    outputs,
+    signingKey,
+    sourceAddress,
     fee,
     discardChange,
     slpOutputs,
     feePaidBy,
-    changeAddress
-  );
-  // submit transaction
-  if (txn.success) {
-    return encodeTransaction(txn.transaction);
-  } else {
-    throw Error("Error building transaction with fee");
-  }
+    changeAddress,
+  });
+
+  return { encodedTransaction: encodeTransaction(transaction), sourceOutputs };
 }

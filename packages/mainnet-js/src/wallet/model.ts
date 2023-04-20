@@ -4,6 +4,8 @@ import { UnitEnum } from "../enum.js";
 import { NFTCapability, UtxoI } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import {
+  Input,
+  Output,
   binToNumberUint16LE,
   binToUtf8,
   hexToBin,
@@ -312,11 +314,15 @@ export class OpReturnData {
 
 export type SendRequestArray = Array<string | number | UnitEnum | Buffer>;
 
+export type SourceOutput = Input & Output;
+
 export class SendResponse {
   txId?: string;
   balance?: BalanceResponse;
   explorerUrl?: string;
   tokenIds?: string[];
+  unsignedTransaction?: string; // unsigned transaction hex
+  sourceOutputs?: SourceOutput[]; // source outputs for signing unsigned transactions
 
   constructor({
     txId,

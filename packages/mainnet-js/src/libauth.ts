@@ -7,4 +7,5 @@ export {
   hexToBin,
   generateTransaction,
   encodeTransaction,
+  decodeTransaction,
 } from "@bitauth/libauth";

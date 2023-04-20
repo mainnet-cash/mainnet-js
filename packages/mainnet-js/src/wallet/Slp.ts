@@ -682,6 +682,7 @@ export class Slp {
       utxos: fundingBchUtxos,
       sendRequests: slpOutputsResult.BchSendRequests,
       privateKey: this.wallet.privateKey,
+      sourceAddress: this.wallet.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: slpOutputsResult.SlpOutputs,
       feePaidBy: FeePaidByEnum.change,
@@ -709,19 +710,21 @@ export class Slp {
       utxos: fundingUtxos,
       sendRequests: slpOutputsResult.BchSendRequests,
       privateKey: this.wallet.privateKey,
+      sourceAddress: this.wallet.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       slpOutputs: slpOutputsResult.SlpOutputs,
       feePaidBy: FeePaidByEnum.change,
     });
 
-    const encodedTransaction = await buildEncodedTransaction(
-      fundingUtxos,
-      slpOutputsResult.BchSendRequests,
-      this.wallet.privateKey,
+    const { encodedTransaction } = await buildEncodedTransaction({
+      inputs: fundingUtxos,
+      outputs: slpOutputsResult.BchSendRequests,
+      signingKey: this.wallet.privateKey,
+      sourceAddress: this.wallet.cashaddr!,
       fee,
-      false,
-      slpOutputsResult.SlpOutputs
-    );
+      discardChange: false,
+      slpOutputs: slpOutputsResult.SlpOutputs,
+    });
 
     return this._submitTransaction(encodedTransaction, tokenId);
   }

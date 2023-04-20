@@ -54,7 +54,9 @@ export interface SendRequestOptionsI {
   awaitTransactionPropagation?: boolean;
   feePaidBy?: FeePaidByEnum;
   checkTokenQuantities?: boolean; // true
+  tokenOperation?: "send" | "genesis" | "mint" | "burn"; // undefined. internal use only
   ensureUtxos?: UtxoI[]; // ensure these inputs will be consumed in the transaction
+  buildUnsigned?: boolean; // false
 }
 
 export interface MnemonicI {

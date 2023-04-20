@@ -106,6 +106,8 @@ describe("Test Wallet Endpoints", () => {
       to: [{
         cashaddr: bobCashaddr,
         tokenId: tokenId,
+        capability: NFTCapability.mutable,
+        commitment: "abcd",
       }]
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
@@ -189,6 +191,7 @@ describe("Test Wallet Endpoints", () => {
       to: [{
         cashaddr: process.env.ADDRESS!,
         tokenId: tokenId,
+        capability: NFTCapability.mutable,
         commitment: "abcd02",
       }]
     })).body;
@@ -229,8 +232,12 @@ describe("Test Wallet Endpoints", () => {
       tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
+        commitment: "test",
+        capability: NFTCapability.none,
       }, {
         cashaddr: process.env.ADDRESS!,
+        commitment: "test",
+        capability: NFTCapability.none,
       }]
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
@@ -272,8 +279,12 @@ describe("Test Wallet Endpoints", () => {
       tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0a",
       }, {
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0a",
       }],
       deductTokenAmount: true
     })).body;
@@ -295,8 +306,12 @@ describe("Test Wallet Endpoints", () => {
       tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0c",
       }, {
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0d",
       }],
       deductTokenAmount: false
     })).body;
@@ -318,10 +333,16 @@ describe("Test Wallet Endpoints", () => {
       tokenId: tokenId,
       requests: [{
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0a",
       }, {
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0a",
       }, {
         cashaddr: process.env.ADDRESS!,
+        capability: NFTCapability.none,
+        commitment: "0a",
       }],
       deductTokenAmount: true
     })).body;
