@@ -1,6 +1,22 @@
 Newest changes
 --------------
 
+1.1.2
+
+* Rework and simplify token utxo selection
+* Require to always provide commitment and capability for tokens sent
+* Allow to build unsigned transactions (for watch only wallets too)
+Example:
+
+```
+const { unsignedTransaction, sourceOutputs } = await watchWallet.send({...}), { buildUnsigned: true });
+```
+
+Where `unsignedTransaction` is a hex-encoded serialized transaction. It will have its inputs unlocking bytecode to be empty.
+
+`sourceOutputs` will contain the detailed information about the inputs being spent, including lockingBytecode, satoshi values and token information.
+This information can be used to recreate the signing context for libauth.
+
 1.1.1
 
 * Add stricter token utxo selection, add 3 more cashtoken regression tests
