@@ -154,10 +154,10 @@ export function prepareInputs({
       amount: BigInt(i.token.amount),
       category: hexToBin(i.token.tokenId),
       nft:
-        i.token.capability || i.token.commitment
+        i.token.capability !== undefined || i.token.commitment !== undefined
           ? {
               capability: i.token.capability,
-              commitment: i.token.commitment && hexToBin(i.token.commitment!),
+              commitment: i.token.commitment !== undefined && hexToBin(i.token.commitment!),
             }
           : undefined,
     };
@@ -267,7 +267,7 @@ export function prepareTokenOutputs(
     amount: BigInt(token.amount),
     category: hexToBin(token.tokenId),
     nft:
-      token.capability || token.commitment
+      token.capability !== undefined || token.commitment !== undefined
         ? {
             capability: token.capability,
             commitment: token.commitment !== undefined && hexToBin(token.commitment!),
