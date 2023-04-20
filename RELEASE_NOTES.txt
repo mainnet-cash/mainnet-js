@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+1.1.3
+
+* Fix token genesis not filtering out token inputs
+* Fix source outputs lockingBytecode derivation
+
 1.1.2
 
 * Rework and simplify token utxo selection

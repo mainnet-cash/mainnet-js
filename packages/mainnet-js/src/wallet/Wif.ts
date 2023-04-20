@@ -1479,7 +1479,7 @@ export class Wallet extends BaseWallet {
       utxos = await this.getAddressUtxos(this.cashaddr);
     }
 
-    const genesisInputs = utxos.filter((val) => val.vout === 0);
+    const genesisInputs = utxos.filter((val) => val.vout === 0 && !val.token);
     if (genesisInputs.length === 0) {
       throw new Error(
         "No suitable inputs with vout=0 available for new token genesis"
@@ -1494,8 +1494,7 @@ export class Wallet extends BaseWallet {
       commitment: genesisRequest.commitment,
       tokenId: utxos[0].txid,
     });
-    // TODO: remove
-    (genesisSendRequest as any)._isGenesis = true;
+
     return this.send([genesisSendRequest, ...(sendRequests as any)], {
       ...options,
       utxoIds: utxos,

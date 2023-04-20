@@ -13,6 +13,7 @@ import {
   Output,
   hexToBin,
   verifyTransactionTokens,
+  stringify,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
@@ -191,6 +192,12 @@ export function prepareInputs({
         };
 
     preparedInputs.push(newInput);
+
+    const lockingBytecode = cashAddressToLockingBytecode(sourceAddress);
+    if (typeof lockingBytecode === "string") {
+      throw lockingBytecode;
+    }
+
     sourceOutputs.push({
       outpointIndex: utxoIndex,
       outpointTransactionHash: utxoOutpointTransactionHash,
@@ -198,7 +205,7 @@ export function prepareInputs({
       unlockingBytecode: Uint8Array.from([]),
 
       // additional info for sourceOutputs
-      lockingBytecode: cashAddressToLockingBytecode(sourceAddress),
+      lockingBytecode: lockingBytecode.bytecode,
       valueSatoshis: BigInt(utxoTxnValue),
       token: libAuthToken,
     });
