@@ -954,11 +954,8 @@ export class Wallet extends BaseWallet {
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    const { encodedTransaction, tokenIds, sourceOutputs } = await this.encodeTransaction(
-      requests,
-      undefined,
-      options
-    );
+    const { encodedTransaction, tokenIds, sourceOutputs } =
+      await this.encodeTransaction(requests, undefined, options);
 
     const resp = new SendResponse({});
     resp.tokenIds = tokenIds;
@@ -966,13 +963,17 @@ export class Wallet extends BaseWallet {
     if (options?.buildUnsigned !== true) {
       const txId = await this.submitTransaction(
         encodedTransaction,
-        options?.awaitTransactionPropagation === undefined || options?.awaitTransactionPropagation === true
+        options?.awaitTransactionPropagation === undefined ||
+          options?.awaitTransactionPropagation === true
       );
 
       resp.txId = txId;
       resp.explorerUrl = this.explorerUrl(resp.txId);
 
-      if (options?.queryBalance === undefined || options?.queryBalance === true) {
+      if (
+        options?.queryBalance === undefined ||
+        options?.queryBalance === true
+      ) {
         resp.balance = (await this.getBalance()) as BalanceResponse;
       }
     } else {
@@ -1010,10 +1011,12 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    const { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend({
-      outputCount: 1,
-      options: options,
-    });
+    const { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend(
+      {
+        outputCount: 1,
+        options: options,
+      }
+    );
 
     if (!options) {
       options = {};
@@ -1027,11 +1030,8 @@ export class Wallet extends BaseWallet {
       unit: "sat",
     });
 
-    const { encodedTransaction, tokenIds, sourceOutputs } = await this.encodeTransaction(
-      [sendRequest],
-      true,
-      options
-    );
+    const { encodedTransaction, tokenIds, sourceOutputs } =
+      await this.encodeTransaction([sendRequest], true, options);
 
     const resp = new SendResponse({});
     resp.tokenIds = tokenIds;
@@ -1039,13 +1039,17 @@ export class Wallet extends BaseWallet {
     if (options?.buildUnsigned !== true) {
       const txId = await this.submitTransaction(
         encodedTransaction,
-        options?.awaitTransactionPropagation === undefined || options?.awaitTransactionPropagation === true
+        options?.awaitTransactionPropagation === undefined ||
+          options?.awaitTransactionPropagation === true
       );
 
       resp.txId = txId;
       resp.explorerUrl = this.explorerUrl(resp.txId);
 
-      if (options?.queryBalance === undefined || options?.queryBalance === true) {
+      if (
+        options?.queryBalance === undefined ||
+        options?.queryBalance === true
+      ) {
         resp.balance = (await this.getBalance()) as BalanceResponse;
       }
     } else {
@@ -1132,7 +1136,7 @@ export class Wallet extends BaseWallet {
     // if (options?.ensureUtxos?.every(val => !val.token) && sendRequests.some(val => (val as TokenSendRequest).tokenId)) {
     //   tokenOp = "genesis";
     // } else if (options?.ensureUtxos?.length === 1 && options?.ensureUtxos?.[0].token?.capability === NFTCapability.minting && ) {
-  
+
     // }
 
     const addTokenChangeOutputs = (
@@ -1214,7 +1218,7 @@ export class Wallet extends BaseWallet {
       feePaidBy,
       sendRequests,
       options?.ensureUtxos || [],
-      options?.tokenOperation,
+      options?.tokenOperation
     );
     if (fundingUtxos.length === 0) {
       throw Error(
@@ -1230,17 +1234,19 @@ export class Wallet extends BaseWallet {
       slpOutputs: [],
       feePaidBy: feePaidBy,
     });
-    const { encodedTransaction, sourceOutputs } = await buildEncodedTransaction({
-      inputs: fundingUtxos,
-      outputs: sendRequests,
-      signingKey: this.privateKey ?? Uint8Array.from([]),
-      sourceAddress: this.cashaddr!,
-      fee,
-      discardChange,
-      slpOutputs: [],
-      feePaidBy,
-      changeAddress
-    });
+    const { encodedTransaction, sourceOutputs } = await buildEncodedTransaction(
+      {
+        inputs: fundingUtxos,
+        outputs: sendRequests,
+        signingKey: this.privateKey ?? Uint8Array.from([]),
+        sourceAddress: this.cashaddr!,
+        fee,
+        discardChange,
+        slpOutputs: [],
+        feePaidBy,
+        changeAddress,
+      }
+    );
 
     const tokenIds = [
       ...fundingUtxos
@@ -1490,20 +1496,14 @@ export class Wallet extends BaseWallet {
     });
     // TODO: remove
     (genesisSendRequest as any)._isGenesis = true;
-    return this.send(
-      [
-        genesisSendRequest,
-        ...(sendRequests as any),
-      ],
-      {
-        ...options,
-        utxoIds: utxos,
-        ensureUtxos: [utxos[0]],
-        checkTokenQuantities: false,
-        queryBalance: false,
-        tokenOperation: "genesis",
-      }
-    );
+    return this.send([genesisSendRequest, ...(sendRequests as any)], {
+      ...options,
+      utxoIds: utxos,
+      ensureUtxos: [utxos[0]],
+      checkTokenQuantities: false,
+      queryBalance: false,
+      tokenOperation: "genesis",
+    });
   }
 
   /**
@@ -1636,7 +1636,7 @@ export class Wallet extends BaseWallet {
       } else {
         // add utxos to spend from
         let available = 0;
-        for (const token of tokenUtxos.filter(val => val.token?.amount)) {
+        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
           utxoIds.push(token);
           available += token.token?.amount!;
           if (available >= fungibleBurnAmount) {
@@ -1666,7 +1666,7 @@ export class Wallet extends BaseWallet {
       } else {
         // add utxos to spend from
         let available = 0;
-        for (const token of tokenUtxos.filter(val => val.token?.amount)) {
+        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
           utxoIds.push(token);
           available += token.token?.amount!;
           if (available >= fungibleBurnAmount) {

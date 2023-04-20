@@ -39,17 +39,17 @@ export async function buildP2pkhNonHdTransaction({
   discardChange = false,
   slpOutputs = [],
   feePaidBy = FeePaidByEnum.change,
-  changeAddress = ""
-} : {
-  inputs: UtxoI[],
-  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  signingKey: Uint8Array,
-  sourceAddress: string,
-  fee?: number,
-  discardChange?: boolean,
-  slpOutputs?: Output[],
-  feePaidBy?: FeePaidByEnum,
-  changeAddress?: string,
+  changeAddress = "",
+}: {
+  inputs: UtxoI[];
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
+  signingKey: Uint8Array;
+  sourceAddress: string;
+  fee?: number;
+  discardChange?: boolean;
+  slpOutputs?: Output[];
+  feePaidBy?: FeePaidByEnum;
+  changeAddress?: string;
 }) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -97,7 +97,12 @@ export async function buildP2pkhNonHdTransaction({
     }
   }
 
-  const { preparedInputs, sourceOutputs } = prepareInputs({inputs, compiler, signingKey, sourceAddress});
+  const { preparedInputs, sourceOutputs } = prepareInputs({
+    inputs,
+    compiler,
+    signingKey,
+    sourceAddress,
+  });
   const result = generateTransaction({
     inputs: preparedInputs,
     locktime: 0,
@@ -124,16 +129,16 @@ export function prepareInputs({
   inputs,
   compiler,
   signingKey,
-  sourceAddress
+  sourceAddress,
 }: {
-  inputs: UtxoI[],
+  inputs: UtxoI[];
   compiler: Compiler<
     CompilationContextBCH,
     AnyCompilerConfiguration<CompilationContextBCH>,
     AuthenticationProgramStateCommon
-  >,
-  signingKey: Uint8Array,
-  sourceAddress: string,
+  >;
+  signingKey: Uint8Array;
+  sourceAddress: string;
 }) {
   const preparedInputs: any[] = [];
   const sourceOutputs: any[] = [];
@@ -157,29 +162,33 @@ export function prepareInputs({
         i.token.capability !== undefined || i.token.commitment !== undefined
           ? {
               capability: i.token.capability,
-              commitment: i.token.commitment !== undefined && hexToBin(i.token.commitment!),
+              commitment:
+                i.token.commitment !== undefined &&
+                hexToBin(i.token.commitment!),
             }
           : undefined,
     };
-    const newInput = signingKey?.length ? {
-      outpointIndex: utxoIndex,
-      outpointTransactionHash: utxoOutpointTransactionHash,
-      sequenceNumber: 0,
-      unlockingBytecode: {
-        compiler,
-        data: {
-          keys: { privateKeys: { key: signingKey } },
-        },
-        valueSatoshis: BigInt(utxoTxnValue),
-        script: "unlock",
-        token: libAuthToken,
-      },
-    } : {
-      outpointIndex: utxoIndex,
-      outpointTransactionHash: utxoOutpointTransactionHash,
-      sequenceNumber: 0,
-      unlockingBytecode: Uint8Array.from([]),
-    };
+    const newInput = signingKey?.length
+      ? {
+          outpointIndex: utxoIndex,
+          outpointTransactionHash: utxoOutpointTransactionHash,
+          sequenceNumber: 0,
+          unlockingBytecode: {
+            compiler,
+            data: {
+              keys: { privateKeys: { key: signingKey } },
+            },
+            valueSatoshis: BigInt(utxoTxnValue),
+            script: "unlock",
+            token: libAuthToken,
+          },
+        }
+      : {
+          outpointIndex: utxoIndex,
+          outpointTransactionHash: utxoOutpointTransactionHash,
+          sequenceNumber: 0,
+          unlockingBytecode: Uint8Array.from([]),
+        };
 
     preparedInputs.push(newInput);
     sourceOutputs.push({
@@ -192,7 +201,7 @@ export function prepareInputs({
       lockingBytecode: cashAddressToLockingBytecode(sourceAddress),
       valueSatoshis: BigInt(utxoTxnValue),
       token: libAuthToken,
-    })
+    });
   }
   return { preparedInputs, sourceOutputs };
 }
@@ -205,7 +214,7 @@ export function prepareInputs({
  * @returns A promise to a list of unspent outputs
  */
 export async function prepareOutputs(
-  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>
 ) {
   const lockedOutputs: Output[] = [];
   for (const output of outputs) {
@@ -255,9 +264,7 @@ export function prepareOpReturnOutput(request: OpReturnData): Output {
  *
  * @returns A libauth Output
  */
-export function prepareTokenOutputs(
-  request: TokenSendRequest,
-): Output {
+export function prepareTokenOutputs(request: TokenSendRequest): Output {
   const token: TokenI = request;
   const outputLockingBytecode = cashAddressToLockingBytecode(request.cashaddr);
   if (typeof outputLockingBytecode === "string")
@@ -270,7 +277,8 @@ export function prepareTokenOutputs(
       token.capability !== undefined || token.commitment !== undefined
         ? {
             capability: token.capability,
-            commitment: token.commitment !== undefined && hexToBin(token.commitment!),
+            commitment:
+              token.commitment !== undefined && hexToBin(token.commitment!),
           }
         : undefined,
   };
@@ -311,8 +319,14 @@ export async function getSuitableUtxos(
   // find matching utxos for token transfers
   if (tokenOperation === "send") {
     for (const request of tokenRequests) {
-      const tokenInputs = availableInputs.filter(val => val.token?.tokenId === request.tokenId);
-      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs].filter(val => val.token?.capability === request.capability && val.token?.commitment === request.commitment);
+      const tokenInputs = availableInputs.filter(
+        (val) => val.token?.tokenId === request.tokenId
+      );
+      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs].filter(
+        (val) =>
+          val.token?.capability === request.capability &&
+          val.token?.commitment === request.commitment
+      );
       if (sameCommitmentTokens.length) {
         const input = sameCommitmentTokens[0];
         const index = availableInputs.indexOf(input);
@@ -325,8 +339,14 @@ export async function getSuitableUtxos(
         continue;
       }
 
-      if (request.capability === NFTCapability.minting || request.capability === NFTCapability.mutable) {
-        const changeCommitmentTokens = [...suitableUtxos, ...tokenInputs].filter(val => val.token?.capability === request.capability);
+      if (
+        request.capability === NFTCapability.minting ||
+        request.capability === NFTCapability.mutable
+      ) {
+        const changeCommitmentTokens = [
+          ...suitableUtxos,
+          ...tokenInputs,
+        ].filter((val) => val.token?.capability === request.capability);
         if (changeCommitmentTokens.length) {
           const input = changeCommitmentTokens[0];
           const index = availableInputs.indexOf(input);
@@ -338,7 +358,9 @@ export async function getSuitableUtxos(
           continue;
         }
       }
-      throw Error(`No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`);
+      throw Error(
+        `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
+      );
     }
   }
   // find plain bch outputs
@@ -364,7 +386,12 @@ export async function getSuitableUtxos(
   }
 
   const addEnsured = (suitableUtxos) => {
-    return [...ensureUtxos, ...suitableUtxos].filter((val, index, array) => array.findIndex(other => other.txid === val.txid && other.vout === val.vout) === index);
+    return [...ensureUtxos, ...suitableUtxos].filter(
+      (val, index, array) =>
+        array.findIndex(
+          (other) => other.txid === val.txid && other.vout === val.vout
+        ) === index
+    );
   };
 
   // if the fee is split with a feePaidBy option, skip checking change.
@@ -411,17 +438,18 @@ export async function getFeeAmount({
   // build transaction
   if (utxos) {
     // Build the transaction to get the approximate size
-    const { encodedTransaction: draftTransaction } = await buildEncodedTransaction({
-      inputs: utxos,
-      outputs: sendRequests,
-      signingKey: privateKey,
-      sourceAddress,
-      fee: 0, //DUST_UTXO_THRESHOLD
-      discardChange: discardChange ?? false,
-      slpOutputs,
-      feePaidBy,
-      changeAddress: "",
-  });
+    const { encodedTransaction: draftTransaction } =
+      await buildEncodedTransaction({
+        inputs: utxos,
+        outputs: sendRequests,
+        signingKey: privateKey,
+        sourceAddress,
+        fee: 0, //DUST_UTXO_THRESHOLD
+        discardChange: discardChange ?? false,
+        slpOutputs,
+        feePaidBy,
+        changeAddress: "",
+      });
 
     return draftTransaction.length * relayFeePerByteInSatoshi + 1;
   } else {
@@ -433,27 +461,26 @@ export async function getFeeAmount({
 
 // Build encoded transaction
 export async function buildEncodedTransaction({
-    inputs,
-    outputs,
-    signingKey,
-    sourceAddress,
-    fee = 0,
-    discardChange = false,
-    slpOutputs = [],
-    feePaidBy = FeePaidByEnum.change,
-    changeAddress = ""
-  } : {
-    inputs: UtxoI[],
-    outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
-    signingKey: Uint8Array,
-    sourceAddress: string,
-    fee?: number,
-    discardChange?: boolean,
-    slpOutputs?: Output[],
-    feePaidBy?: FeePaidByEnum,
-    changeAddress?: string,
-  }
-) {
+  inputs,
+  outputs,
+  signingKey,
+  sourceAddress,
+  fee = 0,
+  discardChange = false,
+  slpOutputs = [],
+  feePaidBy = FeePaidByEnum.change,
+  changeAddress = "",
+}: {
+  inputs: UtxoI[];
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
+  signingKey: Uint8Array;
+  sourceAddress: string;
+  fee?: number;
+  discardChange?: boolean;
+  slpOutputs?: Output[];
+  feePaidBy?: FeePaidByEnum;
+  changeAddress?: string;
+}) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,
     outputs,
@@ -463,7 +490,7 @@ export async function buildEncodedTransaction({
     discardChange,
     slpOutputs,
     feePaidBy,
-    changeAddress
+    changeAddress,
   });
 
   return { encodedTransaction: encodeTransaction(transaction), sourceOutputs };

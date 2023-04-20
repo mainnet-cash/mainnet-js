@@ -7,7 +7,13 @@ import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
 import { delay } from "../util/delay";
 import { OpReturnData, SendResponse } from "./model";
 import { ElectrumRawTransaction } from "../network/interface";
-import { binToHex, binsAreEqual, decodeTransaction, hexToBin, utf8ToBin } from "@bitauth/libauth";
+import {
+  binToHex,
+  binsAreEqual,
+  decodeTransaction,
+  hexToBin,
+  utf8ToBin,
+} from "@bitauth/libauth";
 import { mine } from "../mine";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 
@@ -1124,64 +1130,87 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const aliceUtxos = await aliceWallet.getAddressUtxos();
 
     {
-      const { encodedTransaction, sourceOutputs } = await aliceWallet.encodeTransaction([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 2000,
-          unit: "satoshis",
-        },
-      ], false, { buildUnsigned: true });
+      const { encodedTransaction, sourceOutputs } =
+        await aliceWallet.encodeTransaction(
+          [
+            {
+              cashaddr: bobWallet.cashaddr!,
+              value: 2000,
+              unit: "satoshis",
+            },
+          ],
+          false,
+          { buildUnsigned: true }
+        );
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(JSON.stringify(await aliceWallet.getAddressUtxos()));
+      expect(JSON.stringify(aliceUtxos)).toBe(
+        JSON.stringify(await aliceWallet.getAddressUtxos())
+      );
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
         throw decoded;
       }
 
-      expect(binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))).toBe(true);
+      expect(
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+      ).toBe(true);
       expect(sourceOutputs.length).toBe(decoded.inputs.length);
     }
 
     {
-      const { unsignedTransaction, sourceOutputs } = await aliceWallet.send([
-        {
-          cashaddr: bobWallet.cashaddr!,
-          value: 2000,
-          unit: "satoshis",
-        },
-      ], { buildUnsigned: true });
+      const { unsignedTransaction, sourceOutputs } = await aliceWallet.send(
+        [
+          {
+            cashaddr: bobWallet.cashaddr!,
+            value: 2000,
+            unit: "satoshis",
+          },
+        ],
+        { buildUnsigned: true }
+      );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(JSON.stringify(await aliceWallet.getAddressUtxos()));
+      expect(JSON.stringify(aliceUtxos)).toBe(
+        JSON.stringify(await aliceWallet.getAddressUtxos())
+      );
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
         throw decoded;
       }
 
-      expect(binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))).toBe(true);
+      expect(
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+      ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
     }
 
     {
-      const { unsignedTransaction, sourceOutputs } = await aliceWallet.sendMax(bobWallet.cashaddr!, { buildUnsigned: true });
+      const { unsignedTransaction, sourceOutputs } = await aliceWallet.sendMax(
+        bobWallet.cashaddr!,
+        { buildUnsigned: true }
+      );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(JSON.stringify(await aliceWallet.getAddressUtxos()));
+      expect(JSON.stringify(aliceUtxos)).toBe(
+        JSON.stringify(await aliceWallet.getAddressUtxos())
+      );
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
         throw decoded;
       }
 
-      expect(binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))).toBe(true);
+      expect(
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+      ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
     }
   });
