@@ -1,6 +1,7 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import {
+  OpReturnData,
   SendRequest,
   SendResponse,
   TokenMintRequest,
@@ -950,6 +951,35 @@ describe(`Test cashtokens`, () => {
       expect(binToHex(decoded.outputs[0].token?.nft?.commitment!)).toBe("0a");
     }
   });
+
+  test("Kek", async () => {
+    const aliceWatchWallet = await TestNetWallet.watchOnly("bchtest:zzm0t7f76ye50xh2hr0lmt2a0wage2sutcqnl25ahq");
+
+    // const utxos = (await aliceWatchWallet.getTokenUtxos()).filter(val => val.token?.tokenId.startsWith("4cca"));
+    // console.log(utxos);
+    // return;
+
+
+      const { unsignedTransaction, sourceOutputs } = await aliceWatchWallet.tokenGenesis({
+        cashaddr: aliceWatchWallet.cashaddr!,
+        capability: NFTCapability.minting,
+        commitment: "",
+        value: 1000
+      }, OpReturnData.from(""), { buildUnsigned: true });
+      const encodedTransaction = hexToBin(unsignedTransaction!);
+      expect(encodedTransaction.length).toBeGreaterThan(0);
+
+      // const decoded = decodeTransaction(encodedTransaction);
+      // if (typeof decoded === "string") {
+      //   throw decoded;
+      // }
+
+      // expect(binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))).toBe(true);
+      // expect(sourceOutputs!.length).toBe(decoded.inputs.length);
+      // expect(binToHex(decoded.outputs[0].token?.nft?.commitment!)).toBe("00");
+
+  });
+
 
   test("Test enforcing token addresses", async () => {
     const bob = await RegTestWallet.newRandom();
