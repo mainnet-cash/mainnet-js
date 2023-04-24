@@ -1240,7 +1240,7 @@ export class Wallet extends BaseWallet {
         slpOutputs: [],
         feePaidBy,
         changeAddress,
-        buildUnsigned: options?.buildUnsigned === true
+        buildUnsigned: options?.buildUnsigned === true,
       }
     );
 
@@ -1256,12 +1256,19 @@ export class Wallet extends BaseWallet {
     return { encodedTransaction, tokenIds, sourceOutputs };
   }
 
-  public async signUnsignedTransaction(transaction: Uint8Array | string, sourceOutputs: SourceOutput[]): Promise<Uint8Array> {
+  public async signUnsignedTransaction(
+    transaction: Uint8Array | string,
+    sourceOutputs: SourceOutput[]
+  ): Promise<Uint8Array> {
     if (!this.privateKey) {
       throw Error("Can not sign a transaction with watch-only wallet.");
     }
 
-    return signUnsignedTransaction(transaction, sourceOutputs, this.privateKey!);
+    return signUnsignedTransaction(
+      transaction,
+      sourceOutputs,
+      this.privateKey!
+    );
   }
 
   // Submit a raw transaction

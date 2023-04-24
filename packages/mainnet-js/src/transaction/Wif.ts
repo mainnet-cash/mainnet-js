@@ -501,13 +501,19 @@ export async function buildEncodedTransaction({
   });
 
   if (buildUnsigned === true) {
-    transaction.inputs.forEach(input => input.unlockingBytecode = Uint8Array.from([]));
+    transaction.inputs.forEach(
+      (input) => (input.unlockingBytecode = Uint8Array.from([]))
+    );
   }
 
   return { encodedTransaction: encodeTransaction(transaction), sourceOutputs };
 }
 
-export async function signUnsignedTransaction(transaction: Uint8Array | string, sourceOutputs: SourceOutput[], signingKey: Uint8Array): Promise<Uint8Array> {
+export async function signUnsignedTransaction(
+  transaction: Uint8Array | string,
+  sourceOutputs: SourceOutput[],
+  signingKey: Uint8Array
+): Promise<Uint8Array> {
   if (typeof transaction === "string") {
     transaction = hexToBin(transaction);
   }
@@ -525,7 +531,9 @@ export async function signUnsignedTransaction(transaction: Uint8Array | string, 
   }
 
   const compiler = authenticationTemplateToCompilerBCH(template);
-  const transactionTemplate: Readonly<TransactionTemplateFixed<typeof compiler>> = {...decoded};
+  const transactionTemplate: Readonly<
+    TransactionTemplateFixed<typeof compiler>
+  > = { ...decoded };
   for (const [index, input] of decoded.inputs.entries()) {
     const sourceOutput = sourceOutputs[index];
     transactionTemplate.inputs[index] = {
@@ -538,7 +546,7 @@ export async function signUnsignedTransaction(transaction: Uint8Array | string, 
         valueSatoshis: sourceOutput.valueSatoshis,
         script: "unlock",
         token: sourceOutput.token,
-      }
+      },
     };
   }
 
