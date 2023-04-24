@@ -12,6 +12,7 @@ import {
   binsAreEqual,
   decodeTransaction,
   hexToBin,
+  lockingBytecodeToCashAddress,
   utf8ToBin,
 } from "@bitauth/libauth";
 import { mine } from "../mine";
@@ -1157,6 +1158,19 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(
         binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
       ).toBe(true);
+      const toCashAddress = (bytecode) => {
+        const cashaddr = lockingBytecodeToCashAddress(bytecode, "bchreg");
+        if (typeof cashaddr !== "string") {
+          throw Error(cashaddr.error);
+        }
+        return cashaddr;
+      };
+      expect(toCashAddress(decoded.outputs[0].lockingBytecode)).toBe(
+        bobWallet.cashaddr
+      );
+      expect(toCashAddress(decoded.outputs[1].lockingBytecode)).toBe(
+        aliceWallet.cashaddr
+      );
       expect(sourceOutputs.length).toBe(decoded.inputs.length);
     }
 
