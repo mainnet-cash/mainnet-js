@@ -1,4 +1,3 @@
-// Unstable?
 import {
   authenticationTemplateP2pkhNonHd,
   authenticationTemplateToCompilerBCH,
@@ -13,9 +12,7 @@ import {
   Output,
   hexToBin,
   verifyTransactionTokens,
-  stringify,
   decodeTransaction,
-  Input,
   TransactionTemplateFixed,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
@@ -78,22 +75,15 @@ export async function buildP2pkhNonHdTransaction({
 
   const lockedOutputs = await prepareOutputs(outputs);
 
+  if (!changeAddress) {
+    changeAddress = sourceAddress;
+  }
+
   if (discardChange !== true) {
     if (changeAmount > DUST_UTXO_THRESHOLD) {
-      let changeLockingBytecode;
-      if (changeAddress) {
-        changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
-      } else {
-        // Get the change locking bytecode
-        changeLockingBytecode = compiler.generateBytecode({
-          scriptId: "lock",
-          data: {
-            keys: { privateKeys: { key: signingKey } },
-          },
-        });
-      }
+      const changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
       if (typeof changeLockingBytecode === "string") {
-        throw new Error(changeLockingBytecode);
+        throw Error(changeLockingBytecode);
       }
       lockedOutputs.push({
         lockingBytecode: changeLockingBytecode.bytecode,

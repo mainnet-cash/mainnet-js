@@ -1108,7 +1108,7 @@ export class Wallet extends BaseWallet {
     if (options && options.changeAddress) {
       changeAddress = options.changeAddress;
     } else {
-      changeAddress = "";
+      changeAddress = this.cashaddr!;
     }
 
     let checkTokenQuantities: boolean = true;
