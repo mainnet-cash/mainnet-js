@@ -14,6 +14,9 @@ import {
   hexToBin,
   verifyTransactionTokens,
   stringify,
+  decodeTransaction,
+  Input,
+  TransactionTemplateFixed,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
@@ -23,6 +26,7 @@ import {
   OpReturnData,
   SendRequest,
   SendRequestType,
+  SourceOutput,
   TokenSendRequest,
 } from "../wallet/model.js";
 import { amountInSatoshi } from "../util/amountInSatoshi.js";
@@ -169,27 +173,21 @@ export function prepareInputs({
             }
           : undefined,
     };
-    const newInput = signingKey?.length
-      ? {
-          outpointIndex: utxoIndex,
-          outpointTransactionHash: utxoOutpointTransactionHash,
-          sequenceNumber: 0,
-          unlockingBytecode: {
-            compiler,
-            data: {
-              keys: { privateKeys: { key: signingKey } },
-            },
-            valueSatoshis: BigInt(utxoTxnValue),
-            script: "unlock",
-            token: libAuthToken,
-          },
-        }
-      : {
-          outpointIndex: utxoIndex,
-          outpointTransactionHash: utxoOutpointTransactionHash,
-          sequenceNumber: 0,
-          unlockingBytecode: Uint8Array.from([]),
-        };
+    const key = signingKey?.length ? signingKey : Uint8Array.from(Array(32));
+    const newInput = {
+      outpointIndex: utxoIndex,
+      outpointTransactionHash: utxoOutpointTransactionHash,
+      sequenceNumber: 0,
+      unlockingBytecode: {
+        compiler,
+        data: {
+          keys: { privateKeys: { key: key } },
+        },
+        valueSatoshis: BigInt(utxoTxnValue),
+        script: "unlock",
+        token: libAuthToken,
+      },
+    };
 
     preparedInputs.push(newInput);
 
@@ -477,6 +475,7 @@ export async function buildEncodedTransaction({
   slpOutputs = [],
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
+  buildUnsigned = false,
 }: {
   inputs: UtxoI[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
@@ -487,6 +486,7 @@ export async function buildEncodedTransaction({
   slpOutputs?: Output[];
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
+  buildUnsigned?: boolean;
 }) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,
@@ -500,5 +500,52 @@ export async function buildEncodedTransaction({
     changeAddress,
   });
 
+  if (buildUnsigned === true) {
+    transaction.inputs.forEach(input => input.unlockingBytecode = Uint8Array.from([]));
+  }
+
   return { encodedTransaction: encodeTransaction(transaction), sourceOutputs };
+}
+
+export async function signUnsignedTransaction(transaction: Uint8Array | string, sourceOutputs: SourceOutput[], signingKey: Uint8Array): Promise<Uint8Array> {
+  if (typeof transaction === "string") {
+    transaction = hexToBin(transaction);
+  }
+
+  const decoded = decodeTransaction(transaction);
+  if (typeof decoded === "string") {
+    throw decoded;
+  }
+
+  const template = importAuthenticationTemplate(
+    authenticationTemplateP2pkhNonHd
+  );
+  if (typeof template === "string") {
+    throw new Error("Transaction template error");
+  }
+
+  const compiler = authenticationTemplateToCompilerBCH(template);
+  const transactionTemplate: Readonly<TransactionTemplateFixed<typeof compiler>> = {...decoded};
+  for (const [index, input] of decoded.inputs.entries()) {
+    const sourceOutput = sourceOutputs[index];
+    transactionTemplate.inputs[index] = {
+      ...input,
+      unlockingBytecode: {
+        compiler,
+        data: {
+          keys: { privateKeys: { key: signingKey } },
+        },
+        valueSatoshis: sourceOutput.valueSatoshis,
+        script: "unlock",
+        token: sourceOutput.token,
+      }
+    };
+  }
+
+  const result = generateTransaction(transactionTemplate);
+  if (!result.success) {
+    throw result.errors;
+  }
+
+  return encodeTransaction(result.transaction);
 }
