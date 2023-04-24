@@ -510,10 +510,11 @@ describe(`Wallet should function in the browser`, () => {
         aliceWallet.cashaddr
       );
 
+      let tokenId;
       {
         const aliceUtxos = await aliceWallet.getAddressUtxos();
 
-        const { unsignedTransaction, sourceOutputs } =
+        const { unsignedTransaction, sourceOutputs, tokenIds } =
           await aliceWatchWallet.tokenGenesis(
             {
               capability: "minting",
@@ -540,13 +541,20 @@ describe(`Wallet should function in the browser`, () => {
         ).toBe(true);
         expect(sourceOutputs.length).toBe(decoded.inputs.length);
         expect(binToHex(decoded.outputs[0].token?.nft?.commitment)).toBe("00");
-      }
 
-      const genesisResponse = await aliceWallet.tokenGenesis({
-        capability: "minting",
-        commitment: "00",
-      });
-      const tokenId = genesisResponse.tokenIds[0];
+        const signed = await aliceWallet.signUnsignedTransaction(
+          unsignedTransaction,
+          sourceOutputs
+        );
+        await aliceWallet.submitTransaction(signed);
+
+        tokenId = tokenIds[0];
+
+        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(1);
+        const tokenUtxos = await aliceWallet.getTokenUtxos(tokenId);
+        expect(tokenUtxos.length).toBe(1);
+        expect(tokenUtxos[0].token?.capability).toBe(NFTCapability.minting);
+      }
 
       {
         const aliceUtxos = await aliceWallet.getAddressUtxos();
@@ -581,12 +589,27 @@ describe(`Wallet should function in the browser`, () => {
         expect(binToHex(sourceOutputs[0].token?.nft?.commitment)).toBe("00");
         expect(binToHex(decoded.outputs[0].token?.nft?.commitment)).toBe("00");
         expect(binToHex(decoded.outputs[1].token?.nft?.commitment)).toBe("0a");
-      }
 
-      await aliceWallet.tokenMint(tokenId, {
-        capability: "none",
-        commitment: "0a",
-      });
+        const signed = await aliceWallet.signUnsignedTransaction(
+          unsignedTransaction,
+          sourceOutputs
+        );
+        await aliceWallet.submitTransaction(signed);
+
+        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(2);
+        const tokenUtxos = await aliceWallet.getTokenUtxos(tokenId);
+        expect(tokenUtxos.length).toBe(2);
+        expect(
+          tokenUtxos.filter(
+            (val) => val.token?.capability === NFTCapability.minting
+          ).length
+        ).toBe(1);
+        expect(
+          tokenUtxos.filter(
+            (val) => val.token?.capability === NFTCapability.none
+          ).length
+        ).toBe(1);
+      }
 
       {
         const aliceUtxos = await aliceWallet.getAddressUtxos();
@@ -622,6 +645,25 @@ describe(`Wallet should function in the browser`, () => {
         expect(sourceOutputs.length).toBe(decoded.inputs.length);
         expect(binToHex(sourceOutputs[0].token?.nft?.commitment)).toBe("0a");
         expect(binToHex(decoded.outputs[0].token?.nft?.commitment)).toBe("0a");
+
+        const signed = await aliceWallet.signUnsignedTransaction(
+          unsignedTransaction,
+          sourceOutputs
+        );
+        await aliceWallet.submitTransaction(signed);
+        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(2);
+        const tokenUtxos = await aliceWallet.getTokenUtxos(tokenId);
+        expect(tokenUtxos.length).toBe(2);
+        expect(
+          tokenUtxos.filter(
+            (val) => val.token?.capability === NFTCapability.minting
+          ).length
+        ).toBe(1);
+        expect(
+          tokenUtxos.filter(
+            (val) => val.token?.capability === NFTCapability.none
+          ).length
+        ).toBe(1);
       }
     }, process.env.ALICE_ID);
   });

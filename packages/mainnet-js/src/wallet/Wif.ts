@@ -39,6 +39,7 @@ import {
   SendRequestArray,
   SendRequestType,
   SendResponse,
+  SourceOutput,
   TokenBurnRequest,
   TokenGenesisRequest,
   TokenMintRequest,
@@ -50,6 +51,7 @@ import {
   buildEncodedTransaction,
   getSuitableUtxos,
   getFeeAmount,
+  signUnsignedTransaction,
 } from "../transaction/Wif.js";
 
 import { asSendRequestObject } from "../util/asSendRequestObject.js";
@@ -1132,13 +1134,6 @@ export class Wallet extends BaseWallet {
       utxos = utxos.filter((val) => !val.token);
     }
 
-    // let tokenOp: "send" | "genesis" | "mint" | "burn" | undefined = undefined;
-    // if (options?.ensureUtxos?.every(val => !val.token) && sendRequests.some(val => (val as TokenSendRequest).tokenId)) {
-    //   tokenOp = "genesis";
-    // } else if (options?.ensureUtxos?.length === 1 && options?.ensureUtxos?.[0].token?.capability === NFTCapability.minting && ) {
-
-    // }
-
     const addTokenChangeOutputs = (
       inputs: UtxoI[],
       outputs: SendRequestType[]
@@ -1245,6 +1240,7 @@ export class Wallet extends BaseWallet {
         slpOutputs: [],
         feePaidBy,
         changeAddress,
+        buildUnsigned: options?.buildUnsigned === true,
       }
     );
 
@@ -1258,6 +1254,21 @@ export class Wallet extends BaseWallet {
     ].filter((value, index, array) => array.indexOf(value) === index);
 
     return { encodedTransaction, tokenIds, sourceOutputs };
+  }
+
+  public async signUnsignedTransaction(
+    transaction: Uint8Array | string,
+    sourceOutputs: SourceOutput[]
+  ): Promise<Uint8Array> {
+    if (!this.privateKey) {
+      throw Error("Can not sign a transaction with watch-only wallet.");
+    }
+
+    return signUnsignedTransaction(
+      transaction,
+      sourceOutputs,
+      this.privateKey!
+    );
   }
 
   // Submit a raw transaction

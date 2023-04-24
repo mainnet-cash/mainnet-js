@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+1.1.5
+
+* Add new wallet method signUnsignedTransaction
+* Fix unsigned transactions underestimate fee
+
 1.1.4
 
 * Fix token genesis using wrong input
