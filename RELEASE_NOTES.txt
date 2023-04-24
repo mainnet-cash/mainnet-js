@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.7
+
+* Fix docker image building
+
 1.1.6
 
 * Fix change address derivation and encoding

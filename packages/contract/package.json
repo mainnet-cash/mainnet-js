@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/contract",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -14,7 +14,7 @@
     "@types/pako": "^2.0.0",
     "cashc": "^0.8.0-next.2",
     "cashscript": "^0.8.0-next.2",
-    "mainnet-js": "1.1.6",
+    "mainnet-js": "1.1.7",
     "pako": "^2.1.0"
   },
   "devDependencies": {
