@@ -1,7 +1,7 @@
 import { disconnectProviders, initProviders } from "../network/Connection.js";
 import { setupAxiosMock, removeAxiosMock } from "../test/axios.js";
 import { BCMR } from "./Bcmr.js";
-import { Registry } from "./bcmr-v1.schema.js";
+import { Registry } from "./bcmr-v2.schema.js";
 import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
 import { binToHex, hexToBin, sha256, utf8ToBin } from "@bitauth/libauth";
@@ -21,6 +21,7 @@ afterEach(async () => {
 
 describe(`Test BCMR support`, () => {
   const registry: Registry = {
+    $schema: "https://cashtokens.org/bcmr-v2.schema.json",
     version: {
       major: 0,
       minor: 1,
@@ -30,26 +31,38 @@ describe(`Test BCMR support`, () => {
     registryIdentity: {
       name: "example bcmr",
       description: "example bcmr for tokens on chipnet",
-      time: {
-        begin: "2023-01-26T18:51:35.115Z",
-      },
     },
     identities: {
-      "0000000000000000000000000000000000000000000000000000000000000000": [
-        {
+      "0000000000000000000000000000000000000000000000000000000000000000": {
+        "2023-01-26T18:51:35.115Z": {
           name: "test tokens",
           description: "",
-          time: {
-            begin: "2023-01-26T18:51:35.115Z",
+          uris: {
+            icon: "https://example.com/nft"
           },
           token: {
             category:
               "0000000000000000000000000000000000000000000000000000000000000000",
             symbol: "TOK",
             decimals: 8,
+            nfts: {
+              description: "",
+              parse: {
+                bytecode: "00d2",
+                types: {
+                  "00": {
+                    name: "NFT Item 0",
+                    description: "NFT Item 0 in the collection",
+                    uris: {
+                      icon: "https://example.com/nft/00.jpg"
+                    }
+                  }
+                }
+              }
+            }
           },
         },
-      ],
+      },
     },
   };
 
@@ -473,7 +486,7 @@ describe(`Test BCMR support`, () => {
     const bob = await RegTestWallet.newRandom();
 
     const registry_v1 = { ...registry };
-    registry_v1.extensions = { authchain: [] };
+    registry_v1.extensions = { authchain: {} };
     const contentHash_v1 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)))
       .reverse();
@@ -494,7 +507,7 @@ describe(`Test BCMR support`, () => {
 
     const registry_v2 = { ...registry };
     registry_v2.extensions = {
-      authchain: [await bob.provider!.getRawTransaction(response.txId)],
+      authchain: {0: await bob.provider!.getRawTransaction(response.txId)},
     };
     const contentHash_v2 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)))
@@ -516,10 +529,10 @@ describe(`Test BCMR support`, () => {
 
     const registry_v3 = { ...registry };
     registry_v3.extensions = {
-      authchain: [
-        await bob.provider!.getRawTransaction(response.txId),
-        await bob.provider!.getRawTransaction(response2.txId),
-      ],
+      authchain: {
+        0: await bob.provider!.getRawTransaction(response.txId),
+        1: await bob.provider!.getRawTransaction(response2.txId),
+      },
     };
     const contentHash_v3 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)))

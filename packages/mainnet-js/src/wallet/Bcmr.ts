@@ -10,10 +10,9 @@ import {
 } from "@bitauth/libauth";
 import axios from "axios";
 import { Network, TxI } from "../interface.js";
-import { getGlobalProvider } from "../network/default.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
-import { IdentitySnapshot, Registry } from "./bcmr-v1.schema.js";
+import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
 import { initProvider } from "../network/Connection.js";
 
 export interface AuthChainElement {
@@ -324,9 +323,9 @@ export class BCMR {
       if (
         registry.extensions &&
         registry.extensions["authchain"] &&
-        (registry.extensions["authchain"] as string[]).length
+        (Object.keys(registry.extensions["authchain"])).length
       ) {
-        const chainTxArray = registry.extensions!["authchain"] as string[];
+        const chainTxArray = Object.values(registry.extensions!["authchain"]) as string[];
 
         chainBase = chainTxArray
           .map((tx) => {
@@ -435,28 +434,16 @@ export class BCMR {
    */
   public static getTokenInfo(tokenId: string): IdentitySnapshot | undefined {
     for (const registry of this.metadataRegistries.slice().reverse()) {
-      // registry identity is an authbase string pointer
-      if (typeof registry.registryIdentity === "string") {
-        // enforce spec, ensure identities have this authbase
-        if (registry.identities?.[registry.registryIdentity]) {
-          // find the latest identity in history and add it to the list
-          const latestIdentityInHistory = registry.identities![tokenId]?.[0];
-          if (latestIdentityInHistory) {
-            return latestIdentityInHistory;
-          }
-        }
-      } else {
-        // if the token identity is the registry identity and categories match, return it
-        if (registry.registryIdentity.token?.category === tokenId) {
-          return registry.registryIdentity;
-        }
-
-        // find the latest identity in history and add it to the list
-        const latestIdentityInHistory = registry.identities![tokenId]?.[0];
-        if (latestIdentityInHistory) {
-          return latestIdentityInHistory;
-        }
+      const history = registry.identities?.[tokenId];
+      if (!history) {
+        continue;
       }
+      const latestIdentityIndex = Object.keys(history)[0];
+      if (latestIdentityIndex === undefined) {
+        continue;
+      }
+
+      return history[latestIdentityIndex];
     }
 
     return undefined;

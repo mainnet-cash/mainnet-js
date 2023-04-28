@@ -7,19 +7,50 @@ var app;
 
 describe("Test Wallet BCMR Endpoints", () => {
   const registry = {
-    version: { major: 1, minor: 0, patch: 0 },
-    latestRevision: Date.toString(),
+    $schema: "https://cashtokens.org/bcmr-v2.schema.json",
+    version: {
+      major: 0,
+      minor: 1,
+      patch: 0,
+    },
+    latestRevision: "2023-01-26T18:51:35.115Z",
     registryIdentity: {
-      name: "Test token registry",
-      time: { begin: Date.now() },
-      token: {
-        category:
-          "0000000000000000000000000000000000000000000000000000000000000000",
-        symbol: "TOK",
-        decimals: 8,
+      name: "example bcmr",
+      description: "example bcmr for tokens on chipnet",
+    },
+    identities: {
+      "0000000000000000000000000000000000000000000000000000000000000000": {
+        "2023-01-26T18:51:35.115Z": {
+          name: "test tokens",
+          description: "",
+          uris: {
+            icon: "https://example.com/nft"
+          },
+          token: {
+            category:
+              "0000000000000000000000000000000000000000000000000000000000000000",
+            symbol: "TOK",
+            decimals: 8,
+            nfts: {
+              description: "",
+              parse: {
+                bytecode: "00d2",
+                types: {
+                  "00": {
+                    name: "NFT Item 0",
+                    description: "NFT Item 0 in the collection",
+                    uris: {
+                      icon: "https://example.com/nft/00.jpg"
+                    }
+                  }
+                }
+              }
+            }
+          },
+        },
       },
     },
-    extensions: {},
+    extensions: {}
   };
 
   beforeAll(async function () {
@@ -171,7 +202,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const bobCashaddr = bobResp.cashaddr;
 
     const registry_v1 = { ...registry };
-    registry_v1.extensions = { authchain: [] };
+    registry_v1.extensions = { authchain: {} };
     const contentHash_v1 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)))
       .reverse();
@@ -199,10 +230,10 @@ describe("Test Wallet BCMR Endpoints", () => {
 
     const registry_v2 = { ...registry };
     registry_v2.extensions = {
-      authchain: [(await request(app).post("/wallet/util/get_raw_transaction").send({
+      authchain: {0: (await request(app).post("/wallet/util/get_raw_transaction").send({
         txHash: response.txId,
         network: "regtest",
-      })).body.txHex],
+      })).body.txHex},
     };
     const contentHash_v2 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)))
@@ -226,16 +257,16 @@ describe("Test Wallet BCMR Endpoints", () => {
 
     const registry_v3 = { ...registry };
     registry_v3.extensions = {
-      authchain: [
-        (await request(app).post("/wallet/util/get_raw_transaction").send({
+      authchain: {
+        0: (await request(app).post("/wallet/util/get_raw_transaction").send({
           txHash: response.txId,
           network: "regtest",
         })).body.txHex,
-        (await request(app).post("/wallet/util/get_raw_transaction").send({
+        1: (await request(app).post("/wallet/util/get_raw_transaction").send({
           txHash: response2.txId,
           network: "regtest",
         })).body.txHex,
-      ],
+      },
     };
     const contentHash_v3 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)))

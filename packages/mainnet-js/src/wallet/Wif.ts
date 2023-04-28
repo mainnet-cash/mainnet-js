@@ -107,7 +107,7 @@ import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant.js";
 
 import { TransactionHistoryI } from "../history/interface.js";
 import { getAddressHistory } from "../history/electrumTransformer.js";
-import { IdentitySnapshot, Registry } from "./bcmr-v1.schema.js";
+import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
 import { BCMR } from "./Bcmr.js";
 import { qrAddress } from "../qr/Qr.js";
 import { ImageI } from "../qr/interface.js";
