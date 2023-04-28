@@ -38,7 +38,7 @@ describe(`Test BCMR support`, () => {
           name: "test tokens",
           description: "",
           uris: {
-            icon: "https://example.com/nft"
+            icon: "https://example.com/nft",
           },
           token: {
             category:
@@ -54,12 +54,12 @@ describe(`Test BCMR support`, () => {
                     name: "NFT Item 0",
                     description: "NFT Item 0 in the collection",
                     uris: {
-                      icon: "https://example.com/nft/00.jpg"
-                    }
-                  }
-                }
-              }
-            }
+                      icon: "https://example.com/nft/00.jpg",
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -507,7 +507,7 @@ describe(`Test BCMR support`, () => {
 
     const registry_v2 = { ...registry };
     registry_v2.extensions = {
-      authchain: {0: await bob.provider!.getRawTransaction(response.txId)},
+      authchain: { 0: await bob.provider!.getRawTransaction(response.txId) },
     };
     const contentHash_v2 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)))

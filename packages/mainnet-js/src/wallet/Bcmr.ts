@@ -323,9 +323,11 @@ export class BCMR {
       if (
         registry.extensions &&
         registry.extensions["authchain"] &&
-        (Object.keys(registry.extensions["authchain"])).length
+        Object.keys(registry.extensions["authchain"]).length
       ) {
-        const chainTxArray = Object.values(registry.extensions!["authchain"]) as string[];
+        const chainTxArray = Object.values(
+          registry.extensions!["authchain"]
+        ) as string[];
 
         chainBase = chainTxArray
           .map((tx) => {

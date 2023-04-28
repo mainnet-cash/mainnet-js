@@ -258,16 +258,16 @@ export type NftCategoryField = {
     encoding:
       | {
           type:
-            | 'binary'
-            | 'boolean'
-            | 'hex'
-            | 'https-url'
-            | 'ipfs-cid'
-            | 'utf8'
+            | "binary"
+            | "boolean"
+            | "hex"
+            | "https-url"
+            | "ipfs-cid"
+            | "utf8"
             | `locktime`;
         }
       | {
-          type: 'number';
+          type: "number";
 
           /**
            * The `aggregate` property indicates that aggregating this
@@ -284,7 +284,7 @@ export type NftCategoryField = {
            * bitwise AND, bitwise OR, and bitwise XOR, etc. – only `add`
            * is currently supported.
            */
-          aggregate?: 'add';
+          aggregate?: "add";
 
           /**
            * An integer between `0` and `18` (inclusive) indicating the
@@ -533,7 +533,7 @@ export type IdentitySnapshot = {
    * if the burned identity represented a token type – consider burning any
    * remaining tokens of that category to reclaim funds from those outputs.
    */
-  status?: 'active' | 'burned' | 'inactive';
+  status?: "active" | "burned" | "inactive";
 
   /**
    * The split ID of this identity's chain of record.
@@ -594,7 +594,7 @@ export type IdentitySnapshot = {
  * native currency unit (name, description, symbol, icon, etc.) as can be
  * provided for other registered tokens.
  */
-export type ChainSnapshot = Omit<IdentitySnapshot, 'migrated' | 'token'> & {
+export type ChainSnapshot = Omit<IdentitySnapshot, "migrated" | "token"> & {
   /**
    * A data structure indicating how the chain's native currency units should be
    * displayed in user interfaces.
@@ -694,7 +694,7 @@ export type IdentityHistory = RegistryTimestampKeyedValues<IdentitySnapshot>;
 
 export type OffChainRegistryIdentity = Pick<
   IdentitySnapshot,
-  'name' | 'description' | 'uris' | 'tags' | 'extensions'
+  "name" | "description" | "uris" | "tags" | "extensions"
 >;
 
 /**
