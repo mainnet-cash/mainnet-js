@@ -14,6 +14,7 @@ import {
   verifyTransactionTokens,
   decodeTransaction,
   TransactionTemplateFixed,
+  stringify,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
@@ -109,6 +110,7 @@ export async function buildP2pkhNonHdTransaction({
     throw Error("Error building transaction with fee");
   }
 
+  // console.log(stringify(result.transaction), stringify(sourceOutputs))
   const tokenValidationResult = verifyTransactionTokens(
     result.transaction,
     sourceOutputs
@@ -358,6 +360,7 @@ export async function getSuitableUtxos(
       );
     }
   }
+  // console.log(suitableUtxos)
   // find plain bch outputs
   for (const u of availableInputs) {
     if (u.token) {

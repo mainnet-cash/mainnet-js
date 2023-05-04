@@ -1169,21 +1169,49 @@ export class Wallet extends BaseWallet {
           (prev, cur) => prev + cur.amount,
           0
         );
-        const change = inputAmountSum - outputAmountSum;
-        if (change < 0) {
+
+        const diff = inputAmountSum - outputAmountSum;
+        if (diff < 0) {
           throw new Error("Not enough token amount to send");
         }
-        if (change > 0) {
-          outputs.push(
-            new TokenSendRequest({
-              cashaddr: toTokenaddr(changeAddress) || this.tokenaddr!,
-              amount: change,
-              tokenId: tokenId,
-              commitment: tokenOutputs[0].commitment,
-              capability: tokenOutputs[0].capability,
-              value: tokenOutputs[0].value,
-            })
-          );
+        if (diff > 0) {
+          let available = 0;
+          let change = 0;
+          const ensureUtxos: UtxoI[] = [];
+          for (const token of tokenInputs.filter((val) => val.token?.amount)) {
+            ensureUtxos.push(token);
+            available += token.token?.amount!;
+            if (available >= outputAmountSum) {
+              change = available - outputAmountSum;
+              break;
+            }
+          }
+          if (ensureUtxos.length) {
+            if (!options) {
+              options = {};
+            }
+            options!.ensureUtxos = [
+              ...(options.ensureUtxos ?? []),
+              ...ensureUtxos,
+            ].filter(
+              (val, index, array) =>
+                array.findIndex(
+                  (other) => other.txid === val.txid && other.vout === val.vout
+                ) === index
+            );
+          }
+          if (change > 0) {
+            outputs.push(
+              new TokenSendRequest({
+                cashaddr: toTokenaddr(changeAddress) || this.tokenaddr!,
+                amount: change,
+                tokenId: tokenId,
+                commitment: tokenOutputs[0].commitment,
+                capability: tokenOutputs[0].capability,
+                value: tokenOutputs[0].value,
+              })
+            );
+          }
         }
       }
     };
@@ -1200,6 +1228,7 @@ export class Wallet extends BaseWallet {
     }
 
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
+    // console.trace(utxos.slice().filter(val => val.token).reverse().slice(0, 10))
     const feeEstimate = await getFeeAmount({
       utxos: utxos,
       sendRequests: sendRequests,
@@ -1210,6 +1239,7 @@ export class Wallet extends BaseWallet {
       feePaidBy: feePaidBy,
     });
 
+    // console.warn(utxos.slice().filter(val => val.token).reverse().slice(0, 10))
     const fundingUtxos = await getSuitableUtxos(
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
@@ -1219,6 +1249,7 @@ export class Wallet extends BaseWallet {
       options?.ensureUtxos || [],
       options?.tokenOperation
     );
+    // console.log(fundingUtxos.slice().filter(val => val.token).reverse().slice(0, 10))
     if (fundingUtxos.length === 0) {
       throw Error(
         "The available inputs couldn't satisfy the request with fees"

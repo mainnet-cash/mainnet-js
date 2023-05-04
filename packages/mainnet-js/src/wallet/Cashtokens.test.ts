@@ -994,7 +994,6 @@ describe(`Test cashtokens`, () => {
 
   test("Test enforcing token addresses", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
-    const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
       amount: 100,
     });
@@ -1012,17 +1011,10 @@ describe(`Test cashtokens`, () => {
     await expect(wrap(alice.cashaddr)).resolves.not.toThrow();
     await expect(wrap(alice.tokenaddr)).resolves.not.toThrow();
 
-    await alice.send(
-      new TokenSendRequest({
-        cashaddr: bob.cashaddr!,
-        tokenId: tokenId,
-        amount: 1,
-      })
-    );
     await expect(
       alice.send(
         new TokenSendRequest({
-          cashaddr: bob.cashaddr!,
+          cashaddr: alice.cashaddr!,
           tokenId: tokenId,
           amount: 1,
         })
@@ -1032,9 +1024,9 @@ describe(`Test cashtokens`, () => {
     await expect(
       alice.send(
         new TokenSendRequest({
-          cashaddr: bob.tokenaddr!,
+          cashaddr: alice.tokenaddr!,
           tokenId: tokenId,
-          amount: 1,
+          amount: 2,
         })
       )
     ).resolves.not.toThrow();
@@ -1047,7 +1039,7 @@ describe(`Test cashtokens`, () => {
       (async () =>
         await alice.send(
           new TokenSendRequest({
-            cashaddr: bob.cashaddr!,
+            cashaddr: alice.cashaddr!,
             tokenId: tokenId,
             amount: 1,
           })
@@ -1057,9 +1049,9 @@ describe(`Test cashtokens`, () => {
     await expect(
       alice.send(
         new TokenSendRequest({
-          cashaddr: bob.tokenaddr!,
+          cashaddr: alice.tokenaddr!,
           tokenId: tokenId,
-          amount: 1,
+          amount: 2,
         })
       )
     ).resolves.not.toThrow();
