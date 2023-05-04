@@ -1190,9 +1190,15 @@ export class Wallet extends BaseWallet {
             if (!options) {
               options = {};
             }
-            options!.ensureUtxos = [...(options.ensureUtxos ?? []), ...ensureUtxos].filter((val, index, array) => array.findIndex(
-              (other) => other.txid === val.txid && other.vout === val.vout
-            ) === index);
+            options!.ensureUtxos = [
+              ...(options.ensureUtxos ?? []),
+              ...ensureUtxos,
+            ].filter(
+              (val, index, array) =>
+                array.findIndex(
+                  (other) => other.txid === val.txid && other.vout === val.vout
+                ) === index
+            );
           }
           if (change > 0) {
             outputs.push(
