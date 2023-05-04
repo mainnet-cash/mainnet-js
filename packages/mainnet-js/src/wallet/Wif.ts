@@ -61,7 +61,11 @@ import {
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
-import { deriveCashaddr, deriveTokenaddr } from "../util/deriveCashaddr.js";
+import {
+  deriveCashaddr,
+  deriveTokenaddr,
+  toTokenaddr,
+} from "../util/deriveCashaddr.js";
 import {
   derivePrefix,
   derivePublicKeyHash,
@@ -1172,7 +1176,7 @@ export class Wallet extends BaseWallet {
         if (change > 0) {
           outputs.push(
             new TokenSendRequest({
-              cashaddr: changeAddress || this.tokenaddr!,
+              cashaddr: toTokenaddr(changeAddress) || this.tokenaddr!,
               amount: change,
               tokenId: tokenId,
               commitment: tokenOutputs[0].commitment,

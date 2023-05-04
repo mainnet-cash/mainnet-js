@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.9
+
+* Fix check for token addresses in strict mode (Config.EnforceCashTokenReceiptAddresses === true)
+
 1.1.8
 
 * Upgrade to support BCMRv2 schema
