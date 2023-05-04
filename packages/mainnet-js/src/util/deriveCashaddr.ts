@@ -6,6 +6,9 @@ import {
   decodeCashAddressFormat,
   decodeCashAddressFormatWithoutPrefix,
   CashAddressVersionByte,
+  decodeCashAddress,
+  cashAddressTypeBitsToType,
+  decodeCashAddressVersionByte,
 } from "@bitauth/libauth";
 
 import { hash160 } from "./hash160.js";
@@ -116,19 +119,28 @@ export function isTokenaddr(address: string): boolean {
   if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
   }
-  // otherwise, derive the network from the address without prefix
   else {
+    // otherwise, derive the network from the address without prefix
     result = decodeCashAddressFormatWithoutPrefix(address);
   }
 
   if (typeof result === "string") throw new Error(result);
 
+  const info = decodeCashAddressVersionByte(result.version);
+  if (typeof info === "string") throw new Error(info);
+
+  const type = cashAddressTypeBitsToType[
+    info.typeBits as keyof typeof cashAddressTypeBitsToType
+  ] as CashAddressType | undefined;
+  if (type === undefined) {
+    throw Error("Wrong cashaddress type");
+  }
+
   return (
     [
-      CashAddressVersionByte.p2pkhWithTokens,
-      CashAddressVersionByte.p2sh20WithTokens,
-      CashAddressVersionByte.p2sh32WithTokens,
-    ].indexOf(result.version) !== -1
+      CashAddressType.p2pkhWithTokens,
+      CashAddressType.p2shWithTokens,
+    ].indexOf(type) !== -1
   );
 }
 
