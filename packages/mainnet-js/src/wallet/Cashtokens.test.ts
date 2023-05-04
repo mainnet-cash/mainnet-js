@@ -1012,38 +1012,57 @@ describe(`Test cashtokens`, () => {
     await expect(wrap(alice.cashaddr)).resolves.not.toThrow();
     await expect(wrap(alice.tokenaddr)).resolves.not.toThrow();
 
-    await alice.send(new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      tokenId: tokenId,
-      amount: 1
-    }));
-    await expect(alice.send(new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      tokenId: tokenId,
-      amount: 1
-    }))).resolves.not.toThrow();
+    await alice.send(
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        amount: 1,
+      })
+    );
+    await expect(
+      alice.send(
+        new TokenSendRequest({
+          cashaddr: bob.cashaddr!,
+          tokenId: tokenId,
+          amount: 1,
+        })
+      )
+    ).resolves.not.toThrow();
 
-    await expect(alice.send(new TokenSendRequest({
-      cashaddr: bob.tokenaddr!,
-      tokenId: tokenId,
-      amount: 1
-    }))).resolves.not.toThrow();
+    await expect(
+      alice.send(
+        new TokenSendRequest({
+          cashaddr: bob.tokenaddr!,
+          tokenId: tokenId,
+          amount: 1,
+        })
+      )
+    ).resolves.not.toThrow();
 
     Config.EnforceCashTokenReceiptAddresses = true;
     await expect(wrap(alice.cashaddr)).rejects.toThrow();
     await expect(wrap(alice.tokenaddr)).resolves.not.toThrow();
 
-    await expect((async () => await alice.send(new TokenSendRequest({
-      cashaddr: bob.cashaddr!,
-      tokenId: tokenId,
-      amount: 1
-    })))()).rejects.toThrow();
+    await expect(
+      (async () =>
+        await alice.send(
+          new TokenSendRequest({
+            cashaddr: bob.cashaddr!,
+            tokenId: tokenId,
+            amount: 1,
+          })
+        ))()
+    ).rejects.toThrow();
 
-    await expect(alice.send(new TokenSendRequest({
-      cashaddr: bob.tokenaddr!,
-      tokenId: tokenId,
-      amount: 1
-    }))).resolves.not.toThrow();
+    await expect(
+      alice.send(
+        new TokenSendRequest({
+          cashaddr: bob.tokenaddr!,
+          tokenId: tokenId,
+          amount: 1,
+        })
+      )
+    ).resolves.not.toThrow();
 
     Config.EnforceCashTokenReceiptAddresses = previousValue;
   });

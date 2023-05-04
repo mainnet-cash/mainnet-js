@@ -118,8 +118,7 @@ export function isTokenaddr(address: string): boolean {
   // If the address has a prefix decode it as is
   if (address.includes(":")) {
     result = decodeCashAddressFormat(address);
-  }
-  else {
+  } else {
     // otherwise, derive the network from the address without prefix
     result = decodeCashAddressFormatWithoutPrefix(address);
   }
@@ -137,10 +136,9 @@ export function isTokenaddr(address: string): boolean {
   }
 
   return (
-    [
-      CashAddressType.p2pkhWithTokens,
-      CashAddressType.p2shWithTokens,
-    ].indexOf(type) !== -1
+    [CashAddressType.p2pkhWithTokens, CashAddressType.p2shWithTokens].indexOf(
+      type
+    ) !== -1
   );
 }
 

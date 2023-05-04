@@ -61,7 +61,11 @@ import {
   BalanceResponse,
 } from "../util/balanceObjectFromSatoshi.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
-import { deriveCashaddr, deriveTokenaddr, toTokenaddr } from "../util/deriveCashaddr.js";
+import {
+  deriveCashaddr,
+  deriveTokenaddr,
+  toTokenaddr,
+} from "../util/deriveCashaddr.js";
 import {
   derivePrefix,
   derivePublicKeyHash,
