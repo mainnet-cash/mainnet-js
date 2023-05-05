@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.11
+
+* Fix FT utxo selection when spending all tokens in the same transaction
+
 1.1.10
 
 * Fix fungible token change calculation and input selection
