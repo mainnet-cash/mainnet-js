@@ -1174,7 +1174,7 @@ export class Wallet extends BaseWallet {
         if (diff < 0) {
           throw new Error("Not enough token amount to send");
         }
-        if (diff > 0) {
+        if (diff >= 0) {
           let available = 0;
           let change = 0;
           const ensureUtxos: UtxoI[] = [];
