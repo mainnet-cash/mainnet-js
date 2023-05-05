@@ -119,6 +119,17 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getTokenBalance(tokenId)).toBe(25);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(0);
     expect((await bob.getAllNftTokenBalances())[tokenId] || 0).toBe(0);
+
+    await alice.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 75,
+        tokenId: tokenId,
+      })
+    ]);
+
+    expect(await alice.getTokenBalance(tokenId)).toBe(0);
+    expect(await bob.getTokenBalance(tokenId)).toBe(100);
   });
 
   test("Test NFT cashtoken genesis and sending", async () => {
