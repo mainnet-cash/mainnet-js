@@ -14,7 +14,7 @@ export const toCashScript = (utxo: UtxoI) =>
     vout: utxo.vout,
     token: utxo.token
       ? ({
-          amount: utxo.token?.amount ? BigInt(utxo.token.amount) : undefined,
+          amount: utxo.token?.amount ? BigInt(utxo.token.amount) : 0n,
           category: utxo.token?.tokenId,
           nft:
             utxo.token?.capability || utxo.token?.commitment
