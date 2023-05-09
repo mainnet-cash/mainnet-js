@@ -537,6 +537,14 @@
     "@bitauth/libauth" "^2.0.0-alpha.8"
     hash.js "^1.1.7"
 
+"@cashscript/utils@^0.8.0-next.3":
+  version "0.8.0-next.3"
+  resolved "https://registry.yarnpkg.com/@cashscript/utils/-/utils-0.8.0-next.3.tgz#48d297d64c8beaf527cbeae823a2e45febd939db"
+  integrity sha512-R2tatMRc7w8+vf7h4uVefp4rdVfuw8kacXkVCt7Py+atFR+JgCife0JtpsSThiDAvIyaE1v48WsaYXr5DtIjJQ==
+  dependencies:
+    "@bitauth/libauth" "^2.0.0-alpha.8"
+    hash.js "^1.1.7"
+
 "@cspotcode/source-map-consumer@0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-consumer/-/source-map-consumer-0.8.0.tgz#33bf4b7b39c178821606f669bbc447a6a629786b"
@@ -2322,13 +2330,13 @@ cashscript@^0.6.5:
     delay "^5.0.0"
     electrum-cash "^2.0.6"
 
-cashscript@^0.8.0-next.2:
-  version "0.8.0-next.2"
-  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.8.0-next.2.tgz#1bc7841350747ac0d368817b50af4222b54b44c4"
-  integrity sha512-NqOdu236F15UKbp9TpN6GBKsZ9e8k0SBN72pMI9DwlmmV2/3qA80E+Oj5NthM04WP+B3c2Os4GxjmNhsUorQ5Q==
+cashscript@^0.8.0-next.3:
+  version "0.8.0-next.3"
+  resolved "https://registry.yarnpkg.com/cashscript/-/cashscript-0.8.0-next.3.tgz#bb312f2ab6a79cb0751bb567452a2af7421b18d7"
+  integrity sha512-/WdAG27bcCo7DJcqSL2DdKOcGf6GKhTSMep7w/Mv5e9yLdNumD98stxWg4x5U5GrFifZg6WKrFvGYVa93r59Tw==
   dependencies:
     "@bitauth/libauth" "^2.0.0-alpha.8"
-    "@cashscript/utils" "^0.8.0-next.2"
+    "@cashscript/utils" "^0.8.0-next.3"
     bip68 "^1.0.4"
     bitcoin-rpc-promise-retry "^1.3.0"
     delay "^5.0.0"
