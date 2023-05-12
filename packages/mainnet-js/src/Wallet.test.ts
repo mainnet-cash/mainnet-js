@@ -505,12 +505,14 @@ describe(`Test Wallet library`, () => {
     expect(wallet.parentDerivationPath).toBe("m/44'/0'/0'");
     expect(wallet.derivationPath).toBe("m/44'/0'/0'/0/0");
 
-    Config.DefaultParentDerivationPath = "m/44'/145'/0'"
+    Config.DefaultParentDerivationPath = "m/44'/145'/0'";
     const otherWallet = await Wallet.newRandom();
     expect(otherWallet.parentDerivationPath).toBe("m/44'/145'/0'");
     expect(otherWallet.derivationPath).toBe("m/44'/145'/0'/0/0");
 
-    expect(binToHex(wallet.privateKey!)).not.toBe(binToHex(otherWallet.privateKey!));
+    expect(binToHex(wallet.privateKey!)).not.toBe(
+      binToHex(otherWallet.privateKey!)
+    );
 
     Config.DefaultParentDerivationPath = savedDerivationPath;
   });
