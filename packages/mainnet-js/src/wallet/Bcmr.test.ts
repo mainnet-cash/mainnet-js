@@ -485,8 +485,9 @@ describe(`Test BCMR support`, () => {
 
     const registry_v1 = { ...registry };
     registry_v1.extensions = { authchain: {} };
-    const contentHash_v1 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)));
+    const contentHash_v1 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v1, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
       JSON.stringify(registry_v1, null, 2)
@@ -506,8 +507,9 @@ describe(`Test BCMR support`, () => {
     registry_v2.extensions = {
       authchain: { 0: await bob.provider!.getRawTransaction(response.txId) },
     };
-    const contentHash_v2 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)));
+    const contentHash_v2 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v2, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
       JSON.stringify(registry_v2, null, 2)
@@ -530,8 +532,9 @@ describe(`Test BCMR support`, () => {
         1: await bob.provider!.getRawTransaction(response2.txId),
       },
     };
-    const contentHash_v3 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)));
+    const contentHash_v3 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v3, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
       JSON.stringify(registry_v3, null, 2)
@@ -549,8 +552,9 @@ describe(`Test BCMR support`, () => {
 
     const registry_v4 = { ...registry };
     registry_v4.extensions = {};
-    const contentHash_v4 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v4, null, 2)));
+    const contentHash_v4 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v4, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
       JSON.stringify(registry_v4, null, 2)
