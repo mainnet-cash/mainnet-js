@@ -284,7 +284,7 @@ export class BCMR {
       } else {
         // HTTPS Publication Output
         // content hash is in OP_SHA256 byte order per spec
-        result.contentHash = binToHex(chunks[1].slice().reverse());
+        result.contentHash = binToHex(chunks[1].slice());
         result.uri = binToUtf8(chunks[2]);
         if (result.uri.indexOf("https://") < 0) {
           result.uri = `https://${result.uri}`;

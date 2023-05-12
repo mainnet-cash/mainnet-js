@@ -128,14 +128,12 @@ describe("Test Wallet BCMR Endpoints", () => {
 
     const registryContent = JSON.stringify(registry, null, 2);
     const registryContentHashBin = sha256.hash(utf8ToBin(registryContent));
-    const registryContentHashBinBitcoinByteOrder = registryContentHashBin
-      .slice()
-      .reverse();
+    const registryContentHashBinBitcoinByteOrder = registryContentHashBin;
 
     let chunks = [
       "BCMR",
       registryContentHashBinBitcoinByteOrder,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = (await request(app).post("/wallet/send").send({
@@ -204,8 +202,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const registry_v1 = { ...registry };
     registry_v1.extensions = { authchain: {} };
     const contentHash_v1 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)))
-      .reverse();
+      .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)));
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
       JSON.stringify(registry_v1, null, 2)
@@ -213,7 +210,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     let chunks = [
       "BCMR",
       contentHash_v1,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = (await request(app).post("/wallet/send").send({
@@ -236,8 +233,7 @@ describe("Test Wallet BCMR Endpoints", () => {
       })).body.txHex},
     };
     const contentHash_v2 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)))
-      .reverse();
+      .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)));
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
       JSON.stringify(registry_v2, null, 2)
@@ -245,7 +241,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     chunks = [
       "BCMR",
       contentHash_v2,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
     ];
     const opreturnData2 = OpReturnData.fromArray(chunks);
     const response2 = (await request(app).post("/wallet/send").send({
@@ -269,8 +265,7 @@ describe("Test Wallet BCMR Endpoints", () => {
       },
     };
     const contentHash_v3 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)))
-      .reverse();
+      .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)));
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
       JSON.stringify(registry_v3, null, 2)
@@ -278,7 +273,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     chunks = [
       "BCMR",
       contentHash_v3,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
     ];
     const opreturnData3 = OpReturnData.fromArray(chunks);
     const response3 = (await request(app).post("/wallet/send").send({
@@ -291,8 +286,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const registry_v4 = { ...registry };
     registry_v4.extensions = {};
     const contentHash_v4 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v4, null, 2)))
-      .reverse();
+      .hash(utf8ToBin(JSON.stringify(registry_v4, null, 2)));
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
       JSON.stringify(registry_v4, null, 2)
@@ -300,7 +294,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     chunks = [
       "BCMR",
       contentHash_v4,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
     ];
     const opreturnData4 = OpReturnData.fromArray(chunks);
     const response4 = (await request(app).post("/wallet/send").send({
