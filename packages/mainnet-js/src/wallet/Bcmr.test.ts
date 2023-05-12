@@ -69,9 +69,7 @@ describe(`Test BCMR support`, () => {
   const registryContent = JSON.stringify(registry, null, 2);
   const registryContentHashBin = sha256.hash(utf8ToBin(registryContent));
   const registryContentHash = binToHex(registryContentHashBin);
-  const registryContentHashBinBitcoinByteOrder = registryContentHashBin
-    .slice()
-    .reverse();
+  const registryContentHashBinBitcoinByteOrder = registryContentHashBin;
 
   test("Add metadata registry and get token info", async () => {
     expect(
@@ -248,8 +246,8 @@ describe(`Test BCMR support`, () => {
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
     const chunks = [
       "BCMR",
-      contentHashBin.slice().reverse(),
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+      contentHashBin,
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
 
@@ -278,7 +276,7 @@ describe(`Test BCMR support`, () => {
     const chunks = [
       "BCMR",
       sha256.hash(utf8ToBin("registry_contents")),
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       "something else",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
@@ -324,7 +322,7 @@ describe(`Test BCMR support`, () => {
     let chunks = [
       "BCMR",
       registryContentHashBinBitcoinByteOrder,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = await alice.send([
@@ -394,7 +392,7 @@ describe(`Test BCMR support`, () => {
       let chunks = [
         "BCMR",
         registryContentHashBinBitcoinByteOrder,
-        "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+        "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       ];
       const opreturnData = OpReturnData.fromArray(chunks);
       const response = await alice.send([
@@ -404,7 +402,7 @@ describe(`Test BCMR support`, () => {
       if (mineCombo[0]) await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
 
       chunks[2] =
-        "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json";
+        "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json";
       const opreturnData2 = OpReturnData.fromArray(chunks);
       const response2 = await bob.send([
         new SendRequest({ cashaddr: bob.cashaddr!, value: 9500, unit: "sat" }),
@@ -413,7 +411,7 @@ describe(`Test BCMR support`, () => {
       if (mineCombo[1]) await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
 
       chunks[2] =
-        "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json";
+        "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json";
       const opreturnData3 = OpReturnData.fromArray(chunks);
       const response3 = await bob.send([
         new SendRequest({
@@ -487,9 +485,9 @@ describe(`Test BCMR support`, () => {
 
     const registry_v1 = { ...registry };
     registry_v1.extensions = { authchain: {} };
-    const contentHash_v1 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)))
-      .reverse();
+    const contentHash_v1 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v1, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
       JSON.stringify(registry_v1, null, 2)
@@ -497,7 +495,7 @@ describe(`Test BCMR support`, () => {
     let chunks = [
       "BCMR",
       contentHash_v1,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = await alice.send([
@@ -509,9 +507,9 @@ describe(`Test BCMR support`, () => {
     registry_v2.extensions = {
       authchain: { 0: await bob.provider!.getRawTransaction(response.txId) },
     };
-    const contentHash_v2 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)))
-      .reverse();
+    const contentHash_v2 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v2, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
       JSON.stringify(registry_v2, null, 2)
@@ -519,7 +517,7 @@ describe(`Test BCMR support`, () => {
     chunks = [
       "BCMR",
       contentHash_v2,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
     ];
     const opreturnData2 = OpReturnData.fromArray(chunks);
     const response2 = await bob.send([
@@ -534,9 +532,9 @@ describe(`Test BCMR support`, () => {
         1: await bob.provider!.getRawTransaction(response2.txId),
       },
     };
-    const contentHash_v3 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)))
-      .reverse();
+    const contentHash_v3 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v3, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
       JSON.stringify(registry_v3, null, 2)
@@ -544,7 +542,7 @@ describe(`Test BCMR support`, () => {
     chunks = [
       "BCMR",
       contentHash_v3,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
     ];
     const opreturnData3 = OpReturnData.fromArray(chunks);
     const response3 = await bob.send([
@@ -554,9 +552,9 @@ describe(`Test BCMR support`, () => {
 
     const registry_v4 = { ...registry };
     registry_v4.extensions = {};
-    const contentHash_v4 = sha256
-      .hash(utf8ToBin(JSON.stringify(registry_v4, null, 2)))
-      .reverse();
+    const contentHash_v4 = sha256.hash(
+      utf8ToBin(JSON.stringify(registry_v4, null, 2))
+    );
     setupAxiosMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
       JSON.stringify(registry_v4, null, 2)
@@ -564,7 +562,7 @@ describe(`Test BCMR support`, () => {
     chunks = [
       "BCMR",
       contentHash_v4,
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
     ];
     const opreturnData4 = OpReturnData.fromArray(chunks);
     const response4 = await bob.send([
@@ -702,8 +700,8 @@ describe(`Test BCMR support`, () => {
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
     const chunks = [
       "BCMR",
-      contentHashBin.slice().reverse(),
-      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+      contentHashBin,
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
 

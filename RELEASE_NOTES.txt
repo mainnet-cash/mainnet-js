@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.14
+
+* BCMR: content hashes follow sha256 byteorder, not reversed
+
 1.1.13
 
 * toCashScript: set token amount to explicit 0n if token has no FT amounts
