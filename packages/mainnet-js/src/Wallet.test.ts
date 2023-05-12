@@ -7,6 +7,8 @@ import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
 import { ExchangeRate } from "./rate/ExchangeRate";
 import { initProviders, disconnectProviders } from "./network/Connection";
 import { toUtxoId } from "./wallet/model";
+import { Config } from "./config";
+import { binToHex } from "@bitauth/libauth";
 
 beforeAll(async () => {
   await initProviders();
@@ -494,5 +496,22 @@ describe(`Test Wallet library`, () => {
 
     const charlieFinalBalance = await charlie.getBalance("sat");
     expect(charlieFinalBalance).toBe(0);
+  });
+
+  test("Set default derivation path", async () => {
+    const savedDerivationPath = Config.DefaultParentDerivationPath;
+
+    const wallet = await Wallet.newRandom();
+    expect(wallet.parentDerivationPath).toBe("m/44'/0'/0'");
+    expect(wallet.derivationPath).toBe("m/44'/0'/0'/0/0");
+
+    Config.DefaultParentDerivationPath = "m/44'/145'/0'"
+    const otherWallet = await Wallet.newRandom();
+    expect(otherWallet.parentDerivationPath).toBe("m/44'/145'/0'");
+    expect(otherWallet.derivationPath).toBe("m/44'/145'/0'/0/0");
+
+    expect(binToHex(wallet.privateKey!)).not.toBe(binToHex(otherWallet.privateKey!));
+
+    Config.DefaultParentDerivationPath = savedDerivationPath;
   });
 });
