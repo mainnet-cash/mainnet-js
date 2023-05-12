@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.15
+
+* Allow to set the default derivation path for new wallets using `Config.DefaultParentDerivationPath`
+
 1.1.14
 
 * BCMR: content hashes follow sha256 byteorder, not reversed

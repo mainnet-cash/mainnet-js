@@ -115,6 +115,7 @@ import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
 import { BCMR } from "./Bcmr.js";
 import { qrAddress } from "../qr/Qr.js";
 import { ImageI } from "../qr/interface.js";
+import { Config } from "../config.js";
 
 //#endregion Imports
 
@@ -124,8 +125,8 @@ import { ImageI } from "../qr/interface.js";
 export class Wallet extends BaseWallet {
   cashaddr?: string;
   tokenaddr?: string;
-  derivationPath: string = "m/44'/0'/0'/0/0";
-  parentDerivationPath: string = "m/44'/0'/0'";
+  derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
+  parentDerivationPath: string = Config.DefaultParentDerivationPath;
   parentXPubKey?: string;
   privateKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
