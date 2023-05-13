@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.16
+
+* May 15 preparation: Remove network check in getUtxos
+
 1.1.15
 
 * Allow to set the default derivation path for new wallets using `Config.DefaultParentDerivationPath`
