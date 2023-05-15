@@ -399,7 +399,10 @@ describe(`Wallet should function in the browser`, () => {
         const alice = await RegTestWallet.fromId(id);
         const bob = await RegTestWallet.newRandom();
 
-        const chunks = ["BCMR", "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"];
+        const chunks = [
+          "BCMR",
+          "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv",
+        ];
         const opreturnData = OpReturnData.fromArray(chunks);
 
         const response = await alice.send([
@@ -451,8 +454,12 @@ describe(`Wallet should function in the browser`, () => {
         expect(chain.length).toBe(1);
         expect(chain[0].uris.length).toBe(2);
         expect(chain[0].uris[0]).toBe("mainnet.cash");
-        expect(chain[0].uris[1]).toBe("ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv");
-        expect(chain[0].httpsUrl).toBe("https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json");
+        expect(chain[0].uris[1]).toBe(
+          "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+        );
+        expect(chain[0].httpsUrl).toBe(
+          "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+        );
       },
       [process.env.ALICE_ID, registry]
     );

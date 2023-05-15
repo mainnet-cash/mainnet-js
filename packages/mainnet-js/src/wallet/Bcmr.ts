@@ -284,15 +284,15 @@ export class BCMR {
 
             // case for domain name specifier, like example.com
             if (uriString.indexOf("/") === -1) {
-              result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`
+              result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`;
             }
 
             result.httpsUrl = `https://${result.httpsUrl}`;
-          } else if (uriString.indexOf("ipfs://") === 0 ) {
+          } else if (uriString.indexOf("ipfs://") === 0) {
             const ipfsCid = uriString.replace("ipfs://", "");
-            result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`
+            result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
           } else {
-            throw new Error(`Unsupported uri type: ${uriString}`)
+            throw new Error(`Unsupported uri type: ${uriString}`);
           }
         }
       }

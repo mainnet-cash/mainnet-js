@@ -247,11 +247,7 @@ describe(`Test BCMR support`, () => {
     const bob = await RegTestWallet.newRandom();
 
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
-    const chunks = [
-      "BCMR",
-      contentHashBin,
-      "mainnet.cash",
-    ];
+    const chunks = ["BCMR", contentHashBin, "mainnet.cash"];
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
@@ -264,9 +260,7 @@ describe(`Test BCMR support`, () => {
     });
     expect(chain.length).toBe(1);
     expect(chain[0].contentHash).toBe(binToHex(contentHashBin));
-    expect(chain[0].uris[0]).toBe(
-      "mainnet.cash"
-    );
+    expect(chain[0].uris[0]).toBe("mainnet.cash");
     expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
@@ -298,8 +292,12 @@ describe(`Test BCMR support`, () => {
     expect(chain.length).toBe(1);
     expect(chain[0].uris.length).toBe(2);
     expect(chain[0].uris[0]).toBe("mainnet.cash");
-    expect(chain[0].uris[1]).toBe("ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv");
-    expect(chain[0].httpsUrl).toBe("https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json");
+    expect(chain[0].uris[1]).toBe(
+      "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].httpsUrl).toBe(
+      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
   });
 
   test("Auth chain: all OP_PUSDHDATA encodings", async () => {
@@ -443,23 +441,26 @@ describe(`Test BCMR support`, () => {
 
       expect(chain.length).toBe(3);
       expect(chain[0].txHash).toBe(response.txId!);
-      expect(chain[0].uris[0]).toBe(
-        "mainnet.cash"
+      expect(chain[0].uris[0]).toBe("mainnet.cash");
+      expect(chain[0].httpsUrl).toBe(
+        "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
       );
-      expect(chain[0].httpsUrl).toBe("https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json");
 
       expect(chain[1].txHash).toBe(response2.txId!);
       expect(chain[1].uris[0]).toBe(
         "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
       );
-      expect(chain[1].httpsUrl).toBe("https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json");
-
+      expect(chain[1].httpsUrl).toBe(
+        "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
+      );
 
       expect(chain[2].txHash).toBe(response3.txId!);
       expect(chain[2].uris[0]).toBe(
         "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
       );
-      expect(chain[2].httpsUrl).toBe("https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json");
+      expect(chain[2].httpsUrl).toBe(
+        "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
+      );
 
       // extra checks for resolving chains not from head
       if (index === 0) {
