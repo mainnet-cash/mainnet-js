@@ -79,7 +79,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
     const result = (await this.performRequest(
       "blockchain.address.listunspent",
-      cashaddr
+      cashaddr,
+      "include_tokens"
     )) as ElectrumUtxo[];
     return result.map((utxo) => ({
       txid: utxo.tx_hash,
