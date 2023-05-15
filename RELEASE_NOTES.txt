@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.19
+
+* Explicitly add `include_tokens` to a Fulcrum's `listunspent`
+
 1.1.18
 
 * Fix contract template generation
