@@ -164,7 +164,10 @@ describe("Test Wallet BCMR Endpoints", () => {
     })).body;
     expect(chain.length).toBe(1);
     expect(chain[0].txHash).toBe(response.txId);
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
 
@@ -345,22 +348,34 @@ describe("Test Wallet BCMR Endpoints", () => {
     expect(chain.length).toBe(4);
 
     expect(chain[0].txHash).toBe(response.txId);
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
     );
 
     expect(chain[1].txHash).toBe(response2.txId);
-    expect(chain[1].uri).toBe(
+    expect(chain[1].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
+    );
+    expect(chain[1].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
     );
 
     expect(chain[2].txHash).toBe(response3.txId);
-    expect(chain[2].uri).toBe(
+    expect(chain[2].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
+    );
+    expect(chain[2].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
     );
 
     expect(chain[3].txHash).toBe(response4.txId);
-    expect(chain[3].uri).toBe(
+    expect(chain[3].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
+    );
+    expect(chain[3].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
     );
 
@@ -431,7 +446,10 @@ describe("Test Wallet BCMR Endpoints", () => {
     expect(chain[0].contentHash).toBe(
       "516d62577247354173703569476d557751486f67534a47525832367a75526e754c575079745a66694c3735735a76"
     );
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
     );
     expect(chain[0].txHash).toBe(genesisResponse.txId);

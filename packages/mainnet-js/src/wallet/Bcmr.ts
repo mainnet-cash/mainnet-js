@@ -14,11 +14,13 @@ import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
 import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
 import { initProvider } from "../network/Connection.js";
+import { OpReturnData } from "./model.js";
 
 export interface AuthChainElement {
   txHash: string;
   contentHash: string;
-  uri: string;
+  uris: string[];
+  httpsUrl: string;
 }
 
 export type AuthChain = AuthChainElement[];
@@ -236,58 +238,62 @@ export class BCMR {
         return {
           txHash: hash,
           contentHash: "",
-          uri: "",
+          uris: [],
+          httpsUrl: "",
         };
       }
 
       const opReturnHex = opReturns[0];
-      const opReturn = hexToBin(opReturnHex);
-      const chunks: Uint8Array[] = [];
-      let position = 1;
-
-      // handle direct push, OP_PUSHDATA1, OP_PUSHDATA2;
-      // OP_PUSHDATA4 is not supported in OP_RETURNs by consensus
-      while (opReturn[position]) {
-        let length = 0;
-        if (opReturn[position] === 0x4c) {
-          length = opReturn[position + 1];
-          position += 2;
-        } else if (opReturn[position] === 0x4d) {
-          length = binToNumberUint16LE(
-            opReturn.slice(position + 1, position + 3)
-          );
-          position += 3;
-        } else {
-          length = opReturn[position];
-          position += 1;
-        }
-
-        chunks.push(opReturn.slice(position, position + length));
-        position += length;
-      }
-
-      if (chunks.length < 2 || chunks.length > 3) {
+      const chunks = OpReturnData.parseBinary(hexToBin(opReturnHex));
+      if (chunks.length < 2) {
         throw new Error(`Malformed BCMR output: ${opReturnHex}`);
       }
 
       const result: AuthChainElement = {
         txHash: hash,
         contentHash: "",
-        uri: "",
+        uris: [],
+        httpsUrl: "",
       };
 
       if (chunks.length === 2) {
         // IPFS Publication Output
         result.contentHash = binToHex(chunks[1]);
         const ipfsCid = binToUtf8(chunks[1]);
-        result.uri = `https://dweb.link/ipfs/${ipfsCid}`;
+        result.uris = [`ipfs://${ipfsCid}`];
+        result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
       } else {
-        // HTTPS Publication Output
+        // URI Publication Output
         // content hash is in OP_SHA256 byte order per spec
         result.contentHash = binToHex(chunks[1].slice());
-        result.uri = binToUtf8(chunks[2]);
-        if (result.uri.indexOf("https://") < 0) {
-          result.uri = `https://${result.uri}`;
+
+        const uris = chunks.slice(2);
+
+        for (const uri of uris) {
+          const uriString = binToUtf8(uri);
+          result.uris.push(uriString);
+
+          if (result.httpsUrl) {
+            continue;
+          }
+
+          if (uriString.indexOf("https://") === 0) {
+            result.httpsUrl = uriString;
+          } else if (uriString.indexOf("https://") === -1) {
+            result.httpsUrl = uriString;
+
+            // case for domain name specifier, like example.com
+            if (uriString.indexOf("/") === -1) {
+              result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`
+            }
+
+            result.httpsUrl = `https://${result.httpsUrl}`;
+          } else if (uriString.indexOf("ipfs://") === 0 ) {
+            const ipfsCid = uriString.replace("ipfs://", "");
+            result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`
+          } else {
+            throw new Error(`Unsupported uri type: ${uriString}`)
+          }
         }
       }
       return result;
@@ -317,7 +323,7 @@ export class BCMR {
     if (options.resolveBase) {
       // check for accelerated path if "authchain" extension is in registry
       const registry: Registry = await this.fetchMetadataRegistry(
-        element.uri,
+        element.httpsUrl,
         element.contentHash
       );
       if (
@@ -379,13 +385,13 @@ export class BCMR {
 
         // combine the authchain element with the rest obtained
         return [...chainBase, element, ...chainHead].filter(
-          (val) => val.uri.length
+          (val) => val.httpsUrl.length
         );
       }
     }
 
     // return the last chain element (or the only found in an edge case)
-    return [...chainBase, element].filter((val) => val.uri.length);
+    return [...chainBase, element].filter((val) => val.httpsUrl.length);
   }
 
   /**
@@ -420,7 +426,7 @@ export class BCMR {
     }
 
     const registry = await this.fetchMetadataRegistry(
-      authChain.reverse()[0].uri
+      authChain.reverse()[0].httpsUrl
     );
 
     this.addMetadataRegistry(registry);

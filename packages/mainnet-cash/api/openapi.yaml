@@ -5540,8 +5540,11 @@ components:
           $ref: '#/components/schemas/SmartBchTransactionReceipt'
     AuthChainElement:
       example:
+        uris:
+        - uris
+        - uris
+        httpsUrl: httpsUrl
         txHash: txHash
-        uri: uri
         contentHash: contentHash
       properties:
         txHash:
@@ -5551,8 +5554,13 @@ components:
           description: "Content hash of the remote registry, either a SHA256 hash\
             \ of an HTTPS Publication output or an IPFS CID"
           type: string
-        uri:
-          description: URI to fetch the registry from
+        uris:
+          description: URIs of BCMR publication OP_RETURN
+          items:
+            type: string
+          type: array
+        httpsUrl:
+          description: URL to fetch the registry contents from
           type: string
     AuthChain:
       items:

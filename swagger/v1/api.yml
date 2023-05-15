@@ -5152,9 +5152,14 @@ components:
         contentHash:
           type: string
           description: Content hash of the remote registry, either a SHA256 hash of an HTTPS Publication output or an IPFS CID
-        uri:
+        uris:
+          type: array
+          items:
+            type: string
+          description: URIs of BCMR publication OP_RETURN
+        httpsUrl:
           type: string
-          description: URI to fetch the registry from
+          description: URL to fetch the registry contents from
     AuthChain:
       type: array
       items:
