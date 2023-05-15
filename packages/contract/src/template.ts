@@ -191,8 +191,7 @@ export const buildTemplate = async ({
               .map(([input, arg]) => {
                 // const encoded = encodeArgument(arg, input.type);
                 return {
-                  [snake_case(input.name)]:
-                    "0x" + binToHex(arg as Uint8Array),
+                  [snake_case(input.name)]: "0x" + binToHex(arg as Uint8Array),
                 };
               }),
             { function_index: functionIndex.toString() },
@@ -388,8 +387,7 @@ export const buildTemplate = async ({
                       input.name
                     )}.schnorr_signature.all_outputs> // ${input.type}`
                   : `<${snake_case(input.name)}> // ${input.type} = <${
-                      "0x" +
-                      binToHex(arg)
+                      "0x" + binToHex(arg)
                     }>`
               )
             : ["// none"]),
