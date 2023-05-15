@@ -231,7 +231,10 @@ describe(`Test BCMR support`, () => {
     expect(chain[0].contentHash).toBe(
       "516d62577247354173703569476d557751486f67534a47525832367a75526e754c575079745a66694c3735735a76"
     );
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
     );
     expect(chain[0].txHash).toBe(response.txId);
@@ -244,11 +247,7 @@ describe(`Test BCMR support`, () => {
     const bob = await RegTestWallet.newRandom();
 
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
-    const chunks = [
-      "BCMR",
-      contentHashBin,
-      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
-    ];
+    const chunks = ["BCMR", contentHashBin, "mainnet.cash"];
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
@@ -261,13 +260,14 @@ describe(`Test BCMR support`, () => {
     });
     expect(chain.length).toBe(1);
     expect(chain[0].contentHash).toBe(binToHex(contentHashBin));
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe("mainnet.cash");
+    expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     expect(chain[0].txHash).toBe(response.txId);
   });
 
-  test("Auth chain: BCMR, sha256 content hash, uri and another chunk", async () => {
+  test("Auth chain: BCMR, sha256 content hash, 2 uris", async () => {
     const alice = await RegTestWallet.fromId(
       `wif:regtest:${process.env.PRIVATE_WIF!}`
     );
@@ -276,20 +276,28 @@ describe(`Test BCMR support`, () => {
     const chunks = [
       "BCMR",
       sha256.hash(utf8ToBin("registry_contents")),
-      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
-      "something else",
+      "mainnet.cash",
+      "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = await alice.send([
       new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
       opreturnData,
     ]);
-    await expect(
-      BCMR.buildAuthChain({
-        transactionHash: response.txId!,
-        network: Network.REGTEST,
-      })
-    ).rejects.toThrow("Malformed BCMR output");
+    const chain = await BCMR.buildAuthChain({
+      transactionHash: response.txId!,
+      network: Network.REGTEST,
+    });
+
+    expect(chain.length).toBe(1);
+    expect(chain[0].uris.length).toBe(2);
+    expect(chain[0].uris[0]).toBe("mainnet.cash");
+    expect(chain[0].uris[1]).toBe(
+      "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].httpsUrl).toBe(
+      "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
   });
 
   test("Auth chain: all OP_PUSDHDATA encodings", async () => {
@@ -346,7 +354,10 @@ describe(`Test BCMR support`, () => {
     });
     expect(chain.length).toBe(1);
     expect(chain[0].txHash).toBe(response.txId!);
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
 
@@ -392,7 +403,7 @@ describe(`Test BCMR support`, () => {
       let chunks = [
         "BCMR",
         registryContentHashBinBitcoinByteOrder,
-        "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
+        "mainnet.cash",
       ];
       const opreturnData = OpReturnData.fromArray(chunks);
       const response = await alice.send([
@@ -430,17 +441,24 @@ describe(`Test BCMR support`, () => {
 
       expect(chain.length).toBe(3);
       expect(chain[0].txHash).toBe(response.txId!);
-      expect(chain[0].uri).toBe(
+      expect(chain[0].uris[0]).toBe("mainnet.cash");
+      expect(chain[0].httpsUrl).toBe(
         "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
       );
 
       expect(chain[1].txHash).toBe(response2.txId!);
-      expect(chain[1].uri).toBe(
+      expect(chain[1].uris[0]).toBe(
+        "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
+      );
+      expect(chain[1].httpsUrl).toBe(
         "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
       );
 
       expect(chain[2].txHash).toBe(response3.txId!);
-      expect(chain[2].uri).toBe(
+      expect(chain[2].uris[0]).toBe(
+        "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
+      );
+      expect(chain[2].httpsUrl).toBe(
         "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
       );
 
@@ -453,7 +471,10 @@ describe(`Test BCMR support`, () => {
         });
         expect(noFollow.length).toBe(1);
         expect(noFollow[0].txHash).toBe(response2.txId!);
-        expect(noFollow[0].uri).toBe(
+        expect(noFollow[0].uris[0]).toBe(
+          "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
+        );
+        expect(noFollow[0].httpsUrl).toBe(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
         );
 
@@ -465,12 +486,18 @@ describe(`Test BCMR support`, () => {
         expect(follow.length).toBe(2);
 
         expect(follow[0].txHash).toBe(response2.txId!);
-        expect(follow[0].uri).toBe(
+        expect(follow[0].uris[0]).toBe(
+          "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
+        );
+        expect(follow[0].httpsUrl).toBe(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
         );
 
         expect(follow[1].txHash).toBe(response3.txId!);
-        expect(follow[1].uri).toBe(
+        expect(follow[1].uris[0]).toBe(
+          "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
+        );
+        expect(follow[1].httpsUrl).toBe(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
         );
       }
@@ -610,22 +637,34 @@ describe(`Test BCMR support`, () => {
     expect(chain.length).toBe(4);
 
     expect(chain[0].txHash).toBe(response.txId!);
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
     );
 
     expect(chain[1].txHash).toBe(response2.txId!);
-    expect(chain[1].uri).toBe(
+    expect(chain[1].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
+    );
+    expect(chain[1].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
     );
 
     expect(chain[2].txHash).toBe(response3.txId!);
-    expect(chain[2].uri).toBe(
+    expect(chain[2].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
+    );
+    expect(chain[2].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
     );
 
     expect(chain[3].txHash).toBe(response4.txId!);
-    expect(chain[3].uri).toBe(
+    expect(chain[3].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
+    );
+    expect(chain[3].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
     );
 
@@ -679,7 +718,10 @@ describe(`Test BCMR support`, () => {
     expect(chain[0].contentHash).toBe(
       "516d62577247354173703569476d557751486f67534a47525832367a75526e754c575079745a66694c3735735a76"
     );
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "ipfs://QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
     );
     expect(chain[0].txHash).toBe(genesisResponse.txId);
@@ -715,7 +757,10 @@ describe(`Test BCMR support`, () => {
     });
     expect(chain.length).toBe(1);
     expect(chain[0].contentHash).toBe(binToHex(contentHashBin));
-    expect(chain[0].uri).toBe(
+    expect(chain[0].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(chain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     expect(chain[0].txHash).toBe(response.txId);
@@ -749,13 +794,19 @@ describe(`Test BCMR support`, () => {
     });
     expect(gappedChain.length).toBe(2);
     expect(gappedChain[0].contentHash).toBe(binToHex(contentHashBin));
-    expect(gappedChain[0].uri).toBe(
+    expect(gappedChain[0].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(gappedChain[0].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     expect(gappedChain[0].txHash).toBe(response.txId);
 
     expect(gappedChain[1].contentHash).toBe(binToHex(contentHashBin));
-    expect(gappedChain[1].uri).toBe(
+    expect(gappedChain[1].uris[0]).toBe(
+      "mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
+    );
+    expect(gappedChain[1].httpsUrl).toBe(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     expect(gappedChain[1].txHash).toBe(chainHeadResponse.txId);
