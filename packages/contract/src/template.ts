@@ -189,10 +189,10 @@ export const buildTemplate = async ({
             ...zip(functionInputs, args)
               .filter(([input]) => input.type !== PrimitiveType.SIG)
               .map(([input, arg]) => {
-                const encoded = encodeArgument(arg, input.type);
+                // const encoded = encodeArgument(arg, input.type);
                 return {
                   [snake_case(input.name)]:
-                    "0x" + binToHex(encoded as Uint8Array),
+                    "0x" + binToHex(arg as Uint8Array),
                 };
               }),
             { function_index: functionIndex.toString() },
@@ -389,7 +389,7 @@ export const buildTemplate = async ({
                     )}.schnorr_signature.all_outputs> // ${input.type}`
                   : `<${snake_case(input.name)}> // ${input.type} = <${
                       "0x" +
-                      binToHex(encodeArgument(arg, input.type) as Uint8Array)
+                      binToHex(arg)
                     }>`
               )
             : ["// none"]),
