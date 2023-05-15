@@ -1,6 +1,6 @@
 {
   "name": "vue-vite",
-  "version": "1.1.17",
+  "version": "1.1.18",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
@@ -13,7 +13,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "mainnet-js": "1.1.17",
+    "mainnet-js": "1.1.18",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2"
   },
