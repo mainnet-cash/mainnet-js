@@ -12,7 +12,7 @@ import { Network } from "../interface.js";
 import {
   networkTickerMap,
   clusterParams,
-  ELECTRUM_CASH_PROTOCOL_VERSION
+  ELECTRUM_CASH_PROTOCOL_VERSION,
 } from "./constant.js";
 
 export function setGlobalProvider(

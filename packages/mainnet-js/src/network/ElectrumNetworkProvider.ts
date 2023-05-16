@@ -107,7 +107,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBlockHeight(): Promise<number> {
-    return ((await this.performRequest("blockchain.headers.get_tip")) as any).height;
+    return ((await this.performRequest("blockchain.headers.get_tip")) as any)
+      .height;
   }
 
   static rawTransactionCache = {};
