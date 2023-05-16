@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.21
+
+* Remove electrum protocol version selector unnecessary after May 15 upgrade
+
 1.1.20
 
 * Change BCMR auth chain interface to include list of uris and a httpsUrl (see https://github.com/bitjson/chip-bcmr/issues/10)
