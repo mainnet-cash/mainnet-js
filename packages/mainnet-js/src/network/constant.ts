@@ -11,7 +11,7 @@ export const networkTickerMap = {
 export const mainnetServers = [
   "wss://bch.imaginary.cash:50004",
   //"wss://blackie.c3-soft.com:50004",
-  "wss://electrum.imaginary.cash:50004",
+  // "wss://electrum.imaginary.cash:50004",
   // "wss://fulcrum.fountainhead.cash",
 ];
 
