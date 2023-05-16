@@ -1,6 +1,16 @@
 Newest changes
 --------------
 
+1.1.22
+
+* Remove one server from mainnet cluster
+
+This makes mainnet-js to switch from cluster to client mode in electrum-cash.
+
+In cluster mode multiple subscriptions to the same elecrum protocol method render all unresponsive.
+
+This is a temporary hotfix until proper solution will be found.
+
 1.1.21
 
 * Remove electrum protocol version selector unnecessary after May 15 upgrade
