@@ -13,7 +13,6 @@ import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 import { Mutex } from "async-mutex";
 import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
-import { ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET } from "./constant.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -108,22 +107,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBlockHeight(): Promise<number> {
-    if (this.version !== ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET) {
-      return ((await this.performRequest("blockchain.headers.get_tip")) as any)
-        .height;
-    }
-
-    // TODO: remove after enough elecrum servers upgrade to at least v 1.5.0
-    if (!this.blockHeight) {
-      return new Promise(async (resolve) => {
-        await this.subscribeToHeaders((header: HeaderI) => {
-          this.blockHeight = header.height;
-        });
-        resolve(this.blockHeight);
-      });
-    }
-
-    return this.blockHeight;
+    return ((await this.performRequest("blockchain.headers.get_tip")) as any).height;
   }
 
   static rawTransactionCache = {};

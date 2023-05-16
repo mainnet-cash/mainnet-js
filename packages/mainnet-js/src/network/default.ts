@@ -12,8 +12,7 @@ import { Network } from "../interface.js";
 import {
   networkTickerMap,
   clusterParams,
-  ELECTRUM_CASH_PROTOCOL_VERSION,
-  ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET,
+  ELECTRUM_CASH_PROTOCOL_VERSION
 } from "./constant.js";
 
 export function setGlobalProvider(
@@ -129,9 +128,7 @@ function getClient(servers: string[], network: Network) {
 function getElectrumCluster(params: ElectrumClusterParams, network: Network) {
   return new ElectrumCluster(
     getUserAgent(),
-    network === Network.MAINNET
-      ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET
-      : ELECTRUM_CASH_PROTOCOL_VERSION,
+    ELECTRUM_CASH_PROTOCOL_VERSION,
     params.confidence,
     params.distribution,
     params.order,
@@ -146,9 +143,7 @@ function getElectrumClient(
 ) {
   return new ElectrumClient(
     getUserAgent(),
-    network === Network.MAINNET
-      ? ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET
-      : ELECTRUM_CASH_PROTOCOL_VERSION,
+    ELECTRUM_CASH_PROTOCOL_VERSION,
     params.host,
     params.port,
     params.scheme,

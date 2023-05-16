@@ -1,8 +1,6 @@
 import { ClusterOrder } from "electrum-cash";
 
-// Two different protocol versions are communicated, must converge to the same one after May23 upgrade
 export const ELECTRUM_CASH_PROTOCOL_VERSION = "1.5";
-export const ELECTRUM_CASH_PROTOCOL_VERSION_MAINNET = "1.4.1";
 
 export const networkTickerMap = {
   mainnet: "BCH",
