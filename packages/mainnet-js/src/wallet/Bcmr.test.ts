@@ -4,7 +4,15 @@ import { AuthChain, BCMR } from "./Bcmr.js";
 import { Registry } from "./bcmr-v2.schema.js";
 import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
-import { binToHex, binToNumberUint16LE, binToNumberUint32LE, hexToBin, numberToBinUint16LE, sha256, utf8ToBin } from "@bitauth/libauth";
+import {
+  binToHex,
+  binToNumberUint16LE,
+  binToNumberUint32LE,
+  hexToBin,
+  numberToBinUint16LE,
+  sha256,
+  utf8ToBin,
+} from "@bitauth/libauth";
 import { mine } from "../mine";
 import { NFTCapability, Network } from "../interface";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
@@ -817,111 +825,128 @@ describe(`Test BCMR support`, () => {
   test.skip("paytaca", async () => {
     // console.log(await BCMR.buildAuthChain({transactionHash: "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"}))
     // await BCMR.addMetadataRegistryFromUri("file:///Users/pat/Downloads/bitcoin-cash-metadata-registry.json");
-    
+
     const reg = bitcats as Registry;
     const maxNumber = 288;
     // const hexMax = binToHex(numberToBinUint16LE(maxNumber));
 
     // const missingKeys: number[] = [];
     for (let i = maxNumber; i <= 10000; i++) {
-      delete reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types[binToHex(numberToBinUint16LE(i))];
+      delete reg.identities![
+        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"
+      ]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types[
+        binToHex(numberToBinUint16LE(i))
+      ];
     }
 
-    Object.keys(reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types).forEach(key => {
-      reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types[key].name = `BITCAT - ${binToNumberUint16LE(hexToBin(key))}`;
+    Object.keys(
+      reg.identities![
+        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"
+      ]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types
+    ).forEach((key) => {
+      reg.identities![
+        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"
+      ]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types[
+        key
+      ].name = `BITCAT - ${binToNumberUint16LE(hexToBin(key))}`;
     });
 
     console.log(JSON.stringify(reg));
 
-
     // reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types = Object.values(reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types).filter(val => val.)
-    
+
     // await BCMR.addMetadataRegistry(bitcats);
     // console.log(BCMR.getTokenInfo("07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"));
     // console.log(JSON.stringify(bitcats));
-  })
+  });
 
   test("Test fetching BCMR authchain from chaingraph", async () => {
-    setupAxiosMock(
-      "https://gql.mainnet.cash/v1/graphql",
-      {
-        data: {
-          transaction: [
-            {
-              hash: "\\x07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97",
-              authchains: [
-                {
-                  authchain_length: 330,
-                  migrations: [
-                    {
-                      transaction: [
-                        {
-                          hash: "\\xd5721db8841ecb61ec73daeb2df7df88b180d5029061d4845efc7cb29c42183b",
-                          inputs: [
-                            {
-                              outpoint_index: "0"
-                            }
-                          ],
-                          outputs: [
-                            {
-                              output_index: "1",
-                              locking_bytecode: "\\x6a0442434d5220107b1719c865e8ab631f9e63f1140b51e710a86606992adc7f901b2291746abe4c506261666b7265696171706d6c727473646635637677676834366d707972696332723434696b717a71677465766e79373471646d726a6335646b78792e697066732e6e667473746f726167652e6c696e6b"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      transaction: [
-                        {
-                          hash: "\\x4bdcdd9a347b287e6d26d743ee4404f530a8f35501ff1adb31766edcfb2d20a9",
-                          inputs: [
-                            {
-                              outpoint_index: "0"
-                            },
-                            {
-                              outpoint_index: "0"
-                            }
-                          ],
-                          outputs: [
-                            {
-                              output_index: "1",
-                              locking_bytecode: "\\x6a0442434d5240393231666263306665623665666666613639316331346633656636346234333139656138613461643266636637313064303362613661363534633962346661643f697066732e7061742e6d6e2f697066732f516d556e6661524c4356516d4e453567745274705464476b39544d6939364472507a7351554c31505a7874686637"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      transaction: [
-                        {
-                          hash: "\\x0d7a26fcc472d519ef83a1ca9c3a44a394b27423a55a40f7aacd1552c873e2a5",
-                          inputs: [
-                            {
-                              outpoint_index: "0"
-                            }
-                          ],
-                          outputs: [
-                            {
-                              output_index: "1",
-                              locking_bytecode: "\\x6a0442434d5240323065326630623531343333636566633639393732373765643239616365303438363963326366393136366465653139366538656331333561666630613162343f697066732e7061742e6d6e2f697066732f516d5339687a786a6e42394168416f46584b53626b376a454d7255354577397653726d6e624a593435555932567a"
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      }
-    );
+    setupAxiosMock("https://gql.mainnet.cash/v1/graphql", {
+      data: {
+        transaction: [
+          {
+            hash: "\\x07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97",
+            authchains: [
+              {
+                authchain_length: 330,
+                migrations: [
+                  {
+                    transaction: [
+                      {
+                        hash: "\\xd5721db8841ecb61ec73daeb2df7df88b180d5029061d4845efc7cb29c42183b",
+                        inputs: [
+                          {
+                            outpoint_index: "0",
+                          },
+                        ],
+                        outputs: [
+                          {
+                            output_index: "1",
+                            locking_bytecode:
+                              "\\x6a0442434d5220107b1719c865e8ab631f9e63f1140b51e710a86606992adc7f901b2291746abe4c506261666b7265696171706d6c727473646635637677676834366d707972696332723434696b717a71677465766e79373471646d726a6335646b78792e697066732e6e667473746f726167652e6c696e6b",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    transaction: [
+                      {
+                        hash: "\\x4bdcdd9a347b287e6d26d743ee4404f530a8f35501ff1adb31766edcfb2d20a9",
+                        inputs: [
+                          {
+                            outpoint_index: "0",
+                          },
+                          {
+                            outpoint_index: "0",
+                          },
+                        ],
+                        outputs: [
+                          {
+                            output_index: "1",
+                            locking_bytecode:
+                              "\\x6a0442434d5240393231666263306665623665666666613639316331346633656636346234333139656138613461643266636637313064303362613661363534633962346661643f697066732e7061742e6d6e2f697066732f516d556e6661524c4356516d4e453567745274705464476b39544d6939364472507a7351554c31505a7874686637",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    transaction: [
+                      {
+                        hash: "\\x0d7a26fcc472d519ef83a1ca9c3a44a394b27423a55a40f7aacd1552c873e2a5",
+                        inputs: [
+                          {
+                            outpoint_index: "0",
+                          },
+                        ],
+                        outputs: [
+                          {
+                            output_index: "1",
+                            locking_bytecode:
+                              "\\x6a0442434d5240323065326630623531343333636566633639393732373765643239616365303438363963326366393136366465653139366538656331333561666630613162343f697066732e7061742e6d6e2f697066732f516d5339687a786a6e42394168416f46584b53626b376a454d7255354577397653726d6e624a593435555932567a",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
 
-    const result: AuthChain = await BCMR.fetchAuthChainFromChaingraph({ chaingraphUrl: "https://gql.mainnet.cash/v1/graphql", transactionHash: "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"});
+    const result: AuthChain = await BCMR.fetchAuthChainFromChaingraph({
+      chaingraphUrl: "https://gql.mainnet.cash/v1/graphql",
+      transactionHash:
+        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97",
+    });
     expect(result.length).toBe(3);
-    expect(result.at(-1)?.uris[0]).toBe("ipfs.pat.mn/ipfs/QmS9hzxjnB9AhAoFXKSbk7jEMrU5Ew9vSrmnbJY45UY2Vz")
+    expect(result.at(-1)?.uris[0]).toBe(
+      "ipfs.pat.mn/ipfs/QmS9hzxjnB9AhAoFXKSbk7jEMrU5Ew9vSrmnbJY45UY2Vz"
+    );
     removeAxiosMock("https://gql.mainnet.cash/v1/graphql");
   });
 });

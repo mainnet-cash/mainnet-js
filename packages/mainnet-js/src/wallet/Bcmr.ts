@@ -214,7 +214,7 @@ export class BCMR {
       }
     }
     return result;
-  };
+  }
 
   /**
    * buildAuthChain Build an authchain - Zeroth-Descendant Transaction Chain, refer to https://github.com/bitjson/chip-bcmr#zeroth-descendant-transaction-chains
@@ -409,18 +409,19 @@ export class BCMR {
     network?: string;
   }): Promise<AuthChain> {
     if (!options.chaingraphUrl) {
-      throw new Error("Provide `chaingraphUrl` param.")
+      throw new Error("Provide `chaingraphUrl` param.");
     }
 
     if (options.network === undefined) {
       options.network = "mainnet";
     }
 
-    const response = await axios.post(options.chaingraphUrl, {
-      operationName: null,
-      variables: {},
-      query:
-`{
+    const response = await axios.post(
+      options.chaingraphUrl,
+      {
+        operationName: null,
+        variables: {},
+        query: `{
   transaction(
     where: {
       hash:{_eq:"\\\\x${options.transactionHash}"},
@@ -450,17 +451,20 @@ export class BCMR {
       }
     }
   }
-}`
-    }, {
-      responseType: "json",
-      headers: {
-        Accept: "*/*",
-        "Content-Type": "application/json",
+}`,
       },
-    });
+      {
+        responseType: "json",
+        headers: {
+          Accept: "*/*",
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const result: AuthChain = [];
-    const migrations = response.data.data.transaction[0]?.authchains[0].migrations;
+    const migrations =
+      response.data.data.transaction[0]?.authchains[0].migrations;
     if (!migrations) {
       return result;
     }
@@ -470,13 +474,19 @@ export class BCMR {
       if (!transaction) {
         continue;
       }
-      transaction.inputs.forEach(input => input.outpointIndex = Number(input.outpoint_index));
-      transaction.outputs.forEach(output => {
+      transaction.inputs.forEach(
+        (input) => (input.outpointIndex = Number(input.outpoint_index))
+      );
+      transaction.outputs.forEach((output) => {
         output.outputIndex = Number(output.output_index);
-        output.lockingBytecode = hexToBin(output.locking_bytecode.replace("\\x", ""));
+        output.lockingBytecode = hexToBin(
+          output.locking_bytecode.replace("\\x", "")
+        );
       });
       const txHash = transaction.hash.replace("\\x", "");
-      result.push(BCMR.makeAuthChainElement(transaction as Transaction, txHash));
+      result.push(
+        BCMR.makeAuthChainElement(transaction as Transaction, txHash)
+      );
     }
 
     return result;
