@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+1.1.23
+
+* Add new BCMR method fetchAuthChainFromChaingraph to get the autchain data from a trusted indexer
+* Allows to reduce the network traffic and request amount to Fulcrum servers when resolving long authchains
+
 1.1.22
 
 * Remove one server from mainnet cluster
