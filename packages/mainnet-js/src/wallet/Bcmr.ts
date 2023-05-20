@@ -1,6 +1,5 @@
 import {
   binToHex,
-  binToNumberUint16LE,
   binToUtf8,
   decodeTransaction,
   hexToBin,
@@ -25,7 +24,7 @@ export interface AuthChainElement {
 
 export type AuthChain = AuthChainElement[];
 
-// Implementation of CHIP-BCMR v1.0.0, refer to https://github.com/bitjson/chip-bcmr
+// Implementation of CHIP-BCMR v2.0.0-draft, refer to https://github.com/bitjson/chip-bcmr
 export class BCMR {
   // List of tracked registries
   public static metadataRegistries: Registry[] = [];
@@ -114,6 +113,109 @@ export class BCMR {
     this.addMetadataRegistry(registry);
   }
 
+  // helper function to enforce the constraints on the 0th output, decode the BCMR's OP_RETURN data
+  // returns resolved AuthChainElement
+  public static makeAuthChainElement(
+    rawTx: ElectrumRawTransaction | Transaction,
+    hash: string
+  ): AuthChainElement {
+    let opReturns: string[];
+    let spends0thOutput = false;
+    if (rawTx.hasOwnProperty("vout")) {
+      const electrumTransaction = rawTx as ElectrumRawTransaction;
+      opReturns = electrumTransaction.vout
+        .filter((val) => val.scriptPubKey.type === "nulldata")
+        .map((val) => val.scriptPubKey.hex);
+      spends0thOutput = electrumTransaction.vin.some((val) => val.vout === 0);
+    } else {
+      const libauthTransaction = rawTx as Transaction;
+      opReturns = libauthTransaction.outputs
+        .map((val) => binToHex(val.lockingBytecode))
+        .filter((val) => val.indexOf("6a") === 0);
+      spends0thOutput = libauthTransaction.inputs.some(
+        (val) => val.outpointIndex === 0
+      );
+    }
+
+    if (!spends0thOutput) {
+      throw new Error(
+        "Invalid authchain transaction (does not spend 0th output of previous transaction)"
+      );
+    }
+
+    const bcmrOpReturns = opReturns.filter(
+      (val) =>
+        val.indexOf("6a0442434d52") === 0 ||
+        val.indexOf("6a4c0442434d52") === 0 ||
+        val.indexOf("6a4d040042434d52") === 0 ||
+        val.indexOf("6a4e0400000042434d52") === 0
+    );
+
+    if (bcmrOpReturns.length === 0) {
+      return {
+        txHash: hash,
+        contentHash: "",
+        uris: [],
+        httpsUrl: "",
+      };
+    }
+
+    const opReturnHex = opReturns[0];
+    const chunks = OpReturnData.parseBinary(hexToBin(opReturnHex));
+    if (chunks.length < 2) {
+      throw new Error(`Malformed BCMR output: ${opReturnHex}`);
+    }
+
+    const result: AuthChainElement = {
+      txHash: hash,
+      contentHash: "",
+      uris: [],
+      httpsUrl: "",
+    };
+
+    if (chunks.length === 2) {
+      // IPFS Publication Output
+      result.contentHash = binToHex(chunks[1]);
+      const ipfsCid = binToUtf8(chunks[1]);
+      result.uris = [`ipfs://${ipfsCid}`];
+      result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
+    } else {
+      // URI Publication Output
+      // content hash is in OP_SHA256 byte order per spec
+      result.contentHash = binToHex(chunks[1].slice());
+
+      const uris = chunks.slice(2);
+
+      for (const uri of uris) {
+        const uriString = binToUtf8(uri);
+        result.uris.push(uriString);
+
+        if (result.httpsUrl) {
+          continue;
+        }
+
+        if (uriString.indexOf("https://") === 0) {
+          result.httpsUrl = uriString;
+        } else if (uriString.indexOf("https://") === -1) {
+          result.httpsUrl = uriString;
+
+          // case for domain name specifier, like example.com
+          if (uriString.indexOf("/") === -1) {
+            result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`;
+          }
+
+          result.httpsUrl = `https://${result.httpsUrl}`;
+        } else if (uriString.indexOf("ipfs://") === 0) {
+          const ipfsCid = uriString.replace("ipfs://", "");
+          result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
+        } else {
+          throw new Error(`Unsupported uri type: ${uriString}`);
+        }
+      }
+    }
+    return result;
+  }
+
   /**
    * buildAuthChain Build an authchain - Zeroth-Descendant Transaction Chain, refer to https://github.com/bitjson/chip-bcmr#zeroth-descendant-transaction-chains
    * The authchain in this implementation is specific to resolve to a valid metadata registry
@@ -196,113 +298,10 @@ export class BCMR {
       return undefined;
     };
 
-    // helper function to enforce the constraints on the 0th output, decode the BCMR's OP_RETURN data
-    // returns resolved AuthChainElement
-    const makeAuthChainElement = (
-      rawTx: ElectrumRawTransaction | Transaction,
-      hash: string
-    ): AuthChainElement => {
-      let opReturns: string[];
-      let spends0thOutput = false;
-      if (rawTx.hasOwnProperty("vout")) {
-        const electrumTransaction = rawTx as ElectrumRawTransaction;
-        opReturns = electrumTransaction.vout
-          .filter((val) => val.scriptPubKey.type === "nulldata")
-          .map((val) => val.scriptPubKey.hex);
-        spends0thOutput = electrumTransaction.vin.some((val) => val.vout === 0);
-      } else {
-        const libauthTransaction = rawTx as Transaction;
-        opReturns = libauthTransaction.outputs
-          .map((val) => binToHex(val.lockingBytecode))
-          .filter((val) => val.indexOf("6a") === 0);
-        spends0thOutput = libauthTransaction.inputs.some(
-          (val) => val.outpointIndex === 0
-        );
-      }
-
-      if (!spends0thOutput) {
-        throw new Error(
-          "Invalid authchain transaction (does not spend 0th output of previous transaction)"
-        );
-      }
-
-      const bcmrOpReturns = opReturns.filter(
-        (val) =>
-          val.indexOf("6a0442434d52") === 0 ||
-          val.indexOf("6a4c0442434d52") === 0 ||
-          val.indexOf("6a4d040042434d52") === 0 ||
-          val.indexOf("6a4e0400000042434d52") === 0
-      );
-
-      if (bcmrOpReturns.length === 0) {
-        return {
-          txHash: hash,
-          contentHash: "",
-          uris: [],
-          httpsUrl: "",
-        };
-      }
-
-      const opReturnHex = opReturns[0];
-      const chunks = OpReturnData.parseBinary(hexToBin(opReturnHex));
-      if (chunks.length < 2) {
-        throw new Error(`Malformed BCMR output: ${opReturnHex}`);
-      }
-
-      const result: AuthChainElement = {
-        txHash: hash,
-        contentHash: "",
-        uris: [],
-        httpsUrl: "",
-      };
-
-      if (chunks.length === 2) {
-        // IPFS Publication Output
-        result.contentHash = binToHex(chunks[1]);
-        const ipfsCid = binToUtf8(chunks[1]);
-        result.uris = [`ipfs://${ipfsCid}`];
-        result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
-      } else {
-        // URI Publication Output
-        // content hash is in OP_SHA256 byte order per spec
-        result.contentHash = binToHex(chunks[1].slice());
-
-        const uris = chunks.slice(2);
-
-        for (const uri of uris) {
-          const uriString = binToUtf8(uri);
-          result.uris.push(uriString);
-
-          if (result.httpsUrl) {
-            continue;
-          }
-
-          if (uriString.indexOf("https://") === 0) {
-            result.httpsUrl = uriString;
-          } else if (uriString.indexOf("https://") === -1) {
-            result.httpsUrl = uriString;
-
-            // case for domain name specifier, like example.com
-            if (uriString.indexOf("/") === -1) {
-              result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`;
-            }
-
-            result.httpsUrl = `https://${result.httpsUrl}`;
-          } else if (uriString.indexOf("ipfs://") === 0) {
-            const ipfsCid = uriString.replace("ipfs://", "");
-            result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
-          } else {
-            throw new Error(`Unsupported uri type: ${uriString}`);
-          }
-        }
-      }
-      return result;
-    };
-
     // make authchain element and combine with the rest obtained
     let element: AuthChainElement;
     try {
-      element = makeAuthChainElement(options.rawTx, options.rawTx.hash);
+      element = BCMR.makeAuthChainElement(options.rawTx, options.rawTx.hash);
     } catch (error) {
       // special case for cashtoken authchain lookup by categoryId - allow to fail first lookup and inspect the genesis transaction
       // follow authchain to head and look for BCMR outputs
@@ -349,7 +348,7 @@ export class BCMR {
             );
             return { decoded, hash };
           })
-          .map(({ decoded, hash }) => makeAuthChainElement(decoded, hash));
+          .map(({ decoded, hash }) => BCMR.makeAuthChainElement(decoded, hash));
       } else {
         // simply go back in history towards authhead
         let stop = false;
@@ -359,7 +358,7 @@ export class BCMR {
           const vin = tx.vin.find((val) => val.vout === 0);
           tx = await provider.getRawTransactionObject(vin!.txid);
           try {
-            const pastElement = makeAuthChainElement(tx, tx.hash);
+            const pastElement = BCMR.makeAuthChainElement(tx, tx.hash);
             chainBase.unshift(pastElement);
             maxElements--;
           } catch {
@@ -392,6 +391,105 @@ export class BCMR {
 
     // return the last chain element (or the only found in an edge case)
     return [...chainBase, element].filter((val) => val.httpsUrl.length);
+  }
+
+  /**
+   * fetchAuthChainFromChaingraph Fetch the authchain information from a trusted external indexer
+   * The authchain in this implementation is specific to resolve to a valid metadata registry
+   *
+   * @param  {string} options.chaingraphUrl (required) URL of a chaingraph indexer instance to fetch info from
+   * @param  {string} options.transactionHash (required) transaction hash from which to build the auth chain
+   * @param  {string?} options.network (default=mainnet) network to query the data from, specific to the queried instance, can be mainnet, chipnet, or anything else
+   *
+   * @returns {AuthChain} returns the resolved authchain
+   */
+  public static async fetchAuthChainFromChaingraph(options: {
+    chaingraphUrl: string;
+    transactionHash: string;
+    network?: string;
+  }): Promise<AuthChain> {
+    if (!options.chaingraphUrl) {
+      throw new Error("Provide `chaingraphUrl` param.");
+    }
+
+    if (options.network === undefined) {
+      options.network = "mainnet";
+    }
+
+    const response = await axios.post(
+      options.chaingraphUrl,
+      {
+        operationName: null,
+        variables: {},
+        query: `{
+  transaction(
+    where: {
+      hash:{_eq:"\\\\x${options.transactionHash}"},
+      block_inclusions:{block:{accepted_by:{node:{name:{_ilike:"%${options.network}%"}}}}}
+    }
+  ) {
+    hash
+    authchains {
+      authchain_length
+      migrations(
+        where: {
+          transaction: {
+            outputs: { locking_bytecode_pattern: { _like: "6a04%" } }
+          }
+        }
+      ) {
+        transaction {
+          hash
+          inputs(where:{ outpoint_index: { _eq:"0" } }){
+            outpoint_index
+          }
+          outputs(where: { locking_bytecode_pattern: { _like: "6a04%" } }) {
+            output_index
+            locking_bytecode
+          }
+        }
+      }
+    }
+  }
+}`,
+      },
+      {
+        responseType: "json",
+        headers: {
+          Accept: "*/*",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const result: AuthChain = [];
+    const migrations =
+      response.data.data.transaction[0]?.authchains[0].migrations;
+    if (!migrations) {
+      return result;
+    }
+
+    for (const migration of migrations) {
+      const transaction = migration.transaction[0];
+      if (!transaction) {
+        continue;
+      }
+      transaction.inputs.forEach(
+        (input) => (input.outpointIndex = Number(input.outpoint_index))
+      );
+      transaction.outputs.forEach((output) => {
+        output.outputIndex = Number(output.output_index);
+        output.lockingBytecode = hexToBin(
+          output.locking_bytecode.replace("\\x", "")
+        );
+      });
+      const txHash = transaction.hash.replace("\\x", "");
+      result.push(
+        BCMR.makeAuthChainElement(transaction as Transaction, txHash)
+      );
+    }
+
+    return result;
   }
 
   /**
