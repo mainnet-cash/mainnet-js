@@ -6,10 +6,7 @@ import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
 import {
   binToHex,
-  binToNumberUint16LE,
-  binToNumberUint32LE,
   hexToBin,
-  numberToBinUint16LE,
   sha256,
   utf8ToBin,
 } from "@bitauth/libauth";
@@ -17,7 +14,6 @@ import { mine } from "../mine";
 import { NFTCapability, Network } from "../interface";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 
-import bitcats from "./bitcoin-cash-metadata-registry.json";
 
 beforeAll(async () => {
   await initProviders();
@@ -820,44 +816,6 @@ describe(`Test BCMR support`, () => {
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
     expect(gappedChain[1].txHash).toBe(chainHeadResponse.txId);
-  });
-
-  test.skip("paytaca", async () => {
-    // console.log(await BCMR.buildAuthChain({transactionHash: "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"}))
-    // await BCMR.addMetadataRegistryFromUri("file:///Users/pat/Downloads/bitcoin-cash-metadata-registry.json");
-
-    const reg = bitcats as Registry;
-    const maxNumber = 288;
-    // const hexMax = binToHex(numberToBinUint16LE(maxNumber));
-
-    // const missingKeys: number[] = [];
-    for (let i = maxNumber; i <= 10000; i++) {
-      delete reg.identities![
-        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"
-      ]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types[
-        binToHex(numberToBinUint16LE(i))
-      ];
-    }
-
-    Object.keys(
-      reg.identities![
-        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"
-      ]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types
-    ).forEach((key) => {
-      reg.identities![
-        "07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"
-      ]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types[
-        key
-      ].name = `BITCAT - ${binToNumberUint16LE(hexToBin(key))}`;
-    });
-
-    console.log(JSON.stringify(reg));
-
-    // reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types = Object.values(reg.identities!["07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"]["2023-05-19T00:00:00Z"].token!.nfts!.parse.types).filter(val => val.)
-
-    // await BCMR.addMetadataRegistry(bitcats);
-    // console.log(BCMR.getTokenInfo("07275f68d14780c737279898e730cec3a7b189a761caf43b4197b60a7c891a97"));
-    // console.log(JSON.stringify(bitcats));
   });
 
   test("Test fetching BCMR authchain from chaingraph", async () => {
