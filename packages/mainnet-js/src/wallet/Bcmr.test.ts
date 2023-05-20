@@ -4,16 +4,10 @@ import { AuthChain, BCMR } from "./Bcmr.js";
 import { Registry } from "./bcmr-v2.schema.js";
 import { RegTestWallet } from "./Wif";
 import { OpReturnData, SendRequest } from "./model";
-import {
-  binToHex,
-  hexToBin,
-  sha256,
-  utf8ToBin,
-} from "@bitauth/libauth";
+import { binToHex, hexToBin, sha256, utf8ToBin } from "@bitauth/libauth";
 import { mine } from "../mine";
 import { NFTCapability, Network } from "../interface";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
-
 
 beforeAll(async () => {
   await initProviders();
