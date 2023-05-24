@@ -189,22 +189,25 @@ export const buildTemplate = async ({
             ...zip(functionInputs, args)
               .filter(([input]) => input.type !== PrimitiveType.SIG)
               .map(([input, arg]) => {
-                // const encoded = encodeArgument(arg, input.type);
+                const hex = binToHex(arg as Uint8Array);
+                const result = hex.length ? `0x${hex}` : hex;
                 return {
-                  [snake_case(input.name)]: "0x" + binToHex(arg as Uint8Array),
+                  [snake_case(input.name)]: result,
                 };
               }),
             { function_index: functionIndex.toString() },
-            ...constructorInputs.map((input, index) => ({
-              [snake_case(input.name)]:
-                "0x" +
-                binToHex(
-                  encodeArgument(
-                    contractParameters[index],
-                    constructorInputs[index].type
-                  ) as Uint8Array
-                ),
-            })),
+            ...constructorInputs.map((input, index) => {
+              const hex = binToHex(
+                encodeArgument(
+                  contractParameters[index],
+                  constructorInputs[index].type
+                ) as Uint8Array
+              );
+              const result = hex.length ? `0x${hex}` : hex;
+              return {
+                [snake_case(input.name)]: result
+              }
+            }),
           ]),
           currentBlockHeight: 2,
           currentBlockTime: Math.round(+new Date() / 1000),
@@ -220,7 +223,8 @@ export const buildTemplate = async ({
                 : []),
               ...zip(functionInputs, args)
                 .filter(([input]) => input.type === PrimitiveType.SIG)
-                .map(([input, arg]) => ({
+                .map(([input, arg]) => {
+                  return ({
                   [snake_case(input.name)]: binToHex(
                     manglePrivateKeys
                       ? (arg as SignatureTemplate)
@@ -229,7 +233,7 @@ export const buildTemplate = async ({
                           .slice(0, 32)
                       : (arg as SignatureTemplate | any).privateKey
                   ),
-                })),
+                })}),
             ]),
           },
         },
@@ -400,7 +404,13 @@ export const buildTemplate = async ({
                 "",
               ]
             : []),
-
+        ].join("\n"),
+        unlocks: "lock",
+      },
+      lock: {
+        lockingType: "p2sh20",
+        name: "lock",
+        script: [
           `// "${contract.artifact.contractName}" contract constructor parameters`,
           ...(constructorInputs.length
             ? constructorInputs.map((input, index) => {
@@ -413,22 +423,18 @@ export const buildTemplate = async ({
                 } = <${"0x" + binToHex(encoded)}>`;
               })
             : ["// none"]),
+          "",
+          "// bytecode",
+          ...contract.artifact.bytecode
+            .split(" ")
+            .map((val) => {
+              try {
+                return `<0x${BigInt("0x" + val).toString(16)}>`;
+              } catch {
+                return val;
+              }
+            })
         ].join("\n"),
-        unlocks: "lock",
-      },
-      lock: {
-        lockingType: "p2sh20",
-        name: "lock",
-        script: contract.artifact.bytecode
-          .split(" ")
-          .map((val) => {
-            try {
-              return `<0x${BigInt("0x" + val).toString(16)}>`;
-            } catch {
-              return val;
-            }
-          })
-          .join("\n"),
       },
       ...(hasSignatureTemplates
         ? {

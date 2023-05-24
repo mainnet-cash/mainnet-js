@@ -10,14 +10,12 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "1.1.23",
     "@openzeppelin/contracts": "^4.2.0",
-    "cashc": "^0.6.5",
-    "cashscript": "^0.6.5",
     "ethers": "^5.4.5",
+    "mainnet-js": "1.1.23",
     "solc": "0.8.7-fixed",
-    "xmlhttprequest-ssl": "^2.0.0",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "xmlhttprequest-ssl": "^2.0.0"
   },
   "devDependencies": {
     "typescript": "^4.3.2"
