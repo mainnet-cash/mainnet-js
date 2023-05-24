@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+1.1.24
+
+* Fix bitauth template generation of empty data parameters, move constructor parameters into locking script
+* Update cashscript to 0.8.0-next.4, add patch
+* Remove cashscript from smartbch package
+
 1.1.23
 
 * Add new BCMR method fetchAuthChainFromChaingraph to get the autchain data from a trusted indexer
