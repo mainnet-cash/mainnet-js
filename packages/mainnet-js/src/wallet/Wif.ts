@@ -1229,18 +1229,8 @@ export class Wallet extends BaseWallet {
     }
 
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
-    // console.trace(utxos.slice().filter(val => val.token).reverse().slice(0, 10))
-    const feeEstimate = await getFeeAmount({
-      utxos: utxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey ?? Uint8Array.from([]),
-      sourceAddress: this.cashaddr!,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      slpOutputs: [],
-      feePaidBy: feePaidBy,
-    });
+    const feeEstimate = 500;
 
-    // console.warn(utxos.slice().filter(val => val.token).reverse().slice(0, 10))
     const fundingUtxos = await getSuitableUtxos(
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
@@ -1250,7 +1240,6 @@ export class Wallet extends BaseWallet {
       options?.ensureUtxos || [],
       options?.tokenOperation
     );
-    // console.log(fundingUtxos.slice().filter(val => val.token).reverse().slice(0, 10))
     if (fundingUtxos.length === 0) {
       throw Error(
         "The available inputs couldn't satisfy the request with fees"
