@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+1.1.25
+
+* Simplify transaction estimation from 2 passes to 1
+* This is a performance improvement for wallets with massive amount of utxos
+
 1.1.24
 
 * Fix bitauth template generation of empty data parameters, move constructor parameters into locking script
