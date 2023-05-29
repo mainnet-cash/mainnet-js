@@ -1,13 +1,39 @@
-import { Network, NFTCapability, toTokenaddr, Wallet, hexToBin, OpReturnData, BCMR, getRandomInt, TokenSendRequest, SendRequest, TestNetWallet, RegTestWallet } from "mainnet-js";
+import {
+  Network,
+  NFTCapability,
+  toTokenaddr,
+  Wallet,
+  hexToBin,
+  OpReturnData,
+  BCMR,
+  getRandomInt,
+  TokenSendRequest,
+  SendRequest,
+  TestNetWallet,
+  RegTestWallet,
+} from "mainnet-js";
 
 import { Contract } from "./Contract";
 import { getSignatureTemplate } from "./util";
 
-import { sha256, hash160, utf8ToBin, numberToBinUint32LE, binToHex, bigIntToVmNumber, encodeDataPush, encodeAuthenticationInstructions } from "@bitauth/libauth"
+import {
+  sha256,
+  hash160,
+  utf8ToBin,
+  numberToBinUint32LE,
+  binToHex,
+  bigIntToVmNumber,
+  encodeDataPush,
+  encodeAuthenticationInstructions,
+} from "@bitauth/libauth";
 import { toCashScript } from "./WrappedProvider";
 import { getBitauthUri, buildTemplate } from "./template";
 import { Transaction, Utxo } from "cashscript";
-import { asmToBytecode, replaceBytecodeNop, scriptToBytecode } from "@cashscript/utils";
+import {
+  asmToBytecode,
+  replaceBytecodeNop,
+  scriptToBytecode,
+} from "@cashscript/utils";
 import { encodeArgument } from "cashscript/dist/Argument";
 
 const isTestnet = false;
@@ -17,24 +43,27 @@ const capabilityMap = {
   [NFTCapability.none]: "",
   [NFTCapability.mutable]: "01",
   [NFTCapability.minting]: "02",
-}
+};
 
 const getContractParts = (contract: Contract) => {
   const encoded = contract.parameters
-    .map((arg, i) => encodeArgument(arg, contract.artifact.constructorInputs[i].type))
+    .map((arg, i) =>
+      encodeArgument(arg, contract.artifact.constructorInputs[i].type)
+    )
     .reverse() as Uint8Array[];
-  const head = scriptToBytecode(replaceBytecodeNop([...encoded]))
+  const head = scriptToBytecode(replaceBytecodeNop([...encoded]));
 
-  const tail = asmToBytecode(contract.artifact.bytecode)
+  const tail = asmToBytecode(contract.artifact.bytecode);
   const tailHash = sha256.hash(tail);
 
   return {
     head,
-    tailHash
-  }
-}
+    tailHash,
+  };
+};
 
-const createContract = ({ownerPubKeyHash,
+const createContract = ({
+  ownerPubKeyHash,
   wantSats,
   wantCategory,
   wantNFTCommitment,
@@ -42,16 +71,18 @@ const createContract = ({ownerPubKeyHash,
   platformPubKeyHash,
   platformFee,
   nonce,
-  network = Network.REGTEST}:{
-  ownerPubKeyHash: Uint8Array,
-  wantSats: bigint,
-  wantCategory: string,
-  wantNFTCommitment: string,
-  wantFTs: bigint,
-  platformPubKeyHash: Uint8Array,
-  platformFee: bigint,
-  nonce?: any,
-  network?: Network }) => {
+  network = Network.REGTEST,
+}: {
+  ownerPubKeyHash: Uint8Array;
+  wantSats: bigint;
+  wantCategory: string;
+  wantNFTCommitment: string;
+  wantFTs: bigint;
+  platformPubKeyHash: Uint8Array;
+  platformFee: bigint;
+  nonce?: any;
+  network?: Network;
+}) => {
   const script = /* c */ `// Simple Swap for Bitcoin Cash (BCH) CashTokens
 // v2.0.0
 
@@ -170,7 +201,7 @@ contract SimpleNFTSwap(
     }
   }
 }
-`
+`;
 
   // first 4 bytes
   nonce = getRandomInt(1e18);
@@ -188,40 +219,57 @@ contract SimpleNFTSwap(
     ],
     network
   );
-}
+};
 
 describe(`Create Contract Tests`, () => {
   test("swap NFT for bch", async () => {
-    const funder = isTestnet ? await WalletClass.fromSeed("excuse mother slide subject desert ability dad slab observe mandate tiger code", "m/44'/145'/0'/0/0")
+    const funder = isTestnet
+      ? await WalletClass.fromSeed(
+          "excuse mother slide subject desert ability dad slab observe mandate tiger code",
+          "m/44'/145'/0'/0/0"
+        )
       : await WalletClass.fromId(process.env.ALICE_ID!);
 
     const alice = await WalletClass.newRandom();
     const bob = await WalletClass.newRandom();
     const platform = await WalletClass.newRandom();
 
-    await funder.send([{
-      cashaddr: alice.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }, {
-      cashaddr: bob.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }]);
+    await funder.send([
+      {
+        cashaddr: alice.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+      {
+        cashaddr: bob.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+    ]);
 
-    const genesisInput = (await alice.getAddressUtxos()).filter(val => !val.token && val.vout === 0)[0];
-    const genesisResponse = await alice.tokenGenesis({
-      cashaddr: alice.getDepositAddress(),
-      capability: NFTCapability.none,
-      commitment: `0100`,
-    }, undefined, { utxoIds: [genesisInput] });
+    const genesisInput = (await alice.getAddressUtxos()).filter(
+      (val) => !val.token && val.vout === 0
+    )[0];
+    const genesisResponse = await alice.tokenGenesis(
+      {
+        cashaddr: alice.getDepositAddress(),
+        capability: NFTCapability.none,
+        commitment: `0100`,
+      },
+      undefined,
+      { utxoIds: [genesisInput] }
+    );
 
-    const ownerPubKeyHash = hash160(alice.getPublicKeyCompressed() as Uint8Array);
+    const ownerPubKeyHash = hash160(
+      alice.getPublicKeyCompressed() as Uint8Array
+    );
     const wantSats = 10000n;
     const wantCategory = "";
     const wantNFTCommitment = "";
     const wantFTs = 0n;
-    const platformPubKeyHash = hash160(platform.getPublicKeyCompressed() as Uint8Array);
+    const platformPubKeyHash = hash160(
+      platform.getPublicKeyCompressed() as Uint8Array
+    );
     const platformFee = 1000n;
 
     const contract = createContract({
@@ -232,19 +280,34 @@ describe(`Create Contract Tests`, () => {
       ownerPubKeyHash,
       platformPubKeyHash,
       platformFee,
-      network: isTestnet ? Network.TESTNET : Network.REGTEST
+      network: isTestnet ? Network.TESTNET : Network.REGTEST,
     });
 
-    const tailHash = sha256.hash(asmToBytecode(contract.artifact.bytecode)).slice(0,4);
+    const tailHash = sha256
+      .hash(asmToBytecode(contract.artifact.bytecode))
+      .slice(0, 4);
     const version = 0n;
 
-    const response = await alice.send([new TokenSendRequest({
-      cashaddr: contract.getDepositAddress(),
-      tokenId: genesisResponse.tokenIds![0],
-      capability: NFTCapability.none,
-      commitment: `0100`
-    }), OpReturnData.fromArray(["MPSW", bigIntToVmNumber(version), tailHash, platformPubKeyHash, bigIntToVmNumber(wantSats), hexToBin(wantCategory),
-          hexToBin(wantNFTCommitment), bigIntToVmNumber(wantFTs), ownerPubKeyHash, bigIntToVmNumber(platformFee) ])]);
+    const response = await alice.send([
+      new TokenSendRequest({
+        cashaddr: contract.getDepositAddress(),
+        tokenId: genesisResponse.tokenIds![0],
+        capability: NFTCapability.none,
+        commitment: `0100`,
+      }),
+      OpReturnData.fromArray([
+        "MPSW",
+        bigIntToVmNumber(version),
+        tailHash,
+        platformPubKeyHash,
+        bigIntToVmNumber(wantSats),
+        hexToBin(wantCategory),
+        hexToBin(wantNFTCommitment),
+        bigIntToVmNumber(wantFTs),
+        ownerPubKeyHash,
+        bigIntToVmNumber(platformFee),
+      ]),
+    ]);
     // console.log(await alice.provider.getRawTransaction(response.txId));
 
     const func = contract.getContractFunction("TradeOrCancel");
@@ -258,30 +321,33 @@ describe(`Create Contract Tests`, () => {
     let promise: Transaction;
 
     // fail to mint, covent does not receive mintCost
-    promise = func("","").from(contractInput).fromP2PKH(bobInput, sig).to([
-      {
-        to: alice.getDepositAddress(),
-        amount: wantSats,
-      },
-      // bobs new NFT
-      {
-        to: toTokenaddr(bob.getTokenDepositAddress()),
-        amount: 1000n,
-        token: {
-          category: genesisResponse.tokenIds![0],
-          amount: 0n,
-          nft: {
-            capability: "none",
-            commitment: `0100`,
-          }
+    promise = func("", "")
+      .from(contractInput)
+      .fromP2PKH(bobInput, sig)
+      .to([
+        {
+          to: alice.getDepositAddress(),
+          amount: wantSats,
         },
-      },
-      // platform fee
-      {
-        to: platform.getDepositAddress(),
-        amount: BigInt(platformFee),
-      },
-    ]);
+        // bobs new NFT
+        {
+          to: toTokenaddr(bob.getTokenDepositAddress()),
+          amount: 1000n,
+          token: {
+            category: genesisResponse.tokenIds![0],
+            amount: 0n,
+            nft: {
+              capability: "none",
+              commitment: `0100`,
+            },
+          },
+        },
+        // platform fee
+        {
+          to: platform.getDepositAddress(),
+          amount: BigInt(platformFee),
+        },
+      ]);
 
     await promise.build();
 
@@ -297,36 +363,55 @@ describe(`Create Contract Tests`, () => {
   });
 
   test("swap bch for NFT", async () => {
-    const funder = isTestnet ? await WalletClass.fromSeed("excuse mother slide subject desert ability dad slab observe mandate tiger code", "m/44'/145'/0'/0/0")
+    const funder = isTestnet
+      ? await WalletClass.fromSeed(
+          "excuse mother slide subject desert ability dad slab observe mandate tiger code",
+          "m/44'/145'/0'/0/0"
+        )
       : await WalletClass.fromId(process.env.ALICE_ID!);
 
     const alice = await WalletClass.newRandom();
     const bob = await WalletClass.newRandom();
     const platform = await WalletClass.newRandom();
 
-    await funder.send([{
-      cashaddr: alice.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }, {
-      cashaddr: bob.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }]);
+    await funder.send([
+      {
+        cashaddr: alice.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+      {
+        cashaddr: bob.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+    ]);
     await bob.sendMax(bob.cashaddr!);
 
-    const genesisInput = (await bob.getAddressUtxos()).filter(val => !val.token && val.vout === 0)[0];
-    const genesisResponse = await bob.tokenGenesis({
-      cashaddr: bob.getDepositAddress(),
-      capability: NFTCapability.none,
-      commitment: `0100`,
-    }, undefined, { utxoIds: [genesisInput] });
-    const ownerPubKeyHash = hash160(alice.getPublicKeyCompressed() as Uint8Array);
+    const genesisInput = (await bob.getAddressUtxos()).filter(
+      (val) => !val.token && val.vout === 0
+    )[0];
+    const genesisResponse = await bob.tokenGenesis(
+      {
+        cashaddr: bob.getDepositAddress(),
+        capability: NFTCapability.none,
+        commitment: `0100`,
+      },
+      undefined,
+      { utxoIds: [genesisInput] }
+    );
+    const ownerPubKeyHash = hash160(
+      alice.getPublicKeyCompressed() as Uint8Array
+    );
     const wantSats = 1000n;
-    const wantCategory = binToHex(hexToBin(genesisResponse.tokenIds![0]).reverse()) + capabilityMap[NFTCapability.none];
+    const wantCategory =
+      binToHex(hexToBin(genesisResponse.tokenIds![0]).reverse()) +
+      capabilityMap[NFTCapability.none];
     const wantNFTCommitment = "0100";
     const wantFTs = 0n;
-    const platformPubKeyHash = hash160(platform.getPublicKeyCompressed() as Uint8Array);
+    const platformPubKeyHash = hash160(
+      platform.getPublicKeyCompressed() as Uint8Array
+    );
     const platformFee = 1000n;
 
     const contract = createContract({
@@ -337,18 +422,33 @@ describe(`Create Contract Tests`, () => {
       ownerPubKeyHash,
       platformPubKeyHash,
       platformFee,
-      network: isTestnet ? Network.TESTNET : Network.REGTEST
+      network: isTestnet ? Network.TESTNET : Network.REGTEST,
     });
 
-    const tailHash = sha256.hash(asmToBytecode(contract.artifact.bytecode)).slice(0,4);
+    const tailHash = sha256
+      .hash(asmToBytecode(contract.artifact.bytecode))
+      .slice(0, 4);
     const version = 0n;
 
-    const response = await alice.send([new SendRequest({
-      cashaddr: contract.getDepositAddress(),
-      value: 10000,
-      unit: "sat"
-    }), OpReturnData.fromArray(["MPSW", bigIntToVmNumber(version), tailHash, platformPubKeyHash, bigIntToVmNumber(wantSats), hexToBin(wantCategory),
-          hexToBin(wantNFTCommitment), bigIntToVmNumber(wantFTs), ownerPubKeyHash, bigIntToVmNumber(platformFee) ])]);
+    const response = await alice.send([
+      new SendRequest({
+        cashaddr: contract.getDepositAddress(),
+        value: 10000,
+        unit: "sat",
+      }),
+      OpReturnData.fromArray([
+        "MPSW",
+        bigIntToVmNumber(version),
+        tailHash,
+        platformPubKeyHash,
+        bigIntToVmNumber(wantSats),
+        hexToBin(wantCategory),
+        hexToBin(wantNFTCommitment),
+        bigIntToVmNumber(wantFTs),
+        ownerPubKeyHash,
+        bigIntToVmNumber(platformFee),
+      ]),
+    ]);
 
     const func = contract.getContractFunction("TradeOrCancel");
     const sig = getSignatureTemplate(bob);
@@ -356,74 +456,102 @@ describe(`Create Contract Tests`, () => {
     let contractUtxos = (await contract.getUtxos()).map(toCashScript);
     let contractInput = contractUtxos[0];
 
-    let bobUtxos = (await bob.getTokenUtxos()).map(toCashScript).filter(val => val.token?.category === genesisResponse.tokenIds![0]);
+    let bobUtxos = (await bob.getTokenUtxos())
+      .map(toCashScript)
+      .filter((val) => val.token?.category === genesisResponse.tokenIds![0]);
     let bobInput: Utxo = bobUtxos[0];
     let promise: Transaction;
 
     // fail to mint, covent does not receive mintCost
-    promise = func("","").from(contractInput).fromP2PKH(bobInput, sig).to([
-      {
-        to: alice.getTokenDepositAddress(),
-        amount: 1000n,
-        token: {
-          category: genesisResponse.tokenIds![0],
-          amount: 0n,
-          nft: {
-            capability: "none",
-            commitment: `0100`,
-          }
+    promise = func("", "")
+      .from(contractInput)
+      .fromP2PKH(bobInput, sig)
+      .to([
+        {
+          to: alice.getTokenDepositAddress(),
+          amount: 1000n,
+          token: {
+            category: genesisResponse.tokenIds![0],
+            amount: 0n,
+            nft: {
+              capability: "none",
+              commitment: `0100`,
+            },
+          },
         },
-      },
-      // bobs bch
-      {
-        to: toTokenaddr(bob.getTokenDepositAddress()),
-        amount: 546n, // precalculated fee
-      },
-      // platform fee
-      {
-        to: platform.getDepositAddress(),
-        amount: platformFee,
-      },
-    ]).withoutChange();
+        // bobs bch
+        {
+          to: toTokenaddr(bob.getTokenDepositAddress()),
+          amount: 546n, // precalculated fee
+        },
+        // platform fee
+        {
+          to: platform.getDepositAddress(),
+          amount: platformFee,
+        },
+      ])
+      .withoutChange();
 
     const proposal = await promise.build();
 
     (promise as any).outputs[1].to = bob.getDepositAddress();
-    (promise as any).outputs[1].amount = contractInput.satoshis + bobInput.satoshis - 1000n - BigInt(Math.ceil(proposal.length/2)) - platformFee;
+    (promise as any).outputs[1].amount =
+      contractInput.satoshis +
+      bobInput.satoshis -
+      1000n -
+      BigInt(Math.ceil(proposal.length / 2)) -
+      platformFee;
     await promise.send();
     expect(await platform.getBalance("sat")).toBe(Number(platformFee));
   });
 
   test("swap fungible for bch", async () => {
-    const funder = isTestnet ? await WalletClass.fromSeed("excuse mother slide subject desert ability dad slab observe mandate tiger code", "m/44'/145'/0'/0/0")
+    const funder = isTestnet
+      ? await WalletClass.fromSeed(
+          "excuse mother slide subject desert ability dad slab observe mandate tiger code",
+          "m/44'/145'/0'/0/0"
+        )
       : await WalletClass.fromId(process.env.ALICE_ID!);
 
     const alice = await WalletClass.newRandom();
     const bob = await WalletClass.newRandom();
     const platform = await WalletClass.newRandom();
 
-    await funder.send([{
-      cashaddr: alice.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }, {
-      cashaddr: bob.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }]);
+    await funder.send([
+      {
+        cashaddr: alice.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+      {
+        cashaddr: bob.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+    ]);
 
-    const genesisInput = (await alice.getAddressUtxos()).filter(val => !val.token && val.vout === 0)[0];
-    const genesisResponse = await alice.tokenGenesis({
-      cashaddr: alice.getDepositAddress(),
-      amount: 500
-    }, undefined, { utxoIds: [genesisInput] });
+    const genesisInput = (await alice.getAddressUtxos()).filter(
+      (val) => !val.token && val.vout === 0
+    )[0];
+    const genesisResponse = await alice.tokenGenesis(
+      {
+        cashaddr: alice.getDepositAddress(),
+        amount: 500,
+      },
+      undefined,
+      { utxoIds: [genesisInput] }
+    );
 
-    const ownerPubKeyHash = hash160(alice.getPublicKeyCompressed() as Uint8Array);
+    const ownerPubKeyHash = hash160(
+      alice.getPublicKeyCompressed() as Uint8Array
+    );
     const wantSats = 10000n;
     const wantCategory = "";
     const wantNFTCommitment = "";
     const wantFTs = 0n;
-    const platformPubKeyHash = hash160(platform.getPublicKeyCompressed() as Uint8Array);
+    const platformPubKeyHash = hash160(
+      platform.getPublicKeyCompressed() as Uint8Array
+    );
     const platformFee = 1000n;
 
     const contract = createContract({
@@ -434,18 +562,33 @@ describe(`Create Contract Tests`, () => {
       ownerPubKeyHash,
       platformPubKeyHash,
       platformFee,
-      network: isTestnet ? Network.TESTNET : Network.REGTEST
+      network: isTestnet ? Network.TESTNET : Network.REGTEST,
     });
 
-    const tailHash = sha256.hash(asmToBytecode(contract.artifact.bytecode)).slice(0,4);
+    const tailHash = sha256
+      .hash(asmToBytecode(contract.artifact.bytecode))
+      .slice(0, 4);
     const version = 0n;
 
-    const response = await alice.send([new TokenSendRequest({
-      cashaddr: contract.getDepositAddress(),
-      tokenId: genesisResponse.tokenIds![0],
-      amount: 500
-    }), OpReturnData.fromArray(["MPSW", bigIntToVmNumber(version), tailHash, platformPubKeyHash, bigIntToVmNumber(wantSats), hexToBin(wantCategory),
-          hexToBin(wantNFTCommitment), bigIntToVmNumber(wantFTs), ownerPubKeyHash, bigIntToVmNumber(platformFee) ])]);
+    const response = await alice.send([
+      new TokenSendRequest({
+        cashaddr: contract.getDepositAddress(),
+        tokenId: genesisResponse.tokenIds![0],
+        amount: 500,
+      }),
+      OpReturnData.fromArray([
+        "MPSW",
+        bigIntToVmNumber(version),
+        tailHash,
+        platformPubKeyHash,
+        bigIntToVmNumber(wantSats),
+        hexToBin(wantCategory),
+        hexToBin(wantNFTCommitment),
+        bigIntToVmNumber(wantFTs),
+        ownerPubKeyHash,
+        bigIntToVmNumber(platformFee),
+      ]),
+    ]);
     // console.log(await alice.provider.getRawTransaction(response.txId));
 
     const func = contract.getContractFunction("TradeOrCancel");
@@ -458,28 +601,31 @@ describe(`Create Contract Tests`, () => {
     let bobInput = bobUtxos[0];
     let promise: Transaction;
 
-    console.log(contractInput)
+    console.log(contractInput);
     // fail to mint, covent does not receive mintCost
-    promise = func("","").from(contractInput).fromP2PKH(bobInput, sig).to([
-      {
-        to: alice.getDepositAddress(),
-        amount: wantSats,
-      },
-      // bobs new token
-      {
-        to: toTokenaddr(bob.getTokenDepositAddress()),
-        amount: 1000n,
-        token: {
-          category: genesisResponse.tokenIds![0],
-          amount: 500n,
+    promise = func("", "")
+      .from(contractInput)
+      .fromP2PKH(bobInput, sig)
+      .to([
+        {
+          to: alice.getDepositAddress(),
+          amount: wantSats,
         },
-      },
-      // platform fee
-      {
-        to: platform.getDepositAddress(),
-        amount: BigInt(platformFee),
-      },
-    ]);
+        // bobs new token
+        {
+          to: toTokenaddr(bob.getTokenDepositAddress()),
+          amount: 1000n,
+          token: {
+            category: genesisResponse.tokenIds![0],
+            amount: 500n,
+          },
+        },
+        // platform fee
+        {
+          to: platform.getDepositAddress(),
+          amount: BigInt(platformFee),
+        },
+      ]);
 
     await promise.build();
 
@@ -490,40 +636,59 @@ describe(`Create Contract Tests`, () => {
 
     await promise.send();
     expect((await alice.getTokenUtxos()).length).toBe(0);
-    expect((await bob.getTokenBalance(genesisResponse.tokenIds![0]))).toBe(500);
+    expect(await bob.getTokenBalance(genesisResponse.tokenIds![0])).toBe(500);
     expect(await platform.getBalance("sat")).toBe(Number(platformFee));
   });
 
   test("swap bch for fungible", async () => {
-    const funder = isTestnet ? await WalletClass.fromSeed("excuse mother slide subject desert ability dad slab observe mandate tiger code", "m/44'/145'/0'/0/0")
+    const funder = isTestnet
+      ? await WalletClass.fromSeed(
+          "excuse mother slide subject desert ability dad slab observe mandate tiger code",
+          "m/44'/145'/0'/0/0"
+        )
       : await WalletClass.fromId(process.env.ALICE_ID!);
 
     const alice = await WalletClass.newRandom();
     const bob = await WalletClass.newRandom();
     const platform = await WalletClass.newRandom();
 
-    await funder.send([{
-      cashaddr: alice.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }, {
-      cashaddr: bob.getDepositAddress(),
-      value: 0.01,
-      unit: "bch"
-    }]);
+    await funder.send([
+      {
+        cashaddr: alice.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+      {
+        cashaddr: bob.getDepositAddress(),
+        value: 0.01,
+        unit: "bch",
+      },
+    ]);
     await bob.sendMax(bob.cashaddr!);
 
-    const genesisInput = (await bob.getAddressUtxos()).filter(val => !val.token && val.vout === 0)[0];
-    const genesisResponse = await bob.tokenGenesis({
-      cashaddr: bob.getDepositAddress(),
-      amount: 500
-    }, undefined, { utxoIds: [genesisInput] });
-    const ownerPubKeyHash = hash160(alice.getPublicKeyCompressed() as Uint8Array);
+    const genesisInput = (await bob.getAddressUtxos()).filter(
+      (val) => !val.token && val.vout === 0
+    )[0];
+    const genesisResponse = await bob.tokenGenesis(
+      {
+        cashaddr: bob.getDepositAddress(),
+        amount: 500,
+      },
+      undefined,
+      { utxoIds: [genesisInput] }
+    );
+    const ownerPubKeyHash = hash160(
+      alice.getPublicKeyCompressed() as Uint8Array
+    );
     const wantSats = 1000n;
-    const wantCategory = binToHex(hexToBin(genesisResponse.tokenIds![0]).reverse()) + capabilityMap[NFTCapability.none];
+    const wantCategory =
+      binToHex(hexToBin(genesisResponse.tokenIds![0]).reverse()) +
+      capabilityMap[NFTCapability.none];
     const wantNFTCommitment = "";
     const wantFTs = 500n;
-    const platformPubKeyHash = hash160(platform.getPublicKeyCompressed() as Uint8Array);
+    const platformPubKeyHash = hash160(
+      platform.getPublicKeyCompressed() as Uint8Array
+    );
     const platformFee = 1000n;
 
     const contract = createContract({
@@ -534,20 +699,33 @@ describe(`Create Contract Tests`, () => {
       ownerPubKeyHash,
       platformPubKeyHash,
       platformFee,
-      network: isTestnet ? Network.TESTNET : Network.REGTEST
+      network: isTestnet ? Network.TESTNET : Network.REGTEST,
     });
 
-    const tailHash = sha256.hash(asmToBytecode(contract.artifact.bytecode)).slice(0,4);
+    const tailHash = sha256
+      .hash(asmToBytecode(contract.artifact.bytecode))
+      .slice(0, 4);
     const version = 0n;
 
-    const response = await alice.send([new SendRequest({
-      cashaddr: contract.getDepositAddress(),
-      value: 10000,
-      unit: "sat"
-    }), OpReturnData.fromArray(["MPSW", bigIntToVmNumber(version), tailHash, platformPubKeyHash, bigIntToVmNumber(wantSats), hexToBin(wantCategory),
-          hexToBin(wantNFTCommitment), bigIntToVmNumber(wantFTs), ownerPubKeyHash, bigIntToVmNumber(platformFee) ])]);
-
-
+    const response = await alice.send([
+      new SendRequest({
+        cashaddr: contract.getDepositAddress(),
+        value: 10000,
+        unit: "sat",
+      }),
+      OpReturnData.fromArray([
+        "MPSW",
+        bigIntToVmNumber(version),
+        tailHash,
+        platformPubKeyHash,
+        bigIntToVmNumber(wantSats),
+        hexToBin(wantCategory),
+        hexToBin(wantNFTCommitment),
+        bigIntToVmNumber(wantFTs),
+        ownerPubKeyHash,
+        bigIntToVmNumber(platformFee),
+      ]),
+    ]);
 
     const func = contract.getContractFunction("TradeOrCancel");
     const sig = getSignatureTemplate(bob);
@@ -555,36 +733,48 @@ describe(`Create Contract Tests`, () => {
     let contractUtxos = (await contract.getUtxos()).map(toCashScript);
     let contractInput = contractUtxos[0];
 
-    let bobUtxos = (await bob.getTokenUtxos()).map(toCashScript).filter(val => val.token?.category === genesisResponse.tokenIds![0]);
+    let bobUtxos = (await bob.getTokenUtxos())
+      .map(toCashScript)
+      .filter((val) => val.token?.category === genesisResponse.tokenIds![0]);
     let bobInput: Utxo = bobUtxos[0];
     let promise: Transaction;
 
     // fail to mint, covent does not receive mintCost
-    promise = func("","").from(contractInput).fromP2PKH(bobInput, sig).to([
-      {
-        to: alice.getTokenDepositAddress(),
-        amount: 1000n,
-        token: {
-          category: genesisResponse.tokenIds![0],
-          amount: 500n,
+    promise = func("", "")
+      .from(contractInput)
+      .fromP2PKH(bobInput, sig)
+      .to([
+        {
+          to: alice.getTokenDepositAddress(),
+          amount: 1000n,
+          token: {
+            category: genesisResponse.tokenIds![0],
+            amount: 500n,
+          },
         },
-      },
-      // bobs bch
-      {
-        to: toTokenaddr(bob.getTokenDepositAddress()),
-        amount: 546n, // precalculated fee
-      },
-      // platform fee
-      {
-        to: platform.getDepositAddress(),
-        amount: platformFee,
-      },
-    ]).withoutChange().withoutTokenChange();
+        // bobs bch
+        {
+          to: toTokenaddr(bob.getTokenDepositAddress()),
+          amount: 546n, // precalculated fee
+        },
+        // platform fee
+        {
+          to: platform.getDepositAddress(),
+          amount: platformFee,
+        },
+      ])
+      .withoutChange()
+      .withoutTokenChange();
 
     const proposal = await promise.build();
 
     (promise as any).outputs[1].to = bob.getDepositAddress();
-    (promise as any).outputs[1].amount = contractInput.satoshis + bobInput.satoshis - 1000n - BigInt(Math.ceil(proposal.length/2)) - platformFee;
+    (promise as any).outputs[1].amount =
+      contractInput.satoshis +
+      bobInput.satoshis -
+      1000n -
+      BigInt(Math.ceil(proposal.length / 2)) -
+      platformFee;
 
     // console.log(getBitauthUri(await buildTemplate({contract, transaction: promise})))
 
