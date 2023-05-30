@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.26
+
+* Use model based initial fee estimation
+
 1.1.25
 
 * Simplify transaction estimation from 2 passes to 1
