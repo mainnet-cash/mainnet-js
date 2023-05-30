@@ -1240,16 +1240,6 @@ export class Wallet extends BaseWallet {
       feePaidBy: feePaidBy,
     });
 
-    console.log(feeEstimate, await getFeeAmountSimple({
-      utxos: utxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey ?? Uint8Array.from([]),
-      sourceAddress: this.cashaddr!,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      slpOutputs: [],
-      feePaidBy: feePaidBy,
-    }))
-
     const fundingUtxos = await getSuitableUtxos(
       utxos,
       BigInt(spendAmount) + BigInt(feeEstimate),
