@@ -256,7 +256,7 @@ describe(`Test BCMR support`, () => {
     const chunks = [
       "BCMR",
       sha256.hash(utf8ToBin("registry_contents")),
-      "ipfs://bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm"
+      "ipfs://bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
 
@@ -290,7 +290,7 @@ describe(`Test BCMR support`, () => {
     const chunks = [
       "BCMR",
       sha256.hash(utf8ToBin("registry_contents")),
-      "bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm.ipfs.dweb.link"
+      "bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm.ipfs.dweb.link",
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
 
