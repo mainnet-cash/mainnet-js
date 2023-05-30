@@ -52,6 +52,7 @@ import {
   getSuitableUtxos,
   getFeeAmount,
   signUnsignedTransaction,
+  getFeeAmountSimple,
 } from "../transaction/Wif.js";
 
 import { asSendRequestObject } from "../util/asSendRequestObject.js";
@@ -1229,7 +1230,7 @@ export class Wallet extends BaseWallet {
     }
 
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
-    const feeEstimate = await getFeeAmount({
+    const feeEstimate = await getFeeAmountSimple({
       utxos: utxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey ?? Uint8Array.from([]),

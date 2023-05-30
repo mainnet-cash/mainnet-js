@@ -414,6 +414,7 @@ export async function getSuitableUtxos(
   }
 }
 
+// model-based imprecise and fast fee estimation
 export async function getFeeAmountSimple({
   utxos,
   sendRequests,
@@ -445,7 +446,7 @@ export async function getFeeAmountSimple({
       const tokenRequest = sendRequest as TokenSendRequest;
       return outputSizeP2pkh + 1 + 34 + (1 + (tokenRequest.commitment?.length ?? 0) / 2) + (tokenRequest.amount ? 9 : 0);
     } else if (sendRequest.hasOwnProperty("buffer")) {
-      return (sendRequest as OpReturnData).buffer.length;
+      return 9 + (sendRequest as OpReturnData).buffer.length;
     }
 
     return 0;
@@ -457,7 +458,7 @@ export async function getFeeAmountSimple({
   return (inputTotalSize + outputTotalSize + slpTotalSize + 16) * relayFeePerByteInSatoshi;
 }
 
-
+// precise fee estimation
 export async function getFeeAmount({
   utxos,
   sendRequests,
@@ -479,7 +480,21 @@ export async function getFeeAmount({
 }) {
   // build transaction
   if (utxos) {
-    return getFeeAmountSimple({utxos, sendRequests, privateKey, sourceAddress, relayFeePerByteInSatoshi, slpOutputs, feePaidBy, discardChange});
+    // Build the transaction to get the approximate size
+    const { encodedTransaction: draftTransaction } =
+      await buildEncodedTransaction({
+        inputs: utxos,
+        outputs: sendRequests,
+        signingKey: privateKey,
+        sourceAddress,
+        fee: 0, //DUST_UTXO_THRESHOLD
+        discardChange: discardChange ?? false,
+        slpOutputs,
+        feePaidBy,
+        changeAddress: "",
+      });
+
+    return draftTransaction.length * relayFeePerByteInSatoshi + 1;
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"
