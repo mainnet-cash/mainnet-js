@@ -205,8 +205,8 @@ export const buildTemplate = async ({
               );
               const result = hex.length ? `0x${hex}` : hex;
               return {
-                [snake_case(input.name)]: result
-              }
+                [snake_case(input.name)]: result,
+              };
             }),
           ]),
           currentBlockHeight: 2,
@@ -224,16 +224,17 @@ export const buildTemplate = async ({
               ...zip(functionInputs, args)
                 .filter(([input]) => input.type === PrimitiveType.SIG)
                 .map(([input, arg]) => {
-                  return ({
-                  [snake_case(input.name)]: binToHex(
-                    manglePrivateKeys
-                      ? (arg as SignatureTemplate)
-                          .getPublicKey()
-                          .slice(0, 32)
-                          .slice(0, 32)
-                      : (arg as SignatureTemplate | any).privateKey
-                  ),
-                })}),
+                  return {
+                    [snake_case(input.name)]: binToHex(
+                      manglePrivateKeys
+                        ? (arg as SignatureTemplate)
+                            .getPublicKey()
+                            .slice(0, 32)
+                            .slice(0, 32)
+                        : (arg as SignatureTemplate | any).privateKey
+                    ),
+                  };
+                }),
             ]),
           },
         },
@@ -425,15 +426,13 @@ export const buildTemplate = async ({
             : ["// none"]),
           "",
           "// bytecode",
-          ...contract.artifact.bytecode
-            .split(" ")
-            .map((val) => {
-              try {
-                return `<0x${BigInt("0x" + val).toString(16)}>`;
-              } catch {
-                return val;
-              }
-            })
+          ...contract.artifact.bytecode.split(" ").map((val) => {
+            try {
+              return `<0x${BigInt("0x" + val).toString(16)}>`;
+            } catch {
+              return val;
+            }
+          }),
         ].join("\n"),
       },
       ...(hasSignatureTemplates

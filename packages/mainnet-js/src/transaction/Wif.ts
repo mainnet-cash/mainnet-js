@@ -434,28 +434,50 @@ export async function getFeeAmountSimple({
   const inputSizeP2pkh = 148;
   const outputSizeP2pkh = 34;
 
-  const inputTotalSize = utxos.reduce((prev, curr) => prev + (curr.token ?
-    inputSizeP2pkh + 1 + 34 + Math.round(1 + (curr.token.commitment?.length ?? 0) / 2) + (curr.token.amount ? 9 : 0) :
-    inputSizeP2pkh),
-  0);
+  const inputTotalSize = utxos.reduce(
+    (prev, curr) =>
+      prev +
+      (curr.token
+        ? inputSizeP2pkh +
+          1 +
+          34 +
+          Math.round(1 + (curr.token.commitment?.length ?? 0) / 2) +
+          (curr.token.amount ? 9 : 0)
+        : inputSizeP2pkh),
+    0
+  );
 
   const outputSize = (sendRequest) => {
     if (sendRequest.hasOwnProperty("unit")) {
       return outputSizeP2pkh;
     } else if (sendRequest.hasOwnProperty("tokenId")) {
       const tokenRequest = sendRequest as TokenSendRequest;
-      return outputSizeP2pkh + 1 + 34 + Math.round(1 + (tokenRequest.commitment?.length ?? 0) / 2) + (tokenRequest.amount ? 9 : 0);
+      return (
+        outputSizeP2pkh +
+        1 +
+        34 +
+        Math.round(1 + (tokenRequest.commitment?.length ?? 0) / 2) +
+        (tokenRequest.amount ? 9 : 0)
+      );
     } else if (sendRequest.hasOwnProperty("buffer")) {
       return 9 + (sendRequest as OpReturnData).buffer.length;
     }
 
     return 0;
-  }
+  };
 
-  const outputTotalSize = sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) + (discardChange ? 0 : outputSizeP2pkh);
-  const slpTotalSize = slpOutputs.reduce((prev, curr) => prev + curr.lockingBytecode.length, 0);
+  const outputTotalSize =
+    sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) +
+    (discardChange ? 0 : outputSizeP2pkh);
+  const slpTotalSize = slpOutputs.reduce(
+    (prev, curr) => prev + curr.lockingBytecode.length,
+    0
+  );
 
-  return (inputTotalSize + outputTotalSize + slpTotalSize + 16) * relayFeePerByteInSatoshi;
+  return (
+    (inputTotalSize + outputTotalSize + slpTotalSize + 16) *
+    relayFeePerByteInSatoshi
+  );
 }
 
 // precise fee estimation
