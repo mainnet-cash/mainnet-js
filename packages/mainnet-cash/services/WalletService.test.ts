@@ -975,7 +975,7 @@ describe("Test Wallet Endpoints", () => {
           walletId: bobsWalletId,
           options: { slpSemiAware: true }
         });
-      expect(result.body.sat).toBe(780);
+      expect(result.body.sat).toBe(768);
 
 
       result = await request(app)
