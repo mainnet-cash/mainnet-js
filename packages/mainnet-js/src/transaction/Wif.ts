@@ -435,7 +435,7 @@ export async function getFeeAmountSimple({
   const outputSizeP2pkh = 34;
 
   const inputTotalSize = utxos.reduce((prev, curr) => prev + (curr.token ?
-    inputSizeP2pkh + 1 + 34 + (1 + (curr.token.commitment?.length ?? 0) / 2) + (curr.token.amount ? 9 : 0) :
+    inputSizeP2pkh + 1 + 34 + Math.round(1 + (curr.token.commitment?.length ?? 0) / 2) + (curr.token.amount ? 9 : 0) :
     inputSizeP2pkh),
   0);
 
@@ -444,7 +444,7 @@ export async function getFeeAmountSimple({
       return outputSizeP2pkh;
     } else if (sendRequest.hasOwnProperty("tokenId")) {
       const tokenRequest = sendRequest as TokenSendRequest;
-      return outputSizeP2pkh + 1 + 34 + (1 + (tokenRequest.commitment?.length ?? 0) / 2) + (tokenRequest.amount ? 9 : 0);
+      return outputSizeP2pkh + 1 + 34 + Math.round(1 + (tokenRequest.commitment?.length ?? 0) / 2) + (tokenRequest.amount ? 9 : 0);
     } else if (sendRequest.hasOwnProperty("buffer")) {
       return 9 + (sendRequest as OpReturnData).buffer.length;
     }

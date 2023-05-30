@@ -912,7 +912,7 @@ export class Wallet extends BaseWallet {
       sendRequests
     );
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
-    const fee = await getFeeAmount({
+    const fee = await getFeeAmountSimple({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
       privateKey: this.privateKey ?? Uint8Array.from([]),
@@ -1239,6 +1239,16 @@ export class Wallet extends BaseWallet {
       slpOutputs: [],
       feePaidBy: feePaidBy,
     });
+
+    console.log(feeEstimate, await getFeeAmountSimple({
+      utxos: utxos,
+      sendRequests: sendRequests,
+      privateKey: this.privateKey ?? Uint8Array.from([]),
+      sourceAddress: this.cashaddr!,
+      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
+      slpOutputs: [],
+      feePaidBy: feePaidBy,
+    }))
 
     const fundingUtxos = await getSuitableUtxos(
       utxos,
