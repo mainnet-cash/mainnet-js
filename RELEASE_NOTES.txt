@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.27
+
+* Fix BCMR https urls for ipfs links
+
 1.1.26
 
 * Use model based initial fee estimation

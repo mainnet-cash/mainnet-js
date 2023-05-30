@@ -194,20 +194,23 @@ export class BCMR {
           continue;
         }
 
-        if (uriString.indexOf("https://") === 0) {
+        if (uriString.indexOf("ipfs://") === 0) {
+          const ipfsCid = uriString.replace("ipfs://", "");
+          result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
+        } else if (uriString.indexOf("https://") === 0) {
           result.httpsUrl = uriString;
         } else if (uriString.indexOf("https://") === -1) {
           result.httpsUrl = uriString;
 
           // case for domain name specifier, like example.com
           if (uriString.indexOf("/") === -1) {
-            result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`;
+            const parts = uriString.toLowerCase().split(".");
+            if (!(parts?.[0]?.indexOf("baf") === 0 && parts?.[1] === "ipfs")) {
+              result.httpsUrl = `${result.httpsUrl}/.well-known/bitcoin-cash-metadata-registry.json`;
+            }
           }
 
           result.httpsUrl = `https://${result.httpsUrl}`;
-        } else if (uriString.indexOf("ipfs://") === 0) {
-          const ipfsCid = uriString.replace("ipfs://", "");
-          result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
         } else {
           throw new Error(`Unsupported uri type: ${uriString}`);
         }

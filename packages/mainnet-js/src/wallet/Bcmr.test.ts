@@ -2,9 +2,16 @@ import { disconnectProviders, initProviders } from "../network/Connection.js";
 import { setupAxiosMock, removeAxiosMock } from "../test/axios.js";
 import { AuthChain, BCMR } from "./Bcmr.js";
 import { Registry } from "./bcmr-v2.schema.js";
-import { RegTestWallet } from "./Wif";
-import { OpReturnData, SendRequest } from "./model";
-import { binToHex, hexToBin, sha256, utf8ToBin } from "@bitauth/libauth";
+import { RegTestWallet, Wallet } from "./Wif";
+import { OpReturnData, SendRequest, TokenSendRequest } from "./model";
+import {
+  binToHex,
+  binToNumberUint16LE,
+  hexToBin,
+  numberToBinUint16LE,
+  sha256,
+  utf8ToBin,
+} from "@bitauth/libauth";
 import { mine } from "../mine";
 import { NFTCapability, Network } from "../interface";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
@@ -236,6 +243,74 @@ describe(`Test BCMR support`, () => {
     );
     expect(chain[0].httpsUrl).toBe(
       "https://dweb.link/ipfs/QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"
+    );
+    expect(chain[0].txHash).toBe(response.txId);
+  });
+
+  test("Auth chain: BCMR, ipfs hash and uri", async () => {
+    const alice = await RegTestWallet.fromId(
+      `wif:regtest:${process.env.PRIVATE_WIF!}`
+    );
+    const bob = await RegTestWallet.newRandom();
+
+    const chunks = [
+      "BCMR",
+      sha256.hash(utf8ToBin("registry_contents")),
+      "ipfs://bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm",
+    ];
+    const opreturnData = OpReturnData.fromArray(chunks);
+
+    const response = await alice.send([
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      opreturnData,
+    ]);
+    const chain = await BCMR.buildAuthChain({
+      transactionHash: response.txId!,
+      network: Network.REGTEST,
+    });
+    expect(chain.length).toBe(1);
+    expect(chain[0].contentHash).toBe(
+      "e073b89a80c77c533ad364692db15df01adb9df404592f608d2c0cdd8960ed0e"
+    );
+    expect(chain[0].uris[0]).toBe(
+      "ipfs://bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm"
+    );
+    expect(chain[0].httpsUrl).toBe(
+      "https://dweb.link/ipfs/bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm"
+    );
+    expect(chain[0].txHash).toBe(response.txId);
+  });
+
+  test("Auth chain: BCMR, ipfs https url", async () => {
+    const alice = await RegTestWallet.fromId(
+      `wif:regtest:${process.env.PRIVATE_WIF!}`
+    );
+    const bob = await RegTestWallet.newRandom();
+
+    const chunks = [
+      "BCMR",
+      sha256.hash(utf8ToBin("registry_contents")),
+      "bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm.ipfs.dweb.link",
+    ];
+    const opreturnData = OpReturnData.fromArray(chunks);
+
+    const response = await alice.send([
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      opreturnData,
+    ]);
+    const chain = await BCMR.buildAuthChain({
+      transactionHash: response.txId!,
+      network: Network.REGTEST,
+    });
+    expect(chain.length).toBe(1);
+    expect(chain[0].contentHash).toBe(
+      "e073b89a80c77c533ad364692db15df01adb9df404592f608d2c0cdd8960ed0e"
+    );
+    expect(chain[0].uris[0]).toBe(
+      "bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm.ipfs.dweb.link"
+    );
+    expect(chain[0].httpsUrl).toBe(
+      "https://bafkreiejafiz23ewtyh6m3dpincmxouohdcimrd33abacrq3h2pacewwjm.ipfs.dweb.link"
     );
     expect(chain[0].txHash).toBe(response.txId);
   });
