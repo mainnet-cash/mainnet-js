@@ -1,6 +1,17 @@
 Newest changes
 --------------
 
+1.1.28
+
+* Update cashscript to latest 0.8.0
+
+Other commit messages:
+
+* Rework generateBlock to not use cashscript, remove older cashscript from dev dependencies
+* Remove cashscript patch, update imports in template.ts
+* Replace exchange rate getter with a sync method
+* Add 'describe' to test suites lacking it
+
 1.1.27
 
 * Fix BCMR https urls for ipfs links
