@@ -14,7 +14,7 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
-describe("Rpc tests", async () => {
+describe("Rpc tests", () => {
 test("subcribe to address", async () => {
   const provider = getNetworkProvider(Network.REGTEST);
   try {

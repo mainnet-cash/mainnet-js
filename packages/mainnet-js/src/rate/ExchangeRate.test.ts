@@ -11,7 +11,7 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
-describe("Exchange rate tests", async () => {
+describe("Exchange rate tests", () => {
 test("Get price in usd", async () => {
   ExchangeRate.setupAxiosMock(
     "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",

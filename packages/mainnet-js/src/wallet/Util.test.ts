@@ -9,7 +9,7 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
-describe("Utility tests", async () => {
+describe("Utility tests", () => {
 
 test("Should compute raw transaction hash", async () => {
   const wallet = await RegTestWallet.newRandom();

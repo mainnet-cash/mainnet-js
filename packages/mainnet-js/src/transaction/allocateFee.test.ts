@@ -12,7 +12,7 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
-describe("Fee tests", async () => {
+describe("Fee tests", () => {
 test("Should get the regtest wallet balance", async () => {
   // Build Alice's wallet from Wallet Import Format string, send some sats
   if (!process.env.ADDRESS) {
