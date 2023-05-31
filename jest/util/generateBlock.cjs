@@ -17,7 +17,10 @@ async function getRegtestUtxos(address) {
       //console.log(e);
       return 0;
     }
-    const response = await spv.request("blockchain.address.listunspent", address);
+    const response = await spv.request(
+      "blockchain.address.listunspent",
+      address
+    );
     return response.length;
   } catch (e) {
     console.log("Error getting block height" + e);

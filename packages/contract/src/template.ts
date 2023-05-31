@@ -1,4 +1,12 @@
-import { AbiFunction, Argument, SignatureTemplate, Transaction, Utxo, encodeArgument as csEncodeArgument, isSignableUtxo } from "cashscript";
+import {
+  AbiFunction,
+  Argument,
+  SignatureTemplate,
+  Transaction,
+  Utxo,
+  encodeArgument as csEncodeArgument,
+  isSignableUtxo,
+} from "cashscript";
 import { Contract } from "./Contract";
 import { PrimitiveType } from "@cashscript/utils";
 import {
@@ -17,7 +25,11 @@ import {
 } from "@bitauth/libauth";
 import { deflate } from "pako";
 import { Network } from "mainnet-js";
-import { SignableUtxo, LibauthOutput, Output } from "cashscript/dist/interfaces";
+import {
+  SignableUtxo,
+  LibauthOutput,
+  Output,
+} from "cashscript/dist/interfaces";
 
 function snake_case(str: string) {
   return (
