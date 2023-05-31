@@ -14,6 +14,7 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
+describe("Rpc tests", async () => {
 test("subcribe to address", async () => {
   const provider = getNetworkProvider(Network.REGTEST);
   try {
@@ -117,4 +118,5 @@ test("Wait for block success", async () => {
 
   header = await provider.waitForBlock(height + 2);
   expect(header.height).toBe(height + 2);
+});
 });

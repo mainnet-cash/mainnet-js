@@ -1,5 +1,15 @@
+import { initProviders, disconnectProviders } from "../network";
 import { ElectrumRawTransaction } from "../network/interface";
 import { RegTestWallet, Wallet } from "./Wif";
+
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
+
+describe("Utility tests", async () => {
 
 test("Should compute raw transaction hash", async () => {
   const wallet = await RegTestWallet.newRandom();
@@ -71,4 +81,5 @@ test("Should decode a transaction and fetch input values and addresses", async (
 
   //  uncomment next line
   // expect(await Wallet.util.decodeTransaction(txHash)).toBe(await new Wallet().provider!.getRawTransactionObject(txHash));
+});
 });

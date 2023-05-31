@@ -2,7 +2,16 @@ import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { RegTestWallet } from "../wallet/Wif";
 import { ExchangeRate } from "./ExchangeRate";
 import { delay } from "../util/delay";
+import { initProviders, disconnectProviders } from "../network";
 
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
+
+describe("Exchange rate tests", async () => {
 test("Get price in usd", async () => {
   ExchangeRate.setupAxiosMock(
     "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
@@ -53,4 +62,5 @@ test("Test watchBalanceUsd", async () => {
   );
   expect(cbCounter).toBe(2);
   await cancelWatchFn();
+});
 });

@@ -1,9 +1,18 @@
 import { allocateFee, sortSendRequests } from "./allocateFee";
 import { FeePaidByEnum } from "../wallet/enum";
 import { asSendRequestObject } from "../util/asSendRequestObject";
-import { SendRequest } from "..";
+import { SendRequest, disconnectProviders, initProviders } from "..";
 import { RegTestWallet } from "../wallet/Wif";
 
+beforeAll(async () => {
+  await initProviders();
+});
+
+afterAll(async () => {
+  await disconnectProviders();
+});
+
+describe("Fee tests", async () => {
 test("Should get the regtest wallet balance", async () => {
   // Build Alice's wallet from Wallet Import Format string, send some sats
   if (!process.env.ADDRESS) {
@@ -306,4 +315,5 @@ test("Expect sortSendRequests to sort by lowest value first", async () => {
   expect(result[4].value).toBe(2000);
   expect(result[5].value).toBe(2000);
   expect(result.length).toBe(8);
+});
 });

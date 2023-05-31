@@ -5,7 +5,7 @@ async function getRegtestUtxos(address) {
   try {
     const spv = new electron.ElectrumClient(
       "Mainnet Regtest Client",
-      "1.4.1",
+      "1.5",
       "127.0.0.1",
       60003,
       electron.ElectrumTransport.WS.Scheme
@@ -21,6 +21,7 @@ async function getRegtestUtxos(address) {
       "blockchain.address.listunspent",
       address
     );
+    spv.disconnect();
     return response.length;
   } catch (e) {
     console.log("Error getting block height" + e);
