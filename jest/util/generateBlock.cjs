@@ -1,32 +1,24 @@
 const { spawnSync } = require("child_process");
 const electron = require("electrum-cash");
-const cashscript = require("cashscript");
 
 async function getRegtestUtxos(address) {
   try {
-    let spv = new electron.ElectrumCluster(
+    const spv = new electron.ElectrumClient(
       "Mainnet Regtest Client",
       "1.4.1",
-      1,
-      2,
-      electron.ClusterOrder.RANDOM,
-      1000
-    );
-    spv.addServer(
       "127.0.0.1",
       60003,
-      electron.ElectrumTransport.WS.Scheme,
-      false
+      electron.ElectrumTransport.WS.Scheme
     );
-    let reg = new cashscript.ElectrumNetworkProvider("regtest", spv, false);
     try {
-      await spv.startup();
+      await spv.connect();
     } catch (e) {
-      spv.shutdown();
+      spv.disconnect();
       //console.log(e);
       return 0;
     }
-    return (await reg.getUtxos(address)).length;
+    const response = await spv.request("blockchain.address.listunspent", address);
+    return response.length;
   } catch (e) {
     console.log("Error getting block height" + e);
     return 0;
@@ -64,7 +56,7 @@ function pingBchn(user, password, port) {
     `-rpcconnect=bitcoind`,
     "getblockchaininfo",
   ];
-  let response = spawnSync(`docker`, readinessArgs);
+  const response = spawnSync(`docker`, readinessArgs);
   return response.stderr;
 }
 
