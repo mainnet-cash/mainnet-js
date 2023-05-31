@@ -6,7 +6,7 @@ import {
   RegTestWallet,
   toUtxoId,
 } from "mainnet-js";
-import { TransactionDetails } from "cashscript/dist/module/interfaces";
+import { TransactionDetails } from "cashscript/dist/interfaces";
 
 beforeAll(async () => {
   await initProviders();
