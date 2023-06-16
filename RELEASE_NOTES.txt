@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.29
+
+* Fix BCMR authchains containing incompatible elements
+
 1.1.28
 
 * Update cashscript to latest 0.8.0
