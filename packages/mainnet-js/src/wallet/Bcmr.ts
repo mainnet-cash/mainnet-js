@@ -428,7 +428,7 @@ export class BCMR {
   transaction(
     where: {
       hash:{_eq:"\\\\x${options.transactionHash}"},
-      block_inclusions:{block:{accepted_by:{node:{name:{_ilike:"%${options.network}%"}}}}}
+      node_validation_timeline:{node:{name:{_ilike:"%${options.network}%"}}}
     }
   ) {
     hash
