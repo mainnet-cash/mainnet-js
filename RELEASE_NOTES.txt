@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+1.1.30
+
+* Fetching BCMR from chaingraph checks for chain name in node validations, not block inclusions
+
+This fixes the BCMR data not available until a new block confirmation.
+
 1.1.29
 
 * Fix BCMR authchains containing incompatible elements
