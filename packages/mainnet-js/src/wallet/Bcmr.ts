@@ -492,7 +492,9 @@ export class BCMR {
       );
     }
 
-    return result.filter(element => element.contentHash.length && element.httpsUrl.length);
+    return result.filter(
+      (element) => element.contentHash.length && element.httpsUrl.length
+    );
   }
 
   /**
