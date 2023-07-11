@@ -14,7 +14,6 @@ import {
   verifyTransactionTokens,
   decodeTransaction,
   TransactionTemplateFixed,
-  stringify,
 } from "@bitauth/libauth";
 import { NFTCapability, TokenI, UtxoI } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
@@ -110,7 +109,6 @@ export async function buildP2pkhNonHdTransaction({
     throw Error("Error building transaction with fee");
   }
 
-  // console.log(stringify(result.transaction), stringify(sourceOutputs))
   const tokenValidationResult = verifyTransactionTokens(
     result.transaction,
     sourceOutputs
@@ -355,12 +353,24 @@ export async function getSuitableUtxos(
           continue;
         }
       }
+
+      // handle splitting the hybrid (FT+NFT) token into its parts
+      if (
+        request.capability === undefined &&
+        request.commitment === undefined &&
+        [...suitableUtxos, ...tokenInputs]
+          .map((val) => val.token?.tokenId)
+          .includes(request.tokenId)
+      ) {
+        continue;
+      }
+
       throw Error(
         `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
       );
     }
   }
-  // console.log(suitableUtxos)
+
   // find plain bch outputs
   for (const u of availableInputs) {
     if (u.token) {
