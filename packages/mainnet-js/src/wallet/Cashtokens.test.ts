@@ -841,6 +841,86 @@ describe(`Test cashtokens`, () => {
     );
   });
 
+  test("Test splitting and merging FT and NFTs", async () => {
+    // handle the cases from the following examples
+    // https://bch.loping.net/tx/86f3c86e7e9c6853e489dc7ea85e2192b1b2cce691fa5ff9597e98f045a0bf72
+    // https://bch.loping.net/tx/83ef2ab9687c53bb24c3d99f3cc7f0a2c7f23e180c8dbee5c845d1db6725d3e8
+
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+
+    const genesisResponse = await bob.tokenGenesis({
+      capability: "none",
+      commitment: "0000000e",
+      amount: 10000
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(10000);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+
+    // explicitly split FT amounts from NFT
+    await bob.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0000000e"
+      }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        amount: 10000
+      })
+    ]);
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(10000);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+
+    // add FT amount to an NFT
+    await bob.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        amount: 9000
+      }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0000000e",
+        amount: 1000
+      }),
+    ]);
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(10000);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(2);
+    const tokenUtxos = await bob.getTokenUtxos(tokenId);
+    expect(tokenUtxos[0].token?.amount).toBe(9000);
+    expect(tokenUtxos[1].token?.amount).toBe(1000);
+
+    // merge FT and NFT into single utxo
+    await bob.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        capability: "none",
+        commitment: "0000000e",
+        amount: 10000
+      })
+    ]);
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(10000);
+    expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
+    expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
+  });
+
   test("Should encode unsigned transactions", async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
