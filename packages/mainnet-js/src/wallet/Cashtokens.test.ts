@@ -854,7 +854,7 @@ describe(`Test cashtokens`, () => {
     const genesisResponse = await bob.tokenGenesis({
       capability: "none",
       commitment: "0000000e",
-      amount: 10000
+      amount: 10000,
     });
 
     const tokenId = genesisResponse.tokenIds![0];
@@ -869,13 +869,13 @@ describe(`Test cashtokens`, () => {
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
         capability: "none",
-        commitment: "0000000e"
+        commitment: "0000000e",
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
-        amount: 10000
-      })
+        amount: 10000,
+      }),
     ]);
 
     expect(await bob.getTokenBalance(tokenId)).toBe(10000);
@@ -887,14 +887,14 @@ describe(`Test cashtokens`, () => {
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
-        amount: 9000
+        amount: 9000,
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
         capability: "none",
         commitment: "0000000e",
-        amount: 1000
+        amount: 1000,
       }),
     ]);
 
@@ -912,8 +912,8 @@ describe(`Test cashtokens`, () => {
         tokenId: tokenId,
         capability: "none",
         commitment: "0000000e",
-        amount: 10000
-      })
+        amount: 10000,
+      }),
     ]);
 
     expect(await bob.getTokenBalance(tokenId)).toBe(10000);

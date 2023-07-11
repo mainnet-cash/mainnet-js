@@ -358,7 +358,9 @@ export async function getSuitableUtxos(
       if (
         request.capability === undefined &&
         request.commitment === undefined &&
-        [...suitableUtxos, ...tokenInputs].map(val => val.token?.tokenId).includes(request.tokenId)
+        [...suitableUtxos, ...tokenInputs]
+          .map((val) => val.token?.tokenId)
+          .includes(request.tokenId)
       ) {
         continue;
       }
