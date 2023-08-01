@@ -124,6 +124,8 @@ import { Config } from "../config.js";
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends BaseWallet {
+  static networkPrefix = CashAddressNetworkPrefix.mainnet;
+
   cashaddr?: string;
   tokenaddr?: string;
   derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
