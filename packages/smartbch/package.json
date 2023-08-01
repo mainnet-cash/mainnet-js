@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/smartbch",
-  "version": "1.1.31",
+  "version": "1.1.32",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0",
     "ethers": "^5.4.5",
-    "mainnet-js": "1.1.31",
+    "mainnet-js": "1.1.32",
     "solc": "0.8.7-fixed",
     "webpack-node-externals": "^3.0.0",
     "xmlhttprequest-ssl": "^2.0.0"
