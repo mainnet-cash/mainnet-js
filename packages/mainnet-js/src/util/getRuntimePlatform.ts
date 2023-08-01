@@ -13,14 +13,13 @@ export function getRuntimePlatform(): RuntimePlatform {
   ) {
     return RuntimePlatform.node;
   } else {
-    // if (
-    //   "undefined" !== typeof WorkerGlobalScope &&
-    //   "function" === typeof importScripts &&
-    //   navigator instanceof WorkerNavigator
-    // ) {
-    //   return RuntimePlatform.webworker;
-    // } else
-    if ("undefined" !== typeof navigator && "undefined" !== typeof document) {
+    if (
+      "undefined" !== typeof WorkerGlobalScope &&
+      "function" === typeof importScripts &&
+      navigator instanceof WorkerNavigator
+    ) {
+      return RuntimePlatform.webworker;
+    } else if ("undefined" !== typeof navigator && "undefined" !== typeof document) {
       return RuntimePlatform.browser;
     } else {
       throw Error("Could not determine runtime platform");
