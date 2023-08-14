@@ -424,11 +424,15 @@ export class BCMR {
       {
         operationName: null,
         variables: {},
-        query: `{
+        query: `
+{
   transaction(
     where: {
       hash:{_eq:"\\\\x${options.transactionHash}"},
-      node_validation_timeline:{node:{name:{_ilike:"%${options.network}%"}}}
+      _or: [
+        {node_validation_timeline:{node:{name:{_ilike:"%${options.network}%"}}}},
+        {block_inclusions:{block:{accepted_by:{node:{name:{_ilike:"%${options.network}%"}}}}}},
+      ]
     }
   ) {
     hash
@@ -466,6 +470,7 @@ export class BCMR {
     );
 
     const result: AuthChain = [];
+    console.log(response.data)
     const migrations =
       response.data.data.transaction[0]?.authchains[0].migrations;
     if (!migrations) {
