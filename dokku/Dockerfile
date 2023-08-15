@@ -30,4 +30,6 @@ WORKDIR /app/
 COPY --chown=appuser:appuser . /app/
 RUN yarn
 
+ADD nginx.conf.sigil /app/nginx.conf.sigil
+
 CMD bash -lc "echo $WORKERS workers will be run; yarn api:serve:cluster"
