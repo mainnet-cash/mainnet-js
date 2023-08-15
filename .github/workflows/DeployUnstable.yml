@@ -26,7 +26,7 @@ jobs:
           yarn
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
-          git add -f packages/mainnet-js/dist/* 
+          git add -f packages/mainnet-js/dist/*
           git add -f packages/contract/dist/*
           git add -f packages/smartbch/dist/*
           git commit -m 'Add packaged modules'
@@ -36,7 +36,7 @@ jobs:
           cp dokku/.dockerignore .
           git config --global user.email "ci@github.com"
           git config --global user.name "Github CI"
-          git add .dockerignore CHECKS Dockerfile
+          git add .dockerignore CHECKS Dockerfile nginx.conf.sigil
           git commit -m 'Dokku files'
       - name: Fetch unshallow
         run: git fetch --prune --tags --unshallow
