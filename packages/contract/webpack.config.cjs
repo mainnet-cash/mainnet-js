@@ -123,12 +123,30 @@ const browserConfig = {
       url: false,
       util: require.resolve("util"),
       zlib: false,
-      [path.resolve(__dirname, '../mainnet-js/dist/module/webhook/index.ts')]: false,
-      [path.resolve(__dirname, '../mainnet-js/dist/module/webhook/interface.ts')]: false,
-      [path.resolve(__dirname, '../mainnet-js/dist/module/webhook/Webhook.ts')]: false,
-      [path.resolve(__dirname, '../mainnet-js/dist/module/webhook/WebhookBch.ts')]: false,
-      [path.resolve(__dirname, '../mainnet-js/dist/module/webhook/WebhookWorker.ts')]: false,
-      [path.resolve(__dirname, '../mainnet-js/dist/module/db/SqlProvider.ts')]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/index.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/interface.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/Webhook.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/WebhookBch.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/WebhookWorker.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/db/SqlProvider.ts"
+      )]: false,
     },
     fallback: {
       stream: require.resolve("stream-browserify"),
