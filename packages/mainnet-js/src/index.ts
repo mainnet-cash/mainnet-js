@@ -1,6 +1,5 @@
 export * from "./db/index.js";
 export * from "./mine/index.js";
-export * from "./slp/index.js";
 export * from "./test/expect.js";
 export * from "./test/axios.js";
 export * from "./webhook/index.js";
@@ -49,9 +48,6 @@ export {
   VerifyMessageResponseI,
 } from "./message/interface.js";
 export { WalletRequestI, WalletResponseI } from "./wallet/interface.js";
-
-// TODO move this up to util (Mainnet) ?
-export * from "./util/bchaddr.js";
 
 export function cube(x: number) {
   return x * x * x;

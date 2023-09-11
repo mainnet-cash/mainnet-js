@@ -8,7 +8,6 @@ import SmartbchWalletController from './SmartbchWalletController.js';
 import UtilController from './UtilController.js';
 import WalletController from './WalletController.js';
 import WalletSignedController from './WalletSignedController.js';
-import WalletSlpController from './WalletSlpController.js';
 import WalletUtilController from './WalletUtilController.js';
 import WebhookController from './WebhookController.js';
 
@@ -23,7 +22,6 @@ export default {
   UtilController,
   WalletController,
   WalletSignedController,
-  WalletSlpController,
   WalletUtilController,
   WebhookController,
 };

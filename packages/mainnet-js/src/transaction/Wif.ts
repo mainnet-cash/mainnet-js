@@ -39,7 +39,6 @@ export async function buildP2pkhNonHdTransaction({
   sourceAddress,
   fee = 0,
   discardChange = false,
-  slpOutputs = [],
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
 }: {
@@ -49,7 +48,6 @@ export async function buildP2pkhNonHdTransaction({
   sourceAddress: string;
   fee?: number;
   discardChange?: boolean;
-  slpOutputs?: Output[];
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
 }) {
@@ -101,7 +99,7 @@ export async function buildP2pkhNonHdTransaction({
   const result = generateTransaction({
     inputs: preparedInputs,
     locktime: 0,
-    outputs: [...slpOutputs, ...lockedOutputs],
+    outputs: lockedOutputs,
     version: 2,
   });
 
@@ -429,7 +427,6 @@ export async function getFeeAmountSimple({
   utxos,
   sendRequests,
   relayFeePerByteInSatoshi,
-  slpOutputs,
   discardChange,
 }: {
   utxos: UtxoI[];
@@ -437,7 +434,6 @@ export async function getFeeAmountSimple({
   privateKey: Uint8Array;
   sourceAddress: string;
   relayFeePerByteInSatoshi: number;
-  slpOutputs: Output[];
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
 }) {
@@ -479,13 +475,9 @@ export async function getFeeAmountSimple({
   const outputTotalSize =
     sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) +
     (discardChange ? 0 : outputSizeP2pkh);
-  const slpTotalSize = slpOutputs.reduce(
-    (prev, curr) => prev + curr.lockingBytecode.length,
-    0
-  );
 
   return (
-    (inputTotalSize + outputTotalSize + slpTotalSize + 16) *
+    (inputTotalSize + outputTotalSize + 16) *
     relayFeePerByteInSatoshi
   );
 }
@@ -497,7 +489,6 @@ export async function getFeeAmount({
   privateKey,
   sourceAddress,
   relayFeePerByteInSatoshi,
-  slpOutputs,
   feePaidBy,
   discardChange,
 }: {
@@ -506,7 +497,6 @@ export async function getFeeAmount({
   privateKey: Uint8Array;
   sourceAddress: string;
   relayFeePerByteInSatoshi: number;
-  slpOutputs: Output[];
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
 }) {
@@ -521,7 +511,6 @@ export async function getFeeAmount({
         sourceAddress,
         fee: 0, //DUST_UTXO_THRESHOLD
         discardChange: discardChange ?? false,
-        slpOutputs,
         feePaidBy,
         changeAddress: "",
       });
@@ -542,7 +531,6 @@ export async function buildEncodedTransaction({
   sourceAddress,
   fee = 0,
   discardChange = false,
-  slpOutputs = [],
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
   buildUnsigned = false,
@@ -553,7 +541,6 @@ export async function buildEncodedTransaction({
   sourceAddress: string;
   fee?: number;
   discardChange?: boolean;
-  slpOutputs?: Output[];
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
   buildUnsigned?: boolean;
@@ -565,7 +552,6 @@ export async function buildEncodedTransaction({
     sourceAddress,
     fee,
     discardChange,
-    slpOutputs,
     feePaidBy,
     changeAddress,
   });

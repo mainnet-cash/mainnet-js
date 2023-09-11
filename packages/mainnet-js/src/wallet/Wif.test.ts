@@ -887,29 +887,6 @@ describe(`Wallet subscriptions`, () => {
     delay(3000);
     expect(response.balance!.sat!).toBe(0);
   });
-
-  test.skip("Should get testnet slp tokens and send them back", async () => {
-    let aliceWif = `${process.env.ALICE_TESTNET_WALLET_ID!}`;
-    let aliceWallet = await TestNetWallet.fromId(aliceWif);
-
-    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
-
-    // send bob some bch gas to enable him to send slp
-    await aliceWallet
-      .slpAware()
-      .send([{ cashaddr: wallet.cashaddr!, value: 5000, unit: "sat" }]);
-
-    const txid = await wallet.getTestnetSlp("MNC");
-    expect(txid.length).toBe(64);
-    let balance = await wallet.slp.getBalance("MNC");
-    expect(balance[0].value.toNumber()).toBe(10);
-
-    const tokenId = balance[0].tokenId;
-    const response = await wallet.returnTestnetSlp(tokenId);
-    expect(response.balance).toBe(0);
-
-    await wallet.slpAware(false).sendMax(aliceWallet.cashaddr!);
-  });
 });
 
 describe(`Wallet extrema behavior regression testing`, () => {

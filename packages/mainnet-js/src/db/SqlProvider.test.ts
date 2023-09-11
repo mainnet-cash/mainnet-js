@@ -103,21 +103,6 @@ test("Should handle basic sql injection", async () => {
   sh.close();
 });
 
-test("Should fail registering SLP webhook without tokenId", async () => {
-  let db = new SqlProvider(`regtest ${Math.random()}`);
-  await db.init();
-  await expect(
-    db.addWebhook({
-      cashaddr: "",
-      url: "https://example.com/fail",
-      type: WebhookType.slpTransactionIn,
-      recurrence: WebhookRecurrence.recurrent,
-    })
-  ).rejects.toThrow();
-
-  db.close();
-});
-
 test("Test wallet database name regression", async () => {
   const name = `test ${Math.random()}`;
 

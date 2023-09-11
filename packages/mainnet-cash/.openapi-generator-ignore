@@ -28,7 +28,6 @@ services/*.test.ts
 logger.js
 utils/openapiRouter.js
 #!services/WalletService.js
-#!services/WalletSlpService.js
 #!services/WalletUtilService.js
 #!services/WebhookService.js
 #!services/SmartbchWalletService.js

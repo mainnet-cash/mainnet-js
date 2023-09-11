@@ -5,31 +5,14 @@ const mainnet = require("mainnet-js");
 
 
 const alice = process.env.ADDRESS;
-const aliceSlp = alice; //mainnet.toSlpAddress(alice);
 const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF}`;
 
 let app;
 const request = require("superwstest").default;
 
-const ticker = Math.random().toString(36).substring(8).toUpperCase();
-let tokenId;
-
-const genesisOptions = {
-  name: "Mainnet coin",
-  ticker: ticker,
-  decimals: 2,
-  initialAmount: 10000,
-  documentUrl: "https://mainnet.cash",
-  documentHash:
-    "0000000000000000000000000000000000000000000000000000000000000000",
-};
-
 describe("Test websocket server methods", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
-    const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
-    const genesisResult = await aliceWallet.slp.genesis(genesisOptions);
-    tokenId = genesisResult.tokenId;
   });
   afterAll(async function () {
     app.close();
@@ -125,73 +108,6 @@ describe("Test websocket server methods", () => {
       .ws('/wallet')
       .sendJson({ method: "waitForBlock", data: { height: height + 2 }})
       .expectJson((actual) => (actual.height === (height + 2)))
-      .close()
-      .expectClosed();
-  });
-
-  // slp
-  test("Test slpWatchBalance ws method", async () => {
-    const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
-    const bobWallet = await mainnet.RegTestWallet.newRandom();
-    const bobSlp = mainnet.toSlpAddress(bobWallet.cashaddr);
-
-    setTimeout(async () => {
-      await aliceWallet.slp.send([
-      {
-        slpaddr: bobSlp,
-        value: 1000,
-        tokenId: tokenId,
-      },
-    ])}, 2000);
-
-    await request(app)
-      .ws('/wallet')
-      .sendJson({ method: "slpWatchBalance", data: { slpaddr: aliceSlp, tokenId: tokenId }})
-      .expectJson((actual) => (Number(actual.value) > 0.1))
-      .close()
-      .expectClosed();
-  });
-
-  test("Test slpWaitForBalance ws method", async () => {
-    const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
-    const bobWallet = await mainnet.RegTestWallet.newRandom();
-    const bobSlp = mainnet.toSlpAddress(bobWallet.cashaddr);
-
-    setTimeout(async () => {
-      await aliceWallet.slp.send([
-      {
-        slpaddr: bobSlp,
-        value: 1000,
-        tokenId: tokenId,
-      },
-    ])}, 2000);
-
-    await request(app)
-      .ws('/wallet')
-      .sendJson({ method: "slpWaitForBalance", data: { slpaddr: bobSlp, value: 500, tokenId: tokenId }})
-      .expectJson((actual) => (actual.value >= 500))
-      .close()
-      .expectClosed();
-  });
-
-  test("Test slpWaitForTransaction ws method", async () => {
-    const aliceWallet = await mainnet.RegTestWallet.fromId(aliceWif);
-    const bobWallet = await mainnet.RegTestWallet.newRandom();
-    const bobSlp = mainnet.toSlpAddress(bobWallet.cashaddr);
-
-    setTimeout(async () => {
-      await aliceWallet.slp.send([
-      {
-        slpaddr: bobSlp,
-        value: 1000,
-        tokenId: tokenId,
-      },
-    ])}, 2000);
-
-    await request(app)
-      .ws('/wallet')
-      .sendJson({ method: "slpWaitForTransaction", data: { slpaddr: aliceSlp, tokenId: tokenId }})
-      .expectJson((actual) => (actual !== undefined && actual.tx_hash !== undefined))
       .close()
       .expectClosed();
   });

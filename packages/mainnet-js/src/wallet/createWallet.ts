@@ -165,41 +165,6 @@ export async function createWallet(body: WalletRequestI): Promise<Wallet> {
 }
 
 /**
- * Create a new SLP aware wallet
- * @param body A wallet request object
- * @returns A promise to a new wallet object
- */
-export async function createSlpWallet(body: WalletRequestI): Promise<Wallet> {
-  let wallet;
-  let walletType = body.type ? body.type : "seed";
-  let networkType = body.network ? body.network : "mainnet";
-
-  // Named wallets are saved in the database
-  if (body.name && body.name.length > 0) {
-    wallet = await walletClassMap[walletType][networkType]().slp.named(
-      body.name
-    );
-    if (wallet.network != networkType) {
-      throw Error(
-        `A wallet already exists with name ${body.name}, but with network ${wallet.network} not ${body.network}, per request`
-      );
-    }
-    if (wallet.walletType != walletType) {
-      throw Error(
-        `A wallet already exists with name ${body.name}, but with type ${wallet.walletType} not ${body.type}, per request`
-      );
-    }
-    return wallet;
-  }
-  // This handles unsaved/unnamed wallets
-  else {
-    wallet = await walletClassMap[walletType][networkType]().slp.newRandom();
-    wallet.walletType = walletType;
-    return wallet;
-  }
-}
-
-/**
  * Create a new wallet
  * @param walletRequest A wallet request object
  * @returns A new wallet object
@@ -208,22 +173,6 @@ export async function createWalletResponse(
   walletRequest: WalletRequestI
 ): Promise<WalletResponseI> {
   let wallet = await createWallet(walletRequest);
-  if (wallet) {
-    return asJsonResponse(wallet);
-  } else {
-    throw Error("Error creating wallet");
-  }
-}
-
-/**
- * Create a new SLP aware wallet
- * @param walletRequest A wallet request object
- * @returns A new wallet object
- */
-export async function createSlpWalletResponse(
-  walletRequest: WalletRequestI
-): Promise<WalletResponseI> {
-  let wallet = await createSlpWallet(walletRequest);
   if (wallet) {
     return asJsonResponse(wallet);
   } else {
@@ -241,7 +190,6 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
     return {
       name: wallet.name,
       cashaddr: wallet.cashaddr as string,
-      slpaddr: wallet.slp.slpaddr,
       walletId: wallet.toString(),
       ...wallet.getSeed(),
       network: wallet.network as any,
@@ -250,7 +198,6 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
     return {
       name: wallet.name,
       cashaddr: wallet.cashaddr as string,
-      slpaddr: wallet.slp.slpaddr,
       walletId: wallet.toString(),
       wif: wallet.privateKeyWif,
       network: wallet.network as any,

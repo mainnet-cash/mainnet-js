@@ -40,7 +40,6 @@
   "dependencies": {
     "@bitauth/libauth": "^2.0.0-alpha.8",
     "axios": "^0.21.1",
-    "bchaddrjs-slp": "^0.2.12",
     "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
     "bip39": "^3.0.3",
@@ -49,8 +48,7 @@
     "electrum-cash": "^2.0.10",
     "events": "^3.2.0",
     "eventsource": "^1.0.7",
-    "qrcode-svg": "1.1.0",
-    "slp-parser": "^0.0.4"
+    "qrcode-svg": "1.1.0"
   },
   "devDependencies": {
     "fake-indexeddb": "^3.1.2"
