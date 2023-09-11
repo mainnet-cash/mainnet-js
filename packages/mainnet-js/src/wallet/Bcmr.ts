@@ -402,7 +402,9 @@ export class BCMR {
    *
    * @param  {string} options.chaingraphUrl (required) URL of a chaingraph indexer instance to fetch info from
    * @param  {string} options.transactionHash (required) transaction hash from which to build the auth chain
-   * @param  {string?} options.network (default=mainnet) network to query the data from, specific to the queried instance, can be mainnet, chipnet, or anything else
+   * @param  {string?} options.network (default=undefined) network to query the data from, specific to the queried instance,
+   *  can be 'mainnet', 'chipnet', or anything else.
+   *  if left undefined all chaingraph transactions will be looked at, disregarding the chain
    *
    * @returns {AuthChain} returns the resolved authchain
    */
@@ -415,10 +417,6 @@ export class BCMR {
       throw new Error("Provide `chaingraphUrl` param.");
     }
 
-    if (options.network === undefined) {
-      options.network = "mainnet";
-    }
-
     const response = await axios.post(
       options.chaingraphUrl,
       {
@@ -429,10 +427,7 @@ export class BCMR {
   transaction(
     where: {
       hash:{_eq:"\\\\x${options.transactionHash}"},
-      _or: [
-        {node_validation_timeline:{node:{name:{_ilike:"%${options.network}%"}}}},
-        {block_inclusions:{block:{accepted_by:{node:{name:{_ilike:"%${options.network}%"}}}}}},
-      ]
+      ${options.network ? `node_validation_timeline:{node:{name:{_ilike:"%${options.network}%"}}}` : ""}
     }
   ) {
     hash
