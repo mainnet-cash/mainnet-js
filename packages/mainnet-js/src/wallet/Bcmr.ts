@@ -470,7 +470,6 @@ export class BCMR {
     );
 
     const result: AuthChain = [];
-    console.log(response.data)
     const migrations =
       response.data.data.transaction[0]?.authchains[0].migrations;
     if (!migrations) {
