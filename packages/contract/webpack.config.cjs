@@ -96,7 +96,6 @@ const browserConfig = {
   ],
   resolve: {
     alias: {
-      assert: false,
       bufferutil: false,
       child_process: false,
       crypto: false,
@@ -119,7 +118,7 @@ const browserConfig = {
       stream: require.resolve("stream-browserify"),
       tls: false,
       url: false,
-      util: false,
+      util: require.resolve("util"),
       zlib: false,
     },
     fallback: {
