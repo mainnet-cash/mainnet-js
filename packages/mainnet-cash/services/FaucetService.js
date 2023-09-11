@@ -154,7 +154,7 @@ const getTestnetSbch = ({ getTestnetSbchRequest }) => new Promise(
 
       let db = new mainnet.SqlProvider();
       await db.init();
-      await db.addFaucetQueueItem(getTestnetSbchRequest.address, smartbch.Utils.zeroAddress(), weiValue.toHexString());
+      await db.addFaucetQueueItem(getTestnetSbchRequest.address, weiValue.toHexString());
       db.close();
 
       resolve(Service.successResponse({ success: true }));
@@ -190,7 +190,7 @@ const getTestnetSep20 = ({ getTestnetSep20Request }) => new Promise(
 
       let db = new mainnet.SqlProvider();
       await db.init();
-      await db.addFaucetQueueItem(getTestnetSep20Request.address, getTestnetSep20Request.tokenId, baseValue.toHexString());
+      await db.addFaucetQueueItem(getTestnetSep20Request.address, baseValue.toHexString());
       db.close();
 
       resolve(Service.successResponse({ success: true }));
