@@ -7,6 +7,7 @@ const BundleAnalyzerPlugin =
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const __basedir = require("path").resolve(__dirname, "../../");
 
+const path = require("path");
 const webpack = require("webpack");
 
 const baseConfig = {
@@ -116,6 +117,12 @@ const browserConfig = {
       tls: false,
       url: false,
       zlib: false,
+      [path.resolve(__dirname, './src/webhook/index.ts')]: false,
+      [path.resolve(__dirname, './src/webhook/interface.ts')]: false,
+      [path.resolve(__dirname, './src/webhook/Webhook.ts')]: false,
+      [path.resolve(__dirname, './src/webhook/WebhookBch.ts')]: false,
+      [path.resolve(__dirname, './src/webhook/WebhookWorker.ts')]: false,
+      [path.resolve(__dirname, './src/db/SqlProvider.ts')]: false,
     },
     fallback: {
       stream: require.resolve("stream-browserify"),
