@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.0.1
+
+* fetchAuthChainFromChaingraph allows to not constrain the network in query
+
 2.0.0
 
 * Breaking, this release removes SLP and SmartBCH support
