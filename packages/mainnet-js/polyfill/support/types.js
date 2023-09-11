@@ -3,18 +3,6 @@
 
 "use strict";
 
-const nativeBigInt =
-  (typeof global !== "undefined" && global.BigInt) ||
-  (typeof window !== "undefined" && window.BigInt);
-const supportsNativeBigInt = typeof nativeBigInt === "function";
-
-if (!supportsNativeBigInt) {
-  var _BigInt = require("bigint-polyfill");
-  globalThis.BigInt = function (...args) {
-    return new _BigInt(...args);
-  };
-}
-
 if (typeof window !== "undefined") {
   globalThis.Buffer = require("buffer/").Buffer;
 }
