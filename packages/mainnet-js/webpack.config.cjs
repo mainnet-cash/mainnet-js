@@ -1,5 +1,4 @@
 const { merge } = require("webpack-merge");
-const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
@@ -114,7 +113,6 @@ const browserConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      solc: false,
       tls: false,
       url: false,
       zlib: false,
