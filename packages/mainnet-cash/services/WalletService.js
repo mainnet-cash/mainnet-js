@@ -16,10 +16,6 @@ const balance = ({ balanceRequest }) => new Promise(
         throw Error("Could not derive wallet");
       }
 
-      if (balanceRequest.slpAware) {
-        wallet.slpAware();
-      }
-
       if (balanceRequest.slpSemiAware) {
         wallet.slpSemiAware();
       }

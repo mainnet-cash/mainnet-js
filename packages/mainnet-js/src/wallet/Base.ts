@@ -153,7 +153,7 @@ export class BaseWallet implements WalletI {
    * such kind of wallet does not have a private key and is unable to spend any funds
    * however it still allows to use many utility functions such as getting and watching balance, etc.
    *
-   * @param address   cashaddress, token aware cashaddress or slpaddress of a wallet
+   * @param address   cashaddress, token aware cashaddress of a wallet
    *
    * @returns instantiated wallet
    */

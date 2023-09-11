@@ -1,5 +1,0 @@
-slpsockserve_host=http://slpsockserve
-slpsockserve_port=4001
-
-zmq_outgoing_host=slpdb
-zmq_outgoing_port=28339

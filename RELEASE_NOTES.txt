@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.0.0
+
+* Breaking, this release removes SLP and SmartBCH support
+* Exclude node-specific source files from webpack bundle
+
 1.1.34
 
 * Remove extraneous dependencies, reduce package size

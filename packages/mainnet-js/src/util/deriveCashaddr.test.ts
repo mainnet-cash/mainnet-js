@@ -3,6 +3,7 @@ import {
   deriveCashaddr,
   deriveTokenaddr,
   isTokenaddr,
+  isValidAddress,
   toCashaddr,
   toTokenaddr,
 } from "./deriveCashaddr";
@@ -40,4 +41,11 @@ test("Test address conversion", async () => {
 
   expect(isTokenaddr(wallet.cashaddr!)).toBe(false);
   expect(isTokenaddr(wallet.tokenaddr!)).toBe(true);
+});
+
+test("Test isValidAddress", async () => {
+  const wallet = await RegTestWallet.watchOnly(process.env.ADDRESS!);
+  expect(isValidAddress(wallet.cashaddr!)).toBe(true);
+  expect(isValidAddress(wallet.tokenaddr!)).toBe(true);
+  expect(isValidAddress("asdf")).toBe(false);
 });

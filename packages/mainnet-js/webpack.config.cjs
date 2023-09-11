@@ -1,5 +1,4 @@
 const { merge } = require("webpack-merge");
-const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
@@ -8,6 +7,7 @@ const BundleAnalyzerPlugin =
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const __basedir = require("path").resolve(__dirname, "../../");
 
+const path = require("path");
 const webpack = require("webpack");
 
 const baseConfig = {
@@ -96,11 +96,6 @@ const browserConfig = {
   ],
   resolve: {
     alias: {
-      ethers$: require.resolve("ethers/lib/index.js"),
-      "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
-      "@ethersproject/contracts$": require.resolve(
-        "@ethersproject/contracts/lib/index.js"
-      ),
       bufferutil: false,
       child_process: false,
       crypto: false,
@@ -119,10 +114,15 @@ const browserConfig = {
       pg: false,
       "pg-format": false,
       "pg-native": false,
-      solc: false,
       tls: false,
       url: false,
       zlib: false,
+      [path.resolve(__dirname, "./src/webhook/index.ts")]: false,
+      [path.resolve(__dirname, "./src/webhook/interface.ts")]: false,
+      [path.resolve(__dirname, "./src/webhook/Webhook.ts")]: false,
+      [path.resolve(__dirname, "./src/webhook/WebhookBch.ts")]: false,
+      [path.resolve(__dirname, "./src/webhook/WebhookWorker.ts")]: false,
+      [path.resolve(__dirname, "./src/db/SqlProvider.ts")]: false,
     },
     fallback: {
       stream: require.resolve("stream-browserify"),

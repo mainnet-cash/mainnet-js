@@ -16,7 +16,6 @@ module.exports = {
   roots: [
     "<rootDir>/packages/mainnet-js/src",
     "<rootDir>/packages/contract/src",
-    "<rootDir>/packages/smartbch/src",
   ],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",

@@ -166,7 +166,7 @@ export class Util {
 
 //#region Specific wallet classes
 /**
- * Class to manage an slp enabled testnet wallet.
+ * Class to manage a testnet wallet.
  */
 export class TestNetUtil extends Util {
   static get walletType() {
@@ -175,7 +175,7 @@ export class TestNetUtil extends Util {
 }
 
 /**
- * Class to manage an slp enabled regtest wallet.
+ * Class to manage a regtest wallet.
  */
 export class RegTestUtil extends Util {
   static get walletType() {

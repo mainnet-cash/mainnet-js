@@ -8,11 +8,6 @@ export enum WebhookType {
   transactionOut = "transaction:out",
   transactionInOut = "transaction:in,out",
   balance = "balance",
-
-  slpTransactionIn = "slptransaction:in",
-  slpTransactionOut = "slptransaction:out",
-  slpTransactionInOut = "slptransaction:in,out",
-  slpBalance = "slpbalance",
 }
 
 export enum WebhookRecurrence {
@@ -22,14 +17,13 @@ export enum WebhookRecurrence {
 
 export class Webhook {
   id?: number;
-  cashaddr!: string; // depending on type of the hook, either cashaddr or slpaddr
+  cashaddr!: string;
   type!: string;
   recurrence!: string;
   url!: string;
-  status!: string; // bch only
-  last_height!: number; // bch only
-  tx_seen!: TxI[]; // bch only
-  tokenId?: string; // slp only
+  status!: string;
+  last_height!: number;
+  tx_seen!: TxI[];
   expires_at!: Date;
 
   db!: SqlProvider;

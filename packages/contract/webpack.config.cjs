@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const nodeExternals = require("webpack-node-externals");
 const __basedir = require("path").resolve(__dirname, "../../");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const webpack = require("webpack");
@@ -93,6 +92,10 @@ const browserConfig = {
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
     }),
+    new webpack.IgnorePlugin({
+      resourceRegExp: /wordlists\/(?!english)/,
+      contextRegExp: /bip39/,
+    }),
   ],
   resolve: {
     alias: {
@@ -120,6 +123,30 @@ const browserConfig = {
       url: false,
       util: require.resolve("util"),
       zlib: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/index.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/interface.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/Webhook.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/WebhookBch.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/webhook/WebhookWorker.ts"
+      )]: false,
+      [path.resolve(
+        __dirname,
+        "../mainnet-js/dist/module/db/SqlProvider.ts"
+      )]: false,
     },
     fallback: {
       stream: require.resolve("stream-browserify"),

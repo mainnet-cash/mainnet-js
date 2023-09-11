@@ -41,32 +41,6 @@ const makeWsServer = (server) => {
           const provider = await getProvider();
           const blockHeader = await provider.waitForBlock(height);
           socket.send(JSON.stringify(blockHeader));
-        } else
-
-        // slp
-        if (data.method === "slpWatchBalance") {
-          const slpaddr = data.data.slpaddr;
-          const tokenId = data.data.tokenId;
-          const w = await getSlpWallet(slpaddr);
-          fn = w.slp.watchBalance((balance) => {
-            socket.send(JSON.stringify(balance));
-          }, tokenId);
-          socket.unsubscribeFunctions.push(fn);
-
-        } else if (data.method === "slpWaitForBalance") {
-          const slpaddr = data.data.slpaddr;
-          const value = data.data.value;
-          const tokenId = data.data.tokenId;
-          const w = await getSlpWallet(slpaddr);
-          const balance = await w.slp.waitForBalance(value, tokenId);
-          socket.send(JSON.stringify(balance));
-
-        } else if (data.method === "slpWaitForTransaction") {
-          const slpaddr = data.data.slpaddr;
-          const w = await getSlpWallet(slpaddr);
-          const tokenId = data.data.tokenId;
-          const rawTx = await w.slp.waitForTransaction(tokenId);
-          socket.send(JSON.stringify(rawTx));
         }
 
         // error
@@ -105,12 +79,6 @@ const makeWsServer = (server) => {
   });
 
   return wsServer;
-};
-
-const getSlpWallet = async (addr) => {
-  return process.env.JEST_WORKER_ID === undefined ?
-    mainnet.Wallet.fromSlpaddr(addr) :
-    new mainnet.RegTestWallet().watchOnly(addr);
 };
 
 const getProvider = async () => {

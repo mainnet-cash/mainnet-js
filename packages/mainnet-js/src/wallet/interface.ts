@@ -16,7 +16,6 @@ export interface WalletRequestI {
 export interface WalletResponseI {
   name: string;
   cashaddr?: string;
-  slpaddr?: string;
   address?: string;
   walletId: string;
   network?: NetworkEnum;
@@ -48,7 +47,6 @@ export interface WalletInfoI {
 export interface SendRequestOptionsI {
   utxoIds?: string[] | UtxoI[];
   changeAddress?: string;
-  slpAware?: boolean; // a flag which activates utxo checking against an external slp indexer
   slpSemiAware?: boolean; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
   queryBalance?: boolean;
   awaitTransactionPropagation?: boolean;

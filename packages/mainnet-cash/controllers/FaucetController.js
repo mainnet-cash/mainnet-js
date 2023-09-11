@@ -23,7 +23,3 @@ export const getTestnetSbch = async (request, response) => {
 export const getTestnetSep20 = async (request, response) => {
   await Controller.handleRequest(request, response, service.getTestnetSep20);
 };
-
-export const getTestnetSlp = async (request, response) => {
-  await Controller.handleRequest(request, response, service.getTestnetSlp);
-};

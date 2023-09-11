@@ -13,6 +13,15 @@ import {
 
 import { hash160 } from "./hash160.js";
 
+export function isValidAddress(cashaddr: string): boolean {
+  const result = decodeCashAddress(cashaddr);
+  if (typeof result === "string") {
+    return false;
+  }
+
+  return true;
+}
+
 export function deriveCashaddr(
   privateKey: Uint8Array,
   networkPrefix: CashAddressNetworkPrefix

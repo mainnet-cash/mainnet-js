@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "1.1.34",
+  "version": "2.0.0",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
@@ -59,15 +59,13 @@
     "nuke": "rm -fr jest/playwright/* && rm -fr node_modules && yarn remove:packages && yarn remove:demo",
     "remove:packages": "rm -fr packages/*/node_modules && rm -fr packages/*/dist",
     "remove:demo": "rm -fr demo/*/node_modules && rm -fr demo/*/dist",
-    "build": "yarn build:mainnet-js && yarn build:contract && yarn build:smartbch",
+    "build": "yarn build:mainnet-js && yarn build:contract",
     "build:mainnet-js": "yarn workspace mainnet-js run build",
     "build:contract": "yarn workspace @mainnet-cash/contract run build",
-    "build:smartbch": "yarn workspace @mainnet-cash/smartbch run build",
-    "build:production": "yarn workspace mainnet-js run build:production && yarn workspace @mainnet-cash/contract run build:production && yarn workspace @mainnet-cash/smartbch run build:production",
-    "link:mainnet-js": "yarn workspace mainnet-js link && yarn workspace @mainnet-cash/contract link mainnet-js && yarn workspace @mainnet-cash/smartbch link mainnet-js && yarn workspace mainnet-cash link mainnet-js",
+    "build:production": "yarn workspace mainnet-js run build:production && yarn workspace @mainnet-cash/contract run build:production",
+    "link:mainnet-js": "yarn workspace mainnet-js link && yarn workspace @mainnet-cash/contract link mainnet-js && yarn workspace mainnet-cash link mainnet-js",
     "link:contract": "yarn workspace @mainnet-cash/contract link && yarn workspace mainnet-cash link @mainnet-cash/contract",
-    "link:smartbch": "yarn workspace @mainnet-cash/smartbch link && yarn workspace mainnet-cash link @mainnet-cash/smartbch",
-    "link:all": "yarn link:mainnet-js && yarn link:contract && yarn link:smartbch",
+    "link:all": "yarn link:mainnet-js && yarn link:contract",
     "postinstall": "patch-package && yarn link:all && yarn build",
     "demo": "yarn workspace mainnet-demo start",
     "live": "npx reload --dir=jest/playwright ",

@@ -3,7 +3,6 @@ import { sslConfigI, WalletI, FaucetQueueItemI } from "./interface.js";
 import { TxI } from "../interface.js";
 import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook.js";
 import { RegisterWebhookParams } from "../webhook/interface.js";
-import { isCashAddress } from "../util/bchaddr.js";
 import { getSslConfig } from "./util.js";
 import parseDbUrl from "parse-database-url";
 import pg from "pg";
@@ -64,7 +63,6 @@ export default class SqlProvider implements StorageProvider {
           "status TEXT," +
           "tx_seen JSON," +
           "last_height INTEGER," +
-          "token_id TEXT," +
           "expires_at TIMESTAMPTZ" +
           ");",
         this.webhookTable
@@ -75,7 +73,6 @@ export default class SqlProvider implements StorageProvider {
         "CREATE TABLE IF NOT EXISTS %I (" +
           "id SERIAL PRIMARY KEY," +
           "address TEXT," +
-          "token TEXT," +
           "value TEXT" +
           ");",
         this.faucetQueueTable
@@ -144,19 +141,8 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async webhookFromDb(hook: Webhook) {
-    // map tokenId field from postgres
-    hook.tokenId = (hook as any).token_id;
-    delete (hook as any).token_id;
-
-    if (hook.type.indexOf("slp") === 0) {
-      const { WebhookSlp } = await import("../webhook/WebhookSlp.js");
-      return new WebhookSlp(hook);
-    } else if (isCashAddress(hook.cashaddr)) {
-      const { WebhookBch } = await import("../webhook/WebhookBch.js");
-      return new WebhookBch(hook);
-    }
-
-    throw new Error(`Unsupported or incorrect hook address ${hook.cashaddr}`);
+    const { WebhookBch } = await import("../webhook/WebhookBch.js");
+    return new WebhookBch(hook);
   }
 
   public async addWebhook(params: RegisterWebhookParams): Promise<Webhook> {
@@ -170,17 +156,12 @@ export default class SqlProvider implements StorageProvider {
     params.duration_sec = params.duration_sec || expireTimeout;
     params.duration_sec =
       params.duration_sec > expireTimeout ? expireTimeout : params.duration_sec;
-    params.tokenId = params.tokenId || "";
-
-    if (params.type.indexOf("slp") === 0 && !params.tokenId) {
-      throw new Error("'tokenId' parameter is required for SLP webhooks");
-    }
 
     const expires_at = new Date(
       new Date().getTime() + params.duration_sec * 1000
     );
     let text = this.formatter(
-      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,token_id,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
+      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
       this.webhookTable
     );
 
@@ -192,7 +173,6 @@ export default class SqlProvider implements StorageProvider {
       "",
       "[]",
       0,
-      params.tokenId,
       expires_at.toISOString(),
     ]);
     const hook = await this.webhookFromDb(result.rows[0]);
@@ -266,14 +246,13 @@ export default class SqlProvider implements StorageProvider {
 
   public async addFaucetQueueItem(
     address: string,
-    tokenId: string,
     value: string
   ): Promise<boolean> {
     let text = this.formatter(
-      "INSERT into %I (address,token,value) VALUES ($1, $2, $3);",
+      "INSERT into %I (address,value) VALUES ($1, $2);",
       this.faucetQueueTable
     );
-    return await this.db.query(text, [address, tokenId, value]);
+    return await this.db.query(text, [address, value]);
   }
 
   public async getFaucetQueue(): Promise<Array<FaucetQueueItemI>> {
