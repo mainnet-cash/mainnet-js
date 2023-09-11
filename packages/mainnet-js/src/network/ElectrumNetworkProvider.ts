@@ -10,7 +10,6 @@ import { Network } from "../interface.js";
 import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
-import { Mutex } from "async-mutex";
 import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
 
@@ -19,7 +18,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   public subscriptions: number = 0;
   public version;
   private connectPromise;
-  private mutex = new Mutex();
   private blockHeight = 0;
 
   constructor(
@@ -490,9 +488,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async connect(): Promise<void[]> {
-    return await this.mutex.runExclusive(async () => {
-      return await this.connectPromise;
-    });
+    return await this.connectPromise;
   }
 
   disconnect(): Promise<boolean[]> {
