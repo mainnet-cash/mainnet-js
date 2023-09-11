@@ -476,10 +476,7 @@ export async function getFeeAmountSimple({
     sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) +
     (discardChange ? 0 : outputSizeP2pkh);
 
-  return (
-    (inputTotalSize + outputTotalSize + 16) *
-    relayFeePerByteInSatoshi
-  );
+  return (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi;
 }
 
 // precise fee estimation
