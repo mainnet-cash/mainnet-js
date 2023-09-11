@@ -71,10 +71,9 @@ To install mainnet as a dependency of your webapp use:
 
     yarn add mainnet-js
 
-To include contracts and smartBCH functionality, use the following packages:
+To include contracts functionality, use the following packages:
 
     yarn add @mainnet-cash/contract
-    yarn add @mainnet-cash/smartbch
 
 See the [full documentation](https://mainnet.cash/tutorial/shipping-mainnet.html) for notes and examples for bundling mainnet-js in your project.
 
@@ -102,7 +101,6 @@ This project contains a number of smaller projects in a mono-repo structure, wit
 | ---------------------- | --------------------- |
 | mainnet-js             | Base Library          |
 | mainnet-cash           | REST Express Server   |
-| @mainnet-cash/smartbch | SmartBch Library      |
 | @mainnet-cash/contract | CashScript Library    |
 | @mainnet-cash/demo     | Demo Vue Webapp       |
 | @mainnet-cash/demo-min | Minimal Demo          |

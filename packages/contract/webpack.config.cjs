@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const nodeExternals = require("webpack-node-externals");
 const __basedir = require("path").resolve(__dirname, "../../");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const webpack = require("webpack");

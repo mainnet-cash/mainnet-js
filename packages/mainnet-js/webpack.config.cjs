@@ -96,11 +96,6 @@ const browserConfig = {
   ],
   resolve: {
     alias: {
-      ethers$: require.resolve("ethers/lib/index.js"),
-      "@ethersproject/web$": require.resolve("@ethersproject/web/lib/index.js"),
-      "@ethersproject/contracts$": require.resolve(
-        "@ethersproject/contracts/lib/index.js"
-      ),
       bufferutil: false,
       child_process: false,
       crypto: false,

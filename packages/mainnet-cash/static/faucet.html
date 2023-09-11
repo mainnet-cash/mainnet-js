@@ -3,7 +3,6 @@
     <meta charset="utf-8">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script defer src="/scripts/mainnet.js"></script>
-    <script defer src="/scripts/@mainnet-cash/smartbch.js"></script>
     <script src="https://unpkg.com/buefy/dist/components/input"></script>
     <script src="https://unpkg.com/buefy/dist/components/button"></script>
     <script src="https://unpkg.com/buefy/dist/components/field"></script>
@@ -46,36 +45,13 @@
           <p>Faucet balances available</p>
           <li> <button @click="getBch">Get tBCH</button> {{ balance }} tBCH </li>
         </div>
-        <div class="box">
-          <p v-if="metamaskError" :style="{color: 'red'}">Metamask or another Web3 browser extension is not installed. <a target="_blank" href="https://metamask.io">Download it here.</a></p>
-          <h2 class="title is-4" style="margin-bottom:20px"> SmartBCH testnet</h2>
-          <b-field style="width:50%;"" label="Your address">
-            <b-input v-model="address"></b-input>
-          </b-field>
-          <p>Faucet balances available</p>
-          <li> <button @click="getSbch">Get tBCH</button> {{ sbchBalance }} tBCH </li>
-          <div v-for="token in sep20Balances" :key="token.tokenId">
-            <li>
-              <button @click="getSep20Tokens(token.tokenId)">
-                Get {{ token.ticker }}
-              </button>
-              {{ parseInt(token.value) }}
-              <b-tooltip :label="token.tokenId" position="is-right" :triggers="['click']" :auto-close="['outside', 'escape']">
-                <a>[{{ token.ticker }}]</a>
-              </b-tooltip>
-              {{ token.name }}
-              <img @click="addToMetamask(token.tokenId)" style="width: 1.5rem; height: 1.5rem; cursor: pointer" src="https://www.marketcap.cash/metamask.svg"></img>
-            </li>
-          </div>
-        </div>
         <b-field style="width:50%; margin-top:50px;" label="Instructions">
         </b-field>
-        <p>Your wallet will get refilled to 10000 testnet satoshi (BCH), 0.1 testnet BCH (SmartBch) or 10 tokens per request, if you have more than that - bad luck</p>
+        <p>Your wallet will get refilled to 10000 testnet satoshi (BCH), if you have more than that - bad luck</p>
         <p>Requests are limited to one in 15 minutes from the same IP</p>
         <p>There is as well a global rate limit to prevent abuse</p>
         <p>&nbsp;</p>
         <p>Remember to return the tBCH back to the faucet or donate your own tBCH to <strong>{{ faucetCashaddr }}</strong> </p>
-        <p>Donate your SmartBch tBCH and SEP20 tokens to <strong>{{ faucetSbchContractAddress }}</strong> </p>
       </section>
     </div>`,
 
@@ -108,44 +84,9 @@
         await this.update();
       },
 
-      async addToMetamask(tokenId) {
-        const wallet = await TestNetSmartBchWallet.newRandom();
-        const info = await wallet.sep20.getTokenInfo(tokenId);
-
-        ethereum
-          .request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: tokenId,
-                symbol: info.ticker,
-                decimals: info.decimals,
-              },
-            },
-          })
-          .then((success) => {
-            if (!success)
-              alert('Something went wrong.');
-          });
-      },
-
       async update(first = false) {
         try {
           if (first) {
-            new Promise(async () => {
-              try {
-                const wallet = await Web3TestNetSmartBchWallet.init();
-                this.address = wallet.getDepositAddress();
-              } catch (error) {
-                if (error.message.indexOf("Metamask or another Web3 browser") === 0) {
-                  this.metamaskError = true;
-                } else {
-                  alert(error);
-                }
-              }
-            });
-
             const fetchopt = {
               method: "POST",
               headers: { "Content-type": "application/json; charset=UTF-8" }
@@ -158,21 +99,13 @@
             }
 
             this.faucetCashaddr = json.bchtest;
-            this.faucetSbchAddress = json.sbchtest;
-            this.faucetSbchContractAddress = json.sbchcontract;
-            this.faucetSbchTokenId = json.sbchtoken;
           }
 
           await Promise.all([
             new Promise(async () => {
               const wallet = await Wallet.fromCashaddr(this.faucetCashaddr);
               this.balance = await wallet.slpSemiAware().getBalance("bch");
-            }),
-            new Promise(async () => {
-              const sbchWallet = await TestNetSmartBchWallet.watchOnly(this.faucetSbchContractAddress);
-              this.sbchBalance = await sbchWallet.getBalance("bch");
-              this.sep20Balances = [await sbchWallet.sep20.getBalance(this.faucetSbchTokenId)];
-            }),
+            })
           ]);
         } catch (error) {
           alert(error.message);
@@ -183,11 +116,7 @@
     mounted: async function () {
       document.addEventListener("DOMContentLoaded", async (event) => {
         Object.assign(globalThis, await __mainnetPromise);
-        Object.assign(globalThis, await __smartbchPromise);
 
-        (await TestNetSmartBchWallet.newRandom()).provider.on('block', async (blockNumber) => {
-          await this.update();
-        });
         this.update(true);
       });
     }

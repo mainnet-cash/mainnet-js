@@ -25,11 +25,9 @@ const workspacePackageFiles = [
   "./packages/contract/package.json",
   "./packages/mainnet-cash/package.json",
   "./packages/mainnet-js/package.json",
-  "./packages/smartbch/package.json",
 ];
 const workspacePackages = [
   "mainnet-js",
-  "@mainnet-cash/smartbch",
   "@mainnet-cash/contract",
 ];
 

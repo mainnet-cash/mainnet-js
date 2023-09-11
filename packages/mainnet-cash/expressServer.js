@@ -45,9 +45,6 @@ export default class ExpressServer {
     const module_path = `${__dirname}/node_modules/mainnet-js/dist/`;
     const latest = fs.readdirSync(module_path).filter(val => val.match(/mainnet-\d+\.\d+.\d+.js$/)).pop();
     this.app.use('/scripts/mainnet.js', express.static(module_path + latest));
-    const smartBchModulePath = `${__dirname}/node_modules/@mainnet-cash/smartbch/dist/`;
-    const smartBchLatest = fs.readdirSync(smartBchModulePath).filter(val => val.match(/smartbch-\d+\.\d+.\d+.js$/)).pop();
-    this.app.use('/scripts/@mainnet-cash/smartbch.js', express.static(smartBchModulePath + smartBchLatest));
     this.app.use(express.static(__dirname + '/static'));
     this.app.use(bodyParser.json({ limit: '15MB' }));
     this.app.use(express.json());
