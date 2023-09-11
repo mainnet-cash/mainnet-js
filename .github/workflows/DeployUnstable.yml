@@ -28,7 +28,6 @@ jobs:
           git config --global user.name "Github CI"
           git add -f packages/mainnet-js/dist/*
           git add -f packages/contract/dist/*
-          git add -f packages/smartbch/dist/*
           git commit -m 'Add packaged modules'
       - name: Copy and commit certain files for Dokku
         run: |
