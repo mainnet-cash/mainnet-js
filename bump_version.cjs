@@ -26,10 +26,7 @@ const workspacePackageFiles = [
   "./packages/mainnet-cash/package.json",
   "./packages/mainnet-js/package.json",
 ];
-const workspacePackages = [
-  "mainnet-js",
-  "@mainnet-cash/contract",
-];
+const workspacePackages = ["mainnet-js", "@mainnet-cash/contract"];
 
 // Get the package version from the root package
 
