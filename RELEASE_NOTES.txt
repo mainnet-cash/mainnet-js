@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+1.1.34
+
+* Remove extraneous dependencies, reduce package size
+
 1.1.33
 
 * Fix BCMR query in case node validations are empty
