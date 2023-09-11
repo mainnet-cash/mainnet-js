@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 1.1.34
+  version: 1.1.34-alpha.1
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -64,11 +64,6 @@ tags:
     description: Find out more
     url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/sign
   name: wallet/signed
-- description: Interact with SLP functions of the wallets
-  externalDocs:
-    description: Find out more
-    url: https://rest-unstable.mainnet.cash/api-docs/#/wallet/slp
-  name: wallet/slp
 - description: Invoke wallet utility functions
   externalDocs:
     description: Find out more
@@ -344,32 +339,6 @@ paths:
           description: Invalid input
       summary: |
         Get testnet bch
-      tags:
-      - faucet
-      x-eov-operation-handler: controllers/FaucetController
-  /faucet/get_testnet_slp:
-    post:
-      operationId: getTestnetSlp
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetTestnetSlpRequest'
-        description: |
-          Request to slp faucet
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetTestnetSlpResponse'
-          description: Successful operation
-        "405":
-          content: {}
-          description: Invalid input
-      summary: |
-        Get testnet slp tokens
       tags:
       - faucet
       x-eov-operation-handler: controllers/FaucetController
@@ -1351,325 +1320,6 @@ paths:
       tags:
       - wallet/signed
       x-eov-operation-handler: controllers/WalletSignedController
-  /wallet/slp/create:
-    post:
-      operationId: slpCreateWallet
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WalletRequest'
-        description: Request a new SLP wallet
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WalletResponse'
-          description: successful operation
-        "405":
-          content: {}
-          description: Invalid input
-      summary: create a new SLP wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/genesis:
-    post:
-      operationId: slpGenesis
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpGenesisRequest'
-        description: |
-          Request to create a new SLP token (genesis)
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpGenesisResponse'
-          description: successful operation
-      summary: Get created tokenId back and new slp token balance of the wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/nft_parent_genesis:
-    post:
-      operationId: nftParentGenesis
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpGenesisRequest'
-        description: |
-          Request to create a new NFT parent token (genesis)
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpGenesisResponse'
-          description: successful operation
-      summary: Get created tokenId back and new NFT token balance of the wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/nft_child_genesis:
-    post:
-      operationId: nftChildGenesis
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpGenesisRequest'
-        description: |
-          Request to create a new NFT child token (genesis) by consuming a parent token
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpGenesisResponse'
-          description: successful operation
-      summary: Get created tokenId back and new NFT child token balance of the wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/mint:
-    post:
-      operationId: slpMint
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpMintRequest'
-        description: |
-          Request to mint more of SLP tokens
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpMintResponse'
-          description: successful operation
-      summary: Get created tokenId back and new slp token balance of the wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/token_info:
-    post:
-      operationId: slpTokenInfo
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpTokenInfoRequest'
-        description: |
-          Request to get information about the token
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpTokenInfoResponse'
-          description: successful operation
-      summary: Get information about the token
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/all_balances:
-    post:
-      operationId: slpAllBalances
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request for a wallet slp balances
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpBalanceArrayResponse'
-          description: successful operation
-      summary: Get all slp balances of the wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/balance:
-    post:
-      operationId: slpBalance
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpBalanceRequest'
-        description: |
-          Request for a wallet slp token balance
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpBalanceResponse'
-          description: successful operation
-      summary: Get total slp token balance of the wallet
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/deposit_address:
-    post:
-      operationId: slpDepositAddress
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request for an SLP deposit address given a wallet
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpDepositAddressResponse'
-          description: successful operation
-      summary: Get an SLP deposit address in cash address format
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/deposit_qr:
-    post:
-      operationId: slpDepositQr
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request for an SLP deposit cash address as a Quick Response code (qrcode)
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
-      summary: Get an SLP receiving cash address as a qrcode
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/send:
-    post:
-      operationId: slpSend
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpSendRequest'
-        description: place an SLP send request
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpSendResponse'
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-        "418":
-          content: {}
-          description: Invalid network for given address
-      summary: Send some SLP token amount to a given cash address
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/send_max:
-    post:
-      operationId: slpSendMax
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SlpSendMaxRequest'
-        description: Request to send all available SLP funds to a given address
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpSendResponse'
-          description: transaction accepted
-        "400":
-          content: {}
-          description: Invalid Request
-      summary: Send all available SLP funds to a given address
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/utxo:
-    post:
-      operationId: slpUtxos
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request detailed list of unspent SLP transaction outputs
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpUtxoResponse'
-          description: successful operation
-      summary: Get detailed information about unspent SLP outputs (utxos)
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
-  /wallet/slp/outpoints:
-    post:
-      operationId: slpOutpoints
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request of unspent SLP outpoints
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SlpOutpointsResponse'
-          description: successful operation
-      summary: Get list of unspent SLP outpoints.
-      tags:
-      - wallet/slp
-      x-eov-operation-handler: controllers/WalletSlpController
   /wallet/util/decode_transaction:
     post:
       operationId: utilDecodeTransaction
@@ -1729,12 +1379,6 @@ paths:
           - 'transaction:out' for outgoing BCH transactions
           - 'transaction:in,out' both for incoming and outgoing BCH transactions
           - 'balance' will post the object according to 'BalanceResponse' schema
-          - 'slptransaction:in' for incoming SLP transactions
-          - 'slptransaction:out' for outgoing SLP transactions
-          - 'slptransaction:in,out' both for incoming and outgoing SLP transactions
-          - 'slpbalance' will post the object according to 'SlpBalanceResponse' schema
-
-          'tokenId' parameter is mandatory when using SLP webhooks.
         required: true
       responses:
         "200":
@@ -2373,7 +2017,6 @@ components:
       - $ref: '#/components/schemas/UnitType'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        slpAware: true
         slpSemiAware: true
       properties:
         walletId:
@@ -2381,14 +2024,6 @@ components:
             The walletId to get a balance for.
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
-        slpAware:
-          default: false
-          description: "If you have any SLP tokens on the address, you should set\
-            \ `slpAware` to `true` to prevent accidental token burning This flag activates\
-            \ utxo checking against an external slp indexer So far this option is\
-            \ not switched on by default"
-          example: true
-          type: boolean
         slpSemiAware:
           default: false
           description: This flag requires an utxo to have more than 546 sats to be
@@ -3233,28 +2868,6 @@ components:
         txId:
           description: Transaction id
           type: string
-    GetTestnetSlpRequest:
-      example:
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        slpaddr:
-          description: Receiver's slpaddr
-          type: string
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          type: string
-      required:
-      - slpaddr
-      - tokenId
-    GetTestnetSlpResponse:
-      example:
-        txId: dc38ee5d4233163e69144e4ec6e49257d41f5605e297d05c0af8f1d81ae1a387
-      properties:
-        txId:
-          description: Transaction id
-          type: string
     GetTestnetSbchRequest:
       example:
         address: 0xE25ddbAF8DD61b627727e03e190E32feddBD1319
@@ -3293,16 +2906,12 @@ components:
     GetAddressesResponse:
       example:
         bchtest: bchtest:qzxkd5achtj6v46m9vdqv6gj2pvrac5q0qd2qqa2ga
-        slptest: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
         sbchtest: 0xA01a60F9c0ac519c1288191CC363b0B5Fd6e7e09
         sbchcontract: 0x4Fcb637828E5F79F254b86E97Fcf72361549e28f
         sbchtoken: 0xAAb45D7f352005c19E93F13dfA346ddAe5b97f65
       properties:
         bchtest:
           description: Cashaddr to return testnet BCH
-          type: string
-        slptest:
-          description: Slpaddr to return testnet SLP tokens
           type: string
         sbchtest:
           description: SmartBch testnet faucet contract owner address
@@ -3506,7 +3115,6 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         cashaddr: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-        slpaddr: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
         name: username1
       properties:
         walletId:
@@ -3522,11 +3130,6 @@ components:
           description: |
             The address in cashaddr format.
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-        slpaddr:
-          description: |
-            The SLP address of the wallet in cashaddr format.
-          example: slptest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys5edyr8z5
           type: string
       type: object
     WalletReplaceNamedResponse:
@@ -3631,7 +3234,6 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         output_count: 0
         options:
-          slpAware: true
           slpSemiAware: true
       properties:
         walletId:
@@ -3640,9 +3242,10 @@ components:
           example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
           type: string
         output_count:
-          description: "(optional) if sending all funds to multiple addresses, the\n\
-            count of the number of address funds will be sent\nto may be included.\
-            \            \n"
+          description: |
+            (optional) if sending all funds to multiple addresses, the
+            count of the number of address funds will be sent
+            to may be included.
           format: int32
           type: integer
         options:
@@ -3683,7 +3286,6 @@ components:
       type: string
     SendRequestOptions:
       example:
-        slpAware: true
         queryBalance: false
         feePaidBy: change
         checkTokenQuantities: true
@@ -3703,14 +3305,6 @@ components:
             Cash address to receive change to
           example: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
           type: string
-        slpAware:
-          default: false
-          description: "If you have any SLP tokens on the address, you should set\
-            \ `slpAware` to `true` to prevent accidental token burning This flag activates\
-            \ utxo checking against an external slp indexer So far this option is\
-            \ not switched on by default"
-          example: true
-          type: boolean
         slpSemiAware:
           default: false
           description: This flag requires an utxo to have more than 546 sats to be
@@ -3864,7 +3458,6 @@ components:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         discardChange: false
         options:
-          slpAware: true
           queryBalance: false
           feePaidBy: change
           checkTokenQuantities: true
@@ -4091,459 +3684,6 @@ components:
           type: boolean
         details:
           $ref: '#/components/schemas/VerifySignedMessageResponseDetails'
-    SlpGenesisRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        endBaton: false
-        ticker: MNC
-        documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
-        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        parentTokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        initialAmount: "10000"
-        decimals: 0.8008281904610115
-        documentUrl: https://mainnet.cash
-        name: Mainnet coin
-        type: 1
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        name:
-          description: Token name
-          example: Mainnet coin
-          type: string
-        ticker:
-          description: Token ticker
-          example: MNC
-          type: string
-        initialAmount:
-          description: Value is represented as a string to avoid precision loss
-          example: "10000"
-          type: string
-        decimals:
-          description: Indicates that 1 token is divisible into 10^decimals base units
-          type: number
-        documentUrl:
-          example: https://mainnet.cash
-          type: string
-        documentHash:
-          description: Document hash of the token. Empty or 64 character long hex
-            string.
-          example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
-          type: string
-        endBaton:
-          description: "Indicates if token should not be 'mintable', e.g. total circulation\
-            \ amount increased"
-          example: false
-          type: boolean
-        type:
-          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
-          example: 1
-          type: number
-        tokenReceiverSlpAddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        batonReceiverSlpAddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        parentTokenId:
-          description: Identifier of the NFT parent token
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-      required:
-      - decimals
-      - initialAmount
-      - name
-      - ticker
-      - walletId
-    SlpBalanceResponse:
-      example:
-        ticker: MNC
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        name: Mainnet coin
-        type: 1
-        value: "10000"
-      properties:
-        value:
-          description: A big number represented as a string to avoid precision loss
-          example: "10000"
-          format: float
-          type: string
-        ticker:
-          description: Token ticker
-          example: MNC
-          type: string
-        name:
-          description: Full name of the SLP token
-          example: Mainnet coin
-          type: string
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        type:
-          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
-          example: 1
-          type: number
-    SlpGenesisResponse:
-      example:
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        balance:
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          name: Mainnet coin
-          type: 1
-          value: "10000"
-      properties:
-        tokenId:
-          description: Full token identifier freshly created
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        balance:
-          $ref: '#/components/schemas/SlpBalanceResponse'
-    SlpMintRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        endBaton: false
-        tokenReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        batonReceiverSlpAddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        value: "10000"
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        value:
-          description: Value is represented as a string to avoid precision loss
-          example: "10000"
-          type: string
-        tokenId:
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        endBaton:
-          description: "Indicates if token should not be 'mintable' anymore, e.g.\
-            \ total circulation amount increased"
-          example: false
-          type: boolean
-        tokenReceiverSlpAddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        batonReceiverSlpAddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-      required:
-      - tokenId
-      - value
-      - walletId
-    SlpMintResponse:
-      example:
-        balance:
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          name: Mainnet coin
-          type: 1
-          value: "10000"
-        txId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        txId:
-          description: |
-            Transaction id
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        balance:
-          $ref: '#/components/schemas/SlpBalanceResponse'
-    SlpTokenInfoRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-      required:
-      - tokenId
-      - walletId
-    SlpTokenInfoResponse:
-      example:
-        ticker: MNC
-        documentHash: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        initialAmount: "10000"
-        decimals: 2
-        documentUrl: https://mainnet.cash
-        name: Mainnet coin
-        type: 1
-      nullable: true
-      properties:
-        name:
-          description: Token name
-          example: Mainnet coin
-          type: string
-        ticker:
-          description: Token ticker
-          example: MNC
-          type: string
-        tokenId:
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        initialAmount:
-          description: Value is represented as a string to avoid precision loss
-          example: "10000"
-          type: string
-        decimals:
-          description: Indicates that 1 token is divisible into 10^decimals base units
-          example: 2
-          type: number
-        documentUrl:
-          example: https://mainnet.cash
-          type: string
-        documentHash:
-          description: Document hash of the token. Empty or 64 character long hex
-            string.
-          example: db4451f11eda33950670aaf59e704da90117ff7057283b032cfaec7779313916
-          type: string
-        type:
-          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
-          example: 1
-          type: number
-      type: object
-    SlpBalanceArrayResponse:
-      items:
-        $ref: '#/components/schemas/SlpBalanceResponse'
-      type: array
-    SlpBalanceRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        tokenId:
-          description: Full token identifier aka its genesis transaction id
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-      required:
-      - walletId
-    SlpDepositAddressResponse:
-      example:
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-      properties:
-        slpaddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-    SlpSendRequestItem:
-      example:
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        value: 100
-      properties:
-        slpaddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        value:
-          example: 100
-          type: number
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-      required:
-      - slpaddr
-      - tokenId
-      - value
-      type: object
-    SlpSendRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        to:
-        - tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          value: 100
-        - tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          value: 100
-      properties:
-        walletId:
-          description: |
-            ID that is returned in `wallet` field of /wallet call
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        to:
-          items:
-            $ref: '#/components/schemas/SlpSendRequestItem'
-          type: array
-      required:
-      - to
-      - walletId
-      type: object
-    SlpSendResponse:
-      example:
-        balance:
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          name: Mainnet coin
-          type: 1
-          value: "10000"
-        explorerUrl: https://testnet.simpleledger.info/#tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-        txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-      properties:
-        txId:
-          description: The hash of a transaction
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: string
-        balance:
-          $ref: '#/components/schemas/SlpBalanceResponse'
-        explorerUrl:
-          description: Web url to a transaction on a block explorer
-          example: https://testnet.simpleledger.info/#tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: string
-      type: object
-    SlpSerializedUtxo:
-      description: Slp Serialized unspent outpoint
-      example: shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-      type: string
-    SlpSendRequestOptions:
-      example:
-        utxoIds:
-        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-        - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-      properties:
-        utxoIds:
-          items:
-            $ref: '#/components/schemas/SlpSerializedUtxo'
-          type: array
-      type: object
-    SlpSendMaxRequest:
-      example:
-        walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        slpaddr: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-        options:
-          utxoIds:
-          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-          - shm:43e724033d3c013cd385bb82d3c1c8a7b3f0e032bc82d9bf4980fca62220648a:0:30000
-      properties:
-        walletId:
-          description: |
-            The walletId of the sending wallet
-          example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
-          type: string
-        slpaddr:
-          example: slptest:qqm4gsaa2gvk7flvsvj7f0w4rlq32vqhkq32uar866
-          type: string
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        options:
-          $ref: '#/components/schemas/SlpSendRequestOptions'
-      required:
-      - slpaddr
-      - tokenId
-      - walletId
-    SlpUtxo:
-      example:
-        utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-        ticker: MNC
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-        decimals: 2
-        index: 0.8008281904610115
-        txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-        type: 1
-        value: "10000"
-        satoshis: 546
-      properties:
-        index:
-          type: number
-        txId:
-          description: The hash of a transaction
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: string
-        satoshis:
-          description: Locked satoshi
-          example: 546
-          type: number
-        utxoId:
-          description: serialized outpoint
-          example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          type: string
-        value:
-          description: Token amount represented as a string to avoid precision loss
-          example: "10000"
-          type: string
-        decimals:
-          description: Indicates that 1 token is divisible into 10^decimals base units
-          example: 2
-          type: number
-        ticker:
-          description: Token ticker
-          example: MNC
-          type: string
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          type: string
-        type:
-          description: "Token type. 0x01 Type1, 0x81 NFT Parent, 0x41 NFT Child"
-          example: 1
-          type: number
-    SlpUtxoResponse:
-      example:
-        utxos:
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          decimals: 2
-          index: 0.8008281904610115
-          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: 1
-          value: "10000"
-          satoshis: 546
-        - utxoId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f:0
-          ticker: MNC
-          tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
-          decimals: 2
-          index: 0.8008281904610115
-          txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
-          type: 1
-          value: "10000"
-          satoshis: 546
-      properties:
-        utxos:
-          items:
-            $ref: '#/components/schemas/SlpUtxo'
-          type: array
-    SlpOutpointsResponse:
-      example:
-        outpoints:
-        - 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
-        - 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
-      properties:
-        outpoints:
-          items:
-            description: a list of slp outpoints
-            example: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15:1
-            type: string
-          type: array
     UtilDecodeTransactionRequest:
       allOf:
       - $ref: '#/components/schemas/NetworkEnum'
@@ -4642,7 +3782,6 @@ components:
       example:
         recurrence: recurrent
         cashaddr: bchtest:qzd0tv75gx6y0zspzwqpgkwkq0n72g8fsq2zch26s2
-        tokenId: ""
         type: "transaction:in,out"
         url: http://example.com/webhook
         duration_sec: 86400
@@ -4664,10 +3803,6 @@ components:
           - transaction:out
           - "transaction:in,out"
           - balance
-          - slptransaction:in
-          - slptransaction:out
-          - "slptransaction:in,out"
-          - slpbalance
           example: "transaction:in,out"
           type: string
         recurrence:
@@ -4679,9 +3814,6 @@ components:
           - recurrent
           example: recurrent
           type: string
-        tokenId:
-          description: Token unique hexadecimal identifier to use. Mandatory in SLP
-            webhooks.
         duration_sec:
           default: 86400
           description: Duration of the webhook lifetime in seconds before it will
@@ -5810,17 +4942,8 @@ components:
       - type: string
     MaxAmountToSendRequest_options:
       example:
-        slpAware: true
         slpSemiAware: true
       properties:
-        slpAware:
-          default: false
-          description: "If you have any SLP tokens on the address, you should set\
-            \ `slpAware` to `true` to prevent accidental token burning This flag activates\
-            \ utxo checking against an external slp indexer So far this option is\
-            \ not switched on by default"
-          example: true
-          type: boolean
         slpSemiAware:
           default: false
           description: This flag requires an utxo to have more than 546 sats to be
