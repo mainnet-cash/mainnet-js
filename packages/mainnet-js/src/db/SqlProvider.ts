@@ -63,7 +63,6 @@ export default class SqlProvider implements StorageProvider {
           "status TEXT," +
           "tx_seen JSON," +
           "last_height INTEGER," +
-          "token_id TEXT," +
           "expires_at TIMESTAMPTZ" +
           ");",
         this.webhookTable
@@ -74,7 +73,6 @@ export default class SqlProvider implements StorageProvider {
         "CREATE TABLE IF NOT EXISTS %I (" +
           "id SERIAL PRIMARY KEY," +
           "address TEXT," +
-          "token TEXT," +
           "value TEXT" +
           ");",
         this.faucetQueueTable
@@ -163,7 +161,7 @@ export default class SqlProvider implements StorageProvider {
       new Date().getTime() + params.duration_sec * 1000
     );
     let text = this.formatter(
-      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,token_id,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;",
+      "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
       this.webhookTable
     );
 

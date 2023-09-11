@@ -271,7 +271,6 @@ test("Store and retrieve faucet queue items", async () => {
   const items = await db.getFaucetQueue();
   expect(items.length).toBe(2);
   expect(items[0].address).toBe("0x00");
-  expect(items[0].token).toBe("");
   expect(items[0].value).toBe("0x0a");
   await db.deleteFaucetQueueItems(items);
   await db.commitTransaction();
