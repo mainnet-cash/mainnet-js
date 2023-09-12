@@ -4,7 +4,6 @@ import {
   getRuntimePlatform,
 } from "../util/getRuntimePlatform.js";
 import ExchangeRateProvider from "../db/ExchangeRateProvider.js";
-import { indexedDbIsAvailable } from "../db/util.js";
 import axios from "axios";
 
 export class ExchangeRate {
@@ -77,9 +76,9 @@ export class ExchangeRate {
 
   static async get(symbol: string, useCache = true) {
     const platform = getRuntimePlatform();
-    if (platform !== RuntimePlatform.node && indexedDbIsAvailable()) {
+    if (platform === RuntimePlatform.browser) {
       try {
-        return await this.getRateFromIndexedDb(symbol, useCache);
+        return await this.getRateFromLocalStorage(symbol, useCache);
       } catch {
         return await this.getRateFromGlobalScope(symbol, useCache);
       }
@@ -88,7 +87,7 @@ export class ExchangeRate {
     }
   }
 
-  static async getRateFromIndexedDb(symbol, useCache = true): Promise<number> {
+  static async getRateFromLocalStorage(symbol, useCache = true): Promise<number> {
     if (!useCache) {
       return await getRateFromExchange(symbol);
     }
