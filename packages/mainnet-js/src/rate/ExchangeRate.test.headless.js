@@ -27,12 +27,9 @@ describe("Exchange rate tests", () => {
   });
 
   test("Get price in usd", async () => {
-    await page.evaluate(
-      async () => {
-        let rate = await ExchangeRate.get("usd");
-        expect(rate).toBeGreaterThan(0);
-      },
-      []
-    );
+    await page.evaluate(async () => {
+      let rate = await ExchangeRate.get("usd");
+      expect(rate).toBeGreaterThan(0);
+    }, []);
   });
 });

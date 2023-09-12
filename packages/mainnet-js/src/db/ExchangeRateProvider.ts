@@ -19,7 +19,10 @@ export default class ExchangeRateProvider {
     rate: number,
     ttl: number
   ): Promise<boolean> {
-    localStorage.setItem(`rate-${symbol}`, JSON.stringify({ symbol: symbol, rate: rate, ttl: ttl }));
+    localStorage.setItem(
+      `rate-${symbol}`,
+      JSON.stringify({ symbol: symbol, rate: rate, ttl: ttl })
+    );
     return true;
   }
 }
