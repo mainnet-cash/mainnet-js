@@ -1,7 +1,9 @@
 import { default as SqlProvider } from "./SqlProvider";
-import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
-import { WebhookRecurrence, WebhookType } from "../webhook";
-import { WalletI } from "./interface";
+import { BaseWallet } from "mainnet-js";
+import { RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
+import { WalletI } from "mainnet-js";
+
+BaseWallet.StorageProvider = SqlProvider;
 
 /**
  * @jest-environment jsdom

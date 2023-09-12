@@ -1,0 +1,34 @@
+{
+  "type": "module",
+  "name": "@mainnet-cash/postgresql-storage",
+  "version": "2.0.1",
+  "module": "dist/module/index.js",
+  "types": "dist/module/index.d.ts",
+  "exports": {
+    "import": "./dist/module/index.js"
+  },
+  "license": "MIT",
+  "author": "readcash",
+  "dependencies": {
+    "mainnet-js": "2.0.1",
+    "parse-database-url": "^0.3.0",
+    "pg": "^8.11.3",
+    "pg-format": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.2",
+    "@types/pg-format": "^1.0.2"
+  },
+  "scripts": {
+    "prebuild": "yarn install",
+    "build": "yarn build:module",
+    "build:main": "tsc",
+    "build:module": "tsc -p tsconfig.browser.json",
+    "build:production": "NODE_ENV=production yarn build:module",
+    "test": "jest",
+    "publish:public": "yarn publish --access public"
+  },
+  "testPathIgnorePatterns": [
+    "dist"
+  ]
+}

@@ -13,6 +13,8 @@ import logger from './logger.js';
 import timeout from 'connect-timeout';
 import config from './config.js';
 import * as mainnet from 'mainnet-js';
+import { SqlProvider } from '@mainnet-cash/postgresql-storage';
+mainnet.BaseWallet.StorageProvider = SqlProvider;
 import setupRateLimits from './rateLimits.js';
 
 import makeWsServer from './wsServer.js';

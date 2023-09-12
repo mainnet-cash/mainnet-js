@@ -34,6 +34,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should load module`, async () => {
     expect(page).not.toBeNull();
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       return await typeof TestNetWallet;
     });
     expect(result).toEqual("function");
@@ -42,6 +43,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should not have a "process"`, async () => {
     expect(page).not.toBeNull();
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       return typeof process;
     });
     expect(result).toEqual("undefined");
@@ -50,6 +52,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create regtest wallet`, async () => {
     let params = { name: "Alice's Regtest", type: "wif", network: "regtest" };
     const result = await page.evaluate(async (p) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       return await createWalletResponse(p);
     }, params);
     expect(result.cashaddr.slice(0, 8)).toBe("bchreg:q");
@@ -58,6 +61,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create testnet wallet`, async () => {
     let params = { name: "Alice's TestNet", type: "wif", network: "testnet" };
     const result = await page.evaluate(async (p) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       return await createWalletResponse(p);
     }, params);
     expect(result.cashaddr.slice(0, 9)).toBe("bchtest:q");
@@ -67,6 +71,7 @@ describe(`Wallet should function in the browser`, () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
+        BaseWallet.StorageProvider = IndexedDBProvider;
         return await TestNetWallet.fromId(`wif:regtest:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
@@ -80,6 +85,7 @@ describe(`Wallet should function in the browser`, () => {
     expect.assertions(1);
     try {
       const result = await page.evaluate(async (wif) => {
+        BaseWallet.StorageProvider = IndexedDBProvider;
         return await TestNetWallet.fromId(`hd:testnet:${wif}`);
       }, process.env.PRIVATE_WIF);
     } catch (e) {
@@ -92,6 +98,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should create a random testnet wallet`, async () => {
     let params = {};
     const result = await page.evaluate(async (p) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       let w = await TestNetWallet.newRandom();
       return w.getDepositAddress();
     }, params);
@@ -100,6 +107,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should create mainnet wallet`, async () => {
     const result = await page.evaluate(async (p) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       let w = await Wallet.newRandom();
       return w.getDepositAddress();
     });
@@ -108,6 +116,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should get an empty balance from a mainnet wallet`, async () => {
     const result = await page.evaluate(async (p) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       let w = await Wallet.newRandom();
       return w.getBalance();
     });
@@ -116,6 +125,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
@@ -124,6 +134,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit qr from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositQr();
     }, process.env.PRIVATE_WIF);
@@ -134,6 +145,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await TestNetWallet.fromWIF(wif);
       return alice.getDepositAddress();
     }, process.env.PRIVATE_WIF);
@@ -143,6 +155,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should return watch testnet balance`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
+        BaseWallet.StorageProvider = IndexedDBProvider;
         const alice = await TestNetWallet.watchOnly(addr);
         return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
@@ -158,6 +171,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should return watch named balance`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
+        BaseWallet.StorageProvider = IndexedDBProvider;
         const alice = await TestNetWallet.named("alice");
         return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
@@ -172,6 +186,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return reterive a named wallet`, async () => {
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await TestNetWallet.named("alice");
       const alice2 = await TestNetWallet.named("alice");
       return [alice.cashaddr, alice2.cashaddr];
@@ -182,6 +197,7 @@ describe(`Wallet should function in the browser`, () => {
   test(`Should return testnet balance in usd`, async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const result = await page.evaluate(async (addr) => {
+        BaseWallet.StorageProvider = IndexedDBProvider;
         const alice = await TestNetWallet.watchOnly(addr);
         return alice.getBalance("usd");
       }, process.env.ALICE_TESTNET_ADDRESS);
@@ -196,6 +212,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should return testnet balance in usd`, async () => {
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       return await Mainnet.convert(1, "bch", "sat");
     });
     expect(result).toBe(100000000);
@@ -203,6 +220,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should sign a message and verify it`, async () => {
     const result = await page.evaluate(async (wif) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await walletFromId(`wif:regtest:${wif}`);
       let result = await alice.sign("test");
       return {
@@ -218,6 +236,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test(`Should send to Bob; sendMax all of Bob's funds back`, async () => {
     const result = await page.evaluate(async (wif) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await walletFromId(`wif:regtest:${wif}`);
       const bob = await createWallet({
         type: "wif",
@@ -238,6 +257,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test("Store and replace a Regtest wallet", async () => {
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const name = `storereplace ${Math.random()}`;
 
       const check1 = await RegTestWallet.namedExists(name);
@@ -276,6 +296,7 @@ describe(`Wallet should function in the browser`, () => {
 
   test("Test waiting and watching", async () => {
     await page.evaluate(async (ALICE_ID) => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       const alice = await RegTestWallet.fromId(ALICE_ID);
 
       const bob = await RegTestWallet.newRandom();

@@ -1,8 +1,8 @@
-import SqlProvider from "../db/SqlProvider.js";
-import { TxI } from "../interface.js";
-import { ElectrumRawTransaction } from "../network/interface.js";
-import { balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi.js";
-import { Wallet } from "../wallet/Wif.js";
+import SqlProvider from "../SqlProvider.js";
+import { TxI } from "mainnet-js";
+import { ElectrumRawTransaction } from "mainnet-js";
+import { balanceResponseFromSatoshi } from "mainnet-js";
+import { Wallet } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
 import WebhookWorker from "./WebhookWorker.js";
 

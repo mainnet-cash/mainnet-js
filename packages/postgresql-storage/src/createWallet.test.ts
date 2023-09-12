@@ -1,8 +1,11 @@
-import { createWallet, walletFromId } from "./createWallet";
-import { WalletRequestI } from "./interface";
-import { initProviders, disconnectProviders } from "../network/Connection";
-import { delay } from "../util/delay";
-import { WalletTypeEnum } from "./enum";
+import { BaseWallet, createWallet, walletFromId } from "mainnet-js";
+import { WalletRequestI } from "mainnet-js";
+import { initProviders, disconnectProviders } from "mainnet-js";
+import { delay } from "mainnet-js";
+import { WalletTypeEnum } from "mainnet-js";
+import { default as SqlProvider } from "./SqlProvider.js";
+
+BaseWallet.StorageProvider = SqlProvider;
 
 beforeAll(async () => {
   await initProviders();

@@ -1,12 +1,10 @@
-import StorageProvider from "./StorageProvider.js";
-import { sslConfigI, WalletI, FaucetQueueItemI } from "./interface.js";
-import { TxI } from "../interface.js";
-import { Webhook, WebhookRecurrence, WebhookType } from "../webhook/Webhook.js";
-import { RegisterWebhookParams } from "../webhook/interface.js";
+import { StorageProvider, WalletI, FaucetQueueItemI, TxI } from "mainnet-js";
+import { RegisterWebhookParams } from "./webhook/interface.js";
 import { getSslConfig } from "./util.js";
 import parseDbUrl from "parse-database-url";
 import pg from "pg";
 import format from "pg-format";
+import { Webhook, WebhookRecurrence, WebhookType } from "./webhook/index.js";
 
 export default class SqlProvider implements StorageProvider {
   private db;
@@ -141,7 +139,7 @@ export default class SqlProvider implements StorageProvider {
   }
 
   public async webhookFromDb(hook: Webhook) {
-    const { WebhookBch } = await import("../webhook/WebhookBch.js");
+    const { WebhookBch } = await import("./webhook/WebhookBch.js");
     return new WebhookBch(hook);
   }
 

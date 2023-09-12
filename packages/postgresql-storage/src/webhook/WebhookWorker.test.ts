@@ -1,6 +1,4 @@
 import WebhookWorker from "../webhook/WebhookWorker";
-import { RegTestWallet } from "../wallet/Wif";
-import { mine } from "../mine/mine";
 import { Webhook } from "./Webhook";
 
 let worker: WebhookWorker;

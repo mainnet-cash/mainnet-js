@@ -18,6 +18,7 @@
   "private": true,
   "dependencies": {
     "@mainnet-cash/contract": "2.0.1",
+    "@mainnet-cash/postgresql-storage": "file:./packages/postgresql-storage",
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",
     "connect-timeout": "^1.9.0",
