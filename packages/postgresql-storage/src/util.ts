@@ -1,4 +1,9 @@
-import { sslConfigI } from "mainnet-js";
+export interface sslConfigI {
+  rejectUnauthorized: boolean;
+  ca?: string;
+  key?: string;
+  cert?: string;
+}
 
 export function getSslConfig(): sslConfigI | undefined {
   const ca = process.env.DATABASE_SSL_CA
