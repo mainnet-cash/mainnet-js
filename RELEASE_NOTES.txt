@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.1.1
+
+* Reimplement ExchangeRateProvider to use localStorage instead of IndexedDB in browsers
+
 2.1.0
 
 * Split out IndexedDBProvider and SqlProvider from the core package into separate packages
