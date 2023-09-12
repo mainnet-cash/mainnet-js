@@ -28,7 +28,12 @@ const workspacePackageFiles = [
   "./packages/postgresql-storage/package.json",
   "./packages/mainnet-cash/package.json",
 ];
-const workspacePackages = ["mainnet-js", "@mainnet-cash/contract", "@mainnet-cash/indexeddb-storage", "@mainnet-cash/postgresql-storage"];
+const workspacePackages = [
+  "mainnet-js",
+  "@mainnet-cash/contract",
+  "@mainnet-cash/indexeddb-storage",
+  "@mainnet-cash/postgresql-storage",
+];
 
 // Get the package version from the root package
 

@@ -38,9 +38,7 @@ describe(`Test Wallet library`, () => {
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * 100000000
-      );
+      expect(await alice.getBalance("sat")).toBeGreaterThan(5000 * 100000000);
     }
   });
 
@@ -132,9 +130,7 @@ describe(`Test Wallet library`, () => {
       let alice = await RegTestWallet.fromId(
         `wif:regtest:${process.env.PRIVATE_WIF}`
       ); // insert WIF from #1
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * 100000000
-      );
+      expect(await alice.getBalance("sat")).toBeGreaterThan(5000 * 100000000);
     }
   });
 
@@ -524,7 +520,9 @@ describe(`Test Wallet library`, () => {
       return true;
     };
 
-    expect(binsAreEqual(wallet.privateKey!, otherWallet.privateKey!)).toBe(false);
+    expect(binsAreEqual(wallet.privateKey!, otherWallet.privateKey!)).toBe(
+      false
+    );
 
     Config.DefaultParentDerivationPath = savedDerivationPath;
   });

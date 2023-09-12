@@ -7,7 +7,10 @@ const __basedir = require("path").resolve(__dirname, "../../");
 const fs = require("fs");
 
 fs.mkdirSync(__basedir + "/jest/playwright/indexeddb-storage");
-fs.copyFileSync(__basedir + "/jest/playwright/mainnet.js", __basedir + "/jest/playwright/indexeddb-storage/mainnet.js");
+fs.copyFileSync(
+  __basedir + "/jest/playwright/mainnet.js",
+  __basedir + "/jest/playwright/indexeddb-storage/mainnet.js"
+);
 
 const baseConfig = {
   mode: "development",
@@ -67,8 +70,7 @@ const browserConfig = {
       title: "The Empty Mainnet App",
     }),
     new InjectBodyPlugin({
-      content:
-        `<script defer src="mainnet.js"></script><script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>`,
+      content: `<script defer src="mainnet.js"></script><script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>`,
     }),
   ],
   resolve: {
