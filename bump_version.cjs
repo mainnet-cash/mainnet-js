@@ -22,11 +22,13 @@ const workspacePackageFiles = [
   "./demo/vue-nuxt/package.json",
   "./demo/vue-vite/package.json",
   "./demo/vue3/package.json",
-  "./packages/contract/package.json",
-  "./packages/mainnet-cash/package.json",
   "./packages/mainnet-js/package.json",
+  "./packages/contract/package.json",
+  "./packages/indexeddb-storage/package.json",
+  "./packages/postgresql-storage/package.json",
+  "./packages/mainnet-cash/package.json",
 ];
-const workspacePackages = ["mainnet-js", "@mainnet-cash/contract"];
+const workspacePackages = ["mainnet-js", "@mainnet-cash/contract", "@mainnet-cash/indexeddb-storage", "@mainnet-cash/postgresql-storage"];
 
 // Get the package version from the root package
 

@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/postgresql-storage",
-  "version": "2.0.1",
+  "version": "2.1.0-alpha.2",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "2.0.1",
+    "mainnet-js": "2.1.0-alpha.2",
     "parse-database-url": "^0.3.0",
     "pg": "^8.11.3",
     "pg-format": "^1.0.4"

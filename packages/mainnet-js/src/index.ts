@@ -47,6 +47,3 @@ export {
   VerifyMessageResponseI,
 } from "./message/interface.js";
 export { WalletRequestI, WalletResponseI } from "./wallet/interface.js";
-
-export { WalletI } from "./db/interface.js";
-export { ElectrumRawTransaction } from "./network/interface.js";
