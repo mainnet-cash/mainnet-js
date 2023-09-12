@@ -6,7 +6,6 @@ import { WebhookRecurrence, WebhookType } from "./webhook/index.js";
 export default class SqlProvider {
     constructor(walletTable) {
         this.webhookTable = "webhook";
-        this.faucetQueueTable = "faucet_queue";
         this.isInit = false;
         this.walletTable = walletTable ? walletTable : "wallet";
         if (!process.env.DATABASE_URL) {
@@ -44,13 +43,7 @@ export default class SqlProvider {
                 "expires_at TIMESTAMPTZ" +
                 ");", this.webhookTable);
             const resWebhook = await this.db.query(createWebhookTable);
-            let createFaucetQueueTable = this.formatter("CREATE TABLE IF NOT EXISTS %I (" +
-                "id SERIAL PRIMARY KEY," +
-                "address TEXT," +
-                "value TEXT" +
-                ");", this.faucetQueueTable);
-            const resFaucetQueue = await this.db.query(createFaucetQueueTable);
-            if (!resWallet || !resWebhook || !resFaucetQueue)
+            if (!resWallet || !resWebhook)
                 throw new Error("Failed to init SqlProvider");
         }
         return this;
@@ -161,10 +154,6 @@ export default class SqlProvider {
     async clearWebhooks() {
         let text = this.formatter("DELETE FROM %I;", this.webhookTable);
         await this.db.query(text);
-    }
-    async addFaucetQueueItem(address, value) {
-        let text = this.formatter("INSERT into %I (address,value) VALUES ($1, $2);", this.faucetQueueTable);
-        return await this.db.query(text, [address, value]);
     }
     async getFaucetQueue() {
         let text = this.formatter("SELECT * FROM %I;", this.faucetQueueTable);

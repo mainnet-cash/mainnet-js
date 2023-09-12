@@ -21,15 +21,10 @@
     el: '#app',
     data: {
       balance: 0,
-      sbchBalance: 0,
-      sep20Balances: [],
       cashaddr: "",
       address: "",
 
       faucetCashaddr: "",
-      faucetSbchAddress: "",
-      faucetSbchContractAddress: "",
-      faucetSbchTokenId: "",
       metamaskError: false,
     },
 
@@ -73,14 +68,6 @@
       },
       async getBch() {
         await this.fetch("/faucet/get_testnet_bch", {cashaddr: toCashAddress(this.cashaddr)});
-        await this.update();
-      },
-      async getSbch() {
-        await this.fetch("/faucet/get_testnet_sbch", {address: this.address});
-        await this.update();
-      },
-      async getSep20Tokens(tokenId) {
-        await this.fetch("/faucet/get_testnet_sep20", {address: this.address, tokenId: tokenId});
         await this.update();
       },
 

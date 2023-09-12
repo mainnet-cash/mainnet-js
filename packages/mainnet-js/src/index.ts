@@ -47,7 +47,3 @@ export {
   VerifyMessageResponseI,
 } from "./message/interface.js";
 export { WalletRequestI, WalletResponseI } from "./wallet/interface.js";
-
-// export function cube(x: number) {
-//   return x * x * x;
-// }

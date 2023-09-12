@@ -4,8 +4,7 @@ import config  from '../config.js';
 import * as mainnet from "mainnet-js";
 
 const assertFaucetAvailable = () => {
-  if ([config.FAUCET_CASHADDR, config.FAUCET_WIF,
-       config.FAUCET_SBCH_ADDRESS, config.FAUCET_SBCH_PRIVKEY, config.FAUCET_SBCH_CONTRACT_ADDRESS, config.FAUCET_SBCH_TOKEN_ID].some(val => !val)) {
+  if ([config.FAUCET_CASHADDR, config.FAUCET_WIF].some(val => !val)) {
     throw new Error('Faucet service was not configured for this server');
   }
 }
@@ -22,9 +21,6 @@ const getAddresses = () => new Promise(
       assertFaucetAvailable();
       resolve(Service.successResponse({
         bchtest: config.FAUCET_CASHADDR,
-        sbchtest: config.FAUCET_SBCH_ADDRESS,
-        sbchcontract: config.FAUCET_SBCH_CONTRACT_ADDRESS,
-        sbchtoken: config.FAUCET_SBCH_TOKEN_ID,
       }));
     } catch (e) {
       // console.trace(e);

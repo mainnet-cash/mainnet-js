@@ -262,23 +262,3 @@ test("Should not have ssl property when unconfigured", async () => {
   let c = provider.getConfig();
   expect(c.ssl).toBe(undefined);
 });
-
-test("Store and retrieve faucet queue items", async () => {
-  let db = new SqlProvider(`testnet ${Math.random()}`);
-  await db.init();
-  await db.addFaucetQueueItem("0x00", "0x0a");
-  await db.addFaucetQueueItem("0x01", "0x0b");
-
-  await db.beginTransaction();
-  const items = await db.getFaucetQueue();
-  expect(items.length).toBe(2);
-  expect(items[0].address).toBe("0x00");
-  expect(items[0].value).toBe("0x0a");
-  await db.deleteFaucetQueueItems(items);
-  await db.commitTransaction();
-
-  const newItems = await db.getFaucetQueue();
-  expect(newItems.length).toBe(0);
-
-  db.close();
-});

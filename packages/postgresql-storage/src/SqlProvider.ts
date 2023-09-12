@@ -1,4 +1,4 @@
-import { StorageProvider, WalletI, FaucetQueueItemI, TxI } from "mainnet-js";
+import { StorageProvider, WalletI, TxI } from "mainnet-js";
 import { RegisterWebhookParams } from "./webhook/interface.js";
 import { getSslConfig } from "./util.js";
 import parseDbUrl from "parse-database-url";
@@ -13,7 +13,6 @@ export default class SqlProvider implements StorageProvider {
   private formatter;
   private walletTable: string;
   private webhookTable: string = "webhook";
-  private faucetQueueTable: string = "faucet_queue";
   private isInit = false;
 
   public constructor(walletTable?: string) {
@@ -67,17 +66,7 @@ export default class SqlProvider implements StorageProvider {
       );
       const resWebhook = await this.db.query(createWebhookTable);
 
-      let createFaucetQueueTable = this.formatter(
-        "CREATE TABLE IF NOT EXISTS %I (" +
-          "id SERIAL PRIMARY KEY," +
-          "address TEXT," +
-          "value TEXT" +
-          ");",
-        this.faucetQueueTable
-      );
-      const resFaucetQueue = await this.db.query(createFaucetQueueTable);
-
-      if (!resWallet || !resWebhook || !resFaucetQueue)
+      if (!resWallet || !resWebhook)
         throw new Error("Failed to init SqlProvider");
     }
 
@@ -240,56 +229,5 @@ export default class SqlProvider implements StorageProvider {
   public async clearWebhooks(): Promise<void> {
     let text = this.formatter("DELETE FROM %I;", this.webhookTable);
     await this.db.query(text);
-  }
-
-  public async addFaucetQueueItem(
-    address: string,
-    value: string
-  ): Promise<boolean> {
-    let text = this.formatter(
-      "INSERT into %I (address,value) VALUES ($1, $2);",
-      this.faucetQueueTable
-    );
-    return await this.db.query(text, [address, value]);
-  }
-
-  public async getFaucetQueue(): Promise<Array<FaucetQueueItemI>> {
-    let text = this.formatter("SELECT * FROM %I;", this.faucetQueueTable);
-    let result = await this.db.query(text);
-    if (result) {
-      const FaucetQueueItemArray: FaucetQueueItemI[] = await Promise.all(
-        result.rows.map(async (obj: FaucetQueueItemI) => {
-          return obj;
-        })
-      );
-      return FaucetQueueItemArray;
-    } else {
-      return [];
-    }
-  }
-
-  public async deleteFaucetQueueItems(
-    items: Array<FaucetQueueItemI>
-  ): Promise<boolean> {
-    const ids = items.map((val) => val.id);
-    let text = this.formatter(
-      "DELETE FROM %I WHERE id IN (%L);",
-      this.faucetQueueTable,
-      ids
-    );
-    let result = await this.db.query(text);
-    return result;
-  }
-
-  public async beginTransaction(): Promise<boolean> {
-    return await this.db.query("BEGIN");
-  }
-
-  public async commitTransaction(): Promise<boolean> {
-    return await this.db.query("COMMIT");
-  }
-
-  public async rollbackTransaction(): Promise<boolean> {
-    return await this.db.query("ROLLBACK");
   }
 }
