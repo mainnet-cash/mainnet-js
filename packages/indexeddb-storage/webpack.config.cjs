@@ -1,7 +1,12 @@
 const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { webpack } = require("webpack");
+const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const __basedir = require("path").resolve(__dirname, "../../");
+const fs = require("fs");
+
+fs.copyFileSync(__basedir + "/jest/playwright/mainnet.js", __basedir + "/jest/playwright/indexeddb-storage/mainnet.js");
 
 const baseConfig = {
   mode: "development",
@@ -59,6 +64,10 @@ const browserConfig = {
     //new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
       title: "The Empty Mainnet App",
+    }),
+    new InjectBodyPlugin({
+      content:
+        `<script defer src="mainnet.js"></script><script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>`,
     }),
   ],
   resolve: {

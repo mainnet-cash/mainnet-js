@@ -1,5 +1,5 @@
 const playwright = require("playwright");
-const PAGE_URL = "http://localhost:8080";
+const PAGE_URL = "http://localhost:8080/indexeddb-storage/index.html";
 
 describe(`Wallet should function in the browser`, () => {
   let browser = null;
