@@ -6,7 +6,9 @@ const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const __basedir = require("path").resolve(__dirname, "../../");
 const fs = require("fs");
 
-fs.mkdirSync(__basedir + "/jest/playwright/indexeddb-storage");
+fs.mkdirSync(__basedir + "/jest/playwright/indexeddb-storage", {
+  recursive: true,
+});
 fs.copyFileSync(
   __basedir + "/jest/playwright/mainnet.js",
   __basedir + "/jest/playwright/indexeddb-storage/mainnet.js"
