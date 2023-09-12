@@ -1,4 +1,4 @@
-import { getStorageProvider } from "../db/getStorageProvider.js";
+// import { getStorageProvider } from "../db/getStorageProvider.js";
 import { MnemonicI, WalletI } from "./interface.js";
 import { NetworkType } from "../enum.js";
 import { StorageProvider } from "../db/index.js";
@@ -20,7 +20,7 @@ export class BaseWallet implements WalletI {
   address?: string;
   privateKey?: any;
   publicKey?: any;
-  storage?: StorageProvider;
+  public static StorageProvider?: typeof StorageProvider;
   isTestnet: boolean;
   name: string;
   network: NetworkType;
@@ -528,4 +528,11 @@ export async function getNamedWalletId(
       "No database was available or configured to store the named wallet."
     );
   }
+}
+
+function getStorageProvider(dbName: string): StorageProvider | undefined {
+  if (!BaseWallet.StorageProvider) {
+    return undefined;
+  }
+  return new (BaseWallet.StorageProvider as any)(dbName);
 }

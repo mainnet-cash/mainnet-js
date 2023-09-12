@@ -5,6 +5,7 @@ module.exports = {
   roots: [
     "<rootDir>/packages/mainnet-js/src",
     "<rootDir>/packages/contract/src",
+    "<rootDir>/packages/indexeddb-storage/src",
   ],
   preset: "jest-playwright-preset",
   collectCoverageFrom: ["**/*.{js}", "!**/node_modules/**", "!**/generated/**"],

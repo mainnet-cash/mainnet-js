@@ -1,6 +1,5 @@
 import Dexie from "dexie";
-import StorageProvider from "./StorageProvider.js";
-import { WalletI } from "./interface.js";
+import { StorageProvider, WalletI } from "mainnet-js";
 
 export default class IndexedDBProvider
   extends Dexie

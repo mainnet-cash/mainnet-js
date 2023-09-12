@@ -24,10 +24,6 @@ if (process.env.USE_DOTENV || true) {
   PROJECT_DIR: __dirname,
   FAUCET_CASHADDR: process.env.FAUCET_CASHADDR,
   FAUCET_WIF: process.env.FAUCET_WIF,
-  FAUCET_SBCH_ADDRESS: process.env.FAUCET_SBCH_ADDRESS,
-  FAUCET_SBCH_PRIVKEY: process.env.FAUCET_SBCH_PRIVKEY,
-  FAUCET_SBCH_CONTRACT_ADDRESS: process.env.FAUCET_SBCH_CONTRACT_ADDRESS,
-  FAUCET_SBCH_TOKEN_ID: process.env.FAUCET_SBCH_TOKEN_ID,
   API_KEY: process.env.API_KEY
 };
 config.OPENAPI_YAML = path.join(config.ROOT_DIR, 'api', 'openapi.yaml');

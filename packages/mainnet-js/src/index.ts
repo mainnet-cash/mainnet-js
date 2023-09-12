@@ -2,7 +2,6 @@ export * from "./db/index.js";
 export * from "./mine/index.js";
 export * from "./test/expect.js";
 export * from "./test/axios.js";
-export * from "./webhook/index.js";
 export * from "./wallet/Bcmr.js";
 
 export * from "./network/index.js";
@@ -48,7 +47,3 @@ export {
   VerifyMessageResponseI,
 } from "./message/interface.js";
 export { WalletRequestI, WalletResponseI } from "./wallet/interface.js";
-
-// export function cube(x: number) {
-//   return x * x * x;
-// }

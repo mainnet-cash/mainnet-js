@@ -1,4 +1,7 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
+import { RegTestWallet, TestNetWallet, Wallet, BaseWallet } from "mainnet-js";
+import { default as SqlProvider } from "./SqlProvider";
+
+BaseWallet.StorageProvider = SqlProvider;
 
 /**
  * @jest-environment jsdom

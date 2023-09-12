@@ -1,14 +1,15 @@
-import { WalletTypeEnum } from "./wallet/enum";
-import { UnitEnum } from "./enum";
-import { bchParam } from "./chain";
-import { Wallet, RegTestWallet, TestNetWallet } from "./wallet/Wif";
-import { createWallet } from "./wallet/createWallet";
-import { BalanceResponse } from "./util/balanceObjectFromSatoshi";
-import { ExchangeRate } from "./rate/ExchangeRate";
-import { initProviders, disconnectProviders } from "./network/Connection";
-import { toUtxoId } from "./wallet/model";
-import { Config } from "./config";
-import { binToHex } from "@bitauth/libauth";
+import { BaseWallet, WalletTypeEnum } from "mainnet-js";
+import { UnitEnum } from "mainnet-js";
+import { Wallet, RegTestWallet, TestNetWallet } from "mainnet-js";
+import { createWallet } from "mainnet-js";
+import { BalanceResponse } from "mainnet-js";
+import { ExchangeRate } from "mainnet-js";
+import { initProviders, disconnectProviders } from "mainnet-js";
+import { toUtxoId } from "mainnet-js";
+import { Config } from "mainnet-js";
+import { default as SqlProvider } from "./SqlProvider.js";
+
+BaseWallet.StorageProvider = SqlProvider;
 
 beforeAll(async () => {
   await initProviders();
@@ -37,9 +38,7 @@ describe(`Test Wallet library`, () => {
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * bchParam.subUnits
-      );
+      expect(await alice.getBalance("sat")).toBeGreaterThan(5000 * 100000000);
     }
   });
 
@@ -131,9 +130,7 @@ describe(`Test Wallet library`, () => {
       let alice = await RegTestWallet.fromId(
         `wif:regtest:${process.env.PRIVATE_WIF}`
       ); // insert WIF from #1
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * bchParam.subUnits
-      );
+      expect(await alice.getBalance("sat")).toBeGreaterThan(5000 * 100000000);
     }
   });
 
@@ -510,10 +507,65 @@ describe(`Test Wallet library`, () => {
     expect(otherWallet.parentDerivationPath).toBe("m/44'/145'/0'");
     expect(otherWallet.derivationPath).toBe("m/44'/145'/0'/0/0");
 
-    expect(binToHex(wallet.privateKey!)).not.toBe(
-      binToHex(otherWallet.privateKey!)
+    const binsAreEqual = (a, b) => {
+      if (a.length !== b.length) {
+        return false;
+      }
+      // eslint-disable-next-line functional/no-let, functional/no-loop-statement, no-plusplus
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    expect(binsAreEqual(wallet.privateKey!, otherWallet.privateKey!)).toBe(
+      false
     );
 
     Config.DefaultParentDerivationPath = savedDerivationPath;
+  });
+});
+
+describe(`Tests named wallet creation`, () => {
+  test("Expect a nameless named wallet to error", async () => {
+    expect.assertions(1);
+    try {
+      await Wallet.named("");
+    } catch (e: any) {
+      expect(e.message).toBe("Named wallets must have a non-empty name");
+    }
+  });
+
+  test("Expect force saving over a named wallet to fail", async () => {
+    expect.assertions(1);
+    try {
+      await RegTestWallet.named("duplicate_name", "dup_test");
+      await RegTestWallet.named("duplicate_name", "dup_test", true);
+    } catch (e: any) {
+      expect(e.message).toBe(
+        "A wallet with the name duplicate_name already exists in dup_test"
+      );
+    }
+  });
+
+  test("Store and replace a Regtest wallet", async () => {
+    const name = `storereplace ${Math.random()}`;
+    expect(await RegTestWallet.namedExists(name)).toBe(false);
+    let w1 = await RegTestWallet.named(name);
+    expect(await RegTestWallet.namedExists(name)).toBe(true);
+
+    let seedId = (
+      await RegTestWallet.fromSeed(new Array(12).join("abandon "))
+    ).toDbString();
+    let w3 = await RegTestWallet.replaceNamed(name, seedId);
+    let w4 = await RegTestWallet.named(name);
+    expect(w4.toDbString()).not.toBe(w1.toDbString());
+    expect(w4.toDbString()).toBe(seedId);
+
+    let w5 = await RegTestWallet.replaceNamed(`${name}_nonexistent`, seedId);
+    let w6 = await RegTestWallet.named(`${name}_nonexistent`);
+    expect(w6.toDbString()).toBe(w5.toDbString());
   });
 });

@@ -1,7 +1,8 @@
-import { sslConfigI } from "./interface.js";
-
-export function indexedDbIsAvailable() {
-  return "indexedDB" in globalThis;
+export interface sslConfigI {
+  rejectUnauthorized: boolean;
+  ca?: string;
+  key?: string;
+  cert?: string;
 }
 
 export function getSslConfig(): sslConfigI | undefined {

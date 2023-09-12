@@ -1,4 +1,5 @@
 import * as mainnet from "mainnet-js";
+import { Webhook } from "@mainnet-cash/postgresql-storage";
 import server from "../";
 import request from "supertest";
 
@@ -7,11 +8,11 @@ var app;
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
     app = await server.getServer().launch();
-    mainnet.Webhook.debug.setupAxiosMocks();
+    Webhook.debug.setupAxiosMocks();
   });
 
   beforeEach(function () {
-    mainnet.Webhook.debug.reset();
+    Webhook.debug.reset();
   });
 
   afterAll(async function () {
@@ -53,7 +54,7 @@ describe("Test Webhook Endpoints", () => {
       });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(mainnet.Webhook.debug.responses["http://example.com/balance"].length).toBe(1);
+    expect(Webhook.debug.responses["http://example.com/balance"].length).toBe(1);
   });
 
   it("Should register a transaction watch webhook", async () => {
@@ -86,7 +87,7 @@ describe("Test Webhook Endpoints", () => {
       });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(mainnet.Webhook.debug.responses["http://example.com/transaction"].length).toBe(1);
+    expect(Webhook.debug.responses["http://example.com/transaction"].length).toBe(1);
   });
 
   it("Should fail register a webhook of unknown type", async () => {

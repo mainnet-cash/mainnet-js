@@ -140,29 +140,6 @@ describe(`Test creation of wallet from walletId`, () => {
   });
 });
 
-describe(`Tests named wallet creation`, () => {
-  test("Expect a nameless named wallet to error", async () => {
-    expect.assertions(1);
-    try {
-      await Wallet.named("");
-    } catch (e: any) {
-      expect(e.message).toBe("Named wallets must have a non-empty name");
-    }
-  });
-
-  test("Expect force saving over a named wallet to fail", async () => {
-    expect.assertions(1);
-    try {
-      await RegTestWallet.named("duplicate_name", "dup_test");
-      await RegTestWallet.named("duplicate_name", "dup_test", true);
-    } catch (e: any) {
-      expect(e.message).toBe(
-        "A wallet with the name duplicate_name already exists in dup_test"
-      );
-    }
-  });
-});
-
 describe(`Mnemonic wallet creation`, () => {
   test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
     let w = await Wallet.fromId(
@@ -1009,25 +986,6 @@ describe(`Wallet extrema behavior regression testing`, () => {
         `the transaction was rejected by network rules.\n\ndust (code 64)\n`
       );
     }
-  });
-
-  test("Store and replace a Regtest wallet", async () => {
-    const name = `storereplace ${Math.random()}`;
-    expect(await RegTestWallet.namedExists(name)).toBe(false);
-    let w1 = await RegTestWallet.named(name);
-    expect(await RegTestWallet.namedExists(name)).toBe(true);
-
-    let seedId = (
-      await RegTestWallet.fromSeed(new Array(12).join("abandon "))
-    ).toDbString();
-    let w3 = await RegTestWallet.replaceNamed(name, seedId);
-    let w4 = await RegTestWallet.named(name);
-    expect(w4.toDbString()).not.toBe(w1.toDbString());
-    expect(w4.toDbString()).toBe(seedId);
-
-    let w5 = await RegTestWallet.replaceNamed(`${name}_nonexistent`, seedId);
-    let w6 = await RegTestWallet.named(`${name}_nonexistent`);
-    expect(w6.toDbString()).toBe(w5.toDbString());
   });
 
   test("Send op_return data", async () => {

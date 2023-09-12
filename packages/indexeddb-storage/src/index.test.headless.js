@@ -1,5 +1,5 @@
 const playwright = require("playwright");
-const PAGE_URL = "http://localhost:8080";
+const PAGE_URL = "http://localhost:8080/indexeddb-storage/index.html";
 
 describe(`WalletDatabase should handle indexeddb `, () => {
   let browser = null;
@@ -27,6 +27,7 @@ describe(`WalletDatabase should handle indexeddb `, () => {
 
   test(`Should store and recall a testnet wallet`, async () => {
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       let w1 = await TestNetWallet.newRandom("Testnet Wallet 1");
       let w1Again = await TestNetWallet.named("Testnet Wallet 1");
       return [w1, w1Again];
@@ -43,6 +44,7 @@ describe(`WalletDatabase should handle indexeddb `, () => {
 
   test(`Should store and recall a mainnet wallet`, async () => {
     const result = await page.evaluate(async () => {
+      BaseWallet.StorageProvider = IndexedDBProvider;
       let w1 = await Wallet.named("Mainnet Wallet 1");
       let w1Again = await Wallet.named("Mainnet Wallet 1");
       return [w1, w1Again];

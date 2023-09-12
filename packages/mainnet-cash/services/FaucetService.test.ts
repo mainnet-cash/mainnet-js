@@ -76,8 +76,5 @@ describe("Test faucet endpoints", () => {
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body.bchtest).toBe(config.FAUCET_CASHADDR);
-    expect(resp.body.sbchtest).toBe(config.FAUCET_SBCH_ADDRESS);
-    expect(resp.body.sbchcontract).toBe(config.FAUCET_SBCH_CONTRACT_ADDRESS);
-    expect(resp.body.sbchtoken).toBe(config.FAUCET_SBCH_TOKEN_ID);
   });
 });

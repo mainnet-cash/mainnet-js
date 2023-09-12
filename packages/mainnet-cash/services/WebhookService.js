@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import Service from './Service.js';
-import * as mainnet from "mainnet-js";
+import { WebhookWorker } from "@mainnet-cash/postgresql-storage";
 
 /**
 * Create a webhook to watch cashaddress balance and transactions. 
@@ -11,7 +11,7 @@ import * as mainnet from "mainnet-js";
 const watchAddress = ({ watchAddressRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const worker = await mainnet.WebhookWorker.instance();
+      const worker = await WebhookWorker.instance();
       const id =  await worker.registerWebhook({ ...watchAddressRequest }, true);
       resolve(Service.successResponse({
         id: id,
