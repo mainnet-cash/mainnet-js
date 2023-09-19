@@ -1,8 +1,8 @@
 const map = {};
 
-const _fetch = global.fetch;
+const _fetch = globalThis.fetch;
 
-global.fetch = ((uri: any, ...rest: any) => {
+globalThis.fetch = ((uri: any, ...rest: any) => {
   if (!map[uri]) {
     return _fetch(uri, ...rest);
   }

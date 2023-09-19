@@ -169,11 +169,6 @@ const webWorkerConfig = {
 };
 
 const browserTestDiff = {
-  entry: {
-    mainnet: {
-      import: "./src/index.webtests.ts",
-    },
-  },
   output: {
     filename: `[name].js`,
     path: __basedir + "/jest/playwright/",
