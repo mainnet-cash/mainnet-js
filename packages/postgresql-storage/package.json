@@ -10,6 +10,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
+    "axios": "^0.21.1",
     "mainnet-js": "2.1.1",
     "parse-database-url": "^0.3.0",
     "pg": "^8.11.3",

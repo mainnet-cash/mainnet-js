@@ -1,7 +1,5 @@
 export * from "./db/index.js";
 export * from "./mine/index.js";
-export * from "./test/expect.js";
-export * from "./test/axios.js";
 export * from "./wallet/Bcmr.js";
 
 export * from "./network/index.js";
