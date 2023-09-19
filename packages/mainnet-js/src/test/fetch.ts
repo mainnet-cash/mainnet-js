@@ -13,7 +13,9 @@ global.fetch = ((uri: any, ...rest: any) => {
         return typeof map[uri] === "string" ? JSON.parse(map[uri]) : map[uri];
       },
       text: () => {
-        return typeof map[uri] === "string" ? map[uri] : JSON.stringify(map[uri], null, 2);
+        return typeof map[uri] === "string"
+          ? map[uri]
+          : JSON.stringify(map[uri], null, 2);
       },
     })
   );

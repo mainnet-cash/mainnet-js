@@ -40,7 +40,10 @@ export class ExchangeRate {
     }
   }
 
-  static async getRateFromLocalStorage(symbol, useCache = true): Promise<number> {
+  static async getRateFromLocalStorage(
+    symbol,
+    useCache = true
+  ): Promise<number> {
     if (!useCache) {
       return await getRateFromExchange(symbol);
     }

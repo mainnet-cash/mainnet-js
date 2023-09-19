@@ -413,18 +413,16 @@ export class BCMR {
       throw new Error("Provide `chaingraphUrl` param.");
     }
 
-    const response = await fetch(
-      options.chaingraphUrl,
-      {
-        method: "POST",
-        headers: {
-          Accept: "*/*",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          operationName: null,
-          variables: {},
-          query: `
+    const response = await fetch(options.chaingraphUrl, {
+      method: "POST",
+      headers: {
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        operationName: null,
+        variables: {},
+        query: `
 {
   transaction(
     where: {
@@ -459,9 +457,9 @@ export class BCMR {
       }
     }
   }
-}`}),
-      },
-    );
+}`,
+      }),
+    });
 
     const responseData = await response.json();
 
