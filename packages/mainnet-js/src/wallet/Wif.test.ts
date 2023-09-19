@@ -852,18 +852,6 @@ describe(`Wallet subscriptions`, () => {
     expect(blockWaitResult).toBe(true);
     expect(blockNumberWaitResult).toBe(true);
   });
-
-  test.skip("Should get testnet satoshis and send them back", async () => {
-    const wallet = (await TestNetWallet.newRandom()) as TestNetWallet;
-    const txid = await wallet.getTestnetSatoshis();
-    expect(txid.length).toBe(64);
-    const balance = await wallet.getBalance("sat");
-    expect(balance).toBe(10000);
-
-    const response = await wallet.returnTestnetSatoshis();
-    delay(3000);
-    expect(response.balance!.sat!).toBe(0);
-  });
 });
 
 describe(`Wallet extrema behavior regression testing`, () => {

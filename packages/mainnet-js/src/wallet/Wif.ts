@@ -77,7 +77,6 @@ import { sumTokenAmounts, sumUtxoValue } from "../util/sumUtxoValue.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
 import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
-import axios from "axios";
 import {
   RegTestUtil,
   RegTestWatchUtil,
@@ -1757,37 +1756,6 @@ export class TestNetWallet extends Wallet {
   static faucetServer = "https://rest-unstable.mainnet.cash";
   constructor(name = "") {
     super(name, NetworkType.Testnet);
-  }
-
-  // will receive 10000 testnet satoshi, rate limits apply
-  async getTestnetSatoshis(): Promise<string> {
-    try {
-      const response = await axios.post(
-        `${TestNetWallet.faucetServer}/faucet/get_testnet_bch`,
-        { cashaddr: this.cashaddr! }
-      );
-      const data = response.data;
-      return data.txId;
-    } catch (e) {
-      // console.log(e);
-      // console.log(e.response ? e.response.data : "");
-      throw e;
-    }
-  }
-
-  // be nice and return them back
-  async returnTestnetSatoshis(): Promise<SendResponse> {
-    try {
-      const response = await axios.post(
-        `${TestNetWallet.faucetServer}/faucet/get_addresses`
-      );
-      const data = response.data;
-      return await this.sendMax(data.bchtest);
-    } catch (e: any) {
-      console.log(e);
-      console.log(e.response ? e.response.data : "");
-      throw e;
-    }
   }
 
   // interface to static util functions. see Util.ts

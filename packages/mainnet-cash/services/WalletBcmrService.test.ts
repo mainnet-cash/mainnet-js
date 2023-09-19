@@ -1,6 +1,6 @@
 import server from "../index.js";
 import request from "supertest";
-import { setupAxiosMock, removeAxiosMock, binToHex } from "mainnet-js";
+import { setupFetchMock, removeFetchMock, binToHex } from "mainnet-js";
 import { sha256, binToBase64, utf8ToBin, OpReturnData, NFTCapability } from "mainnet-js";
 
 var app;
@@ -84,7 +84,7 @@ describe("Test Wallet BCMR Endpoints", () => {
   test(`Add metadata from uri and get token info`, async () => {
     await request(app).post("/wallet/bcmr/reset_registries").send({});
 
-    setupAxiosMock(
+    setupFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       registry
     );
@@ -110,7 +110,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     });
     expect((await request(app).post("/wallet/bcmr/get_registries").send({})).body.length).toBe(1);
 
-    removeAxiosMock(
+    removeFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
   });
@@ -148,7 +148,7 @@ describe("Test Wallet BCMR Endpoints", () => {
       }
     ]})).body;
 
-    setupAxiosMock(
+    setupFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
       registry
     );
@@ -186,7 +186,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     expect(otherChain.length).toBe(1);
     expect((await request(app).post("/wallet/bcmr/get_registries").send({})).body.length).toBe(1);
 
-    removeAxiosMock(
+    removeFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     );
   });
@@ -206,7 +206,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     registry_v1.extensions = { authchain: {} };
     const contentHash_v1 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v1, null, 2)));
-    setupAxiosMock(
+    setupFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
       JSON.stringify(registry_v1, null, 2)
     );
@@ -237,7 +237,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     };
     const contentHash_v2 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v2, null, 2)));
-    setupAxiosMock(
+    setupFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
       JSON.stringify(registry_v2, null, 2)
     );
@@ -269,7 +269,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     };
     const contentHash_v3 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v3, null, 2)));
-    setupAxiosMock(
+    setupFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
       JSON.stringify(registry_v3, null, 2)
     );
@@ -290,7 +290,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     registry_v4.extensions = {};
     const contentHash_v4 = sha256
       .hash(utf8ToBin(JSON.stringify(registry_v4, null, 2)));
-    setupAxiosMock(
+    setupFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
       JSON.stringify(registry_v4, null, 2)
     );
@@ -379,16 +379,16 @@ describe("Test Wallet BCMR Endpoints", () => {
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
     );
 
-    removeAxiosMock(
+    removeFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
     );
-    removeAxiosMock(
+    removeFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
     );
-    removeAxiosMock(
+    removeFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
     );
-    removeAxiosMock(
+    removeFetchMock(
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
     );
   });

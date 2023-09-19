@@ -1,3 +1,4 @@
+import { removeFetchMock, setupFetchMock } from "../test/fetch";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { RegTestWallet } from "../wallet/Wif";
 import { ExchangeRate } from "./ExchangeRate";
@@ -13,23 +14,20 @@ afterAll(async () => {
 
 describe("Exchange rate tests", () => {
   test("Get price in usd", async () => {
-    ExchangeRate.setupAxiosMock(
+    setupFetchMock(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
       { "bitcoin-cash": { usd: 666.666 } }
     );
-    ExchangeRate.setupAxiosMock(
-      "https://markets.api.bitcoin.com/live/bitcoin",
-      {
-        BCH: 666.666,
-      }
-    );
+    setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
+      BCH: 666.666,
+    });
 
     let rate = await ExchangeRate.get("usd");
     expect(rate).toBe(666.666);
   });
 
   test("Test watchBalanceUsd", async () => {
-    ExchangeRate.setupAxiosMock(
+    setupFetchMock(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
       { "bitcoin-cash": { usd: 666.666 } }
     );
@@ -45,7 +43,7 @@ describe("Exchange rate tests", () => {
       }
     }, 3000);
 
-    ExchangeRate.setupAxiosMock(
+    setupFetchMock(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
       { "bitcoin-cash": { usd: 777.777 } }
     );
@@ -60,7 +58,7 @@ describe("Exchange rate tests", () => {
 
     await delay(3000);
 
-    ExchangeRate.removeAxiosMock(
+    removeFetchMock(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd"
     );
     expect(cbCounter).toBe(2);

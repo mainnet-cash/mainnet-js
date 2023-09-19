@@ -7,7 +7,6 @@ import {
   Transaction,
   utf8ToBin,
 } from "@bitauth/libauth";
-import axios from "axios";
 import { Network, TxI } from "../interface.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
@@ -58,25 +57,22 @@ export class BCMR {
     // content hashes HTTPS Publication Outputs per spec
     if (contentHash) {
       // request as text and verify hash
-      const response = await axios.get(uri, {
-        responseType: "text",
-        transformResponse: (val) => {
-          return val;
-        },
-      });
-      const hash = binToHex(sha256.hash(utf8ToBin(response.data as string)));
+      const response = await fetch(uri);
+      const data = await response.text();
+      const hash = binToHex(sha256.hash(utf8ToBin(data)));
       if (contentHash != hash) {
         throw new Error(
           `Content hash mismatch for URI: ${uri}\nreceived: ${hash}\nrequired: ${contentHash}`
         );
       }
 
-      return JSON.parse(response.data) as Registry;
+      return JSON.parse(data) as Registry;
     }
 
     // request as JSON
-    const response = await axios.get(uri);
-    return response.data as Registry;
+    const response = await fetch(uri);
+    const data = await response.json();
+    return data as Registry;
   }
 
   /**
@@ -417,9 +413,13 @@ export class BCMR {
       throw new Error("Provide `chaingraphUrl` param.");
     }
 
-    const response = await axios.post(
-      options.chaingraphUrl,
-      {
+    const response = await fetch(options.chaingraphUrl, {
+      method: "POST",
+      headers: {
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         operationName: null,
         variables: {},
         query: `
@@ -458,19 +458,14 @@ export class BCMR {
     }
   }
 }`,
-      },
-      {
-        responseType: "json",
-        headers: {
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      }),
+    });
+
+    const responseData = await response.json();
 
     const result: AuthChain = [];
     const migrations =
-      response.data.data.transaction[0]?.authchains[0].migrations;
+      responseData.data.transaction[0]?.authchains[0].migrations;
     if (!migrations) {
       return result;
     }

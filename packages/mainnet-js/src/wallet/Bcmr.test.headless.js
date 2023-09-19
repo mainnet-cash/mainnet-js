@@ -102,7 +102,7 @@ describe(`Wallet should function in the browser`, () => {
       async ([id, registry]) => {
         BCMR.resetRegistries();
 
-        setupAxiosMock(
+        setupFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
           registry
         );
@@ -128,7 +128,7 @@ describe(`Wallet should function in the browser`, () => {
         );
         expect(BCMR.metadataRegistries.length).toBe(1);
 
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
         );
       },
@@ -163,7 +163,7 @@ describe(`Wallet should function in the browser`, () => {
           opreturnData,
         ]);
 
-        setupAxiosMock(
+        setupFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json",
           registry
         );
@@ -198,7 +198,7 @@ describe(`Wallet should function in the browser`, () => {
         expect(otherChain.length).toBe(1);
         expect(BCMR.metadataRegistries.length).toBe(1);
 
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
         );
       },
@@ -219,7 +219,7 @@ describe(`Wallet should function in the browser`, () => {
         const contentHash_v1 = sha256.hash(
           utf8ToBin(JSON.stringify(registry_v1, null, 2))
         );
-        setupAxiosMock(
+        setupFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json",
           JSON.stringify(registry_v1, null, 2)
         );
@@ -245,7 +245,7 @@ describe(`Wallet should function in the browser`, () => {
         const contentHash_v2 = sha256.hash(
           utf8ToBin(JSON.stringify(registry_v2, null, 2))
         );
-        setupAxiosMock(
+        setupFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json",
           JSON.stringify(registry_v2, null, 2)
         );
@@ -270,7 +270,7 @@ describe(`Wallet should function in the browser`, () => {
         const contentHash_v3 = sha256.hash(
           utf8ToBin(JSON.stringify(registry_v3, null, 2))
         );
-        setupAxiosMock(
+        setupFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json",
           JSON.stringify(registry_v3, null, 2)
         );
@@ -290,7 +290,7 @@ describe(`Wallet should function in the browser`, () => {
         const contentHash_v4 = sha256.hash(
           utf8ToBin(JSON.stringify(registry_v4, null, 2))
         );
-        setupAxiosMock(
+        setupFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json",
           JSON.stringify(registry_v4, null, 2)
         );
@@ -376,16 +376,16 @@ describe(`Wallet should function in the browser`, () => {
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
         );
 
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
         );
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
         );
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
         );
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
         );
       },

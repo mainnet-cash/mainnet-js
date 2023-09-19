@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.2.0
+
+* Minor breaking change: node 18 is required
+* Replace axios with fetch for network connectivity
+
 2.1.1
 
 * Reimplement ExchangeRateProvider to use localStorage instead of IndexedDB in browsers
