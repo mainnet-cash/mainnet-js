@@ -128,7 +128,7 @@ describe(`Wallet should function in the browser`, () => {
         );
         expect(BCMR.metadataRegistries.length).toBe(1);
 
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
         );
       },
@@ -198,7 +198,7 @@ describe(`Wallet should function in the browser`, () => {
         expect(otherChain.length).toBe(1);
         expect(BCMR.metadataRegistries.length).toBe(1);
 
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
         );
       },
@@ -376,16 +376,16 @@ describe(`Wallet should function in the browser`, () => {
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
         );
 
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v1.json"
         );
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json"
         );
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v3.json"
         );
-        removeAxiosMock(
+        removeFetchMock(
           "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v4.json"
         );
       },
