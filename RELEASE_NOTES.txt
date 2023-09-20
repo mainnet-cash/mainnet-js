@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.2.1
+
+* Export `sumUtxoValue` and `sumTokenAmounts` utility functions
+
 2.2.0
 
 * Minor breaking change: node 18 is required
