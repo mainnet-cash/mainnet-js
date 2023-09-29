@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.2.2
+
+* Fix utxo selection when sending nfts with same commitment
+* Export FeePaidByEnum
+
 2.2.1
 
 * Export `sumUtxoValue` and `sumTokenAmounts` utility functions

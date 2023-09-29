@@ -19,7 +19,7 @@ export { Config } from "./config.js";
 
 // Enum
 export { NetworkType, UnitEnum } from "./enum.js";
-export { WalletTypeEnum } from "./wallet/enum.js";
+export { WalletTypeEnum, FeePaidByEnum } from "./wallet/enum.js";
 
 // models
 export * from "./wallet/model.js";
