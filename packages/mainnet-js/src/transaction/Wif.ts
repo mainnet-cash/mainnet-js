@@ -308,6 +308,7 @@ export async function getSuitableUtxos(
   ) as TokenSendRequest[];
 
   const availableInputs = inputs.slice();
+  const selectedInputs: UtxoI[] = [];
 
   // find matching utxos for token transfers
   if (tokenOperation === "send") {
@@ -319,12 +320,16 @@ export async function getSuitableUtxos(
         (val) =>
           val.token?.capability === request.capability &&
           val.token?.commitment === request.commitment
+      ).filter(val => selectedInputs.find(selected =>
+        val.txid === selected.txid &&
+        val.vout === selected.vout) === undefined
       );
       if (sameCommitmentTokens.length) {
         const input = sameCommitmentTokens[0];
         const index = availableInputs.indexOf(input);
         if (index !== -1) {
           suitableUtxos.push(input);
+          selectedInputs.push(input);
           availableInputs.splice(index, 1);
           amountAvailable += BigInt(input.satoshis);
         }
