@@ -262,21 +262,18 @@ describe(`Test cashtokens`, () => {
     const tokenId = genesisResponse.tokenIds![0];
 
     // mint 2 NFTs, amount reducing
-    const response = await alice.tokenMint(
-      tokenId,
-      [
-        new TokenMintRequest({
-          cashaddr: alice.cashaddr!,
-          capability: NFTCapability.none,
-          commitment: "0a",
-        }),
-        new TokenMintRequest({
-          cashaddr: alice.cashaddr!,
-          capability: NFTCapability.none,
-          commitment: "0a",
-        }),
-      ]
-    );
+    const response = await alice.tokenMint(tokenId, [
+      new TokenMintRequest({
+        cashaddr: alice.cashaddr!,
+        capability: NFTCapability.none,
+        commitment: "0a",
+      }),
+      new TokenMintRequest({
+        cashaddr: alice.cashaddr!,
+        capability: NFTCapability.none,
+        commitment: "0a",
+      }),
+    ]);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(3);
     expect(tokenId).toEqual(response.tokenIds![0]);

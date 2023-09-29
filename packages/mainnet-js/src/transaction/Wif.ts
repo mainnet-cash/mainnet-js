@@ -316,14 +316,19 @@ export async function getSuitableUtxos(
       const tokenInputs = availableInputs.filter(
         (val) => val.token?.tokenId === request.tokenId
       );
-      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs].filter(
-        (val) =>
-          val.token?.capability === request.capability &&
-          val.token?.commitment === request.commitment
-      ).filter(val => selectedInputs.find(selected =>
-        val.txid === selected.txid &&
-        val.vout === selected.vout) === undefined
-      );
+      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs]
+        .filter(
+          (val) =>
+            val.token?.capability === request.capability &&
+            val.token?.commitment === request.commitment
+        )
+        .filter(
+          (val) =>
+            selectedInputs.find(
+              (selected) =>
+                val.txid === selected.txid && val.vout === selected.vout
+            ) === undefined
+        );
       if (sameCommitmentTokens.length) {
         const input = sameCommitmentTokens[0];
         const index = availableInputs.indexOf(input);
