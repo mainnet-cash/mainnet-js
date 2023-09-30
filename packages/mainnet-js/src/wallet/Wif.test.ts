@@ -5,7 +5,7 @@ import { UnitEnum } from "../enum";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
 import { delay } from "../util/delay";
-import { OpReturnData, SendResponse } from "./model";
+import { OpReturnData, SendResponse, toUtxoId } from "./model";
 import { ElectrumRawTransaction } from "../network/interface";
 import {
   binToHex,
@@ -1150,5 +1150,40 @@ describe(`Wallet extrema behavior regression testing`, () => {
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
     }
+  });
+
+  test("Should send with utxoIds", async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
+
+    const aliceUtxos = await aliceWallet.getAddressUtxos();
+
+    await expect(
+      aliceWallet.send(
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "sat",
+        },
+        { utxoIds: ["00ab:1", "00cd:2"] }
+      )
+    ).rejects.toThrow("not found in wallet");
+
+    await expect(
+      aliceWallet.send(
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "sat",
+        },
+        {
+          utxoIds: [
+            toUtxoId(aliceUtxos[0]),
+            `${aliceUtxos[1].txid}:${aliceUtxos[1].vout}`,
+          ],
+        }
+      )
+    ).resolves.not.toThrow();
   });
 });

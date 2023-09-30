@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.2.3
+
+* Load missing satoshi values for utxoids in format txid:vout
+
 2.2.2
 
 * Fix utxo selection when sending nfts with same commitment
