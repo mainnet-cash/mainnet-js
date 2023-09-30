@@ -1159,19 +1159,31 @@ describe(`Wallet extrema behavior regression testing`, () => {
 
     const aliceUtxos = await aliceWallet.getAddressUtxos();
 
-    await expect(aliceWallet.send({
-      cashaddr: bobWallet.cashaddr!,
-      value: 1000,
-      unit: "sat",
-    }, { utxoIds: ["00ab:1", "00cd:2"] })).rejects.toThrow("not found in wallet");
+    await expect(
+      aliceWallet.send(
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "sat",
+        },
+        { utxoIds: ["00ab:1", "00cd:2"] }
+      )
+    ).rejects.toThrow("not found in wallet");
 
-    await expect(aliceWallet.send({
-      cashaddr: bobWallet.cashaddr!,
-      value: 1000,
-      unit: "sat",
-    }, { utxoIds: [
-      toUtxoId(aliceUtxos[0]),
-      `${aliceUtxos[1].txid}:${aliceUtxos[1].vout}`,
-    ] })).resolves.not.toThrow();
+    await expect(
+      aliceWallet.send(
+        {
+          cashaddr: bobWallet.cashaddr!,
+          value: 1000,
+          unit: "sat",
+        },
+        {
+          utxoIds: [
+            toUtxoId(aliceUtxos[0]),
+            `${aliceUtxos[1].txid}:${aliceUtxos[1].vout}`,
+          ],
+        }
+      )
+    ).resolves.not.toThrow();
   });
 });
