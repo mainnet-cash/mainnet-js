@@ -103,6 +103,7 @@ import { BCMR } from "./Bcmr.js";
 import { qrAddress } from "../qr/Qr.js";
 import { ImageI } from "../qr/interface.js";
 import { Config } from "../config.js";
+import { checkUtxos } from "../util/checkUtxos.js";
 
 //#endregion Imports
 
@@ -816,9 +817,9 @@ export class Wallet extends BaseWallet {
     // get inputs
     let utxos: UtxoI[];
     if (params.options && params.options.utxoIds) {
-      utxos = params.options.utxoIds.map((utxoId: UtxoI | string) =>
+      utxos = await checkUtxos(params.options.utxoIds.map((utxoId: UtxoI | string) =>
         typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
-      );
+      ), this);
     } else {
       utxos = (await this.getAddressUtxos(this.cashaddr)).filter(
         (utxo) => !utxo.token
@@ -1054,9 +1055,9 @@ export class Wallet extends BaseWallet {
     // get inputs from options or query all inputs
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
-      utxos = options.utxoIds.map((utxoId: UtxoI | string) =>
+      utxos = await checkUtxos(options.utxoIds.map((utxoId: UtxoI | string) =>
         typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
-      );
+      ), this);
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);
     }
@@ -1443,9 +1444,9 @@ export class Wallet extends BaseWallet {
 
     let utxos: UtxoI[];
     if (options && options.utxoIds) {
-      utxos = options.utxoIds.map((utxoId: UtxoI | string) =>
+      utxos = await checkUtxos(options.utxoIds.map((utxoId: UtxoI | string) =>
         typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
-      );
+      ), this);
     } else {
       utxos = await this.getAddressUtxos(this.cashaddr);
     }
