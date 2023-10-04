@@ -46,4 +46,4 @@ export {
   SignedMessageResponseI,
   VerifyMessageResponseI,
 } from "./message/interface.js";
-export { WalletRequestI, WalletResponseI } from "./wallet/interface.js";
+export * from "./wallet/interface.js";

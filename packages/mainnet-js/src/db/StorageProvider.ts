@@ -1,4 +1,4 @@
-import { WalletI } from "./interface.js";
+import { WalletDbEntryI } from "./interface.js";
 
 export default abstract class StorageProvider {
   /**
@@ -34,7 +34,7 @@ export default abstract class StorageProvider {
   /**
    * @returns All saved wallets.
    */
-  abstract getWallets(): Promise<Array<WalletI>>;
+  abstract getWallets(): Promise<Array<WalletDbEntryI>>;
 
   /**
    * Get a named wallet from the database
@@ -42,7 +42,7 @@ export default abstract class StorageProvider {
    * @throws {Error} If the wallet could not be saved.
    * @returns The requested wallet.
    */
-  abstract getWallet(name: string): Promise<WalletI | undefined>;
+  abstract getWallet(name: string): Promise<WalletDbEntryI | undefined>;
 
   /**
    * Update named wallet in the database
