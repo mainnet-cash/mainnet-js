@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 2.2.3
+  version: 2.2.4
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
