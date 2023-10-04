@@ -1,7 +1,7 @@
 import { default as SqlProvider } from "./SqlProvider";
 import { BaseWallet } from "mainnet-js";
 import { RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
-import { WalletI } from "mainnet-js";
+import { WalletDbEntryI } from "mainnet-js";
 
 BaseWallet.StorageProvider = SqlProvider;
 
@@ -108,7 +108,7 @@ test("Should handle basic sql injection", async () => {
 test("Test wallet database name regression", async () => {
   const name = `test ${Math.random()}`;
 
-  let wallet: Wallet, db: SqlProvider, dbWallet: WalletI | undefined;
+  let wallet: Wallet, db: SqlProvider, dbWallet: WalletDbEntryI | undefined;
 
   wallet = await Wallet.named(name);
   db = new SqlProvider("bitcoincash");

@@ -1,4 +1,4 @@
-export interface WalletI {
+export interface WalletDbEntryI {
   id?: number;
   name: string;
   wallet: string;

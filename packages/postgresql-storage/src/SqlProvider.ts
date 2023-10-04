@@ -1,4 +1,4 @@
-import { StorageProvider, WalletI, TxI } from "mainnet-js";
+import { StorageProvider, WalletDbEntryI, TxI } from "mainnet-js";
 import { RegisterWebhookParams } from "./webhook/interface.js";
 import { getSslConfig } from "./util.js";
 import parseDbUrl from "parse-database-url";
@@ -90,12 +90,12 @@ export default class SqlProvider implements StorageProvider {
     return await this.db.query(text, [name, walletId]);
   }
 
-  public async getWallets(): Promise<Array<WalletI>> {
+  public async getWallets(): Promise<Array<WalletDbEntryI>> {
     let text = this.formatter("SELECT * FROM %I;", this.walletTable);
     let result = await this.db.query(text);
     if (result) {
-      const WalletArray: WalletI[] = await Promise.all(
-        result.rows.map(async (obj: WalletI) => {
+      const WalletArray: WalletDbEntryI[] = await Promise.all(
+        result.rows.map(async (obj: WalletDbEntryI) => {
           return obj;
         })
       );
@@ -105,7 +105,7 @@ export default class SqlProvider implements StorageProvider {
     }
   }
 
-  public async getWallet(name: string): Promise<WalletI | undefined> {
+  public async getWallet(name: string): Promise<WalletDbEntryI | undefined> {
     let text = this.formatter(
       "SELECT * FROM %I WHERE name = $1;",
       this.walletTable

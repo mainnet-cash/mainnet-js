@@ -1,11 +1,11 @@
 import Dexie from "dexie";
-import { StorageProvider, WalletI } from "mainnet-js";
+import { StorageProvider, WalletDbEntryI } from "mainnet-js";
 
 export default class IndexedDBProvider
   extends Dexie
   implements StorageProvider
 {
-  public db: Dexie.Table<WalletI, number>;
+  public db: Dexie.Table<WalletDbEntryI, number>;
 
   public constructor(dbName: string) {
     super(dbName);
@@ -42,7 +42,7 @@ export default class IndexedDBProvider
     });
   }
 
-  public async getWallet(name: string): Promise<WalletI | undefined> {
+  public async getWallet(name: string): Promise<WalletDbEntryI | undefined> {
     let obj = await this.db.get({ name: name });
     if (obj) {
       return obj;
@@ -51,13 +51,13 @@ export default class IndexedDBProvider
     }
   }
 
-  public async getWallets(): Promise<Array<WalletI>> {
+  public async getWallets(): Promise<Array<WalletDbEntryI>> {
     let walletObjects = await this.transaction("r", this.db, async () => {
       return await this.db.where("id").above(0).toArray();
     });
     if (walletObjects) {
-      const WalletArray: WalletI[] = await Promise.all(
-        walletObjects.map(async (obj: WalletI) => {
+      const WalletArray: WalletDbEntryI[] = await Promise.all(
+        walletObjects.map(async (obj: WalletDbEntryI) => {
           return obj;
         })
       );
