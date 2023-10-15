@@ -45,6 +45,18 @@ describe("Test message Signing and Verification", () => {
       "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
     );
     expect(result.details!.publicKeyHashMatch).toBe(true);
+    expect(result.details!.publicKeyMatch).toBe(false);
+    expect(result.details!.signatureValid).toBe(true);
+    expect(result.details!.signatureType).toBe("recoverable");
+
+    let msg2 = "Lessons for China from Japan’s lost decade";
+    result = await SignedMessage.verify(msg2, sig.signature, w1.cashaddr!);
+    expect(result.valid).toBe(false);
+    expect(result.details!.messageHash).toBe(
+      "070kQIcYPSHApGdOGH0O81N1AkMbNKwCTM3IX2Svd3I="
+    );
+    expect(result.details!.publicKeyHashMatch).toBe(false);
+    expect(result.details!.publicKeyMatch).toBe(false);
     expect(result.details!.signatureValid).toBe(true);
     expect(result.details!.signatureType).toBe("recoverable");
   });
@@ -64,6 +76,9 @@ describe("Test message Signing and Verification", () => {
     let sig = await SignedMessage.sign(msg, w.privateKey!);
     let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
     expect(result.valid).toBe(true);
+
+    result = await SignedMessage.verify("test2", sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(false);
   });
 
   test("Test signing and verifying regtest signature using Alice's wallet", async () => {
@@ -75,6 +90,9 @@ describe("Test message Signing and Verification", () => {
 
     let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
     expect(result.valid).toBe(true);
+
+    result = await SignedMessage.verify("test2", sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(false);
   });
 
   test("Test signing and verifying regtest signature using Alice's wallet", async () => {
@@ -85,6 +103,9 @@ describe("Test message Signing and Verification", () => {
     let sig = await SignedMessage.sign(msg, w.privateKey!);
     let result = await SignedMessage.verify(msg, sig.signature, w.cashaddr!);
     expect(result.valid).toBe(true);
+
+    result = await SignedMessage.verify("测试二", sig.signature, w.cashaddr!);
+    expect(result.valid).toBe(false);
   });
 
   test("Test signing and verifying a schnorr signature", async () => {
@@ -101,6 +122,16 @@ describe("Test message Signing and Verification", () => {
     );
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("schnorr");
+
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let invalid = await SignedMessage.verify(
+      msg2,
+      sig.raw!.schnorr,
+      undefined,
+      w.publicKey!
+    );
+    expect(invalid.valid).toBe(false);
   });
 
   test("Test signing and verifying a der signature", async () => {
@@ -133,6 +164,16 @@ describe("Test message Signing and Verification", () => {
     );
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("ecdsa");
+
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let invalid = await SignedMessage.verify(
+      msg2,
+      sig.raw!.ecdsa,
+      undefined,
+      w.publicKey!
+    );
+    expect(invalid.valid).toBe(false);
   });
 
   test("Test signing and verifying a long message", async () => {
@@ -160,10 +201,20 @@ describe("Test message Signing and Verification", () => {
       w1.cashaddr!
     );
     expect(result.valid).toBe(true);
+
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let invalid = await Wallet.signedMessage.verify(
+      msg2,
+      sig.signature,
+      w1.cashaddr!
+    );
+    expect(invalid.valid).toBe(false);
   });
 
   test("Test electron cash example from a wallet instance", async () => {
     let msg1 = "Chancellor on brink of second bailout for banks";
+
     let w1 = await Wallet.fromId(
       `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
     );
@@ -173,5 +224,40 @@ describe("Test message Signing and Verification", () => {
     let sig = await w1.sign(msg1);
     let result = await w1.verify(msg1, sig.signature);
     expect(result.valid).toBe(true);
+
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let invalid = await w1.verify(msg2, sig.signature);
+    expect(invalid.valid).toBe(false);
+  });
+
+  test("Test electron cash example from a wallet instance", async () => {
+    let beak = "Eeny meeny, hide & seek―catch a cephalopod by the beak";
+    let beakSig =
+      "H2a0aK6ZhF5rii4yzKkE+15yLTaQPa4KzoGXwYNHm5I+OYxRdcpTiUVZm3h6+ocy2JYxb0UUrQn7UWh8IcxzEtk=";
+
+    let falseMessage = "Employer provided healthcare is a benefit.";
+
+    let w1 = await Wallet.fromId(
+      `watch:mainnet:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe`
+    );
+    expect(w1.cashaddr!).toBe(
+      "bitcoincash:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe"
+    );
+    let result = await w1.verify(beak, beakSig);
+    expect(result.valid).toBe(true);
+    expect(result.details?.publicKeyHashMatch).toBe(true);
+    expect(result.details?.publicKeyMatch).toBe(false);
+    expect(result.details?.signatureValid).toBe(true);
+    expect(result.details?.signatureType).toBe("recoverable");
+
+    let badResult = await w1.verify(falseMessage, beakSig);
+    expect(badResult.valid).toBe(false);
+
+    // While the recoverable sig is valid, it doesn't match the message.
+    expect(badResult.details?.signatureValid).toBe(true);
+    expect(badResult.details?.publicKeyHashMatch).toBe(false);
+    expect(badResult.details?.publicKeyMatch).toBe(false);
+    expect(result.details?.signatureType).toBe("recoverable");
   });
 });
