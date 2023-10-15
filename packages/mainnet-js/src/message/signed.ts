@@ -184,7 +184,7 @@ export class SignedMessage implements SignedMessageI {
     }
 
     return {
-      valid: (signatureValid && (keyMatch||pkhMatch)),
+      valid: signatureValid && (keyMatch || pkhMatch),
       details: {
         signatureValid: signatureValid,
         signatureType: signatureType,

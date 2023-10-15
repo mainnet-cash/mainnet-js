@@ -49,7 +49,7 @@ describe("Test message Signing and Verification", () => {
     expect(result.details!.signatureValid).toBe(true);
     expect(result.details!.signatureType).toBe("recoverable");
 
-    let msg2 = "Lessons for China from Japan’s lost decade"
+    let msg2 = "Lessons for China from Japan’s lost decade";
     result = await SignedMessage.verify(msg2, sig.signature, w1.cashaddr!);
     expect(result.valid).toBe(false);
     expect(result.details!.messageHash).toBe(
@@ -123,12 +123,14 @@ describe("Test message Signing and Verification", () => {
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("schnorr");
 
-    let msg2 = "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
     let invalid = await SignedMessage.verify(
       msg2,
       sig.raw!.schnorr,
       undefined,
-      w.publicKey!);
+      w.publicKey!
+    );
     expect(invalid.valid).toBe(false);
   });
 
@@ -163,12 +165,14 @@ describe("Test message Signing and Verification", () => {
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("ecdsa");
 
-    let msg2 = "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
     let invalid = await SignedMessage.verify(
       msg2,
       sig.raw!.ecdsa,
       undefined,
-      w.publicKey!);
+      w.publicKey!
+    );
     expect(invalid.valid).toBe(false);
   });
 
@@ -198,11 +202,13 @@ describe("Test message Signing and Verification", () => {
     );
     expect(result.valid).toBe(true);
 
-    let msg2 = "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
     let invalid = await Wallet.signedMessage.verify(
       msg2,
       sig.signature,
-      w1.cashaddr!);
+      w1.cashaddr!
+    );
     expect(invalid.valid).toBe(false);
   });
 
@@ -219,18 +225,18 @@ describe("Test message Signing and Verification", () => {
     let result = await w1.verify(msg1, sig.signature);
     expect(result.valid).toBe(true);
 
-    let msg2 = "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
+    let msg2 =
+      "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
     let invalid = await w1.verify(msg2, sig.signature);
     expect(invalid.valid).toBe(false);
   });
 
   test("Test electron cash example from a wallet instance", async () => {
-
     let beak = "Eeny meeny, hide & seek―catch a cephalopod by the beak";
-    let beakSig = "H2a0aK6ZhF5rii4yzKkE+15yLTaQPa4KzoGXwYNHm5I+OYxRdcpTiUVZm3h6+ocy2JYxb0UUrQn7UWh8IcxzEtk=";
+    let beakSig =
+      "H2a0aK6ZhF5rii4yzKkE+15yLTaQPa4KzoGXwYNHm5I+OYxRdcpTiUVZm3h6+ocy2JYxb0UUrQn7UWh8IcxzEtk=";
 
     let falseMessage = "Employer provided healthcare is a benefit.";
-
 
     let w1 = await Wallet.fromId(
       `watch:mainnet:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe`
@@ -245,7 +251,6 @@ describe("Test message Signing and Verification", () => {
     expect(result.details?.signatureValid).toBe(true);
     expect(result.details?.signatureType).toBe("recoverable");
 
-
     let badResult = await w1.verify(falseMessage, beakSig);
     expect(badResult.valid).toBe(false);
 
@@ -254,7 +259,5 @@ describe("Test message Signing and Verification", () => {
     expect(badResult.details?.publicKeyHashMatch).toBe(false);
     expect(badResult.details?.publicKeyMatch).toBe(false);
     expect(result.details?.signatureType).toBe("recoverable");
-
   });
-
 });

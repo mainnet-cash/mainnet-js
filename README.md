@@ -97,13 +97,13 @@ If you need additionalProperties passed to the client generator, these may be ad
 
 This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
 
-| Project                              | Description           |
-| ------------------------------------ | --------------------- |
-| mainnet-js                           | Base Library          |
-| mainnet-cash                         | REST Express Server   |
-| @mainnet-cash/contract               | CashScript Library    |
-| @mainnet-cash/indexeddb-storage      | IndexedDB Storage     |
-| @mainnet-cash/postgresql-storage     | Posgresql Storage     |
+| Project                          | Description         |
+| -------------------------------- | ------------------- |
+| mainnet-js                       | Base Library        |
+| mainnet-cash                     | REST Express Server |
+| @mainnet-cash/contract           | CashScript Library  |
+| @mainnet-cash/indexeddb-storage  | IndexedDB Storage   |
+| @mainnet-cash/postgresql-storage | Posgresql Storage   |
 
 # Documentation
 
