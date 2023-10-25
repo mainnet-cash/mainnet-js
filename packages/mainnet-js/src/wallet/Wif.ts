@@ -518,6 +518,8 @@ export class Wallet extends BaseWallet {
       nonTokenAwareType = CashAddressType.p2pkh;
     if (nonTokenAwareType == CashAddressType.p2shWithTokens)
       nonTokenAwareType = CashAddressType.p2sh;
+    if(nonTokenAwareType == CashAddressType.p2pkh) 
+      this.publicKeyHash = addressData.payload;
 
     this.cashaddr = encodeCashAddress(
       addressData.prefix as CashAddressNetworkPrefix,
