@@ -1,6 +1,12 @@
 //#region Imports
 // Stable
-import { decodeCashAddress, decodeCashAddressVersionByte, encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
+import {
+  decodeCashAddress,
+  decodeCashAddressVersionByte,
+  encodeHdPublicKey,
+  HdKeyNetwork,
+  secp256k1,
+} from "@bitauth/libauth";
 
 // Unstable?
 import {
@@ -500,18 +506,24 @@ export class Wallet extends BaseWallet {
     }
 
     const prefixedAddress = `${addressPrefix}:${addressBase}`;
-     
-    // check if a token aware address was provided
-    let addressData = decodeCashAddress(prefixedAddress)
-    if(typeof addressData === "string") throw(addressData)
 
-    this.publicKeyHash = addressData.payload
+    // check if a token aware address was provided
+    let addressData = decodeCashAddress(prefixedAddress);
+    if (typeof addressData === "string") throw addressData;
+
+    this.publicKeyHash = addressData.payload;
 
     let nonTokenAwareType = addressData.type;
-    if(nonTokenAwareType == CashAddressType.p2pkhWithTokens) nonTokenAwareType = CashAddressType.p2pkh
-    if(nonTokenAwareType == CashAddressType.p2shWithTokens) nonTokenAwareType = CashAddressType.p2sh
+    if (nonTokenAwareType == CashAddressType.p2pkhWithTokens)
+      nonTokenAwareType = CashAddressType.p2pkh;
+    if (nonTokenAwareType == CashAddressType.p2shWithTokens)
+      nonTokenAwareType = CashAddressType.p2sh;
 
-    this.cashaddr =  encodeCashAddress(addressData.prefix as CashAddressNetworkPrefix, nonTokenAwareType, addressData.payload);
+    this.cashaddr = encodeCashAddress(
+      addressData.prefix as CashAddressNetworkPrefix,
+      nonTokenAwareType,
+      addressData.payload
+    );
     this.address = this.cashaddr;
     this.tokenaddr = deriveTokenaddr(addressData.payload, this.networkPrefix);
 
