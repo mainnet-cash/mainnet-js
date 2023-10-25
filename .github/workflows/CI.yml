@@ -61,7 +61,7 @@ jobs:
   test_browsers:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v1
       with:
         node-version: "18.x"
@@ -71,7 +71,7 @@ jobs:
   test_node:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v1
       with:
         node-version: "18.x"
@@ -80,7 +80,7 @@ jobs:
   test_rest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v1
       with:
         node-version: "18.x"
