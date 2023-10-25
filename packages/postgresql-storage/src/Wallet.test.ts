@@ -45,7 +45,7 @@ describe(`Test Wallet library`, () => {
   });
 
   test("Should get a regtest wallet fromId", async () => {
-    const alice = await getRegtestWallet(5000000000);
+    const alice = await RegTestWallet.newRandom();
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
   });

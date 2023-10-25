@@ -605,7 +605,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test double genesis should not burn tokens", async () => {
-    const alice = await getRegtestWallet(500000);
+    const alice = await getRegtestWallet(5000000);
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
