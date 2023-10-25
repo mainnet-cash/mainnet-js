@@ -9,6 +9,7 @@ import {
   CashAddressType,
   deriveHdPublicNode,
   decodePrivateKeyWif,
+  encodeCashAddress,
   encodePrivateKeyWif,
   deriveHdPrivateNodeFromSeed,
   deriveHdPath,
@@ -505,7 +506,12 @@ export class Wallet extends BaseWallet {
     if(typeof addressData === "string") throw(addressData)
 
     this.publicKeyHash = addressData.payload
-    this.cashaddr =  deriveCashaddr(addressData.payload, this.networkPrefix);
+
+    let nonTokenAwareType = addressData.type;
+    if(nonTokenAwareType == CashAddressType.p2pkhWithTokens) nonTokenAwareType = CashAddressType.p2pkh
+    if(nonTokenAwareType == CashAddressType.p2shWithTokens) nonTokenAwareType = CashAddressType.p2sh
+
+    this.cashaddr =  encodeCashAddress(addressData.prefix as CashAddressNetworkPrefix, nonTokenAwareType, addressData.payload);
     this.address = this.cashaddr;
     this.tokenaddr = deriveTokenaddr(addressData.payload, this.networkPrefix);
 
