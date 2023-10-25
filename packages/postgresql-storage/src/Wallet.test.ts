@@ -36,7 +36,7 @@ describe(`Test Wallet library`, () => {
     if (!process.env.PRIVATE_WIF) {
       throw Error("Attempted to pass an empty WIF");
     } else {
-      let alice = await getRegtestWallet(5000000000) // insert WIF from #1
+      let alice = await getRegtestWallet(5000000000); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(4.9);
@@ -45,7 +45,7 @@ describe(`Test Wallet library`, () => {
   });
 
   test("Should get a regtest wallet fromId", async () => {
-    const alice = await getRegtestWallet(5000000000)
+    const alice = await getRegtestWallet(5000000000);
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
   });
@@ -124,15 +124,14 @@ describe(`Test Wallet library`, () => {
 
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, check sats
-    let alice = await getRegtestWallet(100000000)
+    let alice = await getRegtestWallet(100000000);
     expect(await alice.getBalance("sat")).toBeGreaterThan(100000000);
-
   });
 
   test("Should send a transaction on the regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
-    let alice = await getRegtestWallet(500000)// insert WIF from #1
+    let alice = await getRegtestWallet(500000); // insert WIF from #1
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -149,13 +148,12 @@ describe(`Test Wallet library`, () => {
     // Build Bob's wallet from a public address, check his balance.
     const bobBalance = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalance.sat).toBe(1100);
-
   });
 
   test("Should send a transaction from specific utxos", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
-    let alice = await getRegtestWallet(40000) // insert WIF from #1
+    let alice = await getRegtestWallet(40000); // insert WIF from #1
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -213,13 +211,12 @@ describe(`Test Wallet library`, () => {
     );
     expect(sendResponse2.balance!.sat).toBe(19967);
     expect(await charlie.getBalance("sat")).toBe(1675);
-
   });
 
   test("Should send a transaction with change to different change address", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
-    let funder = await getRegtestWallet(5000000000)
+    let funder = await getRegtestWallet(5000000000);
 
     const alice = await createWallet({
       type: WalletTypeEnum.Wif,
@@ -255,7 +252,6 @@ describe(`Test Wallet library`, () => {
     );
     expect(await bob.getBalance("sat")).toBe(1000);
     expect(await charlie.getBalance("sat")).toBe(1780);
-
   });
 
   test("Should send maximum amount from specific utxos", async () => {
@@ -305,12 +301,11 @@ describe(`Test Wallet library`, () => {
     });
     expect(sendResponse2.balance!.sat).toBe(1000);
     expect(await charlie.getBalance("sat")).toBeGreaterThan(1500);
-
   });
 
   test("Send a transaction in dollars regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
-    let alice = await getRegtestWallet(10000)
+    let alice = await getRegtestWallet(10000);
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -321,14 +316,12 @@ describe(`Test Wallet library`, () => {
     const bobBalance = (await bob.getBalance()) as BalanceResponse;
 
     expect(Math.round(bobBalance.usd!)).toBe(Math.round(usdRate));
-
   });
 
   // If the change from a transaction is less than the DUST_UTXO_THRESHOLD
   // assume that the change cannot be spent and use it as fee instead
   test("Send assume change less than dust is fee", async () => {
-
-    let alice = await getRegtestWallet(10000)
+    let alice = await getRegtestWallet(10000);
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -346,12 +339,11 @@ describe(`Test Wallet library`, () => {
     const charlieBalance = (await charlie.getBalance()) as BalanceResponse;
     expect(Math.round(bobBalance.sat!)).toBe(0);
     expect(Math.round(charlieBalance.sat!)).toBe(734);
-
   });
 
   test("Send a transaction (as array) on the regression network", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
-    let alice = await getRegtestWallet(10000)
+    let alice = await getRegtestWallet(10000);
     const bob = await createWallet({
       network: "regtest",
     });
@@ -359,7 +351,6 @@ describe(`Test Wallet library`, () => {
     // Build Bob's wallet from a public address, check his balance.
     const bobBalance = (await bob.getBalance()) as BalanceResponse;
     expect(bobBalance.sat).toBe(1200);
-
   });
 
   test("Should get a random testnet wallet", async () => {
@@ -409,7 +400,7 @@ describe(`Test Wallet library`, () => {
   test("Send all coins back on regtest", async () => {
     // Build Alice's wallet from Wallet Import Format string, send some sats
 
-    const alice = await getRegtestWallet(1000000)
+    const alice = await getRegtestWallet(1000000);
     const bob = await createWallet({
       type: WalletTypeEnum.Seed,
       network: "regtest",

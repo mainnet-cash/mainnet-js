@@ -17,7 +17,7 @@ import {
 } from "@bitauth/libauth";
 import { delay } from "../util";
 import { Config } from "../config";
-import { getRegtestWallet } from "../test/getRegtestWallet"
+import { getRegtestWallet } from "../test/getRegtestWallet";
 
 beforeAll(async () => {
   await initProviders();
@@ -36,7 +36,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test token genesis and max amount to send", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     await alice.send([[bob.cashaddr!, 0.101, "bch"]]);
     const genesisResponse = await bob.tokenGenesis({
@@ -49,7 +49,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test tokens will not be burned when sending bch value", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
       amount: 100,
@@ -91,7 +91,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test fungible cashtoken genesis and sending", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
       amount: 100,
@@ -134,7 +134,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test NFT cashtoken genesis and sending", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
@@ -170,7 +170,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test immutable NFT cashtoken genesis and sending, error on mutation", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       capability: NFTCapability.none,
@@ -194,7 +194,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test mutable NFT cashtoken genesis and mutation", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       capability: NFTCapability.mutable,
@@ -222,7 +222,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test minting NFT cashtoken genesis and minting", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       capability: NFTCapability.minting,
@@ -253,7 +253,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test minting semifungible tokens and sending them", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       capability: NFTCapability.minting,
@@ -302,7 +302,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test minting NFT and optionally burning FT cashtoken", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       amount: 4,
@@ -390,7 +390,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test explicit burning of FT", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       amount: 4,
@@ -424,7 +424,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test explicit burning of FT and NFT", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.cashaddr!,
       amount: 4,
@@ -497,7 +497,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test cashtoken satoshi values and fee calculations", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
       amount: 100,
@@ -550,7 +550,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test cashtoken waiting and watching", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const genesisResponse = await alice.tokenGenesis({
@@ -605,7 +605,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test double genesis should not burn tokens", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
@@ -637,7 +637,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test sending tokens should not burn tokens", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
@@ -680,7 +680,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test sending bch should not burn tokens", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
@@ -706,7 +706,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test minting NFTs not burn tokens", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
 
@@ -751,7 +751,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test sending NFTs after burning minting token", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
 
@@ -831,7 +831,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test sending NFTs with empty commitment", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
 
@@ -896,7 +896,7 @@ describe(`Test cashtokens`, () => {
     // https://bch.loping.net/tx/86f3c86e7e9c6853e489dc7ea85e2192b1b2cce691fa5ff9597e98f045a0bf72
     // https://bch.loping.net/tx/83ef2ab9687c53bb24c3d99f3cc7f0a2c7f23e180c8dbee5c845d1db6725d3e8
 
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
@@ -1134,7 +1134,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test enforcing token addresses", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis({
       amount: 100,
     });

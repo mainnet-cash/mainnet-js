@@ -649,7 +649,7 @@ describe(`Wallet subscriptions`, () => {
 
   test("Should watch balance, then waitForBalance, then cancel watch", async () => {
     const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     alice.send([
       {
@@ -667,7 +667,7 @@ describe(`Wallet subscriptions`, () => {
 
   test("Should watch multiple wallets", async () => {
     const aliceId = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const charlie = await RegTestWallet.newRandom();
     const dave = await RegTestWallet.newRandom();
@@ -757,7 +757,7 @@ describe(`Wallet subscriptions`, () => {
   });
 
   test("Test waiting and watching", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
 
     const bob = await RegTestWallet.newRandom();
 
@@ -1023,7 +1023,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
   });
 
   test("Test slpSemiAware", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     await alice.send([
       { cashaddr: bob.getDepositAddress(), unit: UnitEnum.SAT, value: 546 },

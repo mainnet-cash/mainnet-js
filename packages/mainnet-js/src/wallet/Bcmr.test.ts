@@ -15,7 +15,7 @@ import {
 import { mine } from "../mine";
 import { NFTCapability, Network } from "../interface";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
-import { getRegtestWallet } from "../test/getRegtestWallet.js"
+import { getRegtestWallet } from "../test/getRegtestWallet.js";
 
 beforeAll(async () => {
   await initProviders();
@@ -178,7 +178,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: no BCMR", async () => {
-    let alice = await getRegtestWallet(500000); 
+    let alice = await getRegtestWallet(500000);
 
     const bob = await RegTestWallet.newRandom();
 
@@ -197,7 +197,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: BCMR, no hash", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const chunks = ["BCMR"];
@@ -216,7 +216,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: BCMR, ipfs hash", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const chunks = ["BCMR", "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"];
@@ -244,7 +244,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: BCMR, ipfs hash and uri", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const chunks = [
@@ -276,7 +276,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: BCMR, ipfs https url", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const chunks = [
@@ -308,7 +308,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: BCMR, sha256 content hash, uri", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
@@ -333,7 +333,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: BCMR, sha256 content hash, 2 uris", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const chunks = [
@@ -364,7 +364,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain: all OP_PUSDHDATA encodings", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const opreturnData = OpReturnData.fromUint8Array(
@@ -383,7 +383,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain with 1 element, add resolved registry", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     let chunks = [
@@ -453,7 +453,7 @@ describe(`Test BCMR support`, () => {
       [1, 1, 0],
       [1, 1, 1],
     ].entries()) {
-      const alice = await getRegtestWallet(500000); 
+      const alice = await getRegtestWallet(500000);
       const bob = await RegTestWallet.newRandom();
       const charlie = await RegTestWallet.newRandom();
 
@@ -562,7 +562,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Authchain tail resolution info in registry acceleration path", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
 
     const registry_v1 = { ...registry };
@@ -741,7 +741,7 @@ describe(`Test BCMR support`, () => {
     const chunks = ["BCMR", "QmbWrG5Asp5iGmUwQHogSJGRX26zuRnuLWPytZfiL75sZv"];
     const opreturnData = OpReturnData.fromArray(chunks);
 
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const genesisResponse = await alice.tokenGenesis(
       {
         cashaddr: alice.cashaddr!,
@@ -790,7 +790,7 @@ describe(`Test BCMR support`, () => {
   });
 
   test("Auth chain with forwards gaps", async () => {
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
 
     const contentHashBin = sha256.hash(utf8ToBin("registry_contents"));
     const chunks = [

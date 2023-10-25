@@ -3,7 +3,7 @@ import { WalletTypeEnum } from "../wallet/enum";
 import { createWallet } from "../wallet/createWallet";
 import { getAddressHistory } from "./electrumTransformer";
 import { mine } from "../mine";
-import { getRegtestWallet } from "../test/getRegtestWallet"
+import { getRegtestWallet } from "../test/getRegtestWallet";
 
 // This class transforms outputs from electrum to a standard array of history.
 test("Should get an address history", async () => {
@@ -11,7 +11,7 @@ test("Should get an address history", async () => {
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");
   } else {
-    let alice = await getRegtestWallet(500000); 
+    let alice = await getRegtestWallet(500000);
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -76,7 +76,7 @@ test("Should get a history with multi-party sends", async () => {
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");
   } else {
-    let alice = await getRegtestWallet(500000); 
+    let alice = await getRegtestWallet(500000);
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -138,7 +138,7 @@ test("Should cut results with a longer history to given count", async () => {
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");
   } else {
-    let alice = await getRegtestWallet(500000); 
+    let alice = await getRegtestWallet(500000);
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",
@@ -200,7 +200,7 @@ test("Should handel input and fee from many utxos", async () => {
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");
   } else {
-    let alice = await getRegtestWallet(500000); 
+    let alice = await getRegtestWallet(500000);
     const bob = await createWallet({
       type: WalletTypeEnum.Wif,
       network: "regtest",

@@ -33,7 +33,7 @@ describe("Exchange rate tests", () => {
       { "bitcoin-cash": { usd: 666.666 } }
     );
 
-    const alice = await getRegtestWallet(500000); 
+    const alice = await getRegtestWallet(500000);
     const bob = await RegTestWallet.newRandom();
     const balance = (await alice.getBalance()) as BalanceResponse;
     let cbCounter = 0;
