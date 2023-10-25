@@ -1,11 +1,12 @@
 //#region Imports
 // Stable
-import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
+import { decodeCashAddress, decodeCashAddressVersionByte, encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
 
 // Unstable?
 import {
   binToHex,
   CashAddressNetworkPrefix,
+  CashAddressType,
   deriveHdPublicNode,
   decodePrivateKeyWif,
   encodePrivateKeyWif,
@@ -497,10 +498,16 @@ export class Wallet extends BaseWallet {
       }
     }
 
-    this.cashaddr = `${addressPrefix}:${addressBase}`;
+    const prefixedAddress = `${addressPrefix}:${addressBase}`;
+     
+    // check if a token aware address was provided
+    let addressData = decodeCashAddress(prefixedAddress)
+    if(typeof addressData === "string") throw(addressData)
+
+    this.publicKeyHash = addressData.payload
+    this.cashaddr =  deriveCashaddr(addressData.payload, this.networkPrefix);
     this.address = this.cashaddr;
-    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
-    this.tokenaddr = deriveTokenaddr(this.publicKeyHash, this.networkPrefix);
+    this.tokenaddr = deriveTokenaddr(addressData.payload, this.networkPrefix);
 
     return this;
   }
