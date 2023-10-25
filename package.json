@@ -44,7 +44,7 @@
     "demo:report": "yarn workspace @mainnet-cash/demo run report",
     "demo:report:view": "npx reload --dir=packages/demo/public/",
     "docs": "npx typedoc",
-    "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --config jest.config.cjs --logHeapUsage  --forceExit",
+    "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules node_modules/jest/bin/jest.js  --config jest.config.cjs --logHeapUsage  --forceExit",
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
     "test:rest": "yarn patch-package && yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",
