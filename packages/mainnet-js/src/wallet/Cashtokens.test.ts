@@ -36,7 +36,7 @@ describe(`Test cashtokens`, () => {
   });
 
   test("Test token genesis and max amount to send", async () => {
-    const alice = await getRegtestWallet(50000000); 
+    const alice = await getRegtestWallet(50000000);
     const bob = await RegTestWallet.newRandom();
     await alice.send([[bob.cashaddr!, 0.101, "bch"]]);
     const genesisResponse = await bob.tokenGenesis({
