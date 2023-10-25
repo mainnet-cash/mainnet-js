@@ -4,6 +4,7 @@ import { RegTestWallet } from "../wallet/Wif";
 import { ExchangeRate } from "./ExchangeRate";
 import { delay } from "../util/delay";
 import { initProviders, disconnectProviders } from "../network";
+import { getRegtestWallet } from "../test/getRegtestWallet";
 
 beforeAll(async () => {
   await initProviders();
@@ -32,7 +33,7 @@ describe("Exchange rate tests", () => {
       { "bitcoin-cash": { usd: 666.666 } }
     );
 
-    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const alice = await getRegtestWallet(500000); 
     const bob = await RegTestWallet.newRandom();
     const balance = (await alice.getBalance()) as BalanceResponse;
     let cbCounter = 0;

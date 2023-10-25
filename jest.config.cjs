@@ -36,6 +36,6 @@ module.exports = {
   globalSetup: "<rootDir>/jest/node.setup.cjs",
   globalTeardown: "<rootDir>/jest/node.teardown.cjs",
   verbose: true,
-  maxConcurrency: 1,
+  maxConcurrency: 4,
   testTimeout: 125000,
 };

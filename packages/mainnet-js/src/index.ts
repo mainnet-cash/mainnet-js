@@ -1,5 +1,6 @@
 export * from "./test/fetch.js";
 export * from "./test/expect.js";
+export * from "./test/getRegtestWallet.js";
 export * from "./db/index.js";
 export * from "./mine/index.js";
 export * from "./wallet/Bcmr.js";
