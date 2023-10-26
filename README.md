@@ -11,10 +11,10 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
   - [What is exactly is this?](#what-is-exactly-is-this)
   - [How can I use it?](#how-can-i-use-it)
   - [Where can't mainnet-js be used? (for now)](#where-cant-mainnet-js-be-used-for-now)
-  - [Finaly, Check Your Node Version First](#finaly-check-your-node-version-first)
+  - [Finally, Check Your Node Version First](#finally-check-your-node-version-first)
 - [Installation](#installation)
   - [As a REST service](#as-a-rest-service)
-  - [For webapps & nodejs](#for-webapps--nodejs)
+  - [For webapps \& nodejs](#for-webapps--nodejs)
   - [REST clients for other languages](#rest-clients-for-other-languages)
 - [Overview of packages](#overview-of-packages)
 - [Documentation](#documentation)
@@ -48,7 +48,7 @@ The core bitcoin library is [@bitauth/libauth](https://libauth.org/) which provi
 
 For the above reason, mainnet-js is not well suited for use as a javascript library supporting a React-Native or Vue-Native app, as the JSC for iOS and Android do not support WebAssembly, at the time of writing (It may be possible with WebView, but with tradeoffs). Nor is it suitable for KaiOS devices below v3, for the same reason.
 
-## Finaly, Check Your Node Version First
+## Finally, Check Your Node Version First
 
 `mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started. Check the nodejs version first.
 
@@ -97,14 +97,13 @@ If you need additionalProperties passed to the client generator, these may be ad
 
 This project contains a number of smaller projects in a mono-repo structure, with each package located in the [packages](packages/) folder.
 
-| Project                | Description           |
-| ---------------------- | --------------------- |
-| mainnet-js             | Base Library          |
-| mainnet-cash           | REST Express Server   |
-| @mainnet-cash/contract | CashScript Library    |
-| @mainnet-cash/demo     | Demo Vue Webapp       |
-| @mainnet-cash/demo-min | Minimal Demo          |
-| @mainnet-cash/root     | Top-level Placeholder |
+| Project                          | Description         |
+| -------------------------------- | ------------------- |
+| mainnet-js                       | Base Library        |
+| mainnet-cash                     | REST Express Server |
+| @mainnet-cash/contract           | CashScript Library  |
+| @mainnet-cash/indexeddb-storage  | IndexedDB Storage   |
+| @mainnet-cash/postgresql-storage | Posgresql Storage   |
 
 # Documentation
 

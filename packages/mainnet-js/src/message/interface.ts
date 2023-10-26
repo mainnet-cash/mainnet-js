@@ -57,6 +57,7 @@ export interface VerifyMessageDetailsI {
   messageHash: string;
   signatureValid: boolean;
   publicKeyHashMatch: boolean;
+  publicKeyMatch: boolean;
 }
 
 export interface VerifyMessageResponseI {

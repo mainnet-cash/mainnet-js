@@ -125,7 +125,8 @@ export class SignedMessage implements SignedMessageI {
     let messageHash = await hash_message(message);
     let sig = base64ToBin(signature);
 
-    let valid = false;
+    let signatureValid = false;
+    let keyMatch = false;
     let pkhMatch = false;
     let pkh, signatureType;
 
@@ -143,7 +144,7 @@ export class SignedMessage implements SignedMessageI {
 
       pkh = await hash160(recoveredPk);
       signatureType = "recoverable";
-      valid = secp256k1.verifySignatureCompact(
+      signatureValid = secp256k1.verifySignatureCompact(
         rawSig,
         recoveredPk,
         messageHash
@@ -163,29 +164,33 @@ export class SignedMessage implements SignedMessageI {
     } else if (publicKey) {
       if (secp256k1.verifySignatureDER(sig, publicKey, messageHash)) {
         signatureType = "der";
-        valid = true;
+        signatureValid = true;
+        keyMatch = true;
       } else if (
         secp256k1.verifySignatureSchnorr(sig, publicKey, messageHash)
       ) {
         signatureType = "schnorr";
-        valid = true;
+        signatureValid = true;
+        keyMatch = true;
       } else if (
         secp256k1.verifySignatureCompact(sig, publicKey, messageHash)
       ) {
         signatureType = "ecdsa";
-        valid = true;
+        signatureValid = true;
+        keyMatch = true;
       } else {
         signatureType = "na";
       }
     }
 
     return {
-      valid: valid,
+      valid: signatureValid && (keyMatch || pkhMatch),
       details: {
-        signatureValid: valid,
+        signatureValid: signatureValid,
         signatureType: signatureType,
         messageHash: binToBase64(messageHash),
         publicKeyHashMatch: pkhMatch,
+        publicKeyMatch: keyMatch,
       },
     };
   }
