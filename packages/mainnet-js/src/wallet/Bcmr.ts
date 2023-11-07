@@ -426,12 +426,7 @@ export class BCMR {
 {
   transaction(
     where: {
-      hash:{_eq:"\\\\x${options.transactionHash}"},
-      ${
-        options.network
-          ? `node_validation_timeline:{node:{name:{_ilike:"%${options.network}%"}}}`
-          : ""
-      }
+      hash:{_eq:"\\\\x${options.transactionHash}"}
     }
   ) {
     hash
