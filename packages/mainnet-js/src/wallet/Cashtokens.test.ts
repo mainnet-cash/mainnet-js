@@ -571,16 +571,16 @@ describe(`Test cashtokens`, () => {
     let sendResponse: SendResponse = {};
     setTimeout(
       async () =>
-      (sendResponse = await alice.send([
-        new TokenSendRequest({
-          cashaddr: bob.cashaddr!,
-          amount: 100,
-          tokenId: tokenId,
-          value: 1500,
-          capability: NFTCapability.minting,
-          commitment: "test",
-        }),
-      ])),
+        (sendResponse = await alice.send([
+          new TokenSendRequest({
+            cashaddr: bob.cashaddr!,
+            amount: 100,
+            tokenId: tokenId,
+            value: 1500,
+            capability: NFTCapability.minting,
+            commitment: "test",
+          }),
+        ])),
       0
     );
 
@@ -711,7 +711,7 @@ describe(`Test cashtokens`, () => {
     // prepare inputs for two token geneses
     await alice.send([
       { cashaddr: bob.cashaddr!, value: 10000, unit: "sat" },
-      { cashaddr: charlie.cashaddr!, value: 10000, unit: "sat" }
+      { cashaddr: charlie.cashaddr!, value: 10000, unit: "sat" },
     ]);
 
     const genesisResponse = await bob.tokenGenesis({
@@ -726,7 +726,6 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos.length).toBe(1);
 
     await bob.send({ cashaddr: alice.cashaddr!, value: 1000, unit: "sat" });
-
 
     await bob.send([
       {
@@ -753,7 +752,8 @@ describe(`Test cashtokens`, () => {
         cashaddr: charlie.cashaddr!,
         tokenId: tokenId,
         amount: 300,
-      }]);
+      },
+    ]);
 
     const tokenBalance2 = await bob.getTokenBalance(tokenId);
     expect(tokenBalance2).toBe(0);
@@ -766,11 +766,13 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos3.length).toBe(5);
 
     // charlie sends some from one of this utxos
-    await charlie.send([{
-      cashaddr: bob.cashaddr!,
-      tokenId: tokenId,
-      amount: 50,
-    }]);
+    await charlie.send([
+      {
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        amount: 50,
+      },
+    ]);
     const tokenBalance4 = await charlie.getTokenBalance(tokenId);
     expect(tokenBalance4).toBe(951);
     const tokenUtxos4 = await charlie.getTokenUtxos(tokenId);
@@ -780,9 +782,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance5).toBe(50);
     const tokenUtxos5 = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos5.length).toBe(1);
-
   });
-
 
   test("Test minting NFTs not burn tokens", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
