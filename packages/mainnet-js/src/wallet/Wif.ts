@@ -1107,7 +1107,7 @@ export class Wallet extends BaseWallet {
       inputs: UtxoI[],
       outputs: SendRequestType[]
     ) => {
-      // allow for implicit token burn if the total amount sent is less than user had
+      // Do NOT allow for implicit token burn if the total amount sent is less than user had
       // allow for token genesis, creating more tokens than we had before (0)
       if (!checkTokenQuantities) {
         return;
@@ -1148,7 +1148,7 @@ export class Wallet extends BaseWallet {
             available += token.token?.amount!;
             if (available >= outputAmountSum) {
               change = available - outputAmountSum;
-              break;
+              //break;
             }
           }
           if (ensureUtxos.length) {
