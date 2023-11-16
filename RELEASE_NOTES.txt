@@ -1,5 +1,28 @@
 Newest changes
 --------------
+2.2.8
+
+* Fix potential implicit FT Burn.
+
+2.2.7
+
+* Drop network from chaingraph BCMR AuthChain query.
+
+2.2.6
+
+* Fix behavior of watchOnly wallets for non-token v. token aware and
+* Fix watching p2sh addresses.
+
+2.2.5 
+
+* Fix results of message validation to be clearer
+* Add README to main mainnet-js package.
+
+2.2.4 
+
+* Export wallet interfaces
+* Fix name collision with database interfaces.
+
 
 2.2.3
 
