@@ -41,7 +41,7 @@ export interface HeaderI {
 }
 
 export interface TokenI {
-  amount: number;
+  amount: bigint;
   tokenId: string;
   capability?: NFTCapability;
   commitment?: string;

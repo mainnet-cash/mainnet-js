@@ -86,7 +86,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       height: utxo.height,
       token: utxo.token_data
         ? {
-            amount: Number(utxo.token_data.amount),
+            amount: BigInt(utxo.token_data.amount),
             tokenId: utxo.token_data.category,
             capability: utxo.token_data.nft?.capability,
             commitment: utxo.token_data.nft?.commitment,

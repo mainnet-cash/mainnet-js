@@ -774,9 +774,9 @@ export class Wallet extends BaseWallet {
   // can be cancelled by calling the function returned from this one
   public watchTokenBalance(
     tokenId: string,
-    callback: (balance: number) => void
+    callback: (balance: bigint) => void
   ): CancelWatchFn {
-    let previous: number | undefined = undefined;
+    let previous: bigint | undefined = undefined;
     return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
@@ -793,12 +793,12 @@ export class Wallet extends BaseWallet {
   // this call halts the execution
   public async waitForTokenBalance(
     tokenId: string,
-    amount: number
-  ): Promise<number> {
+    amount: bigint
+  ): Promise<bigint> {
     return new Promise(async (resolve) => {
       const watchCancel = this.watchTokenBalance(
         tokenId,
-        async (balance: number) => {
+        async (balance: bigint) => {
           if (balance >= amount) {
             await watchCancel();
             resolve(balance);
@@ -819,9 +819,9 @@ export class Wallet extends BaseWallet {
       outputCount?: number;
       options?: SendRequestOptionsI;
     } = {
-      outputCount: 1,
-      options: {},
-    }
+        outputCount: 1,
+        options: {},
+      }
   ): Promise<{ value: number; utxos: UtxoI[] }> {
     if (!this.privateKey && params.options?.buildUnsigned !== true) {
       throw Error("Couldn't get network or private key for wallet.");
@@ -900,9 +900,9 @@ export class Wallet extends BaseWallet {
       outputCount?: number;
       options?: SendRequestOptionsI;
     } = {
-      outputCount: 1,
-      options: {},
-    }
+        outputCount: 1,
+        options: {},
+      }
   ): Promise<BalanceResponse> {
     const { value: result } = await this._getMaxAmountToSend(params);
 
@@ -936,7 +936,7 @@ export class Wallet extends BaseWallet {
       const txId = await this.submitTransaction(
         encodedTransaction,
         options?.awaitTransactionPropagation === undefined ||
-          options?.awaitTransactionPropagation === true
+        options?.awaitTransactionPropagation === true
       );
 
       resp.txId = txId;
@@ -1012,7 +1012,7 @@ export class Wallet extends BaseWallet {
       const txId = await this.submitTransaction(
         encodedTransaction,
         options?.awaitTransactionPropagation === undefined ||
-          options?.awaitTransactionPropagation === true
+        options?.awaitTransactionPropagation === true
       );
 
       resp.txId = txId;
@@ -1107,7 +1107,7 @@ export class Wallet extends BaseWallet {
       inputs: UtxoI[],
       outputs: SendRequestType[]
     ) => {
-      // Do NOT allow for implicit token burn if the total amount sent is less than user had
+      // Allow for implicit token burn if the total amount sent is less than user had
       // allow for token genesis, creating more tokens than we had before (0)
       if (!checkTokenQuantities) {
         return;
@@ -1125,14 +1125,14 @@ export class Wallet extends BaseWallet {
         );
         const inputAmountSum = tokenInputs.reduce(
           (prev, cur) => prev + cur.token!.amount,
-          0
+          0n
         );
         const tokenOutputs = allTokenOutputs.filter(
           (val) => val.tokenId === tokenId
         );
         const outputAmountSum = tokenOutputs.reduce(
           (prev, cur) => prev + cur.amount,
-          0
+          0n
         );
 
         const diff = inputAmountSum - outputAmountSum;
@@ -1140,8 +1140,8 @@ export class Wallet extends BaseWallet {
           throw new Error("Not enough token amount to send");
         }
         if (diff >= 0) {
-          let available = 0;
-          let change = 0;
+          let available = 0n;
+          let change = 0n;
           const ensureUtxos: UtxoI[] = [];
           for (const token of tokenInputs.filter((val) => val.token?.amount)) {
             ensureUtxos.push(token);
@@ -1552,9 +1552,9 @@ export class Wallet extends BaseWallet {
     }
     const newAmount =
       deductTokenAmount && nftUtxos[0].token!.amount > 0
-        ? nftUtxos[0].token!.amount - mintRequests.length
+        ? nftUtxos[0].token!.amount - BigInt(mintRequests.length)
         : nftUtxos[0].token!.amount;
-    const safeNewAmount = Math.max(0, newAmount);
+    const safeNewAmount = newAmount < 0n ? 0n : newAmount;
     const mintingInput = new TokenSendRequest({
       cashaddr: this.tokenaddr!,
       tokenId: tokenId,
@@ -1626,23 +1626,23 @@ export class Wallet extends BaseWallet {
     }
 
     const totalFungibleAmount = tokenUtxos.reduce(
-      (prev, cur) => prev + (cur.token?.amount || 0),
-      0
+      (prev, cur) => prev + (cur.token?.amount || 0n),
+      0n
     );
     const fungibleBurnAmount =
-      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0;
+      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
     const hasNFT = burnRequest.capability || burnRequest.commitment;
 
     let utxoIds: UtxoI[] = [];
     let changeSendRequests: TokenSendRequest[];
     if (hasNFT) {
       // does not have FT tokens, let us destroy the token completely
-      if (totalFungibleAmount === 0) {
+      if (totalFungibleAmount === 0n) {
         changeSendRequests = [];
         utxoIds.push(tokenUtxos[0]);
       } else {
         // add utxos to spend from
-        let available = 0;
+        let available = 0n;
         for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
           utxoIds.push(token);
           available += token.token?.amount!;
@@ -1653,7 +1653,7 @@ export class Wallet extends BaseWallet {
 
         // if there are FT, reduce their amount
         const newAmount = totalFungibleAmount - fungibleBurnAmount;
-        const safeNewAmount = Math.max(0, newAmount);
+        const safeNewAmount = newAmount < 0n ? 0n : newAmount;
         changeSendRequests = [
           new TokenSendRequest({
             cashaddr: burnRequest.cashaddr || this.tokenaddr!,
@@ -1672,7 +1672,7 @@ export class Wallet extends BaseWallet {
         utxoIds.push(tokenUtxos[0]);
       } else {
         // add utxos to spend from
-        let available = 0;
+        let available = 0n;
         for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
           utxoIds.push(token);
           available += token.token?.amount!;
@@ -1683,7 +1683,7 @@ export class Wallet extends BaseWallet {
 
         // reduce the FT amount
         const newAmount = totalFungibleAmount - fungibleBurnAmount;
-        const safeNewAmount = Math.max(0, newAmount);
+        const safeNewAmount = newAmount < 0n ? 0n : newAmount;
         changeSendRequests = [
           new TokenSendRequest({
             cashaddr: burnRequest.cashaddr || this.tokenaddr!,
@@ -1722,9 +1722,9 @@ export class Wallet extends BaseWallet {
    * getTokenBalance Gets fungible token balance
    * for NFT token balance see @ref getNftTokenBalance
    * @param  {string} tokenId tokenId to get balance for
-   * @returns  {number} fungible token balance
+   * @returns  {bigint} fungible token balance
    */
-  public async getTokenBalance(tokenId: string): Promise<number> {
+  public async getTokenBalance(tokenId: string): Promise<bigint> {
     const utxos = (await this.getTokenUtxos(tokenId)).filter(
       (val) => val.token?.amount
     );
@@ -1732,7 +1732,7 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particula tokenId
+   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particular tokenId
    * disregards fungible token balances
    * for fungible token balance see @ref getTokenBalance
    * @param  {string} tokenId tokenId to get balance for

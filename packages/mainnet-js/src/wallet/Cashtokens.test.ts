@@ -746,12 +746,12 @@ describe(`Test cashtokens`, () => {
       {
         cashaddr: charlie.cashaddr!,
         tokenId: tokenId,
-        amount: 100,
+        amount: 100n,
       },
       {
         cashaddr: charlie.cashaddr!,
         tokenId: tokenId,
-        amount: 300,
+        amount: 300n,
       },
     ]);
 
@@ -761,7 +761,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos2.length).toBe(0);
 
     const tokenBalance3 = await charlie.getTokenBalance(tokenId);
-    expect(tokenBalance3).toBe(1001);
+    expect(tokenBalance3).toBe(1001n);
     const tokenUtxos3 = await charlie.getTokenUtxos(tokenId);
     expect(tokenUtxos3.length).toBe(5);
 
