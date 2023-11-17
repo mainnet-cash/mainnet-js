@@ -819,9 +819,9 @@ export class Wallet extends BaseWallet {
       outputCount?: number;
       options?: SendRequestOptionsI;
     } = {
-        outputCount: 1,
-        options: {},
-      }
+      outputCount: 1,
+      options: {},
+    }
   ): Promise<{ value: number; utxos: UtxoI[] }> {
     if (!this.privateKey && params.options?.buildUnsigned !== true) {
       throw Error("Couldn't get network or private key for wallet.");
@@ -900,9 +900,9 @@ export class Wallet extends BaseWallet {
       outputCount?: number;
       options?: SendRequestOptionsI;
     } = {
-        outputCount: 1,
-        options: {},
-      }
+      outputCount: 1,
+      options: {},
+    }
   ): Promise<BalanceResponse> {
     const { value: result } = await this._getMaxAmountToSend(params);
 
@@ -936,7 +936,7 @@ export class Wallet extends BaseWallet {
       const txId = await this.submitTransaction(
         encodedTransaction,
         options?.awaitTransactionPropagation === undefined ||
-        options?.awaitTransactionPropagation === true
+          options?.awaitTransactionPropagation === true
       );
 
       resp.txId = txId;
@@ -1012,7 +1012,7 @@ export class Wallet extends BaseWallet {
       const txId = await this.submitTransaction(
         encodedTransaction,
         options?.awaitTransactionPropagation === undefined ||
-        options?.awaitTransactionPropagation === true
+          options?.awaitTransactionPropagation === true
       );
 
       resp.txId = txId;

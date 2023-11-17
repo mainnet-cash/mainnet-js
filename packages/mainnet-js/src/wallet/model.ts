@@ -370,11 +370,11 @@ export const fromUtxoId = (utxoId: string): UtxoI => {
     txid,
     token: tokenId
       ? {
-        tokenId,
-        amount: BigInt(amount),
-        capability: capability || undefined,
-        commitment: commitment || undefined,
-      }
+          tokenId,
+          amount: BigInt(amount),
+          capability: capability || undefined,
+          commitment: commitment || undefined,
+        }
       : undefined,
   } as UtxoI;
 };
