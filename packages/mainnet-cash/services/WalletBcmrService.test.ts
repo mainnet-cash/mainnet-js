@@ -413,7 +413,7 @@ describe("Test Wallet BCMR Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(0);
+    expect(tokenBalance).toBe(0n);
     const nftTokenBalance = (await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,

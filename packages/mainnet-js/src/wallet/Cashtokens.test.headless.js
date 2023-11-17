@@ -53,8 +53,8 @@ describe(`Wallet should function in the browser`, () => {
       ]);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(2);
-      expect(await alice.getTokenBalance(tokenId)).toBe(75);
-      expect(await bob.getTokenBalance(tokenId)).toBe(25);
+      expect(await alice.getTokenBalance(tokenId)).toBe(75n);
+      expect(await bob.getTokenBalance(tokenId)).toBe(25n);
     }, process.env.ALICE_ID);
   });
 
@@ -81,11 +81,11 @@ describe(`Wallet should function in the browser`, () => {
           commitment: "abcd",
         }),
       ]);
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(0);
 
-      expect(await bob.getTokenBalance(tokenId)).toBe(0);
+      expect(await bob.getTokenBalance(tokenId)).toBe(0n);
       const bobTokenUtxos = await bob.getTokenUtxos(tokenId);
       expect(bobTokenUtxos.length).toBe(1);
       expect(tokenId).toEqual(response.tokenIds[0]);
@@ -104,7 +104,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(0);
+      expect(tokenBalance).toBe(0n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       await expect(
@@ -160,7 +160,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(0);
+      expect(tokenBalance).toBe(0n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       const response = await alice.tokenMint(tokenId, [
@@ -175,7 +175,7 @@ describe(`Wallet should function in the browser`, () => {
           capability: NFTCapability.none,
         }),
       ]);
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(3);
       expect(tokenId).toEqual(response.tokenIds[0]);
@@ -215,7 +215,7 @@ describe(`Wallet should function in the browser`, () => {
         ],
         true
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(2);
+      expect(await alice.getTokenBalance(tokenId)).toBe(2n);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(3);
       expect(tokenId).toEqual(response.tokenIds[0]);
@@ -237,7 +237,7 @@ describe(`Wallet should function in the browser`, () => {
         ],
         false
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(2);
+      expect(await alice.getTokenBalance(tokenId)).toBe(2n);
       const ftTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(ftTokenUtxos.length).toBe(5);
       expect(tokenId).toEqual(ftResponse.tokenIds[0]);
@@ -265,7 +265,7 @@ describe(`Wallet should function in the browser`, () => {
         ],
         true
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       const ft2TokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(ft2TokenUtxos.length).toBe(8);
       expect(tokenId).toEqual(ft2Response.tokenIds[0]);
@@ -282,7 +282,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(4);
+      expect(tokenBalance).toBe(4n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
 
@@ -301,7 +301,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(rawTx.vout[0].scriptPubKey.hex).toContain(
         binToHex(utf8ToBin("burn"))
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(0);
       expect(tokenId).toEqual(response.tokenIds[0]);
@@ -320,7 +320,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(4);
+      expect(tokenBalance).toBe(4n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
 
@@ -341,7 +341,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(rawTx.vout[0].scriptPubKey.hex).toContain(
         binToHex(utf8ToBin("burn"))
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(3);
+      expect(await alice.getTokenBalance(tokenId)).toBe(3n);
       expect((await alice.getAllTokenBalances())[tokenId]).toBe(3);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(1);
@@ -359,7 +359,7 @@ describe(`Wallet should function in the browser`, () => {
         },
         "burn"
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       const ftTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(ftTokenUtxos.length).toBe(1);
       expect(tokenId).toEqual(ftResponse.tokenIds[0]);
@@ -373,7 +373,7 @@ describe(`Wallet should function in the browser`, () => {
         },
         "burn"
       );
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       expect((await alice.getAllTokenBalances())[tokenId] || 0).toBe(0);
       const nftTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(nftTokenUtxos.length).toBe(0);
@@ -395,7 +395,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await bob.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(100);
+      expect(tokenBalance).toBe(100n);
       const tokenUtxos = await bob.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       expect(tokenUtxos[0].satoshis).toBe(7000);
@@ -411,7 +411,7 @@ describe(`Wallet should function in the browser`, () => {
       ]);
       let newTokenUtxos = await bob.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(1);
-      expect(await bob.getTokenBalance(tokenId)).toBe(100);
+      expect(await bob.getTokenBalance(tokenId)).toBe(100n);
 
       let bobUtxos = await bob.getAddressUtxos(bob.cashaddr);
       expect(bobUtxos.length).toBe(2);
@@ -429,7 +429,7 @@ describe(`Wallet should function in the browser`, () => {
       ]);
       newTokenUtxos = await bob.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(1);
-      expect(await bob.getTokenBalance(tokenId)).toBe(100);
+      expect(await bob.getTokenBalance(tokenId)).toBe(100n);
 
       bobUtxos = await bob.getAddressUtxos(bob.cashaddr);
       expect(bobUtxos.length).toBe(2);
@@ -453,7 +453,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(100);
+      expect(tokenBalance).toBe(100n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       expect(tokenUtxos[0].satoshis).toBe(5000);
@@ -483,7 +483,7 @@ describe(`Wallet should function in the browser`, () => {
         delay(1000),
       ]);
 
-      expect(balance).toBe(100);
+      expect(balance).toBe(100n);
       expect(seenBalance).toBe(100);
 
       await Promise.all([cancel(), delay(1000)]);
