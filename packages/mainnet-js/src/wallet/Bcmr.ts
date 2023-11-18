@@ -13,6 +13,7 @@ import { ElectrumRawTransaction } from "../network/interface.js";
 import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
 import { initProvider } from "../network/Connection.js";
 import { OpReturnData } from "./model.js";
+import { Config } from "../config"
 
 export interface AuthChainElement {
   txHash: string;
@@ -174,7 +175,7 @@ export class BCMR {
       result.contentHash = binToHex(chunks[1]);
       const ipfsCid = binToUtf8(chunks[1]);
       result.uris = [`ipfs://${ipfsCid}`];
-      result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
+      result.httpsUrl = `${Config.DefaultIpfsGateway}${ipfsCid}`;
     } else {
       // URI Publication Output
       // content hash is in OP_SHA256 byte order per spec
@@ -192,7 +193,7 @@ export class BCMR {
 
         if (uriString.indexOf("ipfs://") === 0) {
           const ipfsCid = uriString.replace("ipfs://", "");
-          result.httpsUrl = `https://dweb.link/ipfs/${ipfsCid}`;
+          result.httpsUrl = `${Config.DefaultIpfsGateway}${ipfsCid}`;
         } else if (uriString.indexOf("https://") === 0) {
           result.httpsUrl = uriString;
         } else if (uriString.indexOf("https://") === -1) {
