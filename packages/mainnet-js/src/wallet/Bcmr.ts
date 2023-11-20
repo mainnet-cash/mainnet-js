@@ -13,7 +13,7 @@ import { ElectrumRawTransaction } from "../network/interface.js";
 import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
 import { initProvider } from "../network/Connection.js";
 import { OpReturnData } from "./model.js";
-import { Config } from "../config"
+import { Config } from "../config.js"
 
 export interface AuthChainElement {
   txHash: string;
