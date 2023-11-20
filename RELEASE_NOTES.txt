@@ -1,5 +1,10 @@
 Newest changes
 --------------
+
+2.2.9
+
+*  Add ipfs gateway config option
+
 2.2.8
 
 * Fix potential implicit FT Burn.
