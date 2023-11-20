@@ -36,7 +36,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(100);
+      expect(tokenBalance).toBe(100n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       const response = await alice.send([
@@ -70,7 +70,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(0);
+      expect(tokenBalance).toBe(0n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       const response = await alice.send([
@@ -130,7 +130,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(0);
+      expect(tokenBalance).toBe(0n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
       const response = await alice.send([
@@ -484,7 +484,7 @@ describe(`Wallet should function in the browser`, () => {
       ]);
 
       expect(balance).toBe(100n);
-      expect(seenBalance).toBe(100);
+      expect(seenBalance).toBe(100n);
 
       await Promise.all([cancel(), delay(1000)]);
     }, process.env.ALICE_ID);
