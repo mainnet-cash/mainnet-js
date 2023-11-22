@@ -25,7 +25,6 @@ afterAll(async () => {
   await disconnectProviders();
 });
 
-
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
@@ -1068,7 +1067,6 @@ describe(`Wallet extrema behavior regression testing`, () => {
           { buildUnsigned: true }
         );
       expect(encodedTransaction.length).toBeGreaterThan(0);
-      
 
       // check transaction was not submitted
       // BigInts can't be serialized as strings
