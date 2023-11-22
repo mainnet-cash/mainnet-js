@@ -601,7 +601,7 @@ describe(`Wallet should function in the browser`, () => {
         );
         await aliceWallet.submitTransaction(signed);
 
-        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(2n);
+        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(2);
         const tokenUtxos = await aliceWallet.getTokenUtxos(tokenId);
         expect(tokenUtxos.length).toBe(2);
         expect(
