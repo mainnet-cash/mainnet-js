@@ -117,7 +117,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe("0");
+    })).body.balance).toBe(0);
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
