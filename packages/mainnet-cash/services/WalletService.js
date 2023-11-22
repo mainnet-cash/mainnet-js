@@ -337,6 +337,9 @@ const utxos = ({ serializedWallet }) => new Promise(
       let wallet = await mainnet.walletFromId(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
+      BigInt.prototype.toJSON = function () {
+        return this.toString();
+      };
       let resp = await wallet.getUtxos(args);
       resolve(Service.successResponse(resp));
     } catch (e) {
