@@ -672,8 +672,8 @@ describe(`Test cashtokens`, () => {
       tokenId: tokenId,
       amount: 50n,
     });
-    expect((await bob.getTokenUtxos()).length).toBe(2n);
-    expect((await charlie.getTokenUtxos()).length).toBe(1n);
+    expect((await bob.getTokenUtxos()).length).toBe(2);
+    expect((await charlie.getTokenUtxos()).length).toBe(1);
     expect(await bob.getTokenBalance(tokenId)).toBe(50n);
     expect(await charlie.getTokenBalance(tokenId)).toBe(50n);
   });
@@ -1045,7 +1045,7 @@ describe(`Test cashtokens`, () => {
       }),
     ]);
 
-    expect(await bob.getTokenBalance(tokenId)).toBe(10000);
+    expect(await bob.getTokenBalance(tokenId)).toBe(10000n);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(1);
     expect((await bob.getTokenUtxos(tokenId)).length).toBe(1);
   });
