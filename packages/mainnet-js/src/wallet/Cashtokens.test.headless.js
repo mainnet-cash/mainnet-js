@@ -505,6 +505,11 @@ describe(`Wallet should function in the browser`, () => {
         return true;
       };
 
+      BigInt.prototype.toJSON = function () {
+        const int = Number.parseInt(this.toString());
+        return int ?? this.toString();
+      };
+
       const aliceWallet = await RegTestWallet.fromId(id);
       const aliceWatchWallet = await RegTestWallet.watchOnly(
         aliceWallet.cashaddr
