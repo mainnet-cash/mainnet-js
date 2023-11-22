@@ -1749,14 +1749,14 @@ export class Wallet extends BaseWallet {
    * getAllTokenBalances Gets all fungible token balances in this wallet
    * @returns  {Object} a map [tokenId => balance] for all tokens in this wallet
    */
-  public async getAllTokenBalances(): Promise<{ [tokenId: string]: number }> {
+  public async getAllTokenBalances(): Promise<{ [tokenId: string]: bigint }> {
     const result = {};
     const utxos = (await this.getTokenUtxos()).filter(
       (val) => val.token?.amount
     );
     for (const utxo of utxos) {
       if (!result[utxo.token!.tokenId]) {
-        result[utxo.token!.tokenId] = 0;
+        result[utxo.token!.tokenId] = 0n;
       }
       result[utxo.token!.tokenId] += utxo.token!.amount;
     }

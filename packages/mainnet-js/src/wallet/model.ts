@@ -47,7 +47,7 @@ export class SendRequest {
 }
 
 export class TokenGenesisRequest {
-  amount?: number; // fungible token amount
+  amount?: bigint; // fungible token amount
   capability?: NFTCapability;
   commitment?: string;
   cashaddr?: string;
@@ -60,7 +60,7 @@ export class TokenGenesisRequest {
     cashaddr,
     value,
   }: {
-    amount?: number;
+    amount?: bigint;
     capability?: NFTCapability;
     commitment?: string;
     cashaddr?: string;

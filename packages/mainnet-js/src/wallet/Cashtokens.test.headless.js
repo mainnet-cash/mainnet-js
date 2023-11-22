@@ -31,7 +31,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await RegTestWallet.fromId(id);
       const bob = await RegTestWallet.newRandom();
       const genesisResponse = await alice.tokenGenesis({
-        amount: 100,
+        amount: 100n,
       });
 
       const tokenId = genesisResponse.tokenIds[0];
@@ -42,12 +42,12 @@ describe(`Wallet should function in the browser`, () => {
       const response = await alice.send([
         new TokenSendRequest({
           cashaddr: bob.cashaddr,
-          amount: 25,
+          amount: 25n,
           tokenId: tokenId,
         }),
         new TokenSendRequest({
           cashaddr: alice.cashaddr,
-          amount: 25,
+          amount: 25n,
           tokenId: tokenId,
         }),
       ]);
@@ -187,14 +187,14 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await RegTestWallet.fromId(id);
       const genesisResponse = await alice.tokenGenesis({
         cashaddr: alice.cashaddr,
-        amount: 4,
+        amount: 4n,
         capability: NFTCapability.minting,
         commitment: "abcd",
       });
 
       const tokenId = genesisResponse.tokenIds[0];
       const tokenBalance = await alice.getTokenBalance(tokenId);
-      expect(tokenBalance).toBe(4);
+      expect(tokenBalance).toBe(4n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
 
@@ -277,7 +277,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await RegTestWallet.fromId(id);
       const genesisResponse = await alice.tokenGenesis({
         cashaddr: alice.cashaddr,
-        amount: 4,
+        amount: 4n,
       });
 
       const tokenId = genesisResponse.tokenIds[0];
@@ -290,7 +290,7 @@ describe(`Wallet should function in the browser`, () => {
       const response = await alice.tokenBurn(
         {
           tokenId: tokenId,
-          amount: 5,
+          amount: 5n,
         },
         "burn"
       );
@@ -313,7 +313,7 @@ describe(`Wallet should function in the browser`, () => {
       const alice = await RegTestWallet.fromId(id);
       const genesisResponse = await alice.tokenGenesis({
         cashaddr: alice.cashaddr,
-        amount: 4,
+        amount: 4n,
         capability: NFTCapability.minting,
         commitment: "abcd",
       });
@@ -328,7 +328,7 @@ describe(`Wallet should function in the browser`, () => {
       const response = await alice.tokenBurn(
         {
           tokenId: tokenId,
-          amount: 1,
+          amount: 1n,
           capability: NFTCapability.minting,
           commitment: "abcd",
         },
@@ -342,7 +342,7 @@ describe(`Wallet should function in the browser`, () => {
         binToHex(utf8ToBin("burn"))
       );
       expect(await alice.getTokenBalance(tokenId)).toBe(3n);
-      expect((await alice.getAllTokenBalances())[tokenId]).toBe(3);
+      expect((await alice.getAllTokenBalances())[tokenId]).toBe(3n);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(1);
       expect(await alice.getNftTokenBalance(tokenId)).toBe(1);
@@ -374,12 +374,12 @@ describe(`Wallet should function in the browser`, () => {
         "burn"
       );
       expect(await alice.getTokenBalance(tokenId)).toBe(0n);
-      expect((await alice.getAllTokenBalances())[tokenId] || 0).toBe(0);
+      expect((await alice.getAllTokenBalances())[tokenId] || 0n).toBe(0n);
       const nftTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(nftTokenUtxos.length).toBe(0);
       expect(tokenId).toEqual(nftResponse.tokenIds[0]);
       expect(await alice.getNftTokenBalance(tokenId)).toBe(0);
-      expect((await alice.getAllNftTokenBalances())[tokenId] || 0).toBe(0);
+      expect((await alice.getAllNftTokenBalances())[tokenId] || 0n).toBe(0n);
     }, process.env.ALICE_ID);
   });
 
