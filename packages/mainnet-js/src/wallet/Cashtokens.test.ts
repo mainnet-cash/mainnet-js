@@ -567,7 +567,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenUtxos.length).toBe(1);
     expect(tokenUtxos[0].satoshis).toBe(5000);
 
-    let seenBalance = 0;
+    let seenBalance = 0n;
     let sendResponse: SendResponse = {};
     setTimeout(
       async () =>
@@ -756,7 +756,7 @@ describe(`Test cashtokens`, () => {
     ]);
 
     const tokenBalance2 = await bob.getTokenBalance(tokenId);
-    expect(tokenBalance2).toBe(0);
+    expect(tokenBalance2).toBe(0n);
     const tokenUtxos2 = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos2.length).toBe(0);
 
