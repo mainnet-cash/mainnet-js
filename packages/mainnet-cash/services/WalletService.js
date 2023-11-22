@@ -2,14 +2,11 @@
 import Service from './Service.js';
 import * as mainnet from "mainnet-js";
 
-export const JSONStringify = (data) => {
-  const bigInts = /([\[:])?"(\d+)n"([,\}\]])/g;
-  const preliminaryJSON = JSON.stringify(data, (_, value) =>
-    typeof value === "bigint" ? value.toString() + "n" : value
-  );
-  const finalJSON = preliminaryJSON.replace(bigInts, "$1$2$3");
 
-  return finalJSON;
+
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
 };
 
 
@@ -349,7 +346,7 @@ const utxos = ({ serializedWallet }) => new Promise(
       let args = serializedWallet;
       delete args.walletId;
 
-      BigInt.prototype.toJSON = JSONStringify
+      
       let resp = await wallet.getUtxos(args);
       resolve(Service.successResponse(resp));
     } catch (e) {
@@ -475,8 +472,7 @@ const getTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
       const resp = await wallet.getTokenBalance(getTokenBalanceRequest.tokenId);
-      BigInt.prototype.toJSON = JSONStringify
-      
+            
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
       reject(Service.rejectResponse(
