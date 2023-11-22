@@ -141,7 +141,7 @@ describe(`Wallet should function in the browser`, () => {
           commitment: "abcd02",
         }),
       ]);
-      expect(await alice.getTokenBalance(tokenId)).toBe(0);
+      expect(await alice.getTokenBalance(tokenId)).toBe(0n);
       const newTokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(newTokenUtxos.length).toBe(1);
       expect(tokenId).toEqual(response.tokenIds[0]);
@@ -353,7 +353,7 @@ describe(`Wallet should function in the browser`, () => {
       const ftResponse = await alice.tokenBurn(
         {
           tokenId: tokenId,
-          amount: 5,
+          amount: 5n,
           capability: NFTCapability.minting,
           commitment: "abcd",
         },
@@ -596,7 +596,7 @@ describe(`Wallet should function in the browser`, () => {
         );
         await aliceWallet.submitTransaction(signed);
 
-        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(2);
+        expect(await aliceWallet.getNftTokenBalance(tokenId)).toBe(2n);
         const tokenUtxos = await aliceWallet.getTokenUtxos(tokenId);
         expect(tokenUtxos.length).toBe(2);
         expect(
