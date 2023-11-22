@@ -462,7 +462,10 @@ const getTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
       const resp = await wallet.getTokenBalance(getTokenBalanceRequest.tokenId);
-
+      BigInt.prototype.toJSON = function () {
+        return this.toString();
+      };
+      
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
       reject(Service.rejectResponse(
