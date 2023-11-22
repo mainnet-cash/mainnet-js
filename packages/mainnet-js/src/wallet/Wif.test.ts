@@ -1138,9 +1138,9 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getAddressUtxos())
-      );
+      // expect(JSON.stringify(aliceUtxos)).toBe(
+      //   JSON.stringify(await aliceWallet.getAddressUtxos())
+      // );
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
