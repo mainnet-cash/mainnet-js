@@ -1629,8 +1629,9 @@ export class Wallet extends BaseWallet {
       (prev, cur) => prev + (cur.token?.amount || 0n),
       0n
     );
-    const fungibleBurnAmount =
+    let fungibleBurnAmount =
       burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
+    fungibleBurnAmount = BigInt(fungibleBurnAmount)
     const hasNFT = burnRequest.capability || burnRequest.commitment;
 
     let utxoIds: UtxoI[] = [];
@@ -1666,7 +1667,7 @@ export class Wallet extends BaseWallet {
         ];
       }
     } else {
-      // if we are burning last fughible tokens, let us destroy the token completely
+      // if we are burning last fungible tokens, let us destroy the token completely
       if (totalFungibleAmount === fungibleBurnAmount) {
         changeSendRequests = [];
         utxoIds.push(tokenUtxos[0]);
