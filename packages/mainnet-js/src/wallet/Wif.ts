@@ -1631,7 +1631,7 @@ export class Wallet extends BaseWallet {
     );
     let fungibleBurnAmount =
       burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
-    fungibleBurnAmount = BigInt(fungibleBurnAmount)
+    fungibleBurnAmount = BigInt(fungibleBurnAmount);
     const hasNFT = burnRequest.capability || burnRequest.commitment;
 
     let utxoIds: UtxoI[] = [];
