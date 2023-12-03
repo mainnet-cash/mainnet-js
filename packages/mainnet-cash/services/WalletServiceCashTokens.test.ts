@@ -455,7 +455,7 @@ describe("Test Wallet Endpoints", () => {
     })).body.balance).toBe("3");
     expect(((await request(app).post("/wallet/get_all_token_balances").send({
       walletId: aliceId,
-    })).body)[tokenId]).toBe(3);
+    })).body)[tokenId]).toBe("3");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
