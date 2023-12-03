@@ -464,7 +464,7 @@ describe("Test Wallet Endpoints", () => {
     expect(((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance)).toBe("1");
+    })).body.balance)).toBe(1);
     expect(((await request(app).post("/wallet/get_all_nft_token_balances").send({
       walletId: aliceId,
     })).body)[tokenId || 0]).toBe(1);
