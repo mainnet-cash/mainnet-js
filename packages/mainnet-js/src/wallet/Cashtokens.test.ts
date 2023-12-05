@@ -21,7 +21,6 @@ import { Config } from "../config";
 
 beforeAll(async () => {
   await initProviders();
-  
 });
 afterAll(async () => {
   await disconnectProviders();
@@ -1058,7 +1057,7 @@ describe(`Test cashtokens`, () => {
     const aliceWatchWallet = await RegTestWallet.watchOnly(
       aliceWallet.cashaddr!
     );
-    
+
     let tokenId;
     {
       const aliceUtxos = await aliceWallet.getAddressUtxos();
@@ -1076,9 +1075,7 @@ describe(`Test cashtokens`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(
-        json(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1122,9 +1119,7 @@ describe(`Test cashtokens`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(
-        json(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1178,9 +1173,7 @@ describe(`Test cashtokens`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(
-        json(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {

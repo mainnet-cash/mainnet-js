@@ -1072,9 +1072,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       // check transaction was not submitted
       // BigInts can't be serialized as strings
       //
-      expect(json(aliceUtxos)).toBe(
-       json(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1115,9 +1113,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(
-        json(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1139,9 +1135,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(
-        json(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
