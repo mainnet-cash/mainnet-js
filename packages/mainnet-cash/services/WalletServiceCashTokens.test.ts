@@ -34,7 +34,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(100);
+    expect(tokenBalance).toBe("100");
 
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
@@ -62,11 +62,11 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(75);
+    })).body.balance).toBe("75");
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
       tokenId: tokenId,
-    })).body.balance).toBe(25);
+    })).body.balance).toBe("25");
   });
 
   test("Test NFT cashtoken genesis and sending", async () => {
@@ -89,7 +89,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(0);
+    expect(tokenBalance).toBe("0");
     const nftTokenBalance = (await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -113,7 +113,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     expect((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -127,7 +127,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     const bobTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: bobId,
       tokenId: tokenId,
@@ -150,7 +150,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(0);
+    expect(tokenBalance).toBe("0");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -180,7 +180,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(0);
+    expect(tokenBalance).toBe("0");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -198,7 +198,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -221,7 +221,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(0);
+    expect(tokenBalance).toBe("0");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -243,7 +243,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -266,7 +266,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(4);
+    expect(tokenBalance).toBe("4");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -292,7 +292,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(2);
+    })).body.balance).toBe("2");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -318,7 +318,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(2);
+    })).body.balance).toBe("2");
     const ftTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -349,7 +349,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     const ft2TokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -363,14 +363,14 @@ describe("Test Wallet Endpoints", () => {
     const tokenId = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
-      amount: 4,
+      amount: 4n,
     })).body.tokenIds![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(4);
+    expect(tokenBalance).toBe("4");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -381,7 +381,7 @@ describe("Test Wallet Endpoints", () => {
     const response = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
       tokenId: tokenId,
-      amount: 5,
+      amount: 5n,
       message: "burn"
     })).body;
 
@@ -399,7 +399,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -413,7 +413,7 @@ describe("Test Wallet Endpoints", () => {
     const tokenId = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
-      amount: 4,
+      amount: 4n,
       capability: NFTCapability.minting,
       commitment: "abcd",
     })).body.tokenIds![0];
@@ -422,7 +422,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: aliceId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(4);
+    expect(tokenBalance).toBe("4");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -433,7 +433,7 @@ describe("Test Wallet Endpoints", () => {
     const response = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
       tokenId: tokenId,
-      amount: 1,
+      amount: 1n,
       capability: NFTCapability.minting,
       commitment: "abcd",
       message: "burn",
@@ -452,10 +452,10 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(3);
+    })).body.balance).toBe("3");
     expect(((await request(app).post("/wallet/get_all_token_balances").send({
       walletId: aliceId,
-    })).body)[tokenId]).toBe(3);
+    })).body)[tokenId]).toBe("3");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -474,7 +474,7 @@ describe("Test Wallet Endpoints", () => {
     const ftResponse = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
       tokenId: tokenId,
-      amount: 5,
+      amount: 5n,
       capability: NFTCapability.minting,
       commitment: "abcd",
       message: "burn",
@@ -482,7 +482,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     const ftTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
       tokenId: tokenId,
@@ -501,7 +501,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
       tokenId: tokenId,
-    })).body.balance).toBe(0);
+    })).body.balance).toBe("0");
     expect(((await request(app).post("/wallet/get_all_token_balances").send({
       walletId: aliceId,
     })).body)[tokenId] || 0).toBe(0);
@@ -540,7 +540,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobId,
       tokenId: tokenId,
     })).body.balance;
-    expect(tokenBalance).toBe(100);
+    expect(tokenBalance).toBe("100");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: bobId,
       tokenId: tokenId,
@@ -567,7 +567,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
       tokenId: tokenId,
-    })).body.balance).toBe(100);
+    })).body.balance).toBe("100");
 
     let bobUtxos = (await request(app).post("/wallet/utxo").send({
       walletId: bobId,
@@ -594,7 +594,7 @@ describe("Test Wallet Endpoints", () => {
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
       tokenId: tokenId,
-    })).body.balance).toBe(100);
+    })).body.balance).toBe("100");
 
     bobUtxos = (await request(app).post("/wallet/utxo").send({
       walletId: bobId,

@@ -2,6 +2,11 @@
 import Service from './Service.js';
 import * as mainnet from "mainnet-js";
 
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 /**
 * Decode a bitcoin transaction. Accepts both transaction hash or raw transaction in hex format.
 *

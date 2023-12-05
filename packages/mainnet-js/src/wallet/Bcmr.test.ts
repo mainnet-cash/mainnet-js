@@ -773,7 +773,7 @@ describe(`Test BCMR support`, () => {
 
     const tokenId = genesisResponse.tokenIds![0];
     const tokenBalance = await alice.getTokenBalance(tokenId);
-    expect(tokenBalance).toBe(0);
+    expect(tokenBalance).toBe(0n);
     const nftTokenBalance = await alice.getNftTokenBalance(tokenId);
     expect(nftTokenBalance).toBe(1);
     const tokenUtxos = await alice.getTokenUtxos(tokenId);

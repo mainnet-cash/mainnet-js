@@ -1,6 +1,6 @@
 {
   "name": "vue-vite",
-  "version": "2.2.9",
+  "version": "2.3.0",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
@@ -13,7 +13,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "mainnet-js": "2.2.9",
+    "mainnet-js": "2.3.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2"
   },
