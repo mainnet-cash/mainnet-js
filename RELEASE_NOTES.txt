@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.3.0
+
+*  **BREAKING CHANGE:** Use big integers for fungible token amounts.
+
 2.2.9
 
 *  Add ipfs gateway config option
