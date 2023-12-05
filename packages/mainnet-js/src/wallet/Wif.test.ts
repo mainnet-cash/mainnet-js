@@ -16,6 +16,7 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 import { mine } from "../mine";
+import json from "../../polyfill/json";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 
 beforeAll(async () => {
@@ -1069,9 +1070,9 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getAddressUtxos())
-      );
+      // BigInts can't be serialized as strings
+      //
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1112,9 +1113,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1136,9 +1135,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getAddressUtxos())
-      );
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {

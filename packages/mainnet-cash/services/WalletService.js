@@ -2,6 +2,14 @@
 import Service from './Service.js';
 import * as mainnet from "mainnet-js";
 
+
+
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
+
 /**
 * Get total balance for wallet
 *
@@ -337,6 +345,8 @@ const utxos = ({ serializedWallet }) => new Promise(
       let wallet = await mainnet.walletFromId(serializedWallet.walletId);
       let args = serializedWallet;
       delete args.walletId;
+
+      
       let resp = await wallet.getUtxos(args);
       resolve(Service.successResponse(resp));
     } catch (e) {
@@ -462,7 +472,7 @@ const getTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
       const resp = await wallet.getTokenBalance(getTokenBalanceRequest.tokenId);
-
+            
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
       reject(Service.rejectResponse(

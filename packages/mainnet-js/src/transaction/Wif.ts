@@ -294,7 +294,7 @@ export function prepareTokenOutputs(request: TokenSendRequest): Output {
  */
 export async function getSuitableUtxos(
   inputs: UtxoI[],
-  amountRequired: BigInt | undefined,
+  amountRequired: bigint | undefined,
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
   requests: SendRequestType[],

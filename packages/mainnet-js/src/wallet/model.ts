@@ -47,7 +47,7 @@ export class SendRequest {
 }
 
 export class TokenGenesisRequest {
-  amount?: number; // fungible token amount
+  amount?: bigint; // fungible token amount
   capability?: NFTCapability;
   commitment?: string;
   cashaddr?: string;
@@ -60,7 +60,7 @@ export class TokenGenesisRequest {
     cashaddr,
     value,
   }: {
-    amount?: number;
+    amount?: bigint;
     capability?: NFTCapability;
     commitment?: string;
     cashaddr?: string;
@@ -78,7 +78,7 @@ export class TokenBurnRequest {
   tokenId: string;
   capability?: NFTCapability;
   commitment?: string;
-  amount?: number; // fungible token amount
+  amount?: bigint; // fungible token amount
   cashaddr?: string;
 
   constructor({
@@ -91,13 +91,13 @@ export class TokenBurnRequest {
     tokenId: string;
     capability?: NFTCapability;
     commitment?: string;
-    amount?: number;
+    amount?: number | bigint;
     cashaddr?: string;
   }) {
     this.tokenId = tokenId;
     this.capability = capability;
     this.commitment = commitment;
-    this.amount = amount;
+    this.amount = amount ? BigInt(amount) : 0n;
     this.cashaddr = cashaddr;
   }
 }
@@ -105,7 +105,7 @@ export class TokenBurnRequest {
 export class TokenSendRequest {
   cashaddr: string; // cashaddr or tokenaddr to send tokens to
   value?: number; // satoshi value
-  amount: number; // fungible token amount
+  amount: bigint; // fungible token amount
   tokenId: string;
   capability?: NFTCapability;
   commitment?: string;
@@ -120,7 +120,7 @@ export class TokenSendRequest {
   }: {
     cashaddr: string;
     value?: number;
-    amount?: number;
+    amount?: number | bigint;
     tokenId: string;
     capability?: NFTCapability;
     commitment?: string;
@@ -129,7 +129,7 @@ export class TokenSendRequest {
 
     this.cashaddr = cashaddr;
     this.value = value;
-    this.amount = amount || 0;
+    this.amount = amount ? BigInt(amount) : 0n;
     this.tokenId = tokenId;
     this.capability = capability;
     this.commitment = commitment;
@@ -371,7 +371,7 @@ export const fromUtxoId = (utxoId: string): UtxoI => {
     token: tokenId
       ? {
           tokenId,
-          amount: parseInt(amount),
+          amount: BigInt(amount),
           capability: capability || undefined,
           commitment: commitment || undefined,
         }
