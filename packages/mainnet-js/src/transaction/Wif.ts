@@ -1,11 +1,11 @@
 import {
-  authenticationTemplateP2pkhNonHd,
-  authenticationTemplateToCompilerBCH,
+  walletTemplateP2pkhNonHd,
+  walletTemplateToCompilerBCH,
   cashAddressToLockingBytecode,
   Compiler,
   encodeTransaction,
   generateTransaction,
-  importAuthenticationTemplate,
+  importWalletTemplate,
   AnyCompilerConfiguration,
   AuthenticationProgramStateCommon,
   CompilationContextBCH,
@@ -55,14 +55,14 @@ export async function buildP2pkhNonHdTransaction({
     throw new Error("Missing signing key when building transaction");
   }
 
-  const template = importAuthenticationTemplate(
-    authenticationTemplateP2pkhNonHd
+  const template = importWalletTemplate(
+    walletTemplateP2pkhNonHd
   );
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
 
-  const compiler = await authenticationTemplateToCompilerBCH(template);
+  const compiler = await walletTemplateToCompilerBCH(template);
   const inputAmount = await sumUtxoValue(inputs);
 
   const sendAmount = await sumSendRequestAmounts(outputs);
@@ -586,14 +586,14 @@ export async function signUnsignedTransaction(
     throw decoded;
   }
 
-  const template = importAuthenticationTemplate(
-    authenticationTemplateP2pkhNonHd
+  const template = importWalletTemplate(
+    walletTemplateP2pkhNonHd
   );
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
 
-  const compiler = authenticationTemplateToCompilerBCH(template);
+  const compiler = walletTemplateToCompilerBCH(template);
   const transactionTemplate: Readonly<
     TransactionTemplateFixed<typeof compiler>
   > = { ...decoded };
