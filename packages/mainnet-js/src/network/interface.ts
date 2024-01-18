@@ -1,5 +1,5 @@
 import { ClusterOrder } from "electrum-cash";
-import { NFTCapability } from "../interface";
+import { NFTCapability } from "../interface.js";
 
 export interface BlockHeader {
   height: number;
