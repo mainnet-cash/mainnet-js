@@ -55,9 +55,7 @@ export async function buildP2pkhNonHdTransaction({
     throw new Error("Missing signing key when building transaction");
   }
 
-  const template = importWalletTemplate(
-    walletTemplateP2pkhNonHd
-  );
+  const template = importWalletTemplate(walletTemplateP2pkhNonHd);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
@@ -586,9 +584,7 @@ export async function signUnsignedTransaction(
     throw decoded;
   }
 
-  const template = importWalletTemplate(
-    walletTemplateP2pkhNonHd
-  );
+  const template = importWalletTemplate(walletTemplateP2pkhNonHd);
   if (typeof template === "string") {
     throw new Error("Transaction template error");
   }
