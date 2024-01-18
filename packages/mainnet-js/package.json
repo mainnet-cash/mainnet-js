@@ -9,7 +9,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "homepage": "https://mainnet.cash",
   "module": "dist/module/index.js",
   "browser": {
@@ -38,7 +38,7 @@
     "reload": "npx reload --dir=../../jest/playwright "
   },
   "dependencies": {
-    "@bitauth/libauth": "^2.0.0-alpha.8",
+    "@bitauth/libauth": "^2.0.0",
     "bip39": "^3.0.3",
     "buffer": "^6.0.3",
     "electrum-cash": "^2.0.10",

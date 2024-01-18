@@ -1,8 +1,8 @@
 export {
-  importAuthenticationTemplate,
-  authenticationTemplateP2pkhNonHd,
-  authenticationTemplateP2pkh,
-  authenticationTemplateToCompilerBCH,
+  importWalletTemplate,
+  walletTemplateP2pkhNonHd,
+  walletTemplateP2pkh,
+  walletTemplateToCompilerBCH,
   cashAddressToLockingBytecode,
   hexToBin,
   generateTransaction,
