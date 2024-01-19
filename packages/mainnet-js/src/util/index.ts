@@ -25,10 +25,8 @@ export { hash160 } from "./hash160.js";
 export { ExchangeRate } from "../rate/ExchangeRate.js";
 export { sanitizeAddress } from "./sanitizeAddress.js";
 export { sanitizeUnit } from "./sanitizeUnit.js";
-export { getRandomInt } from "./randomInt.js";
+export { getWeakRandomInt } from "./randomInt.js";
 export { getXPubKey } from "../util/getXPubKey.js";
-import * as randomValues from "./randomValues.js";
-export { randomValues };
 export { sumUtxoValue } from "./sumUtxoValue.js";
 export {
   BalanceResponse,
