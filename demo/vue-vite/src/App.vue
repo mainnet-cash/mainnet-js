@@ -1,5 +1,6 @@
 <script lang="ts">
-import { Wallet } from "mainnet-js";
+import { Wallet, BaseWallet } from "mainnet-js";
+import { IndexedDBProvider }from "@mainnet-cash/indexeddb-storage";
 import { defineComponent } from "vue";
 export default defineComponent({
   name: "wallet",
@@ -7,19 +8,23 @@ export default defineComponent({
   data(_props){
     return {
       wallet: null as (Wallet | null),
-      image: null as any
+      image: null as any,
+      balance: null as any
     }
   },
 
   async mounted() {
-    this.wallet = await Wallet.newRandom()
+    //@ts-ignore
+    BaseWallet.StorageProvider = IndexedDBProvider;
+    this.wallet = await Wallet.named("testVueViteWallet");
     this.image = this.wallet.getDepositQr();
+    this.balance = await this.wallet.getBalance('BCH');
   },
 });
 
 </script>
 
-<template>
+<template>  
   <header>
     <img
       alt="Vue logo"
@@ -32,6 +37,7 @@ export default defineComponent({
     <div class="wrapper">
       <img v-if="image" :src="image.src" :alt="image.alt" :title="image.title">
       <div v-if="wallet">{{ wallet.cashaddr }}</div>
+      <div v-if="balance>=0">{{ balance }} BCH</div>
     </div>
   </header>
 </template>

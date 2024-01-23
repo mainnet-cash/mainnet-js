@@ -71,7 +71,7 @@ export class Contract implements ContractI {
       getNetworkProvider(this.network) as any
     );
     this.contract = this.getContractInstance();
-    this.nonce = nonce ? nonce : Mainnet.getRandomInt(2147483647);
+    this.nonce = nonce ? nonce : Mainnet.getWeakRandomInt(2147483647);
   }
 
   public getContractText(): string | Error {
