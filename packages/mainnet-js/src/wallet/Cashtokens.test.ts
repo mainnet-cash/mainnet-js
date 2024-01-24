@@ -116,8 +116,8 @@ describe(`Test cashtokens`, () => {
       new SendRequest({
         cashaddr: bob.cashaddr!,
         value: 20000,
-        unit: 'sat'
-      })
+        unit: "sat",
+      }),
     ]);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(2);
@@ -149,26 +149,24 @@ describe(`Test cashtokens`, () => {
 
     await bob.tokenBurn({
       tokenId: tokenId,
-      amount: 99n
-    })
+      amount: 99n,
+    });
 
     expect(await alice.getTokenBalance(tokenId)).toBe(0n);
     expect(await bob.getTokenBalance(tokenId)).toBe(201n);
 
     await bob.tokenBurn({
       tokenId: tokenId,
-      amount: 200n
-    })
+      amount: 200n,
+    });
 
     expect(await bob.getTokenBalance(tokenId)).toBe(1n);
 
-
     await bob.tokenBurn({
       tokenId: tokenId,
-      amount: 1n
-    })
+      amount: 1n,
+    });
     expect(await bob.getTokenBalance(tokenId)).toBe(0n);
-
   });
 
   test("Test NFT cashtoken genesis and sending", async () => {

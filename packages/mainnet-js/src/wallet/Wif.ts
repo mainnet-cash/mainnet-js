@@ -1670,7 +1670,7 @@ export class Wallet extends BaseWallet {
       // if we are burning last fungible tokens, let us destroy the token completely
       if (totalFungibleAmount === fungibleBurnAmount) {
         changeSendRequests = [];
-        utxoIds.push(... tokenUtxos);
+        utxoIds.push(...tokenUtxos);
       } else {
         // add utxos to spend from
         let available = 0n;
@@ -1690,7 +1690,7 @@ export class Wallet extends BaseWallet {
             cashaddr: burnRequest.cashaddr || this.tokenaddr!,
             tokenId: burnRequest.tokenId,
             amount: safeNewAmount,
-            value: tokenUtxos.reduce( (a,c) => (a+ c.satoshis), 0 ),
+            value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0),
           }),
         ];
       }
