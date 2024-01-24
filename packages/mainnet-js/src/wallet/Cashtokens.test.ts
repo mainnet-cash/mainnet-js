@@ -94,12 +94,12 @@ describe(`Test cashtokens`, () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
-      amount: 100n,
+      amount: 300n,
     });
 
     const tokenId = genesisResponse.tokenIds![0];
     const tokenBalance = await alice.getTokenBalance(tokenId);
-    expect(tokenBalance).toBe(100n);
+    expect(tokenBalance).toBe(300n);
     const tokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
     const response = await alice.send([
@@ -113,10 +113,15 @@ describe(`Test cashtokens`, () => {
         amount: 25n,
         tokenId: tokenId,
       }),
+      new SendRequest({
+        cashaddr: bob.cashaddr!,
+        value: 20000,
+        unit: "sat",
+      }),
     ]);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(2);
-    expect(await alice.getTokenBalance(tokenId)).toBe(75n);
+    expect(await alice.getTokenBalance(tokenId)).toBe(275n);
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
     expect(await bob.getNftTokenBalance(tokenId)).toBe(0);
     expect((await bob.getAllNftTokenBalances())[tokenId] || 0).toBe(0);
@@ -127,10 +132,41 @@ describe(`Test cashtokens`, () => {
         amount: 75n,
         tokenId: tokenId,
       }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 100n,
+        tokenId: tokenId,
+      }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        amount: 100n,
+        tokenId: tokenId,
+      }),
     ]);
 
     expect(await alice.getTokenBalance(tokenId)).toBe(0n);
-    expect(await bob.getTokenBalance(tokenId)).toBe(100n);
+    expect(await bob.getTokenBalance(tokenId)).toBe(300n);
+
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      amount: 99n,
+    });
+
+    expect(await alice.getTokenBalance(tokenId)).toBe(0n);
+    expect(await bob.getTokenBalance(tokenId)).toBe(201n);
+
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      amount: 200n,
+    });
+
+    expect(await bob.getTokenBalance(tokenId)).toBe(1n);
+
+    await bob.tokenBurn({
+      tokenId: tokenId,
+      amount: 1n,
+    });
+    expect(await bob.getTokenBalance(tokenId)).toBe(0n);
   });
 
   test("Test NFT cashtoken genesis and sending", async () => {
