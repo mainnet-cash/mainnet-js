@@ -3,17 +3,17 @@ import { hexToBin } from "@bitauth/libauth";
 import { RegTestWallet } from "./Wif";
 
 describe(`Test bip39 edge cases`, () => {
-  test("Should match match the blank seed", async () => {
-    let blankSeed =
-      "4ed8d4b17698ddeaa1f1559f152f87b5d472f725ca86d341bd0276f1b61197e21dd5a391f9f5ed7340ff4d4513aab9cce44f9497a5e7ed85fd818876b6eb402e";
-    let w = mnemonicToSeedSync("");
+  test("Should match match the abandon seed", async () => {
+    let abandonSeed =
+      "9d7aab1883c82345264e144366d69edacb85be1b311bd97487e241c1a7f6f870dbab428e30f584ea75a608d2d5c50af5199ca79dba02108d85a4272e55f43449";
+    let w = mnemonicToSeedSync(new Array(12).join("abandon "));
     let wSeed = new Uint8Array(w.buffer);
-    expect(wSeed).toStrictEqual(hexToBin(blankSeed));
+    expect(wSeed).toStrictEqual(hexToBin(abandonSeed));
   });
 
   test("Should match the blank seed", async () => {
     try {
-      let w = RegTestWallet.fromSeed(new Array(11).join("abandon ") + "about");
+      let w = RegTestWallet.fromSeed(new Array(12).join("abandon "));
       let cashaddr = (await w).address;
       expect(cashaddr).toContain("qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59");
     } catch (e: any) {
