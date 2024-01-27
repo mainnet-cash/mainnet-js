@@ -14,9 +14,12 @@ export class Config {
   }
 
   public static setWordlist(wordlist: string[]) {
-    let checksum = binToHex(sha256.hash(utf8ToBin(wordlist.join(" "))))
-    if (!Object.values(WORDLIST_CHECKSUMS).includes(checksum)) throw Error("Error matching provided wordlist to a known list, see @scure/bip39/wordlists")
-    Config.DefaultWordlist = wordlist
+    let checksum = binToHex(sha256.hash(utf8ToBin(wordlist.join(" "))));
+    if (!Object.values(WORDLIST_CHECKSUMS).includes(checksum))
+      throw Error(
+        "Error matching provided wordlist to a known list, see @scure/bip39/wordlists"
+      );
+    Config.DefaultWordlist = wordlist;
   }
 
   public static getWordlist(): string[] {
