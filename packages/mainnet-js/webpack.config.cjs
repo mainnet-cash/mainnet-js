@@ -88,11 +88,7 @@ const browserConfig = {
       allowAsyncCycles: false,
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
-    }),
-    // new webpack.IgnorePlugin({
-    //   resourceRegExp: /wordlists\/(?!english)/,
-    //   contextRegExp: /bip39/,
-    // }),
+    })
   ],
   resolve: {
     alias: {
