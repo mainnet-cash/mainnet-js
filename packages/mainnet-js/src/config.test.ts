@@ -24,14 +24,16 @@ test("Should get the default wordlist", () => {
 });
 
 test("Expect Error setting a bad wordlist to the config", async () => {
-  expect.assertions(1);
-  try {
-    let badList = [...english];
-    badList.pop();
-    expect(Config.setWordlist(badList));
-  } catch (e: any) {
-    expect(e.message).toBe("Setting a custom word list is not allowed");
-  }
+    expect.assertions(1);
+    try {
+        let badList = [...english]
+        badList.pop()
+        expect(Config.setWordlist(badList))
+    } catch (e: any) {
+        expect(e.message).toBe(
+            "Error matching provided wordlist to a known list, see @scure/bip39/wordlists"
+        );
+    }
 });
 
 test("Should get the default wordlist", () => {
