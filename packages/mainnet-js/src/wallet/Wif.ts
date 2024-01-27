@@ -23,7 +23,7 @@ import {
 } from "@bitauth/libauth";
 
 import { mnemonicToSeedSync, generateMnemonic } from "@scure/bip39";
-import { wordlist as english } from '@scure/bip39/wordlists/english';
+import { wordlist as english } from "@scure/bip39/wordlists/english";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 
 import { Network, HeaderI, TxI, NFTCapability } from "../interface.js";
