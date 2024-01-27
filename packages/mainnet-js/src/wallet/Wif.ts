@@ -22,7 +22,8 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { mnemonicToSeedSync, generateMnemonic } from "bip39";
+import { mnemonicToSeedSync, generateMnemonic } from "@scure/bip39";
+import { wordlist as english } from '@scure/bip39/wordlists/english';
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 
 import { Network, HeaderI, TxI, NFTCapability } from "../interface.js";
@@ -345,7 +346,7 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateMnemonic() {
-    this.mnemonic = generateMnemonic();
+    this.mnemonic = generateMnemonic(english);
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
     let seed = mnemonicToSeedSync(this.mnemonic!);
