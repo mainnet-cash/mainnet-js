@@ -88,7 +88,7 @@ const browserConfig = {
       allowAsyncCycles: false,
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
-    })
+    }),
   ],
   resolve: {
     alias: {
