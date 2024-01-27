@@ -265,7 +265,7 @@ describe(`Wallet should function in the browser`, () => {
       const check2 = await RegTestWallet.namedExists(name);
 
       const seedId = (
-        await RegTestWallet.fromSeed(new Array(12).join("abandon "))
+        await RegTestWallet.fromSeed(new Array(11).join("abandon ")+"about")
       ).toDbString();
       const w3 = await RegTestWallet.replaceNamed(name, seedId);
       const w4 = await RegTestWallet.named(name);

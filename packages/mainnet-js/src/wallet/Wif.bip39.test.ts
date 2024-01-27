@@ -11,11 +11,11 @@ describe(`Test bip39 edge cases`, () => {
     expect(wSeed).toStrictEqual(hexToBin(blankSeed));
   });
 
-  test("Should match match the blank seed", async () => {
+  test("Should match the blank seed", async () => {
     try {
-      let w = RegTestWallet.fromSeed("");
+      let w = RegTestWallet.fromSeed(new Array(11).join("abandon ")+"about");
       let cashaddr = (await w).address;
-      expect(cashaddr).toContain("qr2ju5k5p3akj2k9j26jdjslsk9");
+      expect(cashaddr).toContain("qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59");
     } catch (e: any) {
       expect(e.message).toBe(`refusing to create wallet from empty mnemonic`);
     }
