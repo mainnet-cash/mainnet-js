@@ -13,7 +13,7 @@ describe(`Test bip39 edge cases`, () => {
 
   test("Should match the blank seed", async () => {
     try {
-      let w = RegTestWallet.fromSeed(new Array(11).join("abandon ")+"about");
+      let w = RegTestWallet.fromSeed(new Array(11).join("abandon ") + "about");
       let cashaddr = (await w).address;
       expect(cashaddr).toContain("qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59");
     } catch (e: any) {
