@@ -11,13 +11,32 @@ describe(`Test bip39 edge cases`, () => {
     expect(wSeed).toStrictEqual(hexToBin(abandonSeed));
   });
 
-  test("Should match the blank seed", async () => {
+  test("Should catch a blank seed", async () => {
     try {
-      let w = RegTestWallet.fromSeed(new Array(12).join("abandon "));
+      let w = RegTestWallet.fromSeed("");
       let cashaddr = (await w).address;
-      expect(cashaddr).toContain("qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59");
+      expect(cashaddr).toContain("bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl");
     } catch (e: any) {
       expect(e.message).toBe(`refusing to create wallet from empty mnemonic`);
     }
+  });
+
+  test("Should catch an invalid seed", async () => {
+    try {
+      let w = RegTestWallet.fromSeed("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon");
+      let cashaddr = (await w).address;
+      expect(cashaddr).toContain("bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl");
+    } catch (e: any) {
+      expect(e.message).toBe(`Invalid mnemonic`);
+    }
+  });
+
+
+  test("Should match the blank seed", async () => {
+
+    let w = RegTestWallet.fromSeed("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about");
+    let cashaddr = (await w).address;
+    expect(cashaddr).toContain("bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl");
+
   });
 });
