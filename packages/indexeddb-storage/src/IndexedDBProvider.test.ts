@@ -28,7 +28,9 @@ test("Store and replace a Regtest wallet", async () => {
   expect(await db.walletExists("storereplace")).toBe(true);
 
   let seedId = (
-    await RegTestWallet.fromSeed("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about")
+    await RegTestWallet.fromSeed(
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    )
   ).toDbString();
   let w3 = await db.updateWallet("storereplace", seedId);
   let w4 = await db.getWallet("storereplace");

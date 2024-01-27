@@ -557,7 +557,9 @@ describe(`Tests named wallet creation`, () => {
     expect(await RegTestWallet.namedExists(name)).toBe(true);
 
     let seedId = (
-      await RegTestWallet.fromSeed("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about")
+      await RegTestWallet.fromSeed(
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      )
     ).toDbString();
     let w3 = await RegTestWallet.replaceNamed(name, seedId);
     let w4 = await RegTestWallet.named(name);
