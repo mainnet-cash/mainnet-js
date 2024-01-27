@@ -1,5 +1,5 @@
 import { wordlist as english } from "@scure/bip39/wordlists/english";
-import { WORDLIST_CHECKSUMS } from "./constant";
+import { WORDLIST_CHECKSUMS } from "./constant.js";
 import { sha256, binToHex, utf8ToBin} from "@bitauth/libauth";
 
 export class Config {
