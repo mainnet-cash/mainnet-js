@@ -12,30 +12,24 @@ import { wordlist as simplifiedChinese } from "@scure/bip39/wordlists/simplified
 import { wordlist as spanish } from "@scure/bip39/wordlists/spanish";
 import { wordlist as traditionalChinese } from "@scure/bip39/wordlists/traditional-chinese";
 
-
-
 test("Should check wordlist checksums", () => {
-
-
   let wordlists = {
-    "czech": czech,
-    "english": english,
-    "french": french,
-    "italian": italian,
-    "japanese": japanese,
-    "korean": korean,
-    "portuguese": portuguese,
-    "simplifiedChinese": simplifiedChinese,
-    "spanish": spanish,
-    "traditionalChinese": traditionalChinese
-  }
+    czech: czech,
+    english: english,
+    french: french,
+    italian: italian,
+    japanese: japanese,
+    korean: korean,
+    portuguese: portuguese,
+    simplifiedChinese: simplifiedChinese,
+    spanish: spanish,
+    traditionalChinese: traditionalChinese,
+  };
   for (let l in wordlists) {
-    let checksum = binToHex(sha256.hash(utf8ToBin(wordlists[l].join(" "))))
+    let checksum = binToHex(sha256.hash(utf8ToBin(wordlists[l].join(" "))));
     expect(WORDLIST_CHECKSUMS[l]).toBe(checksum);
   }
-
 });
-
 
 test("Should get the default wordlist", () => {
   expect(Config.getWordlist().shift()).toBe("abandon");

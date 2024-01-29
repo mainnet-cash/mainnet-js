@@ -26,7 +26,6 @@ export const DERIVATION_PATHS = [
   "m/44'/245'/0'/0",
 ];
 
-
 export const WORDLIST_CHECKSUMS = {
   czech: "92e035ca0e3680fab85fa18b9e5c7e7582b3bd9caeb6d4bc8a2ecc8e492100c9",
   english: "f18b9a84c83e38e98eceb0102b275e26438af83ab08f080cdb780a2caa9f3a6d",
