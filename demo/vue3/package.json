@@ -1,6 +1,6 @@
 {
   "name": "@mainnet-cash/demo",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -13,7 +13,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "electrum-cash": "^2.0.8",
-    "mainnet-js": "2.3.4",
+    "mainnet-js": "2.3.5",
     "register-service-worker": "^1.7.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"

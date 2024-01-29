@@ -1,6 +1,6 @@
 {
   "name": "vue-vite",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
@@ -13,8 +13,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "mainnet-js": "2.3.4",
-    "@mainnet-cash/indexeddb-storage": "2.3.4",
+    "mainnet-js": "2.3.5",
+    "@mainnet-cash/indexeddb-storage": "2.3.5",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2"
   },

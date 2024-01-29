@@ -26,37 +26,6 @@ export const DERIVATION_PATHS = [
   "m/44'/245'/0'/0",
 ];
 
-// import { sha256, binToHex, utf8ToBin } from "@bitauth/libauth";
-
-// import { wordlist as czech } from '@scure/bip39/wordlists/czech';
-// import { wordlist as english } from '@scure/bip39/wordlists/english';
-// import { wordlist as french } from '@scure/bip39/wordlists/french';
-// import { wordlist as italian } from '@scure/bip39/wordlists/italian';
-// import { wordlist as japanese } from '@scure/bip39/wordlists/japanese';
-// import { wordlist as korean } from '@scure/bip39/wordlists/korean';
-// import { wordlist as portuguese } from '@scure/bip39/wordlists/portuguese';
-// import { wordlist as simplifiedChinese } from '@scure/bip39/wordlists/simplified-chinese';
-// import { wordlist as spanish } from '@scure/bip39/wordlists/spanish';
-// import { wordlist as traditionalChinese } from '@scure/bip39/wordlists/traditional-chinese';
-
-// let checks = {}
-// let wordlists = {
-//     "czech": czech,
-//     "english": english,
-//     "french": french,
-//     "italian": italian,
-//     "japanese": japanese,
-//     "korean": korean,
-//     "portuguese": portuguese,
-//     "simplifiedChinese": simplifiedChinese,
-//     "spanish": spanish,
-//     "traditionalChinese": traditionalChinese
-// }
-// for (let l in wordlists) {
-//     checks[l] = binToHex(sha256.hash(utf8ToBin(wordlists[l].join(" "))))
-// }
-
-// console.log(checks)
 
 export const WORDLIST_CHECKSUMS = {
   czech: "92e035ca0e3680fab85fa18b9e5c7e7582b3bd9caeb6d4bc8a2ecc8e492100c9",
