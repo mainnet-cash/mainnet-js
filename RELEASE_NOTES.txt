@@ -1,6 +1,27 @@
 Newest changes
 --------------
 
+2.3.4
+
+This update switches mnemonics to a more modern implementation of bip39.
+
+* Allows for custom configuration of alternative known language word lists.
+* Automatic checksums for altering the configured word list.
+* Removed hacks for legacy bip39 library.  
+
+2.3.3
+
+* Bugfix should resolve a number of accounting issues burning fungible tokens held across multiple utxos.
+
+2.3.2
+
+
+* Bugfix: remove old nodejs crypto dependency
+
+2.3.1
+
+* Bump libauth to v2.0.0
+
 2.3.0
 
 *  **BREAKING CHANGE:** Use big integers for fungible token amounts.
