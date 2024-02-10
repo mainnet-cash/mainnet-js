@@ -61,7 +61,7 @@ test("Store and retrieve a Testnet wallet", async () => {
 test("Store and retrieve a Mainnet wallet", async () => {
   let db = new IndexedDBProvider("mainnet-db");
   await db.init();
-  
+
   let w1 = await Wallet.newRandom();
   w1.name = "dave";
   await db.addWallet(w1.name, w1.toString());
@@ -71,14 +71,10 @@ test("Store and retrieve a Mainnet wallet", async () => {
   db.close();
 });
 
-
 test("Store and retrieve a Mainnet wallet", async () => {
-
   BaseWallet.StorageProvider = IndexedDBProvider;
 
   let w1 = await Wallet.named("testWallet");
   let w2 = await Wallet.named("testWallet");
-  expect(w1.getDepositAddress()).toBe(w2.getDepositAddress())
-  
+  expect(w1.getDepositAddress()).toBe(w2.getDepositAddress());
 });
-
