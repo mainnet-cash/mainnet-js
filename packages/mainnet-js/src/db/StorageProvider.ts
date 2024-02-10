@@ -1,6 +1,11 @@
 import { WalletDbEntryI } from "./interface.js";
 
 export default abstract class StorageProvider {
+
+  constructor(...args: any[]) {
+    throw new Error("StorageProvider is abstract and cannot be instantiated");
+  }
+
   /**
    * Ensure the database exists and is open
    * @throws {Error} If the wallet could not be opened.
