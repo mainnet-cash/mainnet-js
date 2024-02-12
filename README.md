@@ -24,8 +24,8 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 
 ## Unstable
 
-| :warning: WARNING                                                                |
-| :------------------------------------------------------------------------------- |
+| :warning: WARNING                                                               |
+| :------------------------------------------------------------------------------ |
 | This code is in a beta stage, so there is no backwards-compatibility guarantee. |
 
 ## What is exactly is this?
