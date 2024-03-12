@@ -607,7 +607,7 @@ describe(`Test BCMR support`, () => {
 
     const registry_v2 = { ...registry };
     registry_v2.extensions = {
-      authchain: { 0: await bob.provider!.getRawTransaction(response.txId) },
+      authchain: { 0: await bob.provider!.getRawTransaction(response.txId!) },
     };
     const contentHash_v2 = sha256.hash(
       utf8ToBin(JSON.stringify(registry_v2, null, 2))
@@ -630,8 +630,8 @@ describe(`Test BCMR support`, () => {
     const registry_v3 = { ...registry };
     registry_v3.extensions = {
       authchain: {
-        0: await bob.provider!.getRawTransaction(response.txId),
-        1: await bob.provider!.getRawTransaction(response2.txId),
+        0: await bob.provider!.getRawTransaction(response.txId!),
+        1: await bob.provider!.getRawTransaction(response2.txId!),
       },
     };
     const contentHash_v3 = sha256.hash(
