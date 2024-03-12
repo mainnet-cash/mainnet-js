@@ -121,6 +121,7 @@ import { checkUtxos } from "../util/checkUtxos.js";
 export class Wallet extends BaseWallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
 
+  provider?: ElectrumNetworkProvider;
   cashaddr?: string;
   tokenaddr?: string;
   derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
