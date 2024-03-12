@@ -447,7 +447,7 @@ describe(`Test cashtokens`, () => {
       "burn"
     );
 
-    const rawTx = await alice.provider!.getRawTransaction(response.txId, true);
+    const rawTx = await alice.provider!.getRawTransactionObject(response.txId!);
     expect(rawTx!.vout.length).toEqual(3);
     expect(rawTx!.vout[0].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx!.vout[0].scriptPubKey.hex).toContain(
@@ -485,7 +485,7 @@ describe(`Test cashtokens`, () => {
       "burn"
     );
 
-    const rawTx = await alice.provider!.getRawTransaction(response.txId, true);
+    const rawTx = await alice.provider!.getRawTransactionObject(response.txId!);
     expect(rawTx!.vout.length).toEqual(3);
     expect(rawTx!.vout[0].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx!.vout[0].scriptPubKey.hex).toContain(

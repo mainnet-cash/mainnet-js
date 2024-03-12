@@ -6,13 +6,14 @@ import { getRuntimePlatform } from "../util/getRuntimePlatform.js";
 import { qrAddress } from "../qr/Qr.js";
 import { ImageI } from "../qr/interface.js";
 import { WalletTypeEnum } from "./enum.js";
+import NetworkProvider from "../network/NetworkProvider.js";
 
 /**
  * A class to hold features used by all wallets
  * @class  BaseWallet
  */
 export class BaseWallet implements WalletI {
-  provider?: any;
+  provider?: NetworkProvider;
   derivationPath: string = "m/44'/0'/0'/0/0";
   parentDerivationPath: string = "m/44'/0'/0'";
   parentXPubKey?: string;

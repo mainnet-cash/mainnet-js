@@ -54,7 +54,7 @@ test("Should get an address history", async () => {
     // Build Bob's wallet from a public address, check his balance.
     const bobHistory = await getAddressHistory(
       bob.getDepositAddress(),
-      bob.provider
+      bob.provider!
     );
     expect(bobHistory.transactions[0].value).toBe(-2100);
     expect(bobHistory.transactions[0].to).toBe(alice.getDepositAddress());
@@ -112,7 +112,7 @@ test("Should get a history with multi-party sends", async () => {
     // Build Bob's wallet from a public address, check his balance.
     const bobHistory = await getAddressHistory(
       bob.getDepositAddress(),
-      bob.provider
+      bob.provider!
     );
     expect(bobHistory.transactions[1].txn).toBe(bobHistory.transactions[0].txn);
     expect(bobHistory.transactions[1].fee).toBe(bobHistory.transactions[0].fee);
@@ -179,7 +179,7 @@ test("Should cut results with a longer history to given count", async () => {
     // Build Bob's wallet from a public address, check his balance.
     const bobHistory = await getAddressHistory(
       bob.getDepositAddress(),
-      bob.provider,
+      bob.provider!,
       "sat",
       0,
       2
@@ -240,7 +240,7 @@ test("Should handel input and fee from many utxos", async () => {
     // Build Bob's wallet from a public address, check his balance.
     const bobHistory = await getAddressHistory(
       bob.getDepositAddress(),
-      bob.provider,
+      bob.provider!,
       "sat"
     );
 

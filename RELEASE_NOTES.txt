@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.3.11
+
+* Better typings for wallet providers
+
 2.3.4
 
 This update switches mnemonics to a more modern implementation of bip39.
