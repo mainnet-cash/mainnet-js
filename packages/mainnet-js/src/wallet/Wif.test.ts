@@ -1184,3 +1184,15 @@ describe(`Wallet extrema behavior regression testing`, () => {
     ).resolves.not.toThrow();
   });
 });
+
+describe(`Storage provider tests`, () => {
+  test("Throws if storage provider was not set, static", async () => {
+    expect(Wallet.StorageProvider).toBe(undefined);
+    await expect(Wallet.named("testWallet")).rejects.toThrow();
+  });
+
+  test("Throws if storage provider was not set, instance", async () => {
+    const wallet = await Wallet.newRandom();
+    expect(wallet.storageProvider).toBe(undefined);
+  });
+});

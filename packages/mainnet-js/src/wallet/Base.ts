@@ -1,4 +1,3 @@
-// import { getStorageProvider } from "../db/getStorageProvider.js";
 import { MnemonicI, WalletI } from "./interface.js";
 import { NetworkType } from "../enum.js";
 import { StorageProvider } from "../db/index.js";
@@ -13,15 +12,16 @@ import NetworkProvider from "../network/NetworkProvider.js";
  * @class  BaseWallet
  */
 export class BaseWallet implements WalletI {
-  provider?: NetworkProvider;
+  provider: NetworkProvider;
   derivationPath: string = "m/44'/0'/0'/0/0";
   parentDerivationPath: string = "m/44'/0'/0'";
   parentXPubKey?: string;
   mnemonic?: string;
-  address?: string;
+  address: string = undefined as any;
   privateKey?: any;
   publicKey?: any;
-  public static StorageProvider?: typeof StorageProvider;
+  static StorageProvider: typeof StorageProvider;
+  storageProvider!: StorageProvider;
   isTestnet: boolean;
   name: string;
   network: NetworkType;
@@ -325,6 +325,7 @@ export class BaseWallet implements WalletI {
 
     // If there is a database, force saving or error
     if (db) {
+      this.storageProvider = db;
       await db.init();
       let savedWalletRecord = await db.getWallet(name);
       if (savedWalletRecord) {
@@ -376,6 +377,7 @@ export class BaseWallet implements WalletI {
     let db = getStorageProvider(dbName);
 
     if (db) {
+      this.storageProvider = db;
       await db.init();
       let savedWalletRecord = await db.getWallet(name);
       await this.fromId(walletId);
@@ -411,6 +413,7 @@ export class BaseWallet implements WalletI {
     let db = getStorageProvider(dbName);
 
     if (db) {
+      this.storageProvider = db;
       await db.init();
       let savedWalletRecord = await db.getWallet(name);
       await db.close();

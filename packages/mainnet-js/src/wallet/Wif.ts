@@ -2,7 +2,6 @@
 // Stable
 import {
   decodeCashAddress,
-  decodeCashAddressVersionByte,
   encodeHdPublicKey,
   HdKeyNetwork,
   secp256k1,
@@ -121,17 +120,14 @@ import { checkUtxos } from "../util/checkUtxos.js";
 export class Wallet extends BaseWallet {
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
 
-  provider?: ElectrumNetworkProvider;
-  cashaddr?: string;
-  tokenaddr?: string;
-  derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
-  parentDerivationPath: string = Config.DefaultParentDerivationPath;
-  parentXPubKey?: string;
-  privateKey?: Uint8Array;
+  declare provider: ElectrumNetworkProvider;
+  cashaddr: string = undefined as any;
+  tokenaddr: string = undefined as any;
+  declare privateKey?: Uint8Array;
   publicKeyCompressed?: Uint8Array;
   privateKeyWif?: string;
-  publicKey?: Uint8Array;
-  publicKeyHash?: Uint8Array;
+  declare publicKey?: Uint8Array;
+  publicKeyHash: Uint8Array = undefined as any;
   networkPrefix: CashAddressNetworkPrefix;
   _slpSemiAware: boolean = false; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
   _util?: Util;
@@ -263,6 +259,8 @@ export class Wallet extends BaseWallet {
   ) {
     super(name, network, walletType);
     this.networkPrefix = prefixFromNetworkMap[this.network];
+    this.parentDerivationPath = Config.DefaultParentDerivationPath;
+    this.derivationPath = Config.DefaultParentDerivationPath + "/0/0";
   }
 
   /**
