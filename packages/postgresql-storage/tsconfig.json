@@ -15,7 +15,11 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "lib": ["es2020", "es2020.bigint", "dom"],
-    "typeRoots": ["node_modules/@types", "../../node_modules/@types", "./src/types"]
+    "typeRoots": [
+      "node_modules/@types",
+      "../../node_modules/@types",
+      "./src/types"
+    ]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**", "src/**/*test.ts"],
