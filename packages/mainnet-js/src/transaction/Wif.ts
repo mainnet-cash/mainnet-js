@@ -484,7 +484,9 @@ export async function getFeeAmountSimple({
     sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) +
     (discardChange ? 0 : outputSizeP2pkh);
 
-  return (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi;
+  return Math.ceil(
+    (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi
+  );
 }
 
 // precise fee estimation
@@ -520,7 +522,7 @@ export async function getFeeAmount({
         changeAddress: "",
       });
 
-    return draftTransaction.length * relayFeePerByteInSatoshi + 1;
+    return Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1);
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"
