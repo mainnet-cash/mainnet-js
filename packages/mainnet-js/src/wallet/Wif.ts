@@ -1205,7 +1205,7 @@ export class Wallet extends BaseWallet {
 
     const fundingUtxos = await getSuitableUtxos(
       utxos,
-      BigInt(spendAmount) + BigInt(feeEstimate),
+      BigInt(spendAmount) + BigInt(Math.ceil(feeEstimate)),
       bestHeight,
       feePaidBy,
       sendRequests,
