@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --fix-missing postgresql postgresql-cli
 USER root
 WORKDIR /
 RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 RUN npm install -g yarn
 
