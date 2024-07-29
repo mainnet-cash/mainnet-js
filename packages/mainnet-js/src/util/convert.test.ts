@@ -39,3 +39,8 @@ test("Should convert all the BCH from sat to bch", async () => {
   let bch = await convert(21000000 * 100000000, "sat", "BCH");
   expect(bch).toBe(21000000);
 });
+
+test("Should convert BCH to EUR", async () => {
+  let eur = await convert(1, "BCH", "EUR");
+  expect(eur).toBeGreaterThan(0);
+});

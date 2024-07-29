@@ -3,52 +3,33 @@ import { UnitEnum } from "../enum.js";
 import { floor } from "./floor.js";
 import { ExchangeRate } from "../rate/ExchangeRate.js";
 import { sanitizeUnit } from "./sanitizeUnit.js";
+import { Config } from "../config.js";
 
-export class BalanceResponse {
-  bch?: number;
-  sat?: number;
-  usd?: number;
-  constructor(bch?: number, sat?: number, usd?: number) {
-    this.bch = bch;
-    this.sat = sat;
-    this.usd = usd;
-  }
+export interface BalanceResponse {
+  bch: number;
+  sat: number;
+  [currency: string]: number;
 }
 
 export async function balanceResponseFromSatoshi(
   value: number,
-  usdPriceCache: boolean = true
+  priceCache: boolean = true
 ): Promise<BalanceResponse> {
-  let response = new BalanceResponse();
-  let returnUnits: UnitEnum[] = ["bch", "sat", "usd"];
+  const response = {} as BalanceResponse;
 
-  for (const u of returnUnits) {
-    switch (u) {
-      case UnitEnum.BCH:
-        response.bch = value / bchParam.subUnits;
-        break;
-      case UnitEnum.SAT:
-        response.sat = value;
-        break;
-      case UnitEnum.USD:
-        let usd =
-          (value / bchParam.subUnits) *
-          (await ExchangeRate.get("usd", usdPriceCache));
-        response.usd = floor(usd, 2);
-        break;
-      default:
-        throw Error(
-          `Balance response type ${JSON.stringify(u)} not understood`
-        );
-    }
-  }
+  response.bch = value / bchParam.subUnits;
+  response.sat = value;
+  const currencyValue =
+    (value / bchParam.subUnits) *
+    (await ExchangeRate.get(Config.DefaultCurrency, priceCache));
+  response[Config.DefaultCurrency] = floor(currencyValue, 2);
   return response;
 }
 
 export async function balanceFromSatoshi(
   value: number,
   rawUnit: string,
-  usdPriceCache: boolean = true
+  priceCache: boolean = true
 ): Promise<number> {
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
@@ -62,14 +43,10 @@ export async function balanceFromSatoshi(
       return value;
     case UnitEnum.SATOSHIS:
       return value;
-    case UnitEnum.USD:
-      let usd =
-        (value / bchParam.subUnits) *
-        (await ExchangeRate.get("usd", usdPriceCache));
-      return Number(usd.toFixed(2));
     default:
-      throw Error(
-        `Balance response type ${JSON.stringify(unit)} not understood`
-      );
+      const currencyValue =
+        (value / bchParam.subUnits) *
+        (await ExchangeRate.get(Config.DefaultCurrency, priceCache));
+      return Number(currencyValue.toFixed(2));
   }
 }

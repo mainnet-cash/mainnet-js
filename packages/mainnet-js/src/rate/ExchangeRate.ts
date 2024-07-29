@@ -124,9 +124,19 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
         }
       }
     default:
-      throw Error(
-        "Support for giving an amount in '${symbol}' is not supported."
+      const response = await fetch("https://bitpay.com/rates/BCH");
+      const data = (await response.json()) as {
+        data: { code: string; rate: number }[];
+      };
+      const rates = data.data.reduce(
+        (acc, rate) => ({ ...acc, [rate.code.toLocaleLowerCase()]: rate.rate }),
+        {}
       );
+      if (symbol in rates) {
+        return rates[symbol];
+      }
+
+      throw Error(`Currency '${symbol}' is not supported.`);
   }
 }
 

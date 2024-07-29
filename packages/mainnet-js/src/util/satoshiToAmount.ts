@@ -27,16 +27,13 @@ export async function satoshiToAmount(
       return value;
     case UnitEnum.SATOSHIS:
       return value;
-    case UnitEnum.USD:
-      let USD_over_BCH = await ExchangeRate.get("usd");
-      let SAT_over_BCH = bchParam.subUnits;
-      // truncate dollar amounts to fixed precision (2),
-      // then return the fixed value string as a float.
-      let dollarValue = Number(value * (USD_over_BCH / SAT_over_BCH)).toFixed(
-        2
-      );
-      return Number.parseFloat(dollarValue);
     default:
-      throw Error("Unit of value not defined");
+      const Currency_over_BCH = await ExchangeRate.get(rawUnit);
+      // truncate currency amounts to fixed precision (2),
+      // then return the fixed value string as a float.
+      const currencyValue = Number(
+        value * (Currency_over_BCH / bchParam.subUnits)
+      ).toFixed(2);
+      return Number.parseFloat(currencyValue);
   }
 }

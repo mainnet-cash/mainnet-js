@@ -64,4 +64,13 @@ describe("Exchange rate tests", () => {
     expect(cbCounter).toBe(2);
     await cancelWatchFn();
   });
+
+  test("Test other currencies", async () => {
+    const eurRate = await ExchangeRate.get("eur");
+    expect(eurRate).toBeGreaterThan(0);
+  });
+
+  test("Test non-existing currency", async () => {
+    await expect(ExchangeRate.get("xyz")).rejects.toThrow();
+  });
 });
