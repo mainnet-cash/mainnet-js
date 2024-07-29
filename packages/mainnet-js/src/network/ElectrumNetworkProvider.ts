@@ -12,6 +12,7 @@ import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
 import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
+import { Config } from "../config.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -116,8 +117,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     loadInputValues: boolean = false
   ): Promise<string> {
     const key = `${this.network}-${txHash}-${verbose}-${loadInputValues}`;
-    if (ElectrumNetworkProvider.rawTransactionCache[key]) {
-      return ElectrumNetworkProvider.rawTransactionCache[key];
+
+    if (Config.UseLocalStorageCache) {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        return verbose ? JSON.parse(cached) : cached;
+      }
+    } else {
+      ElectrumNetworkProvider.rawTransactionCache[key];
     }
 
     try {
@@ -127,7 +134,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         verbose
       )) as ElectrumRawTransaction;
 
-      ElectrumNetworkProvider.rawTransactionCache[key] = transaction;
+      if (Config.UseLocalStorageCache) {
+        localStorage.setItem(key, verbose ? JSON.stringify(transaction) : transaction as unknown as string);
+      } else {
+        ElectrumNetworkProvider.rawTransactionCache[key] = transaction;
+      }
 
       if (verbose && loadInputValues) {
         // get unique transaction hashes

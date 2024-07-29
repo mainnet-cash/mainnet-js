@@ -7,7 +7,10 @@ export class Config {
   static EnforceCashTokenReceiptAddresses = false;
   static DefaultParentDerivationPath = "m/44'/0'/0'";
   static DefaultIpfsGateway = "https://dweb.link/ipfs/";
+  // default currency for balance and rate conversions
   static DefaultCurrency = "usd";
+  // caches the raw transactions in browser's local storage instead of memory
+  static UseLocalStorageCache = false;
   private static DefaultWordlist = english;
 
   public static setIpfsGateway(ipfsGateway: string) {

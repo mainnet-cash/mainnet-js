@@ -18,6 +18,7 @@ import {
 import { mine } from "../mine";
 import json from "../../polyfill/json";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
+import { Config } from "../config";
 
 beforeAll(async () => {
   await initProviders();
@@ -458,6 +459,23 @@ describe(`Watch only Wallets`, () => {
     }
   });
 
+  test("Should get the regtest wallet balance in eur", async () => {
+    // Build Alice's wallet from Wallet Import Format string, send some sats
+    if (!process.env.ADDRESS) {
+      throw Error("Attempted to pass an empty address");
+    } else {
+      Config.DefaultCurrency = "eur";
+      let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
+      // Build Bob's wallet from a public address, check his balance.
+      expect(alice.getPublicKeyHash()!.length).toBe(20);
+      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
+      expect(aliceBalance.bch).toBeGreaterThan(5000);
+      expect(await alice.getBalance("eur")).toBeGreaterThan(0);
+      expect(await (await RegTestWallet.newRandom()).getBalance("eur")).toBe(0);
+      Config.DefaultCurrency = "usd";
+    }
+  });
+
   test("Should send to testnet coins to a random address", async () => {
     if (!process.env.ALICE_TESTNET_WALLET_ID) {
       throw Error("Attempted to pass an empty address");
@@ -524,6 +542,16 @@ describe(`Watch only Wallets`, () => {
     ]);
 
     expect(await bobWallet.getLastTransaction()).not.toBeNull();
+  });
+
+  test("Should fail localStorage cache", async () => {
+    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
+    const aliceWallet = await RegTestWallet.fromId(aliceWif);
+
+    expect(await aliceWallet.getLastTransaction()).not.toBeNull();
+    Config.UseLocalStorageCache = true;
+    await expect(aliceWallet.getLastTransaction()).rejects.toThrow("localStorage is not defined");
+    Config.UseLocalStorageCache = false;
   });
 });
 describe(`Wallet subscriptions`, () => {
