@@ -396,18 +396,42 @@ describe(`Wallet should function in the browser`, () => {
       const txDecoded = await aliceWallet.getLastTransaction();
       expect(txDecoded === null).toBe(false);
       const txHash = txDecoded.hash;
-      expect(localStorage.getItem(`${aliceWallet.provider.network}-${txHash}-${true}-${false}`)).toBe(null);
+      expect(
+        localStorage.getItem(
+          `${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+        )
+      ).toBe(null);
       Config.UseLocalStorageCache = true;
       await aliceWallet.provider.getRawTransaction(txHash);
       await aliceWallet.provider.getRawTransaction(txHash, true);
 
-      expect(localStorage.getItem(`${aliceWallet.provider.network}-${txHash}-${false}-${false}`) === null).toBe(false);
-      expect(typeof localStorage.getItem(`${aliceWallet.provider.network}-${txHash}-${false}-${false}`) === "string").toBe(true);
-      expect(typeof (await aliceWallet.provider.getRawTransaction(txHash))).toBe("string");
+      expect(
+        localStorage.getItem(
+          `${aliceWallet.provider.network}-${txHash}-${false}-${false}`
+        ) === null
+      ).toBe(false);
+      expect(
+        typeof localStorage.getItem(
+          `${aliceWallet.provider.network}-${txHash}-${false}-${false}`
+        ) === "string"
+      ).toBe(true);
+      expect(
+        typeof (await aliceWallet.provider.getRawTransaction(txHash))
+      ).toBe("string");
 
-      expect(localStorage.getItem(`${aliceWallet.provider.network}-${txHash}-${true}-${false}`) === null).toBe(false);
-      expect(typeof localStorage.getItem(`${aliceWallet.provider.network}-${txHash}-${true}-${false}`) === "string").toBe(true);
-      expect(typeof (await aliceWallet.provider.getRawTransaction(txHash, true))).toBe("object");
+      expect(
+        localStorage.getItem(
+          `${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+        ) === null
+      ).toBe(false);
+      expect(
+        typeof localStorage.getItem(
+          `${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+        ) === "string"
+      ).toBe(true);
+      expect(
+        typeof (await aliceWallet.provider.getRawTransaction(txHash, true))
+      ).toBe("object");
 
       Config.UseLocalStorageCache = false;
     }, process.env.ALICE_ID);

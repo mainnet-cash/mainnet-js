@@ -135,7 +135,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       )) as ElectrumRawTransaction;
 
       if (Config.UseLocalStorageCache) {
-        localStorage.setItem(key, verbose ? JSON.stringify(transaction) : transaction as unknown as string);
+        localStorage.setItem(
+          key,
+          verbose
+            ? JSON.stringify(transaction)
+            : (transaction as unknown as string)
+        );
       } else {
         ElectrumNetworkProvider.rawTransactionCache[key] = transaction;
       }

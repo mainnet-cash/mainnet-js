@@ -550,7 +550,9 @@ describe(`Watch only Wallets`, () => {
 
     expect(await aliceWallet.getLastTransaction()).not.toBeNull();
     Config.UseLocalStorageCache = true;
-    await expect(aliceWallet.getLastTransaction()).rejects.toThrow("localStorage is not defined");
+    await expect(aliceWallet.getLastTransaction()).rejects.toThrow(
+      "localStorage is not defined"
+    );
     Config.UseLocalStorageCache = false;
   });
 });
