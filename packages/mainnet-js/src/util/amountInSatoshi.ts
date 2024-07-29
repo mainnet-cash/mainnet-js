@@ -28,11 +28,10 @@ export async function amountInSatoshi(
       return value;
     case UnitEnum.SATOSHIS:
       return value;
-    case UnitEnum.USD:
-      let USD_over_BCH = await ExchangeRate.get("usd");
-      let SAT_over_BCH = bchParam.subUnits;
-      return Math.round(Number(value * (SAT_over_BCH / USD_over_BCH)));
     default:
-      throw Error("Unit of value not defined");
+      const Currency_over_BCH = await ExchangeRate.get(rawUnit);
+      const SAT_over_BCH = bchParam.subUnits;
+
+      return Math.round(Number(value * (SAT_over_BCH / Currency_over_BCH)));
   }
 }

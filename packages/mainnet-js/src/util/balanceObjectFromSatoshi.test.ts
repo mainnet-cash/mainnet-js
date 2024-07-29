@@ -1,3 +1,4 @@
+import { Config } from "../config";
 import { bchParam } from "../chain";
 import { balanceResponseFromSatoshi } from "./balanceObjectFromSatoshi";
 import { balanceFromSatoshi } from "./balanceObjectFromSatoshi";
@@ -6,6 +7,15 @@ test("Get balanceResponse from 1 bch in satoshi", async () => {
   let bal = await balanceResponseFromSatoshi(100000000);
   expect(bal.bch).toBe(1);
   expect(bal.sat).toBe(bchParam.subUnits);
+});
+
+test("Get balanceResponse from 1 bch in eur", async () => {
+  Config.DefaultCurrency = "eur";
+  let bal = await balanceResponseFromSatoshi(100000000);
+  expect(bal.bch).toBe(1);
+  expect(bal.sat).toBe(bchParam.subUnits);
+  expect(bal.eur).toBeGreaterThan(0);
+  Config.DefaultCurrency = "usd";
 });
 
 test("Get balanceResponse from 1 satoshi", async () => {

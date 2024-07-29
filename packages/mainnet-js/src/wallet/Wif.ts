@@ -636,22 +636,22 @@ export class Wallet extends BaseWallet {
     return await this.getAddressUtxos(this.cashaddr);
   }
 
-  // gets wallet balance in sats, bch and usd
+  // gets wallet balance in sats, bch and currency
   public async getBalance(
     rawUnit?: string,
-    usdPriceCache = true
+    priceCache = true
   ): Promise<BalanceResponse | number> {
     if (rawUnit) {
       const unit = sanitizeUnit(rawUnit);
       return await balanceFromSatoshi(
         await this.getBalanceFromProvider(),
         unit,
-        usdPriceCache
+        priceCache
       );
     } else {
       return await balanceResponseFromSatoshi(
         await this.getBalanceFromProvider(),
-        usdPriceCache
+        priceCache
       );
     }
   }

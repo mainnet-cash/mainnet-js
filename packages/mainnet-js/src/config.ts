@@ -7,6 +7,7 @@ export class Config {
   static EnforceCashTokenReceiptAddresses = false;
   static DefaultParentDerivationPath = "m/44'/0'/0'";
   static DefaultIpfsGateway = "https://dweb.link/ipfs/";
+  static DefaultCurrency = "usd";
   private static DefaultWordlist = english;
 
   public static setIpfsGateway(ipfsGateway: string) {

@@ -334,7 +334,7 @@ export class SendResponse {
     explorerUrl?: string;
   }) {
     this.txId = txId;
-    this.balance = new BalanceResponse(balance);
+    this.balance = balance;
     this.explorerUrl = explorerUrl;
   }
 }
