@@ -18,7 +18,6 @@ test("Get balanceResponse from 1 bch in eur", async () => {
   Config.DefaultCurrency = "usd";
 });
 
-
 test("Get balanceResponse from 1 satoshi", async () => {
   let bal = await balanceResponseFromSatoshi(110000000);
   expect(bal.bch).toBe(1.1);
