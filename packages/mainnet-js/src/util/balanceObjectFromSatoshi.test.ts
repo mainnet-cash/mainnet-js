@@ -9,6 +9,13 @@ test("Get balanceResponse from 1 bch in satoshi", async () => {
   expect(bal.sat).toBe(bchParam.subUnits);
 });
 
+test("Get balanceResponse from 0", async () => {
+  let bal = await balanceResponseFromSatoshi(0);
+  expect(bal.bch).toBe(0);
+  expect(bal.sat).toBe(0);
+  expect(bal.usd).toBe(0);
+});
+
 test("Get balanceResponse from 1 bch in eur", async () => {
   Config.DefaultCurrency = "eur";
   let bal = await balanceResponseFromSatoshi(100000000);
