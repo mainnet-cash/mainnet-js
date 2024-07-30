@@ -462,9 +462,9 @@ describe(`Wallet should function in the browser`, () => {
           `header-${aliceWallet.provider.network}-${height}-${false}`
         ) === "string"
       ).toBe(true);
-      expect(
-        typeof (await aliceWallet.provider.getHeader(854724)).hex
-      ).toBe("string");
+      expect(typeof (await aliceWallet.provider.getHeader(854724)).hex).toBe(
+        "string"
+      );
 
       expect(
         localStorage.getItem(
@@ -476,9 +476,9 @@ describe(`Wallet should function in the browser`, () => {
           `header-${aliceWallet.provider.network}-${height}-${true}`
         ) === "string"
       ).toBe(true);
-      expect(
-        typeof (await aliceWallet.provider.getHeader(854724, true))
-      ).toBe("object");
+      expect(typeof (await aliceWallet.provider.getHeader(854724, true))).toBe(
+        "object"
+      );
 
       Config.UseLocalStorageCache = false;
     });

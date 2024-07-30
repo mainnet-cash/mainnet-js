@@ -13,4 +13,4 @@ export const decodeHeader = (hexHeader: HexHeaderI): HeaderI => {
   result.height = hexHeader.height;
 
   return result;
-}
+};
