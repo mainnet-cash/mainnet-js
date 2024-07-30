@@ -5,7 +5,13 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
-import { HexHeaderI, TxI, UtxoI, ElectrumBalanceI, HeaderI } from "../interface.js";
+import {
+  HexHeaderI,
+  TxI,
+  UtxoI,
+  ElectrumBalanceI,
+  HeaderI,
+} from "../interface.js";
 import { Network } from "../interface.js";
 import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
@@ -107,7 +113,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   static rawHeaderCache = {};
-  async getHeader(height: number, verbose: boolean = false): Promise<HeaderI | HexHeaderI> {
+  async getHeader(
+    height: number,
+    verbose: boolean = false
+  ): Promise<HeaderI | HexHeaderI> {
     const key = `header-${this.network}-${height}-${verbose}`;
 
     if (Config.UseLocalStorageCache) {
@@ -119,7 +128,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       ElectrumNetworkProvider.rawTransactionCache[key];
     }
 
-    const result = await this.performRequest("blockchain.header.get", height) as HexHeaderI;
+    const result = (await this.performRequest(
+      "blockchain.header.get",
+      height
+    )) as HexHeaderI;
     if (Config.UseLocalStorageCache) {
       localStorage.setItem(key, JSON.stringify(result));
     } else {
@@ -372,7 +384,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   // subscribe to notifications sent when new block is found, the block header is sent to callback
-  async subscribeToHeaders(callback: (header: HexHeaderI) => void): Promise<void> {
+  async subscribeToHeaders(
+    callback: (header: HexHeaderI) => void
+  ): Promise<void> {
     await this.subscribeRequest("blockchain.headers.subscribe", callback);
   }
 
