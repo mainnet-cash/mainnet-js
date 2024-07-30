@@ -34,3 +34,4 @@ export {
   balanceResponseFromSatoshi,
 } from "./balanceObjectFromSatoshi.js";
 export * from "./sumUtxoValue.js";
+export { decodeHeader } from "./header.js";

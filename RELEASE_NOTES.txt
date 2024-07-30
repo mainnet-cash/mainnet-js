@@ -1,15 +1,21 @@
 Newest changes
 --------------
 
+2.3.16
+
+* Add `getHeader` method to network provider
+* Add `localStorage` caching behaviour to it steered by `Config.UseLocalStorageCache`
+*
+
 2.3.15
 
-* Add Config.UseLocalStorageCache setting to cache fetched raw transaction data in local storage
+* Add `Config.UseLocalStorageCache` setting to cache fetched raw transaction data in local storage
 * Fix docker image build
 
 2.3.14
 
 * Support many fiat currencies
-* Add Config.DefaultCurrency setting (defaults to "usd")
+* Add `Config.DefaultCurrency` setting (defaults to "usd")
 
 2.3.11
 
