@@ -13,8 +13,8 @@
     "rollup-plugin-node-polyfills": "^0.2.1"
   },
   "dependencies": {
-    "mainnet-js": "2.3.15",
-    "@mainnet-cash/indexeddb-storage": "2.3.15"
+    "mainnet-js": "2.3.16",
+    "@mainnet-cash/indexeddb-storage": "2.3.16"
   },
-  "version": "2.3.15"
+  "version": "2.3.16"
 }

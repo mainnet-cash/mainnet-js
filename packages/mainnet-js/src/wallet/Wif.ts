@@ -25,7 +25,7 @@ import {
 import { mnemonicToSeedSync, generateMnemonic } from "@scure/bip39";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 
-import { Network, HeaderI, TxI, NFTCapability } from "../interface.js";
+import { Network, HexHeaderI, TxI, NFTCapability } from "../interface.js";
 
 import { networkPrefixMap } from "../enum.js";
 import { PrivateKeyI, UtxoI } from "../interface.js";
@@ -1396,7 +1396,7 @@ export class Wallet extends BaseWallet {
    *
    * @returns a function which will cancel watching upon evaluation
    */
-  public watchBlocks(callback: (header: HeaderI) => void): CancelWatchFn {
+  public watchBlocks(callback: (header: HexHeaderI) => void): CancelWatchFn {
     return (this.provider! as ElectrumNetworkProvider).watchBlocks(callback);
   }
 
@@ -1406,7 +1406,7 @@ export class Wallet extends BaseWallet {
    * @param height if specified waits for this exact blockchain height, otherwise resolves with the next block
    *
    */
-  public async waitForBlock(height?: number): Promise<HeaderI> {
+  public async waitForBlock(height?: number): Promise<HexHeaderI> {
     return (this.provider! as ElectrumNetworkProvider).waitForBlock(height);
   }
   //#endregion Funds

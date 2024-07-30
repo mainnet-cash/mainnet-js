@@ -1,4 +1,4 @@
-import { TxI, UtxoI, Network, HeaderI } from "../interface.js";
+import { TxI, UtxoI, Network, HexHeaderI, HeaderI } from "../interface.js";
 
 export default interface NetworkProvider {
   /**
@@ -19,6 +19,12 @@ export default interface NetworkProvider {
    * @returns the balance.
    */
   getBalance(cashaddr: string): Promise<number>;
+
+  /**
+   * @returns The block header fetched at blockheight @param height.
+   * @param verbose steers the response type. If true, a verbose response is returned.
+   */
+  getHeader(height: number, verbose: boolean): Promise<HeaderI | HexHeaderI>;
 
   /**
    * @returns The current block height.
@@ -72,7 +78,7 @@ export default interface NetworkProvider {
    * @param height If specified, waits for blockchain to reach this height.
    * @returns Block header.
    */
-  waitForBlock(height?: number): Promise<HeaderI>;
+  waitForBlock(height?: number): Promise<HexHeaderI>;
 
   /**
    * Subscribe to the address change events

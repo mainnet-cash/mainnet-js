@@ -390,7 +390,7 @@ describe(`Wallet should function in the browser`, () => {
     }, process.env.ALICE_ID);
   });
 
-  test("Should use localStorage cache", async () => {
+  test("Should use localStorage cache for transactions", async () => {
     const result = await page.evaluate(async (walletId) => {
       const aliceWallet = await RegTestWallet.fromId(walletId);
       const txDecoded = await aliceWallet.getLastTransaction();
@@ -398,7 +398,7 @@ describe(`Wallet should function in the browser`, () => {
       const txHash = txDecoded.hash;
       expect(
         localStorage.getItem(
-          `${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+          `tx-${aliceWallet.provider.network}-${txHash}-${true}-${false}`
         )
       ).toBe(null);
       Config.UseLocalStorageCache = true;
@@ -407,12 +407,12 @@ describe(`Wallet should function in the browser`, () => {
 
       expect(
         localStorage.getItem(
-          `${aliceWallet.provider.network}-${txHash}-${false}-${false}`
+          `tx-${aliceWallet.provider.network}-${txHash}-${false}-${false}`
         ) === null
       ).toBe(false);
       expect(
         typeof localStorage.getItem(
-          `${aliceWallet.provider.network}-${txHash}-${false}-${false}`
+          `tx-${aliceWallet.provider.network}-${txHash}-${false}-${false}`
         ) === "string"
       ).toBe(true);
       expect(
@@ -421,12 +421,12 @@ describe(`Wallet should function in the browser`, () => {
 
       expect(
         localStorage.getItem(
-          `${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+          `tx-${aliceWallet.provider.network}-${txHash}-${true}-${false}`
         ) === null
       ).toBe(false);
       expect(
         typeof localStorage.getItem(
-          `${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+          `tx-${aliceWallet.provider.network}-${txHash}-${true}-${false}`
         ) === "string"
       ).toBe(true);
       expect(
@@ -435,5 +435,52 @@ describe(`Wallet should function in the browser`, () => {
 
       Config.UseLocalStorageCache = false;
     }, process.env.ALICE_ID);
+  });
+
+  test("Should use localStorage cache for block headers", async () => {
+    const result = await page.evaluate(async () => {
+      const aliceWallet = await Wallet.newRandom();
+
+      const height = 854724;
+      await aliceWallet.provider.getHeader(854724);
+      expect(
+        localStorage.getItem(
+          `header-${aliceWallet.provider.network}-${height}-${false}`
+        )
+      ).toBe(null);
+      Config.UseLocalStorageCache = true;
+      await aliceWallet.provider.getHeader(854724);
+      await aliceWallet.provider.getHeader(854724, true);
+
+      expect(
+        localStorage.getItem(
+          `header-${aliceWallet.provider.network}-${height}-${false}`
+        ) === null
+      ).toBe(false);
+      expect(
+        typeof localStorage.getItem(
+          `header-${aliceWallet.provider.network}-${height}-${false}`
+        ) === "string"
+      ).toBe(true);
+      expect(typeof (await aliceWallet.provider.getHeader(854724)).hex).toBe(
+        "string"
+      );
+
+      expect(
+        localStorage.getItem(
+          `header-${aliceWallet.provider.network}-${height}-${true}`
+        ) === null
+      ).toBe(false);
+      expect(
+        typeof localStorage.getItem(
+          `header-${aliceWallet.provider.network}-${height}-${true}`
+        ) === "string"
+      ).toBe(true);
+      expect(typeof (await aliceWallet.provider.getHeader(854724, true))).toBe(
+        "object"
+      );
+
+      Config.UseLocalStorageCache = false;
+    });
   });
 });

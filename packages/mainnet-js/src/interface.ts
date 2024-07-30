@@ -35,9 +35,19 @@ export interface TxI {
   fee?: number;
 }
 
-export interface HeaderI {
+export interface HexHeaderI {
   height: number;
   hex: string;
+}
+
+export interface HeaderI {
+  version: number;
+  previousBlockHash: string;
+  merkleRoot: string;
+  timestamp: number;
+  bits: number;
+  nonce: number;
+  height: number;
 }
 
 export interface TokenI {

@@ -5,7 +5,13 @@ import {
   ConnectionStatus,
 } from "electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
-import { HeaderI, TxI, UtxoI, ElectrumBalanceI } from "../interface.js";
+import {
+  HexHeaderI,
+  TxI,
+  UtxoI,
+  ElectrumBalanceI,
+  HeaderI,
+} from "../interface.js";
 import { Network } from "../interface.js";
 import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
@@ -13,6 +19,7 @@ import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
 import { Config } from "../config.js";
+import { decodeHeader } from "../util/header.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
@@ -105,6 +112,35 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result.confirmed + result.unconfirmed;
   }
 
+  static rawHeaderCache = {};
+  async getHeader(
+    height: number,
+    verbose: boolean = false
+  ): Promise<HeaderI | HexHeaderI> {
+    const key = `header-${this.network}-${height}-${verbose}`;
+
+    if (Config.UseLocalStorageCache) {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        return verbose ? decodeHeader(JSON.parse(cached)) : JSON.parse(cached);
+      }
+    } else {
+      ElectrumNetworkProvider.rawTransactionCache[key];
+    }
+
+    const result = (await this.performRequest(
+      "blockchain.header.get",
+      height
+    )) as HexHeaderI;
+    if (Config.UseLocalStorageCache) {
+      localStorage.setItem(key, JSON.stringify(result));
+    } else {
+      ElectrumNetworkProvider.rawTransactionCache[key] = result;
+    }
+
+    return verbose ? decodeHeader(result) : result;
+  }
+
   async getBlockHeight(): Promise<number> {
     return ((await this.performRequest("blockchain.headers.get_tip")) as any)
       .height;
@@ -116,7 +152,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     verbose: boolean = false,
     loadInputValues: boolean = false
   ): Promise<string> {
-    const key = `${this.network}-${txHash}-${verbose}-${loadInputValues}`;
+    const key = `tx-${this.network}-${txHash}-${verbose}-${loadInputValues}`;
 
     if (Config.UseLocalStorageCache) {
       const cached = localStorage.getItem(key);
@@ -317,9 +353,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   // Wait for the next block or a block at given blockchain height.
-  public watchBlocks(callback: (header: HeaderI) => void): CancelWatchFn {
+  public watchBlocks(callback: (header: HexHeaderI) => void): CancelWatchFn {
     let acknowledged = false;
-    const waitForBlockCallback = (_header: HeaderI | HeaderI[]) => {
+    const waitForBlockCallback = (_header: HexHeaderI | HexHeaderI[]) => {
       if (!acknowledged) {
         acknowledged = true;
         return;
@@ -336,7 +372,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   // Wait for the next block or a block at given blockchain height.
-  public async waitForBlock(height?: number): Promise<HeaderI> {
+  public async waitForBlock(height?: number): Promise<HexHeaderI> {
     return new Promise(async (resolve) => {
       const cancelWatch = this.watchBlocks(async (header) => {
         if (height === undefined || header.height >= height!) {
@@ -348,13 +384,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   // subscribe to notifications sent when new block is found, the block header is sent to callback
-  async subscribeToHeaders(callback: (header: HeaderI) => void): Promise<void> {
+  async subscribeToHeaders(
+    callback: (header: HexHeaderI) => void
+  ): Promise<void> {
     await this.subscribeRequest("blockchain.headers.subscribe", callback);
   }
 
   // unsubscribe to notifications sent when new block is found
   async unsubscribeFromHeaders(
-    callback: (header: HeaderI) => void
+    callback: (header: HexHeaderI) => void
   ): Promise<void> {
     await this.unsubscribeRequest("blockchain.headers.subscribe", callback);
   }
