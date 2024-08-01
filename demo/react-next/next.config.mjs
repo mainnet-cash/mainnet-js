@@ -5,19 +5,18 @@ const nextConfig = {
     config.experiments = { ...config.experiments, topLevelAwait: true };
     config.resolve.alias = {
       ...config.resolve.alias, ...{
-        events: require.resolve("events/"),
-        fs: EMPTY_PATH,
-        http: EMPTY_PATH,
-        https: EMPTY_PATH,
-        net: EMPTY_PATH,
-        stream: require.resolve('stream-browserify'),
-        tls: EMPTY_PATH,
-        url: EMPTY_PATH
+        // events: "events/",
+        child_process: false,
+        fs: false,
+        http: false,
+        https: false,
+        net: false,
+        stream: 'stream-browserify',
+        tls: false,
+        url: false
       }
     };
     return config
   },
-
 }
-
-module.exports = nextConfig
+export default nextConfig;

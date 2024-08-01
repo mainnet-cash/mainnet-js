@@ -1,11 +1,21 @@
 Newest changes
 --------------
 
+2.4.0
+
+* Minor Breaking: Rework Wallet.getHistory method and interfaces with focus on output compatibility with ElectronCash wallet
+  * `getHistory` gets transaction history of this wallet with most data decoded and ready to present to user
+  * @note balance calculations are valid only if querying to the blockchain tip (`toHeight` === -1, `count` === -1)
+  * @note this method is heavy on network calls, if invoked in browser use of cache is advised, @see `Config.UseLocalStorageCache`
+  * @note this method tries to recreate the history tab view of Electron Cash wallet, however, it may not be 100% accurate if the tnransaction value changes are the same in the same block (ordering)
+
+* watchBlocks now can take a parameter to not skip current block height notification
+* getRawHistory now takes optional fromHeight and toHeight parameters according to updated electrum cash protocol
+
 2.3.16
 
 * Add `getHeader` method to network provider
 * Add `localStorage` caching behaviour to it steered by `Config.UseLocalStorageCache`
-*
 
 2.3.15
 

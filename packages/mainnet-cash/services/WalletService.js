@@ -157,8 +157,8 @@ new Promise(async (resolve, reject) => {
     let wallet = await mainnet.walletFromId(historyRequest.walletId);
     let args = historyRequest;
     delete args.walletId;
-    let resp = await wallet.getHistory(args.unit, args.start, args.count, args.collapseChange);
-    resolve(Service.successResponse({ ...resp }));
+    let resp = await wallet.getHistory({...args});
+    resolve(Service.successResponse(resp));
   } catch (e) {
     reject(
       Service.rejectResponse(e, e.status || 500)

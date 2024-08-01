@@ -1,10 +1,10 @@
-import { RegTestWallet } from "../wallet/Wif";
+import { RegTestWallet, Wallet } from "../wallet/Wif";
 import { WalletTypeEnum } from "../wallet/enum";
 import { createWallet } from "../wallet/createWallet";
-import { getAddressHistory } from "./electrumTransformer";
 import { mine } from "../mine";
+import { getAddressHistory } from "./electrumTransformer";
 
-// This class transforms outputs from electrum to a standard array of history.
+// // This class transforms outputs from electrum to a standard array of history.
 test("Should get an address history", async () => {
   // Build Alice's wallet from Wallet Import Format string
   if (!process.env.PRIVATE_WIF) {
@@ -52,20 +52,40 @@ test("Should get an address history", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory(
-      bob.getDepositAddress(),
-      bob.provider!
-    );
-    expect(bobHistory.transactions[0].value).toBe(-2100);
-    expect(bobHistory.transactions[0].to).toBe(alice.getDepositAddress());
-    expect(bobHistory.transactions[0].from).toBe(bob.getDepositAddress());
-    expect(bobHistory.transactions[1].value).toBe(-2100);
-    expect(bobHistory.transactions[1].from).toBe(bob.getDepositAddress());
-    expect(bobHistory.transactions[1].to).toBe(charlie.getDepositAddress());
-    expect(bobHistory.transactions[2].value).toBe(31000);
-    expect(bobHistory.transactions[2].balance).toBe(31000);
-    expect(bobHistory.transactions[2].fee).toBe(0);
-    expect(bobHistory.transactions[2].from).toBe(alice.getDepositAddress());
+    const bobHistory = await getAddressHistory({
+      address: bob.getDepositAddress(),
+      provider: bob.provider!,
+    });
+    expect(bobHistory[0].valueChange).toBe(-2320);
+    expect(
+      bobHistory[0].outputs.some(
+        (output) => output.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(
+      bobHistory[0].inputs.some(
+        (input) => input.address === bob.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(bobHistory[1].valueChange).toBe(-2320);
+    expect(
+      bobHistory[1].inputs.some(
+        (input) => input.address === bob.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(
+      bobHistory[1].outputs.some(
+        (output) => output.address === charlie.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(bobHistory[2].valueChange).toBe(31000);
+    expect(bobHistory[2].balance).toBe(31000);
+    expect(bobHistory[2].fee).not.toBe(0);
+    expect(
+      bobHistory[2].inputs.some(
+        (input) => input.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
   }
 });
 
@@ -98,36 +118,57 @@ test("Should get a history with multi-party sends", async () => {
         value: 2100,
         unit: "satoshis",
       },
+    ]);
+    await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
+    await bob.send([
       {
         cashaddr: alice.cashaddr!,
         value: 2100,
         unit: "satoshis",
       },
     ]);
-    await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
     expect(sendResponse!.txId!.length).toBe(64);
     expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory(
-      bob.getDepositAddress(),
-      bob.provider!
-    );
-    expect(bobHistory.transactions[1].txn).toBe(bobHistory.transactions[0].txn);
-    expect(bobHistory.transactions[1].fee).toBe(bobHistory.transactions[0].fee);
-    expect(bobHistory.transactions[1].fee).toBeGreaterThan(120);
-    expect(bobHistory.transactions[1].fee).toBeLessThan(150);
-    expect(bobHistory.transactions[0].value).toBe(-2100);
-    expect(bobHistory.transactions[0].to).toBe(alice.getDepositAddress());
-    expect(bobHistory.transactions[0].from).toBe(bob.getDepositAddress());
-    expect(bobHistory.transactions[1].value).toBe(-2100);
-    expect(bobHistory.transactions[1].to).toBe(charlie.getDepositAddress());
-    expect(bobHistory.transactions[1].from).toBe(bob.getDepositAddress());
+    const bobHistory = await getAddressHistory({
+      address: bob.getDepositAddress(),
+      provider: bob.provider!,
+    });
 
-    expect(bobHistory.transactions[2].value).toBe(31000);
-    expect(bobHistory.transactions[2].fee).toBe(0);
-    expect(bobHistory.transactions[2].from).toBe(alice.getDepositAddress());
+    expect(bobHistory[1].fee).toBeGreaterThan(120);
+    expect(bobHistory[1].fee).toBe(220);
+    expect(bobHistory[0].valueChange).toBe(-2320);
+    expect(
+      bobHistory[0].outputs.some(
+        (output) => output.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(
+      bobHistory[0].inputs.some(
+        (input) => input.address === bob.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(bobHistory[1].valueChange).toBe(-2320);
+    expect(
+      bobHistory[1].outputs.some(
+        (output) => output.address === charlie.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(
+      bobHistory[1].inputs.some(
+        (input) => input.address === bob.getDepositAddress()
+      )
+    ).toBe(true);
+
+    expect(bobHistory[2].valueChange).toBe(31000);
+    expect(bobHistory[2].fee).not.toBe(0);
+    expect(
+      bobHistory[2].inputs.some(
+        (input) => input.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
   }
 });
 
@@ -177,19 +218,27 @@ test("Should cut results with a longer history to given count", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory(
-      bob.getDepositAddress(),
-      bob.provider!,
-      "sat",
-      0,
-      2
-    );
-    expect(bobHistory.transactions.length).toBe(4);
+    const bobHistory = await getAddressHistory({
+      address: bob.getDepositAddress(),
+      provider: bob.provider!,
+      unit: "sat",
+      start: 0,
+      count: 2,
+    });
+    expect(bobHistory.length).toBe(2);
 
-    expect(bobHistory.transactions[0].value).toBe(-2100);
-    expect(bobHistory.transactions[0].to).toBe(alice.getDepositAddress());
-    expect(bobHistory.transactions[1].value).toBe(-2100);
-    expect(bobHistory.transactions[1].to).toBe(alice.getDepositAddress());
+    expect(bobHistory[0].valueChange).toBe(-6588);
+    expect(
+      bobHistory[0].outputs.some(
+        (output) => output.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(bobHistory[1].valueChange).toBe(31000);
+    expect(
+      bobHistory[1].outputs.some(
+        (output) => output.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
   }
 });
 
@@ -238,14 +287,22 @@ test("Should handel input and fee from many utxos", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory(
-      bob.getDepositAddress(),
-      bob.provider!,
-      "sat"
-    );
+    const bobHistory = await getAddressHistory({
+      address: bob.getDepositAddress(),
+      provider: bob.provider!,
+      unit: "sat",
+    });
 
-    expect(bobHistory.transactions[0].value).toBeLessThan(-1700);
-    expect(bobHistory.transactions[0].to).toBe(charlie.getDepositAddress());
-    expect(bobHistory.transactions[1].from).toBe(alice.getDepositAddress());
+    expect(bobHistory[0].valueChange).toBeLessThan(-1700);
+    expect(
+      bobHistory[0].outputs.some(
+        (output) => output.address === charlie.getDepositAddress()
+      )
+    ).toBe(true);
+    expect(
+      bobHistory[1].inputs.some(
+        (input) => input.address === alice.getDepositAddress()
+      )
+    ).toBe(true);
   }
 });
