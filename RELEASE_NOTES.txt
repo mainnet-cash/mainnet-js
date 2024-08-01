@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.4.1
+
+* Bugfix: export TransactionHistoryItem interface
+
 2.4.0
 
 * Minor Breaking: Rework Wallet.getHistory method and interfaces with focus on output compatibility with ElectronCash wallet
