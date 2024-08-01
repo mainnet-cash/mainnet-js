@@ -71,7 +71,11 @@ export default interface NetworkProvider {
    * @throws {Error} When failing to get history.
    * @returns Array of transactions.
    */
-  getHistory(cashaddr: string): Promise<TxI[]>;
+  getHistory(
+    cashaddr: string,
+    fromHeight?: number,
+    toHeight?: number
+  ): Promise<TxI[]>;
 
   /**
    * Wait for the next block or a block at given blockchain height.

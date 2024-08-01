@@ -571,18 +571,24 @@ paths:
             schema:
               $ref: '#/components/schemas/HistoryRequest'
         description: |
-          Request for a wallet history
+          Gets transaction history of this wallet with most data decoded and ready to present to user
+            Note: balance calculations are valid only if querying to the blockchain tip (`toHeight` === -1, `count` === -1)
+            Note: this method is heavy on network calls, if invoked in browser use of cache is advised, @see `Config.UseLocalStorageCache`
+            Note: this method tries to recreate the history tab view of Electron Cash wallet, however, it may not be 100% accurate if the tnransaction value changes are the same in the same block (ordering)
+
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HistoryResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionHistoryItem'
           description: successful operation
-      summary: Get a simplified list of transactions related to a wallet
+      summary: Get a list of transactions related to a wallet
       tags:
-        - wallet        
+        - wallet
   /wallet/max_amount_to_send:
     post:
       operationId: maxAmountToSend
@@ -1474,30 +1480,7 @@ components:
           type: number
           example: 100
         token:
-          type: object
-          nullable: true
-          properties:
-            amount:
-              type: number
-              description: Fungible token amount to send
-            tokenId:
-              type: string
-              description: >-
-                Token unique hexadecimal identifier, also the id of the token
-                creation transaction
-            capability:
-              type: string
-              nullable: true
-              enum:
-                - none
-                - mutable
-                - minting
-              description: Capability of the NFT
-            commitment:
-              type: string
-              nullable: true
-              maxLength: 80
-              description: Token commitment message, hexadecimal encoded, 40 bytes max length
+          $ref: '#/components/schemas/Token'
       required:
         - satoshis
         - txid
@@ -1545,57 +1528,107 @@ components:
           example: sat
           default: sat
           type: string
+        fromHeight:
+          type: number
+          description: optional, if set, history will be limited. Default 0
+          default: 0
+        toHeight:
+          type: number
+          description: optional, if set, history will be limited. Default -1, meaning that all history items will be returned, including mempool
+          default: -1
         start:
           type: number
-          description: The first record to return starting from zero
+          description: optional, if set, the result set will be paginated with offset `start`. Default 0
+          default: 0
         count:
           type: number
-          description: The number of records to return
-        collapseChange:
-          type: boolean
-          example: true
-          default: true
-          description: >-
-            Exclude transactions returned to the wallet as change in response.
+          description: optional, if set, the result set will be paginated with `count`. Default -1, meaning that all history items will be returned
       required:
         - walletId
-    HistoryResponse:
+    Token:
+      type: object
+      nullable: true
       properties:
-        transactions:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransactionHistoryItem'
-    TransactionHistoryItem:
+        amount:
+          type: number
+          description: Fungible token amount
+        tokenId:
+          type: string
+          description: >-
+            Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+        capability:
+          type: string
+          nullable: true
+          enum:
+            - none
+            - mutable
+            - minting
+          description: Capability of the NFT
+        commitment:
+          type: string
+          nullable: true
+          maxLength: 80
+          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+    InOutput:
       properties:
-        to:
+        address:
           type: string
-          description: cashaddr of the receiving cash address.
-        from:
-          type: string
-          description: cashaddr of the sending cash address.
-        unit:
-          $ref: '#/components/schemas/UnitType'
-        index:
-          type: number
-          description: the index of the input or output in the transaction
-        blockheight:
-          type: number
-          description: the blockheight of transaction
-        txn:
-          type: string
-          description: The hash of the transaction
-        txId:
-          type: string
-          description: a unique identifier for the sub-transaction
+          description: address in cashaddr format
         value:
           type: number
-          description: The amount of the transaction, in the unit provided, with respect to the wallet provided.
+          description: value in satoshis
+        token:
+          $ref: '#/components/schemas/Token'
+    TokenAmountChange:
+      properties:
+        tokenId:
+          type: string
+          description: >-
+            Token unique hexadecimal identifier, also the id of the token
+            creation transaction
+        amount:
+          type: number
+          description: Fungible token amount
+        nftAmount:
+          type: number
+          description: Non-fungible token amount
+    TransactionHistoryItem:
+      properties:
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/InOutput'
+        outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/InOutput'
+        blockheight:
+          type: number
+          description: The blockheight of transaction
+        timestamp:
+          type: string
+          description: The timestamp of transaction, undefined if unconfirmed
+          nullable: true
+        hash:
+          type: string
+          description: The hash of the transaction
+        size:
+          type: number
+          description: The size of the transaction
         fee:
           type: number
-          description: The amount paid, if any, by the wallet for the transaction (incoming tranactions are "free")
+          description: Transaction fee
         balance:
           type: number
-          description: A running balance
+          description: A running balance, in units
+        valueChange:
+          type: number
+          description: Change of value in the transaction, in units
+        tokenAmountChanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenAmountChange'
     SendRequestItem:
       anyOf:
         - description: Send request in array form ['cashadr', 100, 'sats']

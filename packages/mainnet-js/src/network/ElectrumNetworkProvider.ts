@@ -255,10 +255,16 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   // Get transaction history of a given cashaddr
-  async getHistory(cashaddr: string): Promise<TxI[]> {
+  async getHistory(
+    cashaddr: string,
+    fromHeight: number = 0,
+    toHeight: number = -1
+  ): Promise<TxI[]> {
     const result = (await this.performRequest(
       "blockchain.address.get_history",
-      cashaddr
+      cashaddr,
+      fromHeight,
+      toHeight
     )) as TxI[];
 
     return result;
@@ -352,9 +358,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     });
   }
 
-  // Wait for the next block or a block at given blockchain height.
-  public watchBlocks(callback: (header: HexHeaderI) => void): CancelWatchFn {
-    let acknowledged = false;
+  // watch for block headers and block height, if `skipCurrentHeight` is set, the notification about current block will not arrive
+  public watchBlocks(
+    callback: (header: HexHeaderI) => void,
+    skipCurrentHeight: boolean = true
+  ): CancelWatchFn {
+    let acknowledged = !skipCurrentHeight;
     const waitForBlockCallback = (_header: HexHeaderI | HexHeaderI[]) => {
       if (!acknowledged) {
         acknowledged = true;

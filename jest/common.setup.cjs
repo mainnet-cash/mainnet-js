@@ -1,6 +1,9 @@
 // jest/node.setup.js
 require("dotenv").config({ path: ".env.regtest" });
 require("dotenv").config({ path: ".env.testnet" });
+const inspect = require("util").inspect;
+inspect.defaultOptions.depth = 10;
+inspect.defaultOptions.maxArrayLength = 1000;
 
 const { spawnSync } = require("child_process");
 const { pingBchn, getRegtestUtxos } = require("./util/generateBlock.cjs");
