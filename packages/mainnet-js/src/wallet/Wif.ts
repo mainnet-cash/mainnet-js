@@ -2,7 +2,6 @@
 // Stable
 import {
   decodeCashAddress,
-  decodeCashAddressVersionByte,
   encodeHdPublicKey,
   HdKeyNetwork,
   secp256k1,
@@ -104,14 +103,14 @@ import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { getXPubKey } from "../util/getXPubKey.js";
 import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant.js";
 
-import { TransactionHistoryI } from "../history/interface.js";
 import { getAddressHistory } from "../history/electrumTransformer.js";
-import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
+import { IdentitySnapshot } from "./bcmr-v2.schema.js";
 import { BCMR } from "./Bcmr.js";
 import { qrAddress } from "../qr/Qr.js";
 import { ImageI } from "../qr/interface.js";
 import { Config } from "../config.js";
 import { checkUtxos } from "../util/checkUtxos.js";
+import { TransactionHistoryItem } from "../history/interface.js";
 
 //#endregion Imports
 
@@ -1282,25 +1281,53 @@ export class Wallet extends BaseWallet {
   }
 
   // gets transaction history of this wallet
-  public async getRawHistory(): Promise<TxI[]> {
-    return await this.provider!.getHistory(this.cashaddr!);
+  public async getRawHistory(
+    fromHeight: number = 0,
+    toHeight: number = -1
+  ): Promise<TxI[]> {
+    return await this.provider!.getHistory(
+      this.cashaddr!,
+      fromHeight,
+      toHeight
+    );
   }
 
-  // gets transaction history of this wallet
-  public async getHistory(
-    unit: UnitEnum,
-    start?: number,
-    count?: number,
-    collapseChange?: boolean
-  ): Promise<TransactionHistoryI> {
-    return getAddressHistory(
-      this.cashaddr!,
-      this.provider!,
+  /**
+   * getHistory gets transaction history of this wallet with most data decoded and ready to present to user
+   * @note balance calculations are valid only if querying to the blockchain tip (`toHeight` === -1, `count` === -1)
+   * @note this method is heavy on network calls, if invoked in browser use of cache is advised, @see `Config.UseLocalStorageCache`
+   * @note this method tries to recreate the history tab view of Electron Cash wallet, however, it may not be 100% accurate if the tnransaction value changes are the same in the same block (ordering)
+   *
+   * @param unit optional, BCH or currency unit to present balance and balance changes. If unit is currency like USD or EUR, balances will be subject to possible rounding errors. Default 0
+   * @param fromHeight optional, if set, history will be limited. Default 0
+   * @param toHeight optional, if set, history will be limited. Default -1, meaning that all history items will be returned, including mempool
+   * @param start optional, if set, the result set will be paginated with offset `start`
+   * @param count optional, if set, the result set will be paginated with `count`. Default -1, meaning that all history items will be returned
+   *
+   * @returns an array of transaction history items, with input values and addresses encoded in cashaddress format. @see `TransactionHistoryItem` type
+   */
+  public async getHistory({
+    unit = "sat",
+    fromHeight = 0,
+    toHeight = -1,
+    start = 0,
+    count = -1,
+  }: {
+    unit?: UnitEnum;
+    fromHeight?: number;
+    toHeight?: number;
+    start?: number;
+    count?: number;
+  }): Promise<TransactionHistoryItem[]> {
+    return getAddressHistory({
+      address: this.cashaddr!,
+      provider: this.provider!,
       unit,
+      fromHeight,
+      toHeight,
       start,
       count,
-      collapseChange
-    );
+    });
   }
 
   // gets last transaction of this wallet
@@ -1393,11 +1420,18 @@ export class Wallet extends BaseWallet {
    * watchBlocks Watch network blocks
    *
    * @param callback callback with a block header object
+   * @param skipCurrentHeight if set, the notification about current block will not arrive
    *
    * @returns a function which will cancel watching upon evaluation
    */
-  public watchBlocks(callback: (header: HexHeaderI) => void): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchBlocks(callback);
+  public watchBlocks(
+    callback: (header: HexHeaderI) => void,
+    skipCurrentHeight: boolean = true
+  ): CancelWatchFn {
+    return (this.provider! as ElectrumNetworkProvider).watchBlocks(
+      callback,
+      skipCurrentHeight
+    );
   }
 
   /**

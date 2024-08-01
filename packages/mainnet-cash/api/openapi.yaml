@@ -573,16 +573,21 @@ paths:
             schema:
               $ref: '#/components/schemas/HistoryRequest'
         description: |
-          Request for a wallet history
+          Gets transaction history of this wallet with most data decoded and ready to present to user
+            Note: balance calculations are valid only if querying to the blockchain tip (`toHeight` === -1, `count` === -1)
+            Note: this method is heavy on network calls, if invoked in browser use of cache is advised, @see `Config.UseLocalStorageCache`
+            Note: this method tries to recreate the history tab view of Electron Cash wallet, however, it may not be 100% accurate if the tnransaction value changes are the same in the same block (ordering)
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HistoryResponse'
+                items:
+                  $ref: '#/components/schemas/TransactionHistoryItem'
+                type: array
           description: successful operation
-      summary: Get a simplified list of transactions related to a wallet
+      summary: Get a list of transactions related to a wallet
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -1334,8 +1339,6 @@ components:
           Utxo: '#/components/schemas/Utxo'
           BalanceRequest: '#/components/schemas/BalanceRequest'
         propertyName: unit_type
-      example:
-        unit: sat
       properties:
         unit:
           description: Unit of account.
@@ -1374,7 +1377,7 @@ components:
           example: 100
           type: number
         token:
-          $ref: '#/components/schemas/Utxo_token'
+          $ref: '#/components/schemas/Token'
       required:
       - satoshis
       - txid
@@ -1404,9 +1407,10 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         unit: sat
-        collapseChange: true
-        start: 0.8008281904610115
-        count: 6.027456183070403
+        fromHeight: 0.8008281904610115
+        start: 1.4658129805029452
+        count: 5.962133916683182
+        toHeight: 6.027456183070403
       properties:
         walletId:
           description: |
@@ -1430,94 +1434,171 @@ components:
           - satoshis
           example: sat
           type: string
+        fromHeight:
+          default: 0
+          description: "optional, if set, history will be limited. Default 0"
+          type: number
+        toHeight:
+          default: -1
+          description: "optional, if set, history will be limited. Default -1, meaning\
+            \ that all history items will be returned, including mempool"
+          type: number
         start:
-          description: The first record to return starting from zero
+          default: 0
+          description: "optional, if set, the result set will be paginated with offset\
+            \ `start`. Default 0"
           type: number
         count:
-          description: The number of records to return
+          description: "optional, if set, the result set will be paginated with `count`.\
+            \ Default -1, meaning that all history items will be returned"
           type: number
-        collapseChange:
-          default: true
-          description: Exclude transactions returned to the wallet as change in response.
-          example: true
-          type: boolean
       required:
       - walletId
-    HistoryResponse:
+    Token:
       example:
-        transactions:
-        - unit:
-            unit: sat
-          balance: 5.637376656633329
-          fee: 5.962133916683182
-          index: 0.8008281904610115
-          txId: txId
-          from: from
-          to: to
-          txn: txn
-          value: 1.4658129805029452
-          blockheight: 6.027456183070403
-        - unit:
-            unit: sat
-          balance: 5.637376656633329
-          fee: 5.962133916683182
-          index: 0.8008281904610115
-          txId: txId
-          from: from
-          to: to
-          txn: txn
-          value: 1.4658129805029452
-          blockheight: 6.027456183070403
+        amount: 6.027456183070403
+        capability: none
+        tokenId: tokenId
+        commitment: commitment
+      nullable: true
       properties:
-        transactions:
-          items:
-            $ref: '#/components/schemas/TransactionHistoryItem'
-          type: array
-    TransactionHistoryItem:
+        amount:
+          description: Fungible token amount
+          type: number
+        tokenId:
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
+          type: string
+        capability:
+          description: Capability of the NFT
+          enum:
+          - none
+          - mutable
+          - minting
+          nullable: true
+          type: string
+        commitment:
+          description: "Token commitment message, hexadecimal encoded, 40 bytes max\
+            \ length"
+          maxLength: 80
+          nullable: true
+          type: string
+      type: object
+    InOutput:
       example:
-        unit:
-          unit: sat
-        balance: 5.637376656633329
-        fee: 5.962133916683182
-        index: 0.8008281904610115
-        txId: txId
-        from: from
-        to: to
-        txn: txn
-        value: 1.4658129805029452
-        blockheight: 6.027456183070403
+        address: address
+        value: 0.8008281904610115
+        token:
+          amount: 6.027456183070403
+          capability: none
+          tokenId: tokenId
+          commitment: commitment
       properties:
-        to:
-          description: cashaddr of the receiving cash address.
-          type: string
-        from:
-          description: cashaddr of the sending cash address.
-          type: string
-        unit:
-          $ref: '#/components/schemas/UnitType'
-        index:
-          description: the index of the input or output in the transaction
-          type: number
-        blockheight:
-          description: the blockheight of transaction
-          type: number
-        txn:
-          description: The hash of the transaction
-          type: string
-        txId:
-          description: a unique identifier for the sub-transaction
+        address:
+          description: address in cashaddr format
           type: string
         value:
-          description: "The amount of the transaction, in the unit provided, with\
-            \ respect to the wallet provided."
+          description: value in satoshis
+          type: number
+        token:
+          $ref: '#/components/schemas/Token'
+    TokenAmountChange:
+      example:
+        amount: 7.061401241503109
+        tokenId: tokenId
+        nftAmount: 9.301444243932576
+      properties:
+        tokenId:
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction"
+          type: string
+        amount:
+          description: Fungible token amount
+          type: number
+        nftAmount:
+          description: Non-fungible token amount
+          type: number
+    TransactionHistoryItem:
+      example:
+        outputs:
+        - address: address
+          value: 0.8008281904610115
+          token:
+            amount: 6.027456183070403
+            capability: none
+            tokenId: tokenId
+            commitment: commitment
+        - address: address
+          value: 0.8008281904610115
+          token:
+            amount: 6.027456183070403
+            capability: none
+            tokenId: tokenId
+            commitment: commitment
+        size: 1.4658129805029452
+        balance: 5.637376656633329
+        inputs:
+        - address: address
+          value: 0.8008281904610115
+          token:
+            amount: 6.027456183070403
+            capability: none
+            tokenId: tokenId
+            commitment: commitment
+        - address: address
+          value: 0.8008281904610115
+          token:
+            amount: 6.027456183070403
+            capability: none
+            tokenId: tokenId
+            commitment: commitment
+        valueChange: 2.3021358869347655
+        fee: 5.962133916683182
+        hash: hash
+        blockheight: 6.027456183070403
+        timestamp: timestamp
+        tokenAmountChanges:
+        - amount: 7.061401241503109
+          tokenId: tokenId
+          nftAmount: 9.301444243932576
+        - amount: 7.061401241503109
+          tokenId: tokenId
+          nftAmount: 9.301444243932576
+      properties:
+        inputs:
+          items:
+            $ref: '#/components/schemas/InOutput'
+          type: array
+        outputs:
+          items:
+            $ref: '#/components/schemas/InOutput'
+          type: array
+        blockheight:
+          description: The blockheight of transaction
+          type: number
+        timestamp:
+          description: "The timestamp of transaction, undefined if unconfirmed"
+          nullable: true
+          type: string
+        hash:
+          description: The hash of the transaction
+          type: string
+        size:
+          description: The size of the transaction
           type: number
         fee:
-          description: "The amount paid, if any, by the wallet for the transaction\
-            \ (incoming tranactions are \"free\")"
+          description: Transaction fee
           type: number
         balance:
-          description: A running balance
+          description: "A running balance, in units"
           type: number
+        valueChange:
+          description: "Change of value in the transaction, in units"
+          type: number
+        tokenAmountChanges:
+          items:
+            $ref: '#/components/schemas/TokenAmountChange'
+          type: array
     SendRequestItem:
       anyOf:
       - description: "Send request in array form ['cashadr', 100, 'sats']"
@@ -3326,36 +3407,6 @@ components:
       anyOf:
       - $ref: '#/components/schemas/utilGetRawTransaction_200_response_anyOf'
       - $ref: '#/components/schemas/ElectrumRawTransaction'
-    Utxo_token:
-      example:
-        amount: 6.027456183070403
-        capability: none
-        tokenId: tokenId
-        commitment: commitment
-      nullable: true
-      properties:
-        amount:
-          description: Fungible token amount to send
-          type: number
-        tokenId:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          type: string
-        capability:
-          description: Capability of the NFT
-          enum:
-          - none
-          - mutable
-          - minting
-          nullable: true
-          type: string
-        commitment:
-          description: "Token commitment message, hexadecimal encoded, 40 bytes max\
-            \ length"
-          maxLength: 80
-          nullable: true
-          type: string
-      type: object
     SendRequestItem_anyOf:
       description: Send request in object notation
       properties:
