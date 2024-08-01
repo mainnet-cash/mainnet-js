@@ -48,3 +48,4 @@ export {
   VerifyMessageResponseI,
 } from "./message/interface.js";
 export * from "./wallet/interface.js";
+export * from "./history/interface.js";
