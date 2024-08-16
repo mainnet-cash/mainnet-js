@@ -104,40 +104,30 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   if (symbol.length > 0) {
     symbol = symbol.toLocaleLowerCase();
   }
-  switch (symbol) {
-    case "usd":
-      try {
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd"
-        );
-        const data = await response.json();
-        return data["bitcoin-cash"].usd;
-      } catch (e1) {
-        try {
-          const response = await fetch(
-            "https://markets.api.bitcoin.com/live/bitcoin"
-          );
-          const data = await response.json();
-          return data["data"]["BCH"];
-        } catch (e2: any) {
-          return e2;
-        }
-      }
-    default:
-      const response = await fetch("https://bitpay.com/rates/BCH");
-      const data = (await response.json()) as {
-        data: { code: string; rate: number }[];
-      };
-      const rates = data.data.reduce(
-        (acc, rate) => ({ ...acc, [rate.code.toLocaleLowerCase()]: rate.rate }),
-        {}
-      );
-      if (symbol in rates) {
-        return rates[symbol];
-      }
 
-      throw Error(`Currency '${symbol}' is not supported.`);
+  if (symbol === "usd") {
+    try {
+      const response = await fetch(
+        "https://markets.api.bitcoin.com/live/bitcoin"
+      );
+      const data = await response.json();
+      return data["data"]["BCH"];
+    } catch {}
   }
+
+  const response = await fetch("https://bitpay.com/rates/BCH");
+  const data = (await response.json()) as {
+    data: { code: string; rate: number }[];
+  };
+  const rates = data.data.reduce(
+    (acc, rate) => ({ ...acc, [rate.code.toLocaleLowerCase()]: rate.rate }),
+    {}
+  );
+  if (symbol in rates) {
+    return rates[symbol];
+  }
+
+  throw Error(`Currency '${symbol}' is not supported.`);
 }
 
 await ExchangeRate.get("usd");

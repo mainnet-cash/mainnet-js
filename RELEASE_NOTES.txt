@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.4.3
+
+* Remove coingecko price lookups. The service now requires the paid subscription and browser console is plagued with errors upon price lookups.
+
 2.4.2
 
 * Add a demo/vue-quasar project with tailwind css and mainnet-js integrated
