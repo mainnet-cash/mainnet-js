@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.4.2
+
+* Add a demo/vue-quasar project with tailwind css and mainnet-js integrated
+
 2.4.1
 
 * Bugfix: export TransactionHistoryItem interface
