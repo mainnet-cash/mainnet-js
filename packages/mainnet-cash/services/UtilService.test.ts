@@ -18,8 +18,7 @@ describe("Test Util Endpoints", () => {
    * test mining blocks
    */
   it("Should convert an amount from usd to bch", async () => {
-    setupFetchMock("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd", { 'bitcoin-cash': { usd: 666.666 } });
-    setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin",  { BCH: 666.666 });
+    setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", { data: { BCH: 1337.42 } });
 
     const rate = Number(await mainnet.Mainnet.getUsdRate()).toFixed(2);
     const convertResp = await request(app).post("/util/convert").send({

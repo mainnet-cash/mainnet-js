@@ -2,6 +2,10 @@ const map = {};
 
 const _fetch = globalThis.fetch;
 
+Object.defineProperty(global, 'fetch', {
+  writable: true,
+});
+
 globalThis.fetch = ((uri: any, ...rest: any) => {
   if (!map[uri]) {
     return _fetch(uri, ...rest);
