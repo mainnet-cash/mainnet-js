@@ -2,7 +2,7 @@ const map = {};
 
 const _fetch = globalThis.fetch;
 
-Object.defineProperty(global, 'fetch', {
+Object.defineProperty(global, "fetch", {
   writable: true,
 });
 

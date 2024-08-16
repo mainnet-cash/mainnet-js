@@ -17,7 +17,7 @@ describe("Exchange rate tests", () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
       data: {
         BCH: 1337.42,
-      }
+      },
     });
 
     let rate = await ExchangeRate.get("usd");
@@ -28,7 +28,7 @@ describe("Exchange rate tests", () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
       data: {
         BCH: 1337.42,
-      }
+      },
     });
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
@@ -45,7 +45,7 @@ describe("Exchange rate tests", () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
       data: {
         BCH: 31337.42,
-      }
+      },
     });
 
     await delay(3000);
@@ -58,9 +58,7 @@ describe("Exchange rate tests", () => {
 
     await delay(3000);
 
-    removeFetchMock(
-      "https://markets.api.bitcoin.com/live/bitcoin"
-    );
+    removeFetchMock("https://markets.api.bitcoin.com/live/bitcoin");
     expect(cbCounter).toBe(2);
     await cancelWatchFn();
   });
