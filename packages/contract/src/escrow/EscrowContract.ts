@@ -40,7 +40,9 @@ export class EscrowContract extends Contract {
     const addressArgs = [sellerAddr, buyerAddr, arbiterAddr];
 
     // Derive the network from addresses given or throw error if not on same network
-    const network = Mainnet.derivedNetwork(Object.values(addressArgs));
+    const network = Mainnet.derivedNetwork(
+      Object.values(addressArgs)
+    ) as Network;
     const tmpNonce = nonce ? nonce : Mainnet.getWeakRandomInt(2147483647);
     // Transform the arguments given to Public Key Hashes
     const rawContractArgs = addressArgs.map((x) => {
@@ -218,7 +220,7 @@ export class EscrowContract extends Contract {
    * @returns The contract text in CashScript
    */
   static getContractText(): string {
-    return `pragma cashscript ^0.8.0;
+    return `
             contract escrow(bytes20 sellerPkh, bytes20 buyerPkh, bytes20 arbiterPkh, int contractAmount, int contractNonce) {
 
                 function spend(pubkey signingPk, sig s, int amount, int nonce) {

@@ -23,7 +23,7 @@ test("Should decode xpubInfo", async () => {
 
 test("Should derive cashaddr given xpub and path", async () => {
   // abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about
-  // m/0
+  // m/44'/145'/0'/0/
   const xpub =
     "xpub6F2iaK2JUPcgrZ6RTGH6t8VybLPu1XzfrHsDsaKvK6NfULznU6i6aw6ZoefDW2DpNruSLw73RwQg46qvpqB3eryeJJ2tkFCF4Z6gbr8Pjja";
   const vectors = [
@@ -37,7 +37,7 @@ test("Should derive cashaddr given xpub and path", async () => {
 
   for (let i = 0; i < vectors.length; i++) {
     // M/44'/145'/0'/0/
-    const publicNode = await derivePublicNodeCashaddr(xpub, 0, `M/${i}`);
+    const publicNode = derivePublicNodeCashaddr(xpub, `${i}`);
     expect(publicNode).toBe(vectors[i]);
   }
 });
@@ -82,7 +82,7 @@ test("Should derive list of change cashaddrs from m/44'/0'/0' given xpub path, &
 
 test("Should derive list of cashaddrs from M/44'/145'/0' given xpub, path and limit", async () => {
   // abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about
-  // m/0
+  // m/44'/145'/0'
   const xpub =
     "xpub6ByHsPNSQXTWZ7PLESMY2FufyYWtLXagSUpMQq7Un96SiThZH2iJB1X7pwviH1WtKVeDP6K8d6xxFzzoaFzF3s8BKCZx8oEDdDkNnp4owAZ";
   const vectors = [
@@ -99,7 +99,7 @@ test("Should derive list of cashaddrs from M/44'/145'/0' given xpub, path and li
 });
 test("Should derive list of change cashaddrs from M/44'/145'/0' given xpub, path and limit", async () => {
   // abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about
-  // m/0
+  // m/44'/145'/0'
   const xpub =
     "xpub6ByHsPNSQXTWZ7PLESMY2FufyYWtLXagSUpMQq7Un96SiThZH2iJB1X7pwviH1WtKVeDP6K8d6xxFzzoaFzF3s8BKCZx8oEDdDkNnp4owAZ";
   const vectors = [

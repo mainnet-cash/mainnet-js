@@ -4,6 +4,7 @@ import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 import server from "../index.js";
 import request from "supertest";
 import { toUtxoId } from "mainnet-js";
+import { checkResponse } from "../utils/testUtils.js";
 
 var app;
 
@@ -25,7 +26,7 @@ describe("Test Wallet Endpoints", () => {
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.sat).toBeGreaterThan(100);
     expect(resp.body.bch).toBeGreaterThanOrEqual(5000);
   });
@@ -39,7 +40,7 @@ describe("Test Wallet Endpoints", () => {
       .send({
         walletId: `watch:regtest:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0`,
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.sat).toBeGreaterThan(100);
     expect(resp.body.bch).toBeGreaterThanOrEqual(5000);
   });
@@ -54,7 +55,7 @@ describe("Test Wallet Endpoints", () => {
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         unit: "sat",
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(parseInt(resp.text)).toBeGreaterThanOrEqual(
       5000 * 100000000
     );
@@ -1129,7 +1130,7 @@ describe("Test Wallet Endpoints", () => {
       .send({
         walletId: bobsWalletResp.body.walletId,
       });
-    expect(bobBalanceResponse.statusCode).toEqual(200);
+    checkResponse(bobBalanceResponse);
     expect(bobBalanceResponse.body.sat).toBe(2000);
   });
 });

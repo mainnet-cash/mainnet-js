@@ -1113,11 +1113,14 @@ describe(`Wallet extrema behavior regression testing`, () => {
         binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
       ).toBe(true);
       const toCashAddress = (bytecode) => {
-        const cashaddr = lockingBytecodeToCashAddress(bytecode, "bchreg");
-        if (typeof cashaddr !== "string") {
-          throw Error(cashaddr.error);
+        const cashaddr = lockingBytecodeToCashAddress({
+          bytecode: bytecode,
+          prefix: "bchreg",
+        });
+        if (typeof cashaddr === "string") {
+          throw Error(cashaddr);
         }
-        return cashaddr;
+        return cashaddr.address;
       };
       expect(toCashAddress(decoded.outputs[0].lockingBytecode)).toBe(
         bobWallet.cashaddr

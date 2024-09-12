@@ -1,4 +1,5 @@
 import {
+  assertSuccess,
   base64ToBin,
   binToBase64,
   CashAddressType,
@@ -152,11 +153,11 @@ export class SignedMessage implements SignedMessageI {
       if (cashaddr) {
         // Validate that the signature actually matches the provided cashaddr
         let prefix = derivePrefix(cashaddr);
-        let resultingCashaddr = encodeCashAddress(
+        let resultingCashaddr = encodeCashAddress({
           prefix,
-          CashAddressType.p2pkh,
-          pkh
-        );
+          type: CashAddressType.p2pkh,
+          payload: pkh,
+        }).address;
         if (resultingCashaddr === cashaddr) {
           pkhMatch = true;
         }

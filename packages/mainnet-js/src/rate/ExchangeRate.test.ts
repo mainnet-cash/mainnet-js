@@ -14,23 +14,22 @@ afterAll(async () => {
 
 describe("Exchange rate tests", () => {
   test("Get price in usd", async () => {
-    setupFetchMock(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
-      { "bitcoin-cash": { usd: 666.666 } }
-    );
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
-      BCH: 666.666,
+      data: {
+        BCH: 1337.42,
+      },
     });
 
     let rate = await ExchangeRate.get("usd");
-    expect(rate).toBe(666.666);
+    expect(rate).toBe(1337.42);
   });
 
   test("Test watchBalanceUsd", async () => {
-    setupFetchMock(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
-      { "bitcoin-cash": { usd: 666.666 } }
-    );
+    setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
+      data: {
+        BCH: 1337.42,
+      },
+    });
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
@@ -43,10 +42,11 @@ describe("Exchange rate tests", () => {
       }
     }, 3000);
 
-    setupFetchMock(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd",
-      { "bitcoin-cash": { usd: 777.777 } }
-    );
+    setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", {
+      data: {
+        BCH: 31337.42,
+      },
+    });
 
     await delay(3000);
 
@@ -58,9 +58,7 @@ describe("Exchange rate tests", () => {
 
     await delay(3000);
 
-    removeFetchMock(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd"
-    );
+    removeFetchMock("https://markets.api.bitcoin.com/live/bitcoin");
     expect(cbCounter).toBe(2);
     await cancelWatchFn();
   });

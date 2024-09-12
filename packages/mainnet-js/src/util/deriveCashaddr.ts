@@ -9,6 +9,7 @@ import {
   decodeCashAddress,
   cashAddressTypeBitsToType,
   decodeCashAddressVersionByte,
+  assertSuccess,
 } from "@bitauth/libauth";
 
 import { hash160 } from "./hash160.js";
@@ -31,7 +32,11 @@ export function deriveCashaddr(
     throw new Error(publicKey);
   }
   let pkh = hash160(publicKey);
-  return encodeCashAddress(networkPrefix, CashAddressType.p2pkh, pkh);
+  return encodeCashAddress({
+    prefix: networkPrefix,
+    type: CashAddressType.p2pkh,
+    payload: pkh,
+  }).address;
 }
 
 export function deriveTokenaddr(
@@ -63,11 +68,11 @@ export function deriveTokenaddr(
     throw new Error("Unsupported type of key");
   }
 
-  return encodeCashAddress(
-    networkPrefix,
-    CashAddressType.p2pkhWithTokens,
-    publicKeyHash
-  );
+  return encodeCashAddress({
+    prefix: networkPrefix,
+    type: CashAddressType.p2pkhWithTokens,
+    payload: publicKeyHash,
+  }).address;
 }
 
 export function toCashaddr(tokenaddr: string): string {
@@ -87,11 +92,11 @@ export function toCashaddr(tokenaddr: string): string {
 
   if (typeof result === "string") throw new Error(result);
 
-  return encodeCashAddress(
-    result.prefix as CashAddressNetworkPrefix,
-    CashAddressType.p2pkh,
-    result.payload
-  );
+  return encodeCashAddress({
+    prefix: result.prefix as CashAddressNetworkPrefix,
+    type: CashAddressType.p2pkh,
+    payload: result.payload,
+  }).address;
 }
 
 export function toTokenaddr(cashaddr: string): string {
@@ -111,11 +116,11 @@ export function toTokenaddr(cashaddr: string): string {
 
   if (typeof result === "string") throw new Error(result);
 
-  return encodeCashAddress(
-    result.prefix as CashAddressNetworkPrefix,
-    CashAddressType.p2pkhWithTokens,
-    result.payload
-  );
+  return encodeCashAddress({
+    prefix: result.prefix as CashAddressNetworkPrefix,
+    type: CashAddressType.p2pkhWithTokens,
+    payload: result.payload,
+  }).address;
 }
 
 export function isTokenaddr(address: string): boolean {

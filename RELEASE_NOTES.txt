@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+2.5.0
+
+* Minor Breaking: upgrade dependencies
+* Upgrade libauth to v3
+* Upgrade cashscript to 0.10.0, remove libauth template generation
+* Upgrade typescript
+* Update HD key derivation implementation
+* Remove 'meep' debug command from Contract class
+
 2.4.3
 
 * Remove coingecko price lookups. The service now requires the paid subscription and browser console is plagued with errors upon price lookups.

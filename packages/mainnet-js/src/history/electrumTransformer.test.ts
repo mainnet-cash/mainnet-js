@@ -243,7 +243,7 @@ test("Should cut results with a longer history to given count", async () => {
 });
 
 // This class transforms outputs from electrum to a standard array of history.
-test("Should handel input and fee from many utxos", async () => {
+test("Should handle input and fee from many utxos", async () => {
   // Build Alice's wallet from Wallet Import Format string
   if (!process.env.PRIVATE_WIF) {
     throw Error("Attempted to pass an empty WIF");

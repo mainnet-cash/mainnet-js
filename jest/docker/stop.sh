@@ -1,1 +1,1 @@
-docker-compose -f jest/regtest-docker-compose.yml down -v
+docker compose -f jest/regtest-docker-compose.yml down -v

@@ -2,6 +2,7 @@ import * as mainnet from "mainnet-js";
 import { Webhook } from "@mainnet-cash/postgresql-storage";
 import server from "../";
 import request from "supertest";
+import { checkResponse } from "../utils/testUtils";
 
 var app;
 
@@ -37,7 +38,7 @@ describe("Test Webhook Endpoints", () => {
       console.log(resp.error.text);
     }
 
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body!.id).toBeGreaterThan(0);
 
     await request(app)
@@ -70,7 +71,7 @@ describe("Test Webhook Endpoints", () => {
     if (resp.error) {
       console.log(resp.error.text);
     }
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body!.id).toBeGreaterThan(0);
 
     await request(app)

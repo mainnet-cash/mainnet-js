@@ -38,11 +38,7 @@ const contractFn = ({ contractFnRequest }) => new Promise(
       const resp = await contract.runFunctionFromStrings(contractFnRequest)
       const marshaledResponse = {contractId: contractFnRequest.contractId}
       if(typeof resp === 'string' || resp instanceof String){
-        if(contractFnRequest.action === "meep"){
-          marshaledResponse.debug = resp
-        }else{
-          marshaledResponse.hex = resp
-        }
+        marshaledResponse.hex = resp
       }else{
         marshaledResponse.txid = resp.txid
         marshaledResponse.hex = resp.hex
