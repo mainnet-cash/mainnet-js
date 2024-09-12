@@ -135,13 +135,19 @@ export class Util {
           n: index,
           scriptPubKey: {
             addresses: [
-              isPayToPublicKey(output.lockingBytecode) ? publicKeyToP2pkhCashAddress({
-                publicKey: lockingBytecodeToAddressContents(output.lockingBytecode).payload,
-                prefix: this.wallet.networkPrefix,
-              }) : assertSuccess(lockingBytecodeToCashAddress({
-                bytecode: output.lockingBytecode,
-                prefix: this.wallet.networkPrefix,
-              })).address,
+              isPayToPublicKey(output.lockingBytecode)
+                ? publicKeyToP2pkhCashAddress({
+                    publicKey: lockingBytecodeToAddressContents(
+                      output.lockingBytecode
+                    ).payload,
+                    prefix: this.wallet.networkPrefix,
+                  })
+                : assertSuccess(
+                    lockingBytecodeToCashAddress({
+                      bytecode: output.lockingBytecode,
+                      prefix: this.wallet.networkPrefix,
+                    })
+                  ).address,
             ],
             hex: binToHex(output.lockingBytecode),
           } as ElectrumRawTransactionVoutScriptPubKey,

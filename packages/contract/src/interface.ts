@@ -1,4 +1,7 @@
-import { FunctionArgument, Recipient as CashscriptRecipientI } from "cashscript";
+import {
+  FunctionArgument,
+  Recipient as CashscriptRecipientI,
+} from "cashscript";
 import { SendRequest, TokenSendRequest } from "mainnet-js";
 
 export interface ContractI {

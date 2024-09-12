@@ -1115,7 +1115,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       const toCashAddress = (bytecode) => {
         const cashaddr = lockingBytecodeToCashAddress({
           bytecode: bytecode,
-          prefix: "bchreg"
+          prefix: "bchreg",
         });
         if (typeof cashaddr === "string") {
           throw Error(cashaddr);

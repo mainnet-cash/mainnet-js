@@ -115,7 +115,8 @@ import { TransactionHistoryItem } from "../history/interface.js";
 
 //#endregion Imports
 
-const placeholderPrivateKey = "0000000000000000000000000000000000000000000000000000000000000001";
+const placeholderPrivateKey =
+  "0000000000000000000000000000000000000000000000000000000000000001";
 
 /**
  * Class to manage a bitcoin cash wallet.
@@ -354,15 +355,11 @@ export class Wallet extends BaseWallet {
     const seed = mnemonicToSeedSync(this.mnemonic!);
     checkForEmptySeed(seed);
     const network = this.isTestnet ? "testnet" : "mainnet";
-    this.parentXPubKey = getXPubKey(
-      seed,
-      this.parentDerivationPath,
-      network
-    );
+    this.parentXPubKey = getXPubKey(seed, this.parentDerivationPath, network);
 
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
-      throwErrors: true
+      throwErrors: true,
     });
 
     const zerothChild = deriveHdPath(hdNode, this.derivationPath);
@@ -472,12 +469,15 @@ export class Wallet extends BaseWallet {
       if (typeof node === "string") {
         throw Error(node);
       }
-      const xPubKey = encodeHdPublicKey({
-        network: this.network as HdKeyNetwork,
-        node: node,
-      }, {
-        throwErrors: true,
-      }).hdPublicKey;
+      const xPubKey = encodeHdPublicKey(
+        {
+          network: this.network as HdKeyNetwork,
+          node: node,
+        },
+        {
+          throwErrors: true,
+        }
+      ).hdPublicKey;
       const key = new XPubKey({
         path: path,
         xPubKey: xPubKey,

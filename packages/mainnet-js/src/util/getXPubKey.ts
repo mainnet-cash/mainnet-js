@@ -26,11 +26,14 @@ export function getXPubKey(
   }
   let parentPublicNode = deriveHdPublicNode(node);
 
-  let xPubKey = encodeHdPublicKey({
-    network: network as HdKeyNetwork,
-    node: parentPublicNode,
-  }, {
-    throwErrors: true,
-  }).hdPublicKey;
+  let xPubKey = encodeHdPublicKey(
+    {
+      network: network as HdKeyNetwork,
+      node: parentPublicNode,
+    },
+    {
+      throwErrors: true,
+    }
+  ).hdPublicKey;
   return xPubKey;
 }

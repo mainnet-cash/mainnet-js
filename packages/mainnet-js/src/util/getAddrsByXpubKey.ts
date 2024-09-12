@@ -38,10 +38,7 @@ export function getAddrsByXpubKeyObject(obj): Array<string> {
   return getAddrsByXpubKey(obj.xpubkey, obj.path, obj.count);
 }
 
-export function derivePublicNodeCashaddr(
-  xpub: string,
-  path?: string
-): string {
+export function derivePublicNodeCashaddr(xpub: string, path?: string): string {
   const publicParent = decodeHdPublicKey(xpub);
 
   if (typeof publicParent === "string") {
@@ -61,7 +58,7 @@ export function derivePublicNodeCashaddr(
       cashaddr = encodeCashAddress({
         prefix,
         type: CashAddressType.p2pkh,
-        payload: childPkh
+        payload: childPkh,
       }).address;
     }
   }
