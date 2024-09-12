@@ -22,7 +22,7 @@
     ],
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**", "src/**/*test.ts", "src/index.web.ts"],
+  "exclude": ["node_modules/**", "src/**/*test.ts"],
   "references": [
     {
       "path": "../mainnet-js/"

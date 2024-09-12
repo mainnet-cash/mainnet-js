@@ -1,6 +1,7 @@
 import server from "../index.js";
 
 import request from "supertest";
+import { checkResponse } from "../utils/testUtils.js";
 
 var app;
 var express;
@@ -35,7 +36,7 @@ describe("Test Mine Endpoints", () => {
       walletId: bobsWalletResp.body.walletId,
     });
 
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.length).toEqual(1);
   });
 });

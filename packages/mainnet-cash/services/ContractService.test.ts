@@ -1,6 +1,7 @@
 import server from "../"
 import { RegTestWallet } from "mainnet-js";
 import request from "supertest";
+import { checkResponse } from "../utils/testUtils";
 
 
 var app;
@@ -40,7 +41,7 @@ describe("Test Contract Services", () => {
       network: 'regtest'
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -66,7 +67,7 @@ describe("Test Contract Services", () => {
       contractId: contractId,
     });
 
-    expect(utxoResp.statusCode).toEqual(200);
+    checkResponse(utxoResp);
     expect(utxoResp.body[0].satoshis).toEqual(21000);
 
     let respSpend = await request(app).post("/contract/call").send({
@@ -81,7 +82,7 @@ describe("Test Contract Services", () => {
     }
     );
 
-    expect(respSpend.statusCode).toEqual(200);
+    checkResponse(respSpend);
     expect(respSpend.body.txid.length).toEqual(64);
     expect(respSpend.body.hex.length).toBe(604);
   });
@@ -114,7 +115,7 @@ describe("Test Contract Services", () => {
       network: 'regtest'
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -192,26 +193,11 @@ describe("Test Contract Services", () => {
       }],
     }
     );
-    expect(hexOnly.statusCode).toEqual(200);
-    expect(hexOnlyAlt.statusCode).toEqual(200);
-    expect(hexOnlyAlt2.statusCode).toEqual(200);
-    expect(hexOnlyAlt3.statusCode).toEqual(200);
+    checkResponse(hexOnly);
+    checkResponse(hexOnlyAlt);
+    checkResponse(hexOnlyAlt2);
+    checkResponse(hexOnlyAlt3);
     expect(hexOnly.body.hex).toMatch(/[0-f]{604}/);
-
-    let debug = await request(app).post("/contract/call").send({
-      contractId: contractId,
-      action: "meep",
-      function: "timeout",
-      arguments: [sender.getPublicKeyCompressed(true), sender.toString()],
-      to: {
-        to: sender.getDepositAddress(),
-        amount: 17000,
-      },
-    }
-    );
-
-    expect(debug.statusCode).toEqual(200);
-    expect(debug.body.debug).toMatch(/meep debug --tx*/);
   });
 
 /**
@@ -241,14 +227,14 @@ describe("Test Contract Services", () => {
       network: 'regtest'
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
     const contractInfoResp = await request(app).post("/contract/info").send({
       contractId: contractResp.body.contractId
     });
-    expect(contractInfoResp.statusCode).toEqual(200);
+    checkResponse(contractInfoResp);
     expect(contractInfoResp.body.contractId).toBe(contractResp.body.contractId);
     expect(contractInfoResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
     expect(contractInfoResp.body.script).toBe(script);
@@ -282,7 +268,7 @@ describe("Test Contract Services", () => {
       network: 'regtest'
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.contractId).toMatch(/contract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -316,7 +302,7 @@ describe("Test Contract Services", () => {
     );
 
     expect(failure.statusCode).toEqual(500);
-    expect(failure.body.message).toMatch(/Transaction failed with reason: the transaction was rejected by network rules*/);
+    expect(failure.body.message).toMatch(/Require statement failed at input/);
   });
 
 });

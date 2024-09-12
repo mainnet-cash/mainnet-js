@@ -1,6 +1,7 @@
 var request = require("supertest");
 const { spawn } = require("child_process");
 var readline = require('readline');
+const { checkResponse } = require("./utils/testUtils");
 
 async function healthCheck() {
   let timeout, interval;
@@ -157,7 +158,7 @@ describe("Test express server", () => {
         to: "usd"
       });
 
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(Number(resp.text)).toBeGreaterThan(1);
 
     await server.close();
@@ -177,7 +178,7 @@ describe("Test express server", () => {
         from: "bch",
         to: "usd"
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(Number(resp.text)).toBeGreaterThan(1);
 
     await server.close();

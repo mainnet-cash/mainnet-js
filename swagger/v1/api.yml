@@ -1859,12 +1859,10 @@ components:
           description: >-
             In addition to `send`ing the built transaction, the built
             transaction hex may be returned (without broadcasting) with `build`
-            action, or the [`meep 🔗`](https://github.com/gcash/meep) debugger
-            command.
+            action.
           enum:
             - build
             - send
-            - meep
           example: send
           default: send
           type: string
@@ -1963,16 +1961,6 @@ components:
           type: string
           example: 0200000001f6d804c0a2f33936dd8b535d1... bdf0e43b30135be5251
           description: The transaction as bitcoin encoded hex.
-        debug:
-          description: >-
-            if a debugger action is passed in the request, the result will
-            return here.
-          example: >
-            meep debug
-            --tx=0200000001b3f2d1ce4951d104e8244310943c49cd8ea59b437fa5b794197fcffc32cfc28900000000b941b0e8a077ea6d70c757487a14c175c9ed21a5f4f54d0477578ac3bc89da86cbb5567f62eb9b46c49c328f02165a54a577cc4228fd2dd5a5497fc25a638f0205b1412103410ef048b3da351793f6ed14cc2fde460becc5b658d9138443b9a3000707a6a7514c5202d70014a72d8e8dc9ca261e8ffafba96514ee92b0c2bf271456b6b22042b90dd67bf2fbfb9aff7d37fbee11245379009c63557a5579ad547aa97b8777777767537a519d547a5479ad537aa9887cb16d5168feffffff0268420000000000001976a91456b6b22042b90dd67bf2fbfb9aff7d37fbee112488ac720e00000000000017a914d411d850ed6395e6e72a5e0497a54ab99a75b84387d7000000
-            --idx=0 --amt=21000
-            --pkscript=a914d411d850ed6395e6e72a5e0497a54ab99a75b84387
-          type: string
     Error:
       properties:
         message:
@@ -2101,12 +2089,10 @@ components:
           description: >-
             In addition to `send`ing the built transaction, the built
             transaction hex may be returned (without broadcasting) with `build`
-            action, or the [`meep 🔗`](https://github.com/gcash/meep) debugger
-            command
+            action.
           enum:
             - build
             - send
-            - meep
         utxoIds:
           type: array
           items:

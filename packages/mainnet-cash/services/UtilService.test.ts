@@ -2,6 +2,7 @@ import * as mainnet from "mainnet-js";
 import { setupFetchMock } from "mainnet-js";
 import server from "../";
 import request from "supertest";
+import { checkResponse } from "../utils/testUtils";
 var app;
 
 describe("Test Util Endpoints", () => {
@@ -26,7 +27,7 @@ describe("Test Util Endpoints", () => {
       from: "bch",
       to: "usd",
     });
-    expect(convertResp.statusCode).toEqual(200);
+    checkResponse(convertResp);
     expect(convertResp.text).toEqual(rate.toString());
   });
 
@@ -37,7 +38,7 @@ describe("Test Util Endpoints", () => {
       path: "0/0",
       count: 3
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body).toStrictEqual([
       "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59",
       "bitcoincash:qp4wzvqu73x22ft4r5tk8tz0aufdz9fescwtpcmhc7",
@@ -51,7 +52,7 @@ describe("Test Util Endpoints", () => {
     const resp = await request(app).post("/util/get_xpubkey_info").send({
         xpubkey: "xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj"
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body).toStrictEqual({
       "chain": "3da4bc190a2680111d31fadfdc905f2a7f6ce77c6f109919116f253d43445219",
       "childNumber": 2147483648,

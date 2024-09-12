@@ -44,7 +44,7 @@ export interface ContractInfoResponseI {
 export interface CashscriptTransactionI {
   arguments: FunctionArgument[];
   function: string;
-  action: "getBitauthUri" | "buildTemplate" | "send" | "build" | "meep";
+  action: "send" | "build";
   to:
     | SendRequest
     | SendRequest[]

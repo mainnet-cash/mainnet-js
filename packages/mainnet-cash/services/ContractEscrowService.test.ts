@@ -1,6 +1,7 @@
 import server from "../"
 import { RegTestWallet, toUtxoId } from "mainnet-js";
 import request from "supertest";
+import { checkResponse } from "../utils/testUtils";
 
 
 var app;
@@ -30,7 +31,7 @@ describe("Test Escrow Contract Services", () => {
       amount: 16000
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -58,7 +59,7 @@ describe("Test Escrow Contract Services", () => {
       to: seller.getDepositAddress()
     });
 
-    expect(respSpend.statusCode).toEqual(200);
+    checkResponse(respSpend);
     expect(respSpend.body.txId.length).toEqual(64);
     expect(respSpend.body.hex.length).toBeGreaterThan(700);
 
@@ -68,7 +69,7 @@ describe("Test Escrow Contract Services", () => {
         walletId: `watch:regtest:${seller.getDepositAddress()}`,
       });
 
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.sat).toBeGreaterThan(16700);
   });
 
@@ -89,7 +90,7 @@ describe("Test Escrow Contract Services", () => {
       amount: 16000
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -118,7 +119,7 @@ describe("Test Escrow Contract Services", () => {
       to: seller.getDepositAddress()
     });
 
-    expect(respHex.statusCode).toEqual(200);
+    checkResponse(respHex);
     expect(respHex.body.hex).toMatch(/020000000[0-9a-f]+/);
 
     const resp = await request(app)
@@ -126,7 +127,7 @@ describe("Test Escrow Contract Services", () => {
       .send({
         walletId: `watch:regtest:${contractAddress}`,
       });
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.sat).toBeGreaterThan(16700);
   });
 
@@ -145,7 +146,7 @@ describe("Test Escrow Contract Services", () => {
       sellerAddr: seller.getDepositAddress(),
       amount: 16000
     });
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -169,7 +170,7 @@ describe("Test Escrow Contract Services", () => {
     const utxoResp = await request(app).post("/contract/escrow/utxos").send({
       escrowContractId: escrowContractId,
     });
-    expect(utxoResp.statusCode).toEqual(200);
+    checkResponse(utxoResp);
     expect(utxoResp.body[0].txid.length).toEqual(64);
   });
 
@@ -189,7 +190,7 @@ describe("Test Escrow Contract Services", () => {
       amount: 16000
     });
 
-    expect(contractResp.statusCode).toEqual(200);
+    checkResponse(contractResp);
     expect(contractResp.body.escrowContractId).toMatch(/escrowContract:regtest:\w+/);
     expect(contractResp.body.cashaddr).toMatch(/bchreg:[p|q]/);
 
@@ -218,7 +219,7 @@ describe("Test Escrow Contract Services", () => {
       escrowContractId: escrowContractId,
     });
 
-    expect(utxoResp.statusCode).toEqual(200);
+    checkResponse(utxoResp);
     expect(utxoResp.body[0].satoshis).toEqual(21000);
     expect(utxoResp.body[1].satoshis).toEqual(21001);
 
@@ -232,7 +233,7 @@ describe("Test Escrow Contract Services", () => {
       utxoIds: utxos
     });
 
-    expect(respSpend.statusCode).toEqual(200);
+    checkResponse(respSpend);
     expect(respSpend.body.txId.length).toEqual(64);
     expect(respSpend.body.hex.length).toBeGreaterThan(700);
 
@@ -242,13 +243,13 @@ describe("Test Escrow Contract Services", () => {
         walletId: `watch:regtest:${seller.getDepositAddress()}`,
       });
 
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.sat).toBeGreaterThan(16700);
     const utxo2Resp = await request(app).post("/contract/escrow/utxos").send({
       escrowContractId: escrowContractId,
     });
 
-    expect(utxo2Resp.statusCode).toEqual(200);
+    checkResponse(utxo2Resp);
     expect(utxo2Resp.body.length).toEqual(1);
   });
 });

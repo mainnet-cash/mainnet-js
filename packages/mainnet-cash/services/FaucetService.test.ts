@@ -3,6 +3,7 @@ import server from "..";
 import request from "supertest";
 import * as mainnet from "mainnet-js";
 import config  from '../config';
+import { checkResponse } from "../utils/testUtils";
 
 var app;
 
@@ -26,7 +27,7 @@ describe("Test faucet endpoints", () => {
     });
 
     if (resp.statusCode !== 200) console.log(resp.body);
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.txId.length).toBe(64);
 
     const balance = await bobwallet.getBalance("sat");
@@ -46,7 +47,7 @@ describe("Test faucet endpoints", () => {
     });
 
     if (resp.statusCode !== 200) console.log(resp.body);
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.txId.length).toBe(64);
 
     resp = await request(app).post("/faucet/get_testnet_bch/").send({
@@ -74,7 +75,7 @@ describe("Test faucet endpoints", () => {
   it("Should get faucet addresses", async () => {
     let resp = await request(app).post("/faucet/get_addresses/").send({});
 
-    expect(resp.statusCode).toEqual(200);
+    checkResponse(resp);
     expect(resp.body.bchtest).toBe(config.FAUCET_CASHADDR);
   });
 });
