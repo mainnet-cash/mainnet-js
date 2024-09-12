@@ -40,7 +40,7 @@ export class EscrowContract extends Contract {
     const addressArgs = [sellerAddr, buyerAddr, arbiterAddr];
 
     // Derive the network from addresses given or throw error if not on same network
-    const network = Mainnet.derivedNetwork(Object.values(addressArgs));
+    const network = Mainnet.derivedNetwork(Object.values(addressArgs)) as Network;
     const tmpNonce = nonce ? nonce : Mainnet.getWeakRandomInt(2147483647);
     // Transform the arguments given to Public Key Hashes
     const rawContractArgs = addressArgs.map((x) => {

@@ -138,10 +138,10 @@ export const getAddressHistory = async ({
       const cached = addressCache[prevoutOutput.lockingBytecode as any];
       let address: string;
       if (!cached) {
-        address = lockingBytecodeToCashAddress(
-          prevoutOutput.lockingBytecode,
-          decoded.prefix as CashAddressNetworkPrefix
-        ) as string;
+        address = lockingBytecodeToCashAddress({
+          bytecode: prevoutOutput.lockingBytecode,
+          prefix: decoded.prefix as CashAddressNetworkPrefix,
+        }) as string;
         addressCache[prevoutOutput.lockingBytecode as any] = address;
       } else {
         address = cached;
@@ -174,10 +174,10 @@ export const getAddressHistory = async ({
         if (output.valueSatoshis === 0n) {
           address = `OP_RETURN: ${binToHex(output.lockingBytecode)}`;
         } else {
-          address = lockingBytecodeToCashAddress(
-            output.lockingBytecode,
-            decoded.prefix as CashAddressNetworkPrefix
-          ) as string;
+          address = lockingBytecodeToCashAddress({
+            bytecode: output.lockingBytecode,
+            prefix: decoded.prefix as CashAddressNetworkPrefix,
+          }) as string;
           addressCache[output.lockingBytecode as any] = address;
         }
       } else {

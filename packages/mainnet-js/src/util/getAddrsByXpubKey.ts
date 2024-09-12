@@ -6,6 +6,7 @@ import {
   binToHex,
   CashAddressNetworkPrefix,
   CashAddressType,
+  assertSuccess,
 } from "@bitauth/libauth";
 
 import { hash160 } from "./hash160.js";
@@ -47,11 +48,11 @@ export function derivePublicNodeCashaddr(
   if (typeof publicParent === "string") {
     throw new Error(publicParent);
   }
-  let prefix = (
+  const prefix = (
     publicParent.network === "mainnet" ? "bitcoincash" : "bchtest"
   ) as CashAddressNetworkPrefix;
 
-  let node = deriveHdPublicNodeChild(publicParent.node, index);
+  const node = deriveHdPublicNodeChild(publicParent.node, index);
   if (typeof node === "string") {
     throw new Error(node);
   }
@@ -61,12 +62,16 @@ export function derivePublicNodeCashaddr(
     if (path[0] !== "M") {
       throw Error("use M for public path derivation");
     }
-    let childNode = deriveHdPath(publicParent.node, path);
+    const childNode = deriveHdPath(publicParent.node, path);
     if (typeof childNode === "string") {
       throw new Error(childNode);
     } else {
-      let childPkh = hash160(childNode.publicKey);
-      cashaddr = encodeCashAddress(prefix, CashAddressType.p2pkh, childPkh);
+      const childPkh = hash160(childNode.publicKey);
+      cashaddr = encodeCashAddress({
+        prefix,
+        type: CashAddressType.p2pkh,
+        payload: childPkh
+      }).address;
     }
   }
   return cashaddr;

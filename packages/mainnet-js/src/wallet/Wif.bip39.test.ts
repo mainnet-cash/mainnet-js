@@ -1,6 +1,6 @@
 import { mnemonicToSeedSync } from "@scure/bip39";
 import { hexToBin } from "@bitauth/libauth";
-import { RegTestWallet } from "./Wif";
+import { RegTestWallet, Wallet } from "./Wif";
 
 describe(`Test bip39 edge cases`, () => {
   test("Should match match the abandon seed", async () => {

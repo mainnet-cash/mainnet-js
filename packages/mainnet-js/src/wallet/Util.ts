@@ -15,6 +15,7 @@ import {
   hexToBin,
   lockingBytecodeToCashAddress,
   Transaction as LibAuthTransaction,
+  assertSuccess,
 } from "@bitauth/libauth";
 import {
   ElectrumRawTransaction,
@@ -131,10 +132,10 @@ export class Util {
           n: index,
           scriptPubKey: {
             addresses: [
-              lockingBytecodeToCashAddress(
-                output.lockingBytecode,
-                this.wallet.networkPrefix
-              ).toString(),
+              assertSuccess(lockingBytecodeToCashAddress({
+                bytecode: output.lockingBytecode,
+                prefix: this.wallet.networkPrefix,
+              })).address,
             ],
             hex: binToHex(output.lockingBytecode),
           } as ElectrumRawTransactionVoutScriptPubKey,

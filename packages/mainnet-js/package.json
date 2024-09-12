@@ -33,12 +33,12 @@
     "build:production": "yarn clean && yarn build:module && NODE_ENV=production yarn build:browser",
     "demo": "npx reload --dir=demo/",
     "publish:public": "yarn publish --access public",
-    "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand  --config jest.config.cjs  --logHeapUsage  --forceExit",
+    "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand  --config ../../jest.config.cjs  --logHeapUsage  --forceExit",
     "test:browser": "PW_EXPERIMENTAL_TS_ESM=1 NODE_OPTIONS=\"--experimental-vm-modules\" node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand --config jest.config.browser.cjs --detectOpenHandles",
     "reload": "npx reload --dir=../../jest/playwright "
   },
   "dependencies": {
-    "@bitauth/libauth": "^2.0.0",
+    "@bitauth/libauth": "^3.0.0",
     "@scure/bip39": "^1.2.2",
     "buffer": "^6.0.3",
     "electrum-cash": "^2.0.10",

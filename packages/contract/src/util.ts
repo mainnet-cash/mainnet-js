@@ -9,7 +9,7 @@ import {
 } from "mainnet-js";
 
 import {
-  Argument,
+  FunctionArgument,
   Artifact,
   Recipient as CashscriptReceipt,
   SignatureTemplate,
@@ -65,7 +65,7 @@ export function castConstructorParametersFromArtifact(
  * @returns A list of arguments
  */
 export async function castStringArgumentsFromArtifact(
-  args: Argument[],
+  args: FunctionArgument[],
   artifact: Artifact,
   funcName: string
 ) {

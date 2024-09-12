@@ -1,4 +1,4 @@
-import { Argument, Recipient as CashscriptRecipientI } from "cashscript";
+import { FunctionArgument, Recipient as CashscriptRecipientI } from "cashscript";
 import { SendRequest, TokenSendRequest } from "mainnet-js";
 
 export interface ContractI {
@@ -42,7 +42,7 @@ export interface ContractInfoResponseI {
 }
 
 export interface CashscriptTransactionI {
-  arguments: Argument[];
+  arguments: FunctionArgument[];
   function: string;
   action: "getBitauthUri" | "buildTemplate" | "send" | "build" | "meep";
   to:

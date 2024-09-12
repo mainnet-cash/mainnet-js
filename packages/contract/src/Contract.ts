@@ -1,8 +1,8 @@
 import { binToHex } from "@bitauth/libauth";
 import {
-  Argument,
   Artifact,
   Contract as CashScriptContract,
+  ConstructorArgument,
   ContractFunction,
   NetworkProvider,
   SignatureTemplate,
@@ -30,14 +30,13 @@ import {
   transformContractToRequests,
 } from "./util.js";
 import WrappedProvider, { toCashScript, toMainnet } from "./WrappedProvider.js";
-import { buildTemplate, getBitauthUri } from "./template.js";
 
 /**
  * Class that manages the Contract source, network, parameters, CashScript artifact and calls
  */
 export class Contract implements ContractI {
   private script: string;
-  public parameters: Argument[];
+  public parameters: ConstructorArgument[];
   public artifact: Artifact;
   private contract: CashScriptContract;
   private provider: NetworkProvider;
@@ -286,7 +285,7 @@ export class Contract implements ContractI {
    */
   public static fromCashScript(
     script: string,
-    parameters: Argument[],
+    parameters: ConstructorArgument[],
     network: Network,
     nonce: number
   ) {
@@ -348,19 +347,6 @@ export class Contract implements ContractI {
     if (request.time) {
       func = func.withTime(request.time);
     }
-
-    if (request.action === "getBitauthUri") {
-      return getBitauthUri(
-        await buildTemplate({
-          contract: this,
-          transaction: func,
-          manglePrivateKeys: false,
-        })
-      );
-    } else if (request.action === "buildTemplate") {
-      return await buildTemplate({ contract: this, transaction: func });
-    }
-
     return await func[request.action]();
   }
 

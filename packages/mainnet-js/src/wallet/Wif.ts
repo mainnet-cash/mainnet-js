@@ -348,21 +348,21 @@ export class Wallet extends BaseWallet {
     this.mnemonic = generateMnemonic(Config.getWordlist());
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    let seed = mnemonicToSeedSync(this.mnemonic!);
+    const seed = mnemonicToSeedSync(this.mnemonic!);
     checkForEmptySeed(seed);
-    let network = this.isTestnet ? "testnet" : "mainnet";
-    this.parentXPubKey = await getXPubKey(
+    const network = this.isTestnet ? "testnet" : "mainnet";
+    this.parentXPubKey = getXPubKey(
       seed,
       this.parentDerivationPath,
       network
     );
 
-    let hdNode = deriveHdPrivateNodeFromSeed(seed);
-    if (!hdNode.valid) {
-      throw Error("Invalid private key derived from mnemonic seed");
-    }
+    const hdNode = deriveHdPrivateNodeFromSeed(seed, {
+      assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
+      throwErrors: true
+    });
 
-    let zerothChild = deriveHdPath(hdNode, this.derivationPath);
+    const zerothChild = deriveHdPath(hdNode, this.derivationPath);
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
@@ -373,7 +373,7 @@ export class Wallet extends BaseWallet {
   }
 
   protected fromId = async (walletId: string): Promise<this> => {
-    let [walletType, networkGiven, arg1]: string[] = walletId.split(":");
+    const [walletType, networkGiven, arg1]: string[] = walletId.split(":");
 
     if (this.network != networkGiven) {
       throw Error(`Network prefix ${networkGiven} to a ${this.network} wallet`);
@@ -408,29 +408,29 @@ export class Wallet extends BaseWallet {
 
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    let seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
-    let hdNode = deriveHdPrivateNodeFromSeed(seed);
-    if (!hdNode.valid) {
-      throw Error("Invalid private key derived from mnemonic seed");
-    }
+    const hdNode = deriveHdPrivateNodeFromSeed(seed, {
+      assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
+      throwErrors: true,
+    });
     if (derivationPath) {
       this.derivationPath = derivationPath;
 
       // If the derivation path is for the first account child, set the parent derivation path
-      let path = derivationPath.split("/");
+      const path = derivationPath.split("/");
       if (path.slice(-2).join("/") == "0/0") {
         this.parentDerivationPath = path.slice(0, -2).join("/");
       }
     }
 
-    let zerothChild = deriveHdPath(hdNode, this.derivationPath);
+    const zerothChild = deriveHdPath(hdNode, this.derivationPath);
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
     this.privateKey = zerothChild.privateKey;
 
-    let network = this.isTestnet ? "testnet" : "mainnet";
+    const network = this.isTestnet ? "testnet" : "mainnet";
     this.parentXPubKey = await getXPubKey(
       seed,
       this.parentDerivationPath,
@@ -446,14 +446,14 @@ export class Wallet extends BaseWallet {
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
     if (!this.mnemonic)
       throw Error("refusing to create wallet from empty mnemonic");
-    let seed = mnemonicToSeedSync(this.mnemonic!);
+    const seed = mnemonicToSeedSync(this.mnemonic!);
     checkForEmptySeed(seed);
-    let hdNode = deriveHdPrivateNodeFromSeed(seed);
-    if (!hdNode.valid) {
-      throw Error("Invalid private key derived from mnemonic seed");
-    }
+    const hdNode = deriveHdPrivateNodeFromSeed(seed, {
+      assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
+      throwErrors: true,
+    });
 
-    let result: any[] = [];
+    const result: any[] = [];
 
     for (const path of hdPaths) {
       if (path === "m") {
@@ -461,19 +461,21 @@ export class Wallet extends BaseWallet {
           "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
         );
       }
-      let childNode = deriveHdPath(hdNode, path);
+      const childNode = deriveHdPath(hdNode, path);
       if (typeof childNode === "string") {
         throw Error(childNode);
       }
-      let node = deriveHdPublicNode(childNode);
+      const node = deriveHdPublicNode(childNode);
       if (typeof node === "string") {
         throw Error(node);
       }
-      let xPubKey = encodeHdPublicKey({
+      const xPubKey = encodeHdPublicKey({
         network: this.network as HdKeyNetwork,
         node: node,
-      });
-      let key = new XPubKey({
+      }, {
+        throwErrors: true,
+      }).hdPublicKey;
+      const key = new XPubKey({
         path: path,
         xPubKey: xPubKey,
       });
@@ -488,7 +490,7 @@ export class Wallet extends BaseWallet {
   // Initialize a watch only wallet from a cash addr
   protected async watchOnly(address: string): Promise<this> {
     this.walletType = WalletTypeEnum.Watch;
-    let addressComponents = address.split(":");
+    const addressComponents = address.split(":");
     let addressPrefix, addressBase;
     if (addressComponents.length === 1) {
       addressBase = addressComponents.shift() as string;
@@ -499,7 +501,7 @@ export class Wallet extends BaseWallet {
       if (addressPrefix in networkPrefixMap) {
         if (networkPrefixMap[addressPrefix] != this.network) {
           throw Error(
-            `a ${addressPrefix} address cannot be watched from a ${this.network} Wallet`
+            `a ${addressPrefix} address cannot be watched from a ${this.network} Walconst`
           );
         }
       }
@@ -508,7 +510,7 @@ export class Wallet extends BaseWallet {
     const prefixedAddress = `${addressPrefix}:${addressBase}`;
 
     // check if a token aware address was provided
-    let addressData = decodeCashAddress(prefixedAddress);
+    const addressData = decodeCashAddress(prefixedAddress);
     if (typeof addressData === "string") throw addressData;
 
     this.publicKeyHash = addressData.payload;
@@ -521,11 +523,11 @@ export class Wallet extends BaseWallet {
     if (nonTokenAwareType == CashAddressType.p2pkh)
       this.publicKeyHash = addressData.payload;
 
-    this.cashaddr = encodeCashAddress(
-      addressData.prefix as CashAddressNetworkPrefix,
-      nonTokenAwareType,
-      addressData.payload
-    );
+    this.cashaddr = encodeCashAddress({
+      prefix: addressData.prefix as CashAddressNetworkPrefix,
+      type: nonTokenAwareType,
+      payload: addressData.payload,
+    }).address;
     this.address = this.cashaddr;
     this.tokenaddr = deriveTokenaddr(addressData.payload, this.networkPrefix);
 
