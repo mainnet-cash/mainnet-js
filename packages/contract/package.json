@@ -15,12 +15,9 @@
     "cashc": "^0.10.0",
     "cashscript": "^0.10.0",
     "mainnet-js": "2.4.3",
-    "pako": "^2.1.0",
     "util": "^0.12.5"
   },
-  "devDependencies": {
-    "@types/pako": "^2.0.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "prebuild": "yarn install",
     "build": "yarn build:module && yarn build:browser",

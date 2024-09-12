@@ -149,7 +149,6 @@ export class Util {
         };
       }
     );
-    console.log(result.vout);
 
     result.locktime = transaction.locktime;
     result.version = transaction.version;
