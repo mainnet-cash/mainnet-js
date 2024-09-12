@@ -6,6 +6,7 @@ import {
   CashAddressNetworkPrefix,
   decodeCashAddress,
   TransactionCommon,
+  assertSuccess,
 } from "@bitauth/libauth";
 import { UnitEnum } from "../enum.js";
 import NetworkProvider from "../network/NetworkProvider.js";
@@ -138,10 +139,10 @@ export const getAddressHistory = async ({
       const cached = addressCache[prevoutOutput.lockingBytecode as any];
       let address: string;
       if (!cached) {
-        address = lockingBytecodeToCashAddress({
+        address = assertSuccess(lockingBytecodeToCashAddress({
           bytecode: prevoutOutput.lockingBytecode,
           prefix: decoded.prefix as CashAddressNetworkPrefix,
-        }) as string;
+        })).address;
         addressCache[prevoutOutput.lockingBytecode as any] = address;
       } else {
         address = cached;
@@ -174,10 +175,10 @@ export const getAddressHistory = async ({
         if (output.valueSatoshis === 0n) {
           address = `OP_RETURN: ${binToHex(output.lockingBytecode)}`;
         } else {
-          address = lockingBytecodeToCashAddress({
+          address = assertSuccess(lockingBytecodeToCashAddress({
             bytecode: output.lockingBytecode,
             prefix: decoded.prefix as CashAddressNetworkPrefix,
-          }) as string;
+          })).address;
           addressCache[output.lockingBytecode as any] = address;
         }
       } else {

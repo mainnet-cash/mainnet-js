@@ -4,6 +4,7 @@ import {
   decodeCashAddress,
   encodeHdPublicKey,
   HdKeyNetwork,
+  hexToBin,
   secp256k1,
 } from "@bitauth/libauth";
 
@@ -113,6 +114,8 @@ import { checkUtxos } from "../util/checkUtxos.js";
 import { TransactionHistoryItem } from "../history/interface.js";
 
 //#endregion Imports
+
+const placeholderPrivateKey = "0000000000000000000000000000000000000000000000000000000000000001";
 
 /**
  * Class to manage a bitcoin cash wallet.
@@ -882,7 +885,7 @@ export class Wallet extends BaseWallet {
     const fee = await getFeeAmountSimple({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
-      privateKey: this.privateKey ?? Uint8Array.from([]),
+      privateKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
       sourceAddress: this.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       feePaidBy: feePaidBy,
@@ -1198,7 +1201,7 @@ export class Wallet extends BaseWallet {
     const feeEstimate = await getFeeAmountSimple({
       utxos: utxos,
       sendRequests: sendRequests,
-      privateKey: this.privateKey ?? Uint8Array.from([]),
+      privateKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
       sourceAddress: this.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       feePaidBy: feePaidBy,
@@ -1221,7 +1224,7 @@ export class Wallet extends BaseWallet {
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
-      privateKey: this.privateKey ?? Uint8Array.from([]),
+      privateKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
       sourceAddress: this.cashaddr!,
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       feePaidBy: feePaidBy,
@@ -1230,7 +1233,7 @@ export class Wallet extends BaseWallet {
       {
         inputs: fundingUtxos,
         outputs: sendRequests,
-        signingKey: this.privateKey ?? Uint8Array.from([]),
+        signingKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
         sourceAddress: this.cashaddr!,
         fee,
         discardChange,

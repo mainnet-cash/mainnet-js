@@ -16,6 +16,9 @@ import {
   lockingBytecodeToCashAddress,
   Transaction as LibAuthTransaction,
   assertSuccess,
+  isPayToPublicKey,
+  publicKeyToP2pkhCashAddress,
+  lockingBytecodeToAddressContents,
 } from "@bitauth/libauth";
 import {
   ElectrumRawTransaction,
@@ -132,7 +135,10 @@ export class Util {
           n: index,
           scriptPubKey: {
             addresses: [
-              assertSuccess(lockingBytecodeToCashAddress({
+              isPayToPublicKey(output.lockingBytecode) ? publicKeyToP2pkhCashAddress({
+                publicKey: lockingBytecodeToAddressContents(output.lockingBytecode).payload,
+                prefix: this.wallet.networkPrefix,
+              }) : assertSuccess(lockingBytecodeToCashAddress({
                 bytecode: output.lockingBytecode,
                 prefix: this.wallet.networkPrefix,
               })).address,
@@ -143,6 +149,7 @@ export class Util {
         };
       }
     );
+    console.log(result.vout);
 
     result.locktime = transaction.locktime;
     result.version = transaction.version;
