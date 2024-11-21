@@ -25,7 +25,7 @@ import {
 import { mnemonicToSeedSync, generateMnemonic } from "@scure/bip39";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 
-import { Network, HexHeaderI, TxI, NFTCapability } from "../interface.js";
+import { Network, HexHeaderI, TxI, NFTCapability, TokenI } from "../interface.js";
 
 import { networkPrefixMap } from "../enum.js";
 import { PrivateKeyI, UtxoI } from "../interface.js";
@@ -112,6 +112,7 @@ import { ImageI } from "../qr/interface.js";
 import { Config } from "../config.js";
 import { checkUtxos } from "../util/checkUtxos.js";
 import { TransactionHistoryItem } from "../history/interface.js";
+import axios from "axios";
 
 //#endregion Imports
 
@@ -615,18 +616,7 @@ export class Wallet extends BaseWallet {
   //#region Funds
   //
   public async getAddressUtxos(address?: string): Promise<UtxoI[]> {
-    if (!address) {
-      address = this.cashaddr!;
-    }
-
-    if (this._slpSemiAware) {
-      const bchUtxos: UtxoI[] = await this.provider!.getUtxos(address);
-      return bchUtxos.filter(
-        (bchutxo) => bchutxo.satoshis > DUST_UTXO_THRESHOLD
-      );
-    } else {
-      return await this.provider!.getUtxos(address);
-    }
+    return this.getUtxosFromBchd(address ?? this.cashaddr!);
   }
 
   /**
@@ -1275,14 +1265,7 @@ export class Wallet extends BaseWallet {
     transaction: Uint8Array,
     awaitPropagation: boolean = true
   ): Promise<string> {
-    if (!this.provider) {
-      throw Error("Wallet network provider was not initialized");
-    }
-    let rawTransaction = binToHex(transaction);
-    return await this.provider.sendRawTransaction(
-      rawTransaction,
-      awaitPropagation
-    );
+    return this.sendTxBchd(binToHex(transaction));
   }
 
   // gets transaction history of this wallet
@@ -1824,6 +1807,57 @@ export class Wallet extends BaseWallet {
     return result;
   }
   //#endregion Cashtokens
+
+  private async getUtxosFromBchd(address: string): Promise<UtxoI[]> {
+    try {
+      console.log(`Getting utxos from bchd for address: ${address}`);
+      const response = await axios.get(
+        "https://bchd.zapit.io/v1/utxos/" + address
+      );
+      if (!response.data.success) {
+        return [];
+      }
+      let bchUtxos: UtxoI[] = [];
+      let tokenUtxos: UtxoI[] = [];
+      if (response.data.bchUtxos.length) {
+        bchUtxos = response.data.bchUtxos.map((utxo: any) => ({
+          txid: utxo.txid as string,
+          vout: utxo.vout as number,
+          satoshis: utxo.satoshis as number,
+          height: utxo.height as number,
+        } as UtxoI));
+      }
+      if (response.data.tokenUtxos.length) {
+        tokenUtxos = response.data.tokenUtxos.map((utxo: any) => ({
+          txid: utxo.txid as string,
+          vout: utxo.vout as number,
+          satoshis: utxo.satoshis as number,
+          height: utxo.height as number,
+          token: utxo.token
+            ? {
+                amount: BigInt(utxo.token.amount),
+                tokenId: utxo.token.tokenId,
+                capability: utxo.token.capability,
+                commitment: utxo.token.commitment,
+              } as TokenI
+            : undefined,
+        } as UtxoI));
+      }
+      return [...bchUtxos, ...tokenUtxos];
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
+  private async sendTxBchd(hex: string): Promise<string> {
+    console.log(`Sending tx to bchd: ${hex}`);
+    const response = await axios.post(
+      `https://bchd.zapit.io/v1/bch/submit-transaction`,
+      { hex }
+    );
+    return response.data.txid;
+  }
 }
 
 /**
