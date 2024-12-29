@@ -26,7 +26,9 @@ export function asSendRequestObject(
             resp.push(OpReturnData.from(r[1] as string | Uint8Array));
           } else if (r[0] === "OP_RETURNB64") {
             resp.push(
-              OpReturnData.fromUint8Array(Uint8Array.from(base64ToBin(r[1] as string)))
+              OpReturnData.fromUint8Array(
+                Uint8Array.from(base64ToBin(r[1] as string))
+              )
             );
           } else {
             // ['cashaddr', 120, 'sats'],
