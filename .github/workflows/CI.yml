@@ -65,7 +65,6 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: "22.x"
-    - uses: microsoft/playwright-github-action@v1
     - run: yarn
     - run: yarn test:browser
   test_node:
