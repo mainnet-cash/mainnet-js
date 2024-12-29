@@ -1025,7 +1025,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
 
     result = await wallet.send([
       [wallet.cashaddr!, 546, "sats"],
-      ["OP_RETURN", Buffer.from([0x00, 0x01, 0x02])],
+      ["OP_RETURN", Uint8Array.from([0x00, 0x01, 0x02])],
     ]);
     transaction = (await wallet.provider!.getRawTransactionObject(
       result.txId!
@@ -1037,7 +1037,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
 
     result = await wallet.send([
       OpReturnData.from(""),
-      OpReturnData.from(Buffer.from([])),
+      OpReturnData.from(Uint8Array.from([])),
     ]);
     transaction = (await wallet.provider!.getRawTransactionObject(
       result.txId!
