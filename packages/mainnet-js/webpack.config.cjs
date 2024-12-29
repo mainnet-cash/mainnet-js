@@ -74,9 +74,6 @@ const browserConfig = {
       content:
         '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __mainnetPromise))</script>',
     }),
-    new webpack.ProvidePlugin({
-      Buffer: ["buffer", "Buffer"],
-    }),
     new CircularDependencyPlugin({
       include: /src/,
       // exclude detection of files based on a RegExp

@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.6.0
+
+* Minor Breaking: Remove Buffer support. Replace with Uint8Array.
+* Fix playwright CI tests, upgrade dependencies
+
 2.5.0
 
 * Minor Breaking: upgrade dependencies

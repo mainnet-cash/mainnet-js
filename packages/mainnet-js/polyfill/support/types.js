@@ -3,10 +3,6 @@
 
 "use strict";
 
-if (typeof window !== "undefined") {
-  globalThis.Buffer = require("buffer/").Buffer;
-}
-
 var isArgumentsObject = require("is-arguments");
 var isGeneratorFunction = require("is-generator-function");
 var whichTypedArray = require("which-typed-array");

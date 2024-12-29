@@ -22,11 +22,13 @@ export function asSendRequestObject(
         // the SendRequestArray[] case
         if (Array.isArray(r)) {
           if (r[0] === "OP_RETURN") {
-            // ['OP_RETURN', Buffer.new('MEMO\x10')],
-            resp.push(OpReturnData.from(r[1] as string | Buffer));
+            // ['OP_RETURN', utf8ToBin('MEMO\x10')],
+            resp.push(OpReturnData.from(r[1] as string | Uint8Array));
           } else if (r[0] === "OP_RETURNB64") {
             resp.push(
-              OpReturnData.fromBuffer(Buffer.from(base64ToBin(r[1] as string)))
+              OpReturnData.fromUint8Array(
+                Uint8Array.from(base64ToBin(r[1] as string))
+              )
             );
           } else {
             // ['cashaddr', 120, 'sats'],
@@ -59,14 +61,14 @@ function convertToClass(object: SendRequest | TokenSendRequest | OpReturnData) {
   } else if (object.hasOwnProperty("tokenId")) {
     return new TokenSendRequest(object as TokenSendRequest);
   } else if (object.hasOwnProperty("buffer")) {
-    return OpReturnData.fromBuffer((object as OpReturnData).buffer);
+    return OpReturnData.fromUint8Array((object as OpReturnData).buffer);
   }
   // endcoding in REST
   else if (object.hasOwnProperty("dataString")) {
     return OpReturnData.fromString((object as any).dataString);
   } else if (object.hasOwnProperty("dataBuffer")) {
-    return OpReturnData.fromBuffer(
-      Buffer.from(base64ToBin((object as any).dataBuffer))
+    return OpReturnData.fromUint8Array(
+      Uint8Array.from(base64ToBin((object as any).dataBuffer))
     );
   }
 
