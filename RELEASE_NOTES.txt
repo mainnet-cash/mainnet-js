@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.6.0
+
+* Minor Breaking: Remove Buffer support. Replace with Uint8Array.
+
 2.5.0
 
 * Minor Breaking: upgrade dependencies
