@@ -43,7 +43,7 @@
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
     "test:rest": "yarn patch-package && yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",
-    "test:browser": "npx jest --config jest.config.browser.cjs --detectOpenHandles --forceExit",
+    "test:browser": "npx playwright install --with-deps && npx jest --config jest.config.browser.cjs --detectOpenHandles --forceExit",
     "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
     "regtest:up": "./jest/docker/start.sh",
     "regtest:down": "./jest/docker/stop.sh",
