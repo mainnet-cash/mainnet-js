@@ -161,10 +161,10 @@ export class TokenMintRequest {
 }
 
 export class OpReturnData {
-  buffer: Buffer;
+  buffer: Uint8Array;
 
-  public constructor(buffer: Buffer) {
-    this.buffer = Buffer.from(buffer);
+  public constructor(buffer: Uint8Array) {
+    this.buffer = Uint8Array.from(buffer);
   }
 
   /**
@@ -174,7 +174,7 @@ export class OpReturnData {
    *
    * @returns class instance
    */
-  public static from(data: string | Buffer | Uint8Array) {
+  public static from(data: string | Uint8Array) {
     return this.fromArray([data]);
   }
 
@@ -197,49 +197,31 @@ export class OpReturnData {
    *
    * @returns class instance
    */
-  public static fromBuffer(buffer: Buffer) {
-    if (buffer[0] !== 0x6a) {
-      return this.fromArray([buffer]);
-    }
-    return new this(buffer);
-  }
-
-  /**
-   * buffer - Accept OP_RETURN data as a binary buffer.
-   * If buffer lacks the OP_RETURN and OP_PUSHDATA opcodes, they will be prepended.
-   *
-   * @param buffer   Data buffer to be assigned to the OP_RETURN outpit
-   *
-   * @returns class instance
-   */
   public static fromUint8Array(uint8Array: Uint8Array) {
     if (uint8Array[0] !== 0x6a) {
       return this.fromArray([uint8Array]);
     }
-    return new this(Buffer.from(uint8Array));
+    return new this(Uint8Array.from(uint8Array));
   }
 
   /**
    * fromArray - Accept array of data
    *
-   * @param array   Array of Buffer or UTF-8 encoded string messages to be converted to OP_RETURN data
+   * @param array   Array of Uint8Array or UTF-8 encoded string messages to be converted to OP_RETURN data
    *
    * @returns class instance
    */
-  public static fromArray(array: Array<string | Buffer | Uint8Array>) {
-    let data: Buffer = Buffer.from([0x6a]); // OP_RETURN
+  public static fromArray(array: Array<string | Uint8Array>) {
+    let data: Uint8Array = Uint8Array.from([0x6a]); // OP_RETURN
     for (const element of array) {
       let length: number;
-      let elementData: Uint8Array | Buffer;
+      let elementData: Uint8Array;
       let lengthData: any;
       if (typeof element === "string") {
         elementData = utf8ToBin(element);
         length = elementData.length;
-      } else if (element instanceof Buffer) {
-        elementData = element;
-        length = elementData.length;
       } else if (element instanceof Uint8Array) {
-        elementData = Buffer.from(element);
+        elementData = element;
         length = elementData.length;
       } else {
         throw new Error("Wrong data array element");
@@ -255,7 +237,7 @@ export class OpReturnData {
         throw new Error("OP_RETURN data can not exceed 220 bytes in size");
       }
 
-      data = Buffer.from([...data, ...lengthData, ...elementData]);
+      data = Uint8Array.from([...data, ...lengthData, ...elementData]);
     }
 
     if (data.length > 220) {
@@ -312,7 +294,7 @@ export class OpReturnData {
   }
 }
 
-export type SendRequestArray = Array<string | number | UnitEnum | Buffer>;
+export type SendRequestArray = Array<string | number | UnitEnum | Uint8Array>;
 
 export type SourceOutput = Input & Output;
 

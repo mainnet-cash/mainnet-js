@@ -74,9 +74,6 @@ const browserConfig = {
       content:
         '<script>document.addEventListener("DOMContentLoaded", async (event) => Object.assign(globalThis, await __contractPromise))</script>',
     }),
-    new webpack.ProvidePlugin({
-      Buffer: ["buffer", "Buffer"],
-    }),
     new webpack.DefinePlugin({
       "process.env.NODE_DEBUG": JSON.stringify(process.env.NODE_DEBUG),
     }),

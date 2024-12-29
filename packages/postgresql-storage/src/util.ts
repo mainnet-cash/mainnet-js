@@ -1,3 +1,5 @@
+import { base64ToBin, binToUtf8 } from "@bitauth/libauth";
+
 export interface sslConfigI {
   rejectUnauthorized: boolean;
   ca?: string;
@@ -7,13 +9,13 @@ export interface sslConfigI {
 
 export function getSslConfig(): sslConfigI | undefined {
   const ca = process.env.DATABASE_SSL_CA
-    ? Buffer.from(process.env.DATABASE_SSL_CA, "base64").toString("ascii")
+    ? binToUtf8(base64ToBin(process.env.DATABASE_SSL_CA))
     : undefined;
   const key = process.env.DATABASE_SSL_KEY
-    ? Buffer.from(process.env.DATABASE_SSL_KEY, "base64").toString("ascii")
+    ? binToUtf8(base64ToBin(process.env.DATABASE_SSL_KEY))
     : undefined;
   const cert = process.env.DATABASE_SSL_CERT
-    ? Buffer.from(process.env.DATABASE_SSL_CERT, "base64").toString("ascii")
+    ? binToUtf8(base64ToBin(process.env.DATABASE_SSL_CERT))
     : undefined;
   let ssl: sslConfigI = {
     rejectUnauthorized:
