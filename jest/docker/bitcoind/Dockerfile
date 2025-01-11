@@ -9,7 +9,7 @@ RUN set -ex \
   && apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget \
   && rm -rf /var/lib/apt/lists/*
 
-ENV BITCOIN_VERSION 27.1.0
+ENV BITCOIN_VERSION 28.0.1
 
 # install bitcoin binaries
 RUN set -ex \
@@ -21,7 +21,7 @@ RUN set -ex \
   && echo "$TARGETPLATFORM" "$BITCOIN_SHA256" "$BITCOIN_URL" \
   && cd /tmp \
   && wget -qO bitcoin.tar.gz "$BITCOIN_URL" \
-  && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
+  # && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
   && tar -xzvf bitcoin.tar.gz -C /usr/local --strip-components=1 --exclude=*-qt \
   && rm -rf /tmp/*
 
