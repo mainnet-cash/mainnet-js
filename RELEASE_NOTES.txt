@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.6.2
+
+* Fix treatment of OP_RETURNs in `getHistory`
+
 2.6.1
 
 * Update docker images
