@@ -7,6 +7,8 @@ import {
   decodeCashAddress,
   TransactionCommon,
   assertSuccess,
+  OpcodesBCH,
+  Opcodes,
 } from "@bitauth/libauth";
 import { UnitEnum } from "../enum.js";
 import NetworkProvider from "../network/NetworkProvider.js";
@@ -174,7 +176,7 @@ export const getAddressHistory = async ({
       const cached = addressCache[output.lockingBytecode as any];
       let address: string;
       if (!cached) {
-        if (output.valueSatoshis === 0n) {
+        if (output.lockingBytecode[0] === Opcodes.OP_RETURN) {
           address = `OP_RETURN: ${binToHex(output.lockingBytecode)}`;
         } else {
           address = assertSuccess(
