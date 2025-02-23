@@ -3,6 +3,13 @@ Newest changes
 
 2.6.2
 
+* Rework electrum response caching for getTransaction and getHeader
+* Introduce 3 new caching classes - memory, localstorage and indexeddb caches
+* The above are steered by `Config.UseMemoryCache`, `Config.UseLocalStorageCache` and `Config.UseIndexedDBCache` respectively
+* If several of these boolean options are set to true then the cache priority is determined in the following order: memory, localstorage, indexeddb.
+
+2.6.2
+
 * Fix treatment of OP_RETURNs in `getHistory`
 
 2.6.1

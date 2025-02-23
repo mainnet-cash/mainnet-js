@@ -32,7 +32,7 @@ module.exports = {
     ],
   },
   testEnvironment: "node",
-  setupFiles: ["fake-indexeddb/auto"],
+  setupFiles: ["fake-indexeddb/auto", "node-localstorage/register"],
   globalSetup: "<rootDir>/jest/node.setup.cjs",
   globalTeardown: "<rootDir>/jest/node.teardown.cjs",
   verbose: true,
