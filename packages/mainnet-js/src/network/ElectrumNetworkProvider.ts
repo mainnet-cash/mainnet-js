@@ -20,13 +20,42 @@ import { CancelWatchFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
 import { Config } from "../config.js";
 import { decodeHeader } from "../util/header.js";
+import { CacheProvider } from "../cache/interface.js";
+import { IndexedDbCache } from "../cache/IndexedDbCache.js";
+import { WebStorageCache } from "../cache/WebStorageCache.js";
+import { MemoryCache } from "../cache/MemoryCache.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumCluster | ElectrumClient;
   public subscriptions: number = 0;
   public version;
   private connectPromise;
-  private blockHeight = 0;
+
+  private _cache: CacheProvider | undefined;
+
+  get cache(): CacheProvider | undefined {
+    if (!Config.UseMemoryCache && !Config.UseLocalStorageCache && !Config.UseIndexedDBCache) {
+      this._cache = undefined;
+      return this._cache;
+    }
+
+    if (Config.UseMemoryCache && !(this._cache instanceof MemoryCache)) {
+      this._cache = new IndexedDbCache();
+      return this._cache;
+    };
+
+    if (Config.UseLocalStorageCache && !(this._cache instanceof WebStorageCache)) {
+      this._cache = new WebStorageCache();
+      return this._cache;
+    };
+
+    if (Config.UseIndexedDBCache && !(this._cache instanceof IndexedDbCache)) {
+      this._cache = new IndexedDbCache();
+      return this._cache;
+    };
+
+    return this._cache;
+  }
 
   constructor(
     electrum: ElectrumCluster | ElectrumClient,
@@ -112,30 +141,25 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result.confirmed + result.unconfirmed;
   }
 
-  static rawHeaderCache = {};
   async getHeader(
     height: number,
     verbose: boolean = false
   ): Promise<HeaderI | HexHeaderI> {
     const key = `header-${this.network}-${height}-${verbose}`;
 
-    if (Config.UseLocalStorageCache) {
-      const cached = localStorage.getItem(key);
+    if (this.cache) {
+      const cached = await this.cache.getItem(key);
       if (cached) {
         return verbose ? decodeHeader(JSON.parse(cached)) : JSON.parse(cached);
       }
-    } else {
-      ElectrumNetworkProvider.rawTransactionCache[key];
     }
 
     const result = (await this.performRequest(
       "blockchain.header.get",
       height
     )) as HexHeaderI;
-    if (Config.UseLocalStorageCache) {
-      localStorage.setItem(key, JSON.stringify(result));
-    } else {
-      ElectrumNetworkProvider.rawTransactionCache[key] = result;
+    if (this.cache) {
+      await this.cache.setItem(key, JSON.stringify(result));
     }
 
     return verbose ? decodeHeader(result) : result;
@@ -146,7 +170,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       .height;
   }
 
-  static rawTransactionCache = {};
   async getRawTransaction(
     txHash: string,
     verbose: boolean = false,
@@ -154,13 +177,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<string> {
     const key = `tx-${this.network}-${txHash}-${verbose}-${loadInputValues}`;
 
-    if (Config.UseLocalStorageCache) {
-      const cached = localStorage.getItem(key);
+    if (this.cache) {
+      const cached = await this.cache.getItem(key);
       if (cached) {
         return verbose ? JSON.parse(cached) : cached;
       }
-    } else {
-      ElectrumNetworkProvider.rawTransactionCache[key];
     }
 
     try {
@@ -170,15 +191,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         verbose
       )) as ElectrumRawTransaction;
 
-      if (Config.UseLocalStorageCache) {
-        localStorage.setItem(
+      if (this.cache) {
+        await this.cache.setItem(
           key,
           verbose
             ? JSON.stringify(transaction)
             : (transaction as unknown as string)
         );
-      } else {
-        ElectrumNetworkProvider.rawTransactionCache[key] = transaction;
       }
 
       if (verbose && loadInputValues) {
@@ -551,6 +570,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async connect(): Promise<void[]> {
+    await this.cache?.init();
     return await this.connectPromise;
   }
 

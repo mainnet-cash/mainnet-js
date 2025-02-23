@@ -543,18 +543,6 @@ describe(`Watch only Wallets`, () => {
 
     expect(await bobWallet.getLastTransaction()).not.toBeNull();
   });
-
-  test("Should fail localStorage cache", async () => {
-    const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
-    const aliceWallet = await RegTestWallet.fromId(aliceWif);
-
-    expect(await aliceWallet.getLastTransaction()).not.toBeNull();
-    Config.UseLocalStorageCache = true;
-    await expect(aliceWallet.getLastTransaction()).rejects.toThrow(
-      "localStorage is not defined"
-    );
-    Config.UseLocalStorageCache = false;
-  });
 });
 describe(`Wallet subscriptions`, () => {
   test("Should wait for transaction", async () => {

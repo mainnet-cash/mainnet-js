@@ -11,6 +11,10 @@ export class Config {
   static DefaultCurrency = "usd";
   // caches the raw transactions in browser's local storage instead of memory
   static UseLocalStorageCache = false;
+  // caches the raw transactions in browser's indexedDB instead of memory
+  static UseIndexedDBCache = false;
+  // caches the raw transactions in browser's memory
+  static UseMemoryCache = false;
   private static DefaultWordlist = english;
 
   public static setIpfsGateway(ipfsGateway: string) {
