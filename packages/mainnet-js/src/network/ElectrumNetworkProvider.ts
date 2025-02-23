@@ -34,7 +34,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   private _cache: CacheProvider | undefined;
 
   get cache(): CacheProvider | undefined {
-    if (!Config.UseMemoryCache && !Config.UseLocalStorageCache && !Config.UseIndexedDBCache) {
+    if (
+      !Config.UseMemoryCache &&
+      !Config.UseLocalStorageCache &&
+      !Config.UseIndexedDBCache
+    ) {
       this._cache = undefined;
       return this._cache;
     }
@@ -42,17 +46,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     if (Config.UseMemoryCache && !(this._cache instanceof MemoryCache)) {
       this._cache = new IndexedDbCache();
       return this._cache;
-    };
+    }
 
-    if (Config.UseLocalStorageCache && !(this._cache instanceof WebStorageCache)) {
+    if (
+      Config.UseLocalStorageCache &&
+      !(this._cache instanceof WebStorageCache)
+    ) {
       this._cache = new WebStorageCache();
       return this._cache;
-    };
+    }
 
     if (Config.UseIndexedDBCache && !(this._cache instanceof IndexedDbCache)) {
       this._cache = new IndexedDbCache();
       return this._cache;
-    };
+    }
 
     return this._cache;
   }

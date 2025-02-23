@@ -4,11 +4,15 @@ import { CacheProvider } from "./interface";
 export class IndexedDbCache implements CacheProvider {
   private db: IDBDatabase | null = null;
 
-  constructor(private objectStoreName: string = 'ElectrumNetworkProviderCache') {
+  constructor(
+    private objectStoreName: string = "ElectrumNetworkProviderCache"
+  ) {
     this.objectStoreName = objectStoreName;
   }
 
-  private getDatabaseObjectFromTarget(target: EventTarget | null): IDBDatabase | null {
+  private getDatabaseObjectFromTarget(
+    target: EventTarget | null
+  ): IDBDatabase | null {
     if (!target) {
       return null;
     }
@@ -18,9 +22,16 @@ export class IndexedDbCache implements CacheProvider {
     return targetWithType.result;
   }
 
-  private throwDatabaseOpenError(reject: (reason: unknown) => void, database: IDBDatabase | null) {
+  private throwDatabaseOpenError(
+    reject: (reason: unknown) => void,
+    database: IDBDatabase | null
+  ) {
     if (!database) {
-      reject(new Error('Something went wrong and the database transaction was not opened.'));
+      reject(
+        new Error(
+          "Something went wrong and the database transaction was not opened."
+        )
+      );
     }
   }
 
@@ -52,10 +63,10 @@ export class IndexedDbCache implements CacheProvider {
 
   async setItem(key: string, value: string): Promise<void> {
     if (!this.db) {
-      throw new Error('Database is not initialized');
+      throw new Error("Database is not initialized");
     }
 
-    const transaction = this.db.transaction(this.objectStoreName, 'readwrite');
+    const transaction = this.db.transaction(this.objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(this.objectStoreName);
 
     return new Promise((resolve, reject) => {
@@ -68,10 +79,10 @@ export class IndexedDbCache implements CacheProvider {
 
   async getItem(key: string): Promise<string | null> {
     if (!this.db) {
-      throw new Error('Database is not initialized');
+      throw new Error("Database is not initialized");
     }
 
-    const transaction = this.db.transaction(this.objectStoreName, 'readonly');
+    const transaction = this.db.transaction(this.objectStoreName, "readonly");
     const objectStore = transaction.objectStore(this.objectStoreName);
 
     return new Promise((resolve, reject) => {
@@ -84,10 +95,10 @@ export class IndexedDbCache implements CacheProvider {
 
   async removeItem(key: string): Promise<void> {
     if (!this.db) {
-      throw new Error('Database is not initialized');
+      throw new Error("Database is not initialized");
     }
 
-    const transaction = this.db.transaction(this.objectStoreName, 'readwrite');
+    const transaction = this.db.transaction(this.objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(this.objectStoreName);
 
     return new Promise((resolve, reject) => {
@@ -100,10 +111,10 @@ export class IndexedDbCache implements CacheProvider {
 
   async clear(): Promise<void> {
     if (!this.db) {
-      throw new Error('Database is not initialized');
+      throw new Error("Database is not initialized");
     }
 
-    const transaction = this.db.transaction(this.objectStoreName, 'readwrite');
+    const transaction = this.db.transaction(this.objectStoreName, "readwrite");
     const objectStore = transaction.objectStore(this.objectStoreName);
 
     return new Promise((resolve, reject) => {
