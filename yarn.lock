@@ -3318,10 +3318,9 @@ expect@^29.7.0:
     jest-message-util "^29.7.0"
     jest-util "^29.7.0"
 
-express-openapi-validator@3.17.2:
+"express-openapi-validator@https://github.com/mainnet-pat/express-openapi-validator#3.17.2-headers":
   version "3.17.2"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-3.17.2.tgz#8b968be4c850bffb05f8958a6fe9dc1836bb88b1"
-  integrity sha512-MPOPy3OpMBCavEcR0HcvthqXKN1Y2H92hRcoFo30f/lkahfS/3jtUerbObRhVUPtf3PWfOtIVfFHaYRATIZ2Yg==
+  resolved "https://github.com/mainnet-pat/express-openapi-validator#c519aa2c4f1cfc746e6059cb9686e412782a9925"
   dependencies:
     ajv "^6.12.4"
     content-type "^1.0.4"

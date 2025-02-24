@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "2.6.3",
+  "version": "2.6.4",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
@@ -41,7 +41,7 @@
     "docs": "npx typedoc",
     "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --config jest.config.cjs --logHeapUsage  --forceExit",
     "test:skip": "SKIP_REGTEST_INIT=1 yarn test",
-    "test:rest": "yarn patch-package && yarn workspace mainnet-cash run test",
+    "test:rest": "yarn workspace mainnet-cash run test",
     "test:rest:skip": "SKIP_REGTEST_INIT=1 yarn test:rest",
     "test:browser": "npx playwright install --with-deps && npx jest --config jest.config.browser.cjs --detectOpenHandles --forceExit",
     "test:browser:skip": "SKIP_REGTEST_INIT=1 yarn test:browser",
@@ -63,7 +63,7 @@
     "link:contract": "yarn workspace @mainnet-cash/contract link && yarn workspace mainnet-cash link @mainnet-cash/contract",
     "link:postgresql-storage": "yarn workspace @mainnet-cash/postgresql-storage link && yarn workspace mainnet-cash link @mainnet-cash/postgresql-storage",
     "link:all": "yarn link:mainnet-js && yarn link:contract && yarn link:postgresql-storage",
-    "postinstall": "patch-package && yarn link:all && yarn build",
+    "postinstall": "yarn link:all && yarn build",
     "live": "npx reload --dir=jest/playwright ",
     "reload": "yarn live"
   },
