@@ -7,7 +7,7 @@ RUN apt-get update
 # Install requirements for libpq
 USER root
 WORKDIR /
-RUN apt-get update && apt-get install -y --fix-missing postgresql postgresql-client libpq-dev make gcc g++ 
+RUN apt-get update && apt-get install -y --fix-missing git postgresql postgresql-client libpq-dev make gcc g++ 
 
 # Install Node and yarn
 USER root
