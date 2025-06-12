@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.6.5
+
+* Fix esm import missing .js extension
+
 2.6.4
 
 * Use patched express-openapi-validator package instead of needing to patch it in workspace
