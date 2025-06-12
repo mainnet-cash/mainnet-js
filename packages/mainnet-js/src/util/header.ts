@@ -4,7 +4,7 @@ import {
   hexToBin,
   readUint32LE,
 } from "@bitauth/libauth";
-import { HeaderI, HexHeaderI } from "../interface";
+import { HeaderI, HexHeaderI } from "../interface.js";
 
 export const decodeHeader = (hexHeader: HexHeaderI): HeaderI => {
   const result = {} as HeaderI;
