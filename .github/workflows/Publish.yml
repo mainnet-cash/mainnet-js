@@ -285,10 +285,10 @@ jobs:
         run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       # Actual job
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7
+          python-version: 3.9
 
       - name: Checkout python repository
         uses: actions/checkout@v2

@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.6.6
+
+* CI: update Python to 3.9
+
 2.6.5
 
 * Fix esm import missing .js extension
