@@ -1,6 +1,6 @@
 {
   "name": "react-next",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mainnet-cash/indexeddb-storage": "2.6.5",
-    "mainnet-js": "2.6.5",
+    "@mainnet-cash/indexeddb-storage": "2.6.6",
+    "mainnet-js": "2.6.6",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18"
