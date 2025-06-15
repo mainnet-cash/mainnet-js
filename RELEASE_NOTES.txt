@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.6.7
+
+* CI: update pypi-publish version
+
+
 2.6.6
 
 * CI: update Python to 3.9

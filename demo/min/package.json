@@ -1,6 +1,6 @@
 {
   "name": "@mainnet-cash/demo-min",
-  "version": "2.6.6",
+  "version": "2.6.7",
   "private": true,
   "main": "index.js",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "publish:public": "echo 'noop'"
   },
   "dependencies": {
-    "@mainnet-cash/contract": "2.6.6"
+    "@mainnet-cash/contract": "2.6.7"
   },
   "devDependencies": {
     "webpack": "5.58.1",

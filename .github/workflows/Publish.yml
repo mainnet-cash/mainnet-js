@@ -310,7 +310,7 @@ jobs:
       - if: env.HAS_PYPI_TOKEN == false
         run: echo "PYPI_TOKEN secret not set, skipping publishing"
       - if: env.HAS_PYPI_TOKEN
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
