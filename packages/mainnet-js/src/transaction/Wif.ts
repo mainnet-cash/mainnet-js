@@ -107,7 +107,8 @@ export async function buildP2pkhNonHdTransaction({
 
   const tokenValidationResult = verifyTransactionTokens(
     result.transaction,
-    sourceOutputs
+    sourceOutputs,
+    { maximumTokenCommitmentLength: 40 }
   );
   if (tokenValidationResult !== true && fee > 0) {
     throw tokenValidationResult;
