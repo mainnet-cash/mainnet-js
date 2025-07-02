@@ -118,7 +118,7 @@ const browserConfig = {
       [path.resolve(__dirname, "./src/db/SqlProvider.ts")]: false,
     },
     fallback: {
-      stream: require.resolve("stream-browserify"),
+      stream: false,
     },
   },
 };
@@ -136,7 +136,7 @@ const webWorkerConfig = {
       child_process: false,
       crypto: false,
       dns: false,
-      events: require.resolve("events/"),
+      events: false,
       eventsource: false,
       fs: false,
       http: false,
@@ -156,7 +156,7 @@ const webWorkerConfig = {
       zlib: false,
     },
     fallback: {
-      stream: require.resolve("stream-browserify"),
+      stream: false,
     },
   },
 };

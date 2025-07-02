@@ -42,14 +42,11 @@
     "@electrum-cash/network": "^4.1.1",
     "@scure/bip39": "^1.2.2",
     "buffer": "^6.0.3",
-    "events": "^3.2.0",
-    "eventsource": "^1.0.7",
     "qrcode-svg": "1.1.0"
   },
   "devDependencies": {},
   "optionalDependencies": {
-    "dotenv": "^10.0.0",
-    "stream-browserify": "^3.0.0"
+    "dotenv": "^10.0.0"
   },
   "testPathIgnorePatterns": [
     "dist"
@@ -57,8 +54,7 @@
   "sideEffects": [
     "src/rate/ExchangeRate.ts",
     "src/network/getRelayFeeCache.ts",
-    "src/network/default.ts",
-    "src/util/eventsource.ts"
+    "src/network/default.ts"
   ],
   "keywords": [
     "bch",

@@ -101,7 +101,7 @@ const browserConfig = {
       crypto: false,
       dns: false,
       eventsource: false,
-      events: require.resolve("events/"),
+      events: false,
       fs: false,
       http: false,
       https: false,
@@ -115,7 +115,7 @@ const browserConfig = {
       "pg-format": false,
       "pg-native": false,
       solc: false,
-      stream: require.resolve("stream-browserify"),
+      stream: false,
       tls: false,
       url: false,
       util: require.resolve("util"),
@@ -146,7 +146,7 @@ const browserConfig = {
       )]: false,
     },
     fallback: {
-      stream: require.resolve("stream-browserify"),
+      stream: false,
     },
   },
 };
