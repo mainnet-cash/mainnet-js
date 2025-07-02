@@ -334,9 +334,14 @@ describe(`Wallet should function in the browser`, () => {
       // });
 
       let bobBalanceWatchResult = false;
-      const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+      const bobBalanceWatchCancel = await bob.watchBalance(async (balance) => {
+        // skip if balance is zero yet
+        if (!balance.bch) {
+          return;
+        }
+
         expect(balance.bch).toBe(0.001);
-        bobBalanceWatchCancel();
+        await bobBalanceWatchCancel();
         bobBalanceWatchResult = true;
       });
 

@@ -1,17 +1,16 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
-import { ElectrumCluster, ElectrumClient } from "electrum-cash";
+import { ElectrumClient } from "@electrum-cash/network";
+import { ElectrumWebSocket } from '@electrum-cash/web-socket';
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
-  getConfidence,
   getDefaultServers,
   getUserAgent,
 } from "./configuration.js";
 import { parseElectrumUrl } from "./util.js";
-import { ElectrumHostParams, ElectrumClusterParams } from "./interface.js";
+import { ElectrumHostParams } from "./interface.js";
 import { Network } from "../interface.js";
 import {
   networkTickerMap,
-  clusterParams,
   ELECTRUM_CASH_PROTOCOL_VERSION,
 } from "./constant.js";
 
@@ -42,7 +41,7 @@ export function getNetworkProvider(
   network: Network = Network.MAINNET,
   servers?: string[] | string,
   manualConnectionManagement?: boolean,
-  options?: ElectrumClusterParams
+  options?: ElectrumHostParams
 ): NetworkProvider {
   const globalContext =
     servers === undefined &&
@@ -55,7 +54,6 @@ export function getNetworkProvider(
     }
   }
 
-  let useCluster;
   manualConnectionManagement = manualConnectionManagement
     ? manualConnectionManagement
     : false;
@@ -63,31 +61,13 @@ export function getNetworkProvider(
   // If the user has passed a single string, assume a single client connection
   if (typeof servers === "string") {
     servers = [servers as string];
-    useCluster = false;
-  }
-
-  // Otherwise, assume a list of servers has been passed
-  else {
-    servers = servers;
-    useCluster = servers.length > 1;
   }
 
   // There were server(s)
   if (servers) {
-    let clusterOrClient;
-    // There were multiple servers
-    if (useCluster) {
-      let clusterParam = clusterParams[network];
-      clusterParam["confidence"] = getConfidence();
-      clusterParam = Object.assign({}, clusterParam, options);
-      clusterOrClient = getCluster(servers, clusterParam, network);
-    }
-    // The server is a single string in an array
-    else {
-      clusterOrClient = getClient(servers, network);
-    }
+    const client = getClient(servers[0], network, options);
     let provider = new ElectrumNetworkProvider(
-      clusterOrClient,
+      client,
       network,
       manualConnectionManagement
     );
@@ -102,38 +82,10 @@ export function getNetworkProvider(
   }
 }
 
-// Create a cluster give a list of servers and parameters
-function getCluster(servers: string[], params, network: Network) {
-  let electrum = getElectrumCluster(params, network);
-
-  for (const s of servers) {
-    let url = parseElectrumUrl(s);
-    try {
-      electrum.addServer(url.host, url.port, url.scheme, false);
-    } catch (error) {
-      console.log(
-        `Error connecting ${url.host}:${url.port} over ${url.scheme}`
-      );
-    }
-  }
-  return electrum;
-}
-
-// create a client with a list of servers
-function getClient(servers: string[], network: Network) {
-  let url = parseElectrumUrl(servers[0]);
-  return getElectrumClient(url, 120000, network);
-}
-
-function getElectrumCluster(params: ElectrumClusterParams, network: Network) {
-  return new ElectrumCluster(
-    getUserAgent(),
-    ELECTRUM_CASH_PROTOCOL_VERSION,
-    params.confidence,
-    params.distribution,
-    params.order,
-    params.timeout
-  );
+// create a client with a server
+function getClient(server: string, network: Network, options?: ElectrumHostParams) {
+  let url = parseElectrumUrl(server);
+  return getElectrumClient(url, options?.timeout ?? 120000, network);
 }
 
 function getElectrumClient(
@@ -141,12 +93,14 @@ function getElectrumClient(
   timeout: number,
   network: Network
 ) {
+  if (params.scheme?.includes("tcp")) {
+    throw Error("TCP connections are not supported.");
+  }
+
+  const webSocket = new ElectrumWebSocket(params.host, params.port, params.scheme === "wss", timeout)
   return new ElectrumClient(
     getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
-    params.host,
-    params.port,
-    params.scheme,
-    timeout
+    webSocket,
   );
 }

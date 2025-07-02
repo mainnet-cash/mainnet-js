@@ -33,7 +33,7 @@ import { PrivateKeyI, UtxoI } from "../interface.js";
 import { BaseWallet } from "./Base.js";
 import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 import {
-  CancelWatchFn,
+  CancelFn,
   SendRequestOptionsI,
   WaitForTransactionOptions,
   WaitForTransactionResponse,
@@ -343,7 +343,7 @@ export class Wallet extends BaseWallet {
 
   private async _generateWif() {
     if (!this.privateKey) {
-      this.privateKey = generatePrivateKey(() => generateRandomBytes(32));
+      this.privateKey = generatePrivateKey(() => generateRandomBytes(32) as Uint8Array);
     }
     return this.deriveInfo();
   }
@@ -683,38 +683,36 @@ export class Wallet extends BaseWallet {
   }
 
   // watching for any transaction hash of this wallet
-  public watchAddress(callback: (txHash: string) => void): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddress(
+  public async watchAddress(callback: (txHash: string) => void): Promise<CancelFn> {
+    return this.provider!.watchAddress(
       this.getDepositAddress(),
       callback
     );
   }
 
   // watching for any transaction of this wallet
-  public watchAddressTransactions(
+  public async watchAddressTransactions(
     callback: (tx: ElectrumRawTransaction) => void
-  ): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddressTransactions(
+  ): Promise<CancelFn> {
+    return this.provider!.watchAddressTransactions(
       this.getDepositAddress(),
       callback
     );
   }
 
   // watching for cashtoken transaction of this wallet
-  public watchAddressTokenTransactions(
+  public async watchAddressTokenTransactions(
     callback: (tx: ElectrumRawTransaction) => void
-  ): CancelWatchFn {
-    return (
-      this.provider! as ElectrumNetworkProvider
-    ).watchAddressTokenTransactions(this.getDepositAddress(), callback);
+  ): Promise<CancelFn> {
+    return this.provider!.watchAddressTokenTransactions(this.getDepositAddress(), callback);
   }
 
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
-  public watchBalance(
+  public async watchBalance(
     callback: (balance: BalanceResponse) => void
-  ): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(
+  ): Promise<CancelFn> {
+    return this.provider!.watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
         const balance = (await this.getBalance()) as BalanceResponse;
@@ -728,10 +726,10 @@ export class Wallet extends BaseWallet {
   // @param `usdPriceRefreshInterval` milliseconds by polling for new BCH USD price
   // Since we want to be most sensitive to usd value change, we do not use the cached exchange rates
   // can be cancelled by calling the function returned from this one
-  public watchBalanceUsd(
+  public async watchBalanceUsd(
     callback: (balance: BalanceResponse) => void,
     usdPriceRefreshInterval = 30000
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     let usdPrice = -1;
 
     const _callback = async () => {
@@ -745,13 +743,11 @@ export class Wallet extends BaseWallet {
       }
     };
 
-    const watchCancel = (
-      this.provider! as ElectrumNetworkProvider
-    ).watchAddressStatus(this.getDepositAddress(), _callback);
+    const watchCancel = await this.provider!.watchAddressStatus(this.getDepositAddress(), _callback);
     const interval = setInterval(_callback, usdPriceRefreshInterval);
 
     return async () => {
-      await watchCancel();
+      await watchCancel?.();
       clearInterval(interval);
     };
   }
@@ -763,11 +759,12 @@ export class Wallet extends BaseWallet {
     rawUnit: UnitEnum = UnitEnum.BCH
   ): Promise<BalanceResponse> {
     return new Promise(async (resolve) => {
-      const watchCancel = this.watchBalance(
+      let watchCancel: CancelFn;
+      watchCancel = await this.watchBalance(
         async (balance: BalanceResponse) => {
           const satoshiBalance = await amountInSatoshi(value, rawUnit);
           if (balance.sat! >= satoshiBalance) {
-            await watchCancel();
+            await watchCancel?.();
             resolve(balance);
           }
         }
@@ -777,12 +774,12 @@ export class Wallet extends BaseWallet {
 
   // sets up a callback to be called upon wallet's token balance change
   // can be cancelled by calling the function returned from this one
-  public watchTokenBalance(
+  public async watchTokenBalance(
     tokenId: string,
     callback: (balance: bigint) => void
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     let previous: bigint | undefined = undefined;
-    return (this.provider! as ElectrumNetworkProvider).watchAddressStatus(
+    return await this.provider!.watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
         const balance = await this.getTokenBalance(tokenId);
@@ -801,11 +798,12 @@ export class Wallet extends BaseWallet {
     amount: bigint
   ): Promise<bigint> {
     return new Promise(async (resolve) => {
-      const watchCancel = this.watchTokenBalance(
+      let watchCancel: CancelFn;
+      watchCancel = await this.watchTokenBalance(
         tokenId,
         async (balance: bigint) => {
           if (balance >= amount) {
-            await watchCancel();
+            await watchCancel?.();
             resolve(balance);
           }
         }
@@ -1392,19 +1390,18 @@ export class Wallet extends BaseWallet {
 
       // waiting for a specific transaction to propagate
       if (options.txHash) {
+        let cancel: CancelFn;
+
         const waitForTransactionCallback = async (data) => {
-          if (data && data[0] === options.txHash!) {
+          if (data && data[0] === options.txHash! && data[1] !== null) {
             txHashSeen = true;
-            this.provider!.unsubscribeFromTransaction(
-              options.txHash!,
-              waitForTransactionCallback
-            );
+            await cancel?.();
 
             resolve(makeResponse(options.txHash!));
           }
         };
 
-        this.provider!.subscribeToTransaction(
+        cancel = await this.provider!.subscribeToTransaction(
           options.txHash,
           waitForTransactionCallback
         );
@@ -1412,11 +1409,16 @@ export class Wallet extends BaseWallet {
       }
 
       // waiting for any address transaction
-      const watchCancel = (
-        this.provider! as ElectrumNetworkProvider
-      ).watchAddressStatus(this.getDepositAddress(), async (_status) => {
-        watchCancel();
-        resolve(makeResponse());
+      let watchCancel: CancelFn;
+      let initialResponseSeen = false;
+      watchCancel = await this.provider!.watchAddressStatus(this.getDepositAddress(), async (_status) => {
+        if (initialResponseSeen) {
+          await watchCancel?.();
+          resolve(makeResponse());
+          return;
+        }
+
+        initialResponseSeen = true;
       });
     });
   }
@@ -1429,11 +1431,11 @@ export class Wallet extends BaseWallet {
    *
    * @returns a function which will cancel watching upon evaluation
    */
-  public watchBlocks(
+  public async watchBlocks(
     callback: (header: HexHeaderI) => void,
     skipCurrentHeight: boolean = true
-  ): CancelWatchFn {
-    return (this.provider! as ElectrumNetworkProvider).watchBlocks(
+  ): Promise<CancelFn> {
+    return this.provider!.watchBlocks(
       callback,
       skipCurrentHeight
     );
@@ -1446,7 +1448,7 @@ export class Wallet extends BaseWallet {
    *
    */
   public async waitForBlock(height?: number): Promise<HexHeaderI> {
-    return (this.provider! as ElectrumNetworkProvider).waitForBlock(height);
+    return this.provider!.waitForBlock(height);
   }
   //#endregion Funds
 

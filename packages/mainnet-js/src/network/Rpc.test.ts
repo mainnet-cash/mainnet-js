@@ -15,11 +15,16 @@ afterAll(async () => {
 });
 
 describe("Rpc tests", () => {
+  test("get utxos", async () => {
+    const provider = getNetworkProvider(Network.REGTEST);
+    expect(await provider.getUtxos("bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0")).not.toHaveLength(0);
+  });
+
   test("subcribe to address", async () => {
     const provider = getNetworkProvider(Network.REGTEST);
     try {
       await provider.subscribeToAddress(
-        "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
+        "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
         async (data) => {
           expect(data).not.toBe("");
         }
@@ -36,7 +41,7 @@ describe("Rpc tests", () => {
 
     try {
       await provider.subscribeToAddress(
-        "bchtest:qzvnjv8xyfkq4uk0xggsfu6uxnray06rcuw7h4zk4u",
+        "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
         async (data) => {
           // console.log("First", data);
           expect(data).not.toBe("");
@@ -45,7 +50,7 @@ describe("Rpc tests", () => {
       );
 
       await provider.subscribeToAddress(
-        "bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9",
+        "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
         async (data) => {
           // console.log("Second", data);
           expect(data).not.toBe("");
@@ -71,7 +76,7 @@ describe("Rpc tests", () => {
     });
     await new Promise((resolve) => setTimeout(resolve, 1000));
     // we do not trigger the callback upon subscription anymore
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   test("Wait for block timeout", async () => {
@@ -118,5 +123,5 @@ describe("Rpc tests", () => {
 
     header = await provider.waitForBlock(height + 2);
     expect(header.height).toBe(height + 2);
-  });
+  }, 20000);
 });

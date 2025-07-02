@@ -1,5 +1,3 @@
-import { ClusterOrder } from "electrum-cash";
-
 export const ELECTRUM_CASH_PROTOCOL_VERSION = "1.5";
 
 export const networkTickerMap = {
@@ -42,25 +40,4 @@ export const defaultServers = {
   mainnet: mainnetServers,
   testnet: testnetServers,
   regtest: regtestServers,
-};
-
-export const clusterParams = {
-  mainnet: {
-    confidence: 1,
-    distribution: 1,
-    order: ClusterOrder.RANDOM,
-    timeout: 45000,
-  },
-  testnet: {
-    confidence: 1,
-    distribution: 1,
-    order: ClusterOrder.RANDOM,
-    timeout: 30000,
-  },
-  regtest: {
-    confidence: 1,
-    distribution: 1,
-    order: ClusterOrder.PRIORITY,
-    timeout: 3000,
-  },
 };

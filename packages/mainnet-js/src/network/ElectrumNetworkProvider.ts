@@ -1,9 +1,10 @@
 import {
-  ElectrumCluster,
   ElectrumClient,
   RequestResponse,
+  ElectrumClientEvents,
+  RPCNotification,
   ConnectionStatus,
-} from "electrum-cash";
+} from '@electrum-cash/network';
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   HexHeaderI,
@@ -16,7 +17,7 @@ import { Network } from "../interface.js";
 import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
-import { CancelWatchFn } from "../wallet/interface.js";
+import { CancelFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
 import { Config } from "../config.js";
 import { decodeHeader } from "../util/header.js";
@@ -26,10 +27,12 @@ import { WebStorageCache } from "../cache/WebStorageCache.js";
 import { MemoryCache } from "../cache/MemoryCache.js";
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
-  public electrum: ElectrumCluster | ElectrumClient;
+  public electrum: ElectrumClient<ElectrumClientEvents>;
   public subscriptions: number = 0;
   public version;
   private connectPromise;
+  private subscribedToHeaders: boolean = false;
+  private subscriptionMap: Record<string, number> = {};
 
   private _cache: CacheProvider | undefined;
 
@@ -65,20 +68,16 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   constructor(
-    electrum: ElectrumCluster | ElectrumClient,
+    electrum: ElectrumClient<ElectrumClientEvents>,
     public network: Network = Network.MAINNET,
     private manualConnectionManagement?: boolean
   ) {
     if (electrum) {
       this.electrum = electrum;
       this.connectPromise = this.getConnectPromise();
-      if (this.electrum instanceof ElectrumCluster) {
-        this.version = (this.electrum as ElectrumCluster).version;
-      } else {
-        this.version = (this.electrum as ElectrumClient).connection.version;
-      }
+      this.version = this.electrum.version;
     } else {
-      throw new Error(`A electrum-cash cluster or client is required.`);
+      throw new Error(`A electrum-cash client is required.`);
     }
   }
 
@@ -89,40 +88,18 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     await Promise.race([
       new Promise(async (resolve) => {
         this.connectPromise = undefined;
-
-        if (this.electrum instanceof ElectrumCluster) {
-          try {
-            await this.connectCluster();
-          } catch (e) {
-            console.warn(
-              `Unable to connect to one or more electrum-cash hosts: ${JSON.stringify(
-                e
-              )}`
-            );
-          }
-          resolve(await this.readyCluster());
-        } else {
-          resolve(await this.connectClient());
-        }
+        resolve(await this.connectClient());
       }),
-      // new Promise(
-      //   (_resolve, reject) =>
-      //     (timeoutHandle = setTimeout(() => {
-      //       reject(
-      //         new Error(`Timeout connecting to electrum network: ${this.network}`)
-      //       );
-      //     }, _timeout))
-      // ),
     ]);
     clearTimeout(timeoutHandle);
   }
 
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
-    const result = (await this.performRequest(
+    const result = await this.performRequest<ElectrumUtxo[]>(
       "blockchain.address.listunspent",
       cashaddr,
       "include_tokens"
-    )) as ElectrumUtxo[];
+    );
     return result.map((utxo) => ({
       txid: utxo.tx_hash,
       vout: utxo.tx_pos,
@@ -140,10 +117,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBalance(cashaddr: string): Promise<number> {
-    const result = (await this.performRequest(
+    const result = await this.performRequest<ElectrumBalanceI>(
       "blockchain.address.get_balance",
       cashaddr
-    )) as ElectrumBalanceI;
+    );
 
     return result.confirmed + result.unconfirmed;
   }
@@ -161,10 +138,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       }
     }
 
-    const result = (await this.performRequest(
+    const result = await this.performRequest<HexHeaderI>(
       "blockchain.header.get",
       height
-    )) as HexHeaderI;
+    );
     if (this.cache) {
       await this.cache.setItem(key, JSON.stringify(result));
     }
@@ -173,7 +150,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBlockHeight(): Promise<number> {
-    return ((await this.performRequest("blockchain.headers.get_tip")) as any)
+    return (await this.performRequest<HexHeaderI>("blockchain.headers.get_tip"))
       .height;
   }
 
@@ -262,17 +239,19 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         this.performRequest("blockchain.transaction.broadcast", txHex);
         resolve(txHash);
       } else {
+        let cancel: CancelFn;
+
         const waitForTransactionCallback = async (data) => {
-          if (data && data[0] === txHash) {
-            this.unsubscribeFromTransaction(txHash, waitForTransactionCallback);
+          if (data && data[0] === txHash && data[1] !== null) {
+            await cancel?.();
             resolve(txHash);
           }
         };
-        this.subscribeToTransaction(txHash, waitForTransactionCallback);
+        cancel = await this.subscribeToTransaction(txHash, waitForTransactionCallback);
 
         this.performRequest("blockchain.transaction.broadcast", txHex).catch(
-          (error) => {
-            this.unsubscribeFromTransaction(txHash, waitForTransactionCallback);
+          async (error) => {
+            await cancel?.();
             reject(error);
           }
         );
@@ -286,12 +265,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     fromHeight: number = 0,
     toHeight: number = -1
   ): Promise<TxI[]> {
-    const result = (await this.performRequest(
+    const result = await this.performRequest<TxI[]>(
       "blockchain.address.get_history",
       cashaddr,
       fromHeight,
       toHeight
-    )) as TxI[];
+    );
 
     return result;
   }
@@ -303,10 +282,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return result;
   }
 
-  public watchAddressStatus(
+  public async watchAddressStatus(
     cashaddr: string,
     callback: (status: string) => void
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     const watchAddressStatusCallback = async (data) => {
       // subscription acknowledgement is the latest known status or null if no status is known
       // status is an array: [ cashaddr, statusHash ]
@@ -321,17 +300,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       }
     };
 
-    this.subscribeToAddress(cashaddr, watchAddressStatusCallback);
-
-    return async () => {
-      await this.unsubscribeFromAddress(cashaddr, watchAddressStatusCallback);
-    };
+    return this.subscribeToAddress(cashaddr, watchAddressStatusCallback);
   }
 
-  public watchAddress(
+  public async watchAddress(
     cashaddr: string,
     callback: (txHash: string) => void
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     const historyMap: { [txid: string]: boolean } = {};
 
     this.getHistory(cashaddr).then((history) =>
@@ -359,20 +334,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.watchAddressStatus(cashaddr, watchAddressStatusCallback);
   }
 
-  public watchAddressTransactions(
+  public async watchAddressTransactions(
     cashaddr: string,
     callback: (tx: ElectrumRawTransaction) => void
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     return this.watchAddress(cashaddr, async (txHash: string) => {
       const tx = await this.getRawTransactionObject(txHash);
       callback(tx);
     });
   }
 
-  public watchAddressTokenTransactions(
+  public async watchAddressTokenTransactions(
     cashaddr: string,
     callback: (tx: ElectrumRawTransaction) => void
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     return this.watchAddress(cashaddr, async (txHash: string) => {
       const tx = await this.getRawTransactionObject(txHash, true);
       if (
@@ -385,10 +360,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   // watch for block headers and block height, if `skipCurrentHeight` is set, the notification about current block will not arrive
-  public watchBlocks(
+  public async watchBlocks(
     callback: (header: HexHeaderI) => void,
     skipCurrentHeight: boolean = true
-  ): CancelWatchFn {
+  ): Promise<CancelFn> {
     let acknowledged = !skipCurrentHeight;
     const waitForBlockCallback = (_header: HexHeaderI | HexHeaderI[]) => {
       if (!acknowledged) {
@@ -399,20 +374,27 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       _header = _header instanceof Array ? _header[0] : _header;
       callback(_header);
     };
-    this.subscribeToHeaders(waitForBlockCallback);
-
-    return async () => {
-      this.unsubscribeFromHeaders(waitForBlockCallback);
-    };
+    return this.subscribeToHeaders(waitForBlockCallback);
   }
 
   // Wait for the next block or a block at given blockchain height.
   public async waitForBlock(height?: number): Promise<HexHeaderI> {
     return new Promise(async (resolve) => {
-      const cancelWatch = this.watchBlocks(async (header) => {
-        if (height === undefined || header.height >= height!) {
-          await cancelWatch();
+      let cancelWatch: CancelFn;
+      if (this.electrum.chainHeight && !height) {
+        height = this.electrum.chainHeight + 1;
+      }
+
+      cancelWatch = await this.watchBlocks(async (header) => {
+        if (!height) {
+          height = header.height + 1;
+          return;
+        }
+
+        if (header.height >= height) {
+          await cancelWatch?.();
           resolve(header);
+          return;
         }
       });
     });
@@ -421,56 +403,16 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   // subscribe to notifications sent when new block is found, the block header is sent to callback
   async subscribeToHeaders(
     callback: (header: HexHeaderI) => void
-  ): Promise<void> {
-    await this.subscribeRequest("blockchain.headers.subscribe", callback);
-  }
-
-  // unsubscribe to notifications sent when new block is found
-  async unsubscribeFromHeaders(
-    callback: (header: HexHeaderI) => void
-  ): Promise<void> {
-    await this.unsubscribeRequest("blockchain.headers.subscribe", callback);
+  ): Promise<CancelFn> {
+    return this.subscribeRequest("blockchain.headers.subscribe", callback);
   }
 
   async subscribeToAddress(
     cashaddr: string,
     callback: (data: any) => void
-  ): Promise<void> {
-    await this.subscribeRequest(
+  ): Promise<CancelFn> {
+    return this.subscribeRequest(
       "blockchain.address.subscribe",
-      callback,
-      cashaddr
-    );
-  }
-
-  async unsubscribeFromAddress(
-    cashaddr: string,
-    callback: (data: any) => void
-  ): Promise<void> {
-    await this.unsubscribeRequest(
-      "blockchain.address.subscribe",
-      callback,
-      cashaddr
-    );
-  }
-
-  async subscribeToAddressTransactions(
-    cashaddr: string,
-    callback: (data: any) => void
-  ): Promise<void> {
-    await this.subscribeRequest(
-      "blockchain.address.transactions.subscribe",
-      callback,
-      cashaddr
-    );
-  }
-
-  async unsubscribeFromAddressTransactions(
-    cashaddr: string,
-    callback: (data: any) => void
-  ): Promise<void> {
-    await this.unsubscribeRequest(
-      "blockchain.address.transactions.subscribe",
       callback,
       cashaddr
     );
@@ -479,29 +421,18 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async subscribeToTransaction(
     txHash: string,
     callback: (data: any) => void
-  ): Promise<void> {
-    await this.subscribeRequest(
+  ): Promise<CancelFn> {
+    return this.subscribeRequest(
       "blockchain.transaction.subscribe",
       callback,
       txHash
     );
   }
 
-  async unsubscribeFromTransaction(
-    txHash: string,
-    callback: (data: any) => void
-  ): Promise<void> {
-    await this.unsubscribeRequest(
-      "blockchain.transaction.subscribe",
-      callback,
-      txHash
-    );
-  }
-
-  private async performRequest(
+  private async performRequest<T>(
     name: string,
     ...parameters: (string | number | boolean)[]
-  ): Promise<RequestResponse> {
+  ): Promise<T> {
     await this.ready();
 
     const requestTimeout = new Promise(function (_resolve, reject) {
@@ -518,7 +449,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       .then((value) => {
         if (value instanceof Error) throw value;
         let result = value as RequestResponse;
-        return result;
+        return result as T;
       })
       .catch(async () => {
         // console.warn(
@@ -528,7 +459,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
           .then((value) => {
             if (value instanceof Error) throw value;
             let result = value as RequestResponse;
-            return result;
+            return result as T;
           })
           .catch(function (e) {
             throw e;
@@ -536,64 +467,105 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       });
   }
 
-  private async subscribeRequest(
+  private async trackSubscription(
     methodName: string,
-    callback: (data) => void,
     ...parameters: (string | number | boolean)[]
-  ): Promise<true> {
-    await this.ready();
+  ): Promise<void> {
+    const key = `${methodName}-${this.network}-${JSON.stringify(parameters)}`;
+    if (this.subscriptionMap[key]) {
+      this.subscriptionMap[key]++;
+    } else {
+      this.subscriptionMap[key] = 1;
+    }
 
-    const result = await this.electrum.subscribe(
-      callback,
+    await this.electrum.subscribe(
       methodName,
       ...parameters
     );
+  }
+
+  private async untrackSubscription(
+    methodName: string,
+    ...parameters: (string | number | boolean)[]
+  ): Promise<void> {
+    const key = `${methodName}-${this.network}-${JSON.stringify(parameters)}`;
+    if (this.subscriptionMap[key]) {
+      this.subscriptionMap[key]--;
+      if (this.subscriptionMap[key] <= 0) {
+        // only really unsubscribe if there are no more subscriptions for this `key`
+        delete this.subscriptionMap[key];
+
+        try {
+          await this.electrum.unsubscribe(methodName, ...parameters);
+        } catch {}
+      }
+    }
+  }
+
+  public async subscribeRequest(
+    methodName: string,
+    callback: (data) => void,
+    ...parameters: (string | number | boolean)[]
+  ): Promise<CancelFn> {
+    await this.ready();
+
+    const handler = (data: RPCNotification) => {
+      if (data.method === methodName) {
+        callback(data.params);
+      }
+    };
+
+    this.electrum.on("notification", handler);
+
+    // safeguard against multiple subscriptions to headers
+    if (methodName === "blockhain.headers.subscribe") {
+      if (!this.subscribedToHeaders) {
+        this.subscribedToHeaders = true;
+
+        await this.trackSubscription(
+          methodName,
+          ...parameters
+        );
+      }
+    } else {
+      await this.trackSubscription(
+        methodName,
+        ...parameters
+      );
+    }
 
     this.subscriptions++;
 
-    return result;
-  }
+    return async () => {
+      this.electrum.off("notification", handler);
+      this.subscriptions--;
 
-  private async unsubscribeRequest(
-    methodName: string,
-    callback: (data) => void,
-    ...parameters: (string | number | boolean)[]
-  ): Promise<true> {
-    await this.ready();
-
-    const result = this.electrum.unsubscribe(
-      callback,
-      methodName,
-      ...parameters
-    );
-
-    this.subscriptions--;
-
-    return result;
+      // there are no blockchain.headers.unsubscribe method, so let's safeguard against it
+      if (methodName !== "blockchain.headers.subscribe") {
+        await this.untrackSubscription(
+          methodName,
+          ...parameters
+        );
+      }
+    };
   }
 
   async ready(): Promise<boolean | unknown> {
-    return (await this.connect()) as void[];
+    return this.connect();
   }
 
-  async connect(): Promise<void[]> {
+  async connect(): Promise<void> {
     await this.cache?.init();
     return await this.connectPromise;
   }
 
-  disconnect(): Promise<boolean[]> {
+  disconnect(): Promise<boolean> {
     if (this.subscriptions > 0) {
       // console.warn(
       //   `Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`
       // );
     }
-    return this.isElectrumClient()
-      ? this.disconnectClient()
-      : this.disconnectCluster();
-  }
-
-  isElectrumClient(): boolean {
-    return this.electrum.hasOwnProperty("connection");
+    return this.disconnectClient();
   }
 
   async readyClient(timeout?: number): Promise<boolean | unknown> {
@@ -601,8 +573,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
     let connectPromise = async () => {
       while (
-        (this.electrum as ElectrumClient).connection.status !==
-        ConnectionStatus.CONNECTED
+        this.electrum.status !== ConnectionStatus.CONNECTED
       ) {
         await delay(100);
       }
@@ -611,37 +582,24 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return connectPromise;
   }
 
-  async readyCluster(timeout?: number): Promise<boolean> {
-    timeout;
-    return (this.electrum as ElectrumCluster).ready();
-  }
-
-  async connectCluster(): Promise<void[]> {
-    return (this.electrum as ElectrumCluster).startup();
-  }
-
-  async connectClient(): Promise<void[]> {
+  async connectClient(): Promise<void> {
     let connectionPromise = async () => {
       try {
-        return await (this.electrum as ElectrumClient).connect();
+        return await this.electrum.connect();
       } catch (e) {
         console.warn(
           `Warning: Failed to connect to client on ${this.network} at ${
-            (this.electrum as ElectrumClient).connection.host
+            this.electrum.hostIdentifier
           }.`,
           e
         );
         return;
       }
     };
-    return [await connectionPromise()];
+    return connectionPromise();
   }
 
-  async disconnectCluster(): Promise<boolean[]> {
-    return (this.electrum as ElectrumCluster).shutdown();
-  }
-
-  async disconnectClient(): Promise<boolean[]> {
-    return [await (this.electrum as ElectrumClient).disconnect(true)];
+  async disconnectClient(): Promise<boolean> {
+    return this.electrum.disconnect(true, false);
   }
 }

@@ -1,4 +1,3 @@
-import { ClusterOrder } from "electrum-cash";
 import { NFTCapability } from "../interface.js";
 
 export interface BlockHeader {
@@ -9,14 +8,8 @@ export interface BlockHeader {
 export interface ElectrumHostParams {
   host: string;
   port: number;
-  scheme: "tcp" | "tcp_tls" | "ws" | "wss" | undefined;
-}
-
-export interface ElectrumClusterParams {
-  confidence: number;
-  distribution: number;
-  order: ClusterOrder;
-  timeout: number;
+  timeout?: number;
+  scheme: "tcp" | "tcp_tls" | "ws" | "wss";
 }
 
 export interface ElectrumTokenData {

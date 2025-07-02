@@ -621,12 +621,12 @@ describe(`Test cashtokens`, () => {
       0
     );
 
-    const cancel = bob.watchTokenBalance(tokenId, (balance) => {
+    const cancel = await bob.watchTokenBalance(tokenId, (balance) => {
       seenBalance = balance;
     });
 
     let bobTxId = ".";
-    const txCancel = bob.watchAddressTokenTransactions((tx) => {
+    const txCancel = await bob.watchAddressTokenTransactions((tx) => {
       bobTxId = tx.txid;
     });
 

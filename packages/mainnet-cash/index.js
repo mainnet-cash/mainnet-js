@@ -22,8 +22,10 @@ const getServer = () => {
   return expressServer
 }
 
-const  killElectrum =  async () => {
-  return mainnet.disconnectProviders()
+const killElectrum =  async () => {
+  try {
+    await mainnet.disconnectProviders()
+  } catch {};
 }
 
 function startServer() {

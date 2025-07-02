@@ -48,7 +48,10 @@ export default class WrappedProvider extends ElectrumNetworkProvider {
       mainnetProvider.network === Network.TESTNET
         ? "chipnet"
         : (mainnetProvider.network as any),
-      mainnetProvider.electrum as any
+      {
+        electrum: mainnetProvider.electrum as any,
+        manualConnectionManagement: false,
+      }
     );
 
     (this as any).performRequest = async (

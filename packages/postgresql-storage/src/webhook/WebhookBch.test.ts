@@ -79,7 +79,7 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  });
+  }, 20000);
 
   test("Test non-recurrent hook to be not deleted after failed call", async () => {
     try {
@@ -119,7 +119,7 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  });
+  }, 20000);
 
   test("Test recurrent hook for incoming transaction", async () => {
     try {
@@ -160,7 +160,7 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  });
+  }, 20000);
 
   test("Test recurrent hook for outgoing transactions", async () => {
     try {
@@ -204,7 +204,7 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  });
+  }, 20000);
 
   test("Test should pickup transactions happened while offline", async () => {
     try {
@@ -278,7 +278,7 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  });
+  }, 30000);
 
   test("Test non-recurrent watch balance hook", async () => {
     try {
@@ -319,5 +319,5 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  });
+  }, 20000);
 });

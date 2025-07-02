@@ -101,4 +101,4 @@ export interface WaitForTransactionResponse {
   balance?: BalanceResponse;
 }
 
-export type CancelWatchFn = () => Promise<void>;
+export type CancelFn = () => Promise<void>;
