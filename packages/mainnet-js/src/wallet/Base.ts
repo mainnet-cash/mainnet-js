@@ -3,8 +3,6 @@ import { MnemonicI, WalletI } from "./interface.js";
 import { NetworkType } from "../enum.js";
 import { StorageProvider } from "../db/index.js";
 import { getRuntimePlatform } from "../util/getRuntimePlatform.js";
-import { qrAddress } from "../qr/Qr.js";
-import { ImageI } from "../qr/interface.js";
 import { WalletTypeEnum } from "./enum.js";
 import NetworkProvider from "../network/NetworkProvider.js";
 
@@ -46,19 +44,6 @@ export class BaseWallet implements WalletI {
    */
   public getDepositAddress(): string {
     return this.address!;
-  }
-
-  /**
-   * getDepositQr - get an address qrcode, encoded for display on the web
-   *
-   * a high-level function
-   *
-   * @see {@link https://rest-unstable.mainnet.cash/api-docs/#/wallet/depositQr|/wallet/deposit_qr} for REST endpoint
-   *
-   * @returns The qrcode for the address
-   */
-  public getDepositQr(): ImageI {
-    return qrAddress(this.getDepositAddress() as string);
   }
 
   // Get mnemonic and derivation path for wallet

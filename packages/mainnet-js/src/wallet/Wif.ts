@@ -107,8 +107,6 @@ import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant.js";
 import { getAddressHistory } from "../history/electrumTransformer.js";
 import { IdentitySnapshot } from "./bcmr-v2.schema.js";
 import { BCMR } from "./Bcmr.js";
-import { qrAddress } from "../qr/Qr.js";
-import { ImageI } from "../qr/interface.js";
 import { Config } from "../config.js";
 import { checkUtxos } from "../util/checkUtxos.js";
 import { TransactionHistoryItem } from "../history/interface.js";
@@ -171,15 +169,6 @@ export class Wallet extends BaseWallet {
    */
   public getTokenDepositAddress(): string {
     return this.tokenaddr!;
-  }
-
-  /**
-   * getDepositQr - get an address qrcode, encoded for display on the web
-   *
-   * @returns The qrcode for the token aware address
-   */
-  public getTokenDepositQr(): ImageI {
-    return qrAddress(this.getTokenDepositAddress());
   }
 
   /**

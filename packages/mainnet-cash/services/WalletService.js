@@ -101,49 +101,6 @@ const tokenDepositAddress = ({ serializedWallet }) => new Promise(
     }
   },
 );
-/**
-* Get receiving cash address as a qrcode
-*
-* serializedWallet SerializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 
-* returns ScalableVectorGraphic
-* */
-const depositQr = ({ serializedWallet }) =>
-  new Promise(async (resolve, reject) => {
-    try {
-      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
-      let args = serializedWallet;
-      delete args.walletId;
-      let resp = await wallet.getDepositQr(args);
-      resolve(Service.successResponse({ ...resp }));
-    } catch (e) {
-      reject(
-        Service.rejectResponse(e, e.status || 500)
-      );
-    }
-  });
-
-/**
-* Get receiving token aware cash address as a qrcode
-*
-* serializedWallet SerializedWallet Request for a token aware deposit cash address as a Quick Response code (qrcode) 
-* returns ScalableVectorGraphic
-* */
-const tokenDepositQr = ({ serializedWallet }) => new Promise(
-  async (resolve, reject) => {
-    try {
-      let wallet = await mainnet.walletFromId(serializedWallet.walletId);
-      let args = serializedWallet;
-      delete args.walletId;
-      let resp = await wallet.getTokenDepositQr(args);
-      resolve(Service.successResponse({ ...resp }));
-    } catch (e) {
-      reject(Service.rejectResponse(
-        e.message || 'Invalid input',
-        e.status || 405,
-      ));
-    }
-  },
-);
 
 /**
 * Get wallet history
@@ -169,7 +126,7 @@ new Promise(async (resolve, reject) => {
 /**
 * Get wallet info
 *
-* serializedWallet SerializedWallet Request for a deposit cash address as a Quick Response code (qrcode) 
+* serializedWallet SerializedWallet Request for a wallet info
 * returns WalletInfo
 * */
 const info = ({ serializedWallet }) =>
@@ -551,8 +508,6 @@ export default {
   createWallet,
   depositAddress,
   tokenDepositAddress,
-  depositQr,
-  tokenDepositQr,
   getHistory,
   info,
   namedExists,

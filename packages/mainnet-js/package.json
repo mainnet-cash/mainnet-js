@@ -41,10 +41,8 @@
     "@bitauth/libauth": "^3.1.0-next.2",
     "@electrum-cash/network": "^4.1.1",
     "@scure/bip39": "^1.2.2",
-    "buffer": "^6.0.3",
-    "qrcode-svg": "1.1.0"
+    "buffer": "^6.0.3"
   },
-  "devDependencies": {},
   "optionalDependencies": {
     "dotenv": "^10.0.0"
   },

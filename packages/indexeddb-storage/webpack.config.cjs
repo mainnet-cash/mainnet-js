@@ -78,7 +78,6 @@ const browserConfig = {
     alias: {
       crypto: false,
       child_process: false,
-      fs: false,
     },
     fallback: {},
   },

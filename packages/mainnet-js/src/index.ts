@@ -33,16 +33,12 @@ export * from "./util/index.js";
 // libauth
 export * as libauth from "./libauth.js";
 
-// qr
-export * from "./qr/Qr.js";
-
 // constants
 import * as CONST from "./constant.js";
 export { CONST };
 
 // interfaces
 export * from "./interface.js";
-export { ImageI } from "./qr/interface.js";
 export {
   SignedMessageResponseI,
   VerifyMessageResponseI,
