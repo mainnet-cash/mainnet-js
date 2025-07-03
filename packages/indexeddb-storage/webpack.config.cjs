@@ -1,7 +1,6 @@
 const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { webpack } = require("webpack");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const __basedir = require("path").resolve(__dirname, "../../");
 const fs = require("fs");
@@ -76,7 +75,11 @@ const browserConfig = {
     }),
   ],
   resolve: {
-    alias: {},
+    alias: {
+      crypto: false,
+      child_process: false,
+      fs: false,
+    },
     fallback: {},
   },
 };

@@ -3,8 +3,6 @@ const path = require("path");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
-const BundleAnalyzerPlugin =
-  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const __basedir = require("path").resolve(__dirname, "../../");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const webpack = require("webpack");
@@ -96,58 +94,11 @@ const browserConfig = {
   ],
   resolve: {
     alias: {
-      bufferutil: false,
-      child_process: false,
       crypto: false,
-      dns: false,
-      eventsource: false,
-      events: false,
+      child_process: false,
       fs: false,
-      http: false,
-      https: false,
-      libpq: false,
-      module: false,
-      net: false,
-      os: false,
-      "parse-database-url": false,
-      path: false,
-      pg: false,
-      "pg-format": false,
-      "pg-native": false,
-      solc: false,
-      stream: false,
-      tls: false,
-      url: false,
-      util: require.resolve("util"),
-      zlib: false,
-      [path.resolve(
-        __dirname,
-        "../mainnet-js/dist/module/webhook/index.ts"
-      )]: false,
-      [path.resolve(
-        __dirname,
-        "../mainnet-js/dist/module/webhook/interface.ts"
-      )]: false,
-      [path.resolve(
-        __dirname,
-        "../mainnet-js/dist/module/webhook/Webhook.ts"
-      )]: false,
-      [path.resolve(
-        __dirname,
-        "../mainnet-js/dist/module/webhook/WebhookBch.ts"
-      )]: false,
-      [path.resolve(
-        __dirname,
-        "../mainnet-js/dist/module/webhook/WebhookWorker.ts"
-      )]: false,
-      [path.resolve(
-        __dirname,
-        "../mainnet-js/dist/module/db/SqlProvider.ts"
-      )]: false,
     },
-    fallback: {
-      stream: false,
-    },
+    fallback: {},
   },
 };
 

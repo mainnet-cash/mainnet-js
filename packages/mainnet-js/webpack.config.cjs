@@ -2,8 +2,6 @@ const { merge } = require("webpack-merge");
 const packageJson = require("./package.json");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
-const BundleAnalyzerPlugin =
-  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const __basedir = require("path").resolve(__dirname, "../../");
 
@@ -89,37 +87,11 @@ const browserConfig = {
   ],
   resolve: {
     alias: {
-      bufferutil: false,
-      child_process: false,
       crypto: false,
-      dns: false,
-      events: require.resolve("events/"),
-      eventsource: false,
+      child_process: false,
       fs: false,
-      http: false,
-      https: false,
-      libpq: false,
-      module: false,
-      net: false,
-      os: false,
-      "parse-database-url": false,
-      path: false,
-      pg: false,
-      "pg-format": false,
-      "pg-native": false,
-      tls: false,
-      url: false,
-      zlib: false,
-      [path.resolve(__dirname, "./src/webhook/index.ts")]: false,
-      [path.resolve(__dirname, "./src/webhook/interface.ts")]: false,
-      [path.resolve(__dirname, "./src/webhook/Webhook.ts")]: false,
-      [path.resolve(__dirname, "./src/webhook/WebhookBch.ts")]: false,
-      [path.resolve(__dirname, "./src/webhook/WebhookWorker.ts")]: false,
-      [path.resolve(__dirname, "./src/db/SqlProvider.ts")]: false,
     },
-    fallback: {
-      stream: false,
-    },
+    fallback: {},
   },
 };
 
@@ -132,32 +104,11 @@ const webWorkerConfig = {
   },
   resolve: {
     alias: {
-      bufferutil: false,
-      child_process: false,
       crypto: false,
-      dns: false,
-      events: false,
-      eventsource: false,
+      child_process: false,
       fs: false,
-      http: false,
-      https: false,
-      libpq: false,
-      module: false,
-      net: false,
-      os: false,
-      "parse-database-url": false,
-      path: false,
-      pg: false,
-      "pg-format": false,
-      "pg-native": false,
-      solc: false,
-      tls: false,
-      url: false,
-      zlib: false,
     },
-    fallback: {
-      stream: false,
-    },
+    fallback: {},
   },
 };
 

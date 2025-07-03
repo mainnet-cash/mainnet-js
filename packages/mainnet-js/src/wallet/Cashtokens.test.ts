@@ -1,13 +1,12 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
+import { RegTestWallet, TestNetWallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import {
-  OpReturnData,
   SendRequest,
   SendResponse,
   TokenMintRequest,
   TokenSendRequest,
 } from "./model";
-import { Network, NFTCapability } from "../interface";
+import { NFTCapability } from "../interface";
 import {
   binToHex,
   binsAreEqual,
@@ -16,8 +15,8 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 import { delay } from "../util";
-import json from "../../polyfill/json";
 import { Config } from "../config";
+import json from "../test/json.test";
 
 beforeAll(async () => {
   await initProviders();

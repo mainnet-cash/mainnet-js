@@ -16,10 +16,9 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 import { mine } from "../mine";
-import json from "../../polyfill/json";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 import { Config } from "../config";
 import { CancelFn } from "./interface";
+import json from "../test/json.test";
 
 beforeAll(async () => {
   await initProviders();
