@@ -1,6 +1,56 @@
 Newest changes
 --------------
 
+2.7.0
+
+* Fix: do not fail the exchange rate request upon library load when, for example, going offline
+* Update docker-compose BCHN version to latest 28.0.1
+* Update cashscript to latest 0.11.0
+* Update libauth to ^3.1.0-next.2 and elecrum-cash to ^4.1.1 to match the cashscript's versions and eliminate the doubled dependencies
+* Rework `ElectrumNetworkProvider` to use the latest @electrum-cash/network
+  - Breaking: the cluster support is removed
+  - Breaking: the provider now behaves the same as the base library, triggering the subscription callbacks immediately after subscribing with some initial request response data returned, such as status, height, etc
+  - Breaking: waiting and watching utilities are now async functions and need to be awaited
+* Cleanup the old and now obsolete code
+  - Remove remnants of smartBCH code
+  - Remove `events` and `eventsource`, `stream-browserify` and other webpack dependencies. Cleanup webpack config.
+  - Remove `polyfills` directory with now dead code
+* Breaking: rework `Wallet` classes
+  - Move lots of common code to the `BaseWallet` from Wif.ts
+  - `BaseWallet` is now repurposed from abstract class to be a keyless wallet class (`WatchOnly`), lacking private key related accessors
+  - `WatchWallet` now inherits from `BaseWallet`
+  - Other private key based wallets (`Seed` and `Wif`) now inherit from `BaseWallet` with many of their properties becoming non-optional
+  - Many other properties are now non-optional and do not need the `?.` accessors, like `wallet?.provider`
+  - Rework Wallet.util interface to break the circular dependency inducing side effects
+* Breaking: remove `qrcode-svg` dependency and remove wallet methods to get QR code images
+  - It is now up to user to chose the library for QR code generation and rendering
+  - The code snippet to produce the QR codes can be found below:
+
+```typescript
+import QRCode from "qrcode-svg";
+
+/**
+ * qrAddress returns a qr code for a given cashaddress as raw utf-8 svg
+ * @param  {string} address
+ * @param  {} size=256 The width and height of the returned image
+ * @returns Image
+ */
+export function qrAddress(address: string, size = 256) {
+  const svg = new QRCode({
+    content: address,
+    width: size,
+    height: size,
+  }).svg();
+
+  const svgB64 = btoa(svg);
+  return {
+    src: `data:image/svg+xml;base64,${svgB64}`,
+    title: address,
+    alt: "a Bitcoin Cash address QR Code",
+  };
+}
+```
+
 2.6.7
 
 * CI: update pypi-publish version
