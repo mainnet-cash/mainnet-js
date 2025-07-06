@@ -10,7 +10,6 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "dexie": "^3.2.4",
     "mainnet-js": "2.7.0"
   },
   "devDependencies": {
