@@ -130,4 +130,5 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   throw Error(`Currency '${symbol}' is not supported.`);
 }
 
-await ExchangeRate.get("usd");
+// do not await and do not throw in case we are offline
+ExchangeRate.get("usd").catch(() => {});

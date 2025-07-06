@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 2.6.7
+  version: 2.7.0
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -660,54 +660,6 @@ paths:
                 $ref: '#/components/schemas/DepositAddressResponse'
           description: successful operation
       summary: Get a token aware deposit address in cash address format
-      tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
-  /wallet/deposit_qr:
-    post:
-      operationId: depositQr
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request for a deposit cash address as a Quick Response code (qrcode)
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
-      summary: Get receiving cash address as a qrcode
-      tags:
-      - wallet
-      x-eov-operation-handler: controllers/WalletController
-  /wallet/token_deposit_qr:
-    post:
-      operationId: tokenDepositQr
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SerializedWallet'
-        description: |
-          Request for a token aware deposit cash address as a Quick Response code (qrcode)
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScalableVectorGraphic'
-          description: |
-            A Qr code image data encoded string in the src field suitable for inclusion in html using:
-               - \<img src\=\"{response.src}"\>
-      summary: Get receiving token aware cash address as a qrcode
       tags:
       - wallet
       x-eov-operation-handler: controllers/WalletController
@@ -2649,27 +2601,6 @@ components:
       properties:
         cashaddr:
           example: bchtest:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-    ScalableVectorGraphic:
-      example:
-        src: "data:image/svg+xml;base64,PD94bWwgdm... ==**"
-        alt: A Bitcoin Cash Qr Code
-        title: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-      properties:
-        src:
-          description: |
-            A Qr code image data in svg format as utf-8 encoded string.
-            Suitable for inclusion in html using:
-                - \<img src\=\"**data:image/svg+xml;base64,PD94bWwgdm... ==**"\>
-          example: "data:image/svg+xml;base64,PD94bWwgdm... ==**"
-          type: string
-        title:
-          description: hover text for graphic
-          example: bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0
-          type: string
-        alt:
-          description: assistive text
-          example: A Bitcoin Cash Qr Code
           type: string
     SerializedUtxo:
       description: Serialized unspent outpoint

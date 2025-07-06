@@ -163,35 +163,6 @@ describe("Test Wallet Endpoints", () => {
   });
 
   /**
-   * depositQr
-   */
-  it("Should get the deposit qr from a regtest wallet", async () => {
-    let resp = await request(app).post("/wallet/deposit_qr").send({
-      walletId:
-        `wif:regtest:${process.env.PRIVATE_WIF}`,
-    });
-    let body = resp.body;
-
-    expect(resp.statusCode).toBe(200);
-    expect(
-      body!.src!.slice(0,36)
-    ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
-    expect(body!.title).toBe("bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0")
-
-    resp = await request(app).post("/wallet/token_deposit_qr").send({
-      walletId:
-        `wif:regtest:${process.env.PRIVATE_WIF}`,
-    });
-    body = resp.body;
-
-    expect(resp.statusCode).toBe(200);
-    expect(
-      body!.src!.slice(0,36)
-    ).toBe("data:image/svg+xml;base64,PD94bWwgdm");
-    expect(body!.title).toBe("bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu")
-  });
-
-  /**
    * getHistory
    */
    it("Should return a wallet history", async () => {

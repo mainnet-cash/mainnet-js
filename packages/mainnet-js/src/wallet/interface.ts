@@ -1,6 +1,5 @@
 import { WalletTypeEnum, FeePaidByEnum } from "./enum.js";
 import { NetworkEnum } from "../enum.js";
-import { ImageI } from "../qr/interface.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
 import { UtxoI } from "../interface.js";
@@ -66,8 +65,8 @@ export interface MnemonicI {
 export interface WalletI {
   // Accessors
   getDepositAddress(): string;
-  getDepositQr(): ImageI;
-  getSeed(): MnemonicI;
+  getTokenDepositAddress(): string;
+  // getSeed(): MnemonicI;
   // getNetworkProvider(network: NetworkType): any;
   // generate(): Promise<this>;
 
@@ -101,4 +100,4 @@ export interface WaitForTransactionResponse {
   balance?: BalanceResponse;
 }
 
-export type CancelWatchFn = () => Promise<void>;
+export type CancelFn = () => Promise<void>;

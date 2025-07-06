@@ -2,7 +2,7 @@ module.exports = {
   rootDir: "./",
   preset: "ts-jest/presets/default-esm",
   resolver: "ts-jest-resolver",
-  collectCoverage: true,
+  collectCoverage: process.env.COVERAGE === "true",
   collectCoverageFrom: [
     "**/*.{js,jsx,ts}",
     "!**/node_modules/**",

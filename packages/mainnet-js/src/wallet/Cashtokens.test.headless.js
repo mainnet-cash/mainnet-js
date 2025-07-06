@@ -474,7 +474,7 @@ describe(`Wallet should function in the browser`, () => {
         0
       );
 
-      const cancel = bob.watchTokenBalance(tokenId, (balance) => {
+      const cancel = await bob.watchTokenBalance(tokenId, (balance) => {
         seenBalance = balance;
       });
 

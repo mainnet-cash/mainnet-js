@@ -1,14 +1,14 @@
 import SqlProvider from "../SqlProvider.js";
-import { TxI } from "mainnet-js";
+import { CancelFn, TxI } from "mainnet-js";
 import { ElectrumRawTransaction } from "mainnet-js";
 import { balanceResponseFromSatoshi } from "mainnet-js";
-import { Wallet } from "mainnet-js";
+import { BaseWallet } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
 import WebhookWorker from "./WebhookWorker.js";
 
 export class WebhookBch extends Webhook {
-  callback!: (data: any | string | Array<string>) => void;
-  wallet!: Wallet;
+  cancel!: CancelFn;
+  wallet!: BaseWallet;
 
   db!: SqlProvider;
   seenStatuses: string[] = [];
@@ -19,10 +19,7 @@ export class WebhookBch extends Webhook {
   }
 
   async stop(): Promise<void> {
-    await this.wallet.provider!.unsubscribeFromAddress(
-      this.cashaddr,
-      this.callback
-    );
+    await this.cancel?.();
   }
 
   async start(): Promise<void> {
@@ -38,7 +35,7 @@ export class WebhookBch extends Webhook {
         }
       } else if (data instanceof Array) {
         status = data[1];
-        if (data[0] !== this.cashaddr) {
+        if (data[0] !== this.cashaddr || status === null) {
           // console.warn("Address missmatch, skipping", data[0], this.cashaddr);
           return;
         }
@@ -46,17 +43,16 @@ export class WebhookBch extends Webhook {
         return;
       }
 
-      if (status != this.status && this.seenStatuses.indexOf(status) === -1) {
+      if (status !== this.status && this.seenStatuses.indexOf(status) === -1) {
         this.seenStatuses.push(status);
         await this.handler(status);
       }
     };
 
-    this.callback = webhookCallback;
-    this.wallet = await Wallet.fromCashaddr(this.cashaddr);
-    await this.wallet.provider!.subscribeToAddress(
+    this.wallet = await BaseWallet.fromCashaddr(this.cashaddr);
+    this.cancel = await this.wallet.provider!.subscribeToAddress(
       this.cashaddr,
-      this.callback
+      webhookCallback
     );
   }
 

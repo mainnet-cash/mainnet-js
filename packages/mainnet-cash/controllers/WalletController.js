@@ -24,14 +24,6 @@ export const tokenDepositAddress = async (request, response) => {
   await Controller.handleRequest(request, response, service.tokenDepositAddress);
 };
 
-export const depositQr = async (request, response) => {
-  await Controller.handleRequest(request, response, service.depositQr);
-};
-
-export const tokenDepositQr = async (request, response) => {
-  await Controller.handleRequest(request, response, service.tokenDepositQr);
-};
-
 export const encodeTransaction = async (request, response) => {
   await Controller.handleRequest(request, response, service.encodeTransaction);
 };

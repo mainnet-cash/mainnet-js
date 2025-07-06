@@ -35,7 +35,7 @@ describe("Exchange rate tests", () => {
     const bob = await RegTestWallet.newRandom();
     const balance = (await alice.getBalance()) as BalanceResponse;
     let cbCounter = 0;
-    const cancelWatchFn = alice.watchBalanceUsd(async (newBalance) => {
+    const cancelWatchFn = await alice.watchBalanceUsd(async (newBalance) => {
       cbCounter++;
       if (cbCounter === 1) {
         expect(newBalance.usd!).toBeGreaterThan(balance.usd!);

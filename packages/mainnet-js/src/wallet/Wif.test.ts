@@ -16,9 +16,9 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 import { mine } from "../mine";
-import json from "../../polyfill/json";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider";
 import { Config } from "../config";
+import { CancelFn } from "./interface";
+import json from "../test/json.test";
 
 beforeAll(async () => {
   await initProviders();
@@ -642,9 +642,9 @@ describe(`Wallet subscriptions`, () => {
   test("Should watch then wait", async () => {
     const aliceWallet = await RegTestWallet.newRandom();
 
-    let cancel = aliceWallet.watchBalance(() => {});
+    let cancel = await aliceWallet.watchBalance(() => {});
 
-    cancel();
+    await cancel();
   });
 
   test("Should wait for balance", async () => {
@@ -677,7 +677,7 @@ describe(`Wallet subscriptions`, () => {
       },
     ]);
 
-    let cancel = bob.watchBalance(() => {});
+    let cancel = await bob.watchBalance(() => {});
     let balance = await bob.waitForBalance(2000, "sat");
     expect(balance.sat!).toBe(2000);
     await cancel();
@@ -801,50 +801,56 @@ describe(`Wallet subscriptions`, () => {
     }, 0);
 
     let aliceWatchResult = false;
-    const aliceWatchCancel = (
-      alice.provider! as ElectrumNetworkProvider
-    ).watchAddressStatus(alice.getDepositAddress(), (_status) => {
-      aliceWatchCancel();
-      aliceWatchResult = true;
-    });
+    let aliceWatchCancel: CancelFn;
+    aliceWatchCancel = await alice.provider!.watchAddressStatus(
+      alice.getDepositAddress(),
+      async (_status) => {
+        await aliceWatchCancel?.();
+        aliceWatchResult = true;
+      }
+    );
 
     let bobWatchResult = false;
     let bobTransactionId = "";
-    const bobWatchCancel = bob.watchAddress((txHash) => {
-      bobWatchCancel();
+    let bobWatchCancel: CancelFn;
+    bobWatchCancel = await bob.watchAddress(async (txHash) => {
+      await bobWatchCancel?.();
       bobWatchResult = true;
       bobTransactionId = txHash;
     });
 
     let bobBalanceWatchResult = false;
-    const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+    let bobBalanceWatchCancel: CancelFn;
+    bobBalanceWatchCancel = await bob.watchBalance(async (balance) => {
+      // skip if balance is zero yet
+      if (!balance.bch) {
+        return;
+      }
+
       expect(balance.bch!).toBe(0.001);
-      bobBalanceWatchCancel();
+      await bobBalanceWatchCancel?.();
       bobBalanceWatchResult = true;
     });
 
     let blockWatchResult = false;
-    const blockWatchCancel = bob.watchBlocks((block) => {
+    let blockWatchCancel: CancelFn;
+    blockWatchCancel = await bob.watchBlocks(async (block) => {
       expect(block.height).toBeGreaterThan(1);
-      blockWatchCancel();
+      await blockWatchCancel?.();
       blockWatchResult = true;
     });
 
+    const blockNumber = await alice.provider!.getBlockHeight();
+
     let blockWaitResult = false;
     setTimeout(async () => {
-      const blockNumber = await (
-        alice.provider! as ElectrumNetworkProvider
-      ).getBlockHeight();
-      const result = await alice.waitForBlock();
+      const result = await alice.waitForBlock(blockNumber + 1);
       expect(result.height).toBe(blockNumber + 1);
       blockWaitResult = true;
     }, 0);
 
     let blockNumberWaitResult = false;
     setTimeout(async () => {
-      const blockNumber = await (
-        alice.provider! as ElectrumNetworkProvider
-      ).getBlockHeight();
       const result = await alice.waitForBlock(blockNumber + 2);
       expect(result.height).toBe(blockNumber + 2);
       blockNumberWaitResult = true;
@@ -1068,7 +1074,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
-    aliceWallet.privateKey = undefined;
+    delete (aliceWallet as any).privateKey;
 
     const aliceUtxos = await aliceWallet.getAddressUtxos();
 

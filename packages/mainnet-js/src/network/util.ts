@@ -1,4 +1,3 @@
-import { ElectrumTransport, TransportScheme } from "electrum-cash";
 import { ElectrumHostParams } from "./interface.js";
 
 export function parseElectrumUrl(givenUrl: string): ElectrumHostParams {
@@ -10,22 +9,22 @@ export function parseElectrumUrl(givenUrl: string): ElectrumHostParams {
 }
 
 function getElectrumScheme(protocol: string) {
-  let transport: TransportScheme;
+  let transport: string;
   switch (protocol) {
     case "http:":
-      transport = ElectrumTransport.TCP.Scheme;
+      transport = "tcp";
       break;
     case "https:":
-      transport = ElectrumTransport.TCP_TLS.Scheme;
+      transport = "tcp_tls";
       break;
     case "ws:":
-      transport = ElectrumTransport.WS.Scheme;
+      transport = "ws";
       break;
     case "wss:":
-      transport = ElectrumTransport.WSS.Scheme;
+      transport = "wss";
       break;
     default:
       throw Error("Electrum transport protocol not understood.");
   }
-  return transport as "tcp" | "tcp_tls" | "ws" | "wss" | undefined;
+  return transport as "tcp" | "tcp_tls" | "ws" | "wss";
 }

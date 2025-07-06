@@ -132,17 +132,6 @@ describe(`Wallet should function in the browser`, () => {
     expect(result.slice(0, 10)).toBe("bchtest:qp");
   });
 
-  test(`Should return deposit qr from testnet wallet`, async () => {
-    const result = await page.evaluate(async (wif) => {
-      BaseWallet.StorageProvider = IndexedDBProvider;
-      const alice = await TestNetWallet.fromWIF(wif);
-      return alice.getDepositQr();
-    }, process.env.PRIVATE_WIF);
-    expect(
-      result.src.startsWith("data:image/svg+xml;base64,PD94bWwgdm")
-    ).toBeTruthy();
-  });
-
   test(`Should return deposit address from testnet wallet`, async () => {
     const result = await page.evaluate(async (wif) => {
       BaseWallet.StorageProvider = IndexedDBProvider;
@@ -334,9 +323,14 @@ describe(`Wallet should function in the browser`, () => {
       // });
 
       let bobBalanceWatchResult = false;
-      const bobBalanceWatchCancel = bob.watchBalance((balance) => {
+      const bobBalanceWatchCancel = await bob.watchBalance(async (balance) => {
+        // skip if balance is zero yet
+        if (!balance.bch) {
+          return;
+        }
+
         expect(balance.bch).toBe(0.001);
-        bobBalanceWatchCancel();
+        await bobBalanceWatchCancel();
         bobBalanceWatchResult = true;
       });
 

@@ -1,4 +1,5 @@
 import { TxI, UtxoI, Network, HexHeaderI, HeaderI } from "../interface.js";
+import { CancelFn } from "../wallet/interface.js";
 
 export default interface NetworkProvider {
   /**
@@ -93,18 +94,7 @@ export default interface NetworkProvider {
   subscribeToAddress(
     cashaddr: string,
     callback: (data: any) => void
-  ): Promise<void>;
-
-  /**
-   * Unsubscribe from the address change events
-   * @param cashaddr The CashAddress for which we wish to retrieve history.
-   * @throws {Error} If the unsubscription failed.
-   * @returns nothing.
-   */
-  unsubscribeFromAddress(
-    cashaddr: string,
-    callback: (data: any) => void
-  ): Promise<void>;
+  ): Promise<CancelFn>;
 
   /**
    * Subscribe to a transaction in order to receive future notifications if its confirmation status changes.
@@ -115,18 +105,7 @@ export default interface NetworkProvider {
   subscribeToTransaction(
     txHash: string,
     callback: (data: any) => void
-  ): Promise<void>;
-
-  /**
-   * Unsubscribe from a transaction, preventing future notifications if its confirmation status changes.
-   * @param txHash The transaction hash as a hexadecimal string.
-   * @throws {Error} If the subscription failed.
-   * @returns nothing.
-   */
-  unsubscribeFromTransaction(
-    txHash: string,
-    callback: (data: any) => void
-  ): Promise<void>;
+  ): Promise<CancelFn>;
 
   /**
    * Function to wait for connection to be ready
@@ -136,14 +115,14 @@ export default interface NetworkProvider {
   ready(timeout?: number): Promise<boolean | unknown>;
 
   /**
-   * Function to connect manually if using persistent connections
-   * @returns array of connection boolean successes, or throws error
+   * Function to connect manually if using persistent connection
+   * @returns a promise resolving when the connection is established.
    */
-  connect(): Promise<void[]>;
+  connect(): Promise<void>;
 
   /**
-   * Function to disconnect manually if using persistent connections
-   * @returns array of connection boolean successes, or throws error
+   * Function to disconnect manually if using persistent connection
+   * @returns true if successfully disconnected, or false if there was no connection
    */
-  disconnect(): Promise<boolean[]>;
+  disconnect(): Promise<boolean>;
 }

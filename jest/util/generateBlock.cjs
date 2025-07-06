@@ -1,14 +1,18 @@
 const { spawnSync } = require("child_process");
-const electron = require("electrum-cash");
+const electron = require("@electrum-cash/network");
+const websocket = require("@electrum-cash/web-socket");
 
 async function getRegtestUtxos(address) {
   try {
-    const spv = new electron.ElectrumClient(
-      "Mainnet Regtest Client",
-      "1.5",
+    const webSocket = new websocket.ElectrumWebSocket(
       "127.0.0.1",
       60003,
-      electron.ElectrumTransport.WS.Scheme
+      false
+    );
+    const spv = new electron.ElectrumClient(
+      "Mainnet.Cash Regtest Client",
+      "1.5",
+      webSocket
     );
     try {
       await spv.connect();

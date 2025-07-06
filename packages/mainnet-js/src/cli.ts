@@ -22,10 +22,6 @@ args.shift(); // remove cli.ts
       });
       console.log(response);
       break;
-    case "wallet/deposit_qr":
-      w = await walletFromId(args[0]);
-      console.log(w.depositQr());
-      break;
     case "wallet/deposit_address":
       w = await walletFromId(args[0]);
       console.log(w.depositAddress());

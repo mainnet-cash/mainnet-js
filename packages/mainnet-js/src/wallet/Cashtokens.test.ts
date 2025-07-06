@@ -1,13 +1,12 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
+import { RegTestWallet, TestNetWallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import {
-  OpReturnData,
   SendRequest,
   SendResponse,
   TokenMintRequest,
   TokenSendRequest,
 } from "./model";
-import { Network, NFTCapability } from "../interface";
+import { NFTCapability } from "../interface";
 import {
   binToHex,
   binsAreEqual,
@@ -16,8 +15,8 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 import { delay } from "../util";
-import json from "../../polyfill/json";
 import { Config } from "../config";
+import json from "../test/json.test";
 
 beforeAll(async () => {
   await initProviders();
@@ -318,13 +317,13 @@ describe(`Test cashtokens`, () => {
     const bob = await RegTestWallet.newRandom();
     await alice.send([
       new TokenSendRequest({
-        cashaddr: bob.address!,
+        cashaddr: bob.cashaddr!,
         tokenId: tokenId,
         capability: NFTCapability.none,
         commitment: "0a",
       }),
       new TokenSendRequest({
-        cashaddr: bob.address!,
+        cashaddr: bob.cashaddr!,
         tokenId: tokenId,
         capability: NFTCapability.none,
         commitment: "0a",
@@ -621,12 +620,12 @@ describe(`Test cashtokens`, () => {
       0
     );
 
-    const cancel = bob.watchTokenBalance(tokenId, (balance) => {
+    const cancel = await bob.watchTokenBalance(tokenId, (balance) => {
       seenBalance = balance;
     });
 
     let bobTxId = ".";
-    const txCancel = bob.watchAddressTokenTransactions((tx) => {
+    const txCancel = await bob.watchAddressTokenTransactions((tx) => {
       bobTxId = tx.txid;
     });
 

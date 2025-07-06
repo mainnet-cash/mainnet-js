@@ -14,7 +14,7 @@ describe(`Test bip39 edge cases`, () => {
   test("Should catch a blank seed", async () => {
     try {
       let w = RegTestWallet.fromSeed("");
-      let cashaddr = (await w).address;
+      let cashaddr = (await w).cashaddr;
       expect(cashaddr).toContain(
         "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
       );
@@ -28,7 +28,7 @@ describe(`Test bip39 edge cases`, () => {
       let w = RegTestWallet.fromSeed(
         "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon"
       );
-      let cashaddr = (await w).address;
+      let cashaddr = (await w).cashaddr;
       expect(cashaddr).toContain(
         "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
       );
@@ -41,7 +41,7 @@ describe(`Test bip39 edge cases`, () => {
     let w = RegTestWallet.fromSeed(
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     );
-    let cashaddr = (await w).address;
+    let cashaddr = (await w).cashaddr;
     expect(cashaddr).toContain(
       "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
     );

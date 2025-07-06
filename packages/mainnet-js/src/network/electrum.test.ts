@@ -1,4 +1,4 @@
-import { ElectrumClient } from "electrum-cash";
+import { ElectrumClient } from "@electrum-cash/network";
 import { getNetworkProvider } from ".";
 import { Network } from "../interface";
 
@@ -6,9 +6,7 @@ test("Should get a transaction with bare electrum", async () => {
   const electrum = new ElectrumClient(
     "Electrum client example",
     "1.4.1",
-    "bch.imaginary.cash",
-    50004,
-    "wss"
+    "bch.imaginary.cash"
   );
   await electrum.connect();
   const transactionID =
