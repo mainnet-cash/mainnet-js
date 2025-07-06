@@ -1,190 +1,100 @@
 //#region Imports
-// Stable
 import {
-  decodeCashAddress,
   encodeHdPublicKey,
   HdKeyNetwork,
-  hexToBin,
   secp256k1,
 } from "@bitauth/libauth";
 
-// Unstable?
 import {
   binToHex,
   CashAddressNetworkPrefix,
-  CashAddressType,
-  deriveHdPublicNode,
   decodePrivateKeyWif,
-  encodeCashAddress,
-  encodePrivateKeyWif,
-  deriveHdPrivateNodeFromSeed,
   deriveHdPath,
+  deriveHdPrivateNodeFromSeed,
+  deriveHdPublicNode,
+  encodePrivateKeyWif,
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { mnemonicToSeedSync, generateMnemonic } from "@scure/bip39";
-import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
+import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
+import { NetworkType } from "../enum.js";
 
-import { Network, HexHeaderI, TxI, NFTCapability } from "../interface.js";
+import { PrivateKeyI } from "../interface.js";
 
-import { networkPrefixMap } from "../enum.js";
-import { PrivateKeyI, UtxoI } from "../interface.js";
-
-import { BaseWallet } from "./Base.js";
-import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
+import { WalletTypeEnum } from "./enum.js";
 import {
-  CancelFn,
+  MnemonicI,
   SendRequestOptionsI,
-  WaitForTransactionOptions,
-  WaitForTransactionResponse,
   WalletInfoI,
 } from "./interface.js";
 
 import {
-  fromUtxoId,
   OpReturnData,
   SendRequest,
   SendRequestArray,
-  SendRequestType,
   SendResponse,
   SourceOutput,
-  TokenBurnRequest,
-  TokenGenesisRequest,
-  TokenMintRequest,
   TokenSendRequest,
   XPubKey,
 } from "./model.js";
 
 import {
-  buildEncodedTransaction,
-  getSuitableUtxos,
-  getFeeAmount,
   signUnsignedTransaction,
-  getFeeAmountSimple,
 } from "../transaction/Wif.js";
 
-import { asSendRequestObject } from "../util/asSendRequestObject.js";
-import {
-  balanceFromSatoshi,
-  balanceResponseFromSatoshi,
-  BalanceResponse,
-} from "../util/balanceObjectFromSatoshi.js";
+import { DERIVATION_PATHS } from "../constant.js";
+import { SignedMessage, SignedMessageI } from "../message/index.js";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
+import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
 import {
   deriveCashaddr,
   deriveTokenaddr,
-  toTokenaddr,
 } from "../util/deriveCashaddr.js";
 import {
-  derivePrefix,
   derivePublicKeyHash,
 } from "../util/derivePublicKeyHash.js";
-import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
-import { sanitizeUnit } from "../util/sanitizeUnit.js";
-import { sumTokenAmounts, sumUtxoValue } from "../util/sumUtxoValue.js";
-import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
-import { ElectrumRawTransaction } from "../network/interface.js";
-import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
-import {
-  RegTestUtil,
-  RegTestWatchUtil,
-  RegTestWifUtil,
-  TestNetUtil,
-  TestNetWatchUtil,
-  TestNetWifUtil,
-  Util,
-  WatchUtil,
-  WifUtil,
-} from "./Util.js";
-import { getNetworkProvider } from "../network/index.js";
-import { generateRandomBytes } from "../util/randomBytes.js";
-import { SignedMessageI, SignedMessage } from "../message/index.js";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
-import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { getXPubKey } from "../util/getXPubKey.js";
-import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD } from "../constant.js";
+import { generateRandomBytes } from "../util/randomBytes.js";
 
-import { getAddressHistory } from "../history/electrumTransformer.js";
-import { IdentitySnapshot } from "./bcmr-v2.schema.js";
-import { BCMR } from "./Bcmr.js";
 import { Config } from "../config.js";
-import { checkUtxos } from "../util/checkUtxos.js";
-import { TransactionHistoryItem } from "../history/interface.js";
-
+import { BalanceResponse, balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi.js";
+import { BaseWallet } from "./Base.js";
 //#endregion Imports
-
-const placeholderPrivateKey =
-  "0000000000000000000000000000000000000000000000000000000000000001";
 
 /**
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends BaseWallet {
-  static networkPrefix = CashAddressNetworkPrefix.mainnet;
-
-  provider?: ElectrumNetworkProvider;
-  cashaddr?: string;
-  tokenaddr?: string;
+  declare provider: ElectrumNetworkProvider;
+  declare cashaddr: string;
+  declare tokenaddr: string;
   derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
   parentDerivationPath: string = Config.DefaultParentDerivationPath;
-  parentXPubKey?: string;
-  privateKey?: Uint8Array;
-  publicKeyCompressed?: Uint8Array;
-  privateKeyWif?: string;
-  publicKey?: Uint8Array;
-  publicKeyHash?: Uint8Array;
-  networkPrefix: CashAddressNetworkPrefix;
-  _slpSemiAware: boolean = false; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
-  _util?: Util;
+  mnemonic!: string;
+  parentXPubKey!: string;
+  privateKey!: Uint8Array;
+  publicKeyCompressed!: Uint8Array;
+  privateKeyWif!: string;
+  publicKey!: Uint8Array;
+  declare publicKeyHash: Uint8Array;
+  declare name: string;
   static signedMessage: SignedMessageI = new SignedMessage();
 
   //#region Accessors
-  // interface to util functions. see Util.ts
-  public get util() {
-    if (!this._util) {
-      this._util = new Util(this);
+  // Get mnemonic and derivation path for wallet
+  public getSeed(): MnemonicI {
+    if (!this.mnemonic) {
+      throw Error("Wallet mnemonic seed phrase not set");
     }
-
-    return this._util;
-  }
-
-  // interface to util util. see Util.Util
-  public static get util() {
-    return Util;
-  }
-
-  public slpSemiAware(value: boolean = true): Wallet {
-    this._slpSemiAware = value;
-    return this;
-  }
-
-  public getNetworkProvider(network: Network = Network.MAINNET) {
-    return getNetworkProvider(network);
-  }
-
-  /**
-   * getTokenDepositAddress - get a cashtoken aware wallet deposit address
-   *
-   * @returns The cashtoken aware deposit address as a string
-   */
-  public getTokenDepositAddress(): string {
-    return this.tokenaddr!;
-  }
-
-  /**
-   *  explorerUrl   Web url to a transaction on a block explorer
-   *
-   * @param txId   transaction Id
-   * @returns   Url string
-   */
-  public explorerUrl(txId: string) {
-    const explorerUrlMap = {
-      mainnet: "https://blockchair.com/bitcoin-cash/transaction/",
-      testnet: "https://www.blockchain.com/bch-testnet/tx/",
-      regtest: "",
+    if (!this.derivationPath) {
+      throw Error("Wallet derivation path not set");
+    }
+    return {
+      seed: this.mnemonic,
+      derivationPath: this.derivationPath,
+      parentDerivationPath: this.parentDerivationPath,
     };
-
-    return explorerUrlMap[this.network] + txId;
   }
 
   // Return wallet info
@@ -201,9 +111,9 @@ export class Wallet extends BaseWallet {
         ? this.getSeed().parentDerivationPath
         : undefined,
       parentXPubKey: this.parentXPubKey ? this.parentXPubKey : undefined,
-      publicKey: this.publicKey ? binToHex(this.publicKey!) : undefined,
-      publicKeyHash: binToHex(this.publicKeyHash!),
-      privateKey: this.privateKey ? binToHex(this.privateKey!) : undefined,
+      publicKey: this.publicKey ? binToHex(this.publicKey) : undefined,
+      publicKeyHash: binToHex(this.publicKeyHash),
+      privateKey: this.privateKey ? binToHex(this.privateKey) : undefined,
       privateKeyWif: this.privateKeyWif,
       walletId: this.toString(),
       walletDbEntry: this.toDbString(),
@@ -213,7 +123,7 @@ export class Wallet extends BaseWallet {
   // returns the public key hash for an address
   public getPublicKey(hex = false): string | Uint8Array {
     if (this.publicKey) {
-      return hex ? binToHex(this.publicKey!) : this.publicKey;
+      return hex ? binToHex(this.publicKey) : this.publicKey;
     } else {
       throw Error(
         "The public key for this wallet is not known, perhaps the wallet was created to watch the *hash* of a public key? i.e. a cashaddress."
@@ -225,7 +135,7 @@ export class Wallet extends BaseWallet {
   public getPublicKeyCompressed(hex = false): string | Uint8Array {
     if (this.publicKeyCompressed) {
       return hex
-        ? binToHex(this.publicKeyCompressed!)
+        ? binToHex(this.publicKeyCompressed)
         : this.publicKeyCompressed;
     } else {
       throw Error(
@@ -233,18 +143,6 @@ export class Wallet extends BaseWallet {
       );
     }
   }
-
-  // returns the public key hash for an address
-  public getPublicKeyHash(hex = false): string | Uint8Array {
-    if (this.publicKeyHash) {
-      return hex ? binToHex(this.publicKeyHash!) : this.publicKeyHash;
-    } else {
-      throw Error(
-        "The public key hash for this wallet is not known. If this wallet was created from the constructor directly, calling the deriveInfo() function may help. "
-      );
-    }
-  }
-
   //#endregion
 
   //#region Constructors and Statics
@@ -253,8 +151,24 @@ export class Wallet extends BaseWallet {
     network = NetworkType.Mainnet,
     walletType = WalletTypeEnum.Seed
   ) {
-    super(name, network, walletType);
-    this.networkPrefix = prefixFromNetworkMap[this.network];
+    super(network);
+    this.name = name;
+    this.walletType = walletType;
+  }
+
+  //#region Statics
+  /**
+   * fromId - create a wallet from encoded walletId string
+   *
+   * @param walletId   walletId options to steer the creation process
+   *
+   * @returns wallet instantiated accordingly to the walletId rules
+   */
+  public static async fromId<T extends typeof Wallet>(
+    this: T,
+    walletId: string
+  ): Promise<InstanceType<T>> {
+    return new this().fromId(walletId) as InstanceType<T>;
   }
 
   /**
@@ -272,47 +186,42 @@ export class Wallet extends BaseWallet {
   }
 
   /**
-   * fromCashaddr - create a watch-only wallet in the network derived from the address
+   * fromSeed - create a wallet using the seed phrase and derivation path
    *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   * unless specified the derivation path m/44'/245'/0'/0/0 will be userd
+   * this derivation path is standard for Electron Cash SLP and other SLP enabled wallets
    *
-   * @param address   cashaddress of a wallet
+   * @param seed   BIP39 12 word seed phrase
+   * @param derivationPath BIP44 HD wallet derivation path to get a single the private key from hierarchy
    *
    * @returns instantiated wallet
    */
-  public static async fromCashaddr<T extends typeof Wallet>(
+  public static async fromSeed<T extends typeof Wallet>(
     this: T,
-    address: string
+    seed: string,
+    derivationPath?: string
   ): Promise<InstanceType<T>> {
-    const prefix = derivePrefix(address);
-    const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this("", networkType, WalletTypeEnum.Watch).watchOnly(
-      address
-    ) as InstanceType<T>;
+    return new this().fromSeed(seed, derivationPath) as InstanceType<T>;
   }
 
   /**
-   * fromTokenaddr - create a watch-only wallet in the network derived from the address
+   * newRandom - create a random wallet
    *
-   * such kind of wallet does not have a private key and is unable to spend any funds
-   * however it still allows to use many utility functions such as getting and watching balance, etc.
+   * if `name` parameter is specified, the wallet will also be persisted to DB
    *
-   * @param address   token aware cashaddress of a wallet
+   * @param name   user friendly wallet alias
+   * @param dbName name under which the wallet will be stored in the database
    *
    * @returns instantiated wallet
    */
-  public static async fromTokenaddr<T extends typeof Wallet>(
+  public static async newRandom<T extends typeof Wallet>(
     this: T,
-    address: string
+    name: string = "",
+    dbName?: string
   ): Promise<InstanceType<T>> {
-    const prefix = derivePrefix(address);
-    const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this("", networkType, WalletTypeEnum.Watch).watchOnly(
-      address
-    ) as InstanceType<T>;
+    return new this().newRandom(name, dbName) as InstanceType<T>;
   }
-  //#endregion Constructors and Statics
+  //#endregion Constructors
 
   //#region Protected implementations
   protected async generate(): Promise<this> {
@@ -341,7 +250,7 @@ export class Wallet extends BaseWallet {
     this.mnemonic = generateMnemonic(Config.getWordlist());
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic!);
+    const seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
     const network = this.isTestnet ? "testnet" : "mainnet";
     this.parentXPubKey = getXPubKey(seed, this.parentDerivationPath, network);
@@ -362,18 +271,45 @@ export class Wallet extends BaseWallet {
   }
 
   protected fromId = async (walletId: string): Promise<this> => {
-    const [walletType, networkGiven, arg1]: string[] = walletId.split(":");
+    const [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
 
-    if (this.network != networkGiven) {
+    if (this.network !== networkGiven) {
       throw Error(`Network prefix ${networkGiven} to a ${this.network} wallet`);
     }
 
     // "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
-    if (walletType === "wif") {
-      return this.fromWIF(arg1);
-    }
+    switch (walletType) {
+      case "wif":
+        return this.fromWIF(arg1);
 
-    return super.fromId(walletId);
+      case "watch":
+        if (arg2) {
+          // watch:testnet:bchtest:qq1234567
+          return this.watchOnly(`${arg1}:${arg2}`);
+        }
+        // watch:testnet:qq1234567
+        return this.watchOnly(`${arg1}`);
+
+      case "named":
+        if (arg2) {
+          // named:testnet:wallet_1:my_database
+          return this.named(arg1, arg2);
+        } else {
+          // named:testnet:wallet_1
+          return this.named(arg1);
+        }
+
+      case "seed":
+        if (arg2) {
+          // seed:testnet:table later ... stove kitten pluck:m/44'/0'/0'/0/0
+          return this.fromSeed(arg1, arg2);
+        }
+        // seed:testnet:table later ... stove kitten pluck
+        return this.fromSeed(arg1);
+
+      default:
+        throw Error(`Unknown wallet type '${walletType}'`);
+      }
   };
 
   public async getXPubKeys(paths?) {
@@ -435,7 +371,7 @@ export class Wallet extends BaseWallet {
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
     if (!this.mnemonic)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic!);
+    const seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
@@ -479,53 +415,6 @@ export class Wallet extends BaseWallet {
     });
   }
 
-  // Initialize a watch only wallet from a cash addr
-  protected async watchOnly(address: string): Promise<this> {
-    this.walletType = WalletTypeEnum.Watch;
-    const addressComponents = address.split(":");
-    let addressPrefix, addressBase;
-    if (addressComponents.length === 1) {
-      addressBase = addressComponents.shift() as string;
-      addressPrefix = derivePrefix(addressBase);
-    } else {
-      addressPrefix = addressComponents.shift() as string;
-      addressBase = addressComponents.shift() as string;
-      if (addressPrefix in networkPrefixMap) {
-        if (networkPrefixMap[addressPrefix] != this.network) {
-          throw Error(
-            `a ${addressPrefix} address cannot be watched from a ${this.network} Walconst`
-          );
-        }
-      }
-    }
-
-    const prefixedAddress = `${addressPrefix}:${addressBase}`;
-
-    // check if a token aware address was provided
-    const addressData = decodeCashAddress(prefixedAddress);
-    if (typeof addressData === "string") throw addressData;
-
-    this.publicKeyHash = addressData.payload;
-
-    let nonTokenAwareType = addressData.type;
-    if (nonTokenAwareType == CashAddressType.p2pkhWithTokens)
-      nonTokenAwareType = CashAddressType.p2pkh;
-    if (nonTokenAwareType == CashAddressType.p2shWithTokens)
-      nonTokenAwareType = CashAddressType.p2sh;
-    if (nonTokenAwareType == CashAddressType.p2pkh)
-      this.publicKeyHash = addressData.payload;
-
-    this.cashaddr = encodeCashAddress({
-      prefix: addressData.prefix as CashAddressNetworkPrefix,
-      type: nonTokenAwareType,
-      payload: addressData.payload,
-    }).address;
-    this.address = this.cashaddr;
-    this.tokenaddr = deriveTokenaddr(addressData.payload, this.networkPrefix);
-
-    return this;
-  }
-
   // Initialize wallet from Wallet Import Format
   protected async fromWIF(secret: string): Promise<this> {
     checkWifNetwork(secret, this.network);
@@ -543,32 +432,19 @@ export class Wallet extends BaseWallet {
     return this;
   }
 
+  /**
+   * newRandom (internal) if the wallet is named, get or create it; otherwise create a random
+   * unnamed wallet
+   * @param {string} name              name of the wallet
+   * @param {string} dbName            database name the wallet is stored in
+   */
   protected async newRandom(name: string, dbName?: string): Promise<this> {
     dbName = dbName ? dbName : this.networkPrefix;
-    return super.newRandom(name, dbName);
-  }
-
-  protected async named(
-    name: string,
-    dbName?: string,
-    forceNew: boolean = false
-  ): Promise<this> {
-    dbName = dbName ? dbName : this.networkPrefix;
-    return super.named(name, dbName, forceNew);
-  }
-
-  protected async replaceNamed(
-    name: string,
-    walletId: string,
-    dbName?: string
-  ): Promise<this> {
-    dbName = dbName ? dbName : this.networkPrefix;
-    return super.replaceNamed(name, walletId, dbName);
-  }
-
-  protected async namedExists(name: string, dbName?: string): Promise<boolean> {
-    dbName = dbName ? dbName : this.networkPrefix;
-    return super.namedExists(name, dbName);
+    if (name.length > 0) {
+      return this.named(name, dbName);
+    } else {
+      return this.generate();
+    }
   }
   //#endregion Protected Implementations
 
@@ -576,25 +452,33 @@ export class Wallet extends BaseWallet {
   // Returns the serialized wallet as a string
   // If storing in a database, set asNamed to false to store secrets
   // In all other cases, the a named wallet is deserialized from the database
-  //  by the name key
+  // by the name key
   public toString() {
-    const result = super.toString();
-    if (result) return result;
-
-    if (this.walletType === WalletTypeEnum.Wif) {
+    if (this.name) {
+      return `named:${this.network}:${this.name}`;
+    } else if (this.walletType == WalletTypeEnum.Seed) {
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else if (this.walletType === WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    } else if (this.walletType == WalletTypeEnum.Watch) {
+      return super.toString();
     }
 
     throw Error("toString unsupported wallet type");
   }
 
-  //
+  /**
+   * toDbString - store the serialized version of the wallet in the database, not just the name
+   *
+   * @throws {Error} if called on BaseWallet
+   */
   public toDbString() {
-    const result = super.toDbString();
-    if (result) return result;
-
-    if (this.walletType === WalletTypeEnum.Wif) {
+    if (this.walletType == WalletTypeEnum.Seed) {
+      return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else if (this.walletType === WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
+    } else if (this.walletType == WalletTypeEnum.Watch) {
+      return super.toDbString();
     }
 
     throw Error("toDbString unsupported wallet type");
@@ -602,291 +486,6 @@ export class Wallet extends BaseWallet {
   //#endregion Serialization
 
   //#region Funds
-  //
-  public async getAddressUtxos(address?: string): Promise<UtxoI[]> {
-    if (!address) {
-      address = this.cashaddr!;
-    }
-
-    if (this._slpSemiAware) {
-      const bchUtxos: UtxoI[] = await this.provider!.getUtxos(address);
-      return bchUtxos.filter(
-        (bchutxo) => bchutxo.satoshis > DUST_UTXO_THRESHOLD
-      );
-    } else {
-      return await this.provider!.getUtxos(address);
-    }
-  }
-
-  /**
-   * utxos Get unspent outputs for the wallet
-   *
-   */
-  public async getUtxos() {
-    if (!this.cashaddr) {
-      throw Error("Attempted to get utxos without an address");
-    }
-    return await this.getAddressUtxos(this.cashaddr);
-  }
-
-  // gets wallet balance in sats, bch and currency
-  public async getBalance(
-    rawUnit?: string,
-    priceCache = true
-  ): Promise<BalanceResponse | number> {
-    if (rawUnit) {
-      const unit = sanitizeUnit(rawUnit);
-      return await balanceFromSatoshi(
-        await this.getBalanceFromProvider(),
-        unit,
-        priceCache
-      );
-    } else {
-      return await balanceResponseFromSatoshi(
-        await this.getBalanceFromProvider(),
-        priceCache
-      );
-    }
-  }
-
-  // Gets balance by summing value in all utxos in stats
-  public async getBalanceFromUtxos(): Promise<number> {
-    const utxos = (await this.getAddressUtxos(this.cashaddr!)).filter(
-      (val) => val.token === undefined
-    );
-    return sumUtxoValue(utxos);
-  }
-
-  // Gets balance from fulcrum
-  public async getBalanceFromProvider(): Promise<number> {
-    // Fulcrum reports balance of all utxos, including tokens, which is undesirable
-    // // TODO not sure why getting the balance from a provider doesn't work
-    // if (this._slpAware || this._slpSemiAware) {
-    //   return await this.getBalanceFromUtxos();
-    // } else {
-    //   return await this.provider!.getBalance(this.cashaddr!);
-    // }
-
-    // FIXME
-    return this.getBalanceFromUtxos();
-  }
-
-  // watching for any transaction hash of this wallet
-  public async watchAddress(callback: (txHash: string) => void): Promise<CancelFn> {
-    return this.provider!.watchAddress(
-      this.getDepositAddress(),
-      callback
-    );
-  }
-
-  // watching for any transaction of this wallet
-  public async watchAddressTransactions(
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.provider!.watchAddressTransactions(
-      this.getDepositAddress(),
-      callback
-    );
-  }
-
-  // watching for cashtoken transaction of this wallet
-  public async watchAddressTokenTransactions(
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.provider!.watchAddressTokenTransactions(this.getDepositAddress(), callback);
-  }
-
-  // sets up a callback to be called upon wallet's balance change
-  // can be cancelled by calling the function returned from this one
-  public async watchBalance(
-    callback: (balance: BalanceResponse) => void
-  ): Promise<CancelFn> {
-    return this.provider!.watchAddressStatus(
-      this.getDepositAddress(),
-      async (_status: string) => {
-        const balance = (await this.getBalance()) as BalanceResponse;
-        callback(balance);
-      }
-    );
-  }
-
-  // sets up a callback to be called upon wallet's BCH or USD balance change
-  // if BCH balance does not change, the callback will be triggered every
-  // @param `usdPriceRefreshInterval` milliseconds by polling for new BCH USD price
-  // Since we want to be most sensitive to usd value change, we do not use the cached exchange rates
-  // can be cancelled by calling the function returned from this one
-  public async watchBalanceUsd(
-    callback: (balance: BalanceResponse) => void,
-    usdPriceRefreshInterval = 30000
-  ): Promise<CancelFn> {
-    let usdPrice = -1;
-
-    const _callback = async () => {
-      const balance = (await this.getBalance(
-        undefined,
-        false
-      )) as BalanceResponse;
-      if (usdPrice !== balance.usd!) {
-        usdPrice = balance.usd!;
-        callback(balance);
-      }
-    };
-
-    const watchCancel = await this.provider!.watchAddressStatus(this.getDepositAddress(), _callback);
-    const interval = setInterval(_callback, usdPriceRefreshInterval);
-
-    return async () => {
-      await watchCancel?.();
-      clearInterval(interval);
-    };
-  }
-
-  // waits for address balance to be greater than or equal to the target value
-  // this call halts the execution
-  public async waitForBalance(
-    value: number,
-    rawUnit: UnitEnum = UnitEnum.BCH
-  ): Promise<BalanceResponse> {
-    return new Promise(async (resolve) => {
-      let watchCancel: CancelFn;
-      watchCancel = await this.watchBalance(
-        async (balance: BalanceResponse) => {
-          const satoshiBalance = await amountInSatoshi(value, rawUnit);
-          if (balance.sat! >= satoshiBalance) {
-            await watchCancel?.();
-            resolve(balance);
-          }
-        }
-      );
-    });
-  }
-
-  // sets up a callback to be called upon wallet's token balance change
-  // can be cancelled by calling the function returned from this one
-  public async watchTokenBalance(
-    tokenId: string,
-    callback: (balance: bigint) => void
-  ): Promise<CancelFn> {
-    let previous: bigint | undefined = undefined;
-    return await this.provider!.watchAddressStatus(
-      this.getDepositAddress(),
-      async (_status: string) => {
-        const balance = await this.getTokenBalance(tokenId);
-        if (previous != balance) {
-          callback(balance);
-        }
-        previous = balance;
-      }
-    );
-  }
-
-  // waits for address token balance to be greater than or equal to the target amount
-  // this call halts the execution
-  public async waitForTokenBalance(
-    tokenId: string,
-    amount: bigint
-  ): Promise<bigint> {
-    return new Promise(async (resolve) => {
-      let watchCancel: CancelFn;
-      watchCancel = await this.watchTokenBalance(
-        tokenId,
-        async (balance: bigint) => {
-          if (balance >= amount) {
-            await watchCancel?.();
-            resolve(balance);
-          }
-        }
-      );
-    });
-  }
-
-  public async getTokenInfo(
-    tokenId: string
-  ): Promise<IdentitySnapshot | undefined> {
-    return BCMR.getTokenInfo(tokenId);
-  }
-
-  private async _getMaxAmountToSend(
-    params: {
-      outputCount?: number;
-      options?: SendRequestOptionsI;
-    } = {
-      outputCount: 1,
-      options: {},
-    }
-  ): Promise<{ value: number; utxos: UtxoI[] }> {
-    if (!this.privateKey && params.options?.buildUnsigned !== true) {
-      throw Error("Couldn't get network or private key for wallet.");
-    }
-    if (!this.cashaddr) {
-      throw Error("attempted to send without a cashaddr");
-    }
-
-    if (params.options && params.options.slpSemiAware) {
-      this._slpSemiAware = true;
-    }
-
-    let feePaidBy;
-    if (params.options && params.options.feePaidBy) {
-      feePaidBy = params.options.feePaidBy;
-    } else {
-      feePaidBy = FeePaidByEnum.change;
-    }
-
-    // get inputs
-    let utxos: UtxoI[];
-    if (params.options && params.options.utxoIds) {
-      utxos = await checkUtxos(
-        params.options.utxoIds.map((utxoId: UtxoI | string) =>
-          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
-        ),
-        this
-      );
-    } else {
-      utxos = (await this.getAddressUtxos(this.cashaddr)).filter(
-        (utxo) => !utxo.token
-      );
-    }
-
-    // Get current height to assure recently mined coins are not spent.
-    const bestHeight = await this.provider!.getBlockHeight();
-
-    // simulate outputs using the sender's address
-    const sendRequest = new SendRequest({
-      cashaddr: this.cashaddr,
-      value: 100,
-      unit: "sat",
-    });
-    const sendRequests = Array(params.outputCount)
-      .fill(0)
-      .map(() => sendRequest);
-
-    const fundingUtxos = await getSuitableUtxos(
-      utxos,
-      undefined,
-      bestHeight,
-      feePaidBy,
-      sendRequests
-    );
-    const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
-    const fee = await getFeeAmountSimple({
-      utxos: fundingUtxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
-      sourceAddress: this.cashaddr!,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      feePaidBy: feePaidBy,
-    });
-    const spendableAmount = sumUtxoValue(fundingUtxos);
-
-    let result = spendableAmount - fee;
-    if (result < 0) {
-      result = 0;
-    }
-
-    return { value: result, utxos: fundingUtxos };
-  }
-
   public async getMaxAmountToSend(
     params: {
       outputCount?: number;
@@ -896,56 +495,13 @@ export class Wallet extends BaseWallet {
       options: {},
     }
   ): Promise<BalanceResponse> {
-    const { value: result } = await this._getMaxAmountToSend(params);
+    const { value: result } = await this._getMaxAmountToSend({
+      options: params.options,
+      outputCount: params.outputCount,
+      privateKey: this.privateKey,
+    });
 
     return await balanceResponseFromSatoshi(result);
-  }
-
-  /**
-   * send Send some amount to an address
-   * this function processes the send requests, encodes the transaction, sends it to the network
-   * @returns (depending on the options parameter) the transaction id, new address balance and a link to the transaction on the blockchain explorer
-   *
-   * This is a first class function with REST analog, maintainers should strive to keep backward-compatibility
-   *
-   */
-  public async send(
-    requests:
-      | SendRequest
-      | TokenSendRequest
-      | OpReturnData
-      | Array<SendRequest | TokenSendRequest | OpReturnData>
-      | SendRequestArray[],
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    const { encodedTransaction, tokenIds, sourceOutputs } =
-      await this.encodeTransaction(requests, undefined, options);
-
-    const resp = new SendResponse({});
-    resp.tokenIds = tokenIds;
-
-    if (options?.buildUnsigned !== true) {
-      const txId = await this.submitTransaction(
-        encodedTransaction,
-        options?.awaitTransactionPropagation === undefined ||
-          options?.awaitTransactionPropagation === true
-      );
-
-      resp.txId = txId;
-      resp.explorerUrl = this.explorerUrl(resp.txId);
-
-      if (
-        options?.queryBalance === undefined ||
-        options?.queryBalance === true
-      ) {
-        resp.balance = (await this.getBalance()) as BalanceResponse;
-      }
-    } else {
-      resp.unsignedTransaction = binToHex(encodedTransaction);
-      resp.sourceOutputs = sourceOutputs;
-    }
-
-    return resp;
   }
 
   /**
@@ -960,68 +516,7 @@ export class Wallet extends BaseWallet {
     cashaddr: string,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    return await this.sendMaxRaw(cashaddr, options);
-  }
-
-  /**
-   * sendMaxRaw (internal) Send all available funds to a destination cash address
-   *
-   * @param  {string} cashaddr destination cash address
-   * @param  {SendRequestOptionsI} options Options of the send requests
-   *
-   * @returns the transaction id sent to the network
-   */
-  private async sendMaxRaw(
-    cashaddr: string,
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    const { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend(
-      {
-        outputCount: 1,
-        options: options,
-      }
-    );
-
-    if (!options) {
-      options = {};
-    }
-
-    options.utxoIds = utxos;
-
-    const sendRequest = new SendRequest({
-      cashaddr: cashaddr,
-      value: maxSpendableAmount,
-      unit: "sat",
-    });
-
-    const { encodedTransaction, tokenIds, sourceOutputs } =
-      await this.encodeTransaction([sendRequest], true, options);
-
-    const resp = new SendResponse({});
-    resp.tokenIds = tokenIds;
-
-    if (options?.buildUnsigned !== true) {
-      const txId = await this.submitTransaction(
-        encodedTransaction,
-        options?.awaitTransactionPropagation === undefined ||
-          options?.awaitTransactionPropagation === true
-      );
-
-      resp.txId = txId;
-      resp.explorerUrl = this.explorerUrl(resp.txId);
-
-      if (
-        options?.queryBalance === undefined ||
-        options?.queryBalance === true
-      ) {
-        resp.balance = (await this.getBalance()) as BalanceResponse;
-      }
-    } else {
-      resp.unsignedTransaction = binToHex(encodedTransaction);
-      resp.sourceOutputs = sourceOutputs;
-    }
-
-    return resp;
+    return this.sendMaxRaw(cashaddr, options, this.privateKey);
   }
 
   /**
@@ -1038,208 +533,10 @@ export class Wallet extends BaseWallet {
       | Array<SendRequest | TokenSendRequest | OpReturnData>
       | SendRequestArray[],
     discardChange: boolean = false,
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
+    privateKey?: Uint8Array,
   ) {
-    let sendRequests = asSendRequestObject(requests);
-
-    if (!this.privateKey && options?.buildUnsigned !== true) {
-      throw new Error(
-        `Wallet ${this.name} is missing either a network or private key`
-      );
-    }
-    if (!this.cashaddr) {
-      throw Error("attempted to send without a cashaddr");
-    }
-
-    if (options && options.slpSemiAware) {
-      this._slpSemiAware = true;
-    }
-
-    let feePaidBy;
-    if (options && options.feePaidBy) {
-      feePaidBy = options.feePaidBy;
-    } else {
-      feePaidBy = FeePaidByEnum.change;
-    }
-
-    let changeAddress;
-    if (options && options.changeAddress) {
-      changeAddress = options.changeAddress;
-    } else {
-      changeAddress = this.cashaddr!;
-    }
-
-    let checkTokenQuantities: boolean = true;
-    if (options && options.checkTokenQuantities === false) {
-      checkTokenQuantities = false;
-    }
-
-    // get inputs from options or query all inputs
-    let utxos: UtxoI[];
-    if (options && options.utxoIds) {
-      utxos = await checkUtxos(
-        options.utxoIds.map((utxoId: UtxoI | string) =>
-          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
-        ),
-        this
-      );
-    } else {
-      utxos = await this.getAddressUtxos(this.cashaddr);
-    }
-
-    // filter out token utxos if there are no token requests
-    if (
-      checkTokenQuantities &&
-      !sendRequests.some((val) => val instanceof TokenSendRequest)
-    ) {
-      utxos = utxos.filter((val) => !val.token);
-    }
-
-    const addTokenChangeOutputs = (
-      inputs: UtxoI[],
-      outputs: SendRequestType[]
-    ) => {
-      // Allow for implicit token burn if the total amount sent is less than user had
-      // allow for token genesis, creating more tokens than we had before (0)
-      if (!checkTokenQuantities) {
-        return;
-      }
-      const allTokenInputs = inputs.filter((val) => val.token);
-      const allTokenOutputs = outputs.filter(
-        (val) => val instanceof TokenSendRequest
-      ) as TokenSendRequest[];
-      const tokenIds = allTokenOutputs
-        .map((val) => val.tokenId)
-        .filter((val, idx, arr) => arr.indexOf(val) === idx);
-      for (let tokenId of tokenIds) {
-        const tokenInputs = allTokenInputs.filter(
-          (val) => val.token?.tokenId === tokenId
-        );
-        const inputAmountSum = tokenInputs.reduce(
-          (prev, cur) => prev + cur.token!.amount,
-          0n
-        );
-        const tokenOutputs = allTokenOutputs.filter(
-          (val) => val.tokenId === tokenId
-        );
-        const outputAmountSum = tokenOutputs.reduce(
-          (prev, cur) => prev + cur.amount,
-          0n
-        );
-
-        const diff = inputAmountSum - outputAmountSum;
-        if (diff < 0) {
-          throw new Error("Not enough token amount to send");
-        }
-        if (diff >= 0) {
-          let available = 0n;
-          let change = 0n;
-          const ensureUtxos: UtxoI[] = [];
-          for (const token of tokenInputs.filter((val) => val.token?.amount)) {
-            ensureUtxos.push(token);
-            available += token.token?.amount!;
-            if (available >= outputAmountSum) {
-              change = available - outputAmountSum;
-              //break;
-            }
-          }
-          if (ensureUtxos.length) {
-            if (!options) {
-              options = {};
-            }
-            options!.ensureUtxos = [
-              ...(options.ensureUtxos ?? []),
-              ...ensureUtxos,
-            ].filter(
-              (val, index, array) =>
-                array.findIndex(
-                  (other) => other.txid === val.txid && other.vout === val.vout
-                ) === index
-            );
-          }
-          if (change > 0) {
-            outputs.push(
-              new TokenSendRequest({
-                cashaddr: toTokenaddr(changeAddress) || this.tokenaddr!,
-                amount: change,
-                tokenId: tokenId,
-                commitment: tokenOutputs[0].commitment,
-                capability: tokenOutputs[0].capability,
-                value: tokenOutputs[0].value,
-              })
-            );
-          }
-        }
-      }
-    };
-    addTokenChangeOutputs(utxos, sendRequests);
-
-    const bestHeight = await this.provider!.getBlockHeight()!;
-    const spendAmount = await sumSendRequestAmounts(sendRequests);
-
-    if (utxos.length === 0) {
-      throw Error("There were no Unspent Outputs");
-    }
-    if (typeof spendAmount !== "bigint") {
-      throw Error("Couldn't get spend amount when building transaction");
-    }
-
-    const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider!);
-    const feeEstimate = await getFeeAmountSimple({
-      utxos: utxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
-      sourceAddress: this.cashaddr!,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      feePaidBy: feePaidBy,
-    });
-
-    const fundingUtxos = await getSuitableUtxos(
-      utxos,
-      BigInt(spendAmount) + BigInt(Math.ceil(feeEstimate)),
-      bestHeight,
-      feePaidBy,
-      sendRequests,
-      options?.ensureUtxos || [],
-      options?.tokenOperation
-    );
-    if (fundingUtxos.length === 0) {
-      throw Error(
-        "The available inputs couldn't satisfy the request with fees"
-      );
-    }
-    const fee = await getFeeAmount({
-      utxos: fundingUtxos,
-      sendRequests: sendRequests,
-      privateKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
-      sourceAddress: this.cashaddr!,
-      relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
-      feePaidBy: feePaidBy,
-    });
-    const { encodedTransaction, sourceOutputs } = await buildEncodedTransaction(
-      {
-        inputs: fundingUtxos,
-        outputs: sendRequests,
-        signingKey: this.privateKey ?? hexToBin(placeholderPrivateKey),
-        sourceAddress: this.cashaddr!,
-        fee,
-        discardChange,
-        feePaidBy,
-        changeAddress,
-        buildUnsigned: options?.buildUnsigned === true,
-      }
-    );
-
-    const tokenIds = [
-      ...fundingUtxos
-        .filter((val) => val.token?.tokenId)
-        .map((val) => val.token!.tokenId),
-      ...sendRequests
-        .filter((val) => val instanceof TokenSendRequest)
-        .map((val) => (val as TokenSendRequest).tokenId),
-    ].filter((value, index, array) => array.indexOf(value) === index);
-
-    return { encodedTransaction, tokenIds, sourceOutputs };
+    return super.encodeTransaction(requests, discardChange, options, this.privateKey);
   }
 
   public async signUnsignedTransaction(
@@ -1253,203 +550,20 @@ export class Wallet extends BaseWallet {
     return signUnsignedTransaction(
       transaction,
       sourceOutputs,
-      this.privateKey!
+      this.privateKey
     );
-  }
-
-  // Submit a raw transaction
-  public async submitTransaction(
-    transaction: Uint8Array,
-    awaitPropagation: boolean = true
-  ): Promise<string> {
-    if (!this.provider) {
-      throw Error("Wallet network provider was not initialized");
-    }
-    let rawTransaction = binToHex(transaction);
-    return await this.provider.sendRawTransaction(
-      rawTransaction,
-      awaitPropagation
-    );
-  }
-
-  // gets transaction history of this wallet
-  public async getRawHistory(
-    fromHeight: number = 0,
-    toHeight: number = -1
-  ): Promise<TxI[]> {
-    return await this.provider!.getHistory(
-      this.cashaddr!,
-      fromHeight,
-      toHeight
-    );
-  }
-
-  /**
-   * getHistory gets transaction history of this wallet with most data decoded and ready to present to user
-   * @note balance calculations are valid only if querying to the blockchain tip (`toHeight` === -1, `count` === -1)
-   * @note this method is heavy on network calls, if invoked in browser use of cache is advised, @see `Config.UseLocalStorageCache`
-   * @note this method tries to recreate the history tab view of Electron Cash wallet, however, it may not be 100% accurate if the tnransaction value changes are the same in the same block (ordering)
-   *
-   * @param unit optional, BCH or currency unit to present balance and balance changes. If unit is currency like USD or EUR, balances will be subject to possible rounding errors. Default 0
-   * @param fromHeight optional, if set, history will be limited. Default 0
-   * @param toHeight optional, if set, history will be limited. Default -1, meaning that all history items will be returned, including mempool
-   * @param start optional, if set, the result set will be paginated with offset `start`
-   * @param count optional, if set, the result set will be paginated with `count`. Default -1, meaning that all history items will be returned
-   *
-   * @returns an array of transaction history items, with input values and addresses encoded in cashaddress format. @see `TransactionHistoryItem` type
-   */
-  public async getHistory({
-    unit = "sat",
-    fromHeight = 0,
-    toHeight = -1,
-    start = 0,
-    count = -1,
-  }: {
-    unit?: UnitEnum;
-    fromHeight?: number;
-    toHeight?: number;
-    start?: number;
-    count?: number;
-  }): Promise<TransactionHistoryItem[]> {
-    return getAddressHistory({
-      address: this.cashaddr!,
-      provider: this.provider!,
-      unit,
-      fromHeight,
-      toHeight,
-      start,
-      count,
-    });
-  }
-
-  // gets last transaction of this wallet
-  public async getLastTransaction(
-    confirmedOnly: boolean = false
-  ): Promise<ElectrumRawTransaction | null> {
-    let history: TxI[] = await this.getRawHistory();
-    if (confirmedOnly) {
-      history = history.filter((val) => val.height > 0);
-    }
-
-    if (!history.length) {
-      return null;
-    }
-
-    const [lastTx] = history.slice(-1);
-    return this.provider!.getRawTransactionObject(lastTx.tx_hash);
-  }
-
-  // waits for next transaction, program execution is halted
-  public async waitForTransaction(
-    options: WaitForTransactionOptions = {
-      getTransactionInfo: true,
-      getBalance: false,
-      txHash: undefined,
-    }
-  ): Promise<WaitForTransactionResponse> {
-    if (options.getTransactionInfo === undefined) {
-      options.getTransactionInfo = true;
-    }
-
-    return new Promise(async (resolve) => {
-      let txHashSeen = false;
-
-      const makeResponse = async (txHash?: string) => {
-        const response = <WaitForTransactionResponse>{};
-        const promises: any[] = [undefined, undefined];
-
-        if (options.getBalance === true) {
-          promises[0] = this.getBalance();
-        }
-
-        if (options.getTransactionInfo === true) {
-          if (!txHash) {
-            promises[1] = this.getLastTransaction();
-          } else {
-            promises[1] = this.provider!.getRawTransactionObject(txHash);
-          }
-        }
-
-        const result = await Promise.all(promises);
-        response.balance = result[0];
-        response.transactionInfo = result[1];
-
-        return response;
-      };
-
-      // waiting for a specific transaction to propagate
-      if (options.txHash) {
-        let cancel: CancelFn;
-
-        const waitForTransactionCallback = async (data) => {
-          if (data && data[0] === options.txHash! && data[1] !== null) {
-            txHashSeen = true;
-            await cancel?.();
-
-            resolve(makeResponse(options.txHash!));
-          }
-        };
-
-        cancel = await this.provider!.subscribeToTransaction(
-          options.txHash,
-          waitForTransactionCallback
-        );
-        return;
-      }
-
-      // waiting for any address transaction
-      let watchCancel: CancelFn;
-      let initialResponseSeen = false;
-      watchCancel = await this.provider!.watchAddressStatus(this.getDepositAddress(), async (_status) => {
-        if (initialResponseSeen) {
-          await watchCancel?.();
-          resolve(makeResponse());
-          return;
-        }
-
-        initialResponseSeen = true;
-      });
-    });
-  }
-
-  /**
-   * watchBlocks Watch network blocks
-   *
-   * @param callback callback with a block header object
-   * @param skipCurrentHeight if set, the notification about current block will not arrive
-   *
-   * @returns a function which will cancel watching upon evaluation
-   */
-  public async watchBlocks(
-    callback: (header: HexHeaderI) => void,
-    skipCurrentHeight: boolean = true
-  ): Promise<CancelFn> {
-    return this.provider!.watchBlocks(
-      callback,
-      skipCurrentHeight
-    );
-  }
-
-  /**
-   * waitForBlock Wait for a network block
-   *
-   * @param height if specified waits for this exact blockchain height, otherwise resolves with the next block
-   *
-   */
-  public async waitForBlock(height?: number): Promise<HexHeaderI> {
-    return this.provider!.waitForBlock(height);
   }
   //#endregion Funds
 
   //#region Private implementation details
   private async deriveInfo() {
-    const publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey!);
+    const publicKey = secp256k1.derivePublicKeyUncompressed(this.privateKey);
     if (typeof publicKey === "string") {
       throw new Error(publicKey);
     }
     this.publicKey = publicKey;
     const publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
-      this.privateKey!
+      this.privateKey
     );
     if (typeof publicKeyCompressed === "string") {
       throw new Error(publicKeyCompressed);
@@ -1457,13 +571,12 @@ export class Wallet extends BaseWallet {
     this.publicKeyCompressed = publicKeyCompressed;
     const networkType =
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
-    this.privateKeyWif = encodePrivateKeyWif(this.privateKey!, networkType);
+    this.privateKeyWif = encodePrivateKeyWif(this.privateKey, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
-    this.cashaddr = deriveCashaddr(this.privateKey!, this.networkPrefix);
-    this.tokenaddr = deriveTokenaddr(this.privateKey!, this.networkPrefix);
-    this.address = this.cashaddr;
-    this.publicKeyHash = derivePublicKeyHash(this.cashaddr!);
+    this.cashaddr = deriveCashaddr(this.privateKey, this.networkPrefix);
+    this.tokenaddr = deriveTokenaddr(this.privateKey, this.networkPrefix);
+    this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     return this;
   }
   //#endregion Private implementation details
@@ -1471,350 +584,8 @@ export class Wallet extends BaseWallet {
   //#region Signing
   // Convenience wrapper to sign interface
   public async sign(message: string) {
-    return await Wallet.signedMessage.sign(message, this.privateKey!);
+    return await Wallet.signedMessage.sign(message, this.privateKey);
   }
-
-  // Convenience wrapper to verify interface
-  public async verify(message: string, sig: string, publicKey?: Uint8Array) {
-    return await Wallet.signedMessage.verify(
-      message,
-      sig,
-      this.cashaddr!,
-      publicKey
-    );
-  }
-  //#endregion Signing
-
-  //#region Cashtokens
-  /**
-   * Create new cashtoken, both funglible and/or non-fungible (NFT)
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {number} genesisRequest.amount amount of *fungible* tokens to create
-   * @param  {NFTCapability?} genesisRequest.capability capability of new NFT
-   * @param  {string?} genesisRequest.commitment NFT commitment message
-   * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   * @param  {SendRequestType | SendRequestType[]} sendRequests single or an array of extra send requests (OP_RETURN, value transfer, etc.) to include in genesis transaction
-   * @param  {SendRequestOptionsI} options Options of the send requests
-   */
-  public async tokenGenesis(
-    genesisRequest: TokenGenesisRequest,
-    sendRequests: SendRequestType | SendRequestType[] = [],
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    if (!Array.isArray(sendRequests)) {
-      sendRequests = [sendRequests];
-    }
-
-    let utxos: UtxoI[];
-    if (options && options.utxoIds) {
-      utxos = await checkUtxos(
-        options.utxoIds.map((utxoId: UtxoI | string) =>
-          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
-        ),
-        this
-      );
-    } else {
-      utxos = await this.getAddressUtxos(this.cashaddr);
-    }
-
-    const genesisInputs = utxos.filter((val) => val.vout === 0 && !val.token);
-    if (genesisInputs.length === 0) {
-      throw new Error(
-        "No suitable inputs with vout=0 available for new token genesis"
-      );
-    }
-
-    const genesisSendRequest = new TokenSendRequest({
-      cashaddr: genesisRequest.cashaddr || this.tokenaddr!,
-      amount: genesisRequest.amount,
-      value: genesisRequest.value || 1000,
-      capability: genesisRequest.capability,
-      commitment: genesisRequest.commitment,
-      tokenId: genesisInputs[0].txid,
-    });
-
-    return this.send([genesisSendRequest, ...(sendRequests as any)], {
-      ...options,
-      utxoIds: utxos,
-      ensureUtxos: [genesisInputs[0]],
-      checkTokenQuantities: false,
-      queryBalance: false,
-      tokenOperation: "genesis",
-    });
-  }
-
-  /**
-   * Mint new NFT cashtokens using an existing minting token
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} tokenId tokenId of an NFT to mint
-   * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
-   * @param  {NFTCapability?} mintRequest.capability capability of new NFT
-   * @param  {string?} mintRequest.commitment NFT commitment message
-   * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   * @param  {boolean?} deductTokenAmount if minting token contains fungible amount, deduct from it by amount of minted tokens
-   * @param  {SendRequestOptionsI} options Options of the send requests
-   */
-  public async tokenMint(
-    tokenId: string,
-    mintRequests: TokenMintRequest | Array<TokenMintRequest>,
-    deductTokenAmount: boolean = false,
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    if (tokenId?.length !== 64) {
-      throw Error(`Invalid tokenId supplied: ${tokenId}`);
-    }
-
-    if (!Array.isArray(mintRequests)) {
-      mintRequests = [mintRequests];
-    }
-
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    const nftUtxos = utxos.filter(
-      (val) =>
-        val.token?.tokenId === tokenId &&
-        val.token?.capability === NFTCapability.minting
-    );
-    if (!nftUtxos.length) {
-      throw new Error(
-        "You do not have any token UTXOs with minting capability for specified tokenId"
-      );
-    }
-    const newAmount =
-      deductTokenAmount && nftUtxos[0].token!.amount > 0
-        ? nftUtxos[0].token!.amount - BigInt(mintRequests.length)
-        : nftUtxos[0].token!.amount;
-    const safeNewAmount = newAmount < 0n ? 0n : newAmount;
-    const mintingInput = new TokenSendRequest({
-      cashaddr: this.tokenaddr!,
-      tokenId: tokenId,
-      capability: nftUtxos[0].token!.capability,
-      commitment: nftUtxos[0].token!.commitment,
-      amount: safeNewAmount,
-      value: nftUtxos[0].satoshis,
-    });
-    return this.send(
-      [
-        mintingInput,
-        ...mintRequests.map(
-          (val) =>
-            new TokenSendRequest({
-              cashaddr: val.cashaddr || this.tokenaddr!,
-              amount: 0,
-              tokenId: tokenId,
-              value: val.value,
-              capability: val.capability,
-              commitment: val.commitment,
-            })
-        ),
-      ],
-      {
-        ...options,
-        ensureUtxos: [nftUtxos[0]],
-        checkTokenQuantities: false,
-        queryBalance: false,
-        tokenOperation: "mint",
-      }
-    );
-  }
-
-  /**
-   * Perform an explicit token burning by spending a token utxo to an OP_RETURN
-   *
-   * Behaves differently for fungible and non-fungible tokens:
-   *  * NFTs are always "destroyed"
-   *  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
-   *
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} burnRequest.tokenId tokenId of a token to burn
-   * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
-   * @param  {string?} burnRequest.commitment commitment of the NFT token to select, optional
-   * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
-   * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
-   * @param  {string?} message optional message to include in OP_RETURN
-   * @param  {SendRequestOptionsI} options Options of the send requests
-   */
-  public async tokenBurn(
-    burnRequest: TokenBurnRequest,
-    message?: string,
-    options?: SendRequestOptionsI
-  ): Promise<SendResponse> {
-    if (burnRequest.tokenId?.length !== 64) {
-      throw Error(`Invalid tokenId supplied: ${burnRequest.tokenId}`);
-    }
-
-    const utxos = await this.getAddressUtxos(this.cashaddr!);
-    const tokenUtxos = utxos.filter(
-      (val) =>
-        val.token?.tokenId === burnRequest.tokenId &&
-        val.token?.capability === burnRequest.capability &&
-        val.token?.commitment === burnRequest.commitment
-    );
-
-    if (!tokenUtxos.length) {
-      throw new Error("You do not have suitable token UTXOs to perform burn");
-    }
-
-    const totalFungibleAmount = tokenUtxos.reduce(
-      (prev, cur) => prev + (cur.token?.amount || 0n),
-      0n
-    );
-    let fungibleBurnAmount =
-      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
-    fungibleBurnAmount = BigInt(fungibleBurnAmount);
-    const hasNFT = burnRequest.capability || burnRequest.commitment;
-
-    let utxoIds: UtxoI[] = [];
-    let changeSendRequests: TokenSendRequest[];
-    if (hasNFT) {
-      // does not have FT tokens, let us destroy the token completely
-      if (totalFungibleAmount === 0n) {
-        changeSendRequests = [];
-        utxoIds.push(tokenUtxos[0]);
-      } else {
-        // add utxos to spend from
-        let available = 0n;
-        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
-          utxoIds.push(token);
-          available += token.token?.amount!;
-          if (available >= fungibleBurnAmount) {
-            break;
-          }
-        }
-
-        // if there are FT, reduce their amount
-        const newAmount = totalFungibleAmount - fungibleBurnAmount;
-        const safeNewAmount = newAmount < 0n ? 0n : newAmount;
-        changeSendRequests = [
-          new TokenSendRequest({
-            cashaddr: burnRequest.cashaddr || this.tokenaddr!,
-            tokenId: burnRequest.tokenId,
-            capability: burnRequest.capability,
-            commitment: burnRequest.commitment,
-            amount: safeNewAmount,
-            value: tokenUtxos[0].satoshis,
-          }),
-        ];
-      }
-    } else {
-      // if we are burning last fungible tokens, let us destroy the token completely
-      if (totalFungibleAmount === fungibleBurnAmount) {
-        changeSendRequests = [];
-        utxoIds.push(...tokenUtxos);
-      } else {
-        // add utxos to spend from
-        let available = 0n;
-        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
-          utxoIds.push(token);
-          available += token.token?.amount!;
-          if (available >= fungibleBurnAmount) {
-            break;
-          }
-        }
-
-        // reduce the FT amount
-        const newAmount = available - fungibleBurnAmount;
-        const safeNewAmount = newAmount < 0n ? 0n : newAmount;
-        changeSendRequests = [
-          new TokenSendRequest({
-            cashaddr: burnRequest.cashaddr || this.tokenaddr!,
-            tokenId: burnRequest.tokenId,
-            amount: safeNewAmount,
-            value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0),
-          }),
-        ];
-      }
-    }
-
-    const opReturn = OpReturnData.fromString(message || "");
-    return this.send([opReturn, ...changeSendRequests], {
-      ...options,
-      checkTokenQuantities: false,
-      queryBalance: false,
-      ensureUtxos: utxoIds.length > 0 ? utxoIds : undefined,
-      tokenOperation: "burn",
-    });
-  }
-
-  /**
-   * getTokenUtxos Get unspent token outputs for the wallet
-   * will return utxos only for the specified token if `tokenId` provided
-   * @param  {string?} tokenId tokenId (category) to filter utxos by, if not set will return utxos from all tokens
-   * @returns  {UtxoI[]} token utxos
-   */
-  public async getTokenUtxos(tokenId?: string): Promise<UtxoI[]> {
-    const utxos = await this.getAddressUtxos(this.address!);
-    return utxos.filter((val) =>
-      tokenId ? val.token?.tokenId === tokenId : val.token
-    );
-  }
-
-  /**
-   * getTokenBalance Gets fungible token balance
-   * for NFT token balance see @ref getNftTokenBalance
-   * @param  {string} tokenId tokenId to get balance for
-   * @returns  {bigint} fungible token balance
-   */
-  public async getTokenBalance(tokenId: string): Promise<bigint> {
-    const utxos = (await this.getTokenUtxos(tokenId)).filter(
-      (val) => val.token?.amount
-    );
-    return sumTokenAmounts(utxos, tokenId);
-  }
-
-  /**
-   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particular tokenId
-   * disregards fungible token balances
-   * for fungible token balance see @ref getTokenBalance
-   * @param  {string} tokenId tokenId to get balance for
-   * @returns  {number} non-fungible token balance
-   */
-  public async getNftTokenBalance(tokenId: string): Promise<number> {
-    const utxos = (await this.getTokenUtxos(tokenId)).filter(
-      (val) => val.token?.commitment !== undefined
-    );
-    return utxos.length;
-  }
-
-  /**
-   * getAllTokenBalances Gets all fungible token balances in this wallet
-   * @returns  {Object} a map [tokenId => balance] for all tokens in this wallet
-   */
-  public async getAllTokenBalances(): Promise<{ [tokenId: string]: bigint }> {
-    const result = {};
-    const utxos = (await this.getTokenUtxos()).filter(
-      (val) => val.token?.amount
-    );
-    for (const utxo of utxos) {
-      if (!result[utxo.token!.tokenId]) {
-        result[utxo.token!.tokenId] = 0n;
-      }
-      result[utxo.token!.tokenId] += utxo.token!.amount;
-    }
-    return result;
-  }
-
-  /**
-   * getAllNftTokenBalances Gets all non-fungible token (NFT) balances in this wallet
-   * @returns  {Object} a map [tokenId => balance] for all NFTs in this wallet
-   */
-  public async getAllNftTokenBalances(): Promise<{
-    [tokenId: string]: number;
-  }> {
-    const result = {};
-    const utxos = (await this.getTokenUtxos()).filter(
-      (val) => val.token?.commitment !== undefined
-    );
-    for (const utxo of utxos) {
-      if (!result[utxo.token!.tokenId]) {
-        result[utxo.token!.tokenId] = 0;
-      }
-      result[utxo.token!.tokenId] += 1;
-    }
-    return result;
-  }
-  //#endregion Cashtokens
 }
 
 /**
@@ -1826,11 +597,6 @@ export class TestNetWallet extends Wallet {
   constructor(name = "") {
     super(name, NetworkType.Testnet);
   }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return TestNetUtil;
-  }
 }
 
 /**
@@ -1840,11 +606,6 @@ export class RegTestWallet extends Wallet {
   static networkPrefix = CashAddressNetworkPrefix.regtest;
   constructor(name = "") {
     super(name, NetworkType.Regtest);
-  }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return RegTestUtil;
   }
 }
 
@@ -1857,11 +618,6 @@ export class WifWallet extends Wallet {
   constructor(name = "") {
     super(name, NetworkType.Mainnet, WalletTypeEnum.Wif);
   }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return WifUtil;
-  }
 }
 
 /**
@@ -1873,11 +629,6 @@ export class TestNetWifWallet extends Wallet {
   constructor(name = "") {
     super(name, NetworkType.Testnet, WalletTypeEnum.Wif);
   }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return TestNetWifUtil;
-  }
 }
 
 /**
@@ -1888,58 +639,5 @@ export class RegTestWifWallet extends Wallet {
   static walletType = WalletTypeEnum.Wif;
   constructor(name = "") {
     super(name, NetworkType.Regtest, WalletTypeEnum.Wif);
-  }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return RegTestWifUtil;
-  }
-}
-
-/**
- * Class to manage a bitcoin cash watch wallet.
- */
-export class WatchWallet extends Wallet {
-  static networkPrefix = CashAddressNetworkPrefix.mainnet;
-  static walletType = WalletTypeEnum.Watch;
-  constructor(name = "") {
-    super(name, NetworkType.Mainnet, WalletTypeEnum.Watch);
-  }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return WatchUtil;
-  }
-}
-
-/**
- * Class to manage a testnet watch wallet.
- */
-export class TestNetWatchWallet extends Wallet {
-  static networkPrefix = CashAddressNetworkPrefix.testnet;
-  static walletType = WalletTypeEnum.Watch;
-  constructor(name = "") {
-    super(name, NetworkType.Testnet, WalletTypeEnum.Watch);
-  }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return TestNetWatchUtil;
-  }
-}
-
-/**
- * Class to manage a regtest watch wallet.
- */
-export class RegTestWatchWallet extends Wallet {
-  static networkPrefix = CashAddressNetworkPrefix.regtest;
-  static walletType = WalletTypeEnum.Watch;
-  constructor(name = "") {
-    super(name, NetworkType.Regtest, WalletTypeEnum.Watch);
-  }
-
-  // interface to static util functions. see Util.ts
-  public static get util() {
-    return RegTestWatchUtil;
   }
 }

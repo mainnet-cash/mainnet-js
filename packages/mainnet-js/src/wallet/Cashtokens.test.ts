@@ -317,13 +317,13 @@ describe(`Test cashtokens`, () => {
     const bob = await RegTestWallet.newRandom();
     await alice.send([
       new TokenSendRequest({
-        cashaddr: bob.address!,
+        cashaddr: bob.cashaddr!,
         tokenId: tokenId,
         capability: NFTCapability.none,
         commitment: "0a",
       }),
       new TokenSendRequest({
-        cashaddr: bob.address!,
+        cashaddr: bob.cashaddr!,
         tokenId: tokenId,
         capability: NFTCapability.none,
         commitment: "0a",

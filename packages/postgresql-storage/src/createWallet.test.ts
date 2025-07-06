@@ -66,17 +66,10 @@ describe(`Named Wallets`, () => {
     expect(w.getInfo()).toStrictEqual({
       cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
       tokenaddr: "bchtest:zppr9h7whx9pzucgqukhtlj8lvgvjlgr3gzzm4cx4e",
-      derivationPath: undefined,
       isTestnet: true,
       name: "",
       network: "testnet",
-      parentDerivationPath: undefined,
-      parentXPubKey: undefined,
-      privateKey: undefined,
-      privateKeyWif: undefined,
-      publicKey: undefined,
       publicKeyHash: "4232dfceb98a117308072d75fe47fb10c97d038a",
-      seed: undefined,
       walletDbEntry:
         "watch:testnet:bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
       walletId:

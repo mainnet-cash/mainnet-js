@@ -1,17 +1,14 @@
-import {
-  Wallet,
-  TestNetWallet,
-  RegTestWallet,
-  WifWallet,
-  TestNetWifWallet,
-  RegTestWifWallet,
-  WatchWallet,
-  TestNetWatchWallet,
-  RegTestWatchWallet,
-} from "./Wif.js";
-import { getNamedWalletId } from "./Base.js";
-import { WalletRequestI, WalletResponseI } from "./interface.js";
 import { prefixFromNetworkMap } from "../enum.js";
+import { getNamedWalletId, RegTestWatchWallet, TestNetWatchWallet, WatchWallet } from "./Base.js";
+import {
+  RegTestWallet,
+  RegTestWifWallet,
+  TestNetWallet,
+  TestNetWifWallet,
+  Wallet,
+  WifWallet,
+} from "./Wif.js";
+import { WalletRequestI, WalletResponseI } from "./interface.js";
 
 // Convenience map to access classes by types and network
 export const walletClassMap = {
@@ -199,7 +196,6 @@ function asJsonResponse(wallet: Wallet): WalletResponseI {
       name: wallet.name,
       cashaddr: wallet.cashaddr as string,
       walletId: wallet.toString(),
-      wif: wallet.privateKeyWif,
       network: wallet.network as any,
     };
   }

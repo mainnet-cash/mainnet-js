@@ -65,7 +65,8 @@ export interface MnemonicI {
 export interface WalletI {
   // Accessors
   getDepositAddress(): string;
-  getSeed(): MnemonicI;
+  getTokenDepositAddress(): string;
+  // getSeed(): MnemonicI;
   // getNetworkProvider(network: NetworkType): any;
   // generate(): Promise<this>;
 

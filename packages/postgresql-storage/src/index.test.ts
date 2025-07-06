@@ -1,4 +1,4 @@
-import { RegTestWallet, TestNetWallet, Wallet, BaseWallet } from "mainnet-js";
+import { BaseWallet, RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider";
 
 BaseWallet.StorageProvider = SqlProvider;

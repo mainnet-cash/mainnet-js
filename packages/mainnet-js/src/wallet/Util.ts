@@ -1,25 +1,17 @@
 import {
-  RegTestWallet,
-  RegTestWatchWallet,
-  RegTestWifWallet,
-  TestNetWallet,
-  TestNetWatchWallet,
-  TestNetWifWallet,
-  Wallet,
-  WatchWallet,
-  WifWallet,
-} from "../wallet/Wif.js";
-import {
+  Transaction as LibAuthTransaction,
+  assertSuccess,
   binToHex,
   decodeTransaction as decodeTransactionLibAuth,
   hexToBin,
-  lockingBytecodeToCashAddress,
-  Transaction as LibAuthTransaction,
-  assertSuccess,
   isPayToPublicKey,
-  publicKeyToP2pkhCashAddress,
   lockingBytecodeToAddressContents,
+  lockingBytecodeToCashAddress,
+  publicKeyToP2pkhCashAddress,
 } from "@bitauth/libauth";
+import { bchParam } from "../chain.js";
+import { NetworkType, prefixFromNetworkMap } from "../enum.js";
+import { getNetworkProvider } from "../network/default.js";
 import {
   ElectrumRawTransaction,
   ElectrumRawTransactionVin,
@@ -27,25 +19,24 @@ import {
   ElectrumRawTransactionVout,
   ElectrumRawTransactionVoutScriptPubKey,
 } from "../network/interface.js";
-import { bchParam } from "../chain.js";
+import NetworkProvider from "../network/NetworkProvider.js";
 import { getTransactionHash } from "../util/transaction.js";
 
 /**
  * Class with various wallet utilities.
  */
 export class Util {
-  readonly wallet: Wallet;
-  static get walletType() {
-    return Wallet;
-  }
+  readonly network: NetworkType;
+  provider: NetworkProvider;
 
   /**
    * Initializes a wallet Util class.
    *
-   * @param wallet     A wallet object
+   * @param network     The network type to use. Defaults to mainnet.
    */
-  constructor(wallet: Wallet) {
-    this.wallet = wallet;
+  constructor(network = NetworkType.Mainnet) {
+    this.network = network;
+    this.provider = getNetworkProvider(network);
   }
 
   public async getTransactionHash(rawTransactionHex: string): Promise<string> {
@@ -74,7 +65,7 @@ export class Util {
     } else {
       // tx hash, look up the raw transaction
       txHash = transactionHashOrHex;
-      transactionHex = await this.wallet.provider!.getRawTransaction(txHash);
+      transactionHex = await this.provider.getRawTransaction(txHash);
       transactionBin = hexToBin(transactionHex);
     }
 
@@ -140,12 +131,12 @@ export class Util {
                     publicKey: lockingBytecodeToAddressContents(
                       output.lockingBytecode
                     ).payload,
-                    prefix: this.wallet.networkPrefix,
+                    prefix: prefixFromNetworkMap[this.network],
                   })
                 : assertSuccess(
                     lockingBytecodeToCashAddress({
                       bytecode: output.lockingBytecode,
-                      prefix: this.wallet.networkPrefix,
+                      prefix: prefixFromNetworkMap[this.network],
                     })
                   ).address,
             ],
@@ -168,85 +159,12 @@ export class Util {
 
   public static async decodeTransaction(
     transactionHashOrHex: string,
-    loadInputValues: boolean = false
+    loadInputValues: boolean = false,
+    network?: NetworkType,
   ): Promise<ElectrumRawTransaction> {
-    return new this.walletType().util.decodeTransaction(
+    return new this(network).decodeTransaction(
       transactionHashOrHex,
       loadInputValues
     );
   }
 }
-
-//#region Specific wallet classes
-/**
- * Class to manage a testnet wallet.
- */
-export class TestNetUtil extends Util {
-  static get walletType() {
-    return TestNetWallet;
-  }
-}
-
-/**
- * Class to manage a regtest wallet.
- */
-export class RegTestUtil extends Util {
-  static get walletType() {
-    return RegTestWallet;
-  }
-}
-
-/**
- * Class to manage a bitcoin cash wif wallet.
- */
-export class WifUtil extends Util {
-  static get walletType() {
-    return WifWallet;
-  }
-}
-
-/**
- * Class to manage a testnet wif wallet.
- */
-export class TestNetWifUtil extends Util {
-  static get walletType() {
-    return TestNetWifWallet;
-  }
-}
-
-/**
- * Class to manage a regtest wif wallet.
- */
-export class RegTestWifUtil extends Util {
-  static get walletType() {
-    return RegTestWifWallet;
-  }
-}
-
-/**
- * Class to manage a bitcoin cash watch wallet.
- */
-export class WatchUtil extends Util {
-  static get walletType() {
-    return WatchWallet;
-  }
-}
-
-/**
- * Class to manage a testnet watch wallet.
- */
-export class TestNetWatchUtil extends Util {
-  static get walletType() {
-    return TestNetWatchWallet;
-  }
-}
-
-/**
- * Class to manage a regtest watch wallet.
- */
-export class RegTestWatchUtil extends Util {
-  static get walletType() {
-    return RegTestWatchWallet;
-  }
-}
-//#endregion

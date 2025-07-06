@@ -1071,7 +1071,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
-    aliceWallet.privateKey = undefined;
+    delete (aliceWallet as any).privateKey;
 
     const aliceUtxos = await aliceWallet.getAddressUtxos();
 
