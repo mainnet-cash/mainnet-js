@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.1
+
+* Remove `dexie` dependency in favor of native indexeddb implementation
+
 2.7.0
 
 * Fix: do not fail the exchange rate request upon library load when, for example, going offline
