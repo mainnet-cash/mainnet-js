@@ -1,25 +1,43 @@
-import Dexie from "dexie";
 import { StorageProvider, WalletDbEntryI } from "mainnet-js";
 
-export default class IndexedDBProvider
-  extends Dexie
-  implements StorageProvider
-{
-  public db: Dexie.Table<WalletDbEntryI, number>;
+export default class IndexedDBProvider implements StorageProvider {
+  private dbName: string;
+  private storeName: string;
+  private db: IDBDatabase | null = null;
 
-  public constructor(dbName: string) {
-    super(dbName);
-    this.version(3).stores({
-      wallet: "name",
+  constructor(dbName = "wallet", storeName = "wallet") {
+    this.dbName = dbName;
+    this.storeName = storeName;
+  }
+
+  private async openDB(): Promise<IDBDatabase> {
+    if (this.db) return this.db;
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, 31);
+      request.onupgradeneeded = (event) => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName, { keyPath: "name" });
+        }
+      };
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(this.db);
+      };
+      request.onerror = () => reject(request.error);
     });
-    this.db = this.table("wallet");
   }
 
   public async init() {
+    await this.openDB();
     return this;
   }
 
   public async close() {
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
     return this;
   }
 
@@ -28,61 +46,62 @@ export default class IndexedDBProvider
   }
 
   public async addWallet(name: string, walletId: string): Promise<boolean> {
-    return this.transaction("rw", this.db, async () => {
-      if ((await this.db.where({ name: name }).count()) === 0) {
-        await this.db.add({ name: name, wallet: walletId }).catch((e) => {
-          throw Error(e);
-        });
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((e) => {
-      throw e.stack || e;
+    const db = await this.openDB();
+    return new Promise<boolean>((resolve, reject) => {
+      const tx = db.transaction(this.storeName, "readwrite");
+      const store = tx.objectStore(this.storeName);
+      const getReq = store.get(name);
+      getReq.onsuccess = () => {
+        if (getReq.result) {
+          resolve(false);
+        } else {
+          const addReq = store.add({ name, wallet: walletId });
+          addReq.onsuccess = () => resolve(true);
+          addReq.onerror = () => reject(addReq.error);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
     });
   }
 
   public async getWallet(name: string): Promise<WalletDbEntryI | undefined> {
-    let obj = await this.db.get({ name: name });
-    if (obj) {
-      return obj;
-    } else {
-      return;
-    }
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.storeName, "readonly");
+      const store = tx.objectStore(this.storeName);
+      const req = store.get(name);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
   }
 
   public async getWallets(): Promise<Array<WalletDbEntryI>> {
-    let walletObjects = await this.transaction("r", this.db, async () => {
-      return await this.db.where("id").above(0).toArray();
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.storeName, "readonly");
+      const store = tx.objectStore(this.storeName);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
     });
-    if (walletObjects) {
-      const WalletArray: WalletDbEntryI[] = await Promise.all(
-        walletObjects.map(async (obj: WalletDbEntryI) => {
-          return obj;
-        })
-      );
-      return WalletArray;
-    } else {
-      return [];
-    }
   }
 
   public async updateWallet(name: string, walletId: string): Promise<void> {
-    this.transaction("rw", this.db, async () => {
-      const collection = this.db.where({ name: name });
-      if ((await collection.count()) === 0) {
-        return false;
-      } else {
-        const wallet = (await collection.first())!;
-        await this.db
-          .put({ id: wallet.id!, name: name, wallet: walletId }, wallet.id!)
-          .catch((e) => {
-            throw Error(e);
-          });
-        return true;
-      }
-    }).catch((e) => {
-      throw e.stack || e;
+    const db = await this.openDB();
+    return new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(this.storeName, "readwrite");
+      const store = tx.objectStore(this.storeName);
+      const getReq = store.get(name);
+      getReq.onsuccess = () => {
+        if (!getReq.result) {
+          resolve();
+        } else {
+          const putReq = store.put({ name, wallet: walletId });
+          putReq.onsuccess = () => resolve();
+          putReq.onerror = () => reject(putReq.error);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
     });
   }
 
