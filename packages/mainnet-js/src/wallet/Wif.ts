@@ -1,9 +1,5 @@
 //#region Imports
-import {
-  encodeHdPublicKey,
-  HdKeyNetwork,
-  secp256k1,
-} from "@bitauth/libauth";
+import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
 
 import {
   binToHex,
@@ -22,11 +18,7 @@ import { NetworkType } from "../enum.js";
 import { PrivateKeyI } from "../interface.js";
 
 import { WalletTypeEnum } from "./enum.js";
-import {
-  MnemonicI,
-  SendRequestOptionsI,
-  WalletInfoI,
-} from "./interface.js";
+import { MnemonicI, SendRequestOptionsI, WalletInfoI } from "./interface.js";
 
 import {
   OpReturnData,
@@ -38,27 +30,23 @@ import {
   XPubKey,
 } from "./model.js";
 
-import {
-  signUnsignedTransaction,
-} from "../transaction/Wif.js";
+import { signUnsignedTransaction } from "../transaction/Wif.js";
 
 import { DERIVATION_PATHS } from "../constant.js";
 import { SignedMessage, SignedMessageI } from "../message/index.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
-import {
-  deriveCashaddr,
-  deriveTokenaddr,
-} from "../util/deriveCashaddr.js";
-import {
-  derivePublicKeyHash,
-} from "../util/derivePublicKeyHash.js";
+import { deriveCashaddr, deriveTokenaddr } from "../util/deriveCashaddr.js";
+import { derivePublicKeyHash } from "../util/derivePublicKeyHash.js";
 import { getXPubKey } from "../util/getXPubKey.js";
 import { generateRandomBytes } from "../util/randomBytes.js";
 
 import { Config } from "../config.js";
-import { BalanceResponse, balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi.js";
+import {
+  BalanceResponse,
+  balanceResponseFromSatoshi,
+} from "../util/balanceObjectFromSatoshi.js";
 import { BaseWallet } from "./Base.js";
 //#endregion Imports
 
@@ -241,7 +229,9 @@ export class Wallet extends BaseWallet {
 
   private async _generateWif() {
     if (!this.privateKey) {
-      this.privateKey = generatePrivateKey(() => generateRandomBytes(32) as Uint8Array);
+      this.privateKey = generatePrivateKey(
+        () => generateRandomBytes(32) as Uint8Array
+      );
     }
     return this.deriveInfo();
   }
@@ -271,7 +261,8 @@ export class Wallet extends BaseWallet {
   }
 
   protected fromId = async (walletId: string): Promise<this> => {
-    const [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
+    const [walletType, networkGiven, arg1, arg2]: string[] =
+      walletId.split(":");
 
     if (this.network !== networkGiven) {
       throw Error(`Network prefix ${networkGiven} to a ${this.network} wallet`);
@@ -309,7 +300,7 @@ export class Wallet extends BaseWallet {
 
       default:
         throw Error(`Unknown wallet type '${walletType}'`);
-      }
+    }
   };
 
   public async getXPubKeys(paths?) {
@@ -534,9 +525,14 @@ export class Wallet extends BaseWallet {
       | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array,
+    privateKey?: Uint8Array
   ) {
-    return super.encodeTransaction(requests, discardChange, options, this.privateKey);
+    return super.encodeTransaction(
+      requests,
+      discardChange,
+      options,
+      this.privateKey
+    );
   }
 
   public async signUnsignedTransaction(
@@ -547,11 +543,7 @@ export class Wallet extends BaseWallet {
       throw Error("Can not sign a transaction with watch-only wallet.");
     }
 
-    return signUnsignedTransaction(
-      transaction,
-      sourceOutputs,
-      this.privateKey
-    );
+    return signUnsignedTransaction(transaction, sourceOutputs, this.privateKey);
   }
   //#endregion Funds
 

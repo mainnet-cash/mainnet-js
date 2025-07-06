@@ -1,5 +1,10 @@
 import { prefixFromNetworkMap } from "../enum.js";
-import { getNamedWalletId, RegTestWatchWallet, TestNetWatchWallet, WatchWallet } from "./Base.js";
+import {
+  getNamedWalletId,
+  RegTestWatchWallet,
+  TestNetWatchWallet,
+  WatchWallet,
+} from "./Base.js";
 import {
   RegTestWallet,
   RegTestWifWallet,

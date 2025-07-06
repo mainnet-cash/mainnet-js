@@ -1,7 +1,20 @@
-import { binToHex, CashAddressNetworkPrefix, CashAddressType, decodeCashAddress, encodeCashAddress, IdentitySnapshot } from "@bitauth/libauth";
+import {
+  binToHex,
+  CashAddressNetworkPrefix,
+  CashAddressType,
+  decodeCashAddress,
+  encodeCashAddress,
+  IdentitySnapshot,
+} from "@bitauth/libauth";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
 import StorageProvider from "../db/StorageProvider.js";
-import { NetworkEnum, networkPrefixMap, NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
+import {
+  NetworkEnum,
+  networkPrefixMap,
+  NetworkType,
+  prefixFromNetworkMap,
+  UnitEnum,
+} from "../enum.js";
 import { getAddressHistory } from "../history/electrumTransformer.js";
 import { TransactionHistoryItem } from "../history/interface.js";
 import { HexHeaderI, NFTCapability, TxI, UtxoI } from "../interface.js";
@@ -10,17 +23,53 @@ import { getNetworkProvider } from "../network/default.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
-import { buildEncodedTransaction, getFeeAmount, getFeeAmountSimple, getSuitableUtxos } from "../transaction/Wif.js";
-import { balanceFromSatoshi, BalanceResponse, balanceResponseFromSatoshi } from "../util/balanceObjectFromSatoshi.js";
+import {
+  buildEncodedTransaction,
+  getFeeAmount,
+  getFeeAmountSimple,
+  getSuitableUtxos,
+} from "../transaction/Wif.js";
+import {
+  balanceFromSatoshi,
+  BalanceResponse,
+  balanceResponseFromSatoshi,
+} from "../util/balanceObjectFromSatoshi.js";
 import { checkUtxos } from "../util/checkUtxos.js";
 import { derivePrefix } from "../util/derivePublicKeyHash.js";
-import { amountInSatoshi, asSendRequestObject, deriveTokenaddr, getRuntimePlatform, hexToBin, sumTokenAmounts, sumUtxoValue, toTokenaddr } from "../util/index.js";
+import {
+  amountInSatoshi,
+  asSendRequestObject,
+  deriveTokenaddr,
+  getRuntimePlatform,
+  hexToBin,
+  sumTokenAmounts,
+  sumUtxoValue,
+  toTokenaddr,
+} from "../util/index.js";
 import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { BCMR } from "./Bcmr.js";
 import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
-import { CancelFn, SendRequestOptionsI, WaitForTransactionOptions, WaitForTransactionResponse, WalletI, WalletInfoI } from "./interface.js";
-import { fromUtxoId, OpReturnData, SendRequest, SendRequestArray, SendRequestType, SendResponse, TokenBurnRequest, TokenGenesisRequest, TokenMintRequest, TokenSendRequest } from "./model.js";
+import {
+  CancelFn,
+  SendRequestOptionsI,
+  WaitForTransactionOptions,
+  WaitForTransactionResponse,
+  WalletI,
+  WalletInfoI,
+} from "./interface.js";
+import {
+  fromUtxoId,
+  OpReturnData,
+  SendRequest,
+  SendRequestArray,
+  SendRequestType,
+  SendResponse,
+  TokenBurnRequest,
+  TokenGenesisRequest,
+  TokenMintRequest,
+  TokenSendRequest,
+} from "./model.js";
 import { Util } from "./Util.js";
 import { Wallet } from "./Wif.js";
 
@@ -120,9 +169,7 @@ export class BaseWallet implements WalletI {
    *
    * @throws {Error} if called on BaseWallet
    */
-  constructor(
-    network = NetworkType.Mainnet,
-  ) {
+  constructor(network = NetworkType.Mainnet) {
     this.network = network;
     this.walletType = WalletTypeEnum.Watch;
     this.provider = this.getNetworkProvider(this.network);
@@ -336,9 +383,7 @@ export class BaseWallet implements WalletI {
   ): Promise<InstanceType<T>> {
     const prefix = derivePrefix(address);
     const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this(networkType).watchOnly(
-      address
-    ) as InstanceType<T>;
+    return new this(networkType).watchOnly(address) as InstanceType<T>;
   }
 
   /**
@@ -357,9 +402,7 @@ export class BaseWallet implements WalletI {
   ): Promise<InstanceType<T>> {
     const prefix = derivePrefix(address);
     const networkType = networkPrefixMap[prefix] as NetworkType;
-    return new this(networkType).watchOnly(
-      address
-    ) as InstanceType<T>;
+    return new this(networkType).watchOnly(address) as InstanceType<T>;
   }
 
   /**
@@ -417,7 +460,8 @@ export class BaseWallet implements WalletI {
   }
 
   protected fromId(walletId: string): Promise<this> {
-    const [walletType, networkGiven, arg1, arg2]: string[] = walletId.split(":");
+    const [walletType, networkGiven, arg1, arg2]: string[] =
+      walletId.split(":");
 
     if (walletType !== WalletTypeEnum.Watch) {
       throw Error(
@@ -434,13 +478,13 @@ export class BaseWallet implements WalletI {
     }
 
     return this.watchOnly(arg1);
-  };
+  }
 
   // Initialize a watch only wallet from a cash addr
   protected async watchOnly(address: string): Promise<this> {
     this.walletType = WalletTypeEnum.Watch;
     const addressComponents = address.split(":");
-    let addressPrefix: string
+    let addressPrefix: string;
     let addressBase: string;
     if (addressComponents.length === 1) {
       addressBase = addressComponents.shift() as string;
@@ -552,11 +596,10 @@ export class BaseWallet implements WalletI {
   }
 
   // watching for any transaction hash of this wallet
-  public async watchAddress(callback: (txHash: string) => void): Promise<CancelFn> {
-    return this.provider.watchAddress(
-      this.getDepositAddress(),
-      callback
-    );
+  public async watchAddress(
+    callback: (txHash: string) => void
+  ): Promise<CancelFn> {
+    return this.provider.watchAddress(this.getDepositAddress(), callback);
   }
 
   // watching for any transaction of this wallet
@@ -573,7 +616,10 @@ export class BaseWallet implements WalletI {
   public async watchAddressTokenTransactions(
     callback: (tx: ElectrumRawTransaction) => void
   ): Promise<CancelFn> {
-    return this.provider.watchAddressTokenTransactions(this.getDepositAddress(), callback);
+    return this.provider.watchAddressTokenTransactions(
+      this.getDepositAddress(),
+      callback
+    );
   }
 
   // sets up a callback to be called upon wallet's balance change
@@ -612,7 +658,10 @@ export class BaseWallet implements WalletI {
       }
     };
 
-    const watchCancel = await this.provider.watchAddressStatus(this.getDepositAddress(), _callback);
+    const watchCancel = await this.provider.watchAddressStatus(
+      this.getDepositAddress(),
+      _callback
+    );
     const interval = setInterval(_callback, usdPriceRefreshInterval);
 
     return async () => {
@@ -855,7 +904,7 @@ export class BaseWallet implements WalletI {
   protected async sendMaxRaw(
     cashaddr: string,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array,
+    privateKey?: Uint8Array
   ): Promise<SendResponse> {
     const { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend(
       {
@@ -922,14 +971,12 @@ export class BaseWallet implements WalletI {
       | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array,
+    privateKey?: Uint8Array
   ) {
     let sendRequests = asSendRequestObject(requests);
 
     if (!privateKey && options?.buildUnsigned !== true) {
-      throw new Error(
-        `Missing private key`
-      );
+      throw new Error(`Missing private key`);
     }
 
     if (options && options.slpSemiAware) {
@@ -1143,11 +1190,7 @@ export class BaseWallet implements WalletI {
     fromHeight: number = 0,
     toHeight: number = -1
   ): Promise<TxI[]> {
-    return await this.provider.getHistory(
-      this.cashaddr,
-      fromHeight,
-      toHeight
-    );
+    return await this.provider.getHistory(this.cashaddr, fromHeight, toHeight);
   }
 
   /**
@@ -1266,15 +1309,18 @@ export class BaseWallet implements WalletI {
       // waiting for any address transaction
       let watchCancel: CancelFn;
       let initialResponseSeen = false;
-      watchCancel = await this.provider.watchAddressStatus(this.getDepositAddress(), async (_status) => {
-        if (initialResponseSeen) {
-          await watchCancel?.();
-          resolve(makeResponse());
-          return;
-        }
+      watchCancel = await this.provider.watchAddressStatus(
+        this.getDepositAddress(),
+        async (_status) => {
+          if (initialResponseSeen) {
+            await watchCancel?.();
+            resolve(makeResponse());
+            return;
+          }
 
-        initialResponseSeen = true;
-      });
+          initialResponseSeen = true;
+        }
+      );
     });
   }
 
@@ -1290,10 +1336,7 @@ export class BaseWallet implements WalletI {
     callback: (header: HexHeaderI) => void,
     skipCurrentHeight: boolean = true
   ): Promise<CancelFn> {
-    return this.provider.watchBlocks(
-      callback,
-      skipCurrentHeight
-    );
+    return this.provider.watchBlocks(callback, skipCurrentHeight);
   }
 
   /**

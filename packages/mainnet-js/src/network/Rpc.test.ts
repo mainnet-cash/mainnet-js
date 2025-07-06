@@ -17,7 +17,11 @@ afterAll(async () => {
 describe("Rpc tests", () => {
   test("get utxos", async () => {
     const provider = getNetworkProvider(Network.REGTEST);
-    expect(await provider.getUtxos("bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0")).not.toHaveLength(0);
+    expect(
+      await provider.getUtxos(
+        "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+      )
+    ).not.toHaveLength(0);
   });
 
   test("subcribe to address", async () => {

@@ -160,7 +160,7 @@ export class Util {
   public static async decodeTransaction(
     transactionHashOrHex: string,
     loadInputValues: boolean = false,
-    network?: NetworkType,
+    network?: NetworkType
   ): Promise<ElectrumRawTransaction> {
     return new this(network).decodeTransaction(
       transactionHashOrHex,

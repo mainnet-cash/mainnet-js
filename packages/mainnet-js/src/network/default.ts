@@ -1,11 +1,8 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
 import { ElectrumClient } from "@electrum-cash/network";
-import { ElectrumWebSocket } from '@electrum-cash/web-socket';
+import { ElectrumWebSocket } from "@electrum-cash/web-socket";
 import { default as NetworkProvider } from "./NetworkProvider.js";
-import {
-  getDefaultServers,
-  getUserAgent,
-} from "./configuration.js";
+import { getDefaultServers, getUserAgent } from "./configuration.js";
 import { parseElectrumUrl } from "./util.js";
 import { ElectrumHostParams } from "./interface.js";
 import { Network } from "../interface.js";
@@ -83,7 +80,11 @@ export function getNetworkProvider(
 }
 
 // create a client with a server
-function getClient(server: string, network: Network, options?: ElectrumHostParams) {
+function getClient(
+  server: string,
+  network: Network,
+  options?: ElectrumHostParams
+) {
   let url = parseElectrumUrl(server);
   return getElectrumClient(url, options?.timeout ?? 120000, network);
 }
@@ -97,10 +98,15 @@ function getElectrumClient(
     throw Error("TCP connections are not supported.");
   }
 
-  const webSocket = new ElectrumWebSocket(params.host, params.port, params.scheme === "wss", timeout)
+  const webSocket = new ElectrumWebSocket(
+    params.host,
+    params.port,
+    params.scheme === "wss",
+    timeout
+  );
   return new ElectrumClient(
     getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
-    webSocket,
+    webSocket
   );
 }

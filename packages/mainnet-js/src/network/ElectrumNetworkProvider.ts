@@ -4,7 +4,7 @@ import {
   ElectrumClientEvents,
   RPCNotification,
   ConnectionStatus,
-} from '@electrum-cash/network';
+} from "@electrum-cash/network";
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   HexHeaderI,
@@ -247,7 +247,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
             resolve(txHash);
           }
         };
-        cancel = await this.subscribeToTransaction(txHash, waitForTransactionCallback);
+        cancel = await this.subscribeToTransaction(
+          txHash,
+          waitForTransactionCallback
+        );
 
         this.performRequest("blockchain.transaction.broadcast", txHex).catch(
           async (error) => {
@@ -478,10 +481,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       this.subscriptionMap[key] = 1;
     }
 
-    await this.electrum.subscribe(
-      methodName,
-      ...parameters
-    );
+    await this.electrum.subscribe(methodName, ...parameters);
   }
 
   private async untrackSubscription(
@@ -522,16 +522,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       if (!this.subscribedToHeaders) {
         this.subscribedToHeaders = true;
 
-        await this.trackSubscription(
-          methodName,
-          ...parameters
-        );
+        await this.trackSubscription(methodName, ...parameters);
       }
     } else {
-      await this.trackSubscription(
-        methodName,
-        ...parameters
-      );
+      await this.trackSubscription(methodName, ...parameters);
     }
 
     this.subscriptions++;
@@ -542,10 +536,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
       // there are no blockchain.headers.unsubscribe method, so let's safeguard against it
       if (methodName !== "blockchain.headers.subscribe") {
-        await this.untrackSubscription(
-          methodName,
-          ...parameters
-        );
+        await this.untrackSubscription(methodName, ...parameters);
       }
     };
   }
@@ -572,9 +563,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     timeout = typeof timeout !== "undefined" ? timeout : 3000;
 
     let connectPromise = async () => {
-      while (
-        this.electrum.status !== ConnectionStatus.CONNECTED
-      ) {
+      while (this.electrum.status !== ConnectionStatus.CONNECTED) {
         await delay(100);
       }
       return true;
@@ -588,9 +577,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         return await this.electrum.connect();
       } catch (e) {
         console.warn(
-          `Warning: Failed to connect to client on ${this.network} at ${
-            this.electrum.hostIdentifier
-          }.`,
+          `Warning: Failed to connect to client on ${this.network} at ${this.electrum.hostIdentifier}.`,
           e
         );
         return;

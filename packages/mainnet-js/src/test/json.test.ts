@@ -8,6 +8,6 @@ export default json;
 
 describe("json tests", () => {
   test("Should serialize bigint", async () => {
-    expect(json(1n)).toBe("\"1\"");
+    expect(json(1n)).toBe('"1"');
   });
 });

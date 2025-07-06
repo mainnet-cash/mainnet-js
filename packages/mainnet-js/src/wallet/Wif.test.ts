@@ -802,10 +802,13 @@ describe(`Wallet subscriptions`, () => {
 
     let aliceWatchResult = false;
     let aliceWatchCancel: CancelFn;
-    aliceWatchCancel = await alice.provider!.watchAddressStatus(alice.getDepositAddress(), async (_status) => {
-      await aliceWatchCancel?.();
-      aliceWatchResult = true;
-    });
+    aliceWatchCancel = await alice.provider!.watchAddressStatus(
+      alice.getDepositAddress(),
+      async (_status) => {
+        await aliceWatchCancel?.();
+        aliceWatchResult = true;
+      }
+    );
 
     let bobWatchResult = false;
     let bobTransactionId = "";

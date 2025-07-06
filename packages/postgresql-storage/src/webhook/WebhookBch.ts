@@ -52,7 +52,7 @@ export class WebhookBch extends Webhook {
     this.wallet = await BaseWallet.fromCashaddr(this.cashaddr);
     this.cancel = await this.wallet.provider!.subscribeToAddress(
       this.cashaddr,
-      webhookCallback,
+      webhookCallback
     );
   }
 

@@ -4,11 +4,15 @@ const websocket = require("@electrum-cash/web-socket");
 
 async function getRegtestUtxos(address) {
   try {
-    const webSocket = new websocket.ElectrumWebSocket("127.0.0.1", 60003, false);
+    const webSocket = new websocket.ElectrumWebSocket(
+      "127.0.0.1",
+      60003,
+      false
+    );
     const spv = new electron.ElectrumClient(
       "Mainnet.Cash Regtest Client",
       "1.5",
-      webSocket,
+      webSocket
     );
     try {
       await spv.connect();

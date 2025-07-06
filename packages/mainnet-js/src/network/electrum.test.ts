@@ -6,7 +6,7 @@ test("Should get a transaction with bare electrum", async () => {
   const electrum = new ElectrumClient(
     "Electrum client example",
     "1.4.1",
-    "bch.imaginary.cash",
+    "bch.imaginary.cash"
   );
   await electrum.connect();
   const transactionID =
