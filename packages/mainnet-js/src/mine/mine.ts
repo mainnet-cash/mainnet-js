@@ -1,6 +1,4 @@
 import { browserNotSupported } from "../util/browserNotSupported.js";
-import child_process from "child_process";
-
 /**
  * Mine blocks to a regtest address
  *
@@ -20,6 +18,8 @@ export async function mine({
 }) {
   // node only
   browserNotSupported();
+
+  const child_process = await import("child_process");
 
   const generateArgs = [
     `exec`,
