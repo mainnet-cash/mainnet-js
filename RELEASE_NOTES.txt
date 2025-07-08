@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.2
+
+* Use async import of `child_process`
+
 2.7.1
 
 * Remove `dexie` dependency in favor of native indexeddb implementation
