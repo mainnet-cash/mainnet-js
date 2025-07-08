@@ -1,11 +1,17 @@
 Newest changes
 --------------
 
-2.7.4
+2.7.5
+
+* Update readme to use node v18
+* Update demo projects
+* Update cashscript to 0.11.1
+
+2.7.4 - Broken release
 
 * Update demo projects
 
-2.7.3
+2.7.3 - Broken release
 
 * Use async import of `child_process`
 * Update readme to use node v18
