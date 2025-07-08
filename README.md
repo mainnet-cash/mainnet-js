@@ -50,7 +50,7 @@ For the above reason, mainnet-js is not well suited for use as a javascript libr
 
 ## Finally, Check Your Node Version First
 
-`mainnet` is currently developed and tested node v14, if your node version is very old or very new, you may have issues getting started. Check the nodejs version first.
+`mainnet` is currently developed and tested node v18, if your node version is very old or very new, you may have issues getting started. Check the nodejs version first.
 
 Perhaps try [`nvm`](https://github.com/nvm-sh/nvm#about) to experiment if your issue occurs with different versions of node.
 
