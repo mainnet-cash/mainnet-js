@@ -30,10 +30,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      // events: require.resolve("events/"),
-      net: EMPTY_PATH,
-      tls: EMPTY_PATH,
-      stream: require.resolve('stream-browserify'),
+      child_process: EMPTY_PATH,
     },
   },
 })

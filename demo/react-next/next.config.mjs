@@ -5,7 +5,7 @@ const nextConfig = {
     config.experiments = { ...config.experiments, topLevelAwait: true };
     config.resolve.alias = {
       ...config.resolve.alias, ...{
-        // child_process: false,
+        child_process: false,
       }
     };
     return config

@@ -139,12 +139,12 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@mainnet-cash/indexeddb-storage@2.7.1":
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/@mainnet-cash/indexeddb-storage/-/indexeddb-storage-2.7.1.tgz#ad33674a5ece3d4781ad5bebdaf096574af6557f"
-  integrity sha512-1RYVIkDg1gh+boW0CHBPpPZfo/CBqhfDIMVZWan705wlu5VrTZx7x/9a7STOawtr2uhXh9sTvOFJigEP7ojIVQ==
+"@mainnet-cash/indexeddb-storage@2.7.3":
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/@mainnet-cash/indexeddb-storage/-/indexeddb-storage-2.7.3.tgz#c017e75e9fb0b3470c506ef68d578b866dc0ad21"
+  integrity sha512-ksXwKchCcCbJ8bxhQRB3FTPZl8bWWHHxTYToeG2ijOrQtYhVVeHgKhOPWgW8mg2+4CBfOYi3es1dwcyFQd/aRA==
   dependencies:
-    mainnet-js "2.7.1"
+    mainnet-js "2.7.3"
 
 "@monsterbitar/isomorphic-ws@^5.3.0":
   version "5.3.1"
@@ -1893,10 +1893,10 @@ lru-cache@^10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
   integrity sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==
 
-mainnet-js@2.7.1:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/mainnet-js/-/mainnet-js-2.7.1.tgz#e599261b6eecb696cd15ac748840bbb9c8094763"
-  integrity sha512-enV00ZRrttOR8Vct565UUmt3uwEgK74mgruV+to79cx+21TZJ+gtmsfRMeBOA7DBHdX63GB+71YZQSOYstcnCA==
+mainnet-js@2.7.3:
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/mainnet-js/-/mainnet-js-2.7.3.tgz#27ea3125da024c780e72470ad39be58ccfc85122"
+  integrity sha512-GHY2GvvcCHUTAovPypSU+jOEsbVCjgF6yN/FMVC9AC26tQ8bDD0NbGK1zJOnkaInEfXXLBY0zlus6uCSiAAamw==
   dependencies:
     "@bitauth/libauth" "^3.1.0-next.2"
     "@electrum-cash/network" "^4.1.1"

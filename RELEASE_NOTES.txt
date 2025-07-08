@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.4
+
+* Update demo projects
+
 2.7.3
 
 * Use async import of `child_process`

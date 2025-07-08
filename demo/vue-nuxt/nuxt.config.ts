@@ -24,14 +24,7 @@ export default defineNuxtConfig({
     },
     resolve: {
       alias: {
-        events: require.resolve("events/"),
-        fs: EMPTY_PATH,
-        http: EMPTY_PATH,
-        https: EMPTY_PATH,
-        net: EMPTY_PATH,
-        stream: require.resolve('stream-browserify'),
-        tls: EMPTY_PATH,
-        url: EMPTY_PATH
+        child_process: EMPTY_PATH,
       },
     },
   }

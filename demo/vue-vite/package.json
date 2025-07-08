@@ -1,6 +1,6 @@
 {
   "name": "vue-vite",
-  "version": "2.7.2",
+  "version": "2.7.4",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
@@ -13,8 +13,9 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "mainnet-js": "2.7.2",
-    "@mainnet-cash/indexeddb-storage": "2.7.2",
+    "@mainnet-cash/indexeddb-storage": "2.7.4",
+    "mainnet-js": "2.7.4",
+    "qrcode-svg": "^1.1.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2"
   },
@@ -23,6 +24,7 @@
     "@rushstack/eslint-patch": "^1.1.0",
     "@types/jsdom": "^16.2.14",
     "@types/node": "^16.11.45",
+    "@types/qrcode-svg": "^1.1.5",
     "@vitejs/plugin-vue": "^3.0.1",
     "@vitejs/plugin-vue-jsx": "^2.0.0",
     "@vue/eslint-config-prettier": "^7.0.0",

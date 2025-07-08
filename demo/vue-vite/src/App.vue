@@ -1,7 +1,8 @@
 <script lang="ts">
-import { Wallet, BaseWallet, StorageProvider } from "mainnet-js";
+import { Wallet, BaseWallet } from "mainnet-js";
 import { IndexedDBProvider }from "@mainnet-cash/indexeddb-storage";
 import { defineComponent } from "vue";
+import { qrAddress } from "./qrcode";
 export default defineComponent({
   name: "wallet",
 
@@ -17,7 +18,7 @@ export default defineComponent({
 
     BaseWallet.StorageProvider = IndexedDBProvider;
     this.wallet = await Wallet.named("testVueViteWallet");
-    this.image = this.wallet.getDepositQr();
+    this.image = qrAddress(this.wallet.getDepositAddress());
     this.balance = await this.wallet.getBalance('BCH');
   },
 });
