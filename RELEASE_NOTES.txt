@@ -1,7 +1,12 @@
 Newest changes
 --------------
 
-2.7.2
+2.7.3
+
+* Use async import of `child_process`
+* Update readme to use node v18
+
+2.7.2 - Broken release
 
 * Use async import of `child_process`
 
