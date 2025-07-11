@@ -6,6 +6,8 @@ import {
   encodeCashAddress,
   secp256k1,
 } from "@bitauth/libauth";
+import { prefixFromNetworkMap } from "../enum.js";
+import { Network } from "../interface.js";
 import { hash160 } from "./hash160.js";
 
 export function isValidAddress(cashaddr: string): boolean {
@@ -92,7 +94,8 @@ export function toTokenaddr(address: string): string {
 
   return encodeCashAddress({
     prefix: result.prefix as CashAddressNetworkPrefix,
-    type: result.type.replace("WithTokens", "") + "WithTokens" as CashAddressType,
+    type: (result.type.replace("WithTokens", "") +
+      "WithTokens") as CashAddressType,
     payload: result.payload,
   }).address;
 }
@@ -101,6 +104,28 @@ export function isTokenaddr(address: string): boolean {
   const result = decodeAddress(address);
 
   return result.type.endsWith("WithTokens");
+}
+
+// This function converts a cash address to a cash address of the specified network.
+// If withTokens is true, it will return a token-aware address.
+// If withTokens is false, it will return a non-token-aware address.
+// If withTokens is undefined, it will not change the token-awareness.
+export function convertAddress(
+  address: string,
+  network: Network = "mainnet",
+  withTokens: boolean | undefined = undefined
+): string {
+  const result = decodeAddress(address);
+
+  return encodeCashAddress({
+    prefix: prefixFromNetworkMap[network] as CashAddressNetworkPrefix,
+    type:
+      withTokens === undefined
+        ? result.type
+        : ((result.type.replace("WithTokens", "") +
+            (withTokens ? "WithTokens" : "")) as CashAddressType),
+    payload: result.payload,
+  }).address;
 }
 
 export function checkTokenaddr(cashaddr: string, enforce: boolean) {
