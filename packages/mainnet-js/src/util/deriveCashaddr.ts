@@ -1,17 +1,13 @@
 import {
   CashAddressNetworkPrefix,
-  encodeCashAddress,
   CashAddressType,
-  secp256k1,
-  decodeCashAddressFormat,
-  decodeCashAddressFormatWithoutPrefix,
-  CashAddressVersionByte,
   decodeCashAddress,
-  cashAddressTypeBitsToType,
-  decodeCashAddressVersionByte,
-  assertSuccess,
+  DecodedCashAddress,
+  encodeCashAddress,
+  secp256k1,
 } from "@bitauth/libauth";
-
+import { prefixFromNetworkMap } from "../enum.js";
+import { Network } from "../interface.js";
 import { hash160 } from "./hash160.js";
 
 export function isValidAddress(cashaddr: string): boolean {
@@ -75,85 +71,61 @@ export function deriveTokenaddr(
   }).address;
 }
 
-export function toCashaddr(tokenaddr: string): string {
-  let result:
-    | string
-    | { payload: Uint8Array; prefix: string; version: number }
-    | undefined;
-
-  // If the address has a prefix decode it as is
-  if (tokenaddr.includes(":")) {
-    result = decodeCashAddressFormat(tokenaddr);
+function decodeAddress(address: string): DecodedCashAddress {
+  const result = decodeCashAddress(address);
+  if (typeof result === "string") {
+    throw new Error(result);
   }
-  // otherwise, derive the network from the tokenaddr without prefix
-  else {
-    result = decodeCashAddressFormatWithoutPrefix(tokenaddr);
-  }
+  return result;
+}
 
-  if (typeof result === "string") throw new Error(result);
+export function toCashaddr(address: string): string {
+  const result = decodeAddress(address);
 
   return encodeCashAddress({
     prefix: result.prefix as CashAddressNetworkPrefix,
-    type: CashAddressType.p2pkh,
+    type: result.type.replace("WithTokens", "") as CashAddressType,
     payload: result.payload,
   }).address;
 }
 
-export function toTokenaddr(cashaddr: string): string {
-  let result:
-    | string
-    | { payload: Uint8Array; prefix: string; version: number }
-    | undefined;
-
-  // If the address has a prefix decode it as is
-  if (cashaddr.includes(":")) {
-    result = decodeCashAddressFormat(cashaddr);
-  }
-  // otherwise, derive the network from the cashaddr without prefix
-  else {
-    result = decodeCashAddressFormatWithoutPrefix(cashaddr);
-  }
-
-  if (typeof result === "string") throw new Error(result);
+export function toTokenaddr(address: string): string {
+  const result = decodeAddress(address);
 
   return encodeCashAddress({
     prefix: result.prefix as CashAddressNetworkPrefix,
-    type: CashAddressType.p2pkhWithTokens,
+    type: (result.type.replace("WithTokens", "") +
+      "WithTokens") as CashAddressType,
     payload: result.payload,
   }).address;
 }
 
 export function isTokenaddr(address: string): boolean {
-  let result:
-    | string
-    | { payload: Uint8Array; prefix: string; version: number }
-    | undefined;
+  const result = decodeAddress(address);
 
-  // If the address has a prefix decode it as is
-  if (address.includes(":")) {
-    result = decodeCashAddressFormat(address);
-  } else {
-    // otherwise, derive the network from the address without prefix
-    result = decodeCashAddressFormatWithoutPrefix(address);
-  }
+  return result.type.endsWith("WithTokens");
+}
 
-  if (typeof result === "string") throw new Error(result);
+// This function converts a cash address to a cash address of the specified network.
+// If withTokens is true, it will return a token-aware address.
+// If withTokens is false, it will return a non-token-aware address.
+// If withTokens is undefined, it will not change the token-awareness.
+export function convertAddress(
+  address: string,
+  network: Network = "mainnet",
+  withTokens: boolean | undefined = undefined
+): string {
+  const result = decodeAddress(address);
 
-  const info = decodeCashAddressVersionByte(result.version);
-  if (typeof info === "string") throw new Error(info);
-
-  const type = cashAddressTypeBitsToType[
-    info.typeBits as keyof typeof cashAddressTypeBitsToType
-  ] as CashAddressType | undefined;
-  if (type === undefined) {
-    throw Error("Wrong cashaddress type");
-  }
-
-  return (
-    [CashAddressType.p2pkhWithTokens, CashAddressType.p2shWithTokens].indexOf(
-      type
-    ) !== -1
-  );
+  return encodeCashAddress({
+    prefix: prefixFromNetworkMap[network] as CashAddressNetworkPrefix,
+    type:
+      withTokens === undefined
+        ? result.type
+        : ((result.type.replace("WithTokens", "") +
+            (withTokens ? "WithTokens" : "")) as CashAddressType),
+    payload: result.payload,
+  }).address;
 }
 
 export function checkTokenaddr(cashaddr: string, enforce: boolean) {

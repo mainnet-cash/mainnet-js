@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.7.6
+
+* Rework cashsaddress utilities to preserve underlying address type
+* Add convertAddress general util
+
 2.7.5
 
 * Update readme to use node v18
