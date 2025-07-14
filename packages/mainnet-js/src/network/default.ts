@@ -107,6 +107,10 @@ function getElectrumClient(
   return new ElectrumClient(
     getUserAgent(),
     ELECTRUM_CASH_PROTOCOL_VERSION,
-    webSocket
+    webSocket,
+    {
+      disableBrowserConnectivityHandling: true,
+      disableBrowserVisibilityHandling: true,
+    }
   );
 }

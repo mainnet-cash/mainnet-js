@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.8
+
+* Update @electrum-cash/network to new development version, disable extra browser features
+
 2.7.7
 
 * Add a utility function `generateWcSignTransactionRequest` which takes a `SendResponse` with an unsigned transaction and converts it to an object compatible with `WalletConnectV2` compatible wallets. See [example test](packages/mainnet-js/src/util/walletConnect.test.ts) for code snippets.

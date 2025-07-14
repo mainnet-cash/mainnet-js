@@ -9,7 +9,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "2.7.7",
+  "version": "2.7.8",
   "homepage": "https://mainnet.cash",
   "module": "dist/module/index.js",
   "browser": {
@@ -40,7 +40,7 @@
   "dependencies": {
     "@bch-wc2/interfaces": "^0.0.4",
     "@bitauth/libauth": "^3.1.0-next.2",
-    "@electrum-cash/network": "^4.1.1",
+    "@electrum-cash/network": "4.1.1-development.10647307155",
     "@scure/bip39": "^1.2.2",
     "buffer": "^6.0.3"
   },
