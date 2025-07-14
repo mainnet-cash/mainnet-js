@@ -6,10 +6,19 @@ export interface WcTransactionOptions {
   userPrompt?: string;
 }
 
-export const generateWcSignTransactionRequest = (sendResponse: SendResponse, options?: WcTransactionOptions): WcSignTransactionRequest => {
+export const generateWcSignTransactionRequest = (
+  sendResponse: SendResponse,
+  options?: WcTransactionOptions
+): WcSignTransactionRequest => {
   if (!sendResponse.unsignedTransaction || !sendResponse.sourceOutputs) {
-    throw new Error("SendResponse does not contain an unsigned transaction or source outputs");
+    throw new Error(
+      "SendResponse does not contain an unsigned transaction or source outputs"
+    );
   }
 
-  return { ...options, transaction: sendResponse.unsignedTransaction, sourceOutputs: sendResponse.sourceOutputs };
-}
+  return {
+    ...options,
+    transaction: sendResponse.unsignedTransaction,
+    sourceOutputs: sendResponse.sourceOutputs,
+  };
+};
