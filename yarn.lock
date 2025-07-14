@@ -666,6 +666,18 @@
     "@babel/helper-validator-identifier" "^7.24.7"
     to-fast-properties "^2.0.0"
 
+"@bch-wc2/interfaces@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@bch-wc2/interfaces/-/interfaces-0.0.4.tgz#702714e31aa55710bb9b8c64c18dc60a9e89045c"
+  integrity sha512-ROQjPxRBAYPvy7z0qiATWjI7Jwf4Zhag1/r68i9PJ5Wp0Uaq75krh0a5/UF+bnJ+AUm0aKwNR4zT5D7a1mZkzA==
+
+"@bch-wc2/privkey-connector@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@bch-wc2/privkey-connector/-/privkey-connector-0.0.4.tgz#f826e40588c4307cf11627652801f6264343c31c"
+  integrity sha512-gVRb2YuhfaSiSMNBbBqoeNzgQ+r0CYJP47iLspvWhs3x8Rj2DYv7vytciTSRwWvOH9l26nRT2znTMikNEk+2yw==
+  dependencies:
+    "@bch-wc2/interfaces" "^0.0.4"
+
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"

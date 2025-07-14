@@ -9,7 +9,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "2.7.6",
+  "version": "2.7.7",
   "homepage": "https://mainnet.cash",
   "module": "dist/module/index.js",
   "browser": {
@@ -38,6 +38,7 @@
     "reload": "npx reload --dir=../../jest/playwright "
   },
   "dependencies": {
+    "@bch-wc2/interfaces": "^0.0.4",
     "@bitauth/libauth": "^3.1.0-next.2",
     "@electrum-cash/network": "^4.1.1",
     "@scure/bip39": "^1.2.2",
@@ -59,5 +60,8 @@
     "bitcoin cash",
     "wasm"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "devDependencies": {
+    "@bch-wc2/privkey-connector": "^0.0.4"
+  }
 }
