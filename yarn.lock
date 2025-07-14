@@ -728,6 +728,18 @@
   dependencies:
     debug "^4.3.7"
 
+"@electrum-cash/network@4.1.1-development.10647307155":
+  version "4.1.1-development.10647307155"
+  resolved "https://registry.yarnpkg.com/@electrum-cash/network/-/network-4.1.1-development.10647307155.tgz#d41d61db58814354f86fa3fb4aa718b5577ade36"
+  integrity sha512-IGvB1lHgY0ozgt2dvWD19Mx0aNrDd+wGh4WvQVDd1ax/GXLFhd7XmLxhHgXNAEm0IpwCTJD5mkiEBNdkvngYcQ==
+  dependencies:
+    "@electrum-cash/debug-logs" "^1.0.0"
+    "@electrum-cash/web-socket" "^1.0.0"
+    async-mutex "^0.5.0"
+    debug "^4.3.2"
+    eventemitter3 "^5.0.1"
+    lossless-json "^4.0.1"
+
 "@electrum-cash/network@^4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@electrum-cash/network/-/network-4.1.1.tgz#1f9571c783f613ce960374b4bffb73c27b28c429"
