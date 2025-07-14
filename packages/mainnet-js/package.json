@@ -38,6 +38,7 @@
     "reload": "npx reload --dir=../../jest/playwright "
   },
   "dependencies": {
+    "@bch-wc2/interfaces": "^0.0.4",
     "@bitauth/libauth": "^3.1.0-next.2",
     "@electrum-cash/network": "^4.1.1",
     "@scure/bip39": "^1.2.2",
@@ -59,5 +60,8 @@
     "bitcoin cash",
     "wasm"
   ],
-  "author": "readcash"
+  "author": "readcash",
+  "devDependencies": {
+    "@bch-wc2/privkey-connector": "^0.0.4"
+  }
 }
