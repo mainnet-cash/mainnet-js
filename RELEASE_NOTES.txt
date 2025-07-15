@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.7.9
+
+* Update @electrum-cash/network to new version
+* Update @bch-wc2/interfaces to new version
+
 2.7.8
 
 * Update @electrum-cash/network to new development version, disable extra browser features
