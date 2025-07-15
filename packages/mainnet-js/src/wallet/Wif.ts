@@ -1,5 +1,5 @@
 //#region Imports
-import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
+import { deriveSeedFromBip39Mnemonic, encodeHdPublicKey, generateBip39Mnemonic, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
 
 import {
   binToHex,
@@ -12,7 +12,6 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { NetworkType } from "../enum.js";
 
 import { PrivateKeyI } from "../interface.js";
@@ -237,10 +236,10 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateMnemonic() {
-    this.mnemonic = generateMnemonic(Config.getWordlist());
+    this.mnemonic = generateBip39Mnemonic();
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
     const network = this.isTestnet ? "testnet" : "mainnet";
     this.parentXPubKey = getXPubKey(seed, this.parentDerivationPath, network);
@@ -324,7 +323,7 @@ export class Wallet extends BaseWallet {
 
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
@@ -362,7 +361,7 @@ export class Wallet extends BaseWallet {
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
     if (!this.mnemonic)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
