@@ -1,5 +1,11 @@
 //#region Imports
-import { deriveSeedFromBip39Mnemonic, encodeHdPublicKey, generateBip39Mnemonic, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
+import {
+  deriveSeedFromBip39Mnemonic,
+  encodeHdPublicKey,
+  generateBip39Mnemonic,
+  HdKeyNetwork,
+  secp256k1,
+} from "@bitauth/libauth";
 
 import {
   binToHex,
