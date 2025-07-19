@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+2.7.10
+
+* Update @bch-wc2/interfaces to new version
+* Update cashscript to new version
+* Fix import quirks in strict environments
+
 2.7.9
 
 * Update @electrum-cash/network to new version
