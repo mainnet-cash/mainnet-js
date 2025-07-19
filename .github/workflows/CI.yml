@@ -95,7 +95,7 @@ jobs:
         node-version: '22.x'
     - run: yarn
     - run: yarn build
-    - uses: paambaati/codeclimate-action@v2.5.7
+    - uses: paambaati/codeclimate-action@v9.0.0
       with:
         coverageCommand: yarn coverage
         debug: true
