@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/contract",
-  "version": "2.7.9",
+  "version": "2.7.10",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -10,10 +10,10 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "@cashscript/utils": "^0.11.1",
-    "cashc": "^0.11.1",
-    "cashscript": "^0.11.1",
-    "mainnet-js": "2.7.9"
+    "@cashscript/utils": "^0.11.2",
+    "cashc": "^0.11.2",
+    "cashscript": "^0.11.2",
+    "mainnet-js": "2.7.10"
   },
   "devDependencies": {},
   "scripts": {
