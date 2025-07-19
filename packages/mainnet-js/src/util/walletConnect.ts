@@ -1,5 +1,5 @@
 import { WcSignTransactionRequest } from "@bch-wc2/interfaces";
-import { SendResponse } from "../wallet/model";
+import { SendResponse } from "../wallet/model.js";
 
 export interface WcTransactionOptions {
   broadcast?: boolean;

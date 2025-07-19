@@ -10,9 +10,9 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "@cashscript/utils": "^0.11.1",
-    "cashc": "^0.11.1",
-    "cashscript": "^0.11.1",
+    "@cashscript/utils": "^0.11.2",
+    "cashc": "^0.11.2",
+    "cashscript": "^0.11.2",
     "mainnet-js": "2.7.9"
   },
   "devDependencies": {},
