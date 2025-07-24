@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.7.11
+
+* Disable python publishing and codeclimate temporarily, fix fetch mocking
+* Update cashscript version eliminating doubled electrum-cash dependency
+
 2.7.10
 
 * Update @bch-wc2/interfaces to new version

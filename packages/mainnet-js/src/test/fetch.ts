@@ -1,4 +1,4 @@
-const map = {};
+const map: Record<string, any> = {};
 
 const _fetch = globalThis.fetch;
 
@@ -6,9 +6,14 @@ Object.defineProperty(globalThis, "fetch", {
   writable: true,
 });
 
-globalThis.fetch = ((uri: any, ...rest: any) => {
+globalThis.fetch = (async (uri: any, ...rest: any) => {
   if (!map[uri]) {
-    return _fetch(uri, ...rest);
+    // allow for execution of the original fetch taking some time
+    const response = await _fetch(uri, ...rest);
+    // upon arrival of the response, check if it was mocked in the meanwhile
+    if (!map[uri]) {
+      return response;
+    }
   }
 
   return new Promise((resolve) =>
@@ -25,10 +30,10 @@ globalThis.fetch = ((uri: any, ...rest: any) => {
   );
 }) as any;
 
-export function setupFetchMock(mockUrl, responseData) {
+export function setupFetchMock(mockUrl: string, responseData: any) {
   map[mockUrl] = responseData;
 }
 
-export function removeFetchMock(mockUrl) {
+export function removeFetchMock(mockUrl: string) {
   delete map[mockUrl];
 }

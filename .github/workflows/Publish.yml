@@ -273,6 +273,7 @@ jobs:
   # Publish python API client to PyPI
   # Requires PYPI_TOKEN github secret to be set
   publish-python:
+    if: false
     needs: build
     runs-on: ubuntu-latest
     steps:
