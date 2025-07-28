@@ -1,8 +1,22 @@
-import { IConnector, WcSignTransactionRequest, WcSignTransactionResponse } from "@bch-wc2/interfaces";
+import {
+  IConnector,
+  WcSignTransactionRequest,
+  WcSignTransactionResponse,
+} from "@bch-wc2/interfaces";
 import { hexToBin } from "@bitauth/libauth";
 import { BaseWallet } from "../wallet/Base.js";
 import { SendRequestOptionsI } from "../wallet/interface.js";
-import { OpReturnData, SendRequest, SendRequestArray, SendRequestType, SendResponse, TokenBurnRequest, TokenGenesisRequest, TokenMintRequest, TokenSendRequest } from "../wallet/model.js";
+import {
+  OpReturnData,
+  SendRequest,
+  SendRequestArray,
+  SendRequestType,
+  SendResponse,
+  TokenBurnRequest,
+  TokenGenesisRequest,
+  TokenMintRequest,
+  TokenSendRequest,
+} from "../wallet/model.js";
 
 export interface WcTransactionOptions {
   broadcast?: boolean;
@@ -48,11 +62,11 @@ export class WCSigner {
     walletMethod: (...args: any[]) => Promise<SendResponse>,
     walletArgs: any[],
     options?: SendRequestOptionsI & WcTransactionOptions,
-    errorMsg: string = "Failed to sign transaction, user may have rejected the request",
+    errorMsg: string = "Failed to sign transaction, user may have rejected the request"
   ): Promise<WcSendResponse> {
     const response = await walletMethod.apply(this.wallet, [
       ...walletArgs,
-      { queryBalance: false, ...options, buildUnsigned: true }
+      { queryBalance: false, ...options, buildUnsigned: true },
     ]);
 
     const signRequest = generateWcSignTransactionRequest(response, options);

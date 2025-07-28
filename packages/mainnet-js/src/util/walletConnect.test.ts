@@ -2,7 +2,10 @@ import { binToHex } from "@bitauth/libauth";
 import { RegTestWallet } from "../wallet/Wif";
 import { generateWcSignTransactionRequest, WCSigner } from "./walletConnect";
 import { WcSignTransactionRequest } from "@bch-wc2/interfaces";
-import { PrivKeyConnector, signWcTransaction } from "@bch-wc2/privkey-connector";
+import {
+  PrivKeyConnector,
+  signWcTransaction,
+} from "@bch-wc2/privkey-connector";
 import { NetworkProvider } from "../network";
 
 export const processWcSignTransactionRequest = async (
