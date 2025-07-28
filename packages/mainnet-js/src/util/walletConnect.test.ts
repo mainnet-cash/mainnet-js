@@ -1,8 +1,8 @@
 import { binToHex } from "@bitauth/libauth";
 import { RegTestWallet } from "../wallet/Wif";
-import { generateWcSignTransactionRequest } from "./walletConnect";
+import { generateWcSignTransactionRequest, WCSigner } from "./walletConnect";
 import { WcSignTransactionRequest } from "@bch-wc2/interfaces";
-import { signWcTransaction } from "@bch-wc2/privkey-connector";
+import { PrivKeyConnector, signWcTransaction } from "@bch-wc2/privkey-connector";
 import { NetworkProvider } from "../network";
 
 export const processWcSignTransactionRequest = async (
@@ -77,6 +77,35 @@ describe("Wallet Connect Utility Functions", () => {
       },
       wallet.provider
     );
+
+    expect(await bob.getBalance("sat")).toBe(5000);
+  });
+
+  it("should sign a transaction with WcSigner", async () => {
+    const wallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    const connector = new PrivKeyConnector({
+      privateKey: wallet.privateKey,
+      pubkeyCompressed: wallet.publicKeyCompressed,
+      networkProvider: wallet.provider,
+    });
+
+    const wcSigner = new WCSigner(wallet, connector);
+
+    const sendResponse = await wcSigner.send(
+      {
+        cashaddr: bob.cashaddr,
+        value: 5000,
+        unit: "satoshi",
+      },
+      {
+        userPrompt: "Confirm transaction",
+        broadcast: true,
+      }
+    );
+
+    expect(sendResponse.signedTransaction).toBeDefined();
 
     expect(await bob.getBalance("sat")).toBe(5000);
   });
