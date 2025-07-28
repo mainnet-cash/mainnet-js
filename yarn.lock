@@ -666,17 +666,17 @@
     "@babel/helper-validator-identifier" "^7.24.7"
     to-fast-properties "^2.0.0"
 
-"@bch-wc2/interfaces@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@bch-wc2/interfaces/-/interfaces-0.0.7.tgz#0d61b1c9c3ee0b4e7fb172c0f020bebff08c49f9"
-  integrity sha512-QF9mSqG4nBvSLov8QQ7iCnndZpRKNwmUMMUB/vOqO42epCfNQSZLeFOeDU7CAOjG9RZEmq/R8GPNrb8+axO7IA==
+"@bch-wc2/interfaces@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@bch-wc2/interfaces/-/interfaces-0.0.8.tgz#2f994aeaa370f2ca506f87fc23e0837e21b475d6"
+  integrity sha512-gRt95azHVqoViGI4X3F1ObgTpYBh3//KaCHRBWSMJbAKNM09T+TA/h9kx9u9SZmE8otMtpFSy4awSHWHUQZmbg==
 
-"@bch-wc2/privkey-connector@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@bch-wc2/privkey-connector/-/privkey-connector-0.0.7.tgz#f9b45c5f5e8d7f2cfc65231e2533c40bf0d18e21"
-  integrity sha512-nN/vgEAn/E320J7tJ8QCKziLM3pG6I4SvxUPmL4LyvX+75KQ2wILY1icV/b5YSx91QqXM0fHGC0tiCHeHN9e+Q==
+"@bch-wc2/privkey-connector@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@bch-wc2/privkey-connector/-/privkey-connector-0.0.8.tgz#b8aa916b369de01007588ac1208ac76d7e686f3b"
+  integrity sha512-JM8EMYNBF3IQ3Mj0Sj+pU1MCEVcVfcwrH1D2whAFNzR0Uv52ogwF+WWGwvcMD4bSPVFQsDewTulAhVrBqRphTA==
   dependencies:
-    "@bch-wc2/interfaces" "^0.0.7"
+    "@bch-wc2/interfaces" "^0.0.8"
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
