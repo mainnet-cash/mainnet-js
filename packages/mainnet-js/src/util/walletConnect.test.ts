@@ -1,6 +1,9 @@
 import { binToHex } from "@bitauth/libauth";
 import { RegTestWallet } from "../wallet/Wif";
-import { generateWcSignTransactionRequest, WcSigner as WcSigner } from "./walletConnect";
+import {
+  generateWcSignTransactionRequest,
+  WcSigner as WcSigner,
+} from "./walletConnect";
 import { WcSignTransactionRequest } from "@bch-wc2/interfaces";
 import {
   PrivKeyConnector,
