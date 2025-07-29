@@ -1,6 +1,9 @@
 import { binToHex } from "@bitauth/libauth";
 import { RegTestWallet } from "../wallet/Wif";
-import { generateWcSignTransactionRequest, WCSigner } from "./walletConnect";
+import {
+  generateWcSignTransactionRequest,
+  WcSigner as WcSigner,
+} from "./walletConnect";
 import { WcSignTransactionRequest } from "@bch-wc2/interfaces";
 import {
   PrivKeyConnector,
@@ -94,7 +97,7 @@ describe("Wallet Connect Utility Functions", () => {
       networkProvider: wallet.provider,
     });
 
-    const wcSigner = new WCSigner(wallet, connector);
+    const wcSigner = new WcSigner(wallet, connector);
 
     const sendResponse = await wcSigner.send(
       {

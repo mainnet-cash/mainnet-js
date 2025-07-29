@@ -3,7 +3,6 @@ import {
   WcSignTransactionRequest,
   WcSignTransactionResponse,
 } from "@bch-wc2/interfaces";
-import { hexToBin } from "@bitauth/libauth";
 import { BaseWallet } from "../wallet/Base.js";
 import { SendRequestOptionsI } from "../wallet/interface.js";
 import {
@@ -45,7 +44,7 @@ export type WcSendResponse = SendResponse & WcSignTransactionResponse;
 // A wrapper class for signing transactions with WalletConnect
 // Interfaces are the same as the original wallet methods
 // Meant to be a drop-in replacement for the original wallet methods
-export class WCSigner {
+export class WcSigner {
   public wallet!: BaseWallet;
   public connector: IConnector;
 
@@ -74,6 +73,13 @@ export class WCSigner {
 
     if (!signResponse) {
       throw new Error(errorMsg);
+    }
+
+    // broadcast transaaction by default
+    if (options?.broadcast !== false) {
+      await this.wallet.provider.sendRawTransaction(
+        signResponse.signedTransaction
+      );
     }
 
     return {
