@@ -68,18 +68,15 @@ export class WcSigner {
       { queryBalance: false, ...options, buildUnsigned: true },
     ]);
 
-    const signRequest = generateWcSignTransactionRequest(response, options);
+    const signRequest = generateWcSignTransactionRequest(response, {
+      // ask to broadcast the transaction by default
+      broadcast: true,
+      ...options,
+    });
     const signResponse = await this.connector.signTransaction(signRequest);
 
     if (!signResponse) {
       throw new Error(errorMsg);
-    }
-
-    // broadcast transaaction by default
-    if (options?.broadcast !== false) {
-      await this.wallet.provider.sendRawTransaction(
-        signResponse.signedTransaction
-      );
     }
 
     return {
