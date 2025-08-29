@@ -4,6 +4,15 @@ import { createWallet } from "../wallet/createWallet";
 import { mine } from "../mine";
 import { getAddressHistory } from "./electrumTransformer";
 
+test("Should get miner history", async () => {
+  const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+  const history = await getAddressHistory({
+    address: alice.getDepositAddress(),
+    provider: alice.provider!,
+  });
+  expect(history.length).toBeGreaterThan(0);
+});
+
 // // This class transforms outputs from electrum to a standard array of history.
 test("Should get an address history", async () => {
   // Build Alice's wallet from Wallet Import Format string
