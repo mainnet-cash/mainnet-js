@@ -7,13 +7,12 @@ import {
   decodeCashAddress,
   TransactionCommon,
   assertSuccess,
-  OpcodesBCH,
   Opcodes,
 } from "@bitauth/libauth";
 import { UnitEnum } from "../enum.js";
 import NetworkProvider from "../network/NetworkProvider.js";
 import { convert } from "../util/convert.js";
-import { HeaderI, TokenI } from "../interface.js";
+import { HeaderI } from "../interface.js";
 import { TransactionHistoryItem, InOutput } from "./interface.js";
 
 type Transaction = TransactionCommon & {
@@ -94,6 +93,13 @@ export const getAddressHistory = async ({
   const prevoutTransactionMap = (
     await Promise.all(
       prevoutTransactionHashes.map(async (hash) => {
+        if (
+          hash ===
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ) {
+          return [hash, undefined];
+        }
+
         const txHex = (await provider.getRawTransaction(hash)) as string;
 
         const transaction = decodeTransaction(hexToBin(txHex));
@@ -126,7 +132,22 @@ export const getAddressHistory = async ({
     let inputTotalValue = 0n;
     let outputTotalValue = 0n;
 
+    const isCoinbase =
+      tx.inputs.length === 1 &&
+      tx.inputs[0].outpointTransactionHash.every((b) => b === 0);
+
     result.inputs = tx.inputs.map((input) => {
+      if (isCoinbase) {
+        const halvings = Math.floor(tx.blockHeight / 210000);
+        const subsidy = Math.floor(5000000000 / 2 ** halvings);
+        inputTotalValue += BigInt(subsidy);
+
+        return {
+          address: "coinbase",
+          value: subsidy,
+        } as InOutput;
+      }
+
       const prevoutTx =
         prevoutTransactionMap[binToHex(input.outpointTransactionHash)];
       if (!prevoutTx) {
@@ -216,6 +237,11 @@ export const getAddressHistory = async ({
     result.hash = tx.hash;
     result.size = tx.size;
     result.fee = Number(inputTotalValue - outputTotalValue);
+
+    if (isCoinbase && result.fee) {
+      // will indicate the fees collected by the miner
+      result.fee = -result.fee;
+    }
 
     return result;
   });
