@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+2.7.17
+
+* Fix publish workflow
+* Update cashscript to 0.11.5
+
+2.7.16 - Broken release
+
+* Update cashscript to 0.11.5
+
 2.7.15
 
 * Fix getting address history including coinbase transactions
