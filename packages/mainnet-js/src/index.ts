@@ -29,6 +29,7 @@ export * from "./wallet/model.js";
 import * as Mainnet from "./util/index.js";
 export { Mainnet };
 export * from "./util/index.js";
+export { getAddressHistory } from "./history/electrumTransformer.js";
 
 // libauth
 export * as libauth from "./libauth.js";
