@@ -1,6 +1,6 @@
 # Dockerfile to produce mainnet/mainnet-rest image
 
-ARG BASE_IMAGE=node:18
+ARG BASE_IMAGE=node:22
 FROM $BASE_IMAGE
 
 ARG GIT_REPO=https://github.com/mainnet-cash/mainnet-js
