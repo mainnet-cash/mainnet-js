@@ -260,4 +260,42 @@ describe("Test message Signing and Verification", () => {
     expect(badResult.details?.publicKeyMatch).toBe(false);
     expect(result.details?.signatureType).toBe("recoverable");
   });
+
+  test("Test signature verification with cashaddr and tokenaddr is equivalent", async () => {
+    let msg1 = "Chancellor on brink of second bailout for banks";
+    let w1 = await Wallet.fromId(
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+    );
+    expect(w1.cashaddr!).toBe(
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+    );
+    let sig = await SignedMessage.sign(msg1, w1.privateKey!);
+
+    let coreLibSig =
+      "H/9jMOnj4MFbH3d7t4yCQ9i7DgZU/VZ278w3+ySv2F4yIsdqjsc5ng3kmN8OZAThgyfCZOQxZCWza9V5XzlVY0Y=";
+    expect(sig.signature).toBe(coreLibSig);
+    let result = await SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
+    expect(result.valid).toBe(true);
+    expect(result.details!.messageHash).toBe(
+      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
+    );
+    expect(result.details!.publicKeyHashMatch).toBe(true);
+    expect(result.details!.publicKeyMatch).toBe(false);
+    expect(result.details!.signatureValid).toBe(true);
+    expect(result.details!.signatureType).toBe("recoverable");
+
+    let result2 = await SignedMessage.verify(
+      msg1,
+      sig.signature,
+      w1.tokenaddr!
+    );
+    expect(result2.valid).toBe(true);
+    expect(result2.details!.messageHash).toBe(
+      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
+    );
+    expect(result2.details!.publicKeyHashMatch).toBe(true);
+    expect(result2.details!.publicKeyMatch).toBe(false);
+    expect(result2.details!.signatureValid).toBe(true);
+    expect(result2.details!.signatureType).toBe("recoverable");
+  });
 });
