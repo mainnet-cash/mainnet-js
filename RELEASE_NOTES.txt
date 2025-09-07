@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.19
+
+* Bump docker image base node version to 22
+
 2.7.18
 
 * Fix signature verification for token addresses
