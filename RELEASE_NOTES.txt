@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.18
+
+* Fix signature verification for token addresses
+
 2.7.17
 
 * Fix publish workflow
