@@ -2,6 +2,7 @@ export { getNetworkProvider } from "./default.js";
 export {
   Connection,
   initProviders,
+  initProvider,
   disconnectProviders,
 } from "./Connection.js";
 export { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";

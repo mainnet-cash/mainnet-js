@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import Service from './Service.js';
-import { BCMR } from 'mainnet-js';
+import { BCMR } from '@mainnet-cash/bcmr';
 
 /**
 * Add BCMR metadata registry from autchain, returning the built chain

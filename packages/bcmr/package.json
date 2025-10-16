@@ -1,0 +1,30 @@
+{
+  "type": "module",
+  "name": "@mainnet-cash/bcmr",
+  "version": "2.7.19",
+  "module": "dist/module/index.js",
+  "types": "dist/module/index.d.ts",
+  "exports": {
+    "import": "./dist/module/index.js"
+  },
+  "license": "MIT",
+  "author": "readcash",
+  "dependencies": {
+    "mainnet-js": "2.7.19"
+  },
+  "devDependencies": {
+  },
+  "scripts": {
+    "prebuild": "yarn install",
+    "build": "yarn build:module && yarn build:browser",
+    "build:main": "tsc",
+    "build:module": "tsc -p tsconfig.browser.json",
+    "build:browser": "npx webpack",
+    "build:production": "yarn build:module && NODE_ENV=production yarn build:browser",
+    "test": "jest",
+    "publish:public": "yarn publish --access public"
+  },
+  "testPathIgnorePatterns": [
+    "dist"
+  ]
+}
