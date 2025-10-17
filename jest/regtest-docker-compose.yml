@@ -11,9 +11,9 @@ services:
       retries: 3
       start_period: 10s
     container_name: bitcoind
-    # ports:
-    #   - "18443:18443" # rpc
-    #   - "28332:28332" # zmq pub
+    ports:
+      - "127.0.0.1:18443:18443" # rpc
+      - "127.0.0.1:28332:28332" # zmq pub
     expose: [18443, 28332]
     volumes:
       - bitcoin-data:/data

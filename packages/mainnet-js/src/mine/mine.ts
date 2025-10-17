@@ -1,5 +1,4 @@
-import { browserNotSupported } from "../util/browserNotSupported.js";
-import child_process from "child_process";
+import { binToBase64, utf8ToBin } from "@bitauth/libauth";
 
 /**
  * Mine blocks to a regtest address
@@ -10,32 +9,34 @@ import child_process from "child_process";
  * @remarks
  * This function assumes a local regtest bitcoin node with RPC_* matching the docker configuration
  */
-
-export async function mine({
+export const mine = async ({
   cashaddr,
   blocks,
 }: {
   cashaddr: string;
   blocks: number;
-}) {
-  // node only
-  browserNotSupported();
+}): Promise<any> => {
+  const response = await fetch(`http://127.0.0.1:${process.env.RPC_PORT}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization:
+        "Basic " +
+        binToBase64(
+          utf8ToBin(`${process.env.RPC_USER}:${process.env.RPC_PASS}`)
+        ),
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "0",
+      method: "generatetoaddress",
+      params: {
+        nblocks: blocks,
+        address: cashaddr,
+      },
+    }),
+  });
+  const json = await response.json();
 
-  const generateArgs = [
-    `exec`,
-    `bitcoind`,
-    `bitcoin-cli`,
-    `--rpcconnect=${process.env.RPC_HOST}`,
-    `--rpcuser=${process.env.RPC_USER}`,
-    `--rpcpassword=${process.env.RPC_PASS}`,
-    `--rpcport=${process.env.RPC_PORT}`,
-    `generatetoaddress`,
-    blocks,
-    cashaddr,
-  ];
-  const cli = child_process.spawnSync(`docker`, generateArgs as any);
-  if (cli.stderr.length > 0) {
-    return console.log("Mine Error: " + cli.stderr.toString());
-  }
-  return JSON.parse(cli.stdout.toString());
-}
+  return json.result;
+};
