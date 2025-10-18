@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.22
+
+* Update react-next demo to use latest next
+
 2.7.21
 
 * Update dependencies, make `dotenv` a dev dependency, remove `buffer`
