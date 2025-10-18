@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.20
+
+* Rework mine function to use fetch instead of docker cli, this removes the `child_process` node-only dependency
+
 2.7.19
 
 * Bump docker image base node version to 22
