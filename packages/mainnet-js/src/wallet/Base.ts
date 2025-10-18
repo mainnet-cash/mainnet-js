@@ -4,12 +4,10 @@ import {
   CashAddressType,
   decodeCashAddress,
   encodeCashAddress,
-  IdentitySnapshot,
 } from "@bitauth/libauth";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
 import StorageProvider from "../db/StorageProvider.js";
 import {
-  NetworkEnum,
   networkPrefixMap,
   NetworkType,
   prefixFromNetworkMap,
@@ -48,7 +46,6 @@ import {
 } from "../util/index.js";
 import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
-import { BCMR } from "./Bcmr.js";
 import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 import {
   CancelFn,
@@ -727,12 +724,6 @@ export class BaseWallet implements WalletI {
         }
       );
     });
-  }
-
-  public async getTokenInfo(
-    tokenId: string
-  ): Promise<IdentitySnapshot | undefined> {
-    return BCMR.getTokenInfo(tokenId);
   }
 
   protected async _getMaxAmountToSend(

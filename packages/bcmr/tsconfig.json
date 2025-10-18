@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "downlevelIteration": true,
+    "composite": true,
+    "module": "esnext",
+    "target": "esnext",
+    "outDir": "./dist/module",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "lib": ["es2020", "es2020.bigint", "dom"],
+    "typeRoots": [
+      "node_modules/@types",
+      "../../node_modules/@types",
+      "./src/types"
+    ]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules/**", "src/**/*test.ts"],
+  "references": [
+    {
+      "path": "../mainnet-js/"
+    }
+  ],
+  "compileOnSave": false
+}

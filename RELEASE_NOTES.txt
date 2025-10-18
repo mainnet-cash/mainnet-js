@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+2.7.23
+
+* Minor breaking
+* Extract BCMR functionality into @mainnet-cash/bcmr
+* Remove `getTokenInfo` from Wallet class
+
 2.7.22
 
 * Update react-next demo to use latest next

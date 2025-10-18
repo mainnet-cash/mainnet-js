@@ -1,6 +1,6 @@
 {
   "name": "react-next",
-  "version": "2.7.22",
+  "version": "2.7.23",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,8 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@mainnet-cash/indexeddb-storage": "2.7.22",
-    "mainnet-js": "2.7.22",
+    "@mainnet-cash/indexeddb-storage": "2.7.23",
+    "mainnet-js": "2.7.23",
     "next": "15.5.5",
     "qrcode-svg": "^1.1.0",
     "react": "19.1.0",

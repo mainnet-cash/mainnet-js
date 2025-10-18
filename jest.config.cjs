@@ -18,6 +18,7 @@ module.exports = {
     "<rootDir>/packages/contract/src",
     "<rootDir>/packages/indexeddb-storage/src",
     "<rootDir>/packages/postgresql-storage/src",
+    "<rootDir>/packages/bcmr/src",
   ],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",

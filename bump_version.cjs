@@ -26,6 +26,7 @@ const workspacePackageFiles = [
   "./packages/contract/package.json",
   "./packages/indexeddb-storage/package.json",
   "./packages/postgresql-storage/package.json",
+  "./packages/bcmr/package.json",
   "./packages/mainnet-cash/package.json",
 ];
 const workspacePackages = [
@@ -33,6 +34,7 @@ const workspacePackages = [
   "@mainnet-cash/contract",
   "@mainnet-cash/indexeddb-storage",
   "@mainnet-cash/postgresql-storage",
+  "@mainnet-cash/bcmr",
 ];
 
 // Get the package version from the root package

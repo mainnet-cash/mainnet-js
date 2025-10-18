@@ -2,8 +2,6 @@ export * from "./test/fetch.js";
 export * from "./test/expect.js";
 export * from "./db/index.js";
 export * from "./mine/index.js";
-export * from "./wallet/Bcmr.js";
-export * from "./wallet/bcmr-v2.schema.js";
 
 export * from "./network/index.js";
 export { SignedMessage } from "./message/signed.js";

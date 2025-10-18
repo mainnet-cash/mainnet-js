@@ -39,15 +39,19 @@ jobs:
           MAINNET_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/mainnet-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
           CONTRACT_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/contract/contract-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
           INDEXEDDB_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/indexeddb-storage/indexeddb-storage-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
+          BCMR_HASH=$(echo sha384-`curl https://cdn.mainnet.cash/bcmr/bcmr-${{ env.TAG_NAME }}.js | openssl dgst -sha384 -binary | openssl base64 -A`)
           MAINNET_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/mainnet' docs/src/tutorial/README.md | cut -d: -f 1 ) +1 ))
           CONTRACT_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/contract' docs/src/tutorial/README.md | cut -d: -f 1 ) +1 ))
           INDEXEDDB_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/indexeddb-storage' docs/src/tutorial/README.md | cut -d: -f 1 ) +1 ))
+          BCMR_INTEGRITY_LN=$(( $(grep -n 'src=\"https\:\/\/cdn\.mainnet\.cash\/bcmr' docs/src/tutorial/README.md | cut -d: -f 1 ) +1 ))
           sed -Ei "s/mainnet-${SEMVER}.js/mainnet-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
           sed -Ei "s/contract\/contract-${SEMVER}.js/contract\/contract-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
           sed -Ei "s/indexeddb-storage\/indexeddb-storage-${SEMVER}.js/indexeddb-storage\/indexeddb-storage-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
+          sed -Ei "s/bcmr\/bcmr-${SEMVER}.js/bcmr\/bcmr-${{ env.TAG_NAME }}.js/g" docs/src/tutorial/README.md
           sed -i "${MAINNET_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$MAINNET_HASH\"|g" docs/src/tutorial/README.md
           sed -i "${CONTRACT_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$CONTRACT_HASH\"|g" docs/src/tutorial/README.md
           sed -i "${INDEXEDDB_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$INDEXEDDB_HASH\"|g" docs/src/tutorial/README.md
+          sed -i "${BCMR_INTEGRITY_LN}s|integrity=\".*\"|integrity=\"$BCMR_HASH\"|g" docs/src/tutorial/README.md
           git config user.email "hello@mainnet.cash"
           git config user.name "Auto-Generated"
           git add .
@@ -210,6 +214,15 @@ jobs:
           password: ${{ secrets.CDN_FTP_UPLOAD }}
           localDir: "packages/postgresql-storage/dist"
           remoteDir: "postgresql-storage"
+      - if: env.HAS_CDN_FTP_UPLOAD
+        name: Publish @mainnet-cash/bcmr to bunny cdn
+        uses: sebastianpopp/ftp-action@releases/v2
+        with:
+          host: storage.bunnycdn.com
+          user: mainnet-js
+          password: ${{ secrets.CDN_FTP_UPLOAD }}
+          localDir: "packages/bcmr/dist"
+          remoteDir: "bcmr"
 
   # Build a matrix of API clients: php, python and go
   # After being built, the clients are commited to their repositories, new tag and github release are created for them
