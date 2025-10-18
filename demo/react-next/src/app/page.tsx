@@ -1,7 +1,5 @@
 "use client";
-import dynamic from "next/dynamic";
-
-const Wallet = dynamic(async () => (await import('@/components/wallet')).default, { ssr: false });
+import Wallet from "@/components/wallet";
 
 export default function Home() {
   return (
