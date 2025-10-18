@@ -3,17 +3,21 @@ import {
   binToUtf8,
   decodeTransaction,
   hexToBin,
+  IdentitySnapshot,
   sha256,
   Transaction,
   utf8ToBin,
 } from "@bitauth/libauth";
-import { Network, TxI } from "../interface.js";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
-import { ElectrumRawTransaction } from "../network/interface.js";
-import { IdentitySnapshot, Registry } from "./bcmr-v2.schema.js";
-import { initProvider } from "../network/Connection.js";
-import { OpReturnData } from "./model.js";
-import { Config } from "../config.js";
+import {
+  ElectrumRawTransaction,
+  OpReturnData,
+  Config,
+  Network,
+  TxI,
+  ElectrumNetworkProvider,
+  initProvider,
+} from "mainnet-js";
+import { Registry } from "./bcmr-v2.schema";
 
 export interface AuthChainElement {
   txHash: string;

@@ -20,7 +20,7 @@
       "**/jest-runner/**"
     ]
   },
-  "version": "2.7.22",
+  "version": "2.7.23",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
@@ -53,13 +53,14 @@
     "lint": "eslint . --ext .ts",
     "nuke": "rm -fr jest/playwright/* && rm -fr node_modules && yarn remove:packages",
     "remove:packages": "rm -fr packages/*/node_modules && rm -fr packages/*/dist",
-    "build": "yarn build:mainnet-js && yarn build:contract && yarn build:indexeddb-storage && yarn build:postgresql-storage",
+    "build": "yarn build:mainnet-js && yarn build:contract && yarn build:indexeddb-storage && yarn build:postgresql-storage && yarn build:bcmr",
     "build:mainnet-js": "yarn workspace mainnet-js run build",
     "build:contract": "yarn workspace @mainnet-cash/contract run build",
     "build:indexeddb-storage": "yarn workspace @mainnet-cash/indexeddb-storage run build",
     "build:postgresql-storage": "yarn workspace @mainnet-cash/postgresql-storage run build",
-    "build:production": "yarn workspace mainnet-js run build:production && yarn workspace @mainnet-cash/contract run build:production && yarn workspace @mainnet-cash/indexeddb-storage run build:production && yarn workspace @mainnet-cash/postgresql-storage run build:production",
-    "link:mainnet-js": "yarn workspace mainnet-js link && yarn workspace @mainnet-cash/contract link mainnet-js && yarn workspace @mainnet-cash/indexeddb-storage link mainnet-js && yarn workspace @mainnet-cash/postgresql-storage link mainnet-js && yarn workspace mainnet-cash link mainnet-js",
+    "build:bcmr": "yarn workspace @mainnet-cash/bcmr run build",
+    "build:production": "yarn workspace mainnet-js run build:production && yarn workspace @mainnet-cash/contract run build:production && yarn workspace @mainnet-cash/indexeddb-storage run build:production && yarn workspace @mainnet-cash/postgresql-storage run build:production && yarn workspace @mainnet-cash/bcmr run build:production",
+    "link:mainnet-js": "yarn workspace mainnet-js link && yarn workspace @mainnet-cash/contract link mainnet-js && yarn workspace @mainnet-cash/indexeddb-storage link mainnet-js && yarn workspace @mainnet-cash/postgresql-storage link mainnet-js && yarn workspace @mainnet-cash/bcmr link mainnet-js && yarn workspace mainnet-cash link mainnet-js",
     "link:contract": "yarn workspace @mainnet-cash/contract link && yarn workspace mainnet-cash link @mainnet-cash/contract",
     "link:postgresql-storage": "yarn workspace @mainnet-cash/postgresql-storage link && yarn workspace mainnet-cash link @mainnet-cash/postgresql-storage",
     "link:all": "yarn link:mainnet-js && yarn link:contract && yarn link:postgresql-storage",
