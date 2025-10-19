@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+2.7.24
+
+* Minor breaking
+* Remove WcSigner, move it to @bch-wc2/mainnet-js-signer
+
 2.7.23
 
 * Minor breaking
@@ -43,15 +48,15 @@ Newest changes
 
 2.7.14
 
-* Make WcSigner broadcast transactions by default
+* Make WcSigner, move it to @bch-wc2/mainnet-js-signer broadcast transactions by default
 
 2.7.13
 
-* Make WcSigner broadcast transactions by default
+* Make WcSigner, move it to @bch-wc2/mainnet-js-signer broadcast transactions by default
 
 2.7.12
 
-* Add `WcSigner` convenience class
+* Add `WcSigner, move it to @bch-wc2/mainnet-js-signer` convenience class
 * Update dependencies
 
 2.7.11
