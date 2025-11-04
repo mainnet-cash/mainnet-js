@@ -54,9 +54,9 @@ import { BaseWallet } from "./Base.js";
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends BaseWallet {
-  readonly declare provider: ElectrumNetworkProvider;
-  readonly declare cashaddr: string;
-  readonly declare tokenaddr: string;
+  declare readonly provider: ElectrumNetworkProvider;
+  declare readonly cashaddr: string;
+  declare readonly tokenaddr: string;
   readonly derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
   readonly parentDerivationPath: string = Config.DefaultParentDerivationPath;
   readonly mnemonic!: string;
@@ -65,7 +65,7 @@ export class Wallet extends BaseWallet {
   readonly publicKeyCompressed!: Uint8Array;
   readonly privateKeyWif!: string;
   readonly publicKey!: Uint8Array;
-  readonly declare publicKeyHash: Uint8Array;
+  declare readonly publicKeyHash: Uint8Array;
   declare name: string;
   static readonly signedMessage: SignedMessageI = new SignedMessage();
 
@@ -580,7 +580,7 @@ export class Wallet extends BaseWallet {
     this.publicKeyCompressed = publicKeyCompressed;
     const networkType =
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
-      // @ts-ignore
+    // @ts-ignore
     this.privateKeyWif = encodePrivateKeyWif(this.privateKey, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
