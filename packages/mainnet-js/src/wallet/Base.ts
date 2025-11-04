@@ -80,14 +80,14 @@ const placeholderPrivateKey =
 export class BaseWallet implements WalletI {
   public static StorageProvider?: typeof StorageProvider;
 
-  provider: ElectrumNetworkProvider;
-  network: NetworkType;
-  walletType: WalletTypeEnum;
+  readonly provider: ElectrumNetworkProvider;
+  readonly network: NetworkType;
+  readonly walletType: WalletTypeEnum;
   _slpSemiAware: boolean = false; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
-  publicKeyHash!: Uint8Array;
-  cashaddr!: string;
-  tokenaddr!: string;
-  isTestnet: boolean;
+  readonly publicKeyHash!: Uint8Array;
+  readonly cashaddr!: string;
+  readonly tokenaddr!: string;
+  readonly isTestnet: boolean;
   name: string = "";
   _util?: Util;
 
@@ -479,6 +479,7 @@ export class BaseWallet implements WalletI {
 
   // Initialize a watch only wallet from a cash addr
   protected async watchOnly(address: string): Promise<this> {
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Watch;
     const addressComponents = address.split(":");
     let addressPrefix: string;
@@ -504,6 +505,7 @@ export class BaseWallet implements WalletI {
     const addressData = decodeCashAddress(prefixedAddress);
     if (typeof addressData === "string") throw addressData;
 
+    // @ts-ignore
     this.publicKeyHash = addressData.payload;
 
     let nonTokenAwareType = addressData.type;
@@ -512,13 +514,16 @@ export class BaseWallet implements WalletI {
     if (nonTokenAwareType == CashAddressType.p2shWithTokens)
       nonTokenAwareType = CashAddressType.p2sh;
     if (nonTokenAwareType == CashAddressType.p2pkh)
+      // @ts-ignore
       this.publicKeyHash = addressData.payload;
 
+    // @ts-ignore
     this.cashaddr = encodeCashAddress({
       prefix: addressData.prefix as CashAddressNetworkPrefix,
       type: nonTokenAwareType,
       payload: addressData.payload,
     }).address;
+    // @ts-ignore
     this.tokenaddr = deriveTokenaddr(addressData.payload, this.networkPrefix);
 
     return this;

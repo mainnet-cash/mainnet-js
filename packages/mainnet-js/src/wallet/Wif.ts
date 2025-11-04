@@ -54,20 +54,20 @@ import { BaseWallet } from "./Base.js";
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends BaseWallet {
-  declare provider: ElectrumNetworkProvider;
-  declare cashaddr: string;
-  declare tokenaddr: string;
-  derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
-  parentDerivationPath: string = Config.DefaultParentDerivationPath;
-  mnemonic!: string;
-  parentXPubKey!: string;
-  privateKey!: Uint8Array;
-  publicKeyCompressed!: Uint8Array;
-  privateKeyWif!: string;
-  publicKey!: Uint8Array;
-  declare publicKeyHash: Uint8Array;
+  readonly declare provider: ElectrumNetworkProvider;
+  readonly declare cashaddr: string;
+  readonly declare tokenaddr: string;
+  readonly derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
+  readonly parentDerivationPath: string = Config.DefaultParentDerivationPath;
+  readonly mnemonic!: string;
+  readonly parentXPubKey!: string;
+  readonly privateKey!: Uint8Array;
+  readonly publicKeyCompressed!: Uint8Array;
+  readonly privateKeyWif!: string;
+  readonly publicKey!: Uint8Array;
+  readonly declare publicKeyHash: Uint8Array;
   declare name: string;
-  static signedMessage: SignedMessageI = new SignedMessage();
+  static readonly signedMessage: SignedMessageI = new SignedMessage();
 
   //#region Accessors
   // Get mnemonic and derivation path for wallet
@@ -141,6 +141,7 @@ export class Wallet extends BaseWallet {
   ) {
     super(network);
     this.name = name;
+    // @ts-ignore
     this.walletType = walletType;
   }
 
@@ -229,6 +230,7 @@ export class Wallet extends BaseWallet {
 
   private async _generateWif() {
     if (!this.privateKey) {
+      // @ts-ignore
       this.privateKey = generatePrivateKey(
         () => generateRandomBytes(32) as Uint8Array
       );
@@ -237,12 +239,14 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateMnemonic() {
+    // @ts-ignore
     this.mnemonic = generateMnemonic(Config.getWordlist());
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
     const seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
     const network = this.isTestnet ? "testnet" : "mainnet";
+    // @ts-ignore
     this.parentXPubKey = getXPubKey(seed, this.parentDerivationPath, network);
 
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
@@ -254,8 +258,10 @@ export class Wallet extends BaseWallet {
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
+    // @ts-ignore
     this.privateKey = zerothChild.privateKey;
 
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Seed;
     return await this.deriveInfo();
   }
@@ -320,6 +326,7 @@ export class Wallet extends BaseWallet {
     mnemonic: string,
     derivationPath?: string
   ): Promise<this> {
+    // @ts-ignore
     this.mnemonic = mnemonic.trim().toLowerCase();
 
     if (this.mnemonic.length == 0)
@@ -331,11 +338,13 @@ export class Wallet extends BaseWallet {
       throwErrors: true,
     });
     if (derivationPath) {
+      // @ts-ignore
       this.derivationPath = derivationPath;
 
       // If the derivation path is for the first account child, set the parent derivation path
       const path = derivationPath.split("/");
       if (path.slice(-2).join("/") == "0/0") {
+        // @ts-ignore
         this.parentDerivationPath = path.slice(0, -2).join("/");
       }
     }
@@ -344,15 +353,18 @@ export class Wallet extends BaseWallet {
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
+    // @ts-ignore
     this.privateKey = zerothChild.privateKey;
 
     const network = this.isTestnet ? "testnet" : "mainnet";
+    // @ts-ignore
     this.parentXPubKey = await getXPubKey(
       seed,
       this.parentDerivationPath,
       network
     );
 
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
@@ -416,8 +428,11 @@ export class Wallet extends BaseWallet {
       throw Error(wifResult as string);
     }
     let resultData: PrivateKeyI = wifResult as PrivateKeyI;
+    // @ts-ignore
     this.privateKey = resultData.privateKey;
+    // @ts-ignore
     this.privateKeyWif = secret;
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Wif;
     await this.deriveInfo();
     return this;
@@ -553,6 +568,7 @@ export class Wallet extends BaseWallet {
     if (typeof publicKey === "string") {
       throw new Error(publicKey);
     }
+    // @ts-ignore
     this.publicKey = publicKey;
     const publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
       this.privateKey
@@ -560,14 +576,19 @@ export class Wallet extends BaseWallet {
     if (typeof publicKeyCompressed === "string") {
       throw new Error(publicKeyCompressed);
     }
+    // @ts-ignore
     this.publicKeyCompressed = publicKeyCompressed;
     const networkType =
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
+      // @ts-ignore
     this.privateKeyWif = encodePrivateKeyWif(this.privateKey, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
+    // @ts-ignore
     this.cashaddr = deriveCashaddr(this.privateKey, this.networkPrefix);
+    // @ts-ignore
     this.tokenaddr = deriveTokenaddr(this.privateKey, this.networkPrefix);
+    // @ts-ignore
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     return this;
   }
