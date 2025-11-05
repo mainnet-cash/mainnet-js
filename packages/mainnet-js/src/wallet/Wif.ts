@@ -1,5 +1,5 @@
 //#region Imports
-import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
+import { encodeHdPublicKey, HdKeyNetwork, hexToBin, secp256k1 } from "@bitauth/libauth";
 
 import {
   binToHex,
@@ -161,6 +161,20 @@ export class Wallet extends BaseWallet {
   }
 
   /**
+   * fromPrivateKey - create a wallet using the private key supplied in hex or Uint8Array
+   *
+   * @param wif   WIF encoded private key string
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromPrivateKey<T extends typeof Wallet>(
+    this: T,
+    privateKey: string | Uint8Array
+  ): Promise<InstanceType<T>> {
+    return new this().fromPrivateKey(privateKey) as InstanceType<T>;
+  }
+
+  /**
    * fromWIF - create a wallet using the private key supplied in `Wallet Import Format`
    *
    * @param wif   WIF encoded private key string
@@ -276,10 +290,13 @@ export class Wallet extends BaseWallet {
 
     // "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     switch (walletType) {
-      case "wif":
+      case WalletTypeEnum.PrivateKey:
+        return this.fromPrivateKey(arg1);
+
+      case WalletTypeEnum.Wif:
         return this.fromWIF(arg1);
 
-      case "watch":
+      case WalletTypeEnum.Watch:
         if (arg2) {
           // watch:testnet:bchtest:qq1234567
           return this.watchOnly(`${arg1}:${arg2}`);
@@ -287,7 +304,7 @@ export class Wallet extends BaseWallet {
         // watch:testnet:qq1234567
         return this.watchOnly(`${arg1}`);
 
-      case "named":
+      case WalletTypeEnum.Named:
         if (arg2) {
           // named:testnet:wallet_1:my_database
           return this.named(arg1, arg2);
@@ -296,7 +313,7 @@ export class Wallet extends BaseWallet {
           return this.named(arg1);
         }
 
-      case "seed":
+      case WalletTypeEnum.Seed:
         if (arg2) {
           // seed:testnet:table later ... stove kitten pluck:m/44'/0'/0'/0/0
           return this.fromSeed(arg1, arg2);
@@ -418,6 +435,20 @@ export class Wallet extends BaseWallet {
     });
   }
 
+  // Initialize wallet from private key in hex or Uint8Array
+  protected async fromPrivateKey(privateKey: string | Uint8Array): Promise<this> {
+    if (typeof privateKey === "string") {
+      privateKey = hexToBin(privateKey);
+    }
+
+    // @ts-ignore
+    this.privateKey = privateKey;
+    // @ts-ignore
+    this.walletType = WalletTypeEnum.PrivateKey;
+    await this.deriveInfo();
+    return this;
+  }
+
   // Initialize wallet from Wallet Import Format
   protected async fromWIF(secret: string): Promise<this> {
     checkWifNetwork(secret, this.network);
@@ -462,6 +493,8 @@ export class Wallet extends BaseWallet {
   public toString() {
     if (this.name) {
       return `named:${this.network}:${this.name}`;
+    } else if (this.walletType == WalletTypeEnum.PrivateKey) {
+      return `${this.walletType}:${this.network}:${binToHex(this.privateKey)}`;
     } else if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     } else if (this.walletType === WalletTypeEnum.Wif) {
@@ -481,6 +514,8 @@ export class Wallet extends BaseWallet {
   public toDbString() {
     if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else if (this.walletType == WalletTypeEnum.PrivateKey) {
+      return `${this.walletType}:${this.network}:${binToHex(this.privateKey)}`;
     } else if (this.walletType === WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     } else if (this.walletType == WalletTypeEnum.Watch) {
