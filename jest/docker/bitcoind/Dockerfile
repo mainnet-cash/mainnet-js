@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:trixie-slim
 
 ARG TARGETPLATFORM
 
@@ -9,24 +9,24 @@ RUN set -ex \
   && apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget \
   && rm -rf /var/lib/apt/lists/*
 
-ENV BITCOIN_VERSION 28.0.1
+ENV BITCOIN_VERSION=28.0.2
 
 # install bitcoin binaries
 RUN set -ex \
   && [ $TARGETPLATFORM = "linux/arm64" ] && platform="aarch64-linux-gnu" || platform="x86_64-linux-gnu" \
-  && export BITCOIN_URL=https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${BITCOIN_VERSION}/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
-  # && export BITCOIN_URL=https://download.bitcoincashnode.org/releases/${BITCOIN_VERSION}/linux/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
-  && [ $TARGETPLATFORM = "linux/arm64" ] && sha256="e7996c776a5432df0455c2d33d7d8779624d11534ee84c8a668bc209f8c1713d" || sha256="0dcc387cbaa3a039c97ddc8fb99c1fa7bff5dc6e4bd3a01d3c3095f595ad2dce" \
+  # && export BITCOIN_URL=https://github.com/bitcoin-cash-node/bitcoin-cash-node/releases/download/v${BITCOIN_VERSION}/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
+  && export BITCOIN_URL=https://download.bitcoincashnode.org/misc/builds/upgrade12_temp/linux/bitcoin-cash-node-${BITCOIN_VERSION}-${platform}.tar.gz \
+  && [ $TARGETPLATFORM = "linux/arm64" ] && sha256="ff06d8bec4077c826f7baa0127f38280f5565a87a2c31c05071be79267761723" || sha256="140b44fd76a4f9428354bfbec4800d58fd39fb723320e761a035f15c2dd43596" \
   && export BITCOIN_SHA256="$sha256" \
   && echo "$TARGETPLATFORM" "$BITCOIN_SHA256" "$BITCOIN_URL" \
   && cd /tmp \
-  && wget -qO bitcoin.tar.gz "$BITCOIN_URL" \
-  # && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
+  && wget -q --show-progress -O bitcoin.tar.gz "$BITCOIN_URL" \
+  && echo "$BITCOIN_SHA256 bitcoin.tar.gz" | sha256sum -c - \
   && tar -xzvf bitcoin.tar.gz -C /usr/local --strip-components=1 --exclude=*-qt \
   && rm -rf /tmp/*
 
 # create data directory
-ENV BITCOIN_DATA /data
+ENV BITCOIN_DATA=/data
 RUN mkdir "$BITCOIN_DATA" \
   && chown -R bitcoin:bitcoin "$BITCOIN_DATA" \
   && ln -sfn "$BITCOIN_DATA" /home/bitcoin/.bitcoin \
