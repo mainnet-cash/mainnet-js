@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/postgresql-storage",
-  "version": "2.7.29",
+  "version": "2.7.31",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -11,7 +11,7 @@
   "author": "readcash",
   "dependencies": {
     "axios": "^0.21.1",
-    "mainnet-js": "2.7.29",
+    "mainnet-js": "2.7.31",
     "parse-database-url": "^0.3.0",
     "pg": "^8.11.3",
     "pg-format": "^1.0.4"
