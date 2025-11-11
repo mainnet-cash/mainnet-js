@@ -1,6 +1,8 @@
 //#region Imports
 import {
+  deriveSeedFromBip39Mnemonic,
   encodeHdPublicKey,
+  generateBip39Mnemonic,
   HdKeyNetwork,
   hexToBin,
   secp256k1,
@@ -17,7 +19,6 @@ import {
   generatePrivateKey,
 } from "@bitauth/libauth";
 
-import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { NetworkType } from "../enum.js";
 
 import { PrivateKeyI } from "../interface.js";
@@ -259,10 +260,10 @@ export class Wallet extends BaseWallet {
 
   private async _generateMnemonic() {
     // @ts-ignore
-    this.mnemonic = generateMnemonic(Config.getWordlist());
+    this.mnemonic = generateBip39Mnemonic();
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
     const network = this.isTestnet ? "testnet" : "mainnet";
     // @ts-ignore
@@ -353,7 +354,7 @@ export class Wallet extends BaseWallet {
 
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
@@ -396,7 +397,7 @@ export class Wallet extends BaseWallet {
   public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
     if (!this.mnemonic)
       throw Error("refusing to create wallet from empty mnemonic");
-    const seed = mnemonicToSeedSync(this.mnemonic);
+    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
