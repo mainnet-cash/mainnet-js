@@ -15,4 +15,9 @@ export class Config {
   public static setIpfsGateway(ipfsGateway: string) {
     this.DefaultIpfsGateway = ipfsGateway;
   }
+
+  // custom exchange rate function
+  public static GetExchangeRateFn:
+    | ((symbol: string) => Promise<number>)
+    | undefined = undefined;
 }
