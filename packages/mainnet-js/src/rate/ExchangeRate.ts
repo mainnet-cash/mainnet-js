@@ -4,6 +4,7 @@ import {
   getRuntimePlatform,
 } from "../util/getRuntimePlatform.js";
 import ExchangeRateProvider from "../db/ExchangeRateProvider.js";
+import { Config } from "../config.js";
 
 export class ExchangeRate {
   symbol: string;
@@ -101,6 +102,10 @@ export function getTtl() {
 
 // Attempt to get the usd rate from some web app
 export async function getRateFromExchange(symbol: string): Promise<number> {
+  if (Config.GetExchangeRateFn) {
+    return await Config.GetExchangeRateFn(symbol);
+  }
+
   if (symbol.length > 0) {
     symbol = symbol.toLocaleLowerCase();
   }

@@ -1,9 +1,10 @@
 import { removeFetchMock, setupFetchMock } from "../test/fetch";
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
 import { RegTestWallet } from "../wallet/Wif";
-import { ExchangeRate } from "./ExchangeRate";
+import { ExchangeRate, getRateFromExchange } from "./ExchangeRate";
 import { delay } from "../util/delay";
 import { initProviders, disconnectProviders } from "../network";
+import { Config } from "../config";
 
 beforeAll(async () => {
   await initProviders();
@@ -70,5 +71,23 @@ describe("Exchange rate tests", () => {
 
   test("Test non-existing currency", async () => {
     await expect(ExchangeRate.get("xyz")).rejects.toThrow();
+  });
+
+  test("Test custom exchange rate function", async () => {
+    Config.GetExchangeRateFn = async (symbol: string): Promise<number> => {
+      if (symbol === "usd") {
+        return 5555.55;
+      }
+      throw new Error("Unsupported currency");
+    };
+
+    const usdRate = await ExchangeRate.get("usd", false);
+    expect(usdRate).toBe(5555.55);
+
+    await expect(ExchangeRate.get("eur", false)).rejects.toThrow(
+      "Unsupported currency"
+    );
+
+    Config.GetExchangeRateFn = undefined;
   });
 });

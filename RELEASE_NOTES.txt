@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+2.7.27
+
+* Add Config.GetExchangeRateFn for user-defined rate fetching
+
+2.7.26
+
+* Move demos into separate repository https://github.com/mainnet-cash/demos
+* An advanced demonstrator which also uses cashscript and WalletConnect2 available at https://github.com/mainnet-pat/dapp-starter
+
 2.7.25
 
 * Mark many wallet props as readonly

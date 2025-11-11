@@ -1,1 +1,0 @@
-This is a minimal package to test bundling with a default webpack configuration.
