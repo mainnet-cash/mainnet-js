@@ -29,8 +29,6 @@ import { MemoryCache } from "../cache/MemoryCache.js";
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumClient<ElectrumClientEvents>;
   public subscriptions: number = 0;
-  public version;
-  private connectPromise;
   private subscribedToHeaders: boolean = false;
   private subscriptionMap: Record<string, number> = {};
 
@@ -74,24 +72,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ) {
     if (electrum) {
       this.electrum = electrum;
-      this.connectPromise = this.getConnectPromise();
-      this.version = this.electrum.version;
     } else {
       throw new Error(`A electrum-cash client is required.`);
     }
-  }
-
-  private async getConnectPromise(_timeout: number = 3000) {
-    // connects to the electrum cash and waits until the connection is ready to accept requests
-    let timeoutHandle;
-
-    await Promise.race([
-      new Promise(async (resolve) => {
-        this.connectPromise = undefined;
-        resolve(await this.connectClient());
-      }),
-    ]);
-    clearTimeout(timeoutHandle);
   }
 
   async getUtxos(cashaddr: string): Promise<UtxoI[]> {
@@ -455,9 +438,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         return result as T;
       })
       .catch(async () => {
-        // console.warn(
-        //   "initial electrum-cash request attempt timed out, retrying..."
-        // );
         return await Promise.race([request, requestTimeout])
           .then((value) => {
             if (value instanceof Error) throw value;
@@ -547,7 +527,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async connect(): Promise<void> {
     await this.cache?.init();
-    return await this.connectPromise;
+    if (this.electrum.status !== ConnectionStatus.CONNECTED) {
+      await this.electrum.connect();
+    }
   }
 
   disconnect(): Promise<boolean> {
@@ -556,37 +538,6 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       //   `Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`
       // );
     }
-    return this.disconnectClient();
-  }
-
-  async readyClient(timeout?: number): Promise<boolean | unknown> {
-    timeout = typeof timeout !== "undefined" ? timeout : 3000;
-
-    let connectPromise = async () => {
-      while (this.electrum.status !== ConnectionStatus.CONNECTED) {
-        await delay(100);
-      }
-      return true;
-    };
-    return connectPromise;
-  }
-
-  async connectClient(): Promise<void> {
-    let connectionPromise = async () => {
-      try {
-        return await this.electrum.connect();
-      } catch (e) {
-        console.warn(
-          `Warning: Failed to connect to client on ${this.network} at ${this.electrum.hostIdentifier}.`,
-          e
-        );
-        return;
-      }
-    };
-    return connectionPromise();
-  }
-
-  async disconnectClient(): Promise<boolean> {
     return this.electrum.disconnect(true, false);
   }
 }

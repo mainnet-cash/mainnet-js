@@ -1,4 +1,11 @@
-import { BaseWallet, RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
+import {
+  BaseWallet,
+  binToHex,
+  RegTestWallet,
+  TestNetWallet,
+  Wallet,
+  WalletTypeEnum,
+} from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider";
 
 BaseWallet.StorageProvider = SqlProvider;
@@ -34,6 +41,25 @@ test("Store and retrieve a TestNet wallet", async () => {
   expect(w1.name).toBe(w1Again.name);
   expect(w1.network).toBe(w1Again.network);
   expect(w1.cashaddr).toBe(w1Again.cashaddr);
+  expect(w1.privateKeyWif).toBe(w1Again.privateKeyWif);
+  expect(w1.toString()).toBe(w1Again.toString());
+});
+
+test("Store and retrieve a private key wallet", async () => {
+  const privkey = "00".repeat(31) + "01";
+
+  let w1 = await Wallet.fromPrivateKey(privkey);
+  expect(w1.network).toBe("mainnet");
+  expect(w1.walletType).toBe(WalletTypeEnum.PrivateKey);
+  expect(w1.toDbString()).toBe(`privkey:mainnet:${privkey}`);
+  expect(w1.toString()).toBe(`privkey:mainnet:${privkey}`);
+
+  let w1Again = await Wallet.fromId(w1.toDbString());
+
+  expect(w1.name).toBe(w1Again.name);
+  expect(w1.network).toBe(w1Again.network);
+  expect(w1.cashaddr).toBe(w1Again.cashaddr);
+  expect(binToHex(w1.privateKey)).toBe(binToHex(w1Again.privateKey));
   expect(w1.privateKeyWif).toBe(w1Again.privateKeyWif);
   expect(w1.toString()).toBe(w1Again.toString());
 });

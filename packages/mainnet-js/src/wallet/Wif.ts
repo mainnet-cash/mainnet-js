@@ -1,5 +1,10 @@
 //#region Imports
-import { encodeHdPublicKey, HdKeyNetwork, secp256k1 } from "@bitauth/libauth";
+import {
+  encodeHdPublicKey,
+  HdKeyNetwork,
+  hexToBin,
+  secp256k1,
+} from "@bitauth/libauth";
 
 import {
   binToHex,
@@ -54,20 +59,20 @@ import { BaseWallet } from "./Base.js";
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends BaseWallet {
-  declare provider: ElectrumNetworkProvider;
-  declare cashaddr: string;
-  declare tokenaddr: string;
-  derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
-  parentDerivationPath: string = Config.DefaultParentDerivationPath;
-  mnemonic!: string;
-  parentXPubKey!: string;
-  privateKey!: Uint8Array;
-  publicKeyCompressed!: Uint8Array;
-  privateKeyWif!: string;
-  publicKey!: Uint8Array;
-  declare publicKeyHash: Uint8Array;
+  declare readonly provider: ElectrumNetworkProvider;
+  declare readonly cashaddr: string;
+  declare readonly tokenaddr: string;
+  readonly derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
+  readonly parentDerivationPath: string = Config.DefaultParentDerivationPath;
+  readonly mnemonic!: string;
+  readonly parentXPubKey!: string;
+  readonly privateKey!: Uint8Array;
+  readonly publicKeyCompressed!: Uint8Array;
+  readonly privateKeyWif!: string;
+  readonly publicKey!: Uint8Array;
+  declare readonly publicKeyHash: Uint8Array;
   declare name: string;
-  static signedMessage: SignedMessageI = new SignedMessage();
+  static readonly signedMessage: SignedMessageI = new SignedMessage();
 
   //#region Accessors
   // Get mnemonic and derivation path for wallet
@@ -141,6 +146,7 @@ export class Wallet extends BaseWallet {
   ) {
     super(network);
     this.name = name;
+    // @ts-ignore
     this.walletType = walletType;
   }
 
@@ -157,6 +163,20 @@ export class Wallet extends BaseWallet {
     walletId: string
   ): Promise<InstanceType<T>> {
     return new this().fromId(walletId) as InstanceType<T>;
+  }
+
+  /**
+   * fromPrivateKey - create a wallet using the private key supplied in hex or Uint8Array
+   *
+   * @param wif   WIF encoded private key string
+   *
+   * @returns instantiated wallet
+   */
+  public static async fromPrivateKey<T extends typeof Wallet>(
+    this: T,
+    privateKey: string | Uint8Array
+  ): Promise<InstanceType<T>> {
+    return new this().fromPrivateKey(privateKey) as InstanceType<T>;
   }
 
   /**
@@ -229,6 +249,7 @@ export class Wallet extends BaseWallet {
 
   private async _generateWif() {
     if (!this.privateKey) {
+      // @ts-ignore
       this.privateKey = generatePrivateKey(
         () => generateRandomBytes(32) as Uint8Array
       );
@@ -237,12 +258,14 @@ export class Wallet extends BaseWallet {
   }
 
   private async _generateMnemonic() {
+    // @ts-ignore
     this.mnemonic = generateMnemonic(Config.getWordlist());
     if (this.mnemonic.length == 0)
       throw Error("refusing to create wallet from empty mnemonic");
     const seed = mnemonicToSeedSync(this.mnemonic);
     checkForEmptySeed(seed);
     const network = this.isTestnet ? "testnet" : "mainnet";
+    // @ts-ignore
     this.parentXPubKey = getXPubKey(seed, this.parentDerivationPath, network);
 
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
@@ -254,8 +277,10 @@ export class Wallet extends BaseWallet {
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
+    // @ts-ignore
     this.privateKey = zerothChild.privateKey;
 
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Seed;
     return await this.deriveInfo();
   }
@@ -270,10 +295,13 @@ export class Wallet extends BaseWallet {
 
     // "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     switch (walletType) {
-      case "wif":
+      case WalletTypeEnum.PrivateKey:
+        return this.fromPrivateKey(arg1);
+
+      case WalletTypeEnum.Wif:
         return this.fromWIF(arg1);
 
-      case "watch":
+      case WalletTypeEnum.Watch:
         if (arg2) {
           // watch:testnet:bchtest:qq1234567
           return this.watchOnly(`${arg1}:${arg2}`);
@@ -281,7 +309,7 @@ export class Wallet extends BaseWallet {
         // watch:testnet:qq1234567
         return this.watchOnly(`${arg1}`);
 
-      case "named":
+      case WalletTypeEnum.Named:
         if (arg2) {
           // named:testnet:wallet_1:my_database
           return this.named(arg1, arg2);
@@ -290,7 +318,7 @@ export class Wallet extends BaseWallet {
           return this.named(arg1);
         }
 
-      case "seed":
+      case WalletTypeEnum.Seed:
         if (arg2) {
           // seed:testnet:table later ... stove kitten pluck:m/44'/0'/0'/0/0
           return this.fromSeed(arg1, arg2);
@@ -320,6 +348,7 @@ export class Wallet extends BaseWallet {
     mnemonic: string,
     derivationPath?: string
   ): Promise<this> {
+    // @ts-ignore
     this.mnemonic = mnemonic.trim().toLowerCase();
 
     if (this.mnemonic.length == 0)
@@ -331,11 +360,13 @@ export class Wallet extends BaseWallet {
       throwErrors: true,
     });
     if (derivationPath) {
+      // @ts-ignore
       this.derivationPath = derivationPath;
 
       // If the derivation path is for the first account child, set the parent derivation path
       const path = derivationPath.split("/");
       if (path.slice(-2).join("/") == "0/0") {
+        // @ts-ignore
         this.parentDerivationPath = path.slice(0, -2).join("/");
       }
     }
@@ -344,15 +375,18 @@ export class Wallet extends BaseWallet {
     if (typeof zerothChild === "string") {
       throw Error(zerothChild);
     }
+    // @ts-ignore
     this.privateKey = zerothChild.privateKey;
 
     const network = this.isTestnet ? "testnet" : "mainnet";
+    // @ts-ignore
     this.parentXPubKey = await getXPubKey(
       seed,
       this.parentDerivationPath,
       network
     );
 
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Seed;
     await this.deriveInfo();
     return this;
@@ -406,6 +440,22 @@ export class Wallet extends BaseWallet {
     });
   }
 
+  // Initialize wallet from private key in hex or Uint8Array
+  protected async fromPrivateKey(
+    privateKey: string | Uint8Array
+  ): Promise<this> {
+    if (typeof privateKey === "string") {
+      privateKey = hexToBin(privateKey);
+    }
+
+    // @ts-ignore
+    this.privateKey = privateKey;
+    // @ts-ignore
+    this.walletType = WalletTypeEnum.PrivateKey;
+    await this.deriveInfo();
+    return this;
+  }
+
   // Initialize wallet from Wallet Import Format
   protected async fromWIF(secret: string): Promise<this> {
     checkWifNetwork(secret, this.network);
@@ -416,8 +466,11 @@ export class Wallet extends BaseWallet {
       throw Error(wifResult as string);
     }
     let resultData: PrivateKeyI = wifResult as PrivateKeyI;
+    // @ts-ignore
     this.privateKey = resultData.privateKey;
+    // @ts-ignore
     this.privateKeyWif = secret;
+    // @ts-ignore
     this.walletType = WalletTypeEnum.Wif;
     await this.deriveInfo();
     return this;
@@ -447,6 +500,8 @@ export class Wallet extends BaseWallet {
   public toString() {
     if (this.name) {
       return `named:${this.network}:${this.name}`;
+    } else if (this.walletType == WalletTypeEnum.PrivateKey) {
+      return `${this.walletType}:${this.network}:${binToHex(this.privateKey)}`;
     } else if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
     } else if (this.walletType === WalletTypeEnum.Wif) {
@@ -466,6 +521,8 @@ export class Wallet extends BaseWallet {
   public toDbString() {
     if (this.walletType == WalletTypeEnum.Seed) {
       return `${this.walletType}:${this.network}:${this.mnemonic}:${this.derivationPath}`;
+    } else if (this.walletType == WalletTypeEnum.PrivateKey) {
+      return `${this.walletType}:${this.network}:${binToHex(this.privateKey)}`;
     } else if (this.walletType === WalletTypeEnum.Wif) {
       return `${this.walletType}:${this.network}:${this.privateKeyWif}`;
     } else if (this.walletType == WalletTypeEnum.Watch) {
@@ -553,6 +610,7 @@ export class Wallet extends BaseWallet {
     if (typeof publicKey === "string") {
       throw new Error(publicKey);
     }
+    // @ts-ignore
     this.publicKey = publicKey;
     const publicKeyCompressed = secp256k1.derivePublicKeyCompressed(
       this.privateKey
@@ -560,14 +618,19 @@ export class Wallet extends BaseWallet {
     if (typeof publicKeyCompressed === "string") {
       throw new Error(publicKeyCompressed);
     }
+    // @ts-ignore
     this.publicKeyCompressed = publicKeyCompressed;
     const networkType =
       this.network === NetworkType.Regtest ? NetworkType.Testnet : this.network;
+    // @ts-ignore
     this.privateKeyWif = encodePrivateKeyWif(this.privateKey, networkType);
     checkWifNetwork(this.privateKeyWif, this.network);
 
+    // @ts-ignore
     this.cashaddr = deriveCashaddr(this.privateKey, this.networkPrefix);
+    // @ts-ignore
     this.tokenaddr = deriveTokenaddr(this.privateKey, this.networkPrefix);
+    // @ts-ignore
     this.publicKeyHash = derivePublicKeyHash(this.cashaddr);
     return this;
   }

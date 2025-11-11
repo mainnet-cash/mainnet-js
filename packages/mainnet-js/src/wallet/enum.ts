@@ -1,4 +1,5 @@
 export enum WalletTypeEnum {
+  Named = "named",
   Wif = "wif",
   Seed = "seed",
   Hd = "hd",
