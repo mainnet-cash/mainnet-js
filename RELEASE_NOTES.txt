@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.27
+
+* Add Config.GetExchangeRateFn for user-defined rate fetching
+
 2.7.26
 
 * Move demos into separate repository https://github.com/mainnet-cash/demos
