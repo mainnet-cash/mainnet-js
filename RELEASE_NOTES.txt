@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+2.7.25
+
+* Mark many wallet props as readonly
+* Add Wallet.fromPrivateKey instantiation
+* Use new bchn docker image with new chips activated
+* Simplify network provider connections, do not connect until first request
+
 2.7.24
 
 * Minor breaking
