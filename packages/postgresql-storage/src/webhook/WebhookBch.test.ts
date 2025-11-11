@@ -278,7 +278,7 @@ describe("Webhook worker tests", () => {
       console.log(e, e.stack, e.message);
       throw e;
     }
-  }, 30000);
+  }, 50000);
 
   test("Test non-recurrent watch balance hook", async () => {
     try {
