@@ -17,11 +17,6 @@ let rootPackageFile = "./package.json";
 
 // update package.json
 const workspacePackageFiles = [
-  "./demo/min/package.json",
-  "./demo/react-next/package.json",
-  "./demo/vue-nuxt/package.json",
-  "./demo/vue-vite/package.json",
-  "./demo/vue3/package.json",
   "./packages/mainnet-js/package.json",
   "./packages/contract/package.json",
   "./packages/indexeddb-storage/package.json",
