@@ -1,7 +1,7 @@
 Newest changes
 --------------
 
-2.7.30 - Broken
+2.7.30
 
 * Switch to libauth's bip39 implementation, remove wordlist support
 
