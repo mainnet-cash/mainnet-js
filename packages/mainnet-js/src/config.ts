@@ -33,4 +33,9 @@ export class Config {
   public static getWordlist(): string[] {
     return [...Config.DefaultWordlist];
   }
+
+  // custom exchange rate function
+  public static GetExchangeRateFn:
+    | ((symbol: string) => Promise<number>)
+    | undefined = undefined;
 }
