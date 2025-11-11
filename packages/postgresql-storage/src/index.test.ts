@@ -1,4 +1,11 @@
-import { BaseWallet, binToHex, RegTestWallet, TestNetWallet, Wallet, WalletTypeEnum } from "mainnet-js";
+import {
+  BaseWallet,
+  binToHex,
+  RegTestWallet,
+  TestNetWallet,
+  Wallet,
+  WalletTypeEnum,
+} from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider";
 
 BaseWallet.StorageProvider = SqlProvider;
