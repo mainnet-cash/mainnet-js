@@ -21,8 +21,8 @@ import {
 /**
  * message_magic - Add "Magic", per standard bitcoin message signing.
  *
- * In this case, the magic is simply adding the number 24 as binary "\x16", and "Bitcoin Signed Message\n" followed
- * by the size of the message in binary followed by the message encoded as binary.
+ * In this case, the magic is simply adding the number 24 as binary "\x18", and "Bitcoin Signed Message\n" followed
+ * by the size of the message in Bitcoin's "varint" format followed by the message encoded as binary.
  *
  * @param {str} string    The string to add the magic syntax to.
  *
