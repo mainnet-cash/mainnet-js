@@ -270,6 +270,8 @@ describe("Test message Signing and Verification", () => {
 
     const ecSig =
       "IPJZmd0kYQbll507F1wWMcbA7WPMcBkF6GhtYXQEpSHsWFNLzDmvy5rI0uA0NDlkHbUiHAiy67lPeCQoHJ8tk7s=";
+    
+    // Private key: cPPQTpVuL8WPDcH9wuhjVcbdKtRX3j4Q4uV2qnL8hbtyW2ugMAcn
     const addr = "bchtest:qrynfuk47hxqj4sgpt62v3yzzpnjw6l2hvnc4p897k";
 
     const result = await SignedMessage.verify(longMsg, ecSig, addr);
