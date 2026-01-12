@@ -1,7 +1,7 @@
 Newest changes
 --------------
 
-2.7.32
+2.7.33
 
 * Thanks @rnbrady: Fix message_magic varint length encoding
 
