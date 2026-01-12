@@ -261,6 +261,24 @@ describe("Test message Signing and Verification", () => {
     expect(result.details?.signatureType).toBe("recoverable");
   });
 
+  // Test verifying a long message (>= 253 bytes) signed by Electron Cash
+  // This tests that the varint length encoding is correct
+  test("Test verifying long message signature from Electron Cash", async () => {
+    // 329 byte message (10 lines of "1234567890 1234567890 1234567890")
+    const longMsg = Array(10).fill("1234567890 1234567890 1234567890").join("\n");
+    expect(longMsg.length).toBe(329); // Confirm >= 253 bytes
+
+    const ecSig =
+      "IPJZmd0kYQbll507F1wWMcbA7WPMcBkF6GhtYXQEpSHsWFNLzDmvy5rI0uA0NDlkHbUiHAiy67lPeCQoHJ8tk7s=";
+    
+    // Private key: cPPQTpVuL8WPDcH9wuhjVcbdKtRX3j4Q4uV2qnL8hbtyW2ugMAcn
+    const addr = "bchtest:qrynfuk47hxqj4sgpt62v3yzzpnjw6l2hvnc4p897k";
+
+    const result = await SignedMessage.verify(longMsg, ecSig, addr);
+    expect(result.valid).toBe(true);
+    expect(result.details?.publicKeyHashMatch).toBe(true);
+  });
+
   test("Test signature verification with cashaddr and tokenaddr is equivalent", async () => {
     let msg1 = "Chancellor on brink of second bailout for banks";
     let w1 = await Wallet.fromId(
