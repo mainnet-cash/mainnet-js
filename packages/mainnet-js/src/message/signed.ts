@@ -1,10 +1,10 @@
 import {
   assertSuccess,
   base64ToBin,
+  bigIntToCompactUint,
   binToBase64,
   decodeCashAddress,
   encodeCashAddress,
-  hexToBin,
   RecoveryId,
   secp256k1,
   sha256,
@@ -21,8 +21,8 @@ import {
 /**
  * message_magic - Add "Magic", per standard bitcoin message signing.
  *
- * In this case, the magic is simply adding the number 24 as binary "\x16", and "Bitcoin Signed Message\n" followed
- * by the size of the message in binary followed by the message encoded as binary.
+ * In this case, the magic is simply adding the number 24 as binary "\x18", and "Bitcoin Signed Message\n" followed
+ * by the size of the message in Bitcoin's "varint" format followed by the message encoded as binary.
  *
  * @param {str} string    The string to add the magic syntax to.
  *
@@ -30,12 +30,12 @@ import {
  */
 // see    https://github.com/Electron-Cash/Electron-Cash/blob/49f9f672364f50053a026e4a5cb30e92db2d195d/electroncash/bitcoin.py#L524
 function message_magic(str: string) {
-  const length = utf8ToBin(str).length.toString(16);
+  const msgBytes = utf8ToBin(str);
   const payload = `\x18Bitcoin Signed Message:\n`;
   return new Uint8Array([
     ...utf8ToBin(payload),
-    ...hexToBin(length),
-    ...utf8ToBin(str),
+    ...bigIntToCompactUint(BigInt(msgBytes.length)),
+    ...msgBytes,
   ]);
 }
 
