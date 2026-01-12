@@ -265,12 +265,14 @@ describe("Test message Signing and Verification", () => {
   // This tests that the varint length encoding is correct
   test("Test verifying long message signature from Electron Cash", async () => {
     // 329 byte message (10 lines of "1234567890 1234567890 1234567890")
-    const longMsg = Array(10).fill("1234567890 1234567890 1234567890").join("\n");
+    const longMsg = Array(10)
+      .fill("1234567890 1234567890 1234567890")
+      .join("\n");
     expect(longMsg.length).toBe(329); // Confirm >= 253 bytes
 
     const ecSig =
       "IPJZmd0kYQbll507F1wWMcbA7WPMcBkF6GhtYXQEpSHsWFNLzDmvy5rI0uA0NDlkHbUiHAiy67lPeCQoHJ8tk7s=";
-    
+
     // Private key: cPPQTpVuL8WPDcH9wuhjVcbdKtRX3j4Q4uV2qnL8hbtyW2ugMAcn
     const addr = "bchtest:qrynfuk47hxqj4sgpt62v3yzzpnjw6l2hvnc4p897k";
 
