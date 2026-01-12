@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.32
+
+* Thanks @rnbrady: Fix message_magic varint length encoding
+
 2.7.31
 
 * Switch to libauth's bip39 implementation, remove wordlist support
