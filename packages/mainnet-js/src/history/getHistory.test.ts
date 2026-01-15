@@ -2,14 +2,11 @@ import { RegTestWallet, Wallet } from "../wallet/Wif";
 import { WalletTypeEnum } from "../wallet/enum";
 import { createWallet } from "../wallet/createWallet";
 import { mine } from "../mine";
-import { getAddressHistory } from "./electrumTransformer";
+import { encodeCashAddress } from "@bitauth/libauth";
 
 test("Should get miner history", async () => {
   const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
-  const history = await getAddressHistory({
-    address: alice.getDepositAddress(),
-    provider: alice.provider!,
-  });
+  const history = await alice.getHistory();
   expect(history.length).toBeGreaterThan(0);
 });
 
@@ -61,10 +58,7 @@ test("Should get an address history", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory({
-      address: bob.getDepositAddress(),
-      provider: bob.provider!,
-    });
+    const bobHistory = await bob.getHistory();
     expect(bobHistory[0].valueChange).toBe(-2320);
     expect(
       bobHistory[0].outputs.some(
@@ -141,10 +135,7 @@ test("Should get a history with multi-party sends", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory({
-      address: bob.getDepositAddress(),
-      provider: bob.provider!,
-    });
+    const bobHistory = await bob.getHistory();
 
     expect(bobHistory[1].fee).toBeGreaterThan(120);
     expect(bobHistory[1].fee).toBe(220);
@@ -227,9 +218,7 @@ test("Should cut results with a longer history to given count", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory({
-      address: bob.getDepositAddress(),
-      provider: bob.provider!,
+    const bobHistory = await bob.getHistory({
       unit: "sat",
       start: 0,
       count: 2,
@@ -296,9 +285,7 @@ test("Should handle input and fee from many utxos", async () => {
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
 
     // Build Bob's wallet from a public address, check his balance.
-    const bobHistory = await getAddressHistory({
-      address: bob.getDepositAddress(),
-      provider: bob.provider!,
+    const bobHistory = await bob.getHistory({
       unit: "sat",
     });
 

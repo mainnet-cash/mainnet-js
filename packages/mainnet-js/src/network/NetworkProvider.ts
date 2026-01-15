@@ -1,4 +1,4 @@
-import { TxI, UtxoI, Network, HexHeaderI, HeaderI } from "../interface.js";
+import { TxI, Utxo, Network, HexHeaderI, HeaderI } from "../interface.js";
 import { CancelFn } from "../wallet/interface.js";
 
 export default interface NetworkProvider {
@@ -12,7 +12,7 @@ export default interface NetworkProvider {
    * @param cashaddr The CashAddress for which we wish to retrieve UTXOs.
    * @returns List of UTXOs spendable by the provided address.
    */
-  getUtxos(cashaddr: string): Promise<UtxoI[]>;
+  getUtxos(cashaddr: string): Promise<Utxo[]>;
 
   /**
    * Retrieve all balance of an address in satoshi

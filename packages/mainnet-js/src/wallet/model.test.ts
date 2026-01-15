@@ -1,4 +1,4 @@
-import { UtxoI } from "../interface";
+import { UtxoId } from "../interface";
 import { fromUtxoId, toUtxoId } from "./model";
 
 test("Should serialize utxo", () => {
@@ -22,6 +22,6 @@ test("Should deserialize utxo", () => {
     txid: "this",
     vout: 42,
     satoshis: 1,
-  } as UtxoI;
+  } as UtxoId;
   expect(toUtxoId(u)).toBe("this:42:1");
 });

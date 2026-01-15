@@ -4,8 +4,8 @@ module.exports = {
   preset: "jest-playwright-preset",
   roots: [
     "<rootDir>/packages/mainnet-js/src",
-    "<rootDir>/packages/contract/src",
     "<rootDir>/packages/indexeddb-storage/src",
+    "<rootDir>/packages/postgresql-storage/src",
     "<rootDir>/packages/bcmr/src",
   ],
   preset: "jest-playwright-preset",

@@ -9,12 +9,11 @@ import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   HexHeaderI,
   TxI,
-  UtxoI,
+  Utxo,
   ElectrumBalanceI,
   HeaderI,
 } from "../interface.js";
 import { Network } from "../interface.js";
-import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
 import { CancelFn } from "../wallet/interface.js";
@@ -45,7 +44,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     if (Config.UseMemoryCache && !(this._cache instanceof MemoryCache)) {
-      this._cache = new IndexedDbCache();
+      this._cache = new MemoryCache();
       return this._cache;
     }
 
@@ -77,13 +76,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  async getUtxos(cashaddr: string): Promise<UtxoI[]> {
+  async getUtxos(cashaddr: string): Promise<Utxo[]> {
     const result = await this.performRequest<ElectrumUtxo[]>(
       "blockchain.address.listunspent",
       cashaddr,
       "include_tokens"
     );
     return result.map((utxo) => ({
+      address: cashaddr,
       txid: utxo.tx_hash,
       vout: utxo.tx_pos,
       satoshis: utxo.value,

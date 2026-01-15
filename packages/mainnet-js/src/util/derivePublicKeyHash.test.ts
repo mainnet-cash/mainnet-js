@@ -53,16 +53,3 @@ test("Should calculate public key hash consistent with hash160", async () => {
   expect(binToHex(pkh2)).toEqual("d986ed01b7a22225a70edbf2ba7cfb63a15cb3aa");
   expect(binToHex(pkh3)).toEqual("d986ed01b7a22225a70edbf2ba7cfb63a15cb3aa");
 });
-
-test("Should return the a public key hash of manually set wallet", async () => {
-  let w = new Wallet();
-  // @ts-ignore
-  w.privateKey = hexToBin(
-    "e284129cc0922579a535bbf4d1a3b25773090d28c909bc0fed73b5e0222cc372"
-  );
-  // @ts-ignore
-  await w.deriveInfo();
-  let pkh = derivePublicKeyHash(w.getDepositAddress());
-  let expectedPKH = "d986ed01b7a22225a70edbf2ba7cfb63a15cb3aa";
-  expect(binToHex(pkh)).toBe(expectedPKH);
-});

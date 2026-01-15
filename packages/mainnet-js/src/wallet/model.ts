@@ -1,7 +1,7 @@
 import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
 import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { UnitEnum } from "../enum.js";
-import { NFTCapability, UtxoI } from "../interface.js";
+import { NFTCapability, Utxo, UtxoId } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import {
   Input,
@@ -343,34 +343,17 @@ export class XPubKey {
   }
 }
 
-export const fromUtxoId = (utxoId: string): UtxoI => {
-  const [txid, vout, satoshis, tokenId, amount, capability, commitment] =
-    utxoId.split(DELIMITER);
+export const fromUtxoId = (utxoId: string): UtxoId => {
+  const [txid, vout, satoshis] = utxoId.split(DELIMITER);
   return {
     satoshis: satoshis ? parseInt(satoshis) : 0,
     vout: parseInt(vout),
     txid,
-    token: tokenId
-      ? {
-          tokenId,
-          amount: BigInt(amount),
-          capability: capability || undefined,
-          commitment: commitment || undefined,
-        }
-      : undefined,
-  } as UtxoI;
+  } as UtxoId;
 };
 
-export const toUtxoId = (utxo: UtxoI): string => {
-  return [
-    utxo.txid,
-    utxo.vout,
-    utxo.satoshis,
-    utxo.token?.tokenId,
-    utxo.token?.amount,
-    utxo.token?.capability,
-    utxo.token?.commitment,
-  ]
+export const toUtxoId = (utxo: UtxoId): string => {
+  return [utxo.txid, utxo.vout, utxo.satoshis]
     .join(DELIMITER)
     .replace(/:+$/, "");
 };

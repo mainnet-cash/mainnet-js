@@ -71,10 +71,6 @@ To install mainnet as a dependency of your webapp use:
 
     yarn add mainnet-js
 
-To include contracts functionality, use the following packages:
-
-    yarn add @mainnet-cash/contract
-
 See the [full documentation](https://mainnet.cash/tutorial/shipping-mainnet.html) for notes and examples for bundling mainnet-js in your project.
 
 ## REST clients for other languages
@@ -101,9 +97,9 @@ This project contains a number of smaller projects in a mono-repo structure, wit
 | -------------------------------- | ------------------- |
 | mainnet-js                       | Base Library        |
 | mainnet-cash                     | REST Express Server |
-| @mainnet-cash/contract           | CashScript Library  |
 | @mainnet-cash/indexeddb-storage  | IndexedDB Storage   |
 | @mainnet-cash/postgresql-storage | Posgresql Storage   |
+| @mainnet-cash/bcmr               | BCMR functionality  |
 
 # Documentation
 

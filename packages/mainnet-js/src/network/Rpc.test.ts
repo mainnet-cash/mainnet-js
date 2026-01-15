@@ -1,8 +1,8 @@
 import { disconnectProviders, initProviders } from "./Connection";
 import { RegTestWallet } from "../wallet/Wif";
 import { getNetworkProvider } from "../network/default";
-import { Network } from "cashscript";
 import { mine } from "../mine";
+import { Network } from "../interface";
 
 const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
 

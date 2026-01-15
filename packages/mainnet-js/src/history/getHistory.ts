@@ -22,8 +22,40 @@ type Transaction = TransactionCommon & {
   hash: string;
 };
 
-export const getAddressHistory = async ({
-  address,
+// export type AddressTxI = TxI & {
+//   address: string;
+// }
+
+// export const getAddressHistory = async ({
+//   address,
+//   provider,
+//   unit = "sat",
+//   fromHeight = 0,
+//   toHeight = -1,
+//   start = 0,
+//   count = -1,
+// }: {
+//   address: string;
+//   provider: NetworkProvider;
+//   unit?: UnitEnum;
+//   fromHeight?: number;
+//   toHeight?: number;
+//   start?: number;
+//   count?: number;
+// }): Promise<TransactionHistoryItem[]> => {
+//   return getHistory({
+//     addresses: [address],
+//     provider,
+//     unit,
+//     fromHeight,
+//     toHeight,
+//     start,
+//     count,
+//   });
+// }
+
+export const getHistory = async ({
+  addresses,
   provider,
   unit = "sat",
   fromHeight = 0,
@@ -31,7 +63,7 @@ export const getAddressHistory = async ({
   start = 0,
   count = -1,
 }: {
-  address: string;
+  addresses: string[];
   provider: NetworkProvider;
   unit?: UnitEnum;
   fromHeight?: number;
@@ -39,24 +71,39 @@ export const getAddressHistory = async ({
   start?: number;
   count?: number;
 }): Promise<TransactionHistoryItem[]> => {
+  if (!addresses.length) {
+    return [];
+  }
+
   if (count === -1) {
     count = 1e10;
   }
 
-  const history = (await provider.getHistory(address, fromHeight, toHeight))
+  const history = (
+    await Promise.all(
+      addresses.map(async (address) =>
+        provider.getHistory(address, fromHeight, toHeight)
+      )
+    )
+  )
+    .flat()
+    .filter(
+      (value, index, array) =>
+        array.findIndex((item) => item.tx_hash === value.tx_hash) === index
+    )
     .sort((a, b) =>
       a.height <= 0 || b.height <= 0 ? a.height - b.height : b.height - a.height
     )
     .slice(start, start + count);
 
   // fill transaction timestamps by requesting headers from network and parsing them
-  const heights = history
+  const uniqueHeights = history
     .map((tx) => tx.height)
     .filter((height) => height > 0)
     .filter((value, index, array) => array.indexOf(value) === index);
   const timestampMap = (
     await Promise.all(
-      heights.map(async (height) => [
+      uniqueHeights.map(async (height) => [
         height,
         ((await provider.getHeader(height, true)) as HeaderI).timestamp,
       ])
@@ -118,10 +165,8 @@ export const getAddressHistory = async ({
     {} as { [hash: string]: TransactionCommon }
   );
 
-  const decoded = decodeCashAddress(address);
-  if (typeof decoded === "string") {
-    throw decoded;
-  }
+  const decoded = assertSuccess(decodeCashAddress(addresses[0]));
+  const prefix = decoded.prefix as CashAddressNetworkPrefix;
 
   const addressCache: Record<any, string> = {};
 
@@ -165,7 +210,7 @@ export const getAddressHistory = async ({
         address = assertSuccess(
           lockingBytecodeToCashAddress({
             bytecode: prevoutOutput.lockingBytecode,
-            prefix: decoded.prefix as CashAddressNetworkPrefix,
+            prefix: prefix,
           })
         ).address;
         addressCache[prevoutOutput.lockingBytecode as any] = address;
@@ -203,7 +248,7 @@ export const getAddressHistory = async ({
           address = assertSuccess(
             lockingBytecodeToCashAddress({
               bytecode: output.lockingBytecode,
-              prefix: decoded.prefix as CashAddressNetworkPrefix,
+              prefix: prefix,
             })
           ).address;
           addressCache[output.lockingBytecode as any] = address;
@@ -253,7 +298,7 @@ export const getAddressHistory = async ({
     const nftTokenBalances: Record<string, bigint> = {};
 
     tx.inputs.forEach((input) => {
-      if (input.address === address) {
+      if (addresses.includes(input.address)) {
         satoshiBalance -= input.value;
 
         if (input.token?.amount) {
@@ -269,7 +314,7 @@ export const getAddressHistory = async ({
       }
     });
     tx.outputs.forEach((output) => {
-      if (output.address === address) {
+      if (addresses.includes(output.address)) {
         satoshiBalance += Number(output.value);
 
         if (output.token?.amount) {
@@ -319,7 +364,10 @@ export const getAddressHistory = async ({
   );
 
   // backfill the balances
-  let prevBalance = await provider.getBalance(address);
+  let prevBalance = (
+    await Promise.all(addresses.map((address) => provider.getBalance(address)))
+  ).reduce((a, b) => a + b, 0);
+
   let prevValueChange = 0;
   historyItems.forEach((tx) => {
     tx.balance = prevBalance - prevValueChange;

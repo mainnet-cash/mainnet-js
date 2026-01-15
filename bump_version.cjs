@@ -18,7 +18,6 @@ let rootPackageFile = "./package.json";
 // update package.json
 const workspacePackageFiles = [
   "./packages/mainnet-js/package.json",
-  "./packages/contract/package.json",
   "./packages/indexeddb-storage/package.json",
   "./packages/postgresql-storage/package.json",
   "./packages/bcmr/package.json",
@@ -26,7 +25,6 @@ const workspacePackageFiles = [
 ];
 const workspacePackages = [
   "mainnet-js",
-  "@mainnet-cash/contract",
   "@mainnet-cash/indexeddb-storage",
   "@mainnet-cash/postgresql-storage",
   "@mainnet-cash/bcmr",

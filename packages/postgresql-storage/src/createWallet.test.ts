@@ -1,7 +1,11 @@
-import { BaseWallet, createWallet, walletFromId } from "mainnet-js";
+import {
+  BaseWallet,
+  createWallet,
+  NetworkType,
+  walletFromId,
+} from "mainnet-js";
 import { WalletRequestI } from "mainnet-js";
 import { initProviders, disconnectProviders } from "mainnet-js";
-import { delay } from "mainnet-js";
 import { WalletTypeEnum } from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider.js";
 
@@ -11,7 +15,7 @@ beforeAll(async () => {
   await initProviders();
 });
 afterAll(async () => {
-  await disconnectProviders();
+  // await disconnectProviders();
 });
 
 describe(`Named Wallets`, () => {
@@ -143,9 +147,22 @@ describe(`Named Wallets`, () => {
     let w = await createWallet(req);
     expect(w.cashaddr).toMatch(/bchtest:q/);
     expect(w.walletType).toBe("wif");
-    delay(1000);
     let w2 = await walletFromId(w.toString());
     expect(w2.cashaddr).toBe(w.cashaddr);
+    expect(w2.name).toBe(w.name);
+  });
+
+  test("Retrieve a testnet hd wallet", async () => {
+    const req = {
+      name: "Bob's Testnet HDWallet, Again",
+      type: WalletTypeEnum.Hd,
+      network: NetworkType.Testnet,
+    } as WalletRequestI;
+    let w = await createWallet(req);
+    expect(w.getDepositAddress()).toMatch(/bchtest:q/);
+    expect(w.walletType).toBe("hd");
+    let w2 = await walletFromId(w.toString());
+    expect(w2.getDepositAddress()).toBe(w.getDepositAddress());
     expect(w2.name).toBe(w.name);
   });
 });

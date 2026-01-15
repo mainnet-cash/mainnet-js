@@ -1,3 +1,4 @@
+import { HDWallet } from "mainnet-js";
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
 import { BaseWallet, RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
 
@@ -77,4 +78,12 @@ test("Store and retrieve a Mainnet wallet", async () => {
   let w1 = await Wallet.named("testWallet");
   let w2 = await Wallet.named("testWallet");
   expect(w1.getDepositAddress()).toBe(w2.getDepositAddress());
+});
+
+test("Store and retrieve a Mainnet hd wallet", async () => {
+  BaseWallet.StorageProvider = IndexedDBProvider;
+
+  const w1 = await HDWallet.named("test");
+  const w2 = await HDWallet.named("test");
+  expect(w1.mnemonic).toBe(w2.mnemonic);
 });

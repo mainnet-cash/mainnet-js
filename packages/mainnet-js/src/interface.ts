@@ -15,13 +15,20 @@ export const Network = {
 };
 export type Network = typeof Network[keyof typeof Network];
 
-export interface UtxoI {
+export interface Utxo {
   txid: string;
   vout: number;
   satoshis: number;
   height?: number;
   coinbase?: boolean;
   token?: TokenI;
+  address: string;
+}
+
+export interface UtxoId {
+  txid: string;
+  vout: number;
+  satoshis: number;
 }
 
 export interface ElectrumBalanceI {

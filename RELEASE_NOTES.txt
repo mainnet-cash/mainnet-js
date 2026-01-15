@@ -1,6 +1,20 @@
 Newest changes
 --------------
 
+3.0.0-next.0
+
+* This is a next major version prerelease
+
+* Add support for HD Wallets
+* Rework wallet class hierarchy for better code reuse
+* Rework wallet initializations, add Wallet.fromPubkey initializer
+* Breaking: remove `contracts` sub-package
+* Make signing functions sync
+
+2.7.33
+
+* Thanks @rnbrady: Fix message_magic varint length encoding
+
 2.7.31
 
 * Switch to libauth's bip39 implementation, remove wordlist support

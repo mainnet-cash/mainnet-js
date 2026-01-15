@@ -1,6 +1,5 @@
 import {
   walletTemplateP2pkhNonHd,
-  walletTemplateToCompilerBCH,
   cashAddressToLockingBytecode,
   Compiler,
   encodeTransaction,
@@ -8,14 +7,15 @@ import {
   importWalletTemplate,
   AnyCompilerConfiguration,
   AuthenticationProgramStateCommon,
-  CompilationContextBCH,
   Output,
   hexToBin,
   verifyTransactionTokens,
   decodeTransaction,
   TransactionTemplateFixed,
+  CompilationContextBch,
+  walletTemplateToCompilerBch,
 } from "@bitauth/libauth";
-import { NFTCapability, TokenI, UtxoI } from "../interface.js";
+import { NFTCapability, TokenI, Utxo } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
 
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
@@ -30,26 +30,31 @@ import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
+import { WalletCacheI } from "../cache/walletCache.js";
+
+export const placeholderPrivateKey =
+  "0000000000000000000000000000000000000000000000000000000000000001";
+export const placeholderPrivateKeyBin = hexToBin(placeholderPrivateKey);
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction({
   inputs,
   outputs,
   signingKey,
-  sourceAddress,
   fee = 0,
   discardChange = false,
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
+  walletCache,
 }: {
-  inputs: UtxoI[];
+  inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
-  signingKey: Uint8Array;
-  sourceAddress: string;
+  signingKey?: Uint8Array;
   fee?: number;
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
+  walletCache?: WalletCacheI;
 }) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -60,8 +65,8 @@ export async function buildP2pkhNonHdTransaction({
     throw new Error("Transaction template error");
   }
 
-  const compiler = await walletTemplateToCompilerBCH(template);
-  const inputAmount = await sumUtxoValue(inputs);
+  const compiler = walletTemplateToCompilerBch(template);
+  const inputAmount = sumUtxoValue(inputs);
 
   const sendAmount = await sumSendRequestAmounts(outputs);
 
@@ -72,7 +77,7 @@ export async function buildP2pkhNonHdTransaction({
   const lockedOutputs = await prepareOutputs(outputs);
 
   if (!changeAddress) {
-    changeAddress = sourceAddress;
+    changeAddress = inputs[0].address;
   }
 
   if (discardChange !== true) {
@@ -92,7 +97,7 @@ export async function buildP2pkhNonHdTransaction({
     inputs,
     compiler,
     signingKey,
-    sourceAddress,
+    walletCache,
   });
   const result = generateTransaction({
     inputs: preparedInputs,
@@ -121,16 +126,16 @@ export function prepareInputs({
   inputs,
   compiler,
   signingKey,
-  sourceAddress,
+  walletCache,
 }: {
-  inputs: UtxoI[];
+  inputs: Utxo[];
   compiler: Compiler<
-    CompilationContextBCH,
-    AnyCompilerConfiguration<CompilationContextBCH>,
+    CompilationContextBch,
+    AnyCompilerConfiguration<CompilationContextBch>,
     AuthenticationProgramStateCommon
   >;
   signingKey: Uint8Array;
-  sourceAddress: string;
+  walletCache?: WalletCacheI;
 }) {
   const preparedInputs: any[] = [];
   const sourceOutputs: any[] = [];
@@ -160,7 +165,9 @@ export function prepareInputs({
             }
           : undefined,
     };
-    const key = signingKey?.length ? signingKey : Uint8Array.from(Array(32));
+    const key =
+      walletCache?.getByAddress(i.address)?.privateKey ??
+      (signingKey?.length ? signingKey : Uint8Array.from(Array(32)));
     const newInput = {
       outpointIndex: utxoIndex,
       outpointTransactionHash: utxoOutpointTransactionHash,
@@ -178,7 +185,7 @@ export function prepareInputs({
 
     preparedInputs.push(newInput);
 
-    const lockingBytecode = cashAddressToLockingBytecode(sourceAddress);
+    const lockingBytecode = cashAddressToLockingBytecode(i.address);
     if (typeof lockingBytecode === "string") {
       throw lockingBytecode;
     }
@@ -292,22 +299,22 @@ export function prepareTokenOutputs(request: TokenSendRequest): Output {
  * @returns A promise to a list of unspent outputs
  */
 export async function getSuitableUtxos(
-  inputs: UtxoI[],
+  inputs: Utxo[],
   amountRequired: bigint | undefined,
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
   requests: SendRequestType[],
-  ensureUtxos: UtxoI[] = [],
+  ensureUtxos: Utxo[] = [],
   tokenOperation: "send" | "genesis" | "mint" | "burn" = "send"
-): Promise<UtxoI[]> {
-  const suitableUtxos: UtxoI[] = [...ensureUtxos];
+): Promise<Utxo[]> {
+  const suitableUtxos: Utxo[] = [...ensureUtxos];
   let amountAvailable = BigInt(0);
   const tokenRequests = requests.filter(
     (val) => val instanceof TokenSendRequest
   ) as TokenSendRequest[];
 
   const availableInputs = inputs.slice();
-  const selectedInputs: UtxoI[] = [];
+  const selectedInputs: Utxo[] = [];
 
   // find matching utxos for token transfers
   if (tokenOperation === "send") {
@@ -438,9 +445,8 @@ export async function getFeeAmountSimple({
   relayFeePerByteInSatoshi,
   discardChange,
 }: {
-  utxos: UtxoI[];
+  utxos: Utxo[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
-  privateKey: Uint8Array;
   sourceAddress: string;
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
@@ -494,19 +500,19 @@ export async function getFeeAmountSimple({
 export async function getFeeAmount({
   utxos,
   sendRequests,
-  privateKey,
   sourceAddress,
   relayFeePerByteInSatoshi,
   feePaidBy,
   discardChange,
+  walletCache,
 }: {
-  utxos: UtxoI[];
+  utxos: Utxo[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
-  privateKey: Uint8Array;
   sourceAddress: string;
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
+  walletCache?: WalletCacheI;
 }) {
   // build transaction
   if (utxos) {
@@ -515,12 +521,12 @@ export async function getFeeAmount({
       await buildEncodedTransaction({
         inputs: utxos,
         outputs: sendRequests,
-        signingKey: privateKey,
-        sourceAddress,
+        signingKey: placeholderPrivateKeyBin,
         fee: 0, //DUST_UTXO_THRESHOLD
         discardChange: discardChange ?? false,
         feePaidBy,
         changeAddress: "",
+        walletCache,
       });
 
     return Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1);
@@ -536,32 +542,32 @@ export async function buildEncodedTransaction({
   inputs,
   outputs,
   signingKey,
-  sourceAddress,
   fee = 0,
   discardChange = false,
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
   buildUnsigned = false,
+  walletCache,
 }: {
-  inputs: UtxoI[];
+  inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
   signingKey: Uint8Array;
-  sourceAddress: string;
   fee?: number;
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
   buildUnsigned?: boolean;
+  walletCache?: WalletCacheI;
 }) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,
     outputs,
     signingKey,
-    sourceAddress,
     fee,
     discardChange,
     feePaidBy,
     changeAddress,
+    walletCache,
   });
 
   if (buildUnsigned === true) {
@@ -592,7 +598,7 @@ export async function signUnsignedTransaction(
     throw new Error("Transaction template error");
   }
 
-  const compiler = walletTemplateToCompilerBCH(template);
+  const compiler = walletTemplateToCompilerBch(template);
   const transactionTemplate: Readonly<
     TransactionTemplateFixed<typeof compiler>
   > = { ...decoded };

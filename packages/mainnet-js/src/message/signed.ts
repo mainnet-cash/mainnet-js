@@ -1,10 +1,10 @@
 import {
   assertSuccess,
   base64ToBin,
+  bigIntToCompactUint,
   binToBase64,
   decodeCashAddress,
   encodeCashAddress,
-  hexToBin,
   RecoveryId,
   secp256k1,
   sha256,
@@ -21,8 +21,8 @@ import {
 /**
  * message_magic - Add "Magic", per standard bitcoin message signing.
  *
- * In this case, the magic is simply adding the number 24 as binary "\x16", and "Bitcoin Signed Message\n" followed
- * by the size of the message in binary followed by the message encoded as binary.
+ * In this case, the magic is simply adding the number 24 as binary "\x18", and "Bitcoin Signed Message\n" followed
+ * by the size of the message in Bitcoin's "varint" format followed by the message encoded as binary.
  *
  * @param {str} string    The string to add the magic syntax to.
  *
@@ -30,12 +30,12 @@ import {
  */
 // see    https://github.com/Electron-Cash/Electron-Cash/blob/49f9f672364f50053a026e4a5cb30e92db2d195d/electroncash/bitcoin.py#L524
 function message_magic(str: string) {
-  const length = utf8ToBin(str).length.toString(16);
+  const msgBytes = utf8ToBin(str);
   const payload = `\x18Bitcoin Signed Message:\n`;
   return new Uint8Array([
     ...utf8ToBin(payload),
-    ...hexToBin(length),
-    ...utf8ToBin(str),
+    ...bigIntToCompactUint(BigInt(msgBytes.length)),
+    ...msgBytes,
   ]);
 }
 
@@ -46,7 +46,7 @@ function message_magic(str: string) {
  *
  * @returns a promise to the hash of the string.
  */
-export async function hash_message(str: string) {
+export function hash_message(str: string) {
   const h = sha256.hash;
   return h(h(message_magic(str)));
 }
@@ -60,11 +60,8 @@ export class SignedMessage implements SignedMessageI {
    *
    * @returns a promise to signature as a string
    */
-  public async sign(
-    message: string,
-    privateKey: Uint8Array
-  ): Promise<SignedMessageResponseI> {
-    const messageHash = await hash_message(message);
+  public sign(message: string, privateKey: Uint8Array): SignedMessageResponseI {
+    const messageHash = hash_message(message);
     const rs = secp256k1.signMessageHashRecoverableCompact(
       privateKey,
       messageHash
@@ -99,7 +96,7 @@ export class SignedMessage implements SignedMessageI {
     };
   }
 
-  public static async sign(message: string, privateKey: Uint8Array) {
+  public static sign(message: string, privateKey: Uint8Array) {
     return new this().sign(message, privateKey);
   }
   /**
@@ -112,14 +109,14 @@ export class SignedMessage implements SignedMessageI {
    *
    * @returns a promise to signature as a string
    */
-  public async verify(
+  public verify(
     message: string,
     signature: string,
     cashaddr?: string,
     publicKey?: Uint8Array
-  ): Promise<VerifyMessageResponseI> {
+  ): VerifyMessageResponseI {
     // Check that the signature is valid for the given message.
-    const messageHash = await hash_message(message);
+    const messageHash = hash_message(message);
     const sig = base64ToBin(signature);
 
     let signatureValid = false;
@@ -139,7 +136,7 @@ export class SignedMessage implements SignedMessageI {
         throw new Error(recoveredPk);
       }
 
-      pkh = await hash160(recoveredPk);
+      pkh = hash160(recoveredPk);
       signatureType = "recoverable";
       signatureValid = secp256k1.verifySignatureCompact(
         rawSig,
@@ -193,7 +190,7 @@ export class SignedMessage implements SignedMessageI {
     };
   }
 
-  public static async verify(
+  public static verify(
     message: string,
     signature: string,
     cashaddr?: string,

@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   bitcoind:
-    image: mainnet/bitcoin-cash-node:v28.0.2
+    image: mainnet/bitcoin-cash-node:v29.0.0
     command: bitcoind -upgrade12activationtime=1762596456 -zmqpubhashtx=tcp://*:28332 -zmqpubrawtx=tcp://*:28332 -zmqpubhashblock=tcp://*:28332 -zmqpubrawblock=tcp://*:28332 -txindex=1 -regtest -rpcbind=bitcoind -rpcallowip=0/0 -rpcuser=alice -rpcpassword=password
     healthcheck:
       test: ["CMD", "/entrypoint.sh", "bitcoin-cli", "getblockchaininfo"]
@@ -20,7 +20,7 @@ services:
     networks:
       - bitcoin
   bitcoin-mine:
-    image: mainnet/bitcoin-cash-node:v28.0.2
+    image: mainnet/bitcoin-cash-node:v29.0.0
     entrypoint: ["/entrypoint.sh"]
     command: /bin/sh -c "/bin/sleep 10 && bitcoin-cli -regtest -rpcconnect=bitcoind  -rpcuser=alice -rpcpassword=password -rpcport=18443 generatetoaddress 215 bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0 1> /dev/null"
     networks:
@@ -31,6 +31,8 @@ services:
     ports:
       - "127.0.0.1:60001:60001"
       - "127.0.0.1:60003:60003"
+      - "127.0.0.1:51001:60001"
+      - "127.0.0.1:51002:60002"
     expose: [60001, 60003]
     depends_on:
       - bitcoin-mine
