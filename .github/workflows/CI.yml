@@ -4,13 +4,16 @@ on:
   push:
     branches:
       - master
+      - develop
+      - next
       - feature/*
       - fix/*
       - bugfix/*
-      - develop
   pull_request:
     branches:
       - master
+      - develop
+      - next
 env:
   ALICE_TESTNET_ADDRESS: ${{ secrets.ALICE_TESTNET_ADDRESS }}
   ALICE_TESTNET_WALLET_ID: ${{ secrets.ALICE_TESTNET_WALLET_ID }}
