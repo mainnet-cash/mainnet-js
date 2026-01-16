@@ -3,6 +3,8 @@ import { HDWallet, RegTestHDWallet } from "./HDWallet";
 import { RegTestWallet, Wallet } from "./Wif";
 import { Config } from "../config";
 import { getNextUnusedIndex } from "../util/hd";
+import { NFTCapability } from "../interface";
+import { TokenMintRequest, TokenSendRequest } from "./model";
 
 const expectedXpub =
   "xpub6CGqRCnS5qDfyxtzV3y3tj8CY7qf3z3GiB2qnCUTdNkhpNxbLtobrU5ZXBVPG3rzPcBUpJAoj3K1u1jyDwKuduL71gLPm27Tckc85apgQRr";
@@ -291,23 +293,23 @@ describe("HDWallet", () => {
     // check cache data is there in other instance
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
     ).toBeDefined();
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getDepositAddress(99))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(99))
     ).not.toBeDefined();
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getDepositAddress(100))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(100))
     ).toBeDefined();
 
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getChangeAddress(0))
+      otherWallet.walletCache.get(hdWallet.getChangeAddress(0))
     ).toBeDefined();
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getChangeAddress(99))
+      otherWallet.walletCache.get(hdWallet.getChangeAddress(99))
     ).not.toBeDefined();
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getChangeAddress(100))
+      otherWallet.walletCache.get(hdWallet.getChangeAddress(100))
     ).toBeDefined();
 
     Config.UseMemoryCache = memoryCacheValue;
@@ -322,7 +324,7 @@ describe("HDWallet", () => {
     // get some addresses to populate cache
     hdWallet.getDepositAddress(0);
     expect(
-      hdWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))?.status
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
     ).toBeNull();
 
     const fundingWallet = await RegTestWallet.fromId(
@@ -335,10 +337,10 @@ describe("HDWallet", () => {
     });
 
     expect(
-      hdWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))?.status
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
     ).not.toBeNull();
     expect(
-      hdWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))?.utxos
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
         .length
     ).toBe(1);
 
@@ -349,24 +351,183 @@ describe("HDWallet", () => {
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
     await otherWallet.watchPromise; // ensure any async init is done
     expect(
-      otherWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
         ?.status
     ).not.toBeNull();
     expect(
-      hdWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))?.utxos
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
         .length
     ).toBe(1);
     expect(
       JSON.stringify(
-        hdWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))?.utxos
+        hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
       )
     ).toBe(
       JSON.stringify(
-        otherWallet.walletCache.getByAddress(hdWallet.getDepositAddress(0))
+        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
           ?.utxos
       )
     );
 
     Config.UseMemoryCache = memoryCacheValue;
+  });
+
+  it("Cashtokens integration test", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+    const alice = await RegTestHDWallet.newRandom();
+    await fundingWallet.send({
+      cashaddr: alice.getDepositAddress(),
+      value: 1000000,
+      unit: "sat",
+    });
+
+    const genesisResponse = await alice.tokenGenesis({
+      cashaddr: alice.getDepositAddress(1),
+      capability: NFTCapability.minting,
+      commitment: "abcd",
+      amount: 1000n,
+    });
+
+    const tokenId = genesisResponse.tokenIds![0];
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // mint 2 NFTs, amount reducing
+    const response = await alice.tokenMint(tokenId, [
+      new TokenMintRequest({
+        cashaddr: alice.getDepositAddress(2),
+        capability: NFTCapability.none,
+        commitment: "",
+      }),
+      new TokenMintRequest({
+        cashaddr: alice.getDepositAddress(3),
+        capability: NFTCapability.mutable,
+        commitment: "00",
+      }),
+    ]);
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const newTokenUtxos = await alice.getTokenUtxos(tokenId);
+    expect(newTokenUtxos.length).toBe(3);
+    expect(tokenId).toEqual(response.tokenIds![0]);
+
+    const bob = await RegTestWallet.newRandom();
+    await alice.send([
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+      capability: NFTCapability.minting,
+      commitment: "abcd",
+        amount: 1000n,
+      }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        capability: NFTCapability.none,
+        commitment: "",
+      }),
+      new TokenSendRequest({
+        cashaddr: bob.cashaddr!,
+        tokenId: tokenId,
+        capability: NFTCapability.mutable,
+        commitment: "00",
+      }),
+    ]);
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect((await alice.getTokenUtxos(tokenId)).length).toBe(0);
+    const bobTokenUtxos = await bob.getTokenUtxos(tokenId);
+    expect(bobTokenUtxos.length).toBe(3);
+    expect(tokenId).toEqual(response.tokenIds![0]);
+  });
+
+  test("Test enforcing token addresses", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+    const alice = await RegTestHDWallet.newRandom();
+    await fundingWallet.send({
+      cashaddr: alice.getDepositAddress(),
+      value: 1000000,
+      unit: "sat",
+    });
+
+    const genesisResponse = await alice.tokenGenesis({
+      amount: 100n,
+    });
+    const tokenId = genesisResponse.tokenIds![0];
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const previousValue = Config.EnforceCashTokenReceiptAddresses;
+
+    const wrap = (addr) => {
+      return new Promise((resolve) => {
+        resolve(new TokenSendRequest({ cashaddr: addr, tokenId: "" }));
+      });
+    };
+
+    Config.EnforceCashTokenReceiptAddresses = false;
+    await expect(wrap(alice.getDepositAddress())).resolves.not.toThrow();
+    await expect(wrap(alice.getTokenDepositAddress())).resolves.not.toThrow();
+
+    await expect(
+      alice.send(
+        new TokenSendRequest({
+          cashaddr: alice.getDepositAddress(),
+          tokenId: tokenId,
+          amount: 1n,
+        })
+      )
+    ).resolves.not.toThrow();
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    await expect(
+      alice.send(
+        new TokenSendRequest({
+          cashaddr: alice.getTokenDepositAddress(),
+          tokenId: tokenId,
+          amount: 2n,
+        })
+      )
+    ).resolves.not.toThrow();
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    Config.EnforceCashTokenReceiptAddresses = true;
+    await expect(wrap(alice.getDepositAddress())).rejects.toThrow();
+    await expect(wrap(alice.getTokenDepositAddress())).resolves.not.toThrow();
+
+    await expect(
+      (async () =>
+        await alice.send(
+          new TokenSendRequest({
+            cashaddr: alice.getDepositAddress(),
+            tokenId: tokenId,
+            amount: 1n,
+          })
+        ))()
+    ).rejects.toThrow();
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    await expect(
+      alice.send(
+        new TokenSendRequest({
+          cashaddr: alice.getTokenDepositAddress(),
+          tokenId: tokenId,
+          amount: 2n,
+        })
+      )
+    ).resolves.not.toThrow();
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    Config.EnforceCashTokenReceiptAddresses = previousValue;
   });
 });
