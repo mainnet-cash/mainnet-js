@@ -30,7 +30,7 @@ import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
-import { WalletCacheI } from "../cache/walletCache.js";
+import { WalletCache } from "../cache/walletCache.js";
 
 export const placeholderPrivateKey =
   "0000000000000000000000000000000000000000000000000000000000000001";
@@ -54,7 +54,7 @@ export async function buildP2pkhNonHdTransaction({
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
-  walletCache?: WalletCacheI;
+  walletCache?: WalletCache;
 }) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -135,7 +135,7 @@ export function prepareInputs({
     AuthenticationProgramStateCommon
   >;
   signingKey: Uint8Array;
-  walletCache?: WalletCacheI;
+  walletCache?: WalletCache;
 }) {
   const preparedInputs: any[] = [];
   const sourceOutputs: any[] = [];
@@ -166,7 +166,7 @@ export function prepareInputs({
           : undefined,
     };
     const key =
-      walletCache?.getByAddress(i.address)?.privateKey ??
+      walletCache?.get(i.address)?.privateKey ??
       (signingKey?.length ? signingKey : Uint8Array.from(Array(32)));
     const newInput = {
       outpointIndex: utxoIndex,
@@ -512,7 +512,7 @@ export async function getFeeAmount({
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
-  walletCache?: WalletCacheI;
+  walletCache?: WalletCache;
 }) {
   // build transaction
   if (utxos) {
@@ -557,7 +557,7 @@ export async function buildEncodedTransaction({
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
   buildUnsigned?: boolean;
-  walletCache?: WalletCacheI;
+  walletCache?: WalletCache;
 }) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,

@@ -1,5 +1,5 @@
 import { binToHex, CashAddressNetworkPrefix } from "@bitauth/libauth";
-import { WalletCacheI } from "../cache/walletCache.js";
+import { WalletCache } from "../cache/walletCache.js";
 import StorageProvider from "../db/StorageProvider.js";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 import { HexHeaderI, NFTCapability, TxI, Utxo, UtxoId } from "../interface.js";
@@ -70,7 +70,7 @@ export const placeholderTokenAddr =
 export class BaseWallet implements WalletI {
   public static StorageProvider?: typeof StorageProvider;
 
-  readonly walletCache?: WalletCacheI;
+  readonly walletCache?: WalletCache;
   readonly provider: ElectrumNetworkProvider;
   readonly network: NetworkType;
   readonly walletType: WalletTypeEnum;

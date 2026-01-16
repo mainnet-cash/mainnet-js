@@ -16,14 +16,6 @@ import { MemoryCache } from "./MemoryCache.js";
 import { WebStorageCache } from "./WebStorageCache.js";
 import { Utxo } from "../interface.js";
 
-// export const addressCache: Record<string, {
-//   privateKey: Uint8Array | undefined,
-//   publicKey: Uint8Array,
-//   publicKeyHash: Uint8Array,
-//   index: number,
-//   change: boolean,
-// }> = {};
-
 export interface WalletCacheEntry {
   address: string;
   tokenAddress: string;
@@ -36,24 +28,17 @@ export interface WalletCacheEntry {
   utxos: Utxo[];
 }
 
-// export const getPrivateKey = (
-//   hdNode: HdPrivateNodeValid,
-//   addressIndex: number,
-//   change: boolean,
-// ): Uint8Array => {
-//   const node = deriveHdPathRelative(
-//     hdNode,
-//     `${change ? 1 : 0}/${addressIndex}`
-//   );
+// Minimal interface for use in transaction signing
+export interface WalletCache {
+  get(address: string): { privateKey: Uint8Array | undefined } | undefined;
+}
 
-//   return node.privateKey;
-// }
-
-export interface WalletCacheI {
+// Full interface for wallet cache management
+export interface WalletCacheI extends WalletCache {
   init(): Promise<void>;
   persist(): Promise<void>;
+  get(address: string): WalletCacheEntry | undefined;
   getByIndex(addressIndex: number, change: boolean): WalletCacheEntry;
-  getByAddress(address: string): WalletCacheEntry | undefined;
   setStatusAndUtxos(
     address: string,
     status: string | null,
@@ -205,7 +190,7 @@ export class WalletCache implements WalletCacheI {
     return this.walletCache[id];
   }
 
-  public getByAddress(address: string) {
+  public get(address: string) {
     const { index, change } = this.indexCache[address] || {};
     if (index === undefined || change === undefined) {
       return undefined;
@@ -218,14 +203,14 @@ export class WalletCache implements WalletCacheI {
     status: string | null,
     utxos: Utxo[]
   ) {
-    const entry = this.getByAddress(address);
+    const entry = this.get(address);
     if (!entry) {
       return;
     }
 
     const { index, change } = this.indexCache[address] || {};
     if (index === undefined || change === undefined) {
-      return undefined;
+      return;
     }
 
     const key = `${this.walletId}-${index}-${change}`;
@@ -240,13 +225,3 @@ export class WalletCache implements WalletCacheI {
     );
   }
 }
-
-// export const getAddressFromCache = (
-//   walletId: string,
-//   hdNode: HdPublicNodeValid | HdPrivateNodeValid,
-//   networkPrefix: string,
-//   addressIndex: number,
-//   change: boolean,
-// ): WalletCacheEntry => {
-
-// };
