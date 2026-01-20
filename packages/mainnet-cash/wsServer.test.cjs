@@ -29,7 +29,7 @@ describe("Test websocket server methods", () => {
       {
         cashaddr: bobWallet.cashaddr,
         value: 1000,
-        unit: "satoshis",
+        unit: "sat",
       },
     ])}, 2000);
 
@@ -50,7 +50,7 @@ describe("Test websocket server methods", () => {
       {
         cashaddr: bobWallet.cashaddr,
         value: 1000,
-        unit: "satoshis",
+        unit: "sat",
       },
     ])}, 2000);
 
@@ -71,7 +71,7 @@ describe("Test websocket server methods", () => {
       {
         cashaddr: bobWallet.cashaddr,
         value: 1000,
-        unit: "satoshis",
+        unit: "sat",
       },
     ])}, 1000);
 

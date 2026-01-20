@@ -47,13 +47,13 @@ const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
 
       const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetBchRequest.cashaddr);
       const receiverBalance = await receiverWallet.slpSemiAware().getBalance("sat");
-      const diff = 10000 - receiverBalance;
-      if (diff <= 0)
+      const diff = 10000n - receiverBalance;
+      if (diff <= 0n)
         throw new Error("You have 10000 sats or more. Refusing to refill.");
 
       const wallet = await mainnet.TestNetWallet.fromWIF(config.FAUCET_WIF);
       wallet.slpSemiAware();
-      const sendResponse = await wallet.send([{cashaddr: getTestnetBchRequest.cashaddr, value: diff, unit: "sat"}]);
+      const sendResponse = await wallet.send([{cashaddr: getTestnetBchRequest.cashaddr, value: diff }]);
       resolve(Service.successResponse({ txId: sendResponse.txId }));
     } catch (e) {
       // console.log(e);

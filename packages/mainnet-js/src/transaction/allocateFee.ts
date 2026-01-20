@@ -6,7 +6,7 @@ import {
 import { FeePaidByEnum } from "../wallet/enum.js";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
 
-export function checkFeeForDust(value: number) {
+export function checkFeeForDust(value: bigint) {
   if (value < DUST_UTXO_THRESHOLD) {
     throw Error("Fee strategy would result in dust output");
   }
@@ -14,11 +14,11 @@ export function checkFeeForDust(value: number) {
 
 export function checkSatsAvailable(
   sendRequestArray: Array<SendRequest>,
-  fee: number
+  fee: bigint
 ) {
   let amountAvailable = sendRequestArray.reduce(function (sum, r) {
     return sum + (r.value - DUST_UTXO_THRESHOLD);
-  }, 0);
+  }, 0n);
   if (amountAvailable < fee) {
     throw Error("Insufficient funds for transaction given fee");
   }
@@ -39,22 +39,21 @@ export function checkForNonStandardSendRequest(
 }
 
 export function sortSendRequests(sendRequestArray: Array<SendRequest>) {
-  return sendRequestArray.sort(
-    (a: SendRequest, b: SendRequest) => a.value - b.value
+  return sendRequestArray.sort((a: SendRequest, b: SendRequest) =>
+    Number(a.value - b.value)
   );
 }
 
-function distributeFees(requests: Array<SendRequest>, fee: number) {
+function distributeFees(requests: Array<SendRequest>, fee: bigint) {
   checkSatsAvailable(requests, fee);
-  fee = Number(fee);
   for (let r = 0; r < requests.length; r++) {
     if (fee > 0) {
       checkForNonStandardSendRequest(requests[r]);
-      let perRequestFee = Math.floor(fee / (requests.length - r));
-      perRequestFee += fee % (requests.length - r);
+      let perRequestFee = fee / BigInt(requests.length - r);
+      perRequestFee += fee % BigInt(requests.length - r);
       if (requests[r].value - perRequestFee < DUST_UTXO_THRESHOLD) {
         fee -= requests[r].value;
-        requests[r].value = 0;
+        requests[r].value = 0n;
       } else {
         fee -= perRequestFee;
         requests[r].value -= perRequestFee;
@@ -66,7 +65,7 @@ function distributeFees(requests: Array<SendRequest>, fee: number) {
 
 function firstPays(
   requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  fee: number
+  fee: bigint
 ) {
   let payer = requests.shift()!;
   payer = checkForNonStandardSendRequest(payer);
@@ -77,7 +76,7 @@ function firstPays(
 }
 function lastPays(
   requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  fee: number
+  fee: bigint
 ) {
   let payer = requests.pop()!;
   payer = checkForNonStandardSendRequest(payer);
@@ -88,7 +87,7 @@ function lastPays(
 }
 function anyPays(
   requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  fee: number
+  fee: bigint
 ) {
   for (let r of requests) {
     checkForNonStandardSendRequest(r);
@@ -100,7 +99,7 @@ function anyPays(
 
 function changeThenFallback(
   requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  fee: number,
+  fee: bigint,
   change: bigint,
   fallbackFn: Function
 ) {
@@ -113,7 +112,7 @@ function changeThenFallback(
 
 export function allocateFee(
   requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
-  fee: number,
+  fee: bigint,
   feePaidBy: FeePaidByEnum,
   change: bigint
 ): Array<SendRequest> {

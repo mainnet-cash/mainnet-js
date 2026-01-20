@@ -1160,16 +1160,8 @@ components:
           description: Unit of account.
           enum:
             - bch
-            - BCH
             - usd
-            - USD
-            - bit
-            - bits
             - sat
-            - SAT
-            - sats
-            - satoshi
-            - satoshis
           example: sat
           type: string
       discriminator:
@@ -1224,16 +1216,8 @@ components:
           description: Unit of account for running balance.
           enum:
             - bch
-            - BCH
             - usd
-            - USD
-            - bit
-            - bits
             - sat
-            - SAT
-            - sats
-            - satoshi
-            - satoshis
           example: sat
           default: sat
           type: string
@@ -1340,7 +1324,7 @@ components:
             $ref: '#/components/schemas/TokenAmountChange'
     SendRequestItem:
       anyOf:
-        - description: Send request in array form ['cashadr', 100, 'sats']
+        - description: Send request in array form ['cashadr', 100]
           type: array
           items:
             anyOf:
@@ -1354,12 +1338,9 @@ components:
             value:
               type: number
               example: 100
-          allOf:
-            - $ref: '#/components/schemas/UnitType'
           required:
             - cashaddr
             - value
-            - unit
           type: object
     TokenSendRequest:
       properties:
@@ -1614,32 +1595,16 @@ components:
           description: Provided value unit of account.
           enum:
             - bch
-            - BCH
             - usd
-            - USD
-            - bit
-            - bits
             - sat
-            - SAT
-            - sats
-            - satoshi
-            - satoshis
           example: bch
           type: string
         to:
           description: Unit of account to be returned
           enum:
             - bch
-            - BCH
             - usd
-            - USD
-            - bit
-            - bits
             - sat
-            - SAT
-            - sats
-            - satoshi
-            - satoshis
           example: usd
           type: string
       required:
@@ -2006,7 +1971,6 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         to:
-          unit: sat
           cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           value: 1000
       type: object

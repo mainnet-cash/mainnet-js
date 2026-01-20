@@ -15,7 +15,7 @@ class Controller {
     if (responsePayload instanceof Object || typeof responsePayload === "object") {
       response.json(responsePayload);
     } else {
-      response.end(responsePayload);
+      response.end(typeof responsePayload === "bigint" ? responsePayload.toString() : responsePayload);
     }
   }
 

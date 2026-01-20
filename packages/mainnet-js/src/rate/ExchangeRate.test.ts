@@ -34,7 +34,7 @@ describe("Exchange rate tests", () => {
 
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
-    const balance = (await alice.getBalance()) as BalanceResponse;
+    const balance = await alice.getBalance();
     let cbCounter = 0;
     const cancelWatchFn = await alice.watchBalanceUsd(async (newBalance) => {
       cbCounter++;
@@ -53,8 +53,7 @@ describe("Exchange rate tests", () => {
 
     await alice.send({
       cashaddr: bob.getDepositAddress(),
-      value: 10000,
-      unit: "sat",
+      value: 10000n,
     });
 
     await delay(3000);

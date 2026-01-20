@@ -546,7 +546,7 @@ describe("Test Wallet Endpoints", () => {
       tokenId: tokenId,
     })).body;
     expect(tokenUtxos.length).toBe(1);
-    expect(tokenUtxos[0].satoshis).toBe(7000);
+    expect(Number(tokenUtxos[0].satoshis)).toBe(7000);
 
     // lower the token satoshi value
     await request(app).post("/wallet/send").send({
@@ -573,8 +573,8 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobId,
     })).body;
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(1500);
-    expect(bobUtxos[1].satoshis).toBe(5245);
+    expect(Number(bobUtxos[0].satoshis)).toBe(1500);
+    expect(Number(bobUtxos[1].satoshis)).toBe(5245);
 
     // raise the token satoshi value
     await request(app).post("/wallet/send").send({
@@ -600,7 +600,7 @@ describe("Test Wallet Endpoints", () => {
       walletId: bobId,
     })).body;
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(3000);
-    expect(bobUtxos[1].satoshis).toBe(3349);
+    expect(Number(bobUtxos[0].satoshis)).toBe(3000);
+    expect(Number(bobUtxos[1].satoshis)).toBe(3349);
   });
 });

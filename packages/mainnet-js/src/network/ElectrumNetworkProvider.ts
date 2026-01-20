@@ -86,7 +86,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       address: cashaddr,
       txid: utxo.tx_hash,
       vout: utxo.tx_pos,
-      satoshis: utxo.value,
+      satoshis: BigInt(utxo.value),
       height: utxo.height,
       token: utxo.token_data
         ? {

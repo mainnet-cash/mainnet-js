@@ -1,3 +1,3 @@
 export const bchParam = {
-  subUnits: 100000000,
+  subUnits: 100000000n,
 };

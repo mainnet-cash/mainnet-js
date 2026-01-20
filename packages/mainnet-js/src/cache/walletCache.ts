@@ -16,6 +16,18 @@ import { MemoryCache } from "./MemoryCache.js";
 import { WebStorageCache } from "./WebStorageCache.js";
 import { Utxo } from "../interface.js";
 
+export const stringify = (_: any) =>
+  JSON.stringify(_, (_, value) =>
+    typeof value === "bigint" ? value.toString() + "n" : value
+  );
+export const parse = (data: string) =>
+  JSON.parse(data, (_, value) => {
+    if (typeof value === "string" && /^\d+n$/.test(value)) {
+      return BigInt(value.slice(0, -1));
+    }
+    return value;
+  });
+
 export interface WalletCacheEntry {
   address: string;
   tokenAddress: string;
@@ -108,7 +120,7 @@ export class WalletCache implements WalletCacheI {
     const data = await this.storage?.getItem(`walletCache-${this.walletId}`);
     if (data) {
       try {
-        const parsed = JSON.parse(data);
+        const parsed = parse(data);
         this.walletCache = parsed.walletCache || {};
         this.indexCache = parsed.indexCache || {};
       } catch (e) {
@@ -123,7 +135,7 @@ export class WalletCache implements WalletCacheI {
 
     this.storage?.setItem(
       `walletCache-${this.walletId}`,
-      JSON.stringify({
+      stringify({
         walletCache: this.walletCache,
         indexCache: this.indexCache,
       })

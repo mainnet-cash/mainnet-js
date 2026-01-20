@@ -55,8 +55,7 @@ describe("Webhook worker tests", () => {
         aliceWallet.send([
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
         bobWallet.waitForTransaction(),
@@ -96,8 +95,7 @@ describe("Webhook worker tests", () => {
         aliceWallet.send([
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
         bobWallet.waitForTransaction(),
@@ -136,8 +134,7 @@ describe("Webhook worker tests", () => {
         aliceWallet.send([
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
         bobWallet.waitForTransaction(),
@@ -177,8 +174,7 @@ describe("Webhook worker tests", () => {
         aliceWallet.send([
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
         bobWallet.waitForTransaction(),
@@ -222,8 +218,7 @@ describe("Webhook worker tests", () => {
       await aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
       ]);
 
@@ -247,15 +242,13 @@ describe("Webhook worker tests", () => {
       await aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
       ]);
       await aliceWallet.send([
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 2000,
-          unit: "satoshis",
+          value: 2000n,
         },
       ]);
       await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 });
@@ -295,8 +288,7 @@ describe("Webhook worker tests", () => {
         aliceWallet.send([
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
         bobWallet.waitForTransaction(),

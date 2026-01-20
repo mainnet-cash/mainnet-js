@@ -142,7 +142,7 @@ export class Util {
             ],
             hex: binToHex(output.lockingBytecode),
           } as ElectrumRawTransactionVoutScriptPubKey,
-          value: Number(output.valueSatoshis) / bchParam.subUnits,
+          value: Number(output.valueSatoshis) / Number(bchParam.subUnits),
         };
       }
     );

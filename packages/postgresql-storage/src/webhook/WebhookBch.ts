@@ -147,7 +147,9 @@ export class WebhookBch extends Webhook {
         const balanceSat = await this.wallet.provider!.getBalance(
           this.cashaddr
         );
-        const balanceObject = await balanceResponseFromSatoshi(balanceSat);
+        const balanceObject = await balanceResponseFromSatoshi(
+          BigInt(balanceSat)
+        );
         result = await this.post(balanceObject);
       }
 

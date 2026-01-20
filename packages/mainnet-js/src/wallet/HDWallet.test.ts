@@ -5,6 +5,7 @@ import { Config } from "../config";
 import { getNextUnusedIndex } from "../util/hd";
 import { NFTCapability } from "../interface";
 import { TokenMintRequest, TokenSendRequest } from "./model";
+import { stringify } from "../cache";
 
 const expectedXpub =
   "xpub6CGqRCnS5qDfyxtzV3y3tj8CY7qf3z3GiB2qnCUTdNkhpNxbLtobrU5ZXBVPG3rzPcBUpJAoj3K1u1jyDwKuduL71gLPm27Tckc85apgQRr";
@@ -95,7 +96,7 @@ describe("HDWallet", () => {
       (async () => 1)(),
       new Promise((resolve) => resolve(2)),
     ]);
-    expect(JSON.stringify(result)).toBe(JSON.stringify([1, 2]));
+    expect(stringify(result)).toBe(stringify([1, 2]));
   });
 
   it("deposit indexes", async () => {
@@ -108,30 +109,26 @@ describe("HDWallet", () => {
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(0),
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
     expect(hdWallet.depositIndex).toBe(1);
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(1),
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
     expect(hdWallet.depositIndex).toBe(2);
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(4),
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
     expect(hdWallet.depositIndex).toBe(5);
 
     // beyond gap size, should not update index
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(30),
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
     expect(hdWallet.depositIndex).toBe(5);
 
@@ -145,16 +142,15 @@ describe("HDWallet", () => {
     );
 
     const hdWallet = await RegTestHDWallet.newRandom();
-    expect(await hdWallet.getBalance("sat")).toBe(0);
+    expect(await hdWallet.getBalance("sat")).toBe(0n);
 
     const depositAddress = hdWallet.getDepositAddress();
     await fundingWallet.send({
       cashaddr: depositAddress,
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
 
-    expect(await hdWallet.getBalance("sat")).toBe(100000);
+    expect(await hdWallet.getBalance("sat")).toBe(100000n);
 
     const depositAddress2 = hdWallet.getDepositAddress();
     expect(depositAddress).not.toBe(depositAddress2);
@@ -162,63 +158,61 @@ describe("HDWallet", () => {
     // send more funds to new deposit address
     await fundingWallet.send({
       cashaddr: depositAddress2,
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
 
-    expect(await hdWallet.getBalance("sat")).toBe(200000);
+    expect(await hdWallet.getBalance("sat")).toBe(200000n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(0))
       ).getBalance("sat")
-    ).toBe(100000);
+    ).toBe(100000n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(1))
       ).getBalance("sat")
-    ).toBe(100000);
+    ).toBe(100000n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(2))
       ).getBalance("sat")
-    ).toBe(0);
+    ).toBe(0n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getChangeAddress(0))
       ).getBalance("sat")
-    ).toBe(0);
+    ).toBe(0n);
 
     const bob = await RegTestWallet.newRandom();
 
     await hdWallet.send({
       cashaddr: bob.getDepositAddress(),
-      value: 150000,
-      unit: "sat",
+      value: 150000n,
     });
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(0))
       ).getBalance("sat")
-    ).toBe(0);
+    ).toBe(0n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(1))
       ).getBalance("sat")
-    ).toBe(0);
+    ).toBe(0n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(2))
       ).getBalance("sat")
-    ).toBe(0);
+    ).toBe(0n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getChangeAddress(0))
       ).getBalance("sat")
-    ).toBeGreaterThan(50000 - 1000);
+    ).toBeGreaterThan(50000n - 1000n);
 
     expect(hdWallet.getChangeAddress()).not.toBe(hdWallet.getChangeAddress(0));
     expect(hdWallet.getChangeAddress()).toBe(hdWallet.getChangeAddress(1));
@@ -226,17 +220,16 @@ describe("HDWallet", () => {
     expect(hdWallet.depositIndex).toBe(2);
     expect(hdWallet.changeIndex).toBe(1);
 
-    expect(await bob.getBalance("sat")).toBe(150000);
+    expect(await bob.getBalance("sat")).toBe(150000n);
 
-    expect(await hdWallet.getBalance("sat")).toBe(49639); // minus fees
+    expect(await hdWallet.getBalance("sat")).toBe(49639n); // minus fees
 
-    expect((await hdWallet.getMaxAmountToSend()).sat).toBe(49407);
-
+    expect((await hdWallet.getMaxAmountToSend()).sat).toBe(49441n);
     const charlie = await RegTestWallet.newRandom();
     await hdWallet.sendMax(charlie.cashaddr);
 
-    expect(await charlie.getBalance("sat")).toBe(49407);
-    expect(await hdWallet.getBalance("sat")).toBe(0);
+    expect(await charlie.getBalance("sat")).toBe(49441n);
+    expect(await hdWallet.getBalance("sat")).toBe(0n);
   });
 
   it("Should build unsigned transactions from an HDWallet", async () => {
@@ -245,22 +238,20 @@ describe("HDWallet", () => {
     );
 
     const hdWallet = await RegTestHDWallet.newRandom();
-    expect(await hdWallet.getBalance("sat")).toBe(0);
+    expect(await hdWallet.getBalance("sat")).toBe(0n);
 
     const depositAddress = hdWallet.getDepositAddress();
     await fundingWallet.send({
       cashaddr: depositAddress,
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
 
-    expect(await hdWallet.getBalance("sat")).toBe(100000);
+    expect(await hdWallet.getBalance("sat")).toBe(100000n);
 
     const unsignedTx = await hdWallet.send(
       {
         cashaddr: (await RegTestWallet.newRandom()).getDepositAddress(),
-        value: 50000,
-        unit: "sat",
+        value: 50000n,
       },
       {
         buildUnsigned: true,
@@ -332,16 +323,14 @@ describe("HDWallet", () => {
     );
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(0),
-      value: 100000,
-      unit: "sat",
+      value: 100000n,
     });
 
     expect(
       hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
     ).not.toBeNull();
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
-        .length
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos.length
     ).toBe(1);
 
     // persist cache
@@ -351,21 +340,16 @@ describe("HDWallet", () => {
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
     await otherWallet.watchPromise; // ensure any async init is done
     expect(
-      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
-        ?.status
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
     ).not.toBeNull();
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
-        .length
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos.length
     ).toBe(1);
     expect(
-      JSON.stringify(
-        hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
-      )
+      stringify(hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos)
     ).toBe(
-      JSON.stringify(
-        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
-          ?.utxos
+      stringify(
+        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
       )
     );
 
@@ -379,8 +363,7 @@ describe("HDWallet", () => {
     const alice = await RegTestHDWallet.newRandom();
     await fundingWallet.send({
       cashaddr: alice.getDepositAddress(),
-      value: 1000000,
-      unit: "sat",
+      value: 1000000n,
     });
 
     const genesisResponse = await alice.tokenGenesis({
@@ -392,7 +375,7 @@ describe("HDWallet", () => {
 
     const tokenId = genesisResponse.tokenIds![0];
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // mint 2 NFTs, amount reducing
     const response = await alice.tokenMint(tokenId, [
@@ -408,7 +391,7 @@ describe("HDWallet", () => {
       }),
     ]);
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(3);
@@ -419,8 +402,8 @@ describe("HDWallet", () => {
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
         tokenId: tokenId,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
+        capability: NFTCapability.minting,
+        commitment: "abcd",
         amount: 1000n,
       }),
       new TokenSendRequest({
@@ -437,7 +420,7 @@ describe("HDWallet", () => {
       }),
     ]);
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     expect((await alice.getTokenUtxos(tokenId)).length).toBe(0);
     const bobTokenUtxos = await bob.getTokenUtxos(tokenId);
@@ -452,8 +435,7 @@ describe("HDWallet", () => {
     const alice = await RegTestHDWallet.newRandom();
     await fundingWallet.send({
       cashaddr: alice.getDepositAddress(),
-      value: 1000000,
-      unit: "sat",
+      value: 1000000n,
     });
 
     const genesisResponse = await alice.tokenGenesis({
@@ -461,7 +443,7 @@ describe("HDWallet", () => {
     });
     const tokenId = genesisResponse.tokenIds![0];
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const previousValue = Config.EnforceCashTokenReceiptAddresses;
 
@@ -485,7 +467,7 @@ describe("HDWallet", () => {
       )
     ).resolves.not.toThrow();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     await expect(
       alice.send(
@@ -497,7 +479,7 @@ describe("HDWallet", () => {
       )
     ).resolves.not.toThrow();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     Config.EnforceCashTokenReceiptAddresses = true;
     await expect(wrap(alice.getDepositAddress())).rejects.toThrow();
@@ -514,7 +496,7 @@ describe("HDWallet", () => {
         ))()
     ).rejects.toThrow();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     await expect(
       alice.send(
@@ -526,7 +508,7 @@ describe("HDWallet", () => {
       )
     ).resolves.not.toThrow();
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     Config.EnforceCashTokenReceiptAddresses = previousValue;
   });

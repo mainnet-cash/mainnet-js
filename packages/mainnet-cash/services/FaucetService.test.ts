@@ -31,7 +31,7 @@ describe("Test faucet endpoints", () => {
     expect(resp.body.txId.length).toBe(64);
 
     const balance = await bobwallet.getBalance("sat");
-    expect(balance).toBe(10000);
+    expect(Number(balance)).toBe(10000);
 
   });
 

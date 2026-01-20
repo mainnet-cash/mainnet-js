@@ -4,21 +4,21 @@ import { balanceResponseFromSatoshi } from "./balanceObjectFromSatoshi";
 import { balanceFromSatoshi } from "./balanceObjectFromSatoshi";
 
 test("Get balanceResponse from 1 bch in satoshi", async () => {
-  let bal = await balanceResponseFromSatoshi(100000000);
+  let bal = await balanceResponseFromSatoshi(100000000n);
   expect(bal.bch).toBe(1);
   expect(bal.sat).toBe(bchParam.subUnits);
 });
 
 test("Get balanceResponse from 0", async () => {
-  let bal = await balanceResponseFromSatoshi(0);
+  let bal = await balanceResponseFromSatoshi(0n);
   expect(bal.bch).toBe(0);
-  expect(bal.sat).toBe(0);
+  expect(bal.sat).toBe(0n);
   expect(bal.usd).toBe(0);
 });
 
 test("Get balanceResponse from 1 bch in eur", async () => {
   Config.DefaultCurrency = "eur";
-  let bal = await balanceResponseFromSatoshi(100000000);
+  let bal = await balanceResponseFromSatoshi(100000000n);
   expect(bal.bch).toBe(1);
   expect(bal.sat).toBe(bchParam.subUnits);
   expect(bal.eur).toBeGreaterThan(0);
@@ -26,30 +26,15 @@ test("Get balanceResponse from 1 bch in eur", async () => {
 });
 
 test("Get balanceResponse from 1 satoshi", async () => {
-  let bal = await balanceResponseFromSatoshi(110000000);
+  let bal = await balanceResponseFromSatoshi(110000000n);
   expect(bal.bch).toBe(1.1);
-  expect(bal.sat).toBe(110000000);
+  expect(bal.sat).toBe(110000000n);
   expect(bal.usd!.toString()).toMatch(/\d+\.?\d{1,2}/);
 });
 
 test("Get balanceResponse from 1 sat", async () => {
-  let val = await balanceFromSatoshi(1, "sat");
-  expect(val).toBe(1);
-});
-
-test("Get balanceResponse from 1 sats", async () => {
-  let val = await balanceFromSatoshi(1, "sats");
-  expect(val).toBe(1);
-});
-
-test("Get balanceResponse from 1 satoshi", async () => {
-  let val = await balanceFromSatoshi(1, "satoshi");
-  expect(val).toBe(1);
-});
-
-test("Get balanceResponse from 1 satoshis", async () => {
-  let val = await balanceFromSatoshi(1, "satoshis");
-  expect(val).toBe(1);
+  let val = await balanceFromSatoshi(1n, "sat");
+  expect(val).toBe(1n);
 });
 
 test("Get balanceResponse from 1 bch", async () => {

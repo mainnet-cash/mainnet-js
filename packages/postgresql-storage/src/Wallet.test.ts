@@ -1,4 +1,4 @@
-import { BaseWallet, WalletTypeEnum } from "mainnet-js";
+import { BaseWallet, convert, WalletTypeEnum } from "mainnet-js";
 import { UnitEnum } from "mainnet-js";
 import { Wallet, RegTestWallet, TestNetWallet } from "mainnet-js";
 import { createWallet } from "mainnet-js";
@@ -26,7 +26,7 @@ describe(`Test Wallet library`, () => {
     const aliceBalance = (await alice.getBalance()) as BalanceResponse;
     expect(aliceBalance.bch).toBe(0);
     expect(aliceBalance.usd).toBe(0);
-    expect(await alice.getBalance("sat")).toBe(0);
+    expect(await alice.getBalance("sat")).toBe(0n);
   });
 
   test("Should get the regtest wallet balance", async () => {
@@ -38,7 +38,7 @@ describe(`Test Wallet library`, () => {
       // Build Bob's wallet from a public address, check his balance.
       const aliceBalance = (await alice.getBalance()) as BalanceResponse;
       expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(5000 * 100000000);
+      expect(await alice.getBalance("sat")).toBeGreaterThan(5000n * 100000000n);
     }
   });
 
@@ -97,31 +97,6 @@ describe(`Test Wallet library`, () => {
     }
   });
 
-  // TODO fix this error message
-  // test("Should throw a nice error when attempting to send fractional satoshi", async () => {
-  //   expect.assertions(1);
-  //   try {
-  //     let alice = await RegTestWallet.fromId(
-  //       `wif:regtest:${process.env.PRIVATE_WIF}`
-  //     );
-  //     const bob = await createWallet({
-  //       type: WalletTypeEnum.Wif,
-  //       network: "regtest",
-  //     });
-  //     await alice.send([
-  //       {
-  //         cashaddr: bob.cashaddr!,
-  //         value: 1100.33333,
-  //         unit: "satoshis",
-  //       },
-  //     ]);
-  //   } catch (e:any) {
-  //     expect(e.message).toBe(
-  //       "Cannot send 1100.33333 satoshis, (fractional sats do not exist, yet), please use an integer number."
-  //     );
-  //   }
-  // });
-
   test("Should get the regtest wallet balance", async () => {
     // Build Alice's wallet from Wallet Import Format string, check sats
     if (!process.env.PRIVATE_WIF) {
@@ -130,7 +105,7 @@ describe(`Test Wallet library`, () => {
       let alice = await RegTestWallet.fromId(
         `wif:regtest:${process.env.PRIVATE_WIF}`
       ); // insert WIF from #1
-      expect(await alice.getBalance("sat")).toBeGreaterThan(5000 * 100000000);
+      expect(await alice.getBalance("sat")).toBeGreaterThan(5000n * 100000000n);
     }
   });
 
@@ -147,15 +122,14 @@ describe(`Test Wallet library`, () => {
       let sendResponse = await alice.send([
         {
           cashaddr: bob.cashaddr!,
-          value: 1100,
-          unit: "satoshis",
+          value: 1100n,
         },
       ]);
       expect(sendResponse!.txId!.length).toBe(64);
       expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(1100);
+      expect(bobBalance.sat).toBe(1100n);
     }
   });
 
@@ -176,35 +150,31 @@ describe(`Test Wallet library`, () => {
       let sendResponse = await alice.send([
         {
           cashaddr: bob.cashaddr!,
-          value: 1001,
-          unit: "satoshis",
+          value: 1001n,
         },
         {
           cashaddr: bob.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
         // Using a larger amount here to test that it would indeed return as change to the sender when specified later.
         {
           cashaddr: bob.cashaddr!,
-          value: 10001,
-          unit: "satoshis",
+          value: 10001n,
         },
         // Using a second larger amount to assure that if too many utxos are specified, money the utxo isn't used
         {
           cashaddr: bob.cashaddr!,
-          value: 10001,
-          unit: "satoshis",
+          value: 10001n,
         },
       ]);
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(22003);
+      expect(bobBalance.sat).toBe(22003n);
       let bobUtxos = await bob.getUtxos();
       expect(bobUtxos.length).toBe(4);
 
       // Filter the list to only odd value utxos
       let oddUtxoIds = bobUtxos
-        .filter((utxo) => utxo.satoshis % 2 == 1)
+        .filter((utxo) => utxo.satoshis % 2n == 1n)
         .map((utxo) => {
           return toUtxoId(utxo);
         });
@@ -214,14 +184,13 @@ describe(`Test Wallet library`, () => {
         [
           {
             cashaddr: charlie.cashaddr!,
-            value: 1675,
-            unit: "satoshis",
+            value: 1675n,
           },
         ],
         { utxoIds: oddUtxoIds }
       );
-      expect(sendResponse2.balance!.sat).toBe(19967);
-      expect(await charlie.getBalance("sat")).toBe(1675);
+      expect(sendResponse2.balance!.sat).toBe(19967n);
+      expect(await charlie.getBalance("sat")).toBe(1675n);
     }
   });
 
@@ -247,8 +216,7 @@ describe(`Test Wallet library`, () => {
       await funder.send([
         {
           cashaddr: alice.cashaddr!,
-          value: 3000,
-          unit: "satoshis",
+          value: 3000n,
         },
       ]);
 
@@ -256,16 +224,15 @@ describe(`Test Wallet library`, () => {
         [
           {
             cashaddr: bob.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ],
         {
           changeAddress: charlie.cashaddr!,
         }
       );
-      expect(await bob.getBalance("sat")).toBe(1000);
-      expect(await charlie.getBalance("sat")).toBe(1780);
+      expect(await bob.getBalance("sat")).toBe(1000n);
+      expect(await charlie.getBalance("sat")).toBe(1780n);
     }
   });
 
@@ -286,28 +253,25 @@ describe(`Test Wallet library`, () => {
       let sendResponse = await alice.send([
         {
           cashaddr: bob.cashaddr!,
-          value: 1001,
-          unit: "satoshis",
+          value: 1001n,
         },
         {
           cashaddr: bob.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
         {
           cashaddr: bob.cashaddr!,
-          value: 1001,
-          unit: "satoshis",
+          value: 1001n,
         },
       ]);
       let bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(3002);
+      expect(bobBalance.sat).toBe(3002n);
       let bobUtxos = await bob.getUtxos();
       expect(bobUtxos.length).toBe(3);
 
       // Filter the list to only odd value utxos
       let oddUtxoIds = bobUtxos
-        .filter((utxo) => utxo.satoshis % 2 == 1)
+        .filter((utxo) => utxo.satoshis % 2n == 1n)
         .map((utxo) => {
           return toUtxoId(utxo);
         });
@@ -316,8 +280,8 @@ describe(`Test Wallet library`, () => {
       let sendResponse2 = await bob.sendMax(charlie.cashaddr!, {
         utxoIds: oddUtxoIds,
       });
-      expect(sendResponse2.balance!.sat).toBe(1000);
-      expect(await charlie.getBalance("sat")).toBeGreaterThan(1500);
+      expect(sendResponse2.balance!.sat).toBe(1000n);
+      expect(await charlie.getBalance("sat")).toBeGreaterThan(1500n);
     }
   });
 
@@ -332,7 +296,9 @@ describe(`Test Wallet library`, () => {
         network: "regtest",
       });
       let usdRate = await ExchangeRate.get("usd");
-      await alice.send([[bob.cashaddr!, usdRate, "Usd"]]);
+      await alice.send([
+        [bob.cashaddr!, BigInt(await convert(usdRate, "Usd", "Sat"))],
+      ]);
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
 
@@ -356,14 +322,14 @@ describe(`Test Wallet library`, () => {
         network: "regtest",
       });
 
-      await alice.send([[bob.cashaddr!, 1440, "sat"]]);
-      await bob.send([[charlie.cashaddr!, 734, "sat"]]);
+      await alice.send([[bob.cashaddr!, 1440n]]);
+      await bob.send([[charlie.cashaddr!, 734n]]);
       // Build Bob's wallet from a public address, check his balance.
-      const bobBalance = (await bob.getBalance()) as BalanceResponse;
+      const bobBalance = await bob.getBalance();
       // Build Bob's wallet from a public address, check his balance.
-      const charlieBalance = (await charlie.getBalance()) as BalanceResponse;
-      expect(Math.round(bobBalance.sat!)).toBe(0);
-      expect(Math.round(charlieBalance.sat!)).toBe(734);
+      const charlieBalance = await charlie.getBalance();
+      expect(bobBalance.sat).toBe(0n);
+      expect(charlieBalance.sat).toBe(734n);
     }
   });
 
@@ -376,10 +342,10 @@ describe(`Test Wallet library`, () => {
       const bob = await createWallet({
         network: "regtest",
       });
-      await alice.send([[bob.cashaddr!, 1200, UnitEnum.SAT]]);
+      await alice.send([[bob.cashaddr!, 1200n]]);
       // Build Bob's wallet from a public address, check his balance.
       const bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(1200);
+      expect(bobBalance.sat).toBe(1200n);
     }
   });
 
@@ -389,7 +355,7 @@ describe(`Test Wallet library`, () => {
     expect(alice.cashaddr!.slice(0, 9)).toBe("bchtest:q");
     expect(aliceBalance.bch).toBe(0);
     expect(aliceBalance.usd).toBe(0);
-    expect(await alice.getBalance("sat")).toBe(0);
+    expect(await alice.getBalance("sat")).toBe(0n);
   });
 
   test("Send a transaction on regtest, send it back", async () => {
@@ -413,8 +379,7 @@ describe(`Test Wallet library`, () => {
     await alice.send([
       {
         cashaddr: bob.cashaddr,
-        value: 3400,
-        unit: UnitEnum.SAT,
+        value: 3400n,
       },
     ]);
 
@@ -424,7 +389,7 @@ describe(`Test Wallet library`, () => {
 
     //
     const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
-    expect(bobBalanceFinal.sat).toBe(0);
+    expect(bobBalanceFinal.sat).toBe(0n);
   });
 
   test("Send all coins back on regtest", async () => {
@@ -453,46 +418,41 @@ describe(`Test Wallet library`, () => {
     await alice.send([
       {
         cashaddr: bob.cashaddr,
-        value: 3400,
-        unit: UnitEnum.SAT,
+        value: 3400n,
       },
       {
         cashaddr: bob.cashaddr,
-        value: 3400,
-        unit: UnitEnum.SAT,
+        value: 3400n,
       },
       {
         cashaddr: bob.cashaddr,
-        value: 3400,
-        unit: UnitEnum.SAT,
+        value: 3400n,
       },
       {
         cashaddr: bob.cashaddr,
-        value: 3400,
-        unit: UnitEnum.SAT,
+        value: 3400n,
       },
       {
         cashaddr: bob.cashaddr,
-        value: 3400,
-        unit: UnitEnum.SAT,
+        value: 3400n,
       },
     ]);
 
     // Send ALL of Bob's coins to Charlie.
     const sendMaxResponse = await bob.sendMax(charlie.cashaddr!);
     expect(sendMaxResponse.txId!.length).toBe(64);
-    expect(sendMaxResponse.balance!.sat!).toBe(0);
+    expect(sendMaxResponse.balance!.sat!).toBe(0n);
 
     const bobFinalBalance = await bob.getBalance("sat");
-    expect(bobFinalBalance).toBe(0);
+    expect(bobFinalBalance).toBe(0n);
 
     // Send ALL of Charlie's coins to Alice.
     const sendMaxResponse2 = await charlie.sendMax(alice.cashaddr);
     expect(sendMaxResponse2.txId!.length).toBe(64);
-    expect(sendMaxResponse2.balance!.sat!).toBe(0);
+    expect(sendMaxResponse2.balance!.sat!).toBe(0n);
 
     const charlieFinalBalance = await charlie.getBalance("sat");
-    expect(charlieFinalBalance).toBe(0);
+    expect(charlieFinalBalance).toBe(0n);
   });
 
   test("Set default derivation path", async () => {

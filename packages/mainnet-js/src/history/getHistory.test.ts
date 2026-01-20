@@ -28,29 +28,25 @@ test("Should get an address history", async () => {
     let sendResponse = await alice.send([
       {
         cashaddr: bob.cashaddr!,
-        value: 31000,
-        unit: "satoshis",
+        value: 31000n,
       },
       {
         cashaddr: charlie.cashaddr!,
-        value: 41000,
-        unit: "satoshis",
+        value: 41000n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
     await bob.send([
       {
         cashaddr: charlie.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
     await bob.send([
       {
         cashaddr: alice.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
     ]);
     expect(sendResponse!.txId!.length).toBe(64);
@@ -110,24 +106,21 @@ test("Should get a history with multi-party sends", async () => {
     let sendResponse = await alice.send([
       {
         cashaddr: bob.cashaddr!,
-        value: 31000,
-        unit: "satoshis",
+        value: 31000n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
     await bob.send([
       {
         cashaddr: charlie.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
     await bob.send([
       {
         cashaddr: alice.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
     ]);
     expect(sendResponse!.txId!.length).toBe(64);
@@ -190,26 +183,22 @@ test("Should cut results with a longer history to given count", async () => {
     let sendResponse = await alice.send([
       {
         cashaddr: bob.cashaddr!,
-        value: 31000,
-        unit: "satoshis",
+        value: 31000n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });
     await bob.send([
       {
         cashaddr: charlie.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
       {
         cashaddr: alice.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
       {
         cashaddr: alice.cashaddr!,
-        value: 2100,
-        unit: "satoshis",
+        value: 2100n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 1 });
@@ -258,23 +247,19 @@ test("Should handle input and fee from many utxos", async () => {
     let sendResponse = await alice.send([
       {
         cashaddr: bob.cashaddr!,
-        value: 600,
-        unit: "satoshis",
+        value: 600n,
       },
       {
         cashaddr: bob.cashaddr!,
-        value: 600,
-        unit: "satoshis",
+        value: 600n,
       },
       {
         cashaddr: bob.cashaddr!,
-        value: 600,
-        unit: "satoshis",
+        value: 600n,
       },
       {
         cashaddr: bob.cashaddr!,
-        value: 600,
-        unit: "satoshis",
+        value: 600n,
       },
     ]);
     await mine({ cashaddr: alice.getDepositAddress(), blocks: 10 });

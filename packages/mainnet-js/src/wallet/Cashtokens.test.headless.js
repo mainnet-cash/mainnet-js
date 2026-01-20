@@ -389,7 +389,7 @@ describe(`Wallet should function in the browser`, () => {
       const bob = await RegTestWallet.newRandom();
       const genesisResponse = await alice.tokenGenesis({
         amount: 100,
-        value: 7000,
+        value: 7000n,
         cashaddr: bob.cashaddr,
       });
 
@@ -398,7 +398,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(tokenBalance).toBe(100n);
       const tokenUtxos = await bob.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
-      expect(tokenUtxos[0].satoshis).toBe(7000);
+      expect(tokenUtxos[0].satoshis).toBe(7000n);
 
       // lower the token satoshi value
       const response = await bob.send([
@@ -406,7 +406,7 @@ describe(`Wallet should function in the browser`, () => {
           cashaddr: bob.cashaddr,
           amount: 100,
           tokenId: tokenId,
-          value: 1500,
+          value: 1500n,
         }),
       ]);
       let newTokenUtxos = await bob.getTokenUtxos(tokenId);
@@ -415,8 +415,8 @@ describe(`Wallet should function in the browser`, () => {
 
       let bobUtxos = await bob.getAddressUtxos(bob.cashaddr);
       expect(bobUtxos.length).toBe(2);
-      expect(bobUtxos[0].satoshis).toBe(1500);
-      expect(bobUtxos[1].satoshis).toBe(5245);
+      expect(bobUtxos[0].satoshis).toBe(1500n);
+      expect(bobUtxos[1].satoshis).toBe(5245n);
 
       // raise the token satoshi value
       await bob.send([
@@ -424,7 +424,7 @@ describe(`Wallet should function in the browser`, () => {
           cashaddr: bob.cashaddr,
           amount: 100,
           tokenId: tokenId,
-          value: 3000,
+          value: 3000n,
         }),
       ]);
       newTokenUtxos = await bob.getTokenUtxos(tokenId);
@@ -433,8 +433,8 @@ describe(`Wallet should function in the browser`, () => {
 
       bobUtxos = await bob.getAddressUtxos(bob.cashaddr);
       expect(bobUtxos.length).toBe(2);
-      expect(bobUtxos[0].satoshis).toBe(3000);
-      expect(bobUtxos[1].satoshis).toBe(3349);
+      expect(bobUtxos[0].satoshis).toBe(3000n);
+      expect(bobUtxos[1].satoshis).toBe(3349n);
     }, process.env.ALICE_ID);
   });
 
@@ -445,7 +445,7 @@ describe(`Wallet should function in the browser`, () => {
 
       const genesisResponse = await alice.tokenGenesis({
         amount: 100,
-        value: 5000,
+        value: 5000n,
         capability: NFTCapability.minting,
         commitment: "test",
         cashaddr: alice.cashaddr,
@@ -456,7 +456,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(tokenBalance).toBe(100n);
       const tokenUtxos = await alice.getTokenUtxos(tokenId);
       expect(tokenUtxos.length).toBe(1);
-      expect(tokenUtxos[0].satoshis).toBe(5000);
+      expect(tokenUtxos[0].satoshis).toBe(5000n);
 
       let seenBalance = 0;
       setTimeout(
@@ -466,7 +466,7 @@ describe(`Wallet should function in the browser`, () => {
               cashaddr: bob.cashaddr,
               amount: 100,
               tokenId: tokenId,
-              value: 1500,
+              value: 1500n,
               capability: NFTCapability.minting,
               commitment: "test",
             }),

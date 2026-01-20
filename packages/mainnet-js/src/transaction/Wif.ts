@@ -26,7 +26,6 @@ import {
   SourceOutput,
   TokenSendRequest,
 } from "../wallet/model.js";
-import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
@@ -41,7 +40,7 @@ export async function buildP2pkhNonHdTransaction({
   inputs,
   outputs,
   signingKey,
-  fee = 0,
+  fee = 0n,
   discardChange = false,
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
@@ -50,7 +49,7 @@ export async function buildP2pkhNonHdTransaction({
   inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
   signingKey?: Uint8Array;
-  fee?: number;
+  fee?: bigint;
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
@@ -231,7 +230,7 @@ export async function prepareOutputs(
     if (typeof outputLockingBytecode === "string")
       throw new Error(outputLockingBytecode);
 
-    const sendAmount = await amountInSatoshi(output.value, output.unit);
+    const sendAmount = Number(output.value);
     if (sendAmount % 1 !== 0) {
       throw Error(
         `Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`
@@ -451,7 +450,7 @@ export async function getFeeAmountSimple({
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
-}) {
+}): Promise<bigint> {
   const inputSizeP2pkh = 148;
   const outputSizeP2pkh = 34;
 
@@ -468,7 +467,7 @@ export async function getFeeAmountSimple({
     0
   );
 
-  const outputSize = (sendRequest) => {
+  const outputSize = (sendRequest: SendRequestType) => {
     if (sendRequest.hasOwnProperty("unit")) {
       return outputSizeP2pkh;
     } else if (sendRequest.hasOwnProperty("tokenId")) {
@@ -491,8 +490,10 @@ export async function getFeeAmountSimple({
     sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) +
     (discardChange ? 0 : outputSizeP2pkh);
 
-  return Math.ceil(
-    (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi
+  return BigInt(
+    Math.ceil(
+      (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi
+    )
   );
 }
 
@@ -522,14 +523,16 @@ export async function getFeeAmount({
         inputs: utxos,
         outputs: sendRequests,
         signingKey: placeholderPrivateKeyBin,
-        fee: 0, //DUST_UTXO_THRESHOLD
+        fee: 0n, //DUST_UTXO_THRESHOLD
         discardChange: discardChange ?? false,
         feePaidBy,
         changeAddress: "",
         walletCache,
       });
 
-    return Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1);
+    return BigInt(
+      Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1)
+    );
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"
@@ -542,7 +545,7 @@ export async function buildEncodedTransaction({
   inputs,
   outputs,
   signingKey,
-  fee = 0,
+  fee = 0n,
   discardChange = false,
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
@@ -552,7 +555,7 @@ export async function buildEncodedTransaction({
   inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
   signingKey: Uint8Array;
-  fee?: number;
+  fee?: bigint;
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;

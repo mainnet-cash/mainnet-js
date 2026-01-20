@@ -18,7 +18,7 @@ export type Network = typeof Network[keyof typeof Network];
 export interface Utxo {
   txid: string;
   vout: number;
-  satoshis: number;
+  satoshis: bigint;
   height?: number;
   coinbase?: boolean;
   token?: TokenI;
@@ -28,7 +28,6 @@ export interface Utxo {
 export interface UtxoId {
   txid: string;
   vout: number;
-  satoshis: number;
 }
 
 export interface ElectrumBalanceI {

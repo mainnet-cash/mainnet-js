@@ -31,12 +31,14 @@ export function asSendRequestObject(
               )
             );
           } else {
-            // ['cashaddr', 120, 'sats'],
+            // ['cashaddr', 120] or ['cashaddr', 120n],
             resp.push(
               new SendRequest({
                 cashaddr: r[0] as string,
-                value: r[1] as number,
-                unit: r[2] as UnitEnum,
+                value:
+                  typeof r[1] === "number"
+                    ? BigInt(Math.floor[1])
+                    : (r[1] as bigint),
               })
             );
           }
@@ -56,9 +58,7 @@ export function asSendRequestObject(
 }
 
 function convertToClass(object: SendRequest | TokenSendRequest | OpReturnData) {
-  if (object.hasOwnProperty("unit")) {
-    return new SendRequest(object as SendRequest);
-  } else if (object.hasOwnProperty("tokenId")) {
+  if (object.hasOwnProperty("tokenId")) {
     return new TokenSendRequest(object as TokenSendRequest);
   } else if (object.hasOwnProperty("buffer")) {
     return OpReturnData.fromUint8Array((object as OpReturnData).buffer);
@@ -70,6 +70,12 @@ function convertToClass(object: SendRequest | TokenSendRequest | OpReturnData) {
     return OpReturnData.fromUint8Array(
       Uint8Array.from(base64ToBin((object as any).dataBuffer))
     );
+  } else if (
+    object.hasOwnProperty("cashaddr") &&
+    object.hasOwnProperty("value") &&
+    object.hasOwnProperty("tokenId") === false
+  ) {
+    return new SendRequest(object as SendRequest);
   }
 
   throw new Error("Unsupported send object");

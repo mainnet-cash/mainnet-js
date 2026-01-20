@@ -413,27 +413,30 @@ export class BaseWallet implements WalletI {
   }
 
   // gets wallet balance in sats, bch and currency
-  public async getBalance(
-    rawUnit?: string,
+  // if rawUnit is provided, returns balance in that unit
+  public async getBalance<T extends string | undefined = undefined>(
+    rawUnit?: T,
     priceCache = true
-  ): Promise<BalanceResponse | number> {
+  ): Promise<
+    T extends undefined ? BalanceResponse : T extends "sat" ? bigint : number
+  > {
     if (rawUnit) {
       const unit = sanitizeUnit(rawUnit);
-      return await balanceFromSatoshi(
+      return (await balanceFromSatoshi(
         await this.getBalanceFromProvider(),
         unit,
         priceCache
-      );
+      )) as any;
     } else {
-      return await balanceResponseFromSatoshi(
+      return (await balanceResponseFromSatoshi(
         await this.getBalanceFromProvider(),
         priceCache
-      );
+      )) as any;
     }
   }
 
   // Gets balance by summing value in all utxos in stats
-  public async getBalanceFromUtxos(): Promise<number> {
+  public async getBalanceFromUtxos(): Promise<bigint> {
     const utxos = (await this.getUtxos()).filter(
       (val) => val.token === undefined
     );
@@ -441,7 +444,7 @@ export class BaseWallet implements WalletI {
   }
 
   // Gets balance from fulcrum
-  public async getBalanceFromProvider(): Promise<number> {
+  public async getBalanceFromProvider(): Promise<bigint> {
     // Fulcrum reports balance of all utxos, including tokens, which is undesirable
     // // TODO not sure why getting the balance from a provider doesn't work
     // if (this._slpAware || this._slpSemiAware) {
@@ -493,7 +496,7 @@ export class BaseWallet implements WalletI {
     return this.provider.watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
-        const balance = (await this.getBalance()) as BalanceResponse;
+        const balance = await this.getBalance();
         callback(balance);
       }
     );
@@ -511,10 +514,7 @@ export class BaseWallet implements WalletI {
     let usdPrice = -1;
 
     const _callback = async () => {
-      const balance = (await this.getBalance(
-        undefined,
-        false
-      )) as BalanceResponse;
+      const balance = await this.getBalance(undefined, false);
       if (usdPrice !== balance.usd!) {
         usdPrice = balance.usd;
         callback(balance);
@@ -601,7 +601,7 @@ export class BaseWallet implements WalletI {
       outputCount: 1,
       options: {},
     }
-  ): Promise<{ value: number; utxos: Utxo[] }> {
+  ): Promise<{ value: bigint; utxos: Utxo[] }> {
     if (params.options && params.options.slpSemiAware) {
       this._slpSemiAware = true;
     }
@@ -632,8 +632,7 @@ export class BaseWallet implements WalletI {
     // simulate outputs using the sender's address
     const sendRequest = new SendRequest({
       cashaddr: placeholderCashAddr,
-      value: 100,
-      unit: "sat",
+      value: 100n,
     });
     const sendRequests = Array(params.outputCount)
       .fill(0)
@@ -657,8 +656,8 @@ export class BaseWallet implements WalletI {
     const spendableAmount = sumUtxoValue(fundingUtxos);
 
     let result = spendableAmount - fee;
-    if (result < 0) {
-      result = 0;
+    if (result < 0n) {
+      result = 0n;
     }
 
     return { value: result, utxos: fundingUtxos };
@@ -715,7 +714,7 @@ export class BaseWallet implements WalletI {
         options?.queryBalance === undefined ||
         options?.queryBalance === true
       ) {
-        resp.balance = (await this.getBalance()) as BalanceResponse;
+        resp.balance = await this.getBalance();
       }
     } else {
       resp.unsignedTransaction = binToHex(encodedTransaction);
@@ -770,7 +769,6 @@ export class BaseWallet implements WalletI {
     const sendRequest = new SendRequest({
       cashaddr: cashaddr,
       value: maxSpendableAmount,
-      unit: "sat",
     });
 
     const { encodedTransaction, tokenIds, sourceOutputs } =
@@ -793,7 +791,7 @@ export class BaseWallet implements WalletI {
         options?.queryBalance === undefined ||
         options?.queryBalance === true
       ) {
-        resp.balance = (await this.getBalance()) as BalanceResponse;
+        resp.balance = await this.getBalance();
       }
     } else {
       resp.unsignedTransaction = binToHex(encodedTransaction);
@@ -964,7 +962,7 @@ export class BaseWallet implements WalletI {
 
     const fundingUtxos = await getSuitableUtxos(
       utxos,
-      BigInt(spendAmount) + BigInt(Math.ceil(feeEstimate)),
+      spendAmount + feeEstimate,
       bestHeight,
       feePaidBy,
       sendRequests,
@@ -1194,7 +1192,7 @@ export class BaseWallet implements WalletI {
     const genesisSendRequest = new TokenSendRequest({
       cashaddr: genesisRequest.cashaddr || this.getTokenDepositAddress(),
       amount: genesisRequest.amount,
-      value: genesisRequest.value || 1000,
+      value: genesisRequest.value || 1000n,
       capability: genesisRequest.capability,
       commitment: genesisRequest.commitment,
       tokenId: genesisInputs[0].txid,
@@ -1267,7 +1265,7 @@ export class BaseWallet implements WalletI {
           (val) =>
             new TokenSendRequest({
               cashaddr: val.cashaddr || this.getTokenDepositAddress(),
-              amount: 0,
+              amount: 0n,
               tokenId: tokenId,
               value: val.value,
               capability: val.capability,
@@ -1389,7 +1387,7 @@ export class BaseWallet implements WalletI {
               burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
             tokenId: burnRequest.tokenId,
             amount: safeNewAmount,
-            value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0),
+            value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0n),
           }),
         ];
       }

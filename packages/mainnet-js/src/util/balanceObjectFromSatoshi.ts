@@ -7,46 +7,41 @@ import { Config } from "../config.js";
 
 export interface BalanceResponse {
   bch: number;
-  sat: number;
-  [currency: string]: number;
+  sat: bigint;
+  [currency: string]: any; // number for other currencies
 }
 
 export async function balanceResponseFromSatoshi(
-  value: number,
+  value: bigint,
   priceCache: boolean = true
 ): Promise<BalanceResponse> {
   const response = {} as BalanceResponse;
 
-  response.bch = value / bchParam.subUnits;
+  response.bch = Number(value) / Number(bchParam.subUnits);
   response.sat = value;
   const currencyValue =
-    (value / bchParam.subUnits) *
+    (Number(value) / Number(bchParam.subUnits)) *
     (await ExchangeRate.get(Config.DefaultCurrency, priceCache));
   response[Config.DefaultCurrency] = floor(currencyValue, 2);
   return response;
 }
 
-export async function balanceFromSatoshi(
-  value: number,
-  rawUnit: string,
+export async function balanceFromSatoshi<T extends UnitEnum>(
+  value: bigint,
+  rawUnit: T,
   priceCache: boolean = true
-): Promise<number> {
+): Promise<T extends "sat" ? bigint : number> {
   const unit = sanitizeUnit(rawUnit);
-  switch (unit) {
-    case UnitEnum.BCH:
-      return value / bchParam.subUnits;
-    case UnitEnum.SAT:
-      return value;
-    case UnitEnum.SATS:
-      return value;
-    case UnitEnum.SATOSHI:
-      return value;
-    case UnitEnum.SATOSHIS:
-      return value;
-    default:
-      const currencyValue =
-        (value / bchParam.subUnits) *
-        (await ExchangeRate.get(Config.DefaultCurrency, priceCache));
-      return Number(currencyValue.toFixed(2));
+  if (unit === UnitEnum.SAT) {
+    return value as T extends "sat" ? bigint : never;
   }
+  if (unit === UnitEnum.BCH) {
+    return (Number(value) / Number(bchParam.subUnits)) as T extends "sat"
+      ? never
+      : number;
+  }
+  const currencyValue =
+    (Number(value) / Number(bchParam.subUnits)) *
+    (await ExchangeRate.get(Config.DefaultCurrency, priceCache));
+  return Number(currencyValue.toFixed(2)) as T extends "sat" ? never : number;
 }

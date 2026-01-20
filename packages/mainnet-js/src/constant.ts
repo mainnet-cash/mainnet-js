@@ -1,7 +1,7 @@
 export const DELIMITER = ":";
 
 // Min amount utxo can be to be accepted by the network
-export const DUST_UTXO_THRESHOLD = 546;
+export const DUST_UTXO_THRESHOLD = 546n;
 
 // Current chained tx limit
 export const MEMPOOL_CHAIN_LIMIT = 50;

@@ -14,7 +14,7 @@ import {
   hexToBin,
   utf8ToBin,
 } from "@bitauth/libauth";
-import { delay } from "../util";
+import { convert, delay } from "../util";
 import { Config } from "../config";
 import json from "../test/json.test";
 
@@ -37,14 +37,16 @@ describe(`Test cashtokens`, () => {
   test("Test token genesis and max amount to send", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
-    await alice.send([[bob.cashaddr!, 0.101, "bch"]]);
+    await alice.send([
+      [bob.cashaddr!, BigInt(await convert(0.101, "bch", "sat"))],
+    ]);
     const genesisResponse = await bob.tokenGenesis({
       amount: 100n,
     });
 
     const maxAmountToSend = await bob.getMaxAmountToSend();
     await bob.send([[alice.cashaddr!, maxAmountToSend.sat!, "sat"]]);
-    expect(await bob.getBalance("sat")).toBe(0);
+    expect(await bob.getBalance("sat")).toBe(0n);
   });
 
   test("Test tokens will not be burned when sending bch value", async () => {
@@ -62,8 +64,7 @@ describe(`Test cashtokens`, () => {
     await alice.send([
       new SendRequest({
         cashaddr: bob.cashaddr!,
-        value: 5000,
-        unit: "sat",
+        value: 5000n,
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
@@ -72,21 +73,20 @@ describe(`Test cashtokens`, () => {
       }),
     ]);
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
-    expect(await bob.getBalance("sat")).toBe(5000);
+    expect(await bob.getBalance("sat")).toBe(5000n);
 
     await bob.send(
       new SendRequest({
         cashaddr: alice.cashaddr!,
-        value: 1000,
-        unit: "sat",
+        value: 1000n,
       })
     );
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
-    expect(await bob.getBalance("sat")).toBe(3780);
+    expect(await bob.getBalance("sat")).toBe(3780n);
 
     await bob.sendMax(alice.cashaddr!);
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
-    expect(await bob.getBalance("sat")).toBe(0);
+    expect(await bob.getBalance("sat")).toBe(0n);
   });
 
   test("Test fungible cashtoken genesis and sending", async () => {
@@ -114,8 +114,7 @@ describe(`Test cashtokens`, () => {
       }),
       new SendRequest({
         cashaddr: bob.cashaddr!,
-        value: 20000,
-        unit: "sat",
+        value: 20000n,
       }),
     ]);
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
@@ -536,7 +535,7 @@ describe(`Test cashtokens`, () => {
     const bob = await RegTestWallet.newRandom();
     const genesisResponse = await alice.tokenGenesis({
       amount: 100n,
-      value: 7000,
+      value: 7000n,
       cashaddr: bob.cashaddr!,
     });
 
@@ -545,7 +544,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(100n);
     const tokenUtxos = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
-    expect(tokenUtxos[0].satoshis).toBe(7000);
+    expect(tokenUtxos[0].satoshis).toBe(7000n);
 
     // lower the token satoshi value
     const response = await bob.send([
@@ -553,7 +552,7 @@ describe(`Test cashtokens`, () => {
         cashaddr: bob.cashaddr!,
         amount: 100n,
         tokenId: tokenId,
-        value: 1500,
+        value: 1500n,
       }),
     ]);
     let newTokenUtxos = await bob.getTokenUtxos(tokenId);
@@ -562,8 +561,8 @@ describe(`Test cashtokens`, () => {
 
     let bobUtxos = await bob.getAddressUtxos(bob.cashaddr!);
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(1500);
-    expect(bobUtxos[1].satoshis).toBe(5245);
+    expect(bobUtxos[0].satoshis).toBe(1500n);
+    expect(bobUtxos[1].satoshis).toBe(5245n);
 
     // raise the token satoshi value
     await bob.send([
@@ -571,7 +570,7 @@ describe(`Test cashtokens`, () => {
         cashaddr: bob.cashaddr!,
         amount: 100n,
         tokenId: tokenId,
-        value: 3000,
+        value: 3000n,
       }),
     ]);
     newTokenUtxos = await bob.getTokenUtxos(tokenId);
@@ -580,8 +579,8 @@ describe(`Test cashtokens`, () => {
 
     bobUtxos = await bob.getAddressUtxos(bob.cashaddr!);
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(3000);
-    expect(bobUtxos[1].satoshis).toBe(3349);
+    expect(bobUtxos[0].satoshis).toBe(3000n);
+    expect(bobUtxos[1].satoshis).toBe(3349n);
   });
 
   test("Test cashtoken waiting and watching", async () => {
@@ -590,7 +589,7 @@ describe(`Test cashtokens`, () => {
 
     const genesisResponse = await alice.tokenGenesis({
       amount: 100n,
-      value: 5000,
+      value: 5000n,
       capability: NFTCapability.minting,
       commitment: "test",
       cashaddr: alice.cashaddr!,
@@ -601,7 +600,7 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(100n);
     const tokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
-    expect(tokenUtxos[0].satoshis).toBe(5000);
+    expect(tokenUtxos[0].satoshis).toBe(5000n);
 
     let seenBalance = 0n;
     let sendResponse: SendResponse = {};
@@ -612,7 +611,7 @@ describe(`Test cashtokens`, () => {
             cashaddr: bob.cashaddr!,
             amount: 100n,
             tokenId: tokenId,
-            value: 1500,
+            value: 1500n,
             capability: NFTCapability.minting,
             commitment: "test",
           }),
@@ -644,8 +643,8 @@ describe(`Test cashtokens`, () => {
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       amount: 100n,
@@ -676,8 +675,8 @@ describe(`Test cashtokens`, () => {
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       amount: 100n,
@@ -719,7 +718,7 @@ describe(`Test cashtokens`, () => {
     const bob = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       amount: 100n,
@@ -732,7 +731,7 @@ describe(`Test cashtokens`, () => {
     const tokenUtxos = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
 
-    await bob.send({ cashaddr: alice.cashaddr!, value: 1000, unit: "sat" });
+    await bob.send({ cashaddr: alice.cashaddr!, value: 1000n });
 
     const tokenBalance2 = await bob.getTokenBalance(tokenId);
     expect(tokenBalance2).toBe(100n);
@@ -746,8 +745,8 @@ describe(`Test cashtokens`, () => {
     const charlie = await RegTestWallet.newRandom();
     // prepare inputs for two token geneses
     await alice.send([
-      { cashaddr: bob.cashaddr!, value: 10000, unit: "sat" },
-      { cashaddr: charlie.cashaddr!, value: 10000, unit: "sat" },
+      { cashaddr: bob.cashaddr!, value: 10000n },
+      { cashaddr: charlie.cashaddr!, value: 10000n },
     ]);
 
     const genesisResponse = await bob.tokenGenesis({
@@ -761,7 +760,7 @@ describe(`Test cashtokens`, () => {
     const tokenUtxos = await bob.getTokenUtxos(tokenId);
     expect(tokenUtxos.length).toBe(1);
 
-    await bob.send({ cashaddr: alice.cashaddr!, value: 1000, unit: "sat" });
+    await bob.send({ cashaddr: alice.cashaddr!, value: 1000n });
 
     await bob.send([
       {
@@ -826,7 +825,7 @@ describe(`Test cashtokens`, () => {
     const charlie = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "minting",
@@ -871,7 +870,7 @@ describe(`Test cashtokens`, () => {
     const charlie = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "minting",
@@ -951,7 +950,7 @@ describe(`Test cashtokens`, () => {
     const charlie = await RegTestWallet.newRandom();
 
     // prepare inputs for two token geneses
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "minting",
@@ -1014,7 +1013,7 @@ describe(`Test cashtokens`, () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
 
-    await alice.send({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
 
     const genesisResponse = await bob.tokenGenesis({
       capability: "none",

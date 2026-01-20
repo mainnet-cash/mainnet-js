@@ -105,8 +105,7 @@ describe("Rpc tests", () => {
     await aliceWallet.send([
       {
         cashaddr: bobWallet.cashaddr!,
-        value: 1000,
-        unit: "satoshis",
+        value: 1000n,
       },
     ]);
 

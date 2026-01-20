@@ -120,7 +120,7 @@ describe(`Wallet should function in the browser`, () => {
       let w = await Wallet.newRandom();
       return w.getBalance();
     });
-    expect(result.sat).toBe(0);
+    expect(result.sat).toBe(0n);
   });
 
   test(`Should return deposit address from testnet wallet`, async () => {
@@ -148,7 +148,7 @@ describe(`Wallet should function in the browser`, () => {
         const alice = await TestNetWallet.watchOnly(addr);
         return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
-      expect(result).toBeGreaterThan(0);
+      expect(result).toBeGreaterThan(0n);
     } else {
       expect.assertions(1);
       console.warn(
@@ -164,7 +164,7 @@ describe(`Wallet should function in the browser`, () => {
         const alice = await TestNetWallet.named("alice");
         return alice.getBalance("sat");
       }, process.env.ALICE_TESTNET_ADDRESS);
-      expect(result).toBe(0);
+      expect(result).toBe(0n);
     } else {
       expect.assertions(1);
       console.warn(
@@ -235,13 +235,12 @@ describe(`Wallet should function in the browser`, () => {
       await alice.send([
         {
           cashaddr: bob.cashaddr,
-          value: 3000,
-          unit: "sat",
+          value: 3000n,
         },
       ]);
       return bob.sendMax(alice.cashaddr);
     }, process.env.PRIVATE_WIF);
-    expect(result.balance.sat).toBe(0);
+    expect(result.balance.sat).toBe(0n);
   });
 
   test("Store and replace a Regtest wallet", async () => {
@@ -298,7 +297,7 @@ describe(`Wallet should function in the browser`, () => {
           getBalance: true,
           getTransactionInfo: true,
         });
-        expect(result.balance.sat).toBeGreaterThan(0);
+        expect(result.balance.sat).toBeGreaterThan(0n);
         expect(result.transactionInfo.hash.length).toBe(64);
         waitTxResult = true;
       }, 0);
@@ -306,7 +305,7 @@ describe(`Wallet should function in the browser`, () => {
       let waitBalanceResult = false;
       setTimeout(async () => {
         const result = await alice.waitForBalance(0.001, "bch");
-        expect(result.sat).toBeGreaterThan(0);
+        expect(result.sat).toBeGreaterThan(0n);
         waitBalanceResult = true;
       }, 0);
 
@@ -363,8 +362,7 @@ describe(`Wallet should function in the browser`, () => {
 
       await alice.send({
         cashaddr: bob.getDepositAddress(),
-        value: 0.001,
-        unit: "bch",
+        value: BigInt(await convert(0.001, "bch", "sat")),
       });
 
       //! mining not supported in browser

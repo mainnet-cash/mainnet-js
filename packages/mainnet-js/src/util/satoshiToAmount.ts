@@ -12,27 +12,21 @@ import { sanitizeUnit } from "../util/sanitizeUnit.js";
  * @returns a promise to the value in the unit of account given by rawUnit
  */
 export async function satoshiToAmount(
-  value: number,
+  value: bigint,
   rawUnit: any
 ): Promise<number> {
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
     case UnitEnum.BCH:
-      return value / bchParam.subUnits;
-    case UnitEnum.SATOSHI:
-      return value;
+      return Number(value) / Number(bchParam.subUnits);
     case UnitEnum.SAT:
-      return value;
-    case UnitEnum.SATS:
-      return value;
-    case UnitEnum.SATOSHIS:
-      return value;
+      return Number(value);
     default:
       const Currency_over_BCH = await ExchangeRate.get(rawUnit);
       // truncate currency amounts to fixed precision (2),
       // then return the fixed value string as a float.
       const currencyValue = Number(
-        value * (Currency_over_BCH / bchParam.subUnits)
+        Number(value) * (Currency_over_BCH / Number(bchParam.subUnits))
       ).toFixed(2);
       return Number.parseFloat(currencyValue);
   }

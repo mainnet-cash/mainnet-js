@@ -1060,16 +1060,8 @@ components:
           description: Unit of account.
           enum:
           - bch
-          - BCH
           - usd
-          - USD
-          - bit
-          - bits
           - sat
-          - SAT
-          - sats
-          - satoshi
-          - satoshis
           example: sat
           type: string
     Utxo:
@@ -1138,16 +1130,8 @@ components:
           description: Unit of account for running balance.
           enum:
           - bch
-          - BCH
           - usd
-          - USD
-          - bit
-          - bits
           - sat
-          - SAT
-          - sats
-          - satoshi
-          - satoshis
           example: sat
           type: string
         fromHeight:
@@ -1220,9 +1204,9 @@ components:
           $ref: '#/components/schemas/Token'
     TokenAmountChange:
       example:
-        amount: 7.061401241503109
+        amount: 9.301444243932576
         tokenId: tokenId
-        nftAmount: 9.301444243932576
+        nftAmount: 3.616076749251911
       properties:
         tokenId:
           description: "Token unique hexadecimal identifier, also the id of the token\
@@ -1251,8 +1235,8 @@ components:
             capability: none
             tokenId: tokenId
             commitment: commitment
-        size: 1.4658129805029452
-        balance: 5.637376656633329
+        size: 5.962133916683182
+        balance: 2.3021358869347655
         inputs:
         - address: address
           value: 0.8008281904610115
@@ -1268,18 +1252,18 @@ components:
             capability: none
             tokenId: tokenId
             commitment: commitment
-        valueChange: 2.3021358869347655
-        fee: 5.962133916683182
+        valueChange: 7.061401241503109
+        fee: 5.637376656633329
         hash: hash
-        blockheight: 6.027456183070403
+        blockheight: 1.4658129805029452
         timestamp: timestamp
         tokenAmountChanges:
-        - amount: 7.061401241503109
+        - amount: 9.301444243932576
           tokenId: tokenId
-          nftAmount: 9.301444243932576
-        - amount: 7.061401241503109
+          nftAmount: 3.616076749251911
+        - amount: 9.301444243932576
           tokenId: tokenId
-          nftAmount: 9.301444243932576
+          nftAmount: 3.616076749251911
       properties:
         inputs:
           items:
@@ -1317,7 +1301,7 @@ components:
           type: array
     SendRequestItem:
       anyOf:
-      - description: "Send request in array form ['cashadr', 100, 'sats']"
+      - description: "Send request in array form ['cashadr', 100]"
         items:
           anyOf:
           - type: string
@@ -1584,32 +1568,16 @@ components:
           description: Provided value unit of account.
           enum:
           - bch
-          - BCH
           - usd
-          - USD
-          - bit
-          - bits
           - sat
-          - SAT
-          - sats
-          - satoshi
-          - satoshis
           example: bch
           type: string
         to:
           description: Unit of account to be returned
           enum:
           - bch
-          - BCH
           - usd
-          - USD
-          - bit
-          - bits
           - sat
-          - SAT
-          - sats
-          - satoshi
-          - satoshis
           example: usd
           type: string
       required:
@@ -1973,7 +1941,6 @@ components:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         to:
-          unit: sat
           cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
           value: 1000
       properties:
@@ -2633,7 +2600,6 @@ components:
           type: number
       required:
       - cashaddr
-      - unit
       - value
       type: object
       example: null

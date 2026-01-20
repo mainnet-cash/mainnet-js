@@ -28,21 +28,11 @@ export type SendRequestType =
 
 export class SendRequest {
   cashaddr: string;
-  value: number;
-  unit: UnitEnum;
+  value: bigint;
 
-  constructor({
-    cashaddr,
-    value,
-    unit,
-  }: {
-    cashaddr: string;
-    value: number;
-    unit: UnitEnum;
-  }) {
+  constructor({ cashaddr, value }: { cashaddr: string; value: bigint }) {
     this.cashaddr = cashaddr;
-    this.value = value;
-    this.unit = sanitizeUnit(unit);
+    this.value = BigInt(value);
   }
 }
 
@@ -51,7 +41,7 @@ export class TokenGenesisRequest {
   capability?: NFTCapability;
   commitment?: string;
   cashaddr?: string;
-  value?: number; // satoshi value
+  value?: bigint; // satoshi value
 
   constructor({
     amount,
@@ -64,7 +54,7 @@ export class TokenGenesisRequest {
     capability?: NFTCapability;
     commitment?: string;
     cashaddr?: string;
-    value?: number;
+    value?: bigint;
   }) {
     this.amount = amount;
     this.capability = capability;
@@ -104,7 +94,7 @@ export class TokenBurnRequest {
 
 export class TokenSendRequest {
   cashaddr: string; // cashaddr or tokenaddr to send tokens to
-  value?: number; // satoshi value
+  value?: bigint; // satoshi value
   amount: bigint; // fungible token amount
   tokenId: string;
   capability?: NFTCapability;
@@ -119,8 +109,8 @@ export class TokenSendRequest {
     commitment,
   }: {
     cashaddr: string;
-    value?: number;
-    amount?: number | bigint;
+    value?: bigint;
+    amount?: bigint;
     tokenId: string;
     capability?: NFTCapability;
     commitment?: string;
@@ -140,7 +130,7 @@ export class TokenMintRequest {
   capability?: NFTCapability;
   commitment?: string;
   cashaddr?: string;
-  value?: number;
+  value?: bigint;
 
   constructor({
     capability,
@@ -151,7 +141,7 @@ export class TokenMintRequest {
     capability?: NFTCapability;
     commitment?: string;
     cashaddr?: string;
-    value?: number;
+    value?: bigint;
   }) {
     this.capability = capability;
     this.commitment = commitment;
@@ -294,7 +284,7 @@ export class OpReturnData {
   }
 }
 
-export type SendRequestArray = Array<string | number | UnitEnum | Uint8Array>;
+export type SendRequestArray = Array<string | bigint | UnitEnum | Uint8Array>;
 
 export type SourceOutput = Input & Output;
 
@@ -346,14 +336,12 @@ export class XPubKey {
 export const fromUtxoId = (utxoId: string): UtxoId => {
   const [txid, vout, satoshis] = utxoId.split(DELIMITER);
   return {
-    satoshis: satoshis ? parseInt(satoshis) : 0,
+    satoshis: satoshis ? BigInt(parseInt(satoshis)) : 0n,
     vout: parseInt(vout),
     txid,
   } as UtxoId;
 };
 
 export const toUtxoId = (utxo: UtxoId): string => {
-  return [utxo.txid, utxo.vout, utxo.satoshis]
-    .join(DELIMITER)
-    .replace(/:+$/, "");
+  return [utxo.txid, utxo.vout].join(DELIMITER).replace(/:+$/, "");
 };
