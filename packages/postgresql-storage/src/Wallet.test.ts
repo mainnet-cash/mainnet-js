@@ -1,12 +1,18 @@
-import { BaseWallet, convert, WalletTypeEnum } from "mainnet-js";
-import { UnitEnum } from "mainnet-js";
-import { Wallet, RegTestWallet, TestNetWallet } from "mainnet-js";
-import { createWallet } from "mainnet-js";
-import { BalanceResponse } from "mainnet-js";
-import { ExchangeRate } from "mainnet-js";
-import { initProviders, disconnectProviders } from "mainnet-js";
-import { toUtxoId } from "mainnet-js";
-import { Config } from "mainnet-js";
+import {
+  BaseWallet,
+  initProviders,
+  disconnectProviders,
+  RegTestWallet,
+  TestNetWallet,
+  Wallet,
+  createWallet,
+  WalletTypeEnum,
+  toBch,
+  toUtxoId,
+  ExchangeRate,
+  convert,
+  Config,
+} from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider.js";
 
 BaseWallet.StorageProvider = SqlProvider;
@@ -23,10 +29,8 @@ describe(`Test Wallet library`, () => {
     let alice = await RegTestWallet.newRandom("alice_random");
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
-    const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-    expect(aliceBalance.bch).toBe(0);
-    expect(aliceBalance.usd).toBe(0);
-    expect(await alice.getBalance("sat")).toBe(0n);
+    const aliceBalance = await alice.getBalance();
+    expect(aliceBalance).toBe(0n);
   });
 
   test("Should get the regtest wallet balance", async () => {
@@ -36,9 +40,9 @@ describe(`Test Wallet library`, () => {
     } else {
       let alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(5000n * 100000000n);
+      const aliceBalance = await alice.getBalance();
+      expect(toBch(aliceBalance)).toBeGreaterThan(5000);
+      expect(aliceBalance).toBeGreaterThan(5000n * 100000000n);
     }
   });
 
@@ -105,7 +109,7 @@ describe(`Test Wallet library`, () => {
       let alice = await RegTestWallet.fromId(
         `wif:regtest:${process.env.PRIVATE_WIF}`
       ); // insert WIF from #1
-      expect(await alice.getBalance("sat")).toBeGreaterThan(5000n * 100000000n);
+      expect(await alice.getBalance()).toBeGreaterThan(5000n * 100000000n);
     }
   });
 
@@ -126,10 +130,10 @@ describe(`Test Wallet library`, () => {
         },
       ]);
       expect(sendResponse!.txId!.length).toBe(64);
-      expect(sendResponse.balance!.bch).toBeGreaterThan(0.01);
+      expect(toBch(sendResponse.balance!)).toBeGreaterThan(0.01);
       // Build Bob's wallet from a public address, check his balance.
-      const bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(1100n);
+      const bobBalance = await bob.getBalance();
+      expect(bobBalance).toBe(1100n);
     }
   });
 
@@ -167,8 +171,8 @@ describe(`Test Wallet library`, () => {
           value: 10001n,
         },
       ]);
-      let bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(22003n);
+      let bobBalance = await bob.getBalance();
+      expect(bobBalance).toBe(22003n);
       let bobUtxos = await bob.getUtxos();
       expect(bobUtxos.length).toBe(4);
 
@@ -189,8 +193,8 @@ describe(`Test Wallet library`, () => {
         ],
         { utxoIds: oddUtxoIds }
       );
-      expect(sendResponse2.balance!.sat).toBe(19967n);
-      expect(await charlie.getBalance("sat")).toBe(1675n);
+      expect(sendResponse2.balance!).toBe(19967n);
+      expect(await charlie.getBalance()).toBe(1675n);
     }
   });
 
@@ -231,8 +235,8 @@ describe(`Test Wallet library`, () => {
           changeAddress: charlie.cashaddr!,
         }
       );
-      expect(await bob.getBalance("sat")).toBe(1000n);
-      expect(await charlie.getBalance("sat")).toBe(1780n);
+      expect(await bob.getBalance()).toBe(1000n);
+      expect(await charlie.getBalance()).toBe(1780n);
     }
   });
 
@@ -264,8 +268,8 @@ describe(`Test Wallet library`, () => {
           value: 1001n,
         },
       ]);
-      let bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(3002n);
+      let bobBalance = await bob.getBalance();
+      expect(bobBalance).toBe(3002n);
       let bobUtxos = await bob.getUtxos();
       expect(bobUtxos.length).toBe(3);
 
@@ -280,8 +284,8 @@ describe(`Test Wallet library`, () => {
       let sendResponse2 = await bob.sendMax(charlie.cashaddr!, {
         utxoIds: oddUtxoIds,
       });
-      expect(sendResponse2.balance!.sat).toBe(1000n);
-      expect(await charlie.getBalance("sat")).toBeGreaterThan(1500n);
+      expect(sendResponse2.balance!).toBe(1000n);
+      expect(await charlie.getBalance()).toBeGreaterThan(1500n);
     }
   });
 
@@ -300,9 +304,11 @@ describe(`Test Wallet library`, () => {
         [bob.cashaddr!, BigInt(await convert(usdRate, "Usd", "Sat"))],
       ]);
       // Build Bob's wallet from a public address, check his balance.
-      const bobBalance = (await bob.getBalance()) as BalanceResponse;
+      const bobBalance = await bob.getBalance();
 
-      expect(Math.round(bobBalance.usd!)).toBe(Math.round(usdRate));
+      expect(Math.floor(await convert(Number(bobBalance), "sat", "usd"))).toBe(
+        Math.floor(usdRate)
+      );
     }
   });
 
@@ -328,8 +334,8 @@ describe(`Test Wallet library`, () => {
       const bobBalance = await bob.getBalance();
       // Build Bob's wallet from a public address, check his balance.
       const charlieBalance = await charlie.getBalance();
-      expect(bobBalance.sat).toBe(0n);
-      expect(charlieBalance.sat).toBe(734n);
+      expect(bobBalance).toBe(0n);
+      expect(charlieBalance).toBe(734n);
     }
   });
 
@@ -344,18 +350,16 @@ describe(`Test Wallet library`, () => {
       });
       await alice.send([[bob.cashaddr!, 1200n]]);
       // Build Bob's wallet from a public address, check his balance.
-      const bobBalance = (await bob.getBalance()) as BalanceResponse;
-      expect(bobBalance.sat).toBe(1200n);
+      const bobBalance = await bob.getBalance();
+      expect(bobBalance).toBe(1200n);
     }
   });
 
   test("Should get a random testnet wallet", async () => {
     let alice = await TestNetWallet.newRandom();
-    const aliceBalance = (await alice.getBalance()) as BalanceResponse;
+    const aliceBalance = await alice.getBalance();
     expect(alice.cashaddr!.slice(0, 9)).toBe("bchtest:q");
-    expect(aliceBalance.bch).toBe(0);
-    expect(aliceBalance.usd).toBe(0);
-    expect(await alice.getBalance("sat")).toBe(0n);
+    expect(aliceBalance).toBe(0n);
   });
 
   test("Send a transaction on regtest, send it back", async () => {
@@ -388,8 +392,8 @@ describe(`Test Wallet library`, () => {
     expect(sendMaxResponse.txId!.length).toBe(64);
 
     //
-    const bobBalanceFinal = (await bob.getBalance()) as BalanceResponse;
-    expect(bobBalanceFinal.sat).toBe(0n);
+    const bobBalanceFinal = await bob.getBalance();
+    expect(bobBalanceFinal).toBe(0n);
   });
 
   test("Send all coins back on regtest", async () => {
@@ -441,17 +445,17 @@ describe(`Test Wallet library`, () => {
     // Send ALL of Bob's coins to Charlie.
     const sendMaxResponse = await bob.sendMax(charlie.cashaddr!);
     expect(sendMaxResponse.txId!.length).toBe(64);
-    expect(sendMaxResponse.balance!.sat!).toBe(0n);
+    expect(sendMaxResponse.balance!).toBe(0n);
 
-    const bobFinalBalance = await bob.getBalance("sat");
+    const bobFinalBalance = await bob.getBalance();
     expect(bobFinalBalance).toBe(0n);
 
     // Send ALL of Charlie's coins to Alice.
     const sendMaxResponse2 = await charlie.sendMax(alice.cashaddr);
     expect(sendMaxResponse2.txId!.length).toBe(64);
-    expect(sendMaxResponse2.balance!.sat!).toBe(0n);
+    expect(sendMaxResponse2.balance!).toBe(0n);
 
-    const charlieFinalBalance = await charlie.getBalance("sat");
+    const charlieFinalBalance = await charlie.getBalance();
     expect(charlieFinalBalance).toBe(0n);
   });
 

@@ -1,3 +1,4 @@
+import { bchParam } from "../chain.js";
 import { amountInSatoshi } from "./amountInSatoshi.js";
 import { satoshiToAmount } from "./satoshiToAmount.js";
 
@@ -29,4 +30,21 @@ export async function convertObject({
   to: any;
 }) {
   return await convert(value, from, to);
+}
+
+// sats -> bch
+export function toBch(sats: bigint): number {
+  return Number(sats) / Number(bchParam.subUnits);
+}
+
+// bch -> sats
+export function toSat(bch: string | number): bigint {
+  return BigInt(Math.round(Number(bch) * Number(bchParam.subUnits)));
+}
+
+export async function toCurrency(
+  sats: bigint,
+  currency: string
+): Promise<number> {
+  return convert(Number(sats), "sat", currency);
 }

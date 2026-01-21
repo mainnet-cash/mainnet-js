@@ -73,7 +73,7 @@ describe("Rpc tests", () => {
 
     let result = false;
     aliceWallet.watchBalance((balance) => {
-      expect(balance.bch).toBeGreaterThan(0);
+      expect(balance).toBeGreaterThan(0);
       result = true;
       // stop watching
       return true;

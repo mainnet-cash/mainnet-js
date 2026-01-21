@@ -3,7 +3,6 @@ import {
   SendRequest,
   TokenSendRequest,
 } from "../wallet/model.js";
-import { amountInSatoshi } from "./amountInSatoshi.js";
 
 // This function sums a list of send request objects
 export async function sumSendRequestAmounts(

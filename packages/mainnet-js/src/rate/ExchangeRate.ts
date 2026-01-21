@@ -137,4 +137,6 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
 
 // do not await and do not throw in case we are offline
 // this promise can be used to warm up the cache
-export const ExchageRatePromise = ExchangeRate.get("usd").catch(() => {});
+export const ExchageRatePromise = ExchangeRate.get(Config.DefaultCurrency)
+  .then((result) => result)
+  .catch((error: Error) => error);

@@ -142,7 +142,6 @@ describe("Test Wallet BCMR Endpoints", () => {
       {
         cashaddr: bobCashaddr,
         value: 10000,
-        unit: "sat",
       }, {
         dataBuffer: binToBase64(opreturnData.buffer)
       }
@@ -222,7 +221,6 @@ describe("Test Wallet BCMR Endpoints", () => {
       {
         cashaddr: bobCashaddr,
         value: 10000,
-        unit: "sat",
       }, {
         dataBuffer: binToBase64(opreturnData.buffer)
       }
@@ -250,7 +248,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const response2 = (await request(app).post("/wallet/send").send({
       walletId: bobId,
       to: [
-      { cashaddr: bobCashaddr, value: 9500, unit: "sat" },
+      { cashaddr: bobCashaddr, value: 9500 },
       { dataBuffer: binToBase64(opreturnData2.buffer) },
     ]})).body;
 
@@ -282,7 +280,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const response3 = (await request(app).post("/wallet/send").send({
       walletId: bobId,
       to: [
-      { cashaddr: bobCashaddr, value: 9000, unit: "sat" },
+      { cashaddr: bobCashaddr, value: 9000 },
       { dataBuffer: binToBase64(opreturnData3.buffer) },
     ]})).body;
 
@@ -303,7 +301,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const response4 = (await request(app).post("/wallet/send").send({
       walletId: bobId,
       to: [
-      { cashaddr: bobCashaddr, value: 8500, unit: "sat" },
+      { cashaddr: bobCashaddr, value: 8500 },
       { dataBuffer: binToBase64(opreturnData4.buffer) },
     ]})).body;
 

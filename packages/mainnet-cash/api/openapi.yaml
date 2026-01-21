@@ -145,10 +145,31 @@ paths:
       responses:
         "200":
           content:
-            text/plain:
+            application/json:
               schema:
-                description: "If a unit of account is passed, a plain number is returned."
-                type: number
+                $ref: '#/components/schemas/ConvertResponse'
+          description: successful operation
+        "405":
+          content: {}
+          description: Invalid input
+      summary: convert between units
+      tags:
+      - util
+      x-eov-operation-handler: controllers/UtilController
+  /util/exchange_rate:
+    post:
+      operationId: exchangeRate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exchangeRate_request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exchangeRate_200_response'
           description: successful operation
         "405":
           content: {}
@@ -319,10 +340,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
-            text/plain:
-              schema:
-                description: "If a unit of account is passed, a plain number is returned."
-                type: number
           description: successful operation
       summary: Get total balance for wallet
       tags:
@@ -1584,6 +1601,16 @@ components:
       - from
       - to
       - value
+    ConvertResponse:
+      example:
+        value: 100
+      properties:
+        value:
+          description: Converted value
+          example: 100
+          type: number
+      required:
+      - value
     getAddrsByXpubKeyRequest:
       example:
         xpubkey: xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj
@@ -1817,23 +1844,12 @@ components:
           type: string
     BalanceResponse:
       example:
-        bch: 1
-        sat: 100000000
-        usd: 438.02
+        sat: "100000000"
       properties:
-        bch:
-          description: Amount in whole Bitcoin Cash
-          example: 1
-          format: float
-          type: number
         sat:
-          description: Amount in satoshis
-          example: 100000000
-          type: integer
-        usd:
-          description: Amount in United States Dollars
-          example: 438.02
-          type: number
+          description: "Amount in satoshis, as a string to avoid precision loss"
+          example: "100000000"
+          type: string
     MaxAmountToSendRequest:
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
@@ -1956,10 +1972,7 @@ components:
       type: object
     SendResponse:
       example:
-        balance:
-          bch: 1
-          sat: 100000000
-          usd: 438.02
+        balance: "99999000"
         explorerUrl: https://www.blockchain.com/bch-testnet/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
         tokenIds:
@@ -1971,7 +1984,9 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
         balance:
-          $ref: '#/components/schemas/BalanceResponse'
+          description: Balance in satoshis in string format to avoid precision loss
+          example: "99999000"
+          type: string
         explorerUrl:
           description: Web url to a transaction on a block explorer
           example: https://www.blockchain.com/bch-testnet/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
@@ -2002,31 +2017,10 @@ components:
       required:
       - cashaddr
       - walletId
-    ZeroBalanceResponse:
-      example:
-        bch: 0
-        sat: 0
-        usd: 0
-      properties:
-        bch:
-          description: Amount in whole Bitcoin Cash
-          example: 0
-          format: float
-          type: number
-        sat:
-          description: Amount in satoshis
-          example: 0
-          type: integer
-        usd:
-          description: Amount in United States Dollars
-          example: 0
-          type: number
     SendMaxResponse:
       example:
         balance:
-          bch: 0
-          sat: 0
-          usd: 0
+          sat: "100000000"
         txId: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
       properties:
         txId:
@@ -2034,7 +2028,7 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           type: string
         balance:
-          $ref: '#/components/schemas/ZeroBalanceResponse'
+          $ref: '#/components/schemas/BalanceResponse'
       type: object
     EncodeTransactionRequest:
       example:
@@ -2443,6 +2437,26 @@ components:
       items:
         $ref: '#/components/schemas/AuthChainElement'
       type: array
+    exchangeRate_request:
+      properties:
+        symbol:
+          description: The currency symbol to get the exchange rate for.
+          example: usd
+          type: string
+      required:
+      - symbol
+      type: object
+    exchangeRate_200_response:
+      example:
+        value: 250.34
+      properties:
+        value:
+          description: The exchange rate for the specified currency symbol.
+          example: 250.34
+          type: number
+      required:
+      - value
+      type: object
     getTokenUtxos_request:
       properties:
         walletId:

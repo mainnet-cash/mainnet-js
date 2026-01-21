@@ -142,7 +142,7 @@ describe("HDWallet", () => {
     );
 
     const hdWallet = await RegTestHDWallet.newRandom();
-    expect(await hdWallet.getBalance("sat")).toBe(0n);
+    expect(await hdWallet.getBalance()).toBe(0n);
 
     const depositAddress = hdWallet.getDepositAddress();
     await fundingWallet.send({
@@ -150,7 +150,7 @@ describe("HDWallet", () => {
       value: 100000n,
     });
 
-    expect(await hdWallet.getBalance("sat")).toBe(100000n);
+    expect(await hdWallet.getBalance()).toBe(100000n);
 
     const depositAddress2 = hdWallet.getDepositAddress();
     expect(depositAddress).not.toBe(depositAddress2);
@@ -161,28 +161,28 @@ describe("HDWallet", () => {
       value: 100000n,
     });
 
-    expect(await hdWallet.getBalance("sat")).toBe(200000n);
+    expect(await hdWallet.getBalance()).toBe(200000n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(0))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(100000n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(1))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(100000n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(2))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(0n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getChangeAddress(0))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(0n);
 
     const bob = await RegTestWallet.newRandom();
@@ -195,23 +195,23 @@ describe("HDWallet", () => {
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(0))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(0n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(1))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(0n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(2))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBe(0n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getChangeAddress(0))
-      ).getBalance("sat")
+      ).getBalance()
     ).toBeGreaterThan(50000n - 1000n);
 
     expect(hdWallet.getChangeAddress()).not.toBe(hdWallet.getChangeAddress(0));
@@ -220,16 +220,16 @@ describe("HDWallet", () => {
     expect(hdWallet.depositIndex).toBe(2);
     expect(hdWallet.changeIndex).toBe(1);
 
-    expect(await bob.getBalance("sat")).toBe(150000n);
+    expect(await bob.getBalance()).toBe(150000n);
 
-    expect(await hdWallet.getBalance("sat")).toBe(49639n); // minus fees
+    expect(await hdWallet.getBalance()).toBe(49639n); // minus fees
 
-    expect((await hdWallet.getMaxAmountToSend()).sat).toBe(49441n);
+    expect(await hdWallet.getMaxAmountToSend()).toBe(49407n);
     const charlie = await RegTestWallet.newRandom();
     await hdWallet.sendMax(charlie.cashaddr);
 
-    expect(await charlie.getBalance("sat")).toBe(49441n);
-    expect(await hdWallet.getBalance("sat")).toBe(0n);
+    expect(await charlie.getBalance()).toBe(49407n);
+    expect(await hdWallet.getBalance()).toBe(0n);
   });
 
   it("Should build unsigned transactions from an HDWallet", async () => {
@@ -238,7 +238,7 @@ describe("HDWallet", () => {
     );
 
     const hdWallet = await RegTestHDWallet.newRandom();
-    expect(await hdWallet.getBalance("sat")).toBe(0n);
+    expect(await hdWallet.getBalance()).toBe(0n);
 
     const depositAddress = hdWallet.getDepositAddress();
     await fundingWallet.send({
@@ -246,7 +246,7 @@ describe("HDWallet", () => {
       value: 100000n,
     });
 
-    expect(await hdWallet.getBalance("sat")).toBe(100000n);
+    expect(await hdWallet.getBalance()).toBe(100000n);
 
     const unsignedTx = await hdWallet.send(
       {

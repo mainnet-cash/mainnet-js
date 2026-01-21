@@ -1,7 +1,6 @@
 import SqlProvider from "../SqlProvider.js";
 import { CancelFn, TxI } from "mainnet-js";
 import { ElectrumRawTransaction } from "mainnet-js";
-import { balanceResponseFromSatoshi } from "mainnet-js";
 import { WatchWallet } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
 import WebhookWorker from "./WebhookWorker.js";
@@ -147,10 +146,7 @@ export class WebhookBch extends Webhook {
         const balanceSat = await this.wallet.provider!.getBalance(
           this.cashaddr
         );
-        const balanceObject = await balanceResponseFromSatoshi(
-          BigInt(balanceSat)
-        );
-        result = await this.post(balanceObject);
+        result = await this.post({ sat: balanceSat.toString() });
       }
 
       if (result) {

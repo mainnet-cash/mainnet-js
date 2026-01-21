@@ -1,7 +1,7 @@
 import { binToHex, CashAddressNetworkPrefix } from "@bitauth/libauth";
 import { WalletCache } from "../cache/walletCache.js";
 import StorageProvider from "../db/StorageProvider.js";
-import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
+import { NetworkType, prefixFromNetworkMap } from "../enum.js";
 import { HexHeaderI, NFTCapability, TxI, Utxo, UtxoId } from "../interface.js";
 import {
   SignedMessageResponseI,
@@ -18,21 +18,14 @@ import {
   getSuitableUtxos,
   placeholderPrivateKeyBin,
 } from "../transaction/Wif.js";
-import {
-  balanceFromSatoshi,
-  BalanceResponse,
-  balanceResponseFromSatoshi,
-} from "../util/balanceObjectFromSatoshi.js";
 import { checkUtxos } from "../util/checkUtxos.js";
 import {
-  amountInSatoshi,
   asSendRequestObject,
   getRuntimePlatform,
   sumTokenAmounts,
   sumUtxoValue,
   toTokenaddr,
 } from "../util/index.js";
-import { sanitizeUnit } from "../util/sanitizeUnit.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 import {
@@ -412,27 +405,9 @@ export class BaseWallet implements WalletI {
     throw Error("getUtxos not implemented in BaseWallet");
   }
 
-  // gets wallet balance in sats, bch and currency
-  // if rawUnit is provided, returns balance in that unit
-  public async getBalance<T extends string | undefined = undefined>(
-    rawUnit?: T,
-    priceCache = true
-  ): Promise<
-    T extends undefined ? BalanceResponse : T extends "sat" ? bigint : number
-  > {
-    if (rawUnit) {
-      const unit = sanitizeUnit(rawUnit);
-      return (await balanceFromSatoshi(
-        await this.getBalanceFromProvider(),
-        unit,
-        priceCache
-      )) as any;
-    } else {
-      return (await balanceResponseFromSatoshi(
-        await this.getBalanceFromProvider(),
-        priceCache
-      )) as any;
-    }
+  // gets wallet balance in sats
+  public async getBalance(): Promise<bigint> {
+    return this.getBalanceFromProvider();
   }
 
   // Gets balance by summing value in all utxos in stats
@@ -491,65 +466,28 @@ export class BaseWallet implements WalletI {
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
   public async watchBalance(
-    callback: (balance: BalanceResponse) => void
+    callback: (balance: bigint) => void
   ): Promise<CancelFn> {
     return this.provider.watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
-        const balance = await this.getBalance();
+        const balance = await this.getBalanceFromProvider();
         callback(balance);
       }
     );
-  }
-
-  // sets up a callback to be called upon wallet's BCH or USD balance change
-  // if BCH balance does not change, the callback will be triggered every
-  // @param `usdPriceRefreshInterval` milliseconds by polling for new BCH USD price
-  // Since we want to be most sensitive to usd value change, we do not use the cached exchange rates
-  // can be cancelled by calling the function returned from this one
-  public async watchBalanceUsd(
-    callback: (balance: BalanceResponse) => void,
-    usdPriceRefreshInterval = 30000
-  ): Promise<CancelFn> {
-    let usdPrice = -1;
-
-    const _callback = async () => {
-      const balance = await this.getBalance(undefined, false);
-      if (usdPrice !== balance.usd!) {
-        usdPrice = balance.usd;
-        callback(balance);
-      }
-    };
-
-    const watchCancel = await this.provider.watchAddressStatus(
-      this.getDepositAddress(),
-      _callback
-    );
-    const interval = setInterval(_callback, usdPriceRefreshInterval);
-
-    return async () => {
-      await watchCancel?.();
-      clearInterval(interval);
-    };
   }
 
   // waits for address balance to be greater than or equal to the target value
   // this call halts the execution
-  public async waitForBalance(
-    value: number,
-    rawUnit: UnitEnum = UnitEnum.BCH
-  ): Promise<BalanceResponse> {
+  public async waitForBalance(value: bigint): Promise<bigint> {
     return new Promise(async (resolve) => {
       let watchCancel: CancelFn;
-      watchCancel = await this.watchBalance(
-        async (balance: BalanceResponse) => {
-          const satoshiBalance = await amountInSatoshi(value, rawUnit);
-          if (balance.sat! >= satoshiBalance) {
-            await watchCancel?.();
-            resolve(balance);
-          }
+      watchCancel = await this.watchBalance(async (balance: bigint) => {
+        if (balance >= value) {
+          await watchCancel?.();
+          resolve(balance);
         }
-      );
+      });
     });
   }
 
@@ -671,10 +609,10 @@ export class BaseWallet implements WalletI {
       outputCount: 1,
       options: {},
     }
-  ): Promise<BalanceResponse> {
+  ): Promise<bigint> {
     const { value: result } = await this._getMaxAmountToSend(params);
 
-    return await balanceResponseFromSatoshi(result);
+    return result;
   }
 
   /**

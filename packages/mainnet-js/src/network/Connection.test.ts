@@ -14,7 +14,7 @@ test("Should connect to mainnet", async () => {
 
   let wallet = await Wallet.newRandom();
   expect(wallet.provider == globalThis.BCH).toBeTruthy();
-  expect(await wallet.getBalance("sat")).toBe(0n);
+  expect(await wallet.getBalance()).toBe(0n);
 
   let height = await globalThis.BCH.getBlockHeight();
   expect(height).toBeGreaterThan(5000);
@@ -23,7 +23,7 @@ test("Should connect to mainnet", async () => {
 test("Should use global provider when creating testnet wallet", async () => {
   let wallet = await TestNetWallet.newRandom();
   expect(wallet.provider == globalThis.tBCH).toBeTruthy();
-  expect(await wallet.getBalance("sat")).toBe(0n);
+  expect(await wallet.getBalance()).toBe(0n);
 
   let height = await globalThis.tBCH.getBlockHeight();
   expect(height).toBeGreaterThan(114);
@@ -34,7 +34,7 @@ test.skip("Should lower overhead in creating wallets", async () => {
   for (let i = 0; i < 100; i++) {
     let wallet = await RegTestWallet.newRandom();
     expect(wallet.provider == globalThis.rBCH).toBeTruthy();
-    expect(await wallet.getBalance("sat")).toBe(0);
+    expect(await wallet.getBalance()).toBe(0n);
   }
 
   let height = await globalThis.rBCH.getBlockHeight();

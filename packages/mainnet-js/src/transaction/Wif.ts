@@ -468,9 +468,7 @@ export async function getFeeAmountSimple({
   );
 
   const outputSize = (sendRequest: SendRequestType) => {
-    if (sendRequest.hasOwnProperty("unit")) {
-      return outputSizeP2pkh;
-    } else if (sendRequest.hasOwnProperty("tokenId")) {
+    if (sendRequest.hasOwnProperty("tokenId")) {
       const tokenRequest = sendRequest as TokenSendRequest;
       return (
         outputSizeP2pkh +
@@ -481,9 +479,9 @@ export async function getFeeAmountSimple({
       );
     } else if (sendRequest.hasOwnProperty("buffer")) {
       return 9 + (sendRequest as OpReturnData).buffer.length;
+    } else {
+      return outputSizeP2pkh;
     }
-
-    return 0;
   };
 
   const outputTotalSize =

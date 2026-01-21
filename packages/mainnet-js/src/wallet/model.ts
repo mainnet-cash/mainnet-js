@@ -1,7 +1,4 @@
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
-import { sanitizeUnit } from "../util/sanitizeUnit.js";
-import { UnitEnum } from "../enum.js";
-import { NFTCapability, Utxo, UtxoId } from "../interface.js";
+import { NFTCapability, UtxoId } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import {
   Input,
@@ -284,13 +281,13 @@ export class OpReturnData {
   }
 }
 
-export type SendRequestArray = Array<string | bigint | UnitEnum | Uint8Array>;
+export type SendRequestArray = Array<string | bigint | Uint8Array>;
 
 export type SourceOutput = Input & Output;
 
 export class SendResponse {
   txId?: string;
-  balance?: BalanceResponse;
+  balance?: bigint;
   explorerUrl?: string;
   tokenIds?: string[];
   unsignedTransaction?: string; // unsigned transaction hex

@@ -46,7 +46,7 @@ const getTestnetBch = ({ getTestnetBchRequest }) => new Promise(
         throw new Error("Incorrect cashaddr");
 
       const receiverWallet = await mainnet.TestNetWallet.watchOnly(getTestnetBchRequest.cashaddr);
-      const receiverBalance = await receiverWallet.slpSemiAware().getBalance("sat");
+      const receiverBalance = await receiverWallet.slpSemiAware().getBalance();
       const diff = 10000n - receiverBalance;
       if (diff <= 0n)
         throw new Error("You have 10000 sats or more. Refusing to refill.");

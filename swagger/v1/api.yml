@@ -140,10 +140,44 @@ paths:
       responses:
         '200':
           content:
-            text/plain:
+            application/json:
               schema:
-                type: number
-                description: If a unit of account is passed, a plain number is returned.
+                $ref: '#/components/schemas/ConvertResponse'
+          description: successful operation
+        '405':
+          content: {}
+          description: Invalid input
+      summary: convert between units
+      tags:
+        - util
+  /util/exchange_rate:
+    post:
+      operationId: exchangeRate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                symbol:
+                  type: string
+                  example: usd
+                  description: The currency symbol to get the exchange rate for.
+              required:
+                - symbol
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: number
+                    example: 250.34
+                    description: The exchange rate for the specified currency symbol.
+                required:
+                  - value
           description: successful operation
         '405':
           content: {}
@@ -311,10 +345,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
-            text/plain:
-              schema:
-                type: number
-                description: If a unit of account is passed, a plain number is returned.
           description: successful operation
       summary: Get total balance for wallet
       tags:
@@ -1611,6 +1641,14 @@ components:
         - value
         - from
         - to
+    ConvertResponse:
+      properties:
+        value:
+          type: number
+          example: 100
+          description: Converted value
+      required:
+        - value
     getAddrsByXpubKeyRequest:
       example:
         xpubkey: >-
@@ -1842,19 +1880,10 @@ components:
           joy vague illegal angle:m/44'/0'/0'/0/0
     BalanceResponse:
       properties:
-        bch:
-          type: number
-          format: float
-          example: 1
-          description: Amount in whole Bitcoin Cash
         sat:
-          type: integer
-          example: 100000000
-          description: Amount in satoshis
-        usd:
-          type: number
-          example: 438.02
-          description: Amount in United States Dollars
+          type: string
+          example: "100000000"
+          description: Amount in satoshis, as a string to avoid precision loss
     MaxAmountToSendRequest:
       properties:
         walletId:
@@ -1981,7 +2010,9 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           description: The hash of a transaction
         balance:
-          $ref: '#/components/schemas/BalanceResponse'
+          type: string
+          example: "99999000"
+          description: Balance in satoshis in string format to avoid precision loss
         explorerUrl:
           type: string
           example: >-
@@ -2012,21 +2043,6 @@ components:
       required:
         - walletId
         - cashaddr
-    ZeroBalanceResponse:
-      properties:
-        bch:
-          type: number
-          format: float
-          example: 0
-          description: Amount in whole Bitcoin Cash
-        sat:
-          type: integer
-          example: 0
-          description: Amount in satoshis
-        usd:
-          type: number
-          example: 0
-          description: Amount in United States Dollars
     SendMaxResponse:
       properties:
         txId:
@@ -2034,7 +2050,7 @@ components:
           example: 1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           description: The hash of a transaction
         balance:
-          $ref: '#/components/schemas/ZeroBalanceResponse'
+          $ref: '#/components/schemas/BalanceResponse'
       type: object
     EncodeTransactionRequest:
       properties:

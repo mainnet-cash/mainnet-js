@@ -22,38 +22,6 @@ type Transaction = TransactionCommon & {
   hash: string;
 };
 
-// export type AddressTxI = TxI & {
-//   address: string;
-// }
-
-// export const getAddressHistory = async ({
-//   address,
-//   provider,
-//   unit = "sat",
-//   fromHeight = 0,
-//   toHeight = -1,
-//   start = 0,
-//   count = -1,
-// }: {
-//   address: string;
-//   provider: NetworkProvider;
-//   unit?: UnitEnum;
-//   fromHeight?: number;
-//   toHeight?: number;
-//   start?: number;
-//   count?: number;
-// }): Promise<TransactionHistoryItem[]> => {
-//   return getHistory({
-//     addresses: [address],
-//     provider,
-//     unit,
-//     fromHeight,
-//     toHeight,
-//     start,
-//     count,
-//   });
-// }
-
 export const getHistory = async ({
   addresses,
   provider,

@@ -29,12 +29,8 @@ const balance = ({ balanceRequest }) => new Promise(
       }
 
       // the balance unit may also be empty
-      let resp = await wallet.getBalance(balanceRequest.unit);
-      if (typeof resp === "number") {
-        resolve(Service.successResponse(resp.toString()));
-      } else {
-        resolve(Service.successResponse(resp));
-      }
+      let resp = await wallet.getBalance();
+      resolve(Service.successResponse({ sat: resp }));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -190,7 +186,7 @@ const maxAmountToSend = ({ maxAmountToSendRequest }) => new
     let args = maxAmountToSendRequest;
     delete args.walletId;
     let resp = await wallet.getMaxAmountToSend(args);
-    resolve(Service.successResponse({ ...resp }));
+    resolve(Service.successResponse({ sat: resp }));
   } catch (e) {
     reject(
       Service.rejectResponse(e, e.status || 500)

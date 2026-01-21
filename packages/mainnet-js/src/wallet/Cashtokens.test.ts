@@ -45,8 +45,8 @@ describe(`Test cashtokens`, () => {
     });
 
     const maxAmountToSend = await bob.getMaxAmountToSend();
-    await bob.send([[alice.cashaddr!, maxAmountToSend.sat!, "sat"]]);
-    expect(await bob.getBalance("sat")).toBe(0n);
+    await bob.send([[alice.cashaddr!, maxAmountToSend]]);
+    expect(await bob.getBalance()).toBe(0n);
   });
 
   test("Test tokens will not be burned when sending bch value", async () => {
@@ -73,7 +73,7 @@ describe(`Test cashtokens`, () => {
       }),
     ]);
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
-    expect(await bob.getBalance("sat")).toBe(5000n);
+    expect(await bob.getBalance()).toBe(5000n);
 
     await bob.send(
       new SendRequest({
@@ -82,11 +82,11 @@ describe(`Test cashtokens`, () => {
       })
     );
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
-    expect(await bob.getBalance("sat")).toBe(3780n);
+    expect(await bob.getBalance()).toBe(3780n);
 
     await bob.sendMax(alice.cashaddr!);
     expect(await bob.getTokenBalance(tokenId)).toBe(25n);
-    expect(await bob.getBalance("sat")).toBe(0n);
+    expect(await bob.getBalance()).toBe(0n);
   });
 
   test("Test fungible cashtoken genesis and sending", async () => {

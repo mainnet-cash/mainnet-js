@@ -120,7 +120,7 @@ describe(`Wallet should function in the browser`, () => {
       let w = await Wallet.newRandom();
       return w.getBalance();
     });
-    expect(result.sat).toBe(0n);
+    expect(result).toBe(0n);
   });
 
   test(`Should return deposit address from testnet wallet`, async () => {
@@ -146,7 +146,7 @@ describe(`Wallet should function in the browser`, () => {
       const result = await page.evaluate(async (addr) => {
         BaseWallet.StorageProvider = IndexedDBProvider;
         const alice = await TestNetWallet.watchOnly(addr);
-        return alice.getBalance("sat");
+        return alice.getBalance();
       }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result).toBeGreaterThan(0n);
     } else {
@@ -162,7 +162,7 @@ describe(`Wallet should function in the browser`, () => {
       const result = await page.evaluate(async (addr) => {
         BaseWallet.StorageProvider = IndexedDBProvider;
         const alice = await TestNetWallet.named("alice");
-        return alice.getBalance("sat");
+        return alice.getBalance();
       }, process.env.ALICE_TESTNET_ADDRESS);
       expect(result).toBe(0n);
     } else {
@@ -240,7 +240,7 @@ describe(`Wallet should function in the browser`, () => {
       ]);
       return bob.sendMax(alice.cashaddr);
     }, process.env.PRIVATE_WIF);
-    expect(result.balance.sat).toBe(0n);
+    expect(result.balance).toBe(0n);
   });
 
   test("Store and replace a Regtest wallet", async () => {
@@ -297,38 +297,26 @@ describe(`Wallet should function in the browser`, () => {
           getBalance: true,
           getTransactionInfo: true,
         });
-        expect(result.balance.sat).toBeGreaterThan(0n);
+        expect(result.balance).toBeGreaterThan(0n);
         expect(result.transactionInfo.hash.length).toBe(64);
         waitTxResult = true;
       }, 0);
 
       let waitBalanceResult = false;
       setTimeout(async () => {
-        const result = await alice.waitForBalance(0.001, "bch");
-        expect(result.sat).toBeGreaterThan(0n);
+        const result = await alice.waitForBalance(100000n);
+        expect(result).toBeGreaterThan(0n);
         waitBalanceResult = true;
       }, 0);
-
-      // let aliceWatchResult = false;
-      // const aliceWatchCancel = alice.watchAddressTransactions((_tx) => {
-      //   aliceWatchCancel();
-      //   aliceWatchResult = true;
-      // });
-
-      // let bobWatchResult = false;
-      // const bobWatchCancel = bob.watchAddress((_txHash) => {
-      //   bobWatchCancel();
-      //   bobWatchResult = true;
-      // });
 
       let bobBalanceWatchResult = false;
       const bobBalanceWatchCancel = await bob.watchBalance(async (balance) => {
         // skip if balance is zero yet
-        if (!balance.bch) {
+        if (!balance) {
           return;
         }
 
-        expect(balance.bch).toBe(0.001);
+        expect(balance).toBeGreaterThanOrEqual(100000n);
         await bobBalanceWatchCancel();
         bobBalanceWatchResult = true;
       });
@@ -362,7 +350,7 @@ describe(`Wallet should function in the browser`, () => {
 
       await alice.send({
         cashaddr: bob.getDepositAddress(),
-        value: BigInt(await convert(0.001, "bch", "sat")),
+        value: 100000n,
       });
 
       //! mining not supported in browser

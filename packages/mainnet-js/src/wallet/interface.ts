@@ -1,7 +1,6 @@
 import { WalletTypeEnum, FeePaidByEnum } from "./enum.js";
 import { NetworkEnum } from "../enum.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
 import { Utxo } from "../interface.js";
 
 export interface WalletRequestI {
@@ -83,7 +82,7 @@ export interface WalletI {
   // namedExists(name: string, dbName?: string): Promise<boolean>;
 
   // Funds
-  getBalance(rawUnit?: any): Promise<any>;
+  getBalance(): Promise<any>;
   getMaxAmountToSend(params?: any): Promise<any>;
   send(requests: any, options?: any): Promise<any>;
   sendMax(address: string, options?: any): Promise<any>;
@@ -97,7 +96,7 @@ export interface WaitForTransactionOptions {
 
 export interface WaitForTransactionResponse {
   transactionInfo?: ElectrumRawTransaction;
-  balance?: BalanceResponse;
+  balance?: bigint;
 }
 
 export type CancelFn = () => Promise<void>;
