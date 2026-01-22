@@ -356,8 +356,8 @@ export class Wallet extends BaseWallet {
       throw Error("refusing to create wallet from empty mnemonic");
     const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
     checkForEmptySeed(seed);
-    if (this.mnemonic.split(" ").length !== 12) {
-      throw Error("Invalid mnemonic");
+    if (![12, 24].includes(this.mnemonic.split(" ").length)) {
+      throw Error("Invalid mnemonic, must be 12 or 24 words");
     }
     const hdNode = deriveHdPrivateNodeFromSeed(seed, {
       assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false

@@ -32,7 +32,7 @@ describe(`Test bip39 edge cases`, () => {
         "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
       );
     } catch (e: any) {
-      expect(e.message).toBe(`Invalid mnemonic`);
+      expect(e.message).toBe(`Invalid mnemonic, must be 12 or 24 words`);
     }
   });
 
