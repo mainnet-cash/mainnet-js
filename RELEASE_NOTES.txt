@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+2.7.34
+
+* Allow for 24 words in seed phrases
+
 2.7.33
 
 * Thanks @rnbrady: Fix message_magic varint length encoding
