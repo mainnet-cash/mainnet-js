@@ -19,7 +19,7 @@ export default interface NetworkProvider {
    * @param cashaddr The CashAddress for which we wish to retrieve UTXOs.
    * @returns the balance.
    */
-  getBalance(cashaddr: string): Promise<number>;
+  getBalance(cashaddr: string): Promise<bigint>;
 
   /**
    * @returns The block header fetched at blockheight @param height.

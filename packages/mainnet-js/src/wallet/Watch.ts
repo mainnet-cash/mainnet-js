@@ -227,22 +227,16 @@ export class WatchWallet extends BaseWallet {
    *
    */
   public async getUtxos(): Promise<Utxo[]> {
-    return this.getAddressUtxos(this.cashaddr);
+    const bchUtxos: Utxo[] = await this.provider.getUtxos(this.cashaddr);
+    return this._slpSemiAware
+      ? bchUtxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
+      : bchUtxos;
   }
 
-  public async getAddressUtxos(address?: string): Promise<Utxo[]> {
-    if (!address) {
-      address = this.cashaddr;
-    }
-
-    if (this._slpSemiAware) {
-      const bchUtxos: Utxo[] = await this.provider.getUtxos(address);
-      return bchUtxos.filter(
-        (bchutxo) => bchutxo.satoshis > DUST_UTXO_THRESHOLD
-      );
-    } else {
-      return this.provider.getUtxos(address);
-    }
+  // Gets balance by summing value in all utxos in sats
+  // Balance includes DUST utxos which could be slp tokens and also cashtokens with BCH amounts
+  public async getBalance(): Promise<bigint> {
+    return this.provider.getBalance(this.cashaddr);
   }
 
   // gets transaction history of this wallet

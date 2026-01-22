@@ -456,7 +456,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(newTokenUtxos.length).toBe(1);
       expect(await bob.getTokenBalance(category)).toBe(100n);
 
-      let bobUtxos = await bob.getAddressUtxos(bob.cashaddr);
+      let bobUtxos = await bob.getUtxos();
       expect(bobUtxos.length).toBe(2);
       expect(bobUtxos[0].satoshis).toBe(1500n);
       expect(bobUtxos[1].satoshis).toBe(5245n);
@@ -474,7 +474,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(newTokenUtxos.length).toBe(1);
       expect(await bob.getTokenBalance(category)).toBe(100n);
 
-      bobUtxos = await bob.getAddressUtxos(bob.cashaddr);
+      bobUtxos = await bob.getUtxos();
       expect(bobUtxos.length).toBe(2);
       expect(bobUtxos[0].satoshis).toBe(3000n);
       expect(bobUtxos[1].satoshis).toBe(3349n);
@@ -564,7 +564,7 @@ describe(`Wallet should function in the browser`, () => {
 
       let category;
       {
-        const aliceUtxos = await aliceWallet.getAddressUtxos();
+        const aliceUtxos = await aliceWallet.getUtxos();
 
         const { unsignedTransaction, sourceOutputs, categories } =
           await aliceWatchWallet.tokenGenesis(
@@ -582,7 +582,7 @@ describe(`Wallet should function in the browser`, () => {
 
         // check transaction was not submitted
         expect(JSON.stringify(aliceUtxos)).toBe(
-          JSON.stringify(await aliceWallet.getAddressUtxos())
+          JSON.stringify(await aliceWallet.getUtxos())
         );
 
         const decoded = libauth.decodeTransaction(encodedTransaction);
@@ -613,7 +613,7 @@ describe(`Wallet should function in the browser`, () => {
       }
 
       {
-        const aliceUtxos = await aliceWallet.getAddressUtxos();
+        const aliceUtxos = await aliceWallet.getUtxos();
 
         const { unsignedTransaction, sourceOutputs } =
           await aliceWatchWallet.tokenMint(
@@ -632,7 +632,7 @@ describe(`Wallet should function in the browser`, () => {
 
         // check transaction was not submitted
         expect(JSON.stringify(aliceUtxos)).toBe(
-          JSON.stringify(await aliceWallet.getAddressUtxos())
+          JSON.stringify(await aliceWallet.getUtxos())
         );
 
         const decoded = libauth.decodeTransaction(encodedTransaction);
@@ -670,7 +670,7 @@ describe(`Wallet should function in the browser`, () => {
       }
 
       {
-        const aliceUtxos = await aliceWallet.getAddressUtxos();
+        const aliceUtxos = await aliceWallet.getUtxos();
 
         const { unsignedTransaction, sourceOutputs } =
           await aliceWatchWallet.send(
@@ -691,7 +691,7 @@ describe(`Wallet should function in the browser`, () => {
 
         // check transaction was not submitted
         expect(JSON.stringify(aliceUtxos)).toBe(
-          JSON.stringify(await aliceWallet.getAddressUtxos())
+          JSON.stringify(await aliceWallet.getUtxos())
         );
 
         const decoded = libauth.decodeTransaction(encodedTransaction);

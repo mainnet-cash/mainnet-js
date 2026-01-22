@@ -29,8 +29,10 @@ const balance = ({ balanceRequest }) => new Promise(
       }
 
       // the balance unit may also be empty
-      let resp = await wallet.getBalance();
-      resolve(Service.successResponse({ sat: resp }));
+      let utxos = await wallet.getUtxos();
+      if (balanceRequest.slpSemiAware) utxos = utxos.filter(u => u.satoshis > 546n);
+
+      resolve(Service.successResponse({ sat: utxos.reduce((acc, u) => acc + u.satoshis, 0n) }));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -296,12 +298,14 @@ const utxos = ({ serializedWallet }) => new Promise(
   async (resolve, reject) => {
     try {
       let wallet = await mainnet.walletFromId(serializedWallet.walletId);
-      let args = serializedWallet;
-      delete args.walletId;
 
-      
-      let resp = await wallet.getUtxos(args);
-      resolve(Service.successResponse(resp));
+      if (serializedWallet.slpSemiAware) {
+        wallet.slpSemiAware();
+      }
+
+      let utxos = await wallet.getUtxos();
+      if (serializedWallet.slpSemiAware) utxos = utxos.filter(u => u.satoshis > 546n);
+      resolve(Service.successResponse(utxos));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)

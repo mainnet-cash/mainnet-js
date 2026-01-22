@@ -405,35 +405,10 @@ export class BaseWallet implements WalletI {
     throw Error("getUtxos not implemented in BaseWallet");
   }
 
-  // gets wallet balance in sats
+  // Gets balance by summing value in all utxos in sats
+  // Balance includes DUST utxos which could be slp tokens and also cashtokens with BCH amounts
   public async getBalance(): Promise<bigint> {
-    return this.getBalanceFromProvider();
-  }
-
-  // Gets balance by summing value in all utxos in stats
-  public async getBalanceFromUtxos(): Promise<bigint> {
-    const utxos = (await this.getUtxos()).filter(
-      (val) => val.token === undefined
-    );
-    return sumUtxoValue(utxos);
-  }
-
-  // Gets balance from fulcrum
-  public async getBalanceFromProvider(): Promise<bigint> {
-    // Fulcrum reports balance of all utxos, including tokens, which is undesirable
-    // // TODO not sure why getting the balance from a provider doesn't work
-    // if (this._slpAware || this._slpSemiAware) {
-    //   return await this.getBalanceFromUtxos();
-    // } else {
-    //   return await this.provider.getBalance(this.cashaddr);
-    // }
-
-    // FIXME
-    return this.getBalanceFromUtxos();
-  }
-
-  public async getAddressUtxos(address?: string): Promise<Utxo[]> {
-    throw Error("getAddressUtxos not implemented in BaseWallet");
+    throw Error("getBalance not implemented in BaseWallet");
   }
 
   // watching for any transaction hash of this wallet
@@ -471,7 +446,7 @@ export class BaseWallet implements WalletI {
     return this.provider.watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
-        const balance = await this.getBalanceFromProvider();
+        const balance = await this.getBalance();
         callback(balance);
       }
     );

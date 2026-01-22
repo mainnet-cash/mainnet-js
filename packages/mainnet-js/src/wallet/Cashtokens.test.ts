@@ -46,7 +46,7 @@ describe(`Test cashtokens`, () => {
 
     const maxAmountToSend = await bob.getMaxAmountToSend();
     await bob.send([[alice.cashaddr!, maxAmountToSend]]);
-    expect(await bob.getBalance()).toBe(0n);
+    expect(await bob.getBalance()).toBe(0n + 1000n);
   });
 
   test("Test tokens will not be burned when sending bch value", async () => {
@@ -73,7 +73,7 @@ describe(`Test cashtokens`, () => {
       }),
     ]);
     expect(await bob.getTokenBalance(category)).toBe(25n);
-    expect(await bob.getBalance()).toBe(5000n);
+    expect(await bob.getBalance()).toBe(5000n + 1000n);
 
     await bob.send(
       new SendRequest({
@@ -82,11 +82,11 @@ describe(`Test cashtokens`, () => {
       })
     );
     expect(await bob.getTokenBalance(category)).toBe(25n);
-    expect(await bob.getBalance()).toBe(3780n);
+    expect(await bob.getBalance()).toBe(3780n + 1000n);
 
     await bob.sendMax(alice.cashaddr!);
     expect(await bob.getTokenBalance(category)).toBe(25n);
-    expect(await bob.getBalance()).toBe(0n);
+    expect(await bob.getBalance()).toBe(0n + 1000n);
   });
 
   test("Test fungible cashtoken genesis and sending", async () => {
@@ -612,7 +612,7 @@ describe(`Test cashtokens`, () => {
     expect(newTokenUtxos.length).toBe(1);
     expect(await bob.getTokenBalance(category)).toBe(100n);
 
-    let bobUtxos = await bob.getAddressUtxos(bob.cashaddr!);
+    let bobUtxos = await bob.getUtxos();
     expect(bobUtxos.length).toBe(2);
     expect(bobUtxos[0].satoshis).toBe(1500n);
     expect(bobUtxos[1].satoshis).toBe(5245n);
@@ -630,7 +630,7 @@ describe(`Test cashtokens`, () => {
     expect(newTokenUtxos.length).toBe(1);
     expect(await bob.getTokenBalance(category)).toBe(100n);
 
-    bobUtxos = await bob.getAddressUtxos(bob.cashaddr!);
+    bobUtxos = await bob.getUtxos();
     expect(bobUtxos.length).toBe(2);
     expect(bobUtxos[0].satoshis).toBe(3000n);
     expect(bobUtxos[1].satoshis).toBe(3349n);
@@ -1187,7 +1187,7 @@ describe(`Test cashtokens`, () => {
 
     let category;
     {
-      const aliceUtxos = await aliceWallet.getAddressUtxos();
+      const aliceUtxos = await aliceWallet.getUtxos();
 
       const { unsignedTransaction, sourceOutputs, categories } =
         await aliceWatchWallet.tokenGenesis(
@@ -1204,7 +1204,7 @@ describe(`Test cashtokens`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1232,7 +1232,7 @@ describe(`Test cashtokens`, () => {
     }
 
     {
-      const aliceUtxos = await aliceWallet.getAddressUtxos();
+      const aliceUtxos = await aliceWallet.getUtxos();
 
       const { unsignedTransaction, sourceOutputs } =
         await aliceWatchWallet.tokenMint(
@@ -1250,7 +1250,7 @@ describe(`Test cashtokens`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1287,7 +1287,7 @@ describe(`Test cashtokens`, () => {
     }
 
     {
-      const aliceUtxos = await aliceWallet.getAddressUtxos();
+      const aliceUtxos = await aliceWallet.getUtxos();
 
       const { unsignedTransaction, sourceOutputs } =
         await aliceWatchWallet.send(
@@ -1307,7 +1307,7 @@ describe(`Test cashtokens`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {

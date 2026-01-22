@@ -28,8 +28,9 @@ import { MemoryCache } from "../cache/MemoryCache.js";
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumClient<ElectrumClientEvents>;
   public subscriptions: number = 0;
-  private subscribedToHeaders: boolean = false;
   private subscriptionMap: Record<string, number> = {};
+  private currentHeight: number = 0;
+  private headerCancelFn?: CancelFn;
 
   private _cache: CacheProvider | undefined;
 
@@ -97,13 +98,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }));
   }
 
-  async getBalance(cashaddr: string): Promise<number> {
+  async getBalance(cashaddr: string): Promise<bigint> {
     const result = await this.performRequest<ElectrumBalanceI>(
       "blockchain.address.get_balance",
       cashaddr
     );
 
-    return result.confirmed + result.unconfirmed;
+    return BigInt(result.confirmed) + BigInt(result.unconfirmed);
   }
 
   async getHeader(
@@ -131,8 +132,22 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBlockHeight(): Promise<number> {
-    return (await this.performRequest<HexHeaderI>("blockchain.headers.get_tip"))
-      .height;
+    if (!this.headerCancelFn) {
+      this.headerCancelFn = await this.subscribeToHeaders(
+        (header: HexHeaderI) => {
+          if (header.height > this.currentHeight) {
+            this.currentHeight = header.height;
+          }
+        }
+      );
+    }
+
+    if (!this.currentHeight) {
+      throw new Error(
+        "Check failed for eventual inconsistency in subscription implementations."
+      );
+    }
+    return this.currentHeight;
   }
 
   async getRawTransaction(
@@ -388,7 +403,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async subscribeToHeaders(
     callback: (header: HexHeaderI) => void
   ): Promise<CancelFn> {
-    return this.subscribeRequest("blockchain.headers.subscribe", callback);
+    return this.subscribeRequest(
+      "blockchain.headers.subscribe",
+      (data: HexHeaderI | HexHeaderI[]) => {
+        callback(data[0] ?? data);
+      }
+    );
   }
 
   async subscribeToAddress(
@@ -494,28 +514,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     };
 
     this.electrum.on("notification", handler);
-
-    // safeguard against multiple subscriptions to headers
-    if (methodName === "blockhain.headers.subscribe") {
-      if (!this.subscribedToHeaders) {
-        this.subscribedToHeaders = true;
-
-        await this.trackSubscription(methodName, ...parameters);
-      }
-    } else {
-      await this.trackSubscription(methodName, ...parameters);
-    }
-
+    await this.trackSubscription(methodName, ...parameters);
     this.subscriptions++;
 
     return async () => {
       this.electrum.off("notification", handler);
+      await this.untrackSubscription(methodName, ...parameters);
       this.subscriptions--;
-
-      // there are no blockchain.headers.unsubscribe method, so let's safeguard against it
-      if (methodName !== "blockchain.headers.subscribe") {
-        await this.untrackSubscription(methodName, ...parameters);
-      }
     };
   }
 
@@ -530,12 +535,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  disconnect(): Promise<boolean> {
+  async disconnect(): Promise<boolean> {
     if (this.subscriptions > 0) {
       // console.warn(
       //   `Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`
       // );
     }
+    await this.headerCancelFn?.();
     return this.electrum.disconnect(true, false);
   }
 }

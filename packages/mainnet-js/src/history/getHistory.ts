@@ -334,7 +334,7 @@ export const getHistory = async ({
   // backfill the balances
   let prevBalance = (
     await Promise.all(addresses.map((address) => provider.getBalance(address)))
-  ).reduce((a, b) => a + b, 0);
+  ).reduce((a, b) => Number(a) + Number(b), 0);
 
   let prevValueChange = 0;
   historyItems.forEach((tx) => {

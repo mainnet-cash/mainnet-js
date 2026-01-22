@@ -1109,8 +1109,6 @@ components:
       - txid
       - vout
     BalanceRequest:
-      allOf:
-      - $ref: '#/components/schemas/UnitType'
       example:
         walletId: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
         slpSemiAware: true

@@ -33,6 +33,8 @@ import {
   TokenSendRequest,
 } from "./model.js";
 import { arrayRange, getNextUnusedIndex } from "../util/hd.js";
+import { DUST_UTXO_THRESHOLD } from "../constant.js";
+import { sumUtxoValue } from "../util/sumUtxoValue.js";
 
 export const GAP_SIZE = 20;
 
@@ -445,7 +447,20 @@ export class HDWallet extends BaseWallet {
   public async getUtxos() {
     await this.watchPromise;
 
-    return [...this.depositUtxos, ...this.changeUtxos].flat();
+    const utxos = [...this.depositUtxos, ...this.changeUtxos].flat();
+
+    return this._slpSemiAware
+      ? utxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
+      : utxos;
+  }
+
+  // Gets balance by summing value in all utxos in sats
+  // Balance includes DUST utxos which could be slp tokens and also cashtokens with BCH amounts
+  public async getBalance(): Promise<bigint> {
+    await this.watchPromise;
+
+    const utxos = [...this.depositUtxos, ...this.changeUtxos].flat();
+    return sumUtxoValue(utxos);
   }
 
   /// Get next unused deposit address, or the address at the specified index

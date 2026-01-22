@@ -1232,8 +1232,6 @@ components:
             This flag requires an utxo to have more than 546 sats to be
             spendable and counted in the balance This option is not switched on
             by default
-      allOf:
-        - $ref: '#/components/schemas/UnitType'
       required:
         - walletId
     HistoryRequest:

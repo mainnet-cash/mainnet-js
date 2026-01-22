@@ -17,7 +17,7 @@ import { mine } from "../mine";
 import { Config } from "../config";
 import { CancelFn } from "./interface";
 import json from "../test/json.test";
-import { convert, toBch, toCurrency, toSat } from "../util";
+import { convert, sumUtxoValue, toBch, toCurrency, toSat } from "../util";
 
 beforeAll(async () => {
   await initProviders();
@@ -1032,15 +1032,15 @@ describe(`Wallet extrema behavior regression testing`, () => {
       { cashaddr: bob.getDepositAddress(), value: 546n },
       { cashaddr: bob.getDepositAddress(), value: 1000n },
     ]);
-    expect(await bob.getBalance()).toBe(1546n);
+    expect(sumUtxoValue(await bob.getUtxos())).toBe(1546n);
     bob.slpSemiAware();
-    expect(await bob.getBalance()).toBe(1000n);
+    expect(sumUtxoValue(await bob.getUtxos())).toBe(1000n);
 
     expect(
       await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })
     ).toBe(768n);
     await bob.sendMax(alice.getDepositAddress());
-    expect(await bob.getBalance()).toBe(0n);
+    expect(await bob.getBalance()).toBe(0n + 546n);
 
     bob.slpSemiAware(false);
     expect(await bob.getBalance()).toBe(546n);
@@ -1055,7 +1055,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const bobWallet = await RegTestWallet.newRandom();
     delete (aliceWallet as any).privateKey;
 
-    const aliceUtxos = await aliceWallet.getAddressUtxos();
+    const aliceUtxos = await aliceWallet.getUtxos();
 
     {
       const { encodedTransaction, sourceOutputs } =
@@ -1074,7 +1074,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       // check transaction was not submitted
       // BigInts can't be serialized as strings
       //
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1117,7 +1117,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1139,7 +1139,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1158,7 +1158,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
 
-    const aliceUtxos = await aliceWallet.getAddressUtxos();
+    const aliceUtxos = await aliceWallet.getUtxos();
 
     await expect(
       aliceWallet.send(
