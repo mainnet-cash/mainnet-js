@@ -15,7 +15,7 @@ export function sumUtxoValue(utxos: Utxo[]) {
 export function sumTokenAmounts(utxos: Utxo[], tokenId: string): bigint {
   if (utxos.length > 0) {
     const tokenArray: bigint[] = utxos
-      .filter((utxo) => utxo.token?.tokenId === tokenId)
+      .filter((utxo) => utxo.token?.category === tokenId)
       .map((o: Utxo) => {
         return o.token?.amount || 0n;
       });

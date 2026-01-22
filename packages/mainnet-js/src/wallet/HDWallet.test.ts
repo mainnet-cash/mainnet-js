@@ -368,12 +368,14 @@ describe("HDWallet", () => {
 
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.getDepositAddress(1),
-      capability: NFTCapability.minting,
-      commitment: "abcd",
+      nft: {
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
       amount: 1000n,
     });
 
-    const tokenId = genesisResponse.tokenIds![0];
+    const tokenId = genesisResponse.categories![0];
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -381,13 +383,17 @@ describe("HDWallet", () => {
     const response = await alice.tokenMint(tokenId, [
       new TokenMintRequest({
         cashaddr: alice.getDepositAddress(2),
-        capability: NFTCapability.none,
-        commitment: "",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "",
+        },
       }),
       new TokenMintRequest({
         cashaddr: alice.getDepositAddress(3),
-        capability: NFTCapability.mutable,
-        commitment: "00",
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "00",
+        },
       }),
     ]);
 
@@ -395,28 +401,34 @@ describe("HDWallet", () => {
 
     const newTokenUtxos = await alice.getTokenUtxos(tokenId);
     expect(newTokenUtxos.length).toBe(3);
-    expect(tokenId).toEqual(response.tokenIds![0]);
+    expect(tokenId).toEqual(response.categories![0]);
 
     const bob = await RegTestWallet.newRandom();
     await alice.send([
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
-        tokenId: tokenId,
-        capability: NFTCapability.minting,
-        commitment: "abcd",
+        category: tokenId,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
         amount: 1000n,
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
-        tokenId: tokenId,
-        capability: NFTCapability.none,
-        commitment: "",
+        category: tokenId,
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "",
+        },
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
-        tokenId: tokenId,
-        capability: NFTCapability.mutable,
-        commitment: "00",
+        category: tokenId,
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "00",
+        },
       }),
     ]);
 
@@ -425,7 +437,7 @@ describe("HDWallet", () => {
     expect((await alice.getTokenUtxos(tokenId)).length).toBe(0);
     const bobTokenUtxos = await bob.getTokenUtxos(tokenId);
     expect(bobTokenUtxos.length).toBe(3);
-    expect(tokenId).toEqual(response.tokenIds![0]);
+    expect(tokenId).toEqual(response.categories![0]);
   });
 
   test("Test enforcing token addresses", async () => {
@@ -441,7 +453,7 @@ describe("HDWallet", () => {
     const genesisResponse = await alice.tokenGenesis({
       amount: 100n,
     });
-    const tokenId = genesisResponse.tokenIds![0];
+    const category = genesisResponse.categories![0];
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -449,7 +461,7 @@ describe("HDWallet", () => {
 
     const wrap = (addr) => {
       return new Promise((resolve) => {
-        resolve(new TokenSendRequest({ cashaddr: addr, tokenId: "" }));
+        resolve(new TokenSendRequest({ cashaddr: addr, category: "" }));
       });
     };
 
@@ -461,7 +473,7 @@ describe("HDWallet", () => {
       alice.send(
         new TokenSendRequest({
           cashaddr: alice.getDepositAddress(),
-          tokenId: tokenId,
+          category: category,
           amount: 1n,
         })
       )
@@ -473,7 +485,7 @@ describe("HDWallet", () => {
       alice.send(
         new TokenSendRequest({
           cashaddr: alice.getTokenDepositAddress(),
-          tokenId: tokenId,
+          category: category,
           amount: 2n,
         })
       )
@@ -490,7 +502,7 @@ describe("HDWallet", () => {
         await alice.send(
           new TokenSendRequest({
             cashaddr: alice.getDepositAddress(),
-            tokenId: tokenId,
+            category: category,
             amount: 1n,
           })
         ))()
@@ -502,7 +514,7 @@ describe("HDWallet", () => {
       alice.send(
         new TokenSendRequest({
           cashaddr: alice.getTokenDepositAddress(),
-          tokenId: tokenId,
+          category: category,
           amount: 2n,
         })
       )

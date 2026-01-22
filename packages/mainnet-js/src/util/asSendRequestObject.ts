@@ -57,7 +57,7 @@ export function asSendRequestObject(
 }
 
 function convertToClass(object: SendRequest | TokenSendRequest | OpReturnData) {
-  if (object.hasOwnProperty("tokenId")) {
+  if (object.hasOwnProperty("category")) {
     return new TokenSendRequest(object as TokenSendRequest);
   } else if (object.hasOwnProperty("buffer")) {
     return OpReturnData.fromUint8Array((object as OpReturnData).buffer);
@@ -72,7 +72,7 @@ function convertToClass(object: SendRequest | TokenSendRequest | OpReturnData) {
   } else if (
     object.hasOwnProperty("cashaddr") &&
     object.hasOwnProperty("value") &&
-    object.hasOwnProperty("tokenId") === false
+    object.hasOwnProperty("category") === false
   ) {
     return new SendRequest(object as SendRequest);
   }

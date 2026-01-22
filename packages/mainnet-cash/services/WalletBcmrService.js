@@ -90,7 +90,7 @@ const bcmrBuildAuthChain = ({ bcmrBuildAuthChainRequest }) => new Promise(
 const bcmrGetTokenInfo = ({ bcmrGetTokenInfoRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const resp = BCMR.getTokenInfo(bcmrGetTokenInfoRequest.tokenId);
+      const resp = BCMR.getTokenInfo(bcmrGetTokenInfoRequest.category);
 
       resolve(Service.successResponse({tokenInfo: resp}));
     } catch (e) {

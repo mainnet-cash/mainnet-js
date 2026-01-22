@@ -153,14 +153,15 @@ export function prepareInputs({
 
     const libAuthToken = i.token && {
       amount: BigInt(i.token.amount),
-      category: hexToBin(i.token.tokenId),
+      category: hexToBin(i.token.category),
       nft:
-        i.token.capability !== undefined || i.token.commitment !== undefined
+        i.token.nft?.capability !== undefined ||
+        i.token.nft?.commitment !== undefined
           ? {
-              capability: i.token.capability,
+              capability: i.token.nft?.capability,
               commitment:
-                i.token.commitment !== undefined &&
-                hexToBin(i.token.commitment!),
+                i.token.nft?.commitment !== undefined &&
+                hexToBin(i.token.nft?.commitment!),
             }
           : undefined,
     };
@@ -270,13 +271,14 @@ export function prepareTokenOutputs(request: TokenSendRequest): Output {
 
   const libAuthToken = {
     amount: BigInt(token.amount),
-    category: hexToBin(token.tokenId),
+    category: hexToBin(token.category),
     nft:
-      token.capability !== undefined || token.commitment !== undefined
+      token.nft?.capability !== undefined || token.nft?.commitment !== undefined
         ? {
-            capability: token.capability,
+            capability: token.nft?.capability,
             commitment:
-              token.commitment !== undefined && hexToBin(token.commitment!),
+              token.nft?.commitment !== undefined &&
+              hexToBin(token.nft?.commitment!),
           }
         : undefined,
   };
@@ -319,13 +321,13 @@ export async function getSuitableUtxos(
   if (tokenOperation === "send") {
     for (const request of tokenRequests) {
       const tokenInputs = availableInputs.filter(
-        (val) => val.token?.tokenId === request.tokenId
+        (val) => val.token?.category === request.category
       );
       const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs]
         .filter(
           (val) =>
-            val.token?.capability === request.capability &&
-            val.token?.commitment === request.commitment
+            val.token?.nft?.capability === request.nft?.capability &&
+            val.token?.nft?.commitment === request.nft?.commitment
         )
         .filter(
           (val) =>
@@ -348,13 +350,15 @@ export async function getSuitableUtxos(
       }
 
       if (
-        request.capability === NFTCapability.minting ||
-        request.capability === NFTCapability.mutable
+        request.nft?.capability === NFTCapability.minting ||
+        request.nft?.capability === NFTCapability.mutable
       ) {
         const changeCommitmentTokens = [
           ...suitableUtxos,
           ...tokenInputs,
-        ].filter((val) => val.token?.capability === request.capability);
+        ].filter(
+          (val) => val.token?.nft?.capability === request.nft?.capability
+        );
         if (changeCommitmentTokens.length) {
           const input = changeCommitmentTokens[0];
           const index = availableInputs.indexOf(input);
@@ -369,17 +373,17 @@ export async function getSuitableUtxos(
 
       // handle splitting the hybrid (FT+NFT) token into its parts
       if (
-        request.capability === undefined &&
-        request.commitment === undefined &&
+        request.nft?.capability === undefined &&
+        request.nft?.commitment === undefined &&
         [...suitableUtxos, ...tokenInputs]
-          .map((val) => val.token?.tokenId)
-          .includes(request.tokenId)
+          .map((val) => val.token?.category)
+          .includes(request.category)
       ) {
         continue;
       }
 
       throw Error(
-        `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
+        `No suitable token utxos available to send token with id "${request.category}", capability "${request.nft?.capability}", commitment "${request.nft?.commitment}"`
       );
     }
   }
@@ -461,20 +465,20 @@ export async function getFeeAmountSimple({
         ? inputSizeP2pkh +
           1 +
           34 +
-          Math.round(1 + (curr.token.commitment?.length ?? 0) / 2) +
+          Math.round(1 + (curr.token.nft?.commitment?.length ?? 0) / 2) +
           (curr.token.amount ? 9 : 0)
         : inputSizeP2pkh),
     0
   );
 
   const outputSize = (sendRequest: SendRequestType) => {
-    if (sendRequest.hasOwnProperty("tokenId")) {
+    if (sendRequest.hasOwnProperty("category")) {
       const tokenRequest = sendRequest as TokenSendRequest;
       return (
         outputSizeP2pkh +
         1 +
         34 +
-        Math.round(1 + (tokenRequest.commitment?.length ?? 0) / 2) +
+        Math.round(1 + (tokenRequest.nft?.commitment?.length ?? 0) / 2) +
         (tokenRequest.amount ? 9 : 0)
       );
     } else if (sendRequest.hasOwnProperty("buffer")) {

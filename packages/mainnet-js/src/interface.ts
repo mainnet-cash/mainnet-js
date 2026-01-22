@@ -58,9 +58,11 @@ export interface HeaderI {
 
 export interface TokenI {
   amount: bigint;
-  tokenId: string;
-  capability?: NFTCapability;
-  commitment?: string;
+  category: string;
+  nft?: {
+    capability: NFTCapability;
+    commitment: string;
+  };
 }
 
 export const NFTCapability = {

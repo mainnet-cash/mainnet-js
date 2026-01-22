@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+3.0.0-next.2
+
+* Rework cashtokens interfaces to be (more) compatible with bchn, cashscript and libauth:
+    - tokenId -> category
+    - { ..., capability?, commitment? } -> { ..., nft?: { capability, commitment } }
+
+
 3.0.0-next.1
 
 * Make satoshi values bigint

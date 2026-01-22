@@ -12,7 +12,7 @@ info:
     url: https://github.com/mainnet-cash/mainnet-js/blob/master/LICENSE
   termsOfService: https://mainnet.cash/terms/
   title: Mainnet Cash
-  version: 3.0.0-next.1
+  version: 3.0.0-next.2
 externalDocs:
   description: Find out more about mainnet-js
   url: https://mainnet.cash
@@ -602,7 +602,7 @@ paths:
         description: |
           Create new cashtoken, both funglible and/or non-fungible (NFT)
           Refer to spec https://github.com/bitjson/cashtokens
-          Newly created token identifier can be found in `tokenIds` field.
+          Newly created token identifier can be found in `categories` field.
         required: true
       responses:
         '200':
@@ -625,7 +625,7 @@ paths:
         description: |
           Mint new NFT cashtokens using an existing minting token
           Refer to spec https://github.com/bitjson/cashtokens
-          Newly minted tokens will retain the parent's `tokenId`.
+          Newly minted tokens will retain the parent's category.
         required: true
       responses:
         '200':
@@ -674,15 +674,16 @@ paths:
                   type: string
                   example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
                   description: The walletId to make a request to.
-                tokenId:
+                category:
+                  nullable: true
                   type: string
-                  description: tokenId (category) to filter utxos by, if not set will return utxos from all tokens
+                  description: category to filter utxos by, if not set will return utxos from all tokens
               required:
                 - walletId
               type: object
         description: |
           Get unspent token outputs for the wallet
-          will return utxos only for the specified token if `tokenId` provided
+          will return utxos only for the specified token if `category` provided
         required: true
       responses:
         '200':
@@ -706,12 +707,12 @@ paths:
                   type: string
                   example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
                   description: The walletId to make a request to.
-                tokenId:
+                category:
                   type: string
-                  description: tokenId to get balance for
+                  description: token category to get balance for
               required:
                 - walletId
-                - tokenId
+                - category
               type: object
         description: |
           Gets fungible token balance
@@ -743,15 +744,15 @@ paths:
                   type: string
                   example: wif:testnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6
                   description: The walletId to make a request to.
-                tokenId:
+                category:
                   type: string
-                  description: tokenId to get balance for
+                  description: token category to get balance for
               required:
                 - walletId
-                - tokenId
+                - category
               type: object
         description: |
-          Gets non-fungible token (NFT) balance for a particula tokenId
+          Gets non-fungible token (NFT) balance for a particular category
           disregards fungible token balances
           for fungible token balance see @ref getTokenBalance
         required: true
@@ -1019,11 +1020,11 @@ paths:
           application/json:
             schema:
               properties:
-                tokenId:
+                category:
                   type: string
-                  description: TokenId to lookup
+                  description: Token category to lookup
               required:
-                - tokenId
+                - category
         description: |
           Return the token info (the identity snapshot as per BCMR spec)
         required: true
@@ -1275,24 +1276,29 @@ components:
         amount:
           type: number
           description: Fungible token amount
-        tokenId:
+        category:
           type: string
           description: >-
             Token unique hexadecimal identifier, also the id of the token
             creation transaction
-        capability:
-          type: string
+        nft:
+          type: object
           nullable: true
-          enum:
-            - none
-            - mutable
-            - minting
-          description: Capability of the NFT
-        commitment:
-          type: string
-          nullable: true
-          maxLength: 80
-          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+          properties:
+            capability:
+              type: string
+              enum:
+                - none
+                - mutable
+                - minting
+              description: Capability of the NFT
+            commitment:
+              type: string
+              maxLength: 80
+              description: Token commitment message, hexadecimal encoded, 40 bytes max length
+          required:
+            - capability
+            - commitment
     InOutput:
       properties:
         address:
@@ -1305,7 +1311,7 @@ components:
           $ref: '#/components/schemas/Token'
     TokenAmountChange:
       properties:
-        tokenId:
+        category:
           type: string
           description: >-
             Token unique hexadecimal identifier, also the id of the token
@@ -1384,29 +1390,36 @@ components:
         amount:
           type: number
           description: Fungible token amount to send
-        tokenId:
+        category:
           type: string
           description: >-
             Token unique hexadecimal identifier, also the id of the token
             creation transaction
-        capability:
-          type: string
-          enum:
-            - none
-            - mutable
-            - minting
-          description: Capability of the NFT
-        commitment:
-          type: string
-          maxLength: 80
-          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+        nft:
+          type: object
+          nullable: true
+          properties:
+            capability:
+              type: string
+              enum:
+                - none
+                - mutable
+                - minting
+              description: Capability of the NFT
+            commitment:
+              type: string
+              maxLength: 80
+              description: Token commitment message, hexadecimal encoded, 40 bytes max length
+          required:
+            - capability
+            - commitment
       required:
         - cashaddr
-        - tokenId
+        - category
       example:
-        slpaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
+        cashaddr: bchtest:qpalhxhl05mlhms3ys43u76rn0ttdv3qg2usm4nm7t
         amount: 100
-        tokenId: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
+        category: 132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15
       type: object
     TokenGenesisRequest:
       properties:
@@ -1416,17 +1429,24 @@ components:
         amount:
           type: number
           description: amount of *fungible* tokens to create
-        capability:
-          type: string
-          enum:
-            - none
-            - mutable
-            - minting
-          description: Capability of the new NFT
-        commitment:
-          type: string
-          maxLength: 80
-          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+        nft:
+          type: object
+          nullable: true
+          properties:
+            capability:
+              type: string
+              enum:
+                - none
+                - mutable
+                - minting
+              description: Capability of the NFT
+            commitment:
+              type: string
+              maxLength: 80
+              description: Token commitment message, hexadecimal encoded, 40 bytes max length
+          required:
+            - capability
+            - commitment
         cashaddr:
           type: string
           description: Cashaddress to send tokens to
@@ -1449,7 +1469,7 @@ components:
         walletId:
           type: string
           description: The walletId to make a request to.
-        tokenId:
+        category:
           type: string
           description: >-
             Token unique hexadecimal identifier, also the id of the token
@@ -1459,17 +1479,24 @@ components:
           items:
             type: object
             properties:
-              capability:
-                type: string
-                enum:
-                  - none
-                  - mutable
-                  - minting
-                description: Capability of the new NFT
-              commitment:
-                type: string
-                maxLength: 80
-                description: Token commitment message, hexadecimal encoded, 40 bytes max length
+              nft:
+                type: object
+                nullable: true
+                properties:
+                  capability:
+                    type: string
+                    enum:
+                      - none
+                      - mutable
+                      - minting
+                    description: Capability of the NFT
+                  commitment:
+                    type: string
+                    maxLength: 80
+                    description: Token commitment message, hexadecimal encoded, 40 bytes max length
+                required:
+                  - capability
+                  - commitment
               cashaddr:
                 type: string
                 description: Cashaddress to send tokens to
@@ -1483,29 +1510,36 @@ components:
           default: false
       required:
         - walletId
-        - tokenId
+        - category
       type: object
     TokenBurnRequest:
       properties:
         walletId:
           type: string
           description: The walletId to make a request to.
-        tokenId:
+        category:
           type: string
           description: >-
             Token unique hexadecimal identifier, also the id of the token
             creation transaction
-        capability:
-          type: string
-          enum:
-            - none
-            - mutable
-            - minting
-          description: Capability of the new NFT
-        commitment:
-          type: string
-          maxLength: 80
-          description: Token commitment message, hexadecimal encoded, 40 bytes max length
+        nft:
+          type: object
+          nullable: true
+          properties:
+            capability:
+              type: string
+              enum:
+                - none
+                - mutable
+                - minting
+              description: Capability of the NFT
+            commitment:
+              type: string
+              maxLength: 80
+              description: Token commitment message, hexadecimal encoded, 40 bytes max length
+          required:
+            - capability
+            - commitment
         amount:
           type: number
           description: amount of fungible tokens to burn
@@ -1517,7 +1551,7 @@ components:
           description: optional message to include in OP_RETURN
       required:
         - walletId
-        - tokenId
+        - category
       type: object
     OpReturnData:
       anyOf:
@@ -1798,7 +1832,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/NetworkEnum'
     WalletReplaceNamedResponse:
-      type: boolean
+      type: object
       properties:
         result:
           type: boolean
@@ -1807,7 +1841,7 @@ components:
         True if operation was successful
         False if service database was not configured or other exception occured
     WalletNamedExistsResponse:
-      type: boolean
+      type: object
       properties:
         result:
           type: boolean
@@ -2018,11 +2052,12 @@ components:
           example: >-
             https://www.blockchain.com/bch-testnet/tx/1e6442a0d3548bb4f917721184ac1cb163ddf324e2c09f55c46ff0ba521cb89f
           description: Web url to a transaction on a block explorer
-        tokenIds:
+        categories:
           type: array
+          nullable: true
           items:
             type: string
-            description: a list of tokens involved in this transaction
+            description: a list of token categories involved in this transaction
             example: ["132731d90ac4c88a79d55eae2ad92709b415de886329e958cf35fdd81ba34c15"]
       type: object
     SendMaxRequest:

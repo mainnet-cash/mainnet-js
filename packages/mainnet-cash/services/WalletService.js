@@ -382,7 +382,7 @@ const tokenMint = ({ tokenMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(tokenMintRequest.walletId);
-      const resp = await wallet.tokenMint(tokenMintRequest.tokenId, tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
+      const resp = await wallet.tokenMint(tokenMintRequest.category, tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
 
       resolve(Service.successResponse(resp));
     } catch (e) {
@@ -403,7 +403,7 @@ const getNftTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
-      const resp = await wallet.getNftTokenBalance(getTokenBalanceRequest.tokenId);
+      const resp = await wallet.getNftTokenBalance(getTokenBalanceRequest.category);
 
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
@@ -424,7 +424,7 @@ const getTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
-      const resp = await wallet.getTokenBalance(getTokenBalanceRequest.tokenId);
+      const resp = await wallet.getTokenBalance(getTokenBalanceRequest.category);
             
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
@@ -445,7 +445,7 @@ const getTokenUtxos = ({ getTokenUtxosRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(getTokenUtxosRequest.walletId);
-      const resp = await wallet.getTokenUtxos(getTokenUtxosRequest.tokenId);
+      const resp = await wallet.getTokenUtxos(getTokenUtxosRequest.category);
 
       resolve(Service.successResponse(resp));
     } catch (e) {

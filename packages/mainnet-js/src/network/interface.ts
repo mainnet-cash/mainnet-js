@@ -16,8 +16,8 @@ export interface ElectrumTokenData {
   amount: string;
   category: string;
   nft?: {
-    capability?: NFTCapability;
-    commitment?: string;
+    capability: NFTCapability;
+    commitment: string;
   };
 }
 

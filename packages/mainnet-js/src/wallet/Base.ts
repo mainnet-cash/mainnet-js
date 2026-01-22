@@ -494,14 +494,14 @@ export class BaseWallet implements WalletI {
   // sets up a callback to be called upon wallet's token balance change
   // can be cancelled by calling the function returned from this one
   public async watchTokenBalance(
-    tokenId: string,
+    category: string,
     callback: (balance: bigint) => void
   ): Promise<CancelFn> {
     let previous: bigint | undefined = undefined;
     return await this.provider.watchAddressStatus(
       this.getDepositAddress(),
       async (_status: string) => {
-        const balance = await this.getTokenBalance(tokenId);
+        const balance = await this.getTokenBalance(category);
         if (previous != balance) {
           callback(balance);
         }
@@ -513,13 +513,13 @@ export class BaseWallet implements WalletI {
   // waits for address token balance to be greater than or equal to the target amount
   // this call halts the execution
   public async waitForTokenBalance(
-    tokenId: string,
+    category: string,
     amount: bigint
   ): Promise<bigint> {
     return new Promise(async (resolve) => {
       let watchCancel: CancelFn;
       watchCancel = await this.watchTokenBalance(
-        tokenId,
+        category,
         async (balance: bigint) => {
           if (balance >= amount) {
             await watchCancel?.();
@@ -632,11 +632,11 @@ export class BaseWallet implements WalletI {
       | SendRequestArray[],
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    const { encodedTransaction, tokenIds, sourceOutputs } =
+    const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction(requests, undefined, options);
 
     const resp = new SendResponse({});
-    resp.tokenIds = tokenIds;
+    resp.categories = categories;
 
     if (options?.buildUnsigned !== true) {
       const txId = await this.submitTransaction(
@@ -709,11 +709,11 @@ export class BaseWallet implements WalletI {
       value: maxSpendableAmount,
     });
 
-    const { encodedTransaction, tokenIds, sourceOutputs } =
+    const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction([sendRequest], true, options, privateKey);
 
     const resp = new SendResponse({});
-    resp.tokenIds = tokenIds;
+    resp.categories = categories;
 
     if (options?.buildUnsigned !== true) {
       const txId = await this.submitTransaction(
@@ -813,19 +813,19 @@ export class BaseWallet implements WalletI {
       const allTokenOutputs = outputs.filter(
         (val) => val instanceof TokenSendRequest
       ) as TokenSendRequest[];
-      const tokenIds = allTokenOutputs
-        .map((val) => val.tokenId)
+      const categories = allTokenOutputs
+        .map((val) => val.category)
         .filter((val, idx, arr) => arr.indexOf(val) === idx);
-      for (let tokenId of tokenIds) {
+      for (let category of categories) {
         const tokenInputs = allTokenInputs.filter(
-          (val) => val.token?.tokenId === tokenId
+          (val) => val.token?.category === category
         );
         const inputAmountSum = tokenInputs.reduce(
           (prev, cur) => prev + cur.token!.amount,
           0n
         );
         const tokenOutputs = allTokenOutputs.filter(
-          (val) => val.tokenId === tokenId
+          (val) => val.category === category
         );
         const outputAmountSum = tokenOutputs.reduce(
           (prev, cur) => prev + cur.amount,
@@ -867,9 +867,8 @@ export class BaseWallet implements WalletI {
               new TokenSendRequest({
                 cashaddr: toTokenaddr(this.getChangeAddress()),
                 amount: change,
-                tokenId: tokenId,
-                commitment: tokenOutputs[0].commitment,
-                capability: tokenOutputs[0].capability,
+                category: category,
+                nft: tokenOutputs[0].nft,
                 value: tokenOutputs[0].value,
               })
             );
@@ -934,16 +933,16 @@ export class BaseWallet implements WalletI {
       }
     );
 
-    const tokenIds = [
+    const categories = [
       ...fundingUtxos
-        .filter((val) => val.token?.tokenId)
-        .map((val) => val.token!.tokenId),
+        .filter((val) => val.token?.category)
+        .map((val) => val.token!.category),
       ...sendRequests
         .filter((val) => val instanceof TokenSendRequest)
-        .map((val) => (val as TokenSendRequest).tokenId),
+        .map((val) => (val as TokenSendRequest).category),
     ].filter((value, index, array) => array.indexOf(value) === index);
 
-    return { encodedTransaction, tokenIds, sourceOutputs };
+    return { encodedTransaction, categories, sourceOutputs };
   }
 
   // Submit a raw transaction
@@ -1131,9 +1130,8 @@ export class BaseWallet implements WalletI {
       cashaddr: genesisRequest.cashaddr || this.getTokenDepositAddress(),
       amount: genesisRequest.amount,
       value: genesisRequest.value || 1000n,
-      capability: genesisRequest.capability,
-      commitment: genesisRequest.commitment,
-      tokenId: genesisInputs[0].txid,
+      nft: genesisRequest.nft,
+      category: genesisInputs[0].txid,
     });
 
     return this.send([genesisSendRequest, ...(sendRequests as any)], {
@@ -1149,7 +1147,7 @@ export class BaseWallet implements WalletI {
   /**
    * Mint new NFT cashtokens using an existing minting token
    * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} tokenId tokenId of an NFT to mint
+   * @param  {string} category category of an NFT to mint
    * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
    * @param  {NFTCapability?} mintRequest.capability capability of new NFT
    * @param  {string?} mintRequest.commitment NFT commitment message
@@ -1159,13 +1157,13 @@ export class BaseWallet implements WalletI {
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenMint(
-    tokenId: string,
+    category: string,
     mintRequests: TokenMintRequest | Array<TokenMintRequest>,
     deductTokenAmount: boolean = false,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    if (tokenId?.length !== 64) {
-      throw Error(`Invalid tokenId supplied: ${tokenId}`);
+    if (category?.length !== 64) {
+      throw Error(`Invalid category supplied: ${category}`);
     }
 
     if (!Array.isArray(mintRequests)) {
@@ -1175,12 +1173,12 @@ export class BaseWallet implements WalletI {
     const utxos = await this.getUtxos();
     const nftUtxos = utxos.filter(
       (val) =>
-        val.token?.tokenId === tokenId &&
-        val.token?.capability === NFTCapability.minting
+        val.token?.category === category &&
+        val.token?.nft?.capability === NFTCapability.minting
     );
     if (!nftUtxos.length) {
       throw new Error(
-        "You do not have any token UTXOs with minting capability for specified tokenId"
+        "You do not have any token UTXOs with minting capability for specified category"
       );
     }
     const newAmount =
@@ -1190,9 +1188,8 @@ export class BaseWallet implements WalletI {
     const safeNewAmount = newAmount < 0n ? 0n : newAmount;
     const mintingInput = new TokenSendRequest({
       cashaddr: toTokenaddr(nftUtxos[0].address),
-      tokenId: tokenId,
-      capability: nftUtxos[0].token!.capability,
-      commitment: nftUtxos[0].token!.commitment,
+      category: category,
+      nft: nftUtxos[0].token?.nft,
       amount: safeNewAmount,
       value: nftUtxos[0].satoshis,
     });
@@ -1204,10 +1201,9 @@ export class BaseWallet implements WalletI {
             new TokenSendRequest({
               cashaddr: val.cashaddr || this.getTokenDepositAddress(),
               amount: 0n,
-              tokenId: tokenId,
+              category: category,
               value: val.value,
-              capability: val.capability,
-              commitment: val.commitment,
+              nft: val.nft,
             })
         ),
       ],
@@ -1229,7 +1225,7 @@ export class BaseWallet implements WalletI {
    *  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
    *
    * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} burnRequest.tokenId tokenId of a token to burn
+   * @param  {string} burnRequest.category category of a token to burn
    * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
    * @param  {string?} burnRequest.commitment commitment of the NFT token to select, optional
    * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
@@ -1242,16 +1238,16 @@ export class BaseWallet implements WalletI {
     message?: string,
     options?: SendRequestOptionsI
   ): Promise<SendResponse> {
-    if (burnRequest.tokenId?.length !== 64) {
-      throw Error(`Invalid tokenId supplied: ${burnRequest.tokenId}`);
+    if (burnRequest.category?.length !== 64) {
+      throw Error(`Invalid category supplied: ${burnRequest.category}`);
     }
 
     const utxos = await this.getUtxos();
     const tokenUtxos = utxos.filter(
       (val) =>
-        val.token?.tokenId === burnRequest.tokenId &&
-        val.token?.capability === burnRequest.capability &&
-        val.token?.commitment === burnRequest.commitment
+        val.token?.category === burnRequest.category &&
+        val.token?.nft?.capability === burnRequest.nft?.capability &&
+        val.token?.nft?.commitment === burnRequest.nft?.commitment
     );
 
     if (!tokenUtxos.length) {
@@ -1265,7 +1261,7 @@ export class BaseWallet implements WalletI {
     let fungibleBurnAmount =
       burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
     fungibleBurnAmount = BigInt(fungibleBurnAmount);
-    const hasNFT = burnRequest.capability || burnRequest.commitment;
+    const hasNFT = burnRequest.nft !== undefined;
 
     let utxoIds: Utxo[] = [];
     let changeSendRequests: TokenSendRequest[];
@@ -1292,9 +1288,8 @@ export class BaseWallet implements WalletI {
           new TokenSendRequest({
             cashaddr:
               burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
-            tokenId: burnRequest.tokenId,
-            capability: burnRequest.capability,
-            commitment: burnRequest.commitment,
+            category: burnRequest.category,
+            nft: burnRequest.nft,
             amount: safeNewAmount,
             value: tokenUtxos[0].satoshis,
           }),
@@ -1323,7 +1318,7 @@ export class BaseWallet implements WalletI {
           new TokenSendRequest({
             cashaddr:
               burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
-            tokenId: burnRequest.tokenId,
+            category: burnRequest.category,
             amount: safeNewAmount,
             value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0n),
           }),
@@ -1343,78 +1338,78 @@ export class BaseWallet implements WalletI {
 
   /**
    * getTokenUtxos Get unspent token outputs for the wallet
-   * will return utxos only for the specified token if `tokenId` provided
-   * @param  {string?} tokenId tokenId (category) to filter utxos by, if not set will return utxos from all tokens
+   * will return utxos only for the specified token if `category` provided
+   * @param  {string?} category category to filter utxos by, if not set will return utxos from all tokens
    * @returns  {Utxo[]} token utxos
    */
-  public async getTokenUtxos(tokenId?: string): Promise<Utxo[]> {
+  public async getTokenUtxos(category?: string): Promise<Utxo[]> {
     const utxos = await this.getUtxos();
     return utxos.filter((val) =>
-      tokenId ? val.token?.tokenId === tokenId : val.token
+      category ? val.token?.category === category : val.token
     );
   }
 
   /**
    * getTokenBalance Gets fungible token balance
    * for NFT token balance see @ref getNftTokenBalance
-   * @param  {string} tokenId tokenId to get balance for
+   * @param  {string} category category to get balance for
    * @returns  {bigint} fungible token balance
    */
-  public async getTokenBalance(tokenId: string): Promise<bigint> {
-    const utxos = (await this.getTokenUtxos(tokenId)).filter(
+  public async getTokenBalance(category: string): Promise<bigint> {
+    const utxos = (await this.getTokenUtxos(category)).filter(
       (val) => val.token?.amount
     );
-    return sumTokenAmounts(utxos, tokenId);
+    return sumTokenAmounts(utxos, category);
   }
 
   /**
-   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particular tokenId
+   * getNftTokenBalance Gets non-fungible token (NFT) balance for a particular category
    * disregards fungible token balances
    * for fungible token balance see @ref getTokenBalance
-   * @param  {string} tokenId tokenId to get balance for
+   * @param  {string} category category to get balance for
    * @returns  {number} non-fungible token balance
    */
-  public async getNftTokenBalance(tokenId: string): Promise<number> {
-    const utxos = (await this.getTokenUtxos(tokenId)).filter(
-      (val) => val.token?.commitment !== undefined
+  public async getNftTokenBalance(category: string): Promise<number> {
+    const utxos = (await this.getTokenUtxos(category)).filter(
+      (val) => val.token?.nft?.commitment !== undefined
     );
     return utxos.length;
   }
 
   /**
    * getAllTokenBalances Gets all fungible token balances in this wallet
-   * @returns  {Object} a map [tokenId => balance] for all tokens in this wallet
+   * @returns  {Object} a map [category => balance] for all tokens in this wallet
    */
-  public async getAllTokenBalances(): Promise<{ [tokenId: string]: bigint }> {
+  public async getAllTokenBalances(): Promise<{ [category: string]: bigint }> {
     const result = {};
     const utxos = (await this.getTokenUtxos()).filter(
       (val) => val.token?.amount
     );
     for (const utxo of utxos) {
-      if (!result[utxo.token!.tokenId]) {
-        result[utxo.token!.tokenId] = 0n;
+      if (!result[utxo.token!.category]) {
+        result[utxo.token!.category] = 0n;
       }
-      result[utxo.token!.tokenId] += utxo.token!.amount;
+      result[utxo.token!.category] += utxo.token!.amount;
     }
     return result;
   }
 
   /**
    * getAllNftTokenBalances Gets all non-fungible token (NFT) balances in this wallet
-   * @returns  {Object} a map [tokenId => balance] for all NFTs in this wallet
+   * @returns  {Object} a map [category => balance] for all NFTs in this wallet
    */
   public async getAllNftTokenBalances(): Promise<{
-    [tokenId: string]: number;
+    [category: string]: number;
   }> {
     const result = {};
     const utxos = (await this.getTokenUtxos()).filter(
-      (val) => val.token?.commitment !== undefined
+      (val) => val.token?.nft?.commitment !== undefined
     );
     for (const utxo of utxos) {
-      if (!result[utxo.token!.tokenId]) {
-        result[utxo.token!.tokenId] = 0;
+      if (!result[utxo.token!.category]) {
+        result[utxo.token!.category] = 0;
       }
-      result[utxo.token!.tokenId] += 1;
+      result[utxo.token!.category] += 1;
     }
     return result;
   }

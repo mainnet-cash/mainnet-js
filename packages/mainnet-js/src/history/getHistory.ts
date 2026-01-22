@@ -193,7 +193,7 @@ export const getHistory = async ({
         value: Number(prevoutOutput.valueSatoshis),
         token: prevoutOutput.token
           ? {
-              tokenId: binToHex(prevoutOutput.token.category),
+              category: binToHex(prevoutOutput.token.category),
               amount: prevoutOutput.token.amount,
               capability: prevoutOutput.token.nft?.capability
                 ? prevoutOutput.token.nft.capability
@@ -232,7 +232,7 @@ export const getHistory = async ({
         value: Number(output.valueSatoshis),
         token: output.token
           ? {
-              tokenId: binToHex(output.token.category),
+              category: binToHex(output.token.category),
               amount: output.token.amount,
               capability: output.token.nft?.capability
                 ? output.token.nft.capability
@@ -270,14 +270,14 @@ export const getHistory = async ({
         satoshiBalance -= input.value;
 
         if (input.token?.amount) {
-          ftTokenBalances[input.token.tokenId] =
-            (ftTokenBalances[input.token.tokenId] || BigInt(0)) -
+          ftTokenBalances[input.token.category] =
+            (ftTokenBalances[input.token.category] || BigInt(0)) -
             input.token.amount;
         }
 
-        if (input.token?.capability) {
-          nftTokenBalances[input.token.tokenId] =
-            (nftTokenBalances[input.token.tokenId] || BigInt(0)) - 1n;
+        if (input.token?.nft?.capability) {
+          nftTokenBalances[input.token.category] =
+            (nftTokenBalances[input.token.category] || BigInt(0)) - 1n;
         }
       }
     });
@@ -286,36 +286,36 @@ export const getHistory = async ({
         satoshiBalance += Number(output.value);
 
         if (output.token?.amount) {
-          ftTokenBalances[output.token.tokenId] =
-            (ftTokenBalances[output.token.tokenId] || BigInt(0)) +
+          ftTokenBalances[output.token.category] =
+            (ftTokenBalances[output.token.category] || BigInt(0)) +
             output.token.amount;
         }
 
-        if (output.token?.capability) {
-          nftTokenBalances[output.token.tokenId] =
-            (nftTokenBalances[output.token.tokenId] || BigInt(0)) + 1n;
+        if (output.token?.nft?.capability) {
+          nftTokenBalances[output.token.category] =
+            (nftTokenBalances[output.token.category] || BigInt(0)) + 1n;
         }
       }
     });
 
     tx.valueChange = satoshiBalance;
     tx.tokenAmountChanges = Object.entries(ftTokenBalances).map(
-      ([tokenId, amount]) => ({
-        tokenId,
+      ([category, amount]) => ({
+        category,
         amount,
         nftAmount: BigInt(0),
       })
     );
 
-    for (const [tokenId, nftAmount] of Object.entries(nftTokenBalances)) {
+    for (const [category, nftAmount] of Object.entries(nftTokenBalances)) {
       const tokenChange = tx.tokenAmountChanges.find(
-        (tokenChange) => tokenChange.tokenId === tokenId
+        (tokenChange) => tokenChange.category === category
       );
       if (tokenChange) {
         tokenChange.nftAmount = nftAmount;
       } else {
         tx.tokenAmountChanges.push({
-          tokenId,
+          category: category,
           amount: BigInt(0),
           nftAmount,
         });

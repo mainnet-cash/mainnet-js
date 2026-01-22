@@ -17,7 +17,7 @@ export interface TransactionHistoryItem {
   balance: number;
   valueChange: number;
   tokenAmountChanges: {
-    tokenId: string;
+    category: string;
     amount: bigint;
     nftAmount: bigint;
   }[];
