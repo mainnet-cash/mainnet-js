@@ -21,7 +21,7 @@ import { Config } from "../config.js";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 import { getHistory } from "../history/getHistory.js";
 import { TransactionHistoryItem } from "../history/interface.js";
-import { Utxo } from "../interface.js";
+import { TxI, Utxo } from "../interface.js";
 import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
 import { _checkContextSafety, BaseWallet } from "./Base.js";
 import { WalletTypeEnum } from "./enum.js";
@@ -70,6 +70,11 @@ export class HDWallet extends BaseWallet {
   readonly xPrivNode!: HdPrivateNodeValid;
   readonly xPubNode!: HdPublicNodeValid;
 
+  // Callback type for wallet activity watching
+  private walletWatchCallbacks: Array<
+    (status: string | null, address: string) => void
+  > = [];
+
   // max index used for deposit address derivation
   depositIndex: number = 0;
   // max index used for change address derivation
@@ -86,6 +91,9 @@ export class HDWallet extends BaseWallet {
 
   depositUtxos: Array<Utxo[]> = [];
   changeUtxos: Array<Utxo[]> = [];
+
+  depositRawHistory: Array<TxI[]> = [];
+  changeRawHistory: Array<TxI[]> = [];
 
   watchPromise?: Promise<any[]> = undefined;
 
@@ -269,163 +277,153 @@ export class HDWallet extends BaseWallet {
     await this.watchPromise;
 
     this.watchPromise = Promise.all([
-      (async () => {
-        const depositIndex = this.depositIndex;
-        const depositStartIndex =
-          (this.depositStatuses
-            .filter((s) => s)
-            .map((_, i) => i)
-            .at(-1) ?? -1) + 1;
-        const depositStopIndex = Math.max(
-          this.depositIndex,
-          depositStartIndex + gapSize
-        );
-
-        const depositAddresses = arrayRange(
-          depositStartIndex,
-          depositStopIndex
-        ).map((i) => this.walletCache.getByIndex(i, false).address);
-
-        await Promise.all(
-          depositAddresses.map(
-            async (addr, index) =>
-              new Promise<void>(async (resolve) => {
-                index = depositStartIndex + index;
-
-                if (this.depositStatuses[index] !== undefined) {
-                  resolve();
-                }
-
-                const { status: prevStatus, utxos: prevUtxos } =
-                  this.walletCache.getByIndex(index, false);
-                this.depositStatuses[index] = prevStatus;
-                this.depositUtxos[index] = prevUtxos;
-
-                const callback = async (
-                  args: [address: string, status: string | null]
-                ) => {
-                  const [address, status] = args;
-                  if (address != addr) {
-                    return;
-                  }
-
-                  if (status === null) {
-                    this.depositUtxos[index] = [];
-                  }
-
-                  if (
-                    status !== null &&
-                    status !== this.depositStatuses[index]
-                  ) {
-                    const utxos = (await this.provider.getUtxos(addr)).map(
-                      (utxo) => {
-                        utxo.address = addr;
-                        return utxo;
-                      }
-                    );
-                    this.depositUtxos[index] = utxos;
-                    this.walletCache.setStatusAndUtxos(addr, status, utxos);
-
-                    const newDepositIndex = Math.max(depositIndex, index + 1);
-                    if (newDepositIndex > depositIndex) {
-                      this.depositIndex = Math.max(
-                        newDepositIndex,
-                        this.depositIndex
-                      );
-                      this.makeWatchPromise();
-                    }
-                  }
-                  this.depositStatuses[index] = status;
-                  resolve();
-                };
-
-                this.depositWatchCancels[index] =
-                  await this.provider.subscribeToAddress(addr, callback as any);
-              })
-          )
-        );
-        return depositAddresses.length;
-      })(),
-
-      (async () => {
-        const changeIndex = this.changeIndex;
-        const changeStartIndex =
-          (this.changeStatuses
-            .filter((s) => s)
-            .map((_, i) => i)
-            .at(-1) ?? -1) + 1;
-        const changeStopIndex = Math.max(
-          this.changeIndex,
-          changeStartIndex + gapSize
-        );
-
-        const changeAddresses = arrayRange(
-          changeStartIndex,
-          changeStopIndex
-        ).map((i) => this.walletCache.getByIndex(i, true).address);
-
-        await Promise.all(
-          changeAddresses.map(
-            async (addr, index) =>
-              new Promise<void>(async (resolve) => {
-                index = changeStartIndex + index;
-
-                if (this.changeStatuses[index] !== undefined) {
-                  resolve();
-                }
-
-                const { status: prevStatus, utxos: prevUtxos } =
-                  this.walletCache.getByIndex(index, false);
-                this.changeStatuses[index] = prevStatus;
-                this.changeUtxos[index] = prevUtxos;
-
-                const callback = async (
-                  args: [address: string, status: string | null]
-                ) => {
-                  const [address, status] = args;
-                  if (address != addr) {
-                    return;
-                  }
-
-                  if (status === null) {
-                    this.changeUtxos[index] = [];
-                  }
-
-                  if (
-                    status !== null &&
-                    status !== this.changeStatuses[index]
-                  ) {
-                    const utxos = (await this.provider.getUtxos(addr)).map(
-                      (utxo) => {
-                        utxo.address = addr;
-                        return utxo;
-                      }
-                    );
-                    this.changeUtxos[index] = utxos;
-                    this.walletCache.setStatusAndUtxos(addr, status, utxos);
-
-                    const newChangeIndex = Math.max(changeIndex, index + 1);
-                    if (newChangeIndex > changeIndex) {
-                      this.changeIndex = Math.max(
-                        newChangeIndex,
-                        this.changeIndex
-                      );
-                      this.makeWatchPromise();
-                    }
-                  }
-                  this.changeStatuses[index] = status;
-                  resolve();
-                };
-
-                this.changeWatchCancels[index] =
-                  await this.provider.subscribeToAddress(addr, callback as any);
-              })
-          )
-        );
-
-        return changeAddresses.length;
-      })(),
+      this.watchAddressType(false, gapSize),
+      this.watchAddressType(true, gapSize),
     ]);
+  }
+
+  /// Watch addresses of a specific type (deposit or change) for activity
+  private async watchAddressType(
+    isChange: boolean,
+    gapSize: number
+  ): Promise<number> {
+    // Select the appropriate arrays based on address type
+    const statuses = isChange ? this.changeStatuses : this.depositStatuses;
+    const utxosArray = isChange ? this.changeUtxos : this.depositUtxos;
+    const historyArray = isChange
+      ? this.changeRawHistory
+      : this.depositRawHistory;
+    const watchCancels = isChange
+      ? this.changeWatchCancels
+      : this.depositWatchCancels;
+    const getCurrentIndex = () =>
+      isChange ? this.changeIndex : this.depositIndex;
+    const setCurrentIndex = (val: number) => {
+      if (isChange) {
+        this.changeIndex = val;
+      } else {
+        this.depositIndex = val;
+      }
+    };
+
+    const currentIndex = getCurrentIndex();
+    const startIndex =
+      (statuses
+        .filter((s) => s)
+        .map((_, i) => i)
+        .at(-1) ?? -1) + 1;
+    const stopIndex = Math.max(currentIndex, startIndex + gapSize);
+
+    const addresses = arrayRange(startIndex, stopIndex).map(
+      (i) => this.walletCache.getByIndex(i, isChange).address
+    );
+
+    await Promise.all(
+      addresses.map(
+        async (addr, idx) =>
+          new Promise<void>(async (resolve) => {
+            const index = startIndex + idx;
+
+            if (statuses[index] !== undefined) {
+              resolve();
+            }
+
+            const {
+              status: prevStatus,
+              utxos: prevUtxos,
+              rawHistory: prevRawHistory,
+              lastConfirmedHeight: prevLastConfirmedHeight,
+            } = this.walletCache.getByIndex(index, isChange);
+            statuses[index] = prevStatus;
+            utxosArray[index] = prevUtxos;
+            historyArray[index] = prevRawHistory;
+
+            // Track lastConfirmedHeight in closure, updated after each fetch
+            let lastConfirmedHeight = prevLastConfirmedHeight;
+
+            const callback = async (
+              args: [address: string, status: string | null]
+            ) => {
+              const [address, status] = args;
+              if (address != addr) {
+                return;
+              }
+
+              if (status === null) {
+                utxosArray[index] = [];
+                historyArray[index] = [];
+              }
+
+              if (status !== null && status !== statuses[index]) {
+                // Use lastConfirmedHeight from closure for incremental fetch
+                const fromHeight = lastConfirmedHeight;
+                const currentHistory = historyArray[index] || [];
+
+                const [utxos, newHistory] = await Promise.all([
+                  this.provider.getUtxos(addr).then((utxos) =>
+                    utxos.map((utxo) => {
+                      utxo.address = addr;
+                      return utxo;
+                    })
+                  ),
+                  // Fetch only from last confirmed height to reduce server load
+                  this.provider.getHistory(addr, fromHeight),
+                ]);
+
+                // Merge: keep confirmed items from current history, add new items
+                const confirmedFromHistory = currentHistory.filter(
+                  (tx) => tx.height > 0 && tx.height < fromHeight
+                );
+                const seen = new Set(
+                  confirmedFromHistory.map((tx) => tx.tx_hash)
+                );
+                const merged = [...confirmedFromHistory];
+                for (const tx of newHistory) {
+                  if (!seen.has(tx.tx_hash)) {
+                    seen.add(tx.tx_hash);
+                    merged.push(tx);
+                  }
+                }
+
+                // Update lastConfirmedHeight in closure
+                lastConfirmedHeight = merged.reduce(
+                  (max, tx) => (tx.height > 0 ? Math.max(max, tx.height) : max),
+                  fromHeight
+                );
+
+                utxosArray[index] = utxos;
+                historyArray[index] = merged;
+                this.walletCache.setStatusAndUtxos(
+                  addr,
+                  status,
+                  utxos,
+                  merged,
+                  lastConfirmedHeight
+                );
+
+                const newIndex = Math.max(currentIndex, index + 1);
+                if (newIndex > currentIndex) {
+                  setCurrentIndex(Math.max(newIndex, getCurrentIndex()));
+                  this.makeWatchPromise();
+                }
+              }
+              statuses[index] = status;
+
+              // Notify wallet watchers of the status change
+              this.notifyWalletWatchers(status, addr);
+
+              resolve();
+            };
+
+            watchCancels[index] = await this.provider.subscribeToAddress(
+              addr,
+              callback as any
+            );
+          })
+      )
+    );
+
+    return addresses.length;
   }
 
   // Return wallet info
@@ -437,6 +435,38 @@ export class HDWallet extends BaseWallet {
       seed: this.mnemonic,
       walletId: this.toString(),
       walletDbEntry: this.toDbString(),
+    };
+  }
+
+  /// Internal method called when any address status changes
+  private notifyWalletWatchers(status: string | null, address: string) {
+    for (const callback of this.walletWatchCallbacks) {
+      try {
+        callback(status, address);
+      } catch (e) {
+        // Ignore callback errors to not break other watchers
+      }
+    }
+  }
+
+  /**
+   * Watch wallet for any activity (status changes on any address)
+   * This is the foundation for watchWalletBalance and watchWalletTransactions
+   * @param callback - Called when any address in the wallet has a status change
+   * @returns Cancel function to stop watching
+   */
+  public async watchStatus(
+    callback: (status: string | null, address: string) => void
+  ): Promise<CancelFn> {
+    await this.watchPromise;
+
+    this.walletWatchCallbacks.push(callback);
+
+    return async () => {
+      const index = this.walletWatchCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.walletWatchCallbacks.splice(index, 1);
+      }
     };
   }
 
@@ -729,22 +759,8 @@ export class HDWallet extends BaseWallet {
     start?: number;
     count?: number;
   }): Promise<TransactionHistoryItem[]> {
-    const addresses = [
-      ...this.depositStatuses
-        .map((status, i) =>
-          status !== null && i < this.depositIndex
-            ? this.walletCache.getByIndex(i, false).address
-            : undefined
-        )
-        .filter((address) => address !== undefined),
-      ...this.changeStatuses
-        .map((status, i) =>
-          status !== null && i < this.depositIndex
-            ? this.walletCache.getByIndex(i, true).address
-            : undefined
-        )
-        .filter((address) => address !== undefined),
-    ];
+    const rawHistory = await this.getRawHistory(fromHeight, toHeight);
+    const addresses = this.getUsedAddresses();
 
     return getHistory({
       addresses: addresses,
@@ -754,6 +770,73 @@ export class HDWallet extends BaseWallet {
       toHeight,
       start,
       count,
+      rawHistory,
+    });
+  }
+
+  // get all used addresses (deposit and change) for this wallet
+  private getUsedAddresses(): string[] {
+    return [
+      ...this.depositStatuses
+        .map((status, i) =>
+          status !== null && i < this.depositIndex
+            ? this.walletCache.getByIndex(i, false).address
+            : undefined
+        )
+        .filter((address) => address !== undefined),
+      ...this.changeStatuses
+        .map((status, i) =>
+          status !== null && i < this.changeIndex
+            ? this.walletCache.getByIndex(i, true).address
+            : undefined
+        )
+        .filter((address) => address !== undefined),
+    ];
+  }
+
+  // gets transaction history of this wallet
+  public async getRawHistory(
+    fromHeight: number = 0,
+    toHeight: number = -1
+  ): Promise<TxI[]> {
+    await this.watchPromise;
+
+    // Collect cached raw history from deposit and change addresses
+    const historyArrays: TxI[][] = [
+      ...this.depositRawHistory.slice(0, this.depositIndex),
+      ...this.changeRawHistory.slice(0, this.changeIndex),
+    ];
+
+    // Deduplicate by tx_hash
+    const seen = new Set<string>();
+    let history: TxI[] = [];
+    for (const arr of historyArrays) {
+      for (const tx of arr) {
+        if (!seen.has(tx.tx_hash)) {
+          seen.add(tx.tx_hash);
+          history.push(tx);
+        }
+      }
+    }
+
+    // Apply height filters if specified
+    if (fromHeight > 0 || toHeight !== -1) {
+      history = history.filter((tx) => {
+        // Unconfirmed transactions (height <= 0) pass the filter when toHeight is -1
+        if (tx.height <= 0) {
+          return toHeight === -1;
+        }
+        const aboveFrom = tx.height >= fromHeight;
+        const belowTo = toHeight === -1 || tx.height <= toHeight;
+        return aboveFrom && belowTo;
+      });
+    }
+
+    // Sort by height (descending, unconfirmed first)
+    return history.sort((a, b) => {
+      if (a.height <= 0 && b.height > 0) return -1;
+      if (b.height <= 0 && a.height > 0) return 1;
+      return b.height - a.height;
     });
   }
 }

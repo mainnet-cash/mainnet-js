@@ -12,7 +12,7 @@ import {
 import { UnitEnum } from "../enum.js";
 import NetworkProvider from "../network/NetworkProvider.js";
 import { convert } from "../util/convert.js";
-import { HeaderI } from "../interface.js";
+import { HeaderI, TxI } from "../interface.js";
 import { TransactionHistoryItem, InOutput } from "./interface.js";
 
 type Transaction = TransactionCommon & {
@@ -30,6 +30,7 @@ export const getHistory = async ({
   toHeight = -1,
   start = 0,
   count = -1,
+  rawHistory,
 }: {
   addresses: string[];
   provider: NetworkProvider;
@@ -38,6 +39,7 @@ export const getHistory = async ({
   toHeight?: number;
   start?: number;
   count?: number;
+  rawHistory?: TxI[];
 }): Promise<TransactionHistoryItem[]> => {
   if (!addresses.length) {
     return [];
@@ -47,22 +49,26 @@ export const getHistory = async ({
     count = 1e10;
   }
 
-  const history = (
-    await Promise.all(
-      addresses.map(async (address) =>
-        provider.getHistory(address, fromHeight, toHeight)
+  const history = rawHistory
+    ? rawHistory.slice(start, start + count)
+    : (
+        await Promise.all(
+          addresses.map(async (address) =>
+            provider.getHistory(address, fromHeight, toHeight)
+          )
+        )
       )
-    )
-  )
-    .flat()
-    .filter(
-      (value, index, array) =>
-        array.findIndex((item) => item.tx_hash === value.tx_hash) === index
-    )
-    .sort((a, b) =>
-      a.height <= 0 || b.height <= 0 ? a.height - b.height : b.height - a.height
-    )
-    .slice(start, start + count);
+        .flat()
+        .filter(
+          (value, index, array) =>
+            array.findIndex((item) => item.tx_hash === value.tx_hash) === index
+        )
+        .sort((a, b) =>
+          a.height <= 0 || b.height <= 0
+            ? a.height - b.height
+            : b.height - a.height
+        )
+        .slice(start, start + count);
 
   // fill transaction timestamps by requesting headers from network and parsing them
   const uniqueHeights = history

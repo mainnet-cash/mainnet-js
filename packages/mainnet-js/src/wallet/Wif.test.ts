@@ -790,18 +790,15 @@ describe(`Wallet subscriptions`, () => {
 
     let aliceWatchResult = false;
     let aliceWatchCancel: CancelFn;
-    aliceWatchCancel = await alice.provider!.watchAddressStatus(
-      alice.getDepositAddress(),
-      async (_status) => {
-        await aliceWatchCancel?.();
-        aliceWatchResult = true;
-      }
-    );
+    aliceWatchCancel = await alice.watchStatus(async (_status) => {
+      await aliceWatchCancel?.();
+      aliceWatchResult = true;
+    });
 
     let bobWatchResult = false;
     let bobTransactionId = "";
     let bobWatchCancel: CancelFn;
-    bobWatchCancel = await bob.watchAddress(async (txHash) => {
+    bobWatchCancel = await bob.watchTransactionHashes(async (txHash) => {
       await bobWatchCancel?.();
       bobWatchResult = true;
       bobTransactionId = txHash;

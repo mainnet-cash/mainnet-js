@@ -14,7 +14,7 @@ import { CacheProvider } from "./interface.js";
 import { IndexedDbCache } from "./IndexedDbCache.js";
 import { MemoryCache } from "./MemoryCache.js";
 import { WebStorageCache } from "./WebStorageCache.js";
-import { Utxo } from "../interface.js";
+import { TxI, Utxo } from "../interface.js";
 
 export const stringify = (_: any) =>
   JSON.stringify(_, (_, value) =>
@@ -38,6 +38,9 @@ export interface WalletCacheEntry {
   change: boolean;
   status: string | null;
   utxos: Utxo[];
+  rawHistory: TxI[];
+  // Top block height of confirmed history items, used for incremental fetching
+  lastConfirmedHeight: number;
 }
 
 // Minimal interface for use in transaction signing
@@ -54,7 +57,9 @@ export interface WalletCacheI extends WalletCache {
   setStatusAndUtxos(
     address: string,
     status: string | null,
-    utxos: Utxo[]
+    utxos: Utxo[],
+    rawHistory: TxI[],
+    lastConfirmedHeight: number
   ): void;
 }
 
@@ -184,6 +189,8 @@ export class WalletCache implements WalletCacheI {
         change,
         status: null,
         utxos: [],
+        rawHistory: [],
+        lastConfirmedHeight: 0,
       };
 
       this.indexCache[address] = {
@@ -213,7 +220,9 @@ export class WalletCache implements WalletCacheI {
   public setStatusAndUtxos(
     address: string,
     status: string | null,
-    utxos: Utxo[]
+    utxos: Utxo[],
+    rawHistory: TxI[],
+    lastConfirmedHeight: number
   ) {
     const entry = this.get(address);
     if (!entry) {
@@ -228,6 +237,8 @@ export class WalletCache implements WalletCacheI {
     const key = `${this.walletId}-${index}-${change}`;
     this.walletCache[key].status = status;
     this.walletCache[key].utxos = utxos;
+    this.walletCache[key].rawHistory = rawHistory;
+    this.walletCache[key].lastConfirmedHeight = lastConfirmedHeight;
 
     // batch new data into a single writeout
     this.timeouts.push(

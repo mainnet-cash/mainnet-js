@@ -681,7 +681,7 @@ describe(`Test cashtokens`, () => {
     });
 
     let bobTxId = ".";
-    const txCancel = await bob.watchAddressTokenTransactions((tx) => {
+    const txCancel = await bob.watchTokenTransactions((tx) => {
       bobTxId = tx.txid;
     });
 

@@ -411,30 +411,18 @@ export class BaseWallet implements WalletI {
     throw Error("getBalance not implemented in BaseWallet");
   }
 
-  // watching for any transaction hash of this wallet
-  public async watchAddress(
-    callback: (txHash: string) => void
+  /**
+   * Watch wallet for any activity (status changes)
+   * This is the foundation for watchWalletBalance and watchWalletTransactions
+   * @param callback - Called when  the wallet has a status change
+   * @returns Cancel function to stop watching
+   */
+  public async watchStatus(
+    callback: (status: string | null, address: string) => void
   ): Promise<CancelFn> {
-    return this.provider.watchAddress(this.getDepositAddress(), callback);
-  }
-
-  // watching for any transaction of this wallet
-  public async watchAddressTransactions(
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.provider.watchAddressTransactions(
+    return this.provider.watchAddressStatus(
       this.getDepositAddress(),
-      callback
-    );
-  }
-
-  // watching for cashtoken transaction of this wallet
-  public async watchAddressTokenTransactions(
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.provider.watchAddressTokenTransactions(
-      this.getDepositAddress(),
-      callback
+      (status) => callback(status, this.getDepositAddress())
     );
   }
 
@@ -443,13 +431,10 @@ export class BaseWallet implements WalletI {
   public async watchBalance(
     callback: (balance: bigint) => void
   ): Promise<CancelFn> {
-    return this.provider.watchAddressStatus(
-      this.getDepositAddress(),
-      async (_status: string) => {
-        const balance = await this.getBalance();
-        callback(balance);
-      }
-    );
+    return this.watchStatus(async () => {
+      const balance = await this.getBalance();
+      callback(balance);
+    });
   }
 
   // waits for address balance to be greater than or equal to the target value
@@ -472,17 +457,10 @@ export class BaseWallet implements WalletI {
     category: string,
     callback: (balance: bigint) => void
   ): Promise<CancelFn> {
-    let previous: bigint | undefined = undefined;
-    return await this.provider.watchAddressStatus(
-      this.getDepositAddress(),
-      async (_status: string) => {
-        const balance = await this.getTokenBalance(category);
-        if (previous != balance) {
-          callback(balance);
-        }
-        previous = balance;
-      }
-    );
+    return await this.watchStatus(async () => {
+      const balance = await this.getTokenBalance(category);
+      callback(balance);
+    });
   }
 
   // waits for address token balance to be greater than or equal to the target amount
@@ -503,6 +481,71 @@ export class BaseWallet implements WalletI {
         }
       );
     });
+  }
+
+  /**
+   * Watch wallet for new transactions
+   * @param callback - Called with new transaction hashes when they appear
+   * @returns Cancel function to stop watching
+   */
+  public async watchTransactionHashes(
+    callback: (txHash: string) => void
+  ): Promise<CancelFn> {
+    const seenTxHashes = new Set<string>();
+
+    let topHeight = 0;
+
+    return this.watchStatus(async () => {
+      const history = (await this.getRawHistory(topHeight)).sort((a, b) =>
+        a.height <= 0 || b.height <= 0 ? -1 : b.height - a.height
+      );
+
+      const newTxHashes: string[] = [];
+
+      for (const tx of history) {
+        if (tx.height > topHeight) {
+          topHeight = tx.height;
+        }
+
+        if (!seenTxHashes.has(tx.tx_hash)) {
+          seenTxHashes.add(tx.tx_hash);
+          newTxHashes.push(tx.tx_hash);
+        }
+      }
+
+      if (newTxHashes.length > 0) {
+        newTxHashes.forEach((txHash) => callback(txHash));
+      }
+    });
+  }
+
+  /**
+   * Watch wallet for new transactions
+   * @param callback - Called with new transaction hashes when they appear
+   * @returns Cancel function to stop watching
+   */
+  public async watchTransactions(
+    callback: (transaction: ElectrumRawTransaction) => void
+  ): Promise<CancelFn> {
+    return this.watchTransactionHashes(async (txHash: string) => {
+      const tx = await this.provider.getRawTransactionObject(txHash);
+      callback(tx);
+    });
+  }
+
+  public async watchTokenTransactions(
+    callback: (tx: ElectrumRawTransaction) => void
+  ): Promise<CancelFn> {
+    return this.watchTransactions(
+      async (transaction: ElectrumRawTransaction) => {
+        if (
+          transaction.vin.some((val) => val.tokenData) ||
+          transaction.vout.some((val) => val.tokenData)
+        ) {
+          callback(transaction);
+        }
+      }
+    );
   }
 
   protected async _getMaxAmountToSend(
@@ -1021,18 +1064,15 @@ export class BaseWallet implements WalletI {
       // waiting for any address transaction
       let watchCancel: CancelFn;
       let initialResponseSeen = false;
-      watchCancel = await this.provider.watchAddressStatus(
-        this.getDepositAddress(),
-        async (_status) => {
-          if (initialResponseSeen) {
-            await watchCancel?.();
-            resolve(makeResponse());
-            return;
-          }
-
-          initialResponseSeen = true;
+      watchCancel = await this.watchStatus(async (_status) => {
+        if (initialResponseSeen) {
+          await watchCancel?.();
+          resolve(makeResponse());
+          return;
         }
-      );
+
+        initialResponseSeen = true;
+      });
     });
   }
 

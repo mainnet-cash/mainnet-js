@@ -283,79 +283,22 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   public async watchAddressStatus(
     cashaddr: string,
-    callback: (status: string) => void
+    callback: (status: string | null) => void
   ): Promise<CancelFn> {
-    const watchAddressStatusCallback = async (data) => {
+    const watchAddressStatusCallback = async (
+      data: [address: string, status: string | null]
+    ) => {
       // subscription acknowledgement is the latest known status or null if no status is known
       // status is an array: [ cashaddr, statusHash ]
       if (data instanceof Array) {
-        const addr = data[0] as string;
-        if (addr !== cashaddr) {
+        if (data[0] !== cashaddr) {
           return;
         }
-
-        const status = data[1];
-        callback(status);
+        callback(data[1]);
       }
     };
 
     return this.subscribeToAddress(cashaddr, watchAddressStatusCallback);
-  }
-
-  public async watchAddress(
-    cashaddr: string,
-    callback: (txHash: string) => void
-  ): Promise<CancelFn> {
-    const historyMap: { [txid: string]: boolean } = {};
-
-    this.getHistory(cashaddr).then((history) =>
-      history.forEach((val) => (historyMap[val.tx_hash] = true))
-    );
-
-    const watchAddressStatusCallback = async () => {
-      const newHistory = await this.getHistory(cashaddr);
-      // sort history to put unconfirmed transactions in the beginning, then transactions in block height descenting order
-      const txHashes = newHistory
-        .sort((a, b) =>
-          a.height <= 0 || b.height <= 0 ? -1 : b.height - a.height
-        )
-        .map((val) => val.tx_hash);
-      for (const hash of txHashes) {
-        if (!(hash in historyMap)) {
-          historyMap[hash] = true;
-          callback(hash);
-          // exit early to prevent further map lookups
-          break;
-        }
-      }
-    };
-
-    return this.watchAddressStatus(cashaddr, watchAddressStatusCallback);
-  }
-
-  public async watchAddressTransactions(
-    cashaddr: string,
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.watchAddress(cashaddr, async (txHash: string) => {
-      const tx = await this.getRawTransactionObject(txHash);
-      callback(tx);
-    });
-  }
-
-  public async watchAddressTokenTransactions(
-    cashaddr: string,
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.watchAddress(cashaddr, async (txHash: string) => {
-      const tx = await this.getRawTransactionObject(txHash, true);
-      if (
-        tx.vin.some((val) => val.tokenData) ||
-        tx.vout.some((val) => val.tokenData)
-      ) {
-        callback(tx);
-      }
-    });
   }
 
   // watch for block headers and block height, if `skipCurrentHeight` is set, the notification about current block will not arrive

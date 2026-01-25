@@ -356,6 +356,210 @@ describe("HDWallet", () => {
     Config.UseMemoryCache = memoryCacheValue;
   });
 
+  it("WalletCache persistence, rawHistory", async () => {
+    const memoryCacheValue = Config.UseMemoryCache;
+    Config.UseMemoryCache = true;
+
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    // get deposit address to populate cache
+    hdWallet.getDepositAddress(0);
+    expect(
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
+    ).toEqual([]);
+
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 100000n,
+    });
+
+    // rawHistory should now have one entry
+    expect(
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory.length
+    ).toBe(1);
+
+    // persist cache
+    await hdWallet.walletCache.persist();
+
+    // check cache data is there in other instance
+    const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
+    await otherWallet.watchPromise;
+    expect(
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
+        .length
+    ).toBe(1);
+    expect(
+      stringify(
+        hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
+      )
+    ).toBe(
+      stringify(
+        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
+      )
+    );
+
+    Config.UseMemoryCache = memoryCacheValue;
+  });
+
+  it("getRawHistory uses cached data", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+
+    // Send to multiple deposit addresses
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 100000n,
+    });
+
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(1),
+      value: 100000n,
+    });
+
+    // Check depositRawHistory arrays are populated
+    expect(hdWallet.depositRawHistory[0].length).toBe(1);
+    expect(hdWallet.depositRawHistory[1].length).toBe(1);
+
+    // getRawHistory should return deduplicated history from cache
+    const rawHistory = await hdWallet.getRawHistory();
+    expect(rawHistory.length).toBe(2);
+
+    // Verify history items have expected structure
+    expect(rawHistory[0]).toHaveProperty("tx_hash");
+    expect(rawHistory[0]).toHaveProperty("height");
+  });
+
+  it("getHistory works with cached rawHistory", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 100000n,
+    });
+
+    const history = await hdWallet.getHistory({ unit: "sat" });
+    expect(history.length).toBe(1);
+    expect(history[0].valueChange).toBe(100000);
+  });
+
+  it("incremental history fetching with lastConfirmedHeight", async () => {
+    const memoryCacheValue = Config.UseMemoryCache;
+    Config.UseMemoryCache = true;
+
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+
+    // First transaction
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 50000n,
+    });
+
+    // Check rawHistory is populated
+    const cacheEntry1 = hdWallet.walletCache.get(hdWallet.getDepositAddress(0));
+    expect(cacheEntry1?.rawHistory.length).toBe(1);
+    // lastConfirmedHeight may be 0 if tx is unconfirmed
+    expect(cacheEntry1?.lastConfirmedHeight).toBeGreaterThanOrEqual(0);
+
+    // Second transaction to same address
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 60000n,
+    });
+
+    // Check history accumulated correctly
+    const cacheEntry2 = hdWallet.walletCache.get(hdWallet.getDepositAddress(0));
+    expect(cacheEntry2?.rawHistory.length).toBe(2);
+
+    // Verify getRawHistory returns both transactions
+    const rawHistory = await hdWallet.getRawHistory();
+    expect(rawHistory.length).toBe(2);
+
+    // Persist and reload - cache should be preserved
+    await hdWallet.walletCache.persist();
+    const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
+    await otherWallet.watchPromise;
+
+    const reloadedEntry = otherWallet.walletCache.get(
+      hdWallet.getDepositAddress(0)
+    );
+    expect(reloadedEntry?.lastConfirmedHeight).toBe(
+      cacheEntry2?.lastConfirmedHeight
+    );
+    expect(reloadedEntry?.rawHistory.length).toBe(2);
+
+    Config.UseMemoryCache = memoryCacheValue;
+  });
+
+  it("watchWallet registers and removes callbacks", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const cancel = await hdWallet.watchStatus(() => {});
+
+    // Verify callback was registered
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(1);
+
+    // Cancel
+    await cancel();
+
+    // Verify callback was removed
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
+  });
+
+  it("watchWallet supports multiple watchers", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const cancel1 = await hdWallet.watchStatus(() => {});
+    const cancel2 = await hdWallet.watchStatus(() => {});
+
+    // Verify both callbacks registered
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(2);
+
+    // Cancel one watcher
+    await cancel1();
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(1);
+
+    await cancel2();
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
+  });
+
+  it("watchWalletBalance sets up callback correctly", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const cancel = await hdWallet.watchBalance(() => {});
+
+    // Verify callback was registered via watchWallet
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(1);
+
+    await cancel();
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
+  });
+
+  it("watchWalletTransactions sets up callback correctly", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const cancel = await hdWallet.watchTransactions(() => {});
+
+    // Verify callback was registered via watchWallet
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(1);
+
+    await cancel();
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
+  });
+
   it("Cashtokens integration test", async () => {
     const fundingWallet = await RegTestWallet.fromId(
       "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
