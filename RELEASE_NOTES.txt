@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+3.0.0-next.5
+
+* Fix walletCache not preserving bin arrays
+
 3.0.0-next.4
 
 * Add HDWallet history tracking and querying
