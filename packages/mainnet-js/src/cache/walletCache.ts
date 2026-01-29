@@ -1,5 +1,6 @@
 import {
   assertSuccess,
+  binToHex,
   CashAddressNetworkPrefix,
   CashAddressType,
   deriveHdPathRelative,
@@ -7,21 +8,27 @@ import {
   hash160,
   HdPrivateNodeValid,
   HdPublicNodeValid,
+  hexToBin,
   secp256k1,
 } from "@bitauth/libauth";
 import { Config } from "../config.js";
-import { CacheProvider } from "./interface.js";
+import { TxI, Utxo } from "../interface.js";
 import { IndexedDbCache } from "./IndexedDbCache.js";
+import { CacheProvider } from "./interface.js";
 import { MemoryCache } from "./MemoryCache.js";
 import { WebStorageCache } from "./WebStorageCache.js";
-import { TxI, Utxo } from "../interface.js";
 
 export const stringify = (_: any) =>
-  JSON.stringify(_, (_, value) =>
-    typeof value === "bigint" ? value.toString() + "n" : value
-  );
+  JSON.stringify(_, (key, value) => {
+    if (key.includes("Key")) return binToHex(value);
+    return typeof value === "bigint" ? value.toString() + "n" : value
+  });
 export const parse = (data: string) =>
-  JSON.parse(data, (_, value) => {
+  JSON.parse(data, (key, value) => {
+    if (key.includes("Key") && typeof value === "string") {
+      return hexToBin(value);
+    }
+
     if (typeof value === "string" && /^\d+n$/.test(value)) {
       return BigInt(value.slice(0, -1));
     }
@@ -102,7 +109,7 @@ export class WalletCache implements WalletCacheI {
       Config.UseIndexedDBCache &&
       !(this._storage instanceof IndexedDbCache)
     ) {
-      this._storage = new IndexedDbCache();
+      this._storage = new IndexedDbCache("WalletCache");
       return this._storage;
     }
 

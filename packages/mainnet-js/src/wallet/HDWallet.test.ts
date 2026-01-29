@@ -283,6 +283,10 @@ describe("HDWallet", () => {
 
     // check cache data is there in other instance
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
+    expect(otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.privateKey instanceof Uint8Array).toBe(true);
+    expect(otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.publicKey instanceof Uint8Array).toBe(true);
+    expect(otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.publicKeyHash instanceof Uint8Array).toBe(true);
+
     expect(
       otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
     ).toBeDefined();
