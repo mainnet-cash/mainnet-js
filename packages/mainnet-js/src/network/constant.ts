@@ -34,7 +34,7 @@ export const testnetServers = [
   // "wss://chipnet.bch.ninja:50004",
 ];
 
-export const regtestServers = ["ws://127.0.0.1:60003"];
+export const regtestServers = ["ws://host.docker.internal:60003"];
 
 export const defaultServers = {
   mainnet: mainnetServers,

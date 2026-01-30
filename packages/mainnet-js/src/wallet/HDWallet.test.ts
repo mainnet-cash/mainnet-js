@@ -123,6 +123,8 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(4),
       value: 100000n,
     });
+    while (hdWallet.depositIndex < 5)
+      await new Promise((r) => setTimeout(r, 50));
     expect(hdWallet.depositIndex).toBe(5);
 
     // beyond gap size, should not update index
@@ -141,28 +143,27 @@ describe("HDWallet", () => {
       "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
     );
 
-    // Create a wallet and fund addresses 0 and 22
-    // Address 0 is within the initial gap scan (0-19)
-    // Address 22 is beyond it, but only 19 unused addresses separate 0 and 22
-    // so the scanner should extend and find 22
+    // Create a wallet and fund addresses 0 and 20
+    // Initial scan covers 0-19, finds addr 0 used (depositIndex=1)
+    // Gap from index 1 to end of scan (19) is 19 < 20, so scanner extends
+    // Next batch includes addr 20, finds it used (depositIndex=21)
     const seedWallet = await RegTestHDWallet.newRandom();
     const addr0 = seedWallet.getDepositAddress(0);
-    const addr22 = seedWallet.getDepositAddress(22);
+    const addr20 = seedWallet.getDepositAddress(20);
 
     await fundingWallet.send([
       { cashaddr: addr0, value: 10000n },
-      { cashaddr: addr22, value: 10000n },
+      { cashaddr: addr20, value: 10000n },
     ]);
 
     // Restore wallet from same seed, starting from index 0
-    // It should scan 0-19, find addr 0 used, extend, find addr 22 used, and set depositIndex to 23
     const restoredWallet = await RegTestHDWallet.fromSeed(
       seedWallet.mnemonic!,
       seedWallet.derivation
     );
     await restoredWallet.watchPromise;
 
-    expect(restoredWallet.depositIndex).toBe(23);
+    expect(restoredWallet.depositIndex).toBe(21);
   });
 
   it("changeIndex updates when spending", async () => {
@@ -188,6 +189,9 @@ describe("HDWallet", () => {
       cashaddr: bob.getDepositAddress(),
       value: 50000n,
     });
+    while (hdWallet.changeIndex < 1) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
     expect(hdWallet.changeIndex).toBe(1);
 
     // fund and spend again, change goes to change address 1
@@ -199,7 +203,20 @@ describe("HDWallet", () => {
       cashaddr: bob.getDepositAddress(),
       value: 50000n,
     });
+    while (hdWallet.changeIndex < 2) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
     expect(hdWallet.changeIndex).toBe(2);
+
+    // Restore wallet from same seed and verify depositIndex is correct
+    const restoredWallet = await RegTestHDWallet.fromSeed(
+      hdWallet.mnemonic!,
+      hdWallet.derivation
+    );
+    await restoredWallet.watchPromise;
+
+    expect(restoredWallet.depositIndex).toBe(hdWallet.depositIndex);
+    expect(restoredWallet.changeIndex).toBe(hdWallet.changeIndex);
   });
 
   it("hasAddress should recognize wallet addresses", async () => {

@@ -279,20 +279,11 @@ export class HDWallet extends BaseWallet {
         this.watchAddressType(true, gapSize),
       ]);
 
-      // Check if the tail of each status array has a full gap of unused addresses
-      const depositTailGap = this.countTailGap(this.depositStatuses);
-      const changeTailGap = this.countTailGap(this.changeStatuses);
-      needsMore = depositTailGap < gapSize || changeTailGap < gapSize;
+      // Check if we have a full gap of addresses beyond the last used index
+      const depositGap = this.depositStatuses.length - this.depositIndex;
+      const changeGap = this.changeStatuses.length - this.changeIndex;
+      needsMore = depositGap < gapSize || changeGap < gapSize;
     }
-  }
-
-  private countTailGap(statuses: (string | null)[]): number {
-    let gap = 0;
-    for (let i = statuses.length - 1; i >= 0; i--) {
-      if (statuses[i]) break;
-      gap++;
-    }
-    return gap;
   }
 
   /// Watch addresses of a specific type (deposit or change) for activity
@@ -320,7 +311,7 @@ export class HDWallet extends BaseWallet {
     };
 
     const startIndex = statuses.length;
-    const stopIndex = startIndex + gapSize;
+    const stopIndex = getCurrentIndex() + gapSize;
 
     const addresses = arrayRange(startIndex, stopIndex).map(
       (i) => this.walletCache.getByIndex(i, isChange).address
@@ -409,13 +400,15 @@ export class HDWallet extends BaseWallet {
                   merged,
                   lastConfirmedHeight
                 );
+              }
+              statuses[index] = status;
 
+              if (status !== null) {
                 const newIndex = index + 1;
                 if (newIndex > getCurrentIndex()) {
                   setCurrentIndex(newIndex);
                 }
               }
-              statuses[index] = status;
 
               // Notify wallet watchers of the status change
               this.notifyWalletWatchers(status, addr);
