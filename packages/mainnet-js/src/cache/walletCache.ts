@@ -80,7 +80,7 @@ export class WalletCache implements WalletCacheI {
       change: boolean;
     }
   > = {};
-  private timeouts: NodeJS.Timeout[] = [];
+  private debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   get storage(): CacheProvider | undefined {
     if (
@@ -141,9 +141,16 @@ export class WalletCache implements WalletCacheI {
     }
   }
 
+  private schedulePersist() {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+      this.persist().catch(() => {});
+    }, this.writeTimeout);
+  }
+
   public async persist() {
-    this.timeouts.map(clearTimeout);
-    this.timeouts = [];
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = undefined;
 
     this.storage?.setItem(
       `walletCache-${this.walletId}`,
@@ -205,12 +212,7 @@ export class WalletCache implements WalletCacheI {
         change,
       };
 
-      // batch new data into a single writeout
-      this.timeouts.push(
-        setTimeout(() => {
-          this.persist().catch(() => {});
-        }, this.writeTimeout)
-      );
+      this.schedulePersist();
     }
 
     return this.walletCache[id];
@@ -247,11 +249,6 @@ export class WalletCache implements WalletCacheI {
     this.walletCache[key].rawHistory = rawHistory;
     this.walletCache[key].lastConfirmedHeight = lastConfirmedHeight;
 
-    // batch new data into a single writeout
-    this.timeouts.push(
-      setTimeout(() => {
-        this.persist().catch(() => {});
-      }, this.writeTimeout)
-    );
+    this.schedulePersist();
   }
 }
