@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+3.0.0-next.6
+
+* Add BaseWallet.hasAddress() utility
+* HDWallet's watchBalance and watchTokenBalance are now debounced to prevent too frequent updates
+* Fix IndexedDbCache not respecting the store name
+
 3.0.0-next.5
 
 * Fix walletCache not preserving bin arrays
