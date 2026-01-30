@@ -80,9 +80,6 @@ export class HDWallet extends BaseWallet {
   // max index used for change address derivation
   changeIndex: number = 0;
 
-  depositStatusCallbacks: Array<(status: string) => void> = [];
-  changeStatusCallbacks: Array<(status: string) => void> = [];
-
   depositWatchCancels: Array<CancelFn> = [];
   changeWatchCancels: Array<CancelFn> = [];
 
@@ -322,9 +319,8 @@ export class HDWallet extends BaseWallet {
       }
     };
 
-    const currentIndex = getCurrentIndex();
     const startIndex = statuses.length;
-    const stopIndex = Math.max(currentIndex, startIndex + gapSize);
+    const stopIndex = startIndex + gapSize;
 
     const addresses = arrayRange(startIndex, stopIndex).map(
       (i) => this.walletCache.getByIndex(i, isChange).address
@@ -338,6 +334,7 @@ export class HDWallet extends BaseWallet {
 
             if (statuses[index] !== undefined) {
               resolve();
+              return;
             }
 
             const {
