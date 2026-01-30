@@ -95,7 +95,7 @@ export class HDWallet extends BaseWallet {
   depositRawHistory: Array<TxI[]> = [];
   changeRawHistory: Array<TxI[]> = [];
 
-  watchPromise?: Promise<any[]> = undefined;
+  watchPromise?: Promise<any> = undefined;
 
   public get networkPrefix(): CashAddressNetworkPrefix {
     return prefixFromNetworkMap[this.network];
@@ -249,7 +249,7 @@ export class HDWallet extends BaseWallet {
     // init wallet cache
     await this.walletCache.init();
     // start watching addresses asynchronously
-    this.makeWatchPromise().catch(() => {});
+    this.watchPromise = this.makeWatchPromise().catch(() => {});
 
     return this;
   }
@@ -267,8 +267,7 @@ export class HDWallet extends BaseWallet {
   /// Scan more addresses for activity beyond the current gap limit, extending the watched range as needed
   public async scanMoreAddresses(amount: number = GAP_SIZE) {
     await this.watchPromise;
-
-    await this.makeWatchPromise(amount);
+    this.watchPromise = this.makeWatchPromise(amount);
     await this.watchPromise;
   }
 
@@ -276,10 +275,27 @@ export class HDWallet extends BaseWallet {
   private async makeWatchPromise(gapSize: number = GAP_SIZE) {
     await this.watchPromise;
 
-    this.watchPromise = Promise.all([
-      this.watchAddressType(false, gapSize),
-      this.watchAddressType(true, gapSize),
-    ]);
+    let needsMore = true;
+    while (needsMore) {
+      await Promise.all([
+        this.watchAddressType(false, gapSize),
+        this.watchAddressType(true, gapSize),
+      ]);
+
+      // Check if the tail of each status array has a full gap of unused addresses
+      const depositTailGap = this.countTailGap(this.depositStatuses);
+      const changeTailGap = this.countTailGap(this.changeStatuses);
+      needsMore = depositTailGap < gapSize || changeTailGap < gapSize;
+    }
+  }
+
+  private countTailGap(statuses: (string | null)[]): number {
+    let gap = 0;
+    for (let i = statuses.length - 1; i >= 0; i--) {
+      if (statuses[i]) break;
+      gap++;
+    }
+    return gap;
   }
 
   /// Watch addresses of a specific type (deposit or change) for activity
@@ -307,11 +323,7 @@ export class HDWallet extends BaseWallet {
     };
 
     const currentIndex = getCurrentIndex();
-    const startIndex =
-      (statuses
-        .filter((s) => s)
-        .map((_, i) => i)
-        .at(-1) ?? -1) + 1;
+    const startIndex = statuses.length;
     const stopIndex = Math.max(currentIndex, startIndex + gapSize);
 
     const addresses = arrayRange(startIndex, stopIndex).map(
@@ -404,7 +416,6 @@ export class HDWallet extends BaseWallet {
                 const newIndex = index + 1;
                 if (newIndex > getCurrentIndex()) {
                   setCurrentIndex(newIndex);
-                  this.makeWatchPromise();
                 }
               }
               statuses[index] = status;

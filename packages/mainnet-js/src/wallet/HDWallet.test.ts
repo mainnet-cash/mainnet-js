@@ -1,5 +1,5 @@
 import { assertSuccess, decodeTransaction, hexToBin } from "@bitauth/libauth";
-import { HDWallet, RegTestHDWallet } from "./HDWallet";
+import { HDWallet, RegTestHDWallet, GAP_SIZE } from "./HDWallet";
 import { RegTestWallet, Wallet } from "./Wif";
 import { Config } from "../config";
 import { getNextUnusedIndex } from "../util/hd";
@@ -134,6 +134,35 @@ describe("HDWallet", () => {
 
     await hdWallet.scanMoreAddresses(30);
     expect(hdWallet.depositIndex).toBe(31);
+  });
+
+  it("should scan beyond gap to find real deposit index", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+
+    // Create a wallet and fund addresses 0 and 22
+    // Address 0 is within the initial gap scan (0-19)
+    // Address 22 is beyond it, but only 19 unused addresses separate 0 and 22
+    // so the scanner should extend and find 22
+    const seedWallet = await RegTestHDWallet.newRandom();
+    const addr0 = seedWallet.getDepositAddress(0);
+    const addr22 = seedWallet.getDepositAddress(22);
+
+    await fundingWallet.send([
+      { cashaddr: addr0, value: 10000n },
+      { cashaddr: addr22, value: 10000n },
+    ]);
+
+    // Restore wallet from same seed, starting from index 0
+    // It should scan 0-19, find addr 0 used, extend, find addr 22 used, and set depositIndex to 23
+    const restoredWallet = await RegTestHDWallet.fromSeed(
+      seedWallet.mnemonic!,
+      seedWallet.derivation
+    );
+    await restoredWallet.watchPromise;
+
+    expect(restoredWallet.depositIndex).toBe(23);
   });
 
   it("changeIndex updates when spending", async () => {
