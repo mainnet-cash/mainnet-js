@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+3.0.0-next.7
+
+* Improve the HDWallet address scanning logic
+
 3.0.0-next.6
 
 * Add BaseWallet.hasAddress() utility
