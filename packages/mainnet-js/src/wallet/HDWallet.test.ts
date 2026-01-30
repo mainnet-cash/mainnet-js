@@ -136,6 +136,56 @@ describe("HDWallet", () => {
     expect(hdWallet.depositIndex).toBe(31);
   });
 
+  it("changeIndex updates when spending", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+    const hdWallet = await RegTestHDWallet.newRandom();
+    const bob = await RegTestWallet.newRandom();
+
+    expect(hdWallet.depositIndex).toBe(0);
+    expect(hdWallet.changeIndex).toBe(0);
+
+    // fund deposit address 0
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 100000n,
+    });
+    expect(hdWallet.depositIndex).toBe(1);
+    expect(hdWallet.changeIndex).toBe(0);
+
+    // spend, which creates change on change address 0
+    await hdWallet.send({
+      cashaddr: bob.getDepositAddress(),
+      value: 50000n,
+    });
+    expect(hdWallet.changeIndex).toBe(1);
+
+    // fund and spend again, change goes to change address 1
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(),
+      value: 100000n,
+    });
+    await hdWallet.send({
+      cashaddr: bob.getDepositAddress(),
+      value: 50000n,
+    });
+    expect(hdWallet.changeIndex).toBe(2);
+  });
+
+  it("hasAddress should recognize wallet addresses", async () => {
+    const hdWallet = await RegTestHDWallet.newRandom();
+
+    const deposit0 = hdWallet.getDepositAddress(0);
+    const deposit1 = hdWallet.getDepositAddress(1);
+    const change0 = hdWallet.getChangeAddress(0);
+
+    expect(hdWallet.hasAddress(deposit0)).toBe(true);
+    expect(hdWallet.hasAddress(deposit1)).toBe(true);
+    expect(hdWallet.hasAddress(change0)).toBe(true);
+    expect(hdWallet.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")).toBe(false);
+  });
+
   it("Should send funds from an HDWallet", async () => {
     const fundingWallet = await RegTestWallet.fromId(
       "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"

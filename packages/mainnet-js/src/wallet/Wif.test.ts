@@ -39,6 +39,14 @@ describe(`Test creation of wallet from walletId`, () => {
     expect(w.privateKeyWif !== "undefined").toBeTruthy();
   });
 
+  test("hasAddress should recognize wallet address", async () => {
+    let w = await RegTestWallet.fromId(
+      "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
+    );
+    expect(w.hasAddress(w.getDepositAddress())).toBe(true);
+    expect(w.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")).toBe(false);
+  });
+
   test("Should get a new random wallet", async () => {
     let w = await RegTestWallet.newRandom();
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();

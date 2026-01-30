@@ -401,9 +401,9 @@ export class HDWallet extends BaseWallet {
                   lastConfirmedHeight
                 );
 
-                const newIndex = Math.max(currentIndex, index + 1);
-                if (newIndex > currentIndex) {
-                  setCurrentIndex(Math.max(newIndex, getCurrentIndex()));
+                const newIndex = index + 1;
+                if (newIndex > getCurrentIndex()) {
+                  setCurrentIndex(newIndex);
                   this.makeWatchPromise();
                 }
               }
