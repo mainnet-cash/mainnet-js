@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+3.0.0-next.8
+
+* Improve address scan and gap handling
+* Fix updating top address index
+
 3.0.0-next.7
 
 * Improve the HDWallet address scanning logic
