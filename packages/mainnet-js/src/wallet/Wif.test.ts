@@ -44,7 +44,9 @@ describe(`Test creation of wallet from walletId`, () => {
       "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
     );
     expect(w.hasAddress(w.getDepositAddress())).toBe(true);
-    expect(w.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")).toBe(false);
+    expect(
+      w.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")
+    ).toBe(false);
   });
 
   test("Should get a new random wallet", async () => {

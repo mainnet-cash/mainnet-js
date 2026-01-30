@@ -212,7 +212,9 @@ describe("HDWallet", () => {
     expect(hdWallet.hasAddress(deposit0)).toBe(true);
     expect(hdWallet.hasAddress(deposit1)).toBe(true);
     expect(hdWallet.hasAddress(change0)).toBe(true);
-    expect(hdWallet.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")).toBe(false);
+    expect(
+      hdWallet.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")
+    ).toBe(false);
   });
 
   it("Should send funds from an HDWallet", async () => {
@@ -362,9 +364,18 @@ describe("HDWallet", () => {
 
     // check cache data is there in other instance
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
-    expect(otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.privateKey instanceof Uint8Array).toBe(true);
-    expect(otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.publicKey instanceof Uint8Array).toBe(true);
-    expect(otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.publicKeyHash instanceof Uint8Array).toBe(true);
+    expect(
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
+        ?.privateKey instanceof Uint8Array
+    ).toBe(true);
+    expect(
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
+        ?.publicKey instanceof Uint8Array
+    ).toBe(true);
+    expect(
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
+        ?.publicKeyHash instanceof Uint8Array
+    ).toBe(true);
 
     expect(
       otherWallet.walletCache.get(hdWallet.getDepositAddress(0))

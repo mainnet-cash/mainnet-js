@@ -21,7 +21,7 @@ import { WebStorageCache } from "./WebStorageCache.js";
 export const stringify = (_: any) =>
   JSON.stringify(_, (key, value) => {
     if (key.includes("Key")) return binToHex(value);
-    return typeof value === "bigint" ? value.toString() + "n" : value
+    return typeof value === "bigint" ? value.toString() + "n" : value;
   });
 export const parse = (data: string) =>
   JSON.parse(data, (key, value) => {
