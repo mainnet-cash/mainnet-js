@@ -158,6 +158,14 @@ export class BaseWallet implements WalletI {
     // return this.tokenaddr;
     throw Error("getTokenDepositAddress not implemented in BaseWallet");
   }
+
+  // check if a given address belongs to this wallet
+  public hasAddress(address: string): boolean {
+    return (
+      address === this.getDepositAddress() ||
+      address === this.getChangeAddress()
+    );
+  }
   //#endregion Accessors
 
   //#region Constructors and Statics

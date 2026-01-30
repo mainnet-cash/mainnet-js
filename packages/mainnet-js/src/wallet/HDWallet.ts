@@ -470,6 +470,35 @@ export class HDWallet extends BaseWallet {
     };
   }
 
+  public async watchBalance(
+    callback: (balance: bigint) => void
+  ): Promise<CancelFn> {
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined = undefined;
+    return this.watchStatus(async () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        debounceTimer = undefined;
+        const balance = await this.getBalance();
+        callback(balance);
+      }, 100);
+    });
+  }
+
+  public async watchTokenBalance(
+    category: string,
+    callback: (balance: bigint) => void
+  ): Promise<CancelFn> {
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined = undefined;
+    return await this.watchStatus(async () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        debounceTimer = undefined;
+        const balance = await this.getTokenBalance(category);
+        callback(balance);
+      }, 100);
+    });
+  }
+
   /**
    * utxos Get unspent outputs for the wallet
    *
@@ -519,6 +548,10 @@ export class HDWallet extends BaseWallet {
     index = getNextUnusedIndex(index, this.changeStatuses);
 
     return this.walletCache.getByIndex(index, true).tokenAddress;
+  }
+
+  public hasAddress(address: string): boolean {
+    return this.walletCache.get(address) !== undefined;
   }
 
   /**

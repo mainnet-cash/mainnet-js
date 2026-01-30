@@ -36,7 +36,7 @@ export class IndexedDbCache implements CacheProvider {
   }
 
   async init() {
-    const db = indexedDB.open("ElectrumNetworkProviderCache", 1);
+    const db = indexedDB.open(this.objectStoreName, 1);
 
     this.db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = db;
