@@ -9,7 +9,7 @@
     "url": "https://github.com/mainnet-cash/mainnet-js/issues"
   },
   "name": "mainnet-js",
-  "version": "3.0.0-next.9",
+  "version": "3.0.0-next.10",
   "homepage": "https://mainnet.cash",
   "module": "dist/module/index.js",
   "browser": {

@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+3.0.0-next.10
+
+* Rework subscription tracking on wallet level
+* `Wallet.stop()` now unsubscribes all callbacks, it should be used where possible when discarding a wallet
+
 3.0.0-next.9
 
 * Better debounce for walletCache
