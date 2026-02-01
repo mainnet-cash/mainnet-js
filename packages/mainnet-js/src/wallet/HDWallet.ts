@@ -253,12 +253,15 @@ export class HDWallet extends BaseWallet {
 
   /// Stops the wallet from watching for address changes
   /// After calling this method, the wallet will no longer update and is considered defunct
-  public async stop() {
-    await Promise.all(
-      [...this.depositWatchCancels, ...this.changeWatchCancels].map(
-        (cancelFn) => cancelFn?.()
-      )
-    );
+  public override async stop() {
+    await Promise.all([
+      super.stop(),
+      ...this.depositWatchCancels.map((fn) => fn?.()),
+      ...this.changeWatchCancels.map((fn) => fn?.()),
+    ]);
+    this.depositWatchCancels = [];
+    this.changeWatchCancels = [];
+    this.walletWatchCallbacks = [];
   }
 
   /// Scan more addresses for activity beyond the current gap limit, extending the watched range as needed

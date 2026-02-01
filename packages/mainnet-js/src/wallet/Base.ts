@@ -74,6 +74,7 @@ export class BaseWallet implements WalletI {
   readonly isTestnet: boolean;
   name: string = "";
   _util?: Util;
+  protected cancelFns: CancelFn[] = [];
 
   public get networkPrefix(): CashAddressNetworkPrefix {
     return prefixFromNetworkMap[this.network];
@@ -420,6 +421,29 @@ export class BaseWallet implements WalletI {
   }
 
   /**
+   * Track a cancel function so it can be cancelled by stop()
+   * Returns a wrapped cancel function that also removes itself from tracking
+   */
+  protected trackCancelFn(cancelFn: CancelFn): CancelFn {
+    this.cancelFns.push(cancelFn);
+    return async () => {
+      const index = this.cancelFns.indexOf(cancelFn);
+      if (index !== -1) {
+        this.cancelFns.splice(index, 1);
+      }
+      await cancelFn();
+    };
+  }
+
+  /**
+   * Stop all active subscriptions on this wallet
+   */
+  public async stop(): Promise<void> {
+    const fns = this.cancelFns.splice(0);
+    await Promise.all(fns.map((fn) => fn()));
+  }
+
+  /**
    * Watch wallet for any activity (status changes)
    * This is the foundation for watchWalletBalance and watchWalletTransactions
    * @param callback - Called when  the wallet has a status change
@@ -428,10 +452,11 @@ export class BaseWallet implements WalletI {
   public async watchStatus(
     callback: (status: string | null, address: string) => void
   ): Promise<CancelFn> {
-    return this.provider.watchAddressStatus(
+    const cancelFn = await this.provider.watchAddressStatus(
       this.getDepositAddress(),
       (status) => callback(status, this.getDepositAddress())
     );
+    return this.trackCancelFn(cancelFn);
   }
 
   // sets up a callback to be called upon wallet's balance change
