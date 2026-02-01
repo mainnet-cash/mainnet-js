@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+3.0.0-next.9
+
+* Better debounce for walletCache
+* Improve performance of getSuitableUtxos, checkUtxos, getHistory
+* Introduce batched cache and provider operations
+
 3.0.0-next.8
 
 * Improve address scan and gap handling
