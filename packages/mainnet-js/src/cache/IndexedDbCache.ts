@@ -109,6 +109,51 @@ export class IndexedDbCache implements CacheProvider {
     });
   }
 
+  async getItems(keys: string[]): Promise<Map<string, string | null>> {
+    if (!this.db) {
+      throw new Error("Database is not initialized");
+    }
+
+    const transaction = this.db.transaction(this.objectStoreName, "readonly");
+    const objectStore = transaction.objectStore(this.objectStoreName);
+
+    const results = new Map<string, string | null>();
+    const requests = keys.map((key) => ({
+      key,
+      request: objectStore.get(key),
+    }));
+
+    return new Promise((resolve, reject) => {
+      transaction.onerror = reject;
+      transaction.oncomplete = () => {
+        for (const { key, request } of requests) {
+          results.set(key, request.result ?? null);
+        }
+        resolve(results);
+      };
+    });
+  }
+
+  async setItems(entries: [string, string][]): Promise<void> {
+    if (!this.db) {
+      throw new Error("Database is not initialized");
+    }
+
+    if (entries.length === 0) return;
+
+    const transaction = this.db.transaction(this.objectStoreName, "readwrite");
+    const objectStore = transaction.objectStore(this.objectStoreName);
+
+    for (const [key, value] of entries) {
+      objectStore.put(value, key);
+    }
+
+    return new Promise((resolve, reject) => {
+      transaction.onerror = reject;
+      transaction.oncomplete = () => resolve();
+    });
+  }
+
   async clear(): Promise<void> {
     if (!this.db) {
       throw new Error("Database is not initialized");

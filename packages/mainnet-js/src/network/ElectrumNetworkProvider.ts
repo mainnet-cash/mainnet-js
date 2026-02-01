@@ -131,6 +131,107 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return verbose ? decodeHeader(result) : result;
   }
 
+  async getRawTransactions(hashes: string[]): Promise<Map<string, string>> {
+    if (hashes.length === 0) return new Map();
+
+    const results = new Map<string, string>();
+    const keys = hashes.map((h) => `tx-${this.network}-${h}-false-false`);
+
+    // batch cache read
+    let cached: Map<string, string | null> | undefined;
+    if (this.cache) {
+      cached = await this.cache.getItems(keys);
+    }
+
+    const misses: string[] = [];
+    for (let i = 0; i < hashes.length; i++) {
+      const val = cached?.get(keys[i]);
+      if (val) {
+        results.set(hashes[i], val);
+      } else {
+        misses.push(hashes[i]);
+      }
+    }
+
+    if (misses.length > 0) {
+      const fetched = await Promise.all(
+        misses.map(async (hash) => {
+          const tx = await this.performRequest<string>(
+            "blockchain.transaction.get",
+            hash,
+            false
+          );
+          return [hash, tx] as [string, string];
+        })
+      );
+
+      // batch cache write
+      if (this.cache) {
+        const entries: [string, string][] = fetched.map(([hash, tx]) => [
+          `tx-${this.network}-${hash}-false-false`,
+          tx,
+        ]);
+        await this.cache.setItems(entries);
+      }
+
+      for (const [hash, tx] of fetched) {
+        results.set(hash, tx);
+      }
+    }
+
+    return results;
+  }
+
+  async getHeaders(heights: number[]): Promise<Map<number, HeaderI>> {
+    if (heights.length === 0) return new Map();
+
+    const results = new Map<number, HeaderI>();
+    const keys = heights.map((h) => `header-${this.network}-${h}-true`);
+
+    // batch cache read
+    let cached: Map<string, string | null> | undefined;
+    if (this.cache) {
+      cached = await this.cache.getItems(keys);
+    }
+
+    const misses: number[] = [];
+    for (let i = 0; i < heights.length; i++) {
+      const val = cached?.get(keys[i]);
+      if (val) {
+        results.set(heights[i], decodeHeader(JSON.parse(val)));
+      } else {
+        misses.push(heights[i]);
+      }
+    }
+
+    if (misses.length > 0) {
+      const fetched = await Promise.all(
+        misses.map(async (height) => {
+          const result = await this.performRequest<HexHeaderI>(
+            "blockchain.header.get",
+            height
+          );
+          return [height, result] as [number, HexHeaderI];
+        })
+      );
+
+      // batch cache write
+      if (this.cache) {
+        const entries: [string, string][] = fetched.map(([height, result]) => [
+          `header-${this.network}-${height}-true`,
+          JSON.stringify(result),
+        ]);
+        await this.cache.setItems(entries);
+      }
+
+      for (const [height, result] of fetched) {
+        results.set(height, decodeHeader(result));
+      }
+    }
+
+    return results;
+  }
+
   async getBlockHeight(): Promise<number> {
     if (!this.headerCancelFn) {
       this.headerCancelFn = await this.subscribeToHeaders(

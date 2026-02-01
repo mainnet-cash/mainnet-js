@@ -436,8 +436,7 @@ export async function getSuitableUtxos(
           !hasCategoryInSuitable &&
           inputs.some(
             (val, i) =>
-              !usedIndices.has(i) &&
-              val.token?.category === request.category
+              !usedIndices.has(i) && val.token?.category === request.category
           );
         if (hasCategoryInSuitable || hasCategoryInInputs) {
           continue;

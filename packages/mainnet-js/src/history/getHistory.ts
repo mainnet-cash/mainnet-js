@@ -11,9 +11,11 @@ import {
 } from "@bitauth/libauth";
 import { UnitEnum } from "../enum.js";
 import NetworkProvider from "../network/NetworkProvider.js";
-import { convert } from "../util/convert.js";
-import { HeaderI, TxI } from "../interface.js";
+import { TxI } from "../interface.js";
 import { TransactionHistoryItem, InOutput } from "./interface.js";
+import { ExchangeRate } from "../rate/ExchangeRate.js";
+import { sanitizeUnit } from "../util/sanitizeUnit.js";
+import { bchParam } from "../chain.js";
 
 type Transaction = TransactionCommon & {
   size: number;
@@ -49,100 +51,124 @@ export const getHistory = async ({
     count = 1e10;
   }
 
-  const history = rawHistory
-    ? rawHistory.slice(start, start + count)
-    : (
-        await Promise.all(
-          addresses.map(async (address) =>
-            provider.getHistory(address, fromHeight, toHeight)
-          )
+  let history: TxI[];
+  if (rawHistory) {
+    history = rawHistory.slice(start, start + count);
+  } else {
+    const allHistory = (
+      await Promise.all(
+        addresses.map(async (address) =>
+          provider.getHistory(address, fromHeight, toHeight)
         )
       )
-        .flat()
-        .filter(
-          (value, index, array) =>
-            array.findIndex((item) => item.tx_hash === value.tx_hash) === index
-        )
-        .sort((a, b) =>
-          a.height <= 0 || b.height <= 0
-            ? a.height - b.height
-            : b.height - a.height
-        )
-        .slice(start, start + count);
+    ).flat();
 
-  // fill transaction timestamps by requesting headers from network and parsing them
-  const uniqueHeights = history
-    .map((tx) => tx.height)
-    .filter((height) => height > 0)
-    .filter((value, index, array) => array.indexOf(value) === index);
-  const timestampMap = (
-    await Promise.all(
-      uniqueHeights.map(async (height) => [
-        height,
-        ((await provider.getHeader(height, true)) as HeaderI).timestamp,
-      ])
-    )
-  ).reduce((acc, [height, timestamp]) => ({ ...acc, [height]: timestamp }), {});
-
-  // first load all transactions
-  const historicTransactions = await Promise.all(
-    history.map(async (tx) => {
-      const txHex = (await provider.getRawTransaction(tx.tx_hash)) as string;
-
-      const transactionCommon = decodeTransaction(hexToBin(txHex));
-      if (typeof transactionCommon === "string") {
-        throw transactionCommon;
+    // Dedup using Set instead of O(N²) findIndex
+    const seen = new Set<string>();
+    const deduped: TxI[] = [];
+    for (const item of allHistory) {
+      if (!seen.has(item.tx_hash)) {
+        seen.add(item.tx_hash);
+        deduped.push(item);
       }
+    }
 
-      const transaction = transactionCommon as Transaction;
-      transaction.blockHeight = tx.height;
-      transaction.timestamp = timestampMap[tx.height];
-      transaction.hash = tx.tx_hash;
-      transaction.size = txHex.length / 2;
+    history = deduped
+      .sort((a, b) =>
+        a.height <= 0 || b.height <= 0
+          ? a.height - b.height
+          : b.height - a.height
+      )
+      .slice(start, start + count);
+  }
 
-      return transaction;
-    })
-  );
+  // Collect unique heights for header fetch
+  const uniqueHeightsSet = new Set<number>();
+  for (const tx of history) {
+    if (tx.height > 0) uniqueHeightsSet.add(tx.height);
+  }
+  const uniqueHeights = [...uniqueHeightsSet];
 
-  // then load their prevout transactions
-  const prevoutTransactionHashes = historicTransactions
-    .map((tx) =>
-      tx.inputs.map((input) => binToHex(input.outpointTransactionHash))
-    )
-    .flat()
-    .filter((value, index, array) => array.indexOf(value) === index);
-  const prevoutTransactionMap = (
-    await Promise.all(
-      prevoutTransactionHashes.map(async (hash) => {
-        if (
-          hash ===
-          "0000000000000000000000000000000000000000000000000000000000000000"
-        ) {
-          return [hash, undefined];
-        }
+  // Batch fetch headers and history transactions in parallel
+  const historyHashes = history.map((tx) => tx.tx_hash);
+  const [headerMap, txHexMap] = await Promise.all([
+    uniqueHeights.length > 0 ? provider.getHeaders(uniqueHeights) : new Map(),
+    provider.getRawTransactions(historyHashes),
+  ] as const);
 
-        const txHex = (await provider.getRawTransaction(hash)) as string;
+  const timestampMap: Record<number, number> = {};
+  for (const [height, header] of headerMap) {
+    timestampMap[height] = header.timestamp;
+  }
 
-        const transaction = decodeTransaction(hexToBin(txHex));
-        if (typeof transaction === "string") {
-          throw transaction;
-        }
+  // Precompute binToHex for each input's outpoint hash once
+  const inputOutpointHashes = new WeakMap<Uint8Array, string>();
+  const getOutpointHash = (bytes: Uint8Array): string => {
+    let hash = inputOutpointHashes.get(bytes);
+    if (hash === undefined) {
+      hash = binToHex(bytes);
+      inputOutpointHashes.set(bytes, hash);
+    }
+    return hash;
+  };
 
-        return [hash, transaction];
-      })
-    )
-  ).reduce(
-    (acc, [hash, transaction]) => ({
-      ...acc,
-      [hash as string]: transaction as TransactionCommon,
-    }),
-    {} as { [hash: string]: TransactionCommon }
-  );
+  const historicTransactions = history.map((tx) => {
+    const txHex = txHexMap.get(tx.tx_hash)!;
+    const transactionCommon = decodeTransaction(hexToBin(txHex));
+    if (typeof transactionCommon === "string") {
+      throw transactionCommon;
+    }
+
+    const transaction = transactionCommon as Transaction;
+    transaction.blockHeight = tx.height;
+    transaction.timestamp = timestampMap[tx.height];
+    transaction.hash = tx.tx_hash;
+    transaction.size = txHex.length / 2;
+
+    return transaction;
+  });
+
+  // Collect unique prevout hashes using Set, excluding already-fetched txs
+  const ZERO_HASH =
+    "0000000000000000000000000000000000000000000000000000000000000000";
+  const prevoutHashSet = new Set<string>();
+  for (const tx of historicTransactions) {
+    for (const input of tx.inputs) {
+      const hash = getOutpointHash(input.outpointTransactionHash);
+      if (hash !== ZERO_HASH && !txHexMap.has(hash)) {
+        prevoutHashSet.add(hash);
+      }
+    }
+  }
+
+  // Batch fetch prevout transactions
+  const prevoutHashes = [...prevoutHashSet];
+  const prevoutHexMap = await provider.getRawTransactions(prevoutHashes);
+
+  // Build prevout transaction map (decode all prevout txs)
+  const prevoutTransactionMap: Record<string, TransactionCommon> = {};
+  const allPrevoutSources = new Map([...txHexMap, ...prevoutHexMap]);
+  for (const tx of historicTransactions) {
+    for (const input of tx.inputs) {
+      const hash = getOutpointHash(input.outpointTransactionHash);
+      if (hash === ZERO_HASH || prevoutTransactionMap[hash]) continue;
+
+      const hex = allPrevoutSources.get(hash);
+      if (!hex) continue;
+
+      const decoded = decodeTransaction(hexToBin(hex));
+      if (typeof decoded === "string") {
+        throw decoded;
+      }
+      prevoutTransactionMap[hash] = decoded;
+    }
+  }
 
   const decoded = assertSuccess(decodeCashAddress(addresses[0]));
   const prefix = decoded.prefix as CashAddressNetworkPrefix;
 
   const addressCache: Record<any, string> = {};
+  const addressSet = new Set(addresses);
 
   // map decoded transaction data to TransactionHistoryItem
   const historyItems = historicTransactions.map((tx) => {
@@ -168,7 +194,7 @@ export const getHistory = async ({
       }
 
       const prevoutTx =
-        prevoutTransactionMap[binToHex(input.outpointTransactionHash)];
+        prevoutTransactionMap[getOutpointHash(input.outpointTransactionHash)];
       if (!prevoutTx) {
         throw new Error("Could not find prevout transaction");
       }
@@ -265,14 +291,14 @@ export const getHistory = async ({
     return result;
   });
 
-  // compute value changes
+  // compute value changes using Set for O(1) address lookup
   historyItems.forEach((tx) => {
     let satoshiBalance = 0;
     const ftTokenBalances: Record<string, bigint> = {};
     const nftTokenBalances: Record<string, bigint> = {};
 
     tx.inputs.forEach((input) => {
-      if (addresses.includes(input.address)) {
+      if (addressSet.has(input.address)) {
         satoshiBalance -= input.value;
 
         if (input.token?.amount) {
@@ -288,7 +314,7 @@ export const getHistory = async ({
       }
     });
     tx.outputs.forEach((output) => {
-      if (addresses.includes(output.address)) {
+      if (addressSet.has(output.address)) {
         satoshiBalance += Number(output.value);
 
         if (output.token?.amount) {
@@ -349,19 +375,35 @@ export const getHistory = async ({
     prevValueChange = tx.valueChange;
   });
 
-  // convert units if needed
+  // convert units if needed — fetch exchange rate once
   if (!(unit as string).includes("sat")) {
+    const sanitizedUnit = sanitizeUnit(unit);
+    let rate: number = 0;
+    if (sanitizedUnit !== UnitEnum.BCH && sanitizedUnit !== UnitEnum.SAT) {
+      rate = await ExchangeRate.get(unit);
+    }
+
+    const subUnits = Number(bchParam.subUnits);
+    const convertSatToUnit = (satValue: number): number => {
+      if (sanitizedUnit === UnitEnum.BCH) {
+        return satValue / subUnits;
+      }
+      // currency conversion matching satoshiToAmount behavior
+      const currencyValue = Number((satValue * (rate / subUnits)).toFixed(2));
+      return currencyValue;
+    };
+
     for (const tx of historyItems) {
       for (const input of tx.inputs) {
-        input.value = await convert(input.value, "sat", unit);
+        input.value = convertSatToUnit(input.value);
       }
 
       for (const output of tx.outputs) {
-        output.value = await convert(output.value, "sat", unit);
+        output.value = convertSatToUnit(output.value);
       }
 
-      tx.valueChange = await convert(tx.valueChange, "sat", unit);
-      tx.balance = await convert(tx.balance, "sat", unit);
+      tx.valueChange = convertSatToUnit(tx.valueChange);
+      tx.balance = convertSatToUnit(tx.balance);
     }
   }
 

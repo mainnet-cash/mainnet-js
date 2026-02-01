@@ -47,6 +47,20 @@ export default interface NetworkProvider {
   getRawTransaction(txHash: string): Promise<string>;
 
   /**
+   * Batch retrieve raw transactions by their hashes.
+   * @param hashes Array of transaction hashes.
+   * @returns Map from hash to hex transaction string.
+   */
+  getRawTransactions(hashes: string[]): Promise<Map<string, string>>;
+
+  /**
+   * Batch retrieve block headers by their heights.
+   * @param heights Array of block heights.
+   * @returns Map from height to decoded header.
+   */
+  getHeaders(heights: number[]): Promise<Map<number, HeaderI>>;
+
+  /**
    * Retrieve a verbose coin-specific response transaction details for a given transaction ID.
    * @param txHash Hex of transaction hash.
    * @throws {Error} If the transaction does not exist
