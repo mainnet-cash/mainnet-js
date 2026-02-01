@@ -308,78 +308,140 @@ export async function getSuitableUtxos(
   ensureUtxos: Utxo[] = [],
   tokenOperation: "send" | "genesis" | "mint" | "burn" = "send"
 ): Promise<Utxo[]> {
-  const suitableUtxos: Utxo[] = [...ensureUtxos];
-  let amountAvailable = BigInt(0);
+  const utxoKey = (u: Utxo) => `${u.txid}:${u.vout}`;
+  const selectedSet = new Set<string>();
+  const suitableUtxos: Utxo[] = [];
+
+  for (const u of ensureUtxos) {
+    const key = utxoKey(u);
+    if (!selectedSet.has(key)) {
+      selectedSet.add(key);
+      suitableUtxos.push(u);
+    }
+  }
+
+  let amountAvailable = suitableUtxos.reduce(
+    (sum, u) => sum + BigInt(u.satoshis),
+    BigInt(0)
+  );
   const tokenRequests = requests.filter(
     (val) => val instanceof TokenSendRequest
   ) as TokenSendRequest[];
 
-  const availableInputs = inputs.slice();
-  const selectedInputs: Utxo[] = [];
+  const usedIndices = new Set<number>();
+
+  // Track how many times each selected UTXO has been "claimed" by a request
+  const claimedUtxos = new Map<string, number>();
 
   // find matching utxos for token transfers
   if (tokenOperation === "send") {
     for (const request of tokenRequests) {
-      const tokenInputs = availableInputs.filter(
-        (val) => val.token?.category === request.category
-      );
-      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs]
-        .filter(
-          (val) =>
-            val.token?.nft?.capability === request.nft?.capability &&
-            val.token?.nft?.commitment === request.nft?.commitment
-        )
-        .filter(
-          (val) =>
-            selectedInputs.find(
-              (selected) =>
-                val.txid === selected.txid && val.vout === selected.vout
-            ) === undefined
-        );
-      if (sameCommitmentTokens.length) {
-        const input = sameCommitmentTokens[0];
-        const index = availableInputs.indexOf(input);
-        if (index !== -1) {
-          suitableUtxos.push(input);
-          selectedInputs.push(input);
-          availableInputs.splice(index, 1);
-          amountAvailable += BigInt(input.satoshis);
-        }
+      // Search suitableUtxos then inputs sequentially to find matching tokens
+      const matchCommitment = (val: Utxo) =>
+        val.token?.category === request.category &&
+        val.token?.nft?.capability === request.nft?.capability &&
+        val.token?.nft?.commitment === request.nft?.commitment;
 
-        continue;
+      // For NFTs (non-fungible), each request needs its own UTXO
+      // For FT-only requests, a single UTXO can satisfy multiple requests
+      const isFungibleOnly =
+        request.nft?.capability === undefined &&
+        request.nft?.commitment === undefined;
+
+      // Check already-selected suitable utxos first (no need to re-add)
+      let found = false;
+      if (isFungibleOnly) {
+        found = suitableUtxos.some(matchCommitment);
+      } else {
+        // For NFTs, find an unclaimed matching UTXO in suitableUtxos
+        for (const val of suitableUtxos) {
+          if (!matchCommitment(val)) continue;
+          const key = utxoKey(val);
+          const claims = claimedUtxos.get(key) || 0;
+          if (claims === 0) {
+            claimedUtxos.set(key, claims + 1);
+            found = true;
+            break;
+          }
+        }
       }
+
+      if (!found) {
+        // Search available inputs for same commitment match
+        for (let i = 0; i < inputs.length; i++) {
+          if (usedIndices.has(i)) continue;
+          const val = inputs[i];
+          if (val.token?.category !== request.category) continue;
+          if (!matchCommitment(val)) continue;
+          const key = utxoKey(val);
+          if (selectedSet.has(key)) continue;
+
+          selectedSet.add(key);
+          suitableUtxos.push(val);
+          usedIndices.add(i);
+          amountAvailable += BigInt(val.satoshis);
+          if (!isFungibleOnly) {
+            claimedUtxos.set(key, 1);
+          }
+          found = true;
+          break;
+        }
+      }
+
+      if (found) continue;
 
       if (
         request.nft?.capability === NFTCapability.minting ||
         request.nft?.capability === NFTCapability.mutable
       ) {
-        const changeCommitmentTokens = [
-          ...suitableUtxos,
-          ...tokenInputs,
-        ].filter(
-          (val) => val.token?.nft?.capability === request.nft?.capability
+        // Check already-selected suitable utxos first
+        const alreadyHas = suitableUtxos.some(
+          (val) =>
+            val.token?.category === request.category &&
+            val.token?.nft?.capability === request.nft?.capability
         );
-        if (changeCommitmentTokens.length) {
-          const input = changeCommitmentTokens[0];
-          const index = availableInputs.indexOf(input);
-          if (index !== -1) {
-            suitableUtxos.push(input);
-            availableInputs.splice(index, 1);
-            amountAvailable += BigInt(input.satoshis);
+        if (alreadyHas) continue;
+
+        let foundCapability = false;
+        for (let i = 0; i < inputs.length; i++) {
+          if (usedIndices.has(i)) continue;
+          const val = inputs[i];
+          if (
+            val.token?.category === request.category &&
+            val.token?.nft?.capability === request.nft?.capability
+          ) {
+            const key = utxoKey(val);
+            if (selectedSet.has(key)) continue;
+
+            selectedSet.add(key);
+            suitableUtxos.push(val);
+            usedIndices.add(i);
+            amountAvailable += BigInt(val.satoshis);
+            foundCapability = true;
+            break;
           }
-          continue;
         }
+        if (foundCapability) continue;
       }
 
       // handle splitting the hybrid (FT+NFT) token into its parts
       if (
         request.nft?.capability === undefined &&
-        request.nft?.commitment === undefined &&
-        [...suitableUtxos, ...tokenInputs]
-          .map((val) => val.token?.category)
-          .includes(request.category)
+        request.nft?.commitment === undefined
       ) {
-        continue;
+        const hasCategoryInSuitable = suitableUtxos.some(
+          (val) => val.token?.category === request.category
+        );
+        const hasCategoryInInputs =
+          !hasCategoryInSuitable &&
+          inputs.some(
+            (val, i) =>
+              !usedIndices.has(i) &&
+              val.token?.category === request.category
+          );
+        if (hasCategoryInSuitable || hasCategoryInInputs) {
+          continue;
+        }
       }
 
       throw Error(
@@ -389,44 +451,31 @@ export async function getSuitableUtxos(
   }
 
   // find plain bch outputs
-  for (const u of availableInputs) {
-    if (u.token) {
-      continue;
-    }
-
-    if (u.coinbase && u.height && bestHeight) {
-      const age = bestHeight - u.height;
-      if (age > 100) {
-        suitableUtxos.push(u);
-        amountAvailable += BigInt(u.satoshis);
-      }
-    } else {
-      suitableUtxos.push(u);
-      amountAvailable += BigInt(u.satoshis);
-    }
-    // if amountRequired is not given, assume it is a max spend request, skip this condition
+  for (let i = 0; i < inputs.length; i++) {
+    // check early if we already have enough
     if (amountRequired && amountAvailable > amountRequired) {
       break;
     }
-  }
+    if (usedIndices.has(i)) continue;
+    const u = inputs[i];
+    if (u.token) continue;
 
-  const addEnsured = (suitableUtxos) => {
-    return [...ensureUtxos, ...suitableUtxos].filter(
-      (val, index, array) =>
-        array.findIndex(
-          (other) => other.txid === val.txid && other.vout === val.vout
-        ) === index
-    );
-  };
+    const key = utxoKey(u);
+    if (selectedSet.has(key)) continue;
+
+    selectedSet.add(key);
+    suitableUtxos.push(u);
+    amountAvailable += BigInt(u.satoshis);
+  }
 
   // if the fee is split with a feePaidBy option, skip checking change.
   if (feePaidBy && feePaidBy != FeePaidByEnum.change) {
-    return addEnsured(suitableUtxos);
+    return suitableUtxos;
   }
 
   // If the amount needed is met, or no amount is given, return
   if (typeof amountRequired === "undefined") {
-    return addEnsured(suitableUtxos);
+    return suitableUtxos;
   } else if (amountAvailable < amountRequired) {
     const e = Error(
       `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
@@ -437,7 +486,7 @@ export async function getSuitableUtxos(
     };
     throw e;
   } else {
-    return addEnsured(suitableUtxos);
+    return suitableUtxos;
   }
 }
 

@@ -20,7 +20,6 @@ export interface Utxo {
   vout: number;
   satoshis: bigint;
   height?: number;
-  coinbase?: boolean;
   token?: TokenI;
   address: string;
 }
