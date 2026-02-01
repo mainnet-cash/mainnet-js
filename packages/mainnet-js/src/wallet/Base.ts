@@ -579,15 +579,16 @@ export class BaseWallet implements WalletI {
 
     // get inputs
     let utxos: Utxo[];
+    const allUtxos = await this.getUtxos();
     if (params.options && params.options.utxoIds) {
-      utxos = await checkUtxos(
+      utxos = checkUtxos(
         params.options.utxoIds.map((utxoId: Utxo | string) =>
           typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
         ),
-        this as any
+        allUtxos
       );
     } else {
-      utxos = (await this.getUtxos()).filter((utxo) => !utxo.token);
+      utxos = allUtxos.filter((utxo) => !utxo.token);
     }
 
     // Get current height to assure recently mined coins are not spent.
@@ -810,7 +811,7 @@ export class BaseWallet implements WalletI {
     // get inputs from options or query all inputs
     let utxos: Utxo[] = await this.getUtxos();
     if (options && options.utxoIds) {
-      utxos = await checkUtxos(
+      utxos = checkUtxos(
         options.utxoIds.map((utxoId: Utxo | string) =>
           typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
         ),
@@ -1134,7 +1135,7 @@ export class BaseWallet implements WalletI {
 
     let utxos: Utxo[] = await this.getUtxos();
     if (options?.utxoIds) {
-      utxos = await checkUtxos(
+      utxos = checkUtxos(
         options.utxoIds.map((utxoId: UtxoId | string) =>
           typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
         ),

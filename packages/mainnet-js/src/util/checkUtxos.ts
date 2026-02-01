@@ -1,18 +1,23 @@
 import { Utxo, UtxoId } from "../interface.js";
 
-export async function checkUtxos(
-  utxoIds: UtxoId[],
-  walletOrUtxos: Utxo[] | import("../wallet/Wif.js").Wallet
-): Promise<Utxo[]> {
-  const addressUtxos = Array.isArray(walletOrUtxos)
-    ? walletOrUtxos
-    : await walletOrUtxos.getUtxos();
-  const absent = utxoIds.filter(
-    (val) =>
-      !addressUtxos.find(
-        (utxo) => val.txid === utxo.txid && val.vout === utxo.vout
-      )
-  );
+export function checkUtxos(utxoIds: UtxoId[], utxos: Utxo[]): Utxo[] {
+  const walletUtxoMap = new Map<string, Utxo>();
+  for (const utxo of utxos) {
+    walletUtxoMap.set(`${utxo.txid}:${utxo.vout}`, utxo);
+  }
+
+  const result: Utxo[] = [];
+  const absent: UtxoId[] = [];
+  for (const id of utxoIds) {
+    const key = `${id.txid}:${id.vout}`;
+    const utxo = walletUtxoMap.get(key);
+    if (utxo) {
+      result.push(utxo);
+    } else {
+      absent.push(id);
+    }
+  }
+
   if (absent.length) {
     const absentString = absent
       .map((val) => `${val.txid}:${val.vout}`)
@@ -20,7 +25,5 @@ export async function checkUtxos(
     throw Error(`Utxos [${absentString}] not found in wallet`);
   }
 
-  return addressUtxos.filter((val) =>
-    utxoIds.find((utxo) => val.txid === utxo.txid && val.vout === utxo.vout)
-  );
+  return result;
 }
