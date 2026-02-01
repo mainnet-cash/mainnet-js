@@ -143,6 +143,9 @@ export class HDWallet extends BaseWallet {
       if (this.mnemonic.length == 0) {
         throw Error("refusing to create wallet from empty mnemonic");
       }
+      if (![12, 24].includes(this.mnemonic.split(" ").length)) {
+        throw Error("Invalid mnemonic, must be 12 or 24 words");
+      }
 
       const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
       checkForEmptySeed(seed);

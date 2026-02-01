@@ -112,8 +112,8 @@ export class Wallet extends WatchWallet {
 
     if (mnemonic?.length) {
       mnemonic = mnemonic.trim().toLowerCase();
-      if (mnemonic.split(" ").length !== 12) {
-        throw Error("Invalid mnemonic");
+      if (![12, 24].includes(mnemonic.split(" ").length)) {
+        throw Error("Invalid mnemonic, must be 12 or 24 words");
       }
 
       if (derivationPath) {
