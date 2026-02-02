@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+3.0.1
+
+* Better `HDWallet.watchStatus` behaviour with default debounce timeout of 100ms
+* Better reuse of other watch methods from BaseWallet
+
 3.0.0
 
 * Major release introducing new big features
