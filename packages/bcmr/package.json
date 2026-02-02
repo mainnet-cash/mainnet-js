@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/bcmr",
-  "version": "3.0.0-next.10",
+  "version": "3.0.0",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "3.0.0-next.10"
+    "mainnet-js": "3.0.0"
   },
   "devDependencies": {},
   "scripts": {
