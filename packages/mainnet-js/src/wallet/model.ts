@@ -1,7 +1,4 @@
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi.js";
-import { sanitizeUnit } from "../util/sanitizeUnit.js";
-import { UnitEnum } from "../enum.js";
-import { NFTCapability, UtxoI } from "../interface.js";
+import { NFTCapability, UtxoId } from "../interface.js";
 import { DELIMITER } from "../constant.js";
 import {
   Input,
@@ -28,133 +25,131 @@ export type SendRequestType =
 
 export class SendRequest {
   cashaddr: string;
-  value: number;
-  unit: UnitEnum;
+  value: bigint;
 
-  constructor({
-    cashaddr,
-    value,
-    unit,
-  }: {
-    cashaddr: string;
-    value: number;
-    unit: UnitEnum;
-  }) {
+  constructor({ cashaddr, value }: { cashaddr: string; value: bigint }) {
     this.cashaddr = cashaddr;
-    this.value = value;
-    this.unit = sanitizeUnit(unit);
+    this.value = BigInt(value);
   }
 }
 
 export class TokenGenesisRequest {
   amount?: bigint; // fungible token amount
-  capability?: NFTCapability;
-  commitment?: string;
+  nft?: {
+    capability: NFTCapability;
+    commitment: string;
+  };
   cashaddr?: string;
-  value?: number; // satoshi value
+  value?: bigint; // satoshi value
 
   constructor({
     amount,
-    capability,
-    commitment,
+    nft,
     cashaddr,
     value,
   }: {
     amount?: bigint;
-    capability?: NFTCapability;
-    commitment?: string;
+    nft?: {
+      capability: NFTCapability;
+      commitment: string;
+    };
     cashaddr?: string;
-    value?: number;
+    value?: bigint;
   }) {
     this.amount = amount;
-    this.capability = capability;
-    this.commitment = commitment;
+    this.nft = nft;
     this.cashaddr = cashaddr;
     this.value = value;
   }
 }
 
 export class TokenBurnRequest {
-  tokenId: string;
-  capability?: NFTCapability;
-  commitment?: string;
+  category: string;
   amount?: bigint; // fungible token amount
+  nft?: {
+    capability: NFTCapability;
+    commitment: string;
+  };
   cashaddr?: string;
 
   constructor({
-    tokenId,
-    capability,
-    commitment,
+    category,
     amount,
+    nft,
     cashaddr,
   }: {
-    tokenId: string;
-    capability?: NFTCapability;
-    commitment?: string;
+    category: string;
     amount?: number | bigint;
     cashaddr?: string;
+    nft?: {
+      capability: NFTCapability;
+      commitment: string;
+    };
   }) {
-    this.tokenId = tokenId;
-    this.capability = capability;
-    this.commitment = commitment;
+    this.category = category;
     this.amount = amount ? BigInt(amount) : 0n;
+    this.nft = nft;
     this.cashaddr = cashaddr;
   }
 }
 
 export class TokenSendRequest {
   cashaddr: string; // cashaddr or tokenaddr to send tokens to
-  value?: number; // satoshi value
+  value?: bigint; // satoshi value
   amount: bigint; // fungible token amount
-  tokenId: string;
-  capability?: NFTCapability;
-  commitment?: string;
+  category: string;
+  nft?: {
+    capability: NFTCapability;
+    commitment: string;
+  };
 
   constructor({
     cashaddr,
     value,
     amount,
-    tokenId,
-    capability,
-    commitment,
+    category,
+    nft,
   }: {
     cashaddr: string;
-    value?: number;
-    amount?: number | bigint;
-    tokenId: string;
-    capability?: NFTCapability;
-    commitment?: string;
+    value?: bigint;
+    amount?: bigint;
+    category: string;
+    nft?: {
+      capability: NFTCapability;
+      commitment: string;
+    };
   }) {
     checkTokenaddr(cashaddr, Config.EnforceCashTokenReceiptAddresses);
 
     this.cashaddr = cashaddr;
     this.value = value;
     this.amount = amount ? BigInt(amount) : 0n;
-    this.tokenId = tokenId;
-    this.capability = capability;
-    this.commitment = commitment;
+    this.category = category;
+    this.nft = nft;
   }
 }
 
 export class TokenMintRequest {
-  capability?: NFTCapability;
-  commitment?: string;
+  nft?: {
+    capability: NFTCapability;
+    commitment: string;
+  };
   cashaddr?: string;
-  value?: number;
+  value?: bigint;
 
   constructor({
-    capability,
-    commitment,
+    nft,
     cashaddr,
     value,
   }: {
-    capability?: NFTCapability;
-    commitment?: string;
+    nft?: {
+      capability: NFTCapability;
+      commitment: string;
+    };
     cashaddr?: string;
-    value?: number;
+    value?: bigint;
   }) {
-    this.capability = capability;
-    this.commitment = commitment;
+    this.nft = nft;
     this.cashaddr = cashaddr;
     this.value = value;
   }
@@ -294,15 +289,15 @@ export class OpReturnData {
   }
 }
 
-export type SendRequestArray = Array<string | number | UnitEnum | Uint8Array>;
+export type SendRequestArray = Array<string | bigint | Uint8Array>;
 
 export type SourceOutput = Input & Output;
 
 export class SendResponse {
   txId?: string;
-  balance?: BalanceResponse;
+  balance?: bigint;
   explorerUrl?: string;
-  tokenIds?: string[];
+  categories?: string[];
   unsignedTransaction?: string; // unsigned transaction hex
   sourceOutputs?: SourceOutput[]; // source outputs for signing unsigned transactions
 
@@ -343,34 +338,15 @@ export class XPubKey {
   }
 }
 
-export const fromUtxoId = (utxoId: string): UtxoI => {
-  const [txid, vout, satoshis, tokenId, amount, capability, commitment] =
-    utxoId.split(DELIMITER);
+export const fromUtxoId = (utxoId: string): UtxoId => {
+  const [txid, vout, satoshis] = utxoId.split(DELIMITER);
   return {
-    satoshis: satoshis ? parseInt(satoshis) : 0,
+    satoshis: satoshis ? BigInt(parseInt(satoshis)) : 0n,
     vout: parseInt(vout),
     txid,
-    token: tokenId
-      ? {
-          tokenId,
-          amount: BigInt(amount),
-          capability: capability || undefined,
-          commitment: commitment || undefined,
-        }
-      : undefined,
-  } as UtxoI;
+  } as UtxoId;
 };
 
-export const toUtxoId = (utxo: UtxoI): string => {
-  return [
-    utxo.txid,
-    utxo.vout,
-    utxo.satoshis,
-    utxo.token?.tokenId,
-    utxo.token?.amount,
-    utxo.token?.capability,
-    utxo.token?.commitment,
-  ]
-    .join(DELIMITER)
-    .replace(/:+$/, "");
+export const toUtxoId = (utxo: UtxoId): string => {
+  return [utxo.txid, utxo.vout].join(DELIMITER).replace(/:+$/, "");
 };

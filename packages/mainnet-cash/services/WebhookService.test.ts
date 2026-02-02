@@ -48,7 +48,6 @@ describe("Test Webhook Endpoints", () => {
         to: [
           {
             cashaddr: bobWallet.cashaddr!,
-            unit: 'satoshis',
             value: 2000,
           },
         ],
@@ -81,7 +80,6 @@ describe("Test Webhook Endpoints", () => {
         to: [
           {
             cashaddr: bobWallet.cashaddr!,
-            unit: 'satoshis',
             value: 2000,
           },
         ],

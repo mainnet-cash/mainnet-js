@@ -15,23 +15,19 @@ import { sanitizeUnit } from "../util/sanitizeUnit.js";
 export async function amountInSatoshi(
   value: number,
   rawUnit: any
-): Promise<number> {
+): Promise<bigint> {
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
     case UnitEnum.BCH:
-      return Math.round(value * bchParam.subUnits);
-    case UnitEnum.SATOSHI:
-      return value;
+      return BigInt(Math.round(value * Number(bchParam.subUnits)));
     case UnitEnum.SAT:
-      return value;
-    case UnitEnum.SATS:
-      return value;
-    case UnitEnum.SATOSHIS:
-      return value;
+      return BigInt(value);
     default:
       const Currency_over_BCH = await ExchangeRate.get(rawUnit);
       const SAT_over_BCH = bchParam.subUnits;
 
-      return Math.round(Number(value * (SAT_over_BCH / Currency_over_BCH)));
+      return BigInt(
+        Math.round(Number(value * (Number(SAT_over_BCH) / Currency_over_BCH)))
+      );
   }
 }

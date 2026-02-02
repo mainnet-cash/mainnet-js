@@ -15,20 +15,34 @@ describe("Test Util Endpoints", () => {
     app.close();
   });
 
-  /**
-   * test mining blocks
-   */
   it("Should convert an amount from usd to bch", async () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", { data: { BCH: 1337.42 } });
 
-    const rate = Number(await mainnet.Mainnet.getUsdRate()).toFixed(2);
+    const rate = await mainnet.Mainnet.getUsdRate();
     const convertResp = await request(app).post("/util/convert").send({
       value: 1,
       from: "bch",
       to: "usd",
     });
     checkResponse(convertResp);
-    expect(convertResp.text).toEqual(rate.toString());
+    expect(convertResp.body.value).toEqual(rate);
+  });
+
+  it("Should get an exchange rate", async () => {
+    setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", { data: { BCH: 1337.42 } });
+
+    const rate = await mainnet.Mainnet.getUsdRate();
+    const exchangeRateResp = await request(app).post("/util/exchange_rate").send({
+      symbol: "usd"
+    });
+    checkResponse(exchangeRateResp);
+    expect(exchangeRateResp.body.value).toEqual(rate);
+
+    const failedResp = await request(app).post("/util/exchange_rate").send({
+      symbol: "nonexistentcurrency"
+    });
+
+    expect(failedResp.status).toBe(500);
   });
 
   it("Should return xpubkey info", async () => {

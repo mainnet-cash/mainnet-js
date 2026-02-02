@@ -25,20 +25,20 @@ describe("Test Wallet Endpoints", () => {
     const bobId = bobResp.walletId;
     const bobCashaddr = bobResp.cashaddr;
 
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       amount: 100,
-    })).body.tokenIds![0];
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("100");
 
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
     await request(app).post("/wallet/send").send({
@@ -46,26 +46,26 @@ describe("Test Wallet Endpoints", () => {
       to: [{
         cashaddr: bobCashaddr,
         amount: 25,
-        tokenId: tokenId,
+        category: category,
       }, {
         cashaddr: process.env.ADDRESS!,
         amount: 25,
-        tokenId: tokenId,
+        category: category,
       }]
     });
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
 
     expect(newTokenUtxos.length).toBe(2);
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("75");
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("25");
   });
 
@@ -78,90 +78,99 @@ describe("Test Wallet Endpoints", () => {
     const bobId = bobResp.walletId;
     const bobCashaddr = bobResp.cashaddr;
 
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
-      capability: NFTCapability.mutable,
-      commitment: "abcd",
-    })).body.tokenIds![0];
+      nft: {
+        capability: NFTCapability.mutable,
+        commitment: "abcd",
+      },
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("0");
     const nftTokenBalance = (await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(nftTokenBalance).toBe(1);
 
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
     const response = (await request(app).post("/wallet/send").send({
       walletId: aliceId,
       to: [{
         cashaddr: bobCashaddr,
-        tokenId: tokenId,
-        capability: NFTCapability.mutable,
-        commitment: "abcd",
+        category: category,
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "abcd",
+        },
       }]
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     expect((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe(0);
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(0);
 
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     const bobTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(bobTokenUtxos.length).toBe(1);
-    expect(tokenId).toEqual(response.tokenIds![0]);
-    expect(bobTokenUtxos[0].token?.commitment).toEqual("abcd");
+    expect(category).toEqual(response.categories![0]);
+    expect(bobTokenUtxos[0].token?.nft?.commitment).toEqual("abcd");
   });
 
   test("Test immutable NFT cashtoken genesis and sending, error on mutation", async () => {
     const aliceId = process.env.ALICE_ID!;
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
-      capability: NFTCapability.none,
-      commitment: "abcd",
-    })).body.tokenIds![0];
+      nft: {
+        capability: NFTCapability.none,
+        commitment: "abcd",
+      },
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("0");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
     const response = (await request(app).post("/wallet/send").send({
       walletId: aliceId,
       to: [{
         cashaddr: process.env.ADDRESS!,
-        tokenId: tokenId,
-        commitment: "abcd02",
+        category: category,
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "abcd02",
+        },
       }]
     })).body;
     expect(response.message).toContain("No suitable token utxos available to send token with id");
@@ -169,218 +178,244 @@ describe("Test Wallet Endpoints", () => {
 
   test("Test mutable NFT cashtoken genesis and mutation", async () => {
     const aliceId = process.env.ALICE_ID!;
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
-      capability: NFTCapability.mutable,
-      commitment: "abcd",
-    })).body.tokenIds![0];
+      nft: {
+        capability: NFTCapability.mutable,
+        commitment: "abcd",
+      },
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("0");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
     const response = (await request(app).post("/wallet/send").send({
       walletId: aliceId,
       to: [{
         cashaddr: process.env.ADDRESS!,
-        tokenId: tokenId,
-        capability: NFTCapability.mutable,
-        commitment: "abcd02",
+        category: category,
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "abcd02",
+        },
       }]
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(1);
-    expect(tokenId).toEqual(response.tokenIds![0]);
-    expect(newTokenUtxos[0].token?.commitment).toEqual("abcd02");
+    expect(category).toEqual(response.categories![0]);
+    expect(newTokenUtxos[0].token?.nft?.commitment).toEqual("abcd02");
   });
 
   test("Test minting NFT cashtoken genesis and minting", async () => {
     const aliceId = process.env.ALICE_ID!;
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
+      nft: {
       capability: NFTCapability.minting,
-      commitment: "abcd",
-    })).body.tokenIds![0];
+        commitment: "abcd",
+      },
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("0");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
     const response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       requests: [{
         cashaddr: process.env.ADDRESS!,
-        commitment: "test",
-        capability: NFTCapability.none,
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "test",
+        },
       }, {
         cashaddr: process.env.ADDRESS!,
-        commitment: "test",
-        capability: NFTCapability.none,
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "test",
+        },
       }]
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(3);
-    expect(tokenId).toEqual(response.tokenIds![0]);
+    expect(category).toEqual(response.categories![0]);
   });
 
   test("Test minting NFT and optionally burning FT cashtoken", async () => {
     const aliceId = process.env.ALICE_ID!;
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
       amount: 4,
+      nft: {
       capability: NFTCapability.minting,
-      commitment: "abcd",
-    })).body.tokenIds![0];
+        commitment: "abcd",
+      },
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("4");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
 
     // mint 2 NFTs, amount reducing
     const response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       requests: [{
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0a",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0a",
+        },
       }, {
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0a",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0a",
+        },
       }],
       deductTokenAmount: true
     })).body;
 
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("2");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(3);
-    expect(tokenId).toEqual(response.tokenIds![0]);
+    expect(category).toEqual(response.categories![0]);
 
     // mint 2 more NFTs without amount reducing
     const ftResponse = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       requests: [{
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0c",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0c",
+        },
       }, {
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0d",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0d",
+        },
       }],
       deductTokenAmount: false
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("2");
     const ftTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(ftTokenUtxos.length).toBe(5);
-    expect(tokenId).toEqual(ftResponse.tokenIds![0]);
+    expect(category).toEqual(ftResponse.categories![0]);
 
     // we are going to hit amount -1, when minting 3 more NFTs
     // check that it will stop at 0
     const ft2Response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       requests: [{
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0a",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0a",
+        },
       }, {
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0a",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0a",
+        },
       }, {
         cashaddr: process.env.ADDRESS!,
-        capability: NFTCapability.none,
-        commitment: "0a",
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "0a",
+        },
       }],
       deductTokenAmount: true
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     const ft2TokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(ft2TokenUtxos.length).toBe(8);
-    expect(tokenId).toEqual(ft2Response.tokenIds![0]);
+    expect(category).toEqual(ft2Response.categories![0]);
   });
 
   test("Test explicit burning of FT", async () => {
     const aliceId = process.env.ALICE_ID!;
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
       amount: 4n,
-    })).body.tokenIds![0];
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("4");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
 
     // burn 5 FT
     const response = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       amount: 5n,
       message: "burn"
     })).body;
@@ -398,44 +433,48 @@ describe("Test Wallet Endpoints", () => {
     );
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(0);
-    expect(tokenId).toEqual(response.tokenIds![0]);
+    expect(category).toEqual(response.categories![0]);
   });
 
   test("Test explicit burning of FT+NFT", async () => {
     const aliceId = process.env.ALICE_ID!;
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       cashaddr: process.env.ADDRESS!,
       amount: 4n,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
-    })).body.tokenIds![0];
+      nft: {
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("4");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
 
     // burn 1 FT
     const response = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       amount: 1n,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
+      nft: {
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
       message: "burn",
     })).body;
 
@@ -451,73 +490,77 @@ describe("Test Wallet Endpoints", () => {
     );
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("3");
     expect(((await request(app).post("/wallet/get_all_token_balances").send({
       walletId: aliceId,
-    })).body)[tokenId]).toBe("3");
+    })).body)[category]).toBe("3");
     const newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(1);
     expect(((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance)).toBe(1);
     expect(((await request(app).post("/wallet/get_all_nft_token_balances").send({
       walletId: aliceId,
-    })).body)[tokenId || 0]).toBe(1);
-    expect(tokenId).toEqual(response.tokenIds![0]);
+    })).body)[category || 0]).toBe(1);
+    expect(category).toEqual(response.categories![0]);
 
     // burn the rest FTs
     const ftResponse = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
       amount: 5n,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
+      nft: {
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
       message: "burn",
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     const ftTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(ftTokenUtxos.length).toBe(1);
-    expect(tokenId).toEqual(ftResponse.tokenIds![0]);
+    expect(category).toEqual(ftResponse.categories![0]);
 
     // burn the NFT too
     const nftResponse = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      tokenId: tokenId,
-      capability: NFTCapability.minting,
-      commitment: "abcd",
+      category: category,
+      nft: {
+        capability: NFTCapability.minting,
+        commitment: "abcd",
+      },
       message: "burn",
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("0");
     expect(((await request(app).post("/wallet/get_all_token_balances").send({
       walletId: aliceId,
-    })).body)[tokenId] || 0).toBe(0);
+    })).body)[category] || 0).toBe(0);
     const nftTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(nftTokenUtxos.length).toBe(0);
-    expect(tokenId).toEqual(nftResponse.tokenIds![0]);
+    expect(category).toEqual(nftResponse.categories![0]);
     expect(((await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance)).toBe(0);
     expect(((await request(app).post("/wallet/get_all_nft_token_balances").send({
       walletId: aliceId,
-    })).body)[tokenId] || 0).toBe(0);
+    })).body)[category] || 0).toBe(0);
   });
 
   test("Test cashtoken satoshi values and fee calculations", async () => {
@@ -529,24 +572,24 @@ describe("Test Wallet Endpoints", () => {
     const bobId = bobResp.walletId;
     const bobCashaddr = bobResp.cashaddr;
 
-    const tokenId = (await request(app).post("/wallet/token_genesis").send({
+    const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
       amount: 100,
       value: 7000,
       cashaddr: bobCashaddr,
-    })).body.tokenIds![0];
+    })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("100");
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
-    expect(tokenUtxos[0].satoshis).toBe(7000);
+    expect(Number(tokenUtxos[0].satoshis)).toBe(7000);
 
     // lower the token satoshi value
     await request(app).post("/wallet/send").send({
@@ -554,27 +597,27 @@ describe("Test Wallet Endpoints", () => {
       to: [{
         cashaddr: bobCashaddr,
         amount: 100,
-        tokenId: tokenId,
+        category: category,
         value: 1500,
       }]
     });
 
     let newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(1);
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("100");
 
     let bobUtxos = (await request(app).post("/wallet/utxo").send({
       walletId: bobId,
     })).body;
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(1500);
-    expect(bobUtxos[1].satoshis).toBe(5245);
+    expect(Number(bobUtxos[0].satoshis)).toBe(1500);
+    expect(Number(bobUtxos[1].satoshis)).toBe(5245);
 
     // raise the token satoshi value
     await request(app).post("/wallet/send").send({
@@ -582,25 +625,25 @@ describe("Test Wallet Endpoints", () => {
       to: [{
         cashaddr: bobCashaddr,
         amount: 100,
-        tokenId: tokenId,
+        category: category,
         value: 3000,
       }]
     });
     newTokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(newTokenUtxos.length).toBe(1);
     expect((await request(app).post("/wallet/get_token_balance").send({
       walletId: bobId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance).toBe("100");
 
     bobUtxos = (await request(app).post("/wallet/utxo").send({
       walletId: bobId,
     })).body;
     expect(bobUtxos.length).toBe(2);
-    expect(bobUtxos[0].satoshis).toBe(3000);
-    expect(bobUtxos[1].satoshis).toBe(3349);
+    expect(Number(bobUtxos[0].satoshis)).toBe(3000);
+    expect(Number(bobUtxos[1].satoshis)).toBe(3349);
   });
 });

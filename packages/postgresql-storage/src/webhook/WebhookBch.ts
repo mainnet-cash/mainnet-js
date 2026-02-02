@@ -1,14 +1,13 @@
 import SqlProvider from "../SqlProvider.js";
 import { CancelFn, TxI } from "mainnet-js";
 import { ElectrumRawTransaction } from "mainnet-js";
-import { balanceResponseFromSatoshi } from "mainnet-js";
-import { BaseWallet } from "mainnet-js";
+import { WatchWallet } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
 import WebhookWorker from "./WebhookWorker.js";
 
 export class WebhookBch extends Webhook {
   cancel!: CancelFn;
-  wallet!: BaseWallet;
+  wallet!: WatchWallet;
 
   db!: SqlProvider;
   seenStatuses: string[] = [];
@@ -49,7 +48,7 @@ export class WebhookBch extends Webhook {
       }
     };
 
-    this.wallet = await BaseWallet.fromCashaddr(this.cashaddr);
+    this.wallet = await WatchWallet.fromCashaddr(this.cashaddr);
     this.cancel = await this.wallet.provider!.subscribeToAddress(
       this.cashaddr,
       webhookCallback
@@ -147,8 +146,7 @@ export class WebhookBch extends Webhook {
         const balanceSat = await this.wallet.provider!.getBalance(
           this.cashaddr
         );
-        const balanceObject = await balanceResponseFromSatoshi(balanceSat);
-        result = await this.post(balanceObject);
+        result = await this.post({ sat: balanceSat.toString() });
       }
 
       if (result) {

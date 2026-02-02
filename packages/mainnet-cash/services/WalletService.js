@@ -29,12 +29,10 @@ const balance = ({ balanceRequest }) => new Promise(
       }
 
       // the balance unit may also be empty
-      let resp = await wallet.getBalance(balanceRequest.unit);
-      if (typeof resp === "number") {
-        resolve(Service.successResponse(resp.toString()));
-      } else {
-        resolve(Service.successResponse(resp));
-      }
+      let utxos = await wallet.getUtxos();
+      if (balanceRequest.slpSemiAware) utxos = utxos.filter(u => u.satoshis > 546n);
+
+      resolve(Service.successResponse({ sat: utxos.reduce((acc, u) => acc + u.satoshis, 0n) }));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -190,7 +188,7 @@ const maxAmountToSend = ({ maxAmountToSendRequest }) => new
     let args = maxAmountToSendRequest;
     delete args.walletId;
     let resp = await wallet.getMaxAmountToSend(args);
-    resolve(Service.successResponse({ ...resp }));
+    resolve(Service.successResponse({ sat: resp }));
   } catch (e) {
     reject(
       Service.rejectResponse(e, e.status || 500)
@@ -300,12 +298,14 @@ const utxos = ({ serializedWallet }) => new Promise(
   async (resolve, reject) => {
     try {
       let wallet = await mainnet.walletFromId(serializedWallet.walletId);
-      let args = serializedWallet;
-      delete args.walletId;
 
-      
-      let resp = await wallet.getUtxos(args);
-      resolve(Service.successResponse(resp));
+      if (serializedWallet.slpSemiAware) {
+        wallet.slpSemiAware();
+      }
+
+      let utxos = await wallet.getUtxos();
+      if (serializedWallet.slpSemiAware) utxos = utxos.filter(u => u.satoshis > 546n);
+      resolve(Service.successResponse(utxos));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -386,7 +386,7 @@ const tokenMint = ({ tokenMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(tokenMintRequest.walletId);
-      const resp = await wallet.tokenMint(tokenMintRequest.tokenId, tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
+      const resp = await wallet.tokenMint(tokenMintRequest.category, tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
 
       resolve(Service.successResponse(resp));
     } catch (e) {
@@ -407,7 +407,7 @@ const getNftTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
-      const resp = await wallet.getNftTokenBalance(getTokenBalanceRequest.tokenId);
+      const resp = await wallet.getNftTokenBalance(getTokenBalanceRequest.category);
 
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
@@ -428,7 +428,7 @@ const getTokenBalance = ({ getTokenBalanceRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(getTokenBalanceRequest.walletId);
-      const resp = await wallet.getTokenBalance(getTokenBalanceRequest.tokenId);
+      const resp = await wallet.getTokenBalance(getTokenBalanceRequest.category);
             
       resolve(Service.successResponse({ balance: resp }));
     } catch (e) {
@@ -449,7 +449,7 @@ const getTokenUtxos = ({ getTokenUtxosRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(getTokenUtxosRequest.walletId);
-      const resp = await wallet.getTokenUtxos(getTokenUtxosRequest.tokenId);
+      const resp = await wallet.getTokenUtxos(getTokenUtxosRequest.category);
 
       resolve(Service.successResponse(resp));
     } catch (e) {

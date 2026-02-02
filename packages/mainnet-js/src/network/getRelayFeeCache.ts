@@ -15,9 +15,9 @@ export async function getRelayFeeCache(provider: NetworkProvider) {
       relayFeePerKbInCoins;
   }
   if (typeof relayFeePerKbInCoins === "number") {
-    return Math.round(relayFeePerKbInCoins * bchParam.subUnits) / 1000;
+    return Math.round(relayFeePerKbInCoins * Number(bchParam.subUnits)) / 1000;
   } else {
     console.warn("Couldn't get min relay fee, using default instead");
-    return Math.round(0.00001 * bchParam.subUnits) / 1000;
+    return Math.round(0.00001 * Number(bchParam.subUnits)) / 1000;
   }
 }

@@ -15,13 +15,18 @@ export const Network = {
 };
 export type Network = typeof Network[keyof typeof Network];
 
-export interface UtxoI {
+export interface Utxo {
   txid: string;
   vout: number;
-  satoshis: number;
+  satoshis: bigint;
   height?: number;
-  coinbase?: boolean;
   token?: TokenI;
+  address: string;
+}
+
+export interface UtxoId {
+  txid: string;
+  vout: number;
 }
 
 export interface ElectrumBalanceI {
@@ -52,9 +57,11 @@ export interface HeaderI {
 
 export interface TokenI {
   amount: bigint;
-  tokenId: string;
-  capability?: NFTCapability;
-  commitment?: string;
+  category: string;
+  nft?: {
+    capability: NFTCapability;
+    commitment: string;
+  };
 }
 
 export const NFTCapability = {

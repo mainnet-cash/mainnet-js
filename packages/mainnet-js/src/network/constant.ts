@@ -7,8 +7,8 @@ export const networkTickerMap = {
 };
 
 export const mainnetServers = [
-  "wss://bch.imaginary.cash:50004",
-  //"wss://blackie.c3-soft.com:50004",
+  // "wss://bch.imaginary.cash:50004",
+  "wss://blackie.c3-soft.com:50004",
   // "wss://electrum.imaginary.cash:50004",
   // "wss://fulcrum.fountainhead.cash",
 ];
@@ -29,9 +29,9 @@ export const mainnetServers = [
 
 // chipnet
 export const testnetServers = [
-  // "wss://chipnet.imaginary.cash:50004",
+  "wss://chipnet.imaginary.cash:50004",
   //"wss://blackie.c3-soft.com:64004", // chipnet with protocol 1.5.0
-  "wss://chipnet.bch.ninja:50004",
+  // "wss://chipnet.bch.ninja:50004",
 ];
 
 export const regtestServers = ["ws://127.0.0.1:60003"];

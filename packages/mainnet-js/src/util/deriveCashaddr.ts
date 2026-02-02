@@ -80,6 +80,10 @@ function decodeAddress(address: string): DecodedCashAddress {
 }
 
 export function toCashaddr(address: string): string {
+  if (address.indexOf(":q") > 0 || address.indexOf(":p") > 0) {
+    return address;
+  }
+
   const result = decodeAddress(address);
 
   return encodeCashAddress({
@@ -90,6 +94,10 @@ export function toCashaddr(address: string): string {
 }
 
 export function toTokenaddr(address: string): string {
+  if (address.indexOf(":z") > 0 || address.indexOf(":r") > 0) {
+    return address;
+  }
+
   const result = decodeAddress(address);
 
   return encodeCashAddress({

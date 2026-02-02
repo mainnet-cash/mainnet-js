@@ -14,6 +14,20 @@ export class WebStorageCache implements CacheProvider {
     return localStorage.getItem(key);
   }
 
+  async getItems(keys: string[]): Promise<Map<string, string | null>> {
+    const results = new Map<string, string | null>();
+    for (const key of keys) {
+      results.set(key, localStorage.getItem(key));
+    }
+    return results;
+  }
+
+  async setItems(entries: [string, string][]): Promise<void> {
+    for (const [key, value] of entries) {
+      localStorage.setItem(key, value);
+    }
+  }
+
   async removeItem(key: string): Promise<void> {
     localStorage.removeItem(key);
   }

@@ -1,7 +1,5 @@
 import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 import { bchParam } from "../chain";
-import { BalanceResponse } from "../util/balanceObjectFromSatoshi";
-import { UnitEnum } from "../enum";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
 import { delay } from "../util/delay";
@@ -19,6 +17,7 @@ import { mine } from "../mine";
 import { Config } from "../config";
 import { CancelFn } from "./interface";
 import json from "../test/json.test";
+import { convert, sumUtxoValue, toBch, toCurrency, toSat } from "../util";
 
 beforeAll(async () => {
   await initProviders();
@@ -38,6 +37,16 @@ describe(`Test creation of wallet from walletId`, () => {
     expect(w.privateKey!.length).toBe(32);
     expect(w.publicKeyHash!.length).toBe(20);
     expect(w.privateKeyWif !== "undefined").toBeTruthy();
+  });
+
+  test("hasAddress should recognize wallet address", async () => {
+    let w = await RegTestWallet.fromId(
+      "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
+    );
+    expect(w.hasAddress(w.getDepositAddress())).toBe(true);
+    expect(
+      w.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")
+    ).toBe(false);
   });
 
   test("Should get a new random wallet", async () => {
@@ -423,8 +432,7 @@ describe(`Watch only Wallets`, () => {
     }
 
     // the balance unit may also be empty
-    let unit;
-    expect(((await w.getBalance(unit)) as BalanceResponse).sat).toBe(0);
+    expect(await w.getBalance()).toBe(0n);
     expect(w.network).toBe("regtest");
     expect(w.networkPrefix).toBe("bchreg");
     expect(w.cashaddr).toBe(
@@ -451,10 +459,10 @@ describe(`Watch only Wallets`, () => {
       let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       expect(alice.getPublicKeyHash()!.length).toBe(20);
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("sat")).toBeGreaterThan(
-        5000 * bchParam.subUnits
+      const aliceBalance = await alice.getBalance();
+      expect(toBch(aliceBalance)).toBeGreaterThan(5000);
+      expect(await alice.getBalance()).toBeGreaterThan(
+        5000n * bchParam.subUnits
       );
     }
   });
@@ -468,10 +476,17 @@ describe(`Watch only Wallets`, () => {
       let alice = await RegTestWallet.watchOnly(process.env.ADDRESS); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
       expect(alice.getPublicKeyHash()!.length).toBe(20);
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.bch).toBeGreaterThan(5000);
-      expect(await alice.getBalance("eur")).toBeGreaterThan(0);
-      expect(await (await RegTestWallet.newRandom()).getBalance("eur")).toBe(0);
+      const aliceBalance = await alice.getBalance();
+      expect(toBch(aliceBalance)).toBeGreaterThan(5000);
+      expect(await toCurrency(await alice.getBalance(), "eur")).toBeGreaterThan(
+        0
+      );
+      expect(
+        await toCurrency(
+          await (await RegTestWallet.newRandom()).getBalance(),
+          "eur"
+        )
+      ).toBe(0);
       Config.DefaultCurrency = "usd";
     }
   });
@@ -486,9 +501,9 @@ describe(`Watch only Wallets`, () => {
       // Build Bob's wallet from a public address, check his balance.
       expect(alice.getPublicKeyHash()!.length).toBe(20);
       let aliceBalance = await alice.send([
-        { cashaddr: alice.cashaddr!, value: 720, unit: "sat" },
+        { cashaddr: alice.cashaddr!, value: 720n },
       ]);
-      expect(aliceBalance.balance!.sat!).toBeGreaterThan(5000);
+      expect(aliceBalance.balance).toBeGreaterThan(5000n);
     }
   });
 
@@ -501,8 +516,8 @@ describe(`Watch only Wallets`, () => {
         process.env.ALICE_TESTNET_ADDRESS!
       ); // insert WIF from #1
       // Build Bob's wallet from a public address, check his balance.
-      const aliceBalance = (await alice.getBalance()) as BalanceResponse;
-      expect(aliceBalance.sat).toBeGreaterThan(2000);
+      const aliceBalance = await alice.getBalance();
+      expect(aliceBalance).toBeGreaterThan(2000n);
     }
   });
 
@@ -514,8 +529,7 @@ describe(`Watch only Wallets`, () => {
     const { encodedTransaction } = await aliceWallet.encodeTransaction([
       {
         cashaddr: bobWallet.cashaddr!,
-        value: 2000,
-        unit: "satoshis",
+        value: 2000n,
       },
     ]);
     expect(encodedTransaction.length).toBeGreaterThan(0);
@@ -523,7 +537,7 @@ describe(`Watch only Wallets`, () => {
     const txId = await aliceWallet.submitTransaction(encodedTransaction, true);
     expect(txId.length).toBeGreaterThan(0);
 
-    expect(await bobWallet.getBalance("sat")).toBe(2000);
+    expect(await bobWallet.getBalance()).toBe(2000n);
   });
 
   test("Should get last transaction", async () => {
@@ -536,8 +550,7 @@ describe(`Watch only Wallets`, () => {
     await aliceWallet.send([
       {
         cashaddr: bobWallet.cashaddr!,
-        value: 2000,
-        unit: "satoshis",
+        value: 2000n,
       },
     ]);
 
@@ -555,8 +568,7 @@ describe(`Wallet subscriptions`, () => {
         aliceWallet.send([
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       0
@@ -566,7 +578,7 @@ describe(`Wallet subscriptions`, () => {
       getTransactionInfo: true,
       getBalance: true,
     });
-    expect(response.balance!.sat).toBeGreaterThan(0);
+    expect(response.balance).toBeGreaterThan(0);
     expect(response.transactionInfo!.hash).not.toBe("");
 
     await bobWallet.sendMax(aliceWallet.cashaddr!);
@@ -577,66 +589,63 @@ describe(`Wallet subscriptions`, () => {
     const bobWallet = await RegTestWallet.newRandom();
 
     let balance, newBalance;
-    balance = await aliceWallet.getBalance("sat");
+    balance = await aliceWallet.getBalance();
 
     aliceWallet.send(
       [
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
       ],
       { awaitTransactionPropagation: false }
     );
-    newBalance = await aliceWallet.getBalance("sat");
+    newBalance = await aliceWallet.getBalance();
     expect(balance).toBe(newBalance);
 
     await delay(1500);
 
-    balance = await aliceWallet.getBalance("sat");
+    balance = await aliceWallet.getBalance();
     await aliceWallet.send(
       [
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
       ],
       { awaitTransactionPropagation: false }
     );
 
-    newBalance = await aliceWallet.getBalance("sat");
+    newBalance = await aliceWallet.getBalance();
     expect(balance).toBe(newBalance);
 
-    balance = await aliceWallet.getBalance("sat");
+    balance = await aliceWallet.getBalance();
     await aliceWallet.send(
       [
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "satoshis",
+          value: 1000n,
         },
       ],
       { awaitTransactionPropagation: true }
     );
 
-    newBalance = await aliceWallet.getBalance("sat");
+    newBalance = await aliceWallet.getBalance();
     expect(balance).toBeGreaterThan(newBalance);
   });
 
   test("Create two wallets, get balances concurrently", async () => {
-    let balance1 = 999,
-      balance2 = 666;
+    let balance1 = 999n;
+    let balance2 = 666n;
     Wallet.newRandom().then((wallet) =>
-      wallet.getBalance("sat").then((balance) => (balance1 = balance as number))
+      wallet.getBalance().then((balance) => (balance1 = balance))
     );
     Wallet.newRandom().then((wallet) =>
-      wallet.getBalance("sat").then((balance) => (balance2 = balance as number))
+      wallet.getBalance().then((balance) => (balance2 = balance))
     );
     await delay(5000);
-    expect(balance1).toBe(0);
-    expect(balance2).toBe(0);
+    expect(balance1).toBe(0n);
+    expect(balance2).toBe(0n);
   });
 
   test("Should watch then wait", async () => {
@@ -655,13 +664,12 @@ describe(`Wallet subscriptions`, () => {
     aliceWallet.send([
       {
         cashaddr: bobWallet.cashaddr!,
-        value: 2000,
-        unit: "satoshis",
+        value: 2000n,
       },
     ]);
 
-    let balance = await bobWallet.waitForBalance(2000, UnitEnum.SATOSHIS);
-    expect(balance.sat!).toBeGreaterThanOrEqual(2000);
+    let balance = await bobWallet.waitForBalance(2000n);
+    expect(balance).toBeGreaterThanOrEqual(2000n);
     await bobWallet.sendMax(aliceWallet.cashaddr!);
   });
 
@@ -672,14 +680,13 @@ describe(`Wallet subscriptions`, () => {
     alice.send([
       {
         cashaddr: bob.cashaddr!,
-        value: 2000,
-        unit: "satoshis",
+        value: 2000n,
       },
     ]);
 
     let cancel = await bob.watchBalance(() => {});
-    let balance = await bob.waitForBalance(2000, "sat");
-    expect(balance.sat!).toBe(2000);
+    let balance = await bob.waitForBalance(2000n);
+    expect(balance).toBe(2000n);
     await cancel();
   });
 
@@ -695,14 +702,13 @@ describe(`Wallet subscriptions`, () => {
         alice.send([
           {
             cashaddr: bob.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       600
     );
 
-    let bobBalance = await bob.waitForBalance(1000, "sat").catch((e) => {
+    let bobBalance = await bob.waitForBalance(1000n).catch((e) => {
       throw e;
     });
     setTimeout(
@@ -710,35 +716,32 @@ describe(`Wallet subscriptions`, () => {
         alice.send([
           {
             cashaddr: charlie.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       600
     );
-    let charlieBalance = await charlie.waitForBalance(1000, "sat");
+    let charlieBalance = await charlie.waitForBalance(1000n);
     setTimeout(
       () =>
         alice.send([
           {
             cashaddr: dave.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       600
     );
-    let daveBalance = await dave.waitForBalance(1000, "sat");
-    expect(bobBalance.sat!).toBe(1000);
-    expect(charlieBalance.sat!).toBe(1000);
-    expect(daveBalance.sat!).toBe(1000);
+    let daveBalance = await dave.waitForBalance(1000n);
+    expect(bobBalance).toBe(1000n);
+    expect(charlieBalance).toBe(1000n);
+    expect(daveBalance).toBe(1000n);
     setTimeout(
       () =>
         alice.send([
           {
             cashaddr: bob.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       600
@@ -750,8 +753,7 @@ describe(`Wallet subscriptions`, () => {
         alice.send([
           {
             cashaddr: bob.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       600
@@ -763,15 +765,14 @@ describe(`Wallet subscriptions`, () => {
         alice.send([
           {
             cashaddr: bob.cashaddr!,
-            value: 1000,
-            unit: "satoshis",
+            value: 1000n,
           },
         ]),
       600
     );
     bobResponse = await bob.waitForTransaction();
     expect(bobResponse.transactionInfo!.version).toBe(2);
-    expect(await bob.getBalance("sat")).toBe(4000);
+    expect(await bob.getBalance()).toBe(4000n);
   });
 
   test("Test waiting and watching", async () => {
@@ -785,35 +786,29 @@ describe(`Wallet subscriptions`, () => {
         getBalance: true,
         getTransactionInfo: true,
       });
-      expect(result.balance!.sat!).toBeGreaterThan(0);
+      expect(result.balance!).toBeGreaterThan(0);
       expect(result.transactionInfo!.hash.length).toBe(64);
       waitTxResult = true;
     }, 0);
 
     let waitBalanceResult = false;
     setTimeout(async () => {
-      const result = (await alice.waitForBalance(
-        0.001,
-        "bch"
-      )) as BalanceResponse;
-      expect(result.sat!).toBeGreaterThan(0);
+      const result = await alice.waitForBalance(toSat(0.001));
+      expect(result).toBeGreaterThan(0n);
       waitBalanceResult = true;
     }, 0);
 
     let aliceWatchResult = false;
     let aliceWatchCancel: CancelFn;
-    aliceWatchCancel = await alice.provider!.watchAddressStatus(
-      alice.getDepositAddress(),
-      async (_status) => {
-        await aliceWatchCancel?.();
-        aliceWatchResult = true;
-      }
-    );
+    aliceWatchCancel = await alice.watchStatus(async (_status) => {
+      await aliceWatchCancel?.();
+      aliceWatchResult = true;
+    });
 
     let bobWatchResult = false;
     let bobTransactionId = "";
     let bobWatchCancel: CancelFn;
-    bobWatchCancel = await bob.watchAddress(async (txHash) => {
+    bobWatchCancel = await bob.watchTransactionHashes(async (txHash) => {
       await bobWatchCancel?.();
       bobWatchResult = true;
       bobTransactionId = txHash;
@@ -823,11 +818,11 @@ describe(`Wallet subscriptions`, () => {
     let bobBalanceWatchCancel: CancelFn;
     bobBalanceWatchCancel = await bob.watchBalance(async (balance) => {
       // skip if balance is zero yet
-      if (!balance.bch) {
+      if (!balance) {
         return;
       }
 
-      expect(balance.bch!).toBe(0.001);
+      expect(balance).toBe(toSat(0.001));
       await bobBalanceWatchCancel?.();
       bobBalanceWatchResult = true;
     });
@@ -858,8 +853,7 @@ describe(`Wallet subscriptions`, () => {
 
     const sendResponse = await alice.send({
       cashaddr: bob.getDepositAddress(),
-      value: 0.001,
-      unit: "bch",
+      value: BigInt(await convert(0.001, "bch", "sat")),
     });
 
     await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
@@ -881,7 +875,7 @@ describe(`Wallet subscriptions`, () => {
 
 describe(`Wallet extrema behavior regression testing`, () => {
   test(`Should operate very well above dust threshold (${
-    DUST * 3
+    DUST * 3n
   }), 'min relay fee not met (code 66)' regression`, async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
@@ -889,20 +883,19 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const charlieWallet = await RegTestWallet.newRandom();
 
     await aliceWallet.send([
-      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-      { cashaddr: bobWallet.cashaddr!, value: DUST * 3, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST },
+      { cashaddr: bobWallet.cashaddr!, value: DUST * 3n },
     ]);
 
     await bobWallet.send({
       cashaddr: charlieWallet.cashaddr!,
       value: DUST,
-      unit: "sat",
     });
-    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+    expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
   test(`Should operate very well above dust threshold (${
-    DUST * 2
+    DUST * 2n
   }), 'min relay fee not met (code 66)' regression`, async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
@@ -910,20 +903,19 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const charlieWallet = await RegTestWallet.newRandom();
 
     await aliceWallet.send([
-      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-      { cashaddr: bobWallet.cashaddr!, value: DUST * 2, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST },
+      { cashaddr: bobWallet.cashaddr!, value: DUST * 2n },
     ]);
 
     await bobWallet.send({
       cashaddr: charlieWallet.cashaddr!,
       value: DUST,
-      unit: "sat",
     });
-    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+    expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
   test(`Should operate well above dust threshold (${
-    DUST + 328
+    DUST + 328n
   }), 'min relay fee not met (code 66)' regression`, async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
@@ -931,18 +923,16 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const charlieWallet = await RegTestWallet.newRandom();
 
     await aliceWallet.send([
-      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-      { cashaddr: bobWallet.cashaddr!, value: DUST + 328, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST },
+      { cashaddr: bobWallet.cashaddr!, value: DUST + 328n },
     ]);
 
-    await bobWallet.send([
-      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
-    ]);
-    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+    await bobWallet.send([{ cashaddr: charlieWallet.cashaddr!, value: DUST }]);
+    expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
   test(`Should operate slightly above dust threshold (${
-    DUST + 1
+    DUST + 1n
   }), 'min relay fee not met (code 66)' regression`, async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
@@ -950,14 +940,12 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const charlieWallet = await RegTestWallet.newRandom();
 
     await aliceWallet.send([
-      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-      { cashaddr: bobWallet.cashaddr!, value: DUST + 1, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST },
+      { cashaddr: bobWallet.cashaddr!, value: DUST + 1n },
     ]);
 
-    await bobWallet.send([
-      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
-    ]);
-    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+    await bobWallet.send([{ cashaddr: charlieWallet.cashaddr!, value: DUST }]);
+    expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
   test(`Should operate with dust threshold (${DUST}), 'min relay fee not met (code 66)' regression`, async () => {
@@ -967,17 +955,15 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const charlieWallet = await RegTestWallet.newRandom();
 
     await aliceWallet.send([
-      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-      { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
+      { cashaddr: bobWallet.cashaddr!, value: DUST },
+      { cashaddr: bobWallet.cashaddr!, value: DUST },
     ]);
 
-    await bobWallet.send([
-      { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
-    ]);
-    expect(await charlieWallet.getBalance("sat")).toBe(DUST);
+    await bobWallet.send([{ cashaddr: charlieWallet.cashaddr!, value: DUST }]);
+    expect(await charlieWallet.getBalance()).toBe(DUST);
   });
   test(`Should throw error with dust amounts (${
-    DUST - 1
+    DUST - 1n
   }), 'min relay fee not met (code 66)' regression`, async () => {
     expect.assertions(1);
     try {
@@ -987,12 +973,12 @@ describe(`Wallet extrema behavior regression testing`, () => {
       const charlieWallet = await RegTestWallet.newRandom();
 
       await aliceWallet.send([
-        { cashaddr: bobWallet.cashaddr!, value: DUST, unit: "sat" },
-        { cashaddr: bobWallet.cashaddr!, value: DUST - 1, unit: "sat" },
+        { cashaddr: bobWallet.cashaddr!, value: DUST },
+        { cashaddr: bobWallet.cashaddr!, value: DUST - 1n },
       ]);
 
       await bobWallet.send([
-        { cashaddr: charlieWallet.cashaddr!, value: DUST, unit: "sat" },
+        { cashaddr: charlieWallet.cashaddr!, value: DUST },
       ]);
     } catch (e: any) {
       expect(e.message).toBe(
@@ -1007,7 +993,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
 
     result = await wallet.send([
       OpReturnData.from("MEMO\x10LÖL😅"),
-      { cashaddr: wallet.cashaddr!, value: 546, unit: "sats" },
+      { cashaddr: wallet.cashaddr!, value: 546n },
     ]);
     transaction = (await wallet.provider!.getRawTransactionObject(
       result.txId!
@@ -1018,7 +1004,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     );
 
     result = await wallet.send([
-      [wallet.cashaddr!, 546, "sats"],
+      [wallet.cashaddr!, 546n],
       ["OP_RETURN", Uint8Array.from([0x00, 0x01, 0x02])],
     ]);
     transaction = (await wallet.provider!.getRawTransactionObject(
@@ -1050,24 +1036,24 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bob = await RegTestWallet.newRandom();
     await alice.send([
-      { cashaddr: bob.getDepositAddress(), unit: UnitEnum.SAT, value: 546 },
-      { cashaddr: bob.getDepositAddress(), unit: UnitEnum.SAT, value: 1000 },
+      { cashaddr: bob.getDepositAddress(), value: 546n },
+      { cashaddr: bob.getDepositAddress(), value: 1000n },
     ]);
-    expect(await bob.getBalance("sat")).toBe(1546);
+    expect(sumUtxoValue(await bob.getUtxos())).toBe(1546n);
     bob.slpSemiAware();
-    expect(await bob.getBalance("sat")).toBe(1000);
+    expect(sumUtxoValue(await bob.getUtxos())).toBe(1000n);
 
     expect(
-      (await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })).sat
-    ).toBe(768);
+      await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })
+    ).toBe(768n);
     await bob.sendMax(alice.getDepositAddress());
-    expect(await bob.getBalance("sat")).toBe(0);
+    expect(await bob.getBalance()).toBe(0n + 546n);
 
     bob.slpSemiAware(false);
-    expect(await bob.getBalance("sat")).toBe(546);
+    expect(await bob.getBalance()).toBe(546n);
     expect(
-      (await bob.getMaxAmountToSend({ options: { slpSemiAware: false } })).sat
-    ).toBeLessThanOrEqual(546);
+      await bob.getMaxAmountToSend({ options: { slpSemiAware: false } })
+    ).toBeLessThanOrEqual(546n);
   });
 
   test("Should encode unsigned transactions", async () => {
@@ -1076,7 +1062,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const bobWallet = await RegTestWallet.newRandom();
     delete (aliceWallet as any).privateKey;
 
-    const aliceUtxos = await aliceWallet.getAddressUtxos();
+    const aliceUtxos = await aliceWallet.getUtxos();
 
     {
       const { encodedTransaction, sourceOutputs } =
@@ -1084,8 +1070,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
           [
             {
               cashaddr: bobWallet.cashaddr!,
-              value: 2000,
-              unit: "satoshis",
+              value: 2000n,
             },
           ],
           false,
@@ -1096,7 +1081,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       // check transaction was not submitted
       // BigInts can't be serialized as strings
       //
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1130,8 +1115,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
         [
           {
             cashaddr: bobWallet.cashaddr!,
-            value: 2000,
-            unit: "satoshis",
+            value: 2000n,
           },
         ],
         { buildUnsigned: true }
@@ -1140,7 +1124,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1162,7 +1146,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
-      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getAddressUtxos()));
+      expect(json(aliceUtxos)).toBe(json(await aliceWallet.getUtxos()));
 
       const decoded = decodeTransaction(encodedTransaction);
       if (typeof decoded === "string") {
@@ -1181,14 +1165,13 @@ describe(`Wallet extrema behavior regression testing`, () => {
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const bobWallet = await RegTestWallet.newRandom();
 
-    const aliceUtxos = await aliceWallet.getAddressUtxos();
+    const aliceUtxos = await aliceWallet.getUtxos();
 
     await expect(
       aliceWallet.send(
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "sat",
+          value: 1000n,
         },
         { utxoIds: ["00ab:1", "00cd:2"] }
       )
@@ -1198,8 +1181,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       aliceWallet.send(
         {
           cashaddr: bobWallet.cashaddr!,
-          value: 1000,
-          unit: "sat",
+          value: 1000n,
         },
         {
           utxoIds: [

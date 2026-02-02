@@ -7,7 +7,9 @@ export * from "./network/index.js";
 export { SignedMessage } from "./message/signed.js";
 
 export * from "./wallet/Base.js";
+export * from "./wallet/Watch.js";
 export * from "./wallet/Wif.js";
+export * from "./wallet/HDWallet.js";
 export * from "./wallet/createWallet.js";
 
 // provider
@@ -27,7 +29,7 @@ export * from "./wallet/model.js";
 import * as Mainnet from "./util/index.js";
 export { Mainnet };
 export * from "./util/index.js";
-export { getAddressHistory } from "./history/electrumTransformer.js";
+export { getHistory } from "./history/getHistory.js";
 
 // libauth
 export * as libauth from "./libauth.js";

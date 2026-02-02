@@ -3,7 +3,7 @@ import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 import server from "../index.js";
 import request from "supertest";
-import { toUtxoId } from "mainnet-js";
+import { toUtxoId, Utxo } from "mainnet-js";
 import { checkResponse } from "../utils/testUtils.js";
 
 var app;
@@ -27,8 +27,7 @@ describe("Test Wallet Endpoints", () => {
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       });
     checkResponse(resp);
-    expect(resp.body.sat).toBeGreaterThan(100);
-    expect(resp.body.bch).toBeGreaterThanOrEqual(5000);
+    expect(Number(resp.body.sat)).toBeGreaterThan(100);
   });
 
   /**
@@ -41,8 +40,7 @@ describe("Test Wallet Endpoints", () => {
         walletId: `watch:regtest:bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0`,
       });
     checkResponse(resp);
-    expect(resp.body.sat).toBeGreaterThan(100);
-    expect(resp.body.bch).toBeGreaterThanOrEqual(5000);
+    expect(Number(resp.body.sat)).toBeGreaterThan(100);
   });
 
   /**
@@ -53,10 +51,9 @@ describe("Test Wallet Endpoints", () => {
       .post("/wallet/balance")
       .send({
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
-        unit: "sat",
       });
     checkResponse(resp);
-    expect(parseInt(resp.text)).toBeGreaterThanOrEqual(
+    expect(Number(resp.body.sat)).toBeGreaterThanOrEqual(
       5000 * 100000000
     );
   });
@@ -179,32 +176,26 @@ describe("Test Wallet Endpoints", () => {
         to: [
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 6000,
           },
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 6000,
           },
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 6000,
           },
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 6000,
           },
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 6000,
           },
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 6000,
           },
         ],
@@ -243,7 +234,6 @@ describe("Test Wallet Endpoints", () => {
           to: [
             {
               cashaddr: bobsCashaddr,
-              unit: 'satoshis',
               value: 2000,
             },
           ],
@@ -254,7 +244,7 @@ describe("Test Wallet Endpoints", () => {
       });
       const body = resp.body;
       expect(resp.statusCode).toBe(200);
-      expect(body!.sat).toBeGreaterThan(1000);
+      expect(Number(body.sat)).toBeGreaterThan(1000);
     }
   });
 
@@ -278,7 +268,6 @@ describe("Test Wallet Endpoints", () => {
           walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
           to: [{
             cashaddr: bobsCashaddr,
-            unit: 'sat',
             value: 3000
           }]
         });
@@ -293,7 +282,7 @@ describe("Test Wallet Endpoints", () => {
       expect(sendResp.statusCode).toBe(200);
       expect((sendResp.body.txId as string).length).toBe(64);
       expect(resp.statusCode).toBe(200);
-      expect(body.sat as number).toBe(3000);
+      expect(Number(body.sat)).toBe(3000);
     }
   });
 
@@ -321,7 +310,6 @@ describe("Test Wallet Endpoints", () => {
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         to: [{
           cashaddr: aliceWalletResp.body.cashaddr,
-          unit: 'sat',
           value: 5000
         }]
       });
@@ -331,7 +319,6 @@ describe("Test Wallet Endpoints", () => {
           walletId: aliceWalletResp.body.walletId,
           to: [{
             cashaddr: bobsCashaddr,
-            unit: 'sat',
             value: 3000
           }],
           options:{
@@ -350,10 +337,10 @@ describe("Test Wallet Endpoints", () => {
       expect(sendResp.statusCode).toBe(200);
       expect((sendResp.body.txId as string).length).toBe(64);
       expect(bobBalanceResp.statusCode).toBe(200);
-      expect(bobBalanceResp.body.sat as number).toBe(3000);
+      expect(Number(bobBalanceResp.body.sat)).toBe(3000);
 
       expect(charlieBalanceResp.statusCode).toBe(200);
-      expect(charlieBalanceResp.body.sat as number).toBe(1780);
+      expect(Number(charlieBalanceResp.body.sat)).toBe(1780);
     }
   });
 
@@ -377,17 +364,14 @@ describe("Test Wallet Endpoints", () => {
             {
               cashaddr: bobsCashaddr!,
               value: 1001,
-              unit: "satoshis",
             },
             {
               cashaddr: bobsCashaddr!,
               value: 1000,
-              unit: "satoshis",
             },
             {
               cashaddr: bobsCashaddr!,
               value: 1001,
-              unit: "satoshis",
             },
           ]
         });
@@ -399,7 +383,7 @@ describe("Test Wallet Endpoints", () => {
         walletId: bobsWalletResp.body.walletId,
       });
       expect(bobBalanceResp.statusCode).toBe(200);
-      expect(bobBalanceResp.body.sat as number).toBe(3002);
+      expect(Number(bobBalanceResp.body.sat)).toBe(3002);
 
       // Get the utxoIds of bob's wallet
       const utxoResp = await request(app)
@@ -431,7 +415,6 @@ describe("Test Wallet Endpoints", () => {
             {
               cashaddr: charliesWalletResp.body.cashaddr!,
               value: 1600,
-              unit: "satoshis",
             },
           ],
           options:{"utxoIds":utxoIds}
@@ -450,13 +433,13 @@ describe("Test Wallet Endpoints", () => {
       let bobBalanceResp2 = await request(app).post("/wallet/balance").send({
         walletId: bobsWalletResp.body.walletId,
       });
-      expect(bobBalanceResp2.body.sat).toBe(1000)
+      expect(Number(bobBalanceResp2.body.sat)).toBe(1000)
 
       // Assure that charlie has the amount sent
       let charlieBalanceResp = await request(app).post("/wallet/balance").send({
         walletId: charliesWalletResp.body.walletId,
       });
-      expect(charlieBalanceResp.body.sat).toBe(1600)
+      expect(Number(charlieBalanceResp.body.sat)).toBe(1600);
   });
 
   /**
@@ -493,7 +476,6 @@ describe("Test Wallet Endpoints", () => {
         walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
         to: [{
           cashaddr: aliceResp.body.cashaddr,
-          unit: 'sat',
           value: 4500
         }]
       });
@@ -503,22 +485,18 @@ describe("Test Wallet Endpoints", () => {
           walletId: aliceResp.body.walletId,
           to: [{
             cashaddr: bobResp.body.cashaddr,
-            unit: 'sat',
             value: 549
           },
           {
             cashaddr: charlieResp.body.cashaddr,
-            unit: 'sat',
             value: 550
           },
           {
             cashaddr: daveResp.body.cashaddr,
-            unit: 'sat',
             value: 551
           },
           {
             cashaddr: edwardResp.body.cashaddr,
-            unit: 'sat',
             value: 2552
           }],
           options:{feePaidBy:'changeThenAny'}
@@ -540,11 +518,11 @@ describe("Test Wallet Endpoints", () => {
         walletId: edwardResp.body.walletId,
       });
 
-      const alice = aliceBalanceResp.body.sat as number;
-      const bob = bobBalanceResp.body.sat as number;
-      const charlie = charlieBalanceResp.body.sat as number;
-      const dave = daveBalanceResp.body.sat as number;
-      const edward = edwardBalanceResp.body.sat as number;
+      const alice = Number(aliceBalanceResp.body.sat);
+      const bob = Number(bobBalanceResp.body.sat);
+      const charlie = Number(charlieBalanceResp.body.sat);
+      const dave = Number(daveBalanceResp.body.sat);
+      const edward = Number(edwardBalanceResp.body.sat);
 
       expect(sendResp.statusCode).toBe(200);
       expect(aliceBalanceResp.statusCode).toBe(200);
@@ -582,10 +560,10 @@ describe("Test Wallet Endpoints", () => {
       walletId: `wif:regtest:${process.env.PRIVATE_WIF}`,
       to: [{
         cashaddr: bobsWallet.cashaddr,
-        unit: 'bch',
-        value: 1
+        value: 100000000
       }]
     });
+
     if (initialResp.error) {
       console.log(initialResp.error.text);
     }
@@ -601,8 +579,7 @@ describe("Test Wallet Endpoints", () => {
     }
     expect(resp.statusCode).toBe(200);
     expect((body.txId as string).length).toBe(64);
-    expect(body.balance!.bch as number).toBe(0);
-    expect(body.balance!.sat as number).toBe(0);
+    expect(Number(body.balance)).toBe(0);
   });
 
   // This is an integration test of sendMax w/utxoIds
@@ -625,17 +602,14 @@ describe("Test Wallet Endpoints", () => {
           {
             cashaddr: bobsCashaddr!,
             value: 1001,
-            unit: "satoshis",
           },
           {
             cashaddr: bobsCashaddr!,
             value: 1000,
-            unit: "satoshis",
           },
           {
             cashaddr: bobsCashaddr!,
             value: 1001,
-            unit: "satoshis",
           },
         ]
       });
@@ -649,7 +623,7 @@ describe("Test Wallet Endpoints", () => {
 
     // expect bob's balance is correct
     expect(bobBalanceResp.statusCode).toBe(200);
-    expect(bobBalanceResp.body.sat as number).toBe(3002);
+    expect(Number(bobBalanceResp.body.sat)).toBe(3002);
 
     // get bob's utxos
     const utxoResp = await request(app)
@@ -697,14 +671,14 @@ describe("Test Wallet Endpoints", () => {
 
     // Should only include the one even utxo
     expect(utxoResp2.body.length).toBe(1);
-    expect(utxoResp2.body[0].satoshis).toBe(1000)
+    expect(Number(utxoResp2.body[0].satoshis)).toBe(1000)
 
 
     // Should have the balance sent 
     let charlieBalanceResp = await request(app).post("/wallet/balance").send({
       walletId: charliesWalletResp.body.walletId,
     });
-    expect(charlieBalanceResp.body.sat).toBeGreaterThan(1600)
+    expect(Number(charlieBalanceResp.body.sat)).toBeGreaterThan(1600)
 });
 
   /**
@@ -720,8 +694,8 @@ describe("Test Wallet Endpoints", () => {
     const body = resp.body;
     if (body) {
       const valueArray = await Promise.all(
-        body.map(async (b) => {
-          return b!.satoshis || 0;
+        body.map(async (b: Utxo) => {
+          return Number(b!.satoshis) || 0;
         })
       );
       const value = valueArray.reduce((a:any, b:any) => a + b, 0);
@@ -838,7 +812,6 @@ describe("Test Wallet Endpoints", () => {
         },
         {
           cashaddr: process.env.ADDRESS!,
-          unit: 'sat',
           value: 546
         }
       ]
@@ -912,12 +885,10 @@ describe("Test Wallet Endpoints", () => {
         to: [
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 546,
           },
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 1000,
           },
         ],
@@ -929,7 +900,7 @@ describe("Test Wallet Endpoints", () => {
         .send({
           walletId: bobsWalletId
         });
-      expect(result.body.sat).toBe(1546);
+      expect(Number(result.body.sat)).toBe(1546);
 
       // slpSemiAware
       result = await request(app)
@@ -938,7 +909,7 @@ describe("Test Wallet Endpoints", () => {
           walletId: bobsWalletId,
           slpSemiAware: true
         });
-      expect(result.body.sat).toBe(1000);
+      expect(Number(result.body.sat)).toBe(1000);
 
       result = await request(app)
         .post("/wallet/max_amount_to_send")
@@ -946,7 +917,7 @@ describe("Test Wallet Endpoints", () => {
           walletId: bobsWalletId,
           options: { slpSemiAware: true }
         });
-      expect(result.body.sat).toBe(768);
+      expect(Number(result.body.sat)).toBe(768);
 
 
       result = await request(app)
@@ -963,7 +934,7 @@ describe("Test Wallet Endpoints", () => {
           walletId: bobsWalletId,
           slpSemiAware: true
         });
-      expect(result.body.sat).toBe(0);
+      expect(result.body.sat).toBe("0");
 
       result = await request(app)
         .post("/wallet/balance")
@@ -971,7 +942,7 @@ describe("Test Wallet Endpoints", () => {
           walletId: bobsWalletId,
           slpSemiAware: false
         });
-      expect(result.body.sat).toBe(546);
+      expect(result.body.sat).toBe("546");
   });
 
   /**
@@ -1080,7 +1051,6 @@ describe("Test Wallet Endpoints", () => {
         to: [
           {
             cashaddr: bobsCashaddr,
-            unit: 'satoshis',
             value: 2000,
           },
         ],
@@ -1102,6 +1072,6 @@ describe("Test Wallet Endpoints", () => {
         walletId: bobsWalletResp.body.walletId,
       });
     checkResponse(bobBalanceResponse);
-    expect(bobBalanceResponse.body.sat).toBe(2000);
+    expect(Number(bobBalanceResponse.body.sat)).toBe(2000);
   });
 });

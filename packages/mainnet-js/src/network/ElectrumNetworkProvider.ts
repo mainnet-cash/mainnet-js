@@ -9,12 +9,11 @@ import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   HexHeaderI,
   TxI,
-  UtxoI,
+  Utxo,
   ElectrumBalanceI,
   HeaderI,
 } from "../interface.js";
 import { Network } from "../interface.js";
-import { delay } from "../util/delay.js";
 import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
 
 import { CancelFn } from "../wallet/interface.js";
@@ -29,8 +28,9 @@ import { MemoryCache } from "../cache/MemoryCache.js";
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumClient<ElectrumClientEvents>;
   public subscriptions: number = 0;
-  private subscribedToHeaders: boolean = false;
   private subscriptionMap: Record<string, number> = {};
+  private currentHeight: number = 0;
+  private headerCancelFn?: CancelFn;
 
   private _cache: CacheProvider | undefined;
 
@@ -45,7 +45,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     if (Config.UseMemoryCache && !(this._cache instanceof MemoryCache)) {
-      this._cache = new IndexedDbCache();
+      this._cache = new MemoryCache();
       return this._cache;
     }
 
@@ -77,35 +77,34 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  async getUtxos(cashaddr: string): Promise<UtxoI[]> {
+  async getUtxos(cashaddr: string): Promise<Utxo[]> {
     const result = await this.performRequest<ElectrumUtxo[]>(
       "blockchain.address.listunspent",
       cashaddr,
       "include_tokens"
     );
     return result.map((utxo) => ({
+      address: cashaddr,
       txid: utxo.tx_hash,
       vout: utxo.tx_pos,
-      satoshis: utxo.value,
+      satoshis: BigInt(utxo.value),
       height: utxo.height,
       token: utxo.token_data
         ? {
+            ...utxo.token_data,
             amount: BigInt(utxo.token_data.amount),
-            tokenId: utxo.token_data.category,
-            capability: utxo.token_data.nft?.capability,
-            commitment: utxo.token_data.nft?.commitment,
           }
         : undefined,
     }));
   }
 
-  async getBalance(cashaddr: string): Promise<number> {
+  async getBalance(cashaddr: string): Promise<bigint> {
     const result = await this.performRequest<ElectrumBalanceI>(
       "blockchain.address.get_balance",
       cashaddr
     );
 
-    return result.confirmed + result.unconfirmed;
+    return BigInt(result.confirmed) + BigInt(result.unconfirmed);
   }
 
   async getHeader(
@@ -132,9 +131,124 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return verbose ? decodeHeader(result) : result;
   }
 
+  async getRawTransactions(hashes: string[]): Promise<Map<string, string>> {
+    if (hashes.length === 0) return new Map();
+
+    const results = new Map<string, string>();
+    const keys = hashes.map((h) => `tx-${this.network}-${h}-false-false`);
+
+    // batch cache read
+    let cached: Map<string, string | null> | undefined;
+    if (this.cache) {
+      cached = await this.cache.getItems(keys);
+    }
+
+    const misses: string[] = [];
+    for (let i = 0; i < hashes.length; i++) {
+      const val = cached?.get(keys[i]);
+      if (val) {
+        results.set(hashes[i], val);
+      } else {
+        misses.push(hashes[i]);
+      }
+    }
+
+    if (misses.length > 0) {
+      const fetched = await Promise.all(
+        misses.map(async (hash) => {
+          const tx = await this.performRequest<string>(
+            "blockchain.transaction.get",
+            hash,
+            false
+          );
+          return [hash, tx] as [string, string];
+        })
+      );
+
+      // batch cache write
+      if (this.cache) {
+        const entries: [string, string][] = fetched.map(([hash, tx]) => [
+          `tx-${this.network}-${hash}-false-false`,
+          tx,
+        ]);
+        await this.cache.setItems(entries);
+      }
+
+      for (const [hash, tx] of fetched) {
+        results.set(hash, tx);
+      }
+    }
+
+    return results;
+  }
+
+  async getHeaders(heights: number[]): Promise<Map<number, HeaderI>> {
+    if (heights.length === 0) return new Map();
+
+    const results = new Map<number, HeaderI>();
+    const keys = heights.map((h) => `header-${this.network}-${h}-true`);
+
+    // batch cache read
+    let cached: Map<string, string | null> | undefined;
+    if (this.cache) {
+      cached = await this.cache.getItems(keys);
+    }
+
+    const misses: number[] = [];
+    for (let i = 0; i < heights.length; i++) {
+      const val = cached?.get(keys[i]);
+      if (val) {
+        results.set(heights[i], decodeHeader(JSON.parse(val)));
+      } else {
+        misses.push(heights[i]);
+      }
+    }
+
+    if (misses.length > 0) {
+      const fetched = await Promise.all(
+        misses.map(async (height) => {
+          const result = await this.performRequest<HexHeaderI>(
+            "blockchain.header.get",
+            height
+          );
+          return [height, result] as [number, HexHeaderI];
+        })
+      );
+
+      // batch cache write
+      if (this.cache) {
+        const entries: [string, string][] = fetched.map(([height, result]) => [
+          `header-${this.network}-${height}-true`,
+          JSON.stringify(result),
+        ]);
+        await this.cache.setItems(entries);
+      }
+
+      for (const [height, result] of fetched) {
+        results.set(height, decodeHeader(result));
+      }
+    }
+
+    return results;
+  }
+
   async getBlockHeight(): Promise<number> {
-    return (await this.performRequest<HexHeaderI>("blockchain.headers.get_tip"))
-      .height;
+    if (!this.headerCancelFn) {
+      this.headerCancelFn = await this.subscribeToHeaders(
+        (header: HexHeaderI) => {
+          if (header.height > this.currentHeight) {
+            this.currentHeight = header.height;
+          }
+        }
+      );
+    }
+
+    if (!this.currentHeight) {
+      throw new Error(
+        "Check failed for eventual inconsistency in subscription implementations."
+      );
+    }
+    return this.currentHeight;
   }
 
   async getRawTransaction(
@@ -270,79 +384,22 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   public async watchAddressStatus(
     cashaddr: string,
-    callback: (status: string) => void
+    callback: (status: string | null) => void
   ): Promise<CancelFn> {
-    const watchAddressStatusCallback = async (data) => {
+    const watchAddressStatusCallback = async (
+      data: [address: string, status: string | null]
+    ) => {
       // subscription acknowledgement is the latest known status or null if no status is known
       // status is an array: [ cashaddr, statusHash ]
       if (data instanceof Array) {
-        const addr = data[0] as string;
-        if (addr !== cashaddr) {
+        if (data[0] !== cashaddr) {
           return;
         }
-
-        const status = data[1];
-        callback(status);
+        callback(data[1]);
       }
     };
 
     return this.subscribeToAddress(cashaddr, watchAddressStatusCallback);
-  }
-
-  public async watchAddress(
-    cashaddr: string,
-    callback: (txHash: string) => void
-  ): Promise<CancelFn> {
-    const historyMap: { [txid: string]: boolean } = {};
-
-    this.getHistory(cashaddr).then((history) =>
-      history.forEach((val) => (historyMap[val.tx_hash] = true))
-    );
-
-    const watchAddressStatusCallback = async () => {
-      const newHistory = await this.getHistory(cashaddr);
-      // sort history to put unconfirmed transactions in the beginning, then transactions in block height descenting order
-      const txHashes = newHistory
-        .sort((a, b) =>
-          a.height <= 0 || b.height <= 0 ? -1 : b.height - a.height
-        )
-        .map((val) => val.tx_hash);
-      for (const hash of txHashes) {
-        if (!(hash in historyMap)) {
-          historyMap[hash] = true;
-          callback(hash);
-          // exit early to prevent further map lookups
-          break;
-        }
-      }
-    };
-
-    return this.watchAddressStatus(cashaddr, watchAddressStatusCallback);
-  }
-
-  public async watchAddressTransactions(
-    cashaddr: string,
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.watchAddress(cashaddr, async (txHash: string) => {
-      const tx = await this.getRawTransactionObject(txHash);
-      callback(tx);
-    });
-  }
-
-  public async watchAddressTokenTransactions(
-    cashaddr: string,
-    callback: (tx: ElectrumRawTransaction) => void
-  ): Promise<CancelFn> {
-    return this.watchAddress(cashaddr, async (txHash: string) => {
-      const tx = await this.getRawTransactionObject(txHash, true);
-      if (
-        tx.vin.some((val) => val.tokenData) ||
-        tx.vout.some((val) => val.tokenData)
-      ) {
-        callback(tx);
-      }
-    });
   }
 
   // watch for block headers and block height, if `skipCurrentHeight` is set, the notification about current block will not arrive
@@ -390,7 +447,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async subscribeToHeaders(
     callback: (header: HexHeaderI) => void
   ): Promise<CancelFn> {
-    return this.subscribeRequest("blockchain.headers.subscribe", callback);
+    return this.subscribeRequest(
+      "blockchain.headers.subscribe",
+      (data: HexHeaderI | HexHeaderI[]) => {
+        callback(data[0] ?? data);
+      }
+    );
   }
 
   async subscribeToAddress(
@@ -496,28 +558,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     };
 
     this.electrum.on("notification", handler);
-
-    // safeguard against multiple subscriptions to headers
-    if (methodName === "blockhain.headers.subscribe") {
-      if (!this.subscribedToHeaders) {
-        this.subscribedToHeaders = true;
-
-        await this.trackSubscription(methodName, ...parameters);
-      }
-    } else {
-      await this.trackSubscription(methodName, ...parameters);
-    }
-
+    await this.trackSubscription(methodName, ...parameters);
     this.subscriptions++;
 
     return async () => {
       this.electrum.off("notification", handler);
+      await this.untrackSubscription(methodName, ...parameters);
       this.subscriptions--;
-
-      // there are no blockchain.headers.unsubscribe method, so let's safeguard against it
-      if (methodName !== "blockchain.headers.subscribe") {
-        await this.untrackSubscription(methodName, ...parameters);
-      }
     };
   }
 
@@ -532,12 +579,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  disconnect(): Promise<boolean> {
+  async disconnect(): Promise<boolean> {
     if (this.subscriptions > 0) {
       // console.warn(
       //   `Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`
       // );
     }
+    await this.headerCancelFn?.();
     return this.electrum.disconnect(true, false);
   }
 }

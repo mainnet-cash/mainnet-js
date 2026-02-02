@@ -12,6 +12,10 @@ export const convert = async (request, response) => {
   await Controller.handleRequest(request, response, service.convert);
 };
 
+export const exchangeRate = async (request, response) => {
+  await Controller.handleRequest(request, response, service.exchangeRate);
+};
+
 export const getAddrsByXpubKey = async (request, response) => {
   await Controller.handleRequest(request, response, service.getAddrsByXpubKey);
 };

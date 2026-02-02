@@ -46,7 +46,7 @@ function message_magic(str: string) {
  *
  * @returns a promise to the hash of the string.
  */
-export async function hash_message(str: string) {
+export function hash_message(str: string) {
   const h = sha256.hash;
   return h(h(message_magic(str)));
 }
@@ -60,11 +60,8 @@ export class SignedMessage implements SignedMessageI {
    *
    * @returns a promise to signature as a string
    */
-  public async sign(
-    message: string,
-    privateKey: Uint8Array
-  ): Promise<SignedMessageResponseI> {
-    const messageHash = await hash_message(message);
+  public sign(message: string, privateKey: Uint8Array): SignedMessageResponseI {
+    const messageHash = hash_message(message);
     const rs = secp256k1.signMessageHashRecoverableCompact(
       privateKey,
       messageHash
@@ -99,7 +96,7 @@ export class SignedMessage implements SignedMessageI {
     };
   }
 
-  public static async sign(message: string, privateKey: Uint8Array) {
+  public static sign(message: string, privateKey: Uint8Array) {
     return new this().sign(message, privateKey);
   }
   /**
@@ -112,14 +109,14 @@ export class SignedMessage implements SignedMessageI {
    *
    * @returns a promise to signature as a string
    */
-  public async verify(
+  public verify(
     message: string,
     signature: string,
     cashaddr?: string,
     publicKey?: Uint8Array
-  ): Promise<VerifyMessageResponseI> {
+  ): VerifyMessageResponseI {
     // Check that the signature is valid for the given message.
-    const messageHash = await hash_message(message);
+    const messageHash = hash_message(message);
     const sig = base64ToBin(signature);
 
     let signatureValid = false;
@@ -139,7 +136,7 @@ export class SignedMessage implements SignedMessageI {
         throw new Error(recoveredPk);
       }
 
-      pkh = await hash160(recoveredPk);
+      pkh = hash160(recoveredPk);
       signatureType = "recoverable";
       signatureValid = secp256k1.verifySignatureCompact(
         rawSig,
@@ -193,7 +190,7 @@ export class SignedMessage implements SignedMessageI {
     };
   }
 
-  public static async verify(
+  public static verify(
     message: string,
     signature: string,
     cashaddr?: string,

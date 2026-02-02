@@ -13,15 +13,7 @@ test("Get price of Bch, BCH, bch in sat", async () => {
 
 test("Get price of sat(s)", async () => {
   let rate = await amountInSatoshi(1, "sat");
-  expect(rate).toBe(1);
-  rate = await amountInSatoshi(1, "sats");
-  expect(rate).toBe(1);
-  rate = await amountInSatoshi(1, "Satoshi");
-  expect(rate).toBe(1);
-  rate = await amountInSatoshi(1, "SATOSHIS");
-  expect(rate).toBe(1);
-  rate = await amountInSatoshi(1, "satoshis");
-  expect(rate).toBe(1);
+  expect(rate).toBe(1n);
 });
 
 test("Get price of USD, Usd, usd", async () => {

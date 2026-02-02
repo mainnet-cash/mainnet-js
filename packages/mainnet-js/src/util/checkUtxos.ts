@@ -1,31 +1,29 @@
-import { UtxoI } from "../interface.js";
+import { Utxo, UtxoId } from "../interface.js";
 
-export async function checkUtxos(
-  utxos: UtxoI[],
-  wallet: import("../wallet/Wif.js").Wallet
-): Promise<UtxoI[]> {
-  if (utxos.some((val) => val.satoshis === 0)) {
-    const addressUtxos = await wallet.getAddressUtxos(wallet.cashaddr);
-    const absent = utxos.filter(
-      (val) =>
-        !addressUtxos.find(
-          (utxo) => val.txid === utxo.txid && val.vout === utxo.vout
-        )
-    );
-    if (absent.length) {
-      const absentString = absent
-        .map((val) => `${val.txid}:${val.vout}`)
-        .join(", ");
-      throw Error(`Utxos [${absentString}] not found in wallet`);
-    }
-
-    utxos = utxos.map(
-      (val) =>
-        addressUtxos.find(
-          (utxo) => val.txid === utxo.txid && val.vout === utxo.vout
-        )!
-    );
+export function checkUtxos(utxoIds: UtxoId[], utxos: Utxo[]): Utxo[] {
+  const walletUtxoMap = new Map<string, Utxo>();
+  for (const utxo of utxos) {
+    walletUtxoMap.set(`${utxo.txid}:${utxo.vout}`, utxo);
   }
 
-  return utxos;
+  const result: Utxo[] = [];
+  const absent: UtxoId[] = [];
+  for (const id of utxoIds) {
+    const key = `${id.txid}:${id.vout}`;
+    const utxo = walletUtxoMap.get(key);
+    if (utxo) {
+      result.push(utxo);
+    } else {
+      absent.push(id);
+    }
+  }
+
+  if (absent.length) {
+    const absentString = absent
+      .map((val) => `${val.txid}:${val.vout}`)
+      .join(", ");
+    throw Error(`Utxos [${absentString}] not found in wallet`);
+  }
+
+  return result;
 }

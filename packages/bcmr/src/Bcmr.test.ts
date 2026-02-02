@@ -185,7 +185,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     const authChain = await BCMR.buildAuthChain({
@@ -205,7 +205,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     await expect(
@@ -226,7 +226,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     const chain = await BCMR.buildAuthChain({
@@ -260,7 +260,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     const chain = await BCMR.buildAuthChain({
@@ -294,7 +294,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     const chain = await BCMR.buildAuthChain({
@@ -325,7 +325,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     const chain = await BCMR.buildAuthChain({
@@ -355,7 +355,7 @@ describe(`Test BCMR support`, () => {
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     const chain = await BCMR.buildAuthChain({
@@ -386,7 +386,7 @@ describe(`Test BCMR support`, () => {
       )
     );
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 1000n }),
       opreturnData,
     ]);
     await BCMR.buildAuthChain({
@@ -408,7 +408,7 @@ describe(`Test BCMR support`, () => {
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 10000n }),
       opreturnData,
     ]);
 
@@ -481,7 +481,7 @@ describe(`Test BCMR support`, () => {
       ];
       const opreturnData = OpReturnData.fromArray(chunks);
       const response = await alice.send([
-        new SendRequest({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" }),
+        new SendRequest({ cashaddr: bob.cashaddr!, value: 10000n }),
         opreturnData,
       ]);
       if (mineCombo[0]) await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
@@ -490,7 +490,7 @@ describe(`Test BCMR support`, () => {
         "mainnet.cash/.well-known/bitcoin-cash-metadata-registry_v2.json";
       const opreturnData2 = OpReturnData.fromArray(chunks);
       const response2 = await bob.send([
-        new SendRequest({ cashaddr: bob.cashaddr!, value: 9500, unit: "sat" }),
+        new SendRequest({ cashaddr: bob.cashaddr!, value: 9500n }),
         opreturnData2,
       ]);
       if (mineCombo[1]) await mine({ cashaddr: alice.cashaddr!, blocks: 1 });
@@ -501,8 +501,7 @@ describe(`Test BCMR support`, () => {
       const response3 = await bob.send([
         new SendRequest({
           cashaddr: charlie.cashaddr!,
-          value: 9000,
-          unit: "sat",
+          value: 900n,
         }),
         opreturnData3,
       ]);
@@ -600,7 +599,7 @@ describe(`Test BCMR support`, () => {
     ];
     const opreturnData = OpReturnData.fromArray(chunks);
     const response = await alice.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 10000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 10000n }),
       opreturnData,
     ]);
 
@@ -622,7 +621,7 @@ describe(`Test BCMR support`, () => {
     ];
     const opreturnData2 = OpReturnData.fromArray(chunks);
     const response2 = await bob.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 9500, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 9500n }),
       opreturnData2,
     ]);
 
@@ -647,7 +646,7 @@ describe(`Test BCMR support`, () => {
     ];
     const opreturnData3 = OpReturnData.fromArray(chunks);
     const response3 = await bob.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 9000, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 9000n }),
       opreturnData3,
     ]);
 
@@ -667,7 +666,7 @@ describe(`Test BCMR support`, () => {
     ];
     const opreturnData4 = OpReturnData.fromArray(chunks);
     const response4 = await bob.send([
-      new SendRequest({ cashaddr: bob.cashaddr!, value: 8500, unit: "sat" }),
+      new SendRequest({ cashaddr: bob.cashaddr!, value: 8500n }),
       opreturnData4,
     ]);
 
@@ -764,24 +763,26 @@ describe(`Test BCMR support`, () => {
     const genesisResponse = await alice.tokenGenesis(
       {
         cashaddr: alice.cashaddr!,
-        capability: NFTCapability.mutable,
-        commitment: "abcd",
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "abcd",
+        },
       },
       opreturnData
     );
 
-    const tokenId = genesisResponse.tokenIds![0];
-    const tokenBalance = await alice.getTokenBalance(tokenId);
+    const category = genesisResponse.categories![0];
+    const tokenBalance = await alice.getTokenBalance(category);
     expect(tokenBalance).toBe(0n);
-    const nftTokenBalance = await alice.getNftTokenBalance(tokenId);
+    const nftTokenBalance = await alice.getNftTokenBalance(category);
     expect(nftTokenBalance).toBe(1);
-    const tokenUtxos = await alice.getTokenUtxos(tokenId);
+    const tokenUtxos = await alice.getTokenUtxos(category);
     expect(tokenUtxos.length).toBe(1);
 
     const transaction = await (
       alice.provider as ElectrumNetworkProvider
     ).getRawTransactionObject(genesisResponse.txId!);
-    expect(transaction.vout[0].tokenData?.category).toBe(tokenId);
+    expect(transaction.vout[0].tokenData?.category).toBe(category);
     expect(transaction.vout[1].scriptPubKey.type).toBe("nulldata");
 
     const chain = await BCMR.buildAuthChain({
@@ -801,7 +802,7 @@ describe(`Test BCMR support`, () => {
     expect(chain[0].txHash).toBe(genesisResponse.txId);
 
     const chainByTokenId = await BCMR.buildAuthChain({
-      transactionHash: tokenId,
+      transactionHash: category,
       network: Network.REGTEST,
     });
 
@@ -822,7 +823,7 @@ describe(`Test BCMR support`, () => {
     const opreturnData = OpReturnData.fromArray(chunks);
 
     const response = await alice.send([
-      new SendRequest({ cashaddr: alice.cashaddr!, value: 3000, unit: "sat" }),
+      new SendRequest({ cashaddr: alice.cashaddr!, value: 3000n }),
       opreturnData,
     ]);
     const chain = await BCMR.buildAuthChain({
@@ -843,8 +844,7 @@ describe(`Test BCMR support`, () => {
       [
         new SendRequest({
           cashaddr: alice.cashaddr!,
-          value: 2000,
-          unit: "sat",
+          value: 2000n,
         }),
       ],
       { utxoIds: [`${response.txId}:0:3000`] }
@@ -854,8 +854,7 @@ describe(`Test BCMR support`, () => {
       [
         new SendRequest({
           cashaddr: alice.cashaddr!,
-          value: 1000,
-          unit: "sat",
+          value: 1000n,
         }),
         opreturnData,
       ],

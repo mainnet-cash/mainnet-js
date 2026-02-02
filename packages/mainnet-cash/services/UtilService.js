@@ -12,7 +12,20 @@ const convert = ({ convertRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       let resp = await mainnet.Mainnet.convertObject(convertRequest)
-      resolve(Service.successResponse(resp.toString()));
+      resolve(Service.successResponse({ value: resp }));
+    } catch (e) {
+      reject(
+        Service.rejectResponse(e, e.status || 500)
+      );
+    }
+  },
+);
+
+const exchangeRate = ({ exchangeRateRequest }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      let resp = await mainnet.ExchangeRate.get(exchangeRateRequest.symbol)
+      resolve(Service.successResponse({ value: resp }));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)
@@ -50,6 +63,7 @@ const getXpubKeyInfo = ({getXpubKeyInfoRequest})=> new Promise(
 
 export default {
   convert,
+  exchangeRate,
   getAddrsByXpubKey,
   getXpubKeyInfo
 };

@@ -1,9 +1,90 @@
 Newest changes
 --------------
 
-2.7.34
+3.0.0
 
-* Allow for 24 words in seed phrases
+* Major release introducing new big features
+  - HDWallet support
+  - Performance optimizations
+  - Contract package removal
+  - Cashtokens interface rework
+
+See detailed changelog in 3.0.0-next.* release notes
+
+3.0.0-next.10
+
+* Rework subscription tracking on wallet level
+* `Wallet.stop()` now unsubscribes all callbacks, it should be used where possible when discarding a wallet
+
+3.0.0-next.9
+
+* Better debounce for walletCache
+* Improve performance of getSuitableUtxos, checkUtxos, getHistory
+* Introduce batched cache and provider operations
+
+3.0.0-next.8
+
+* Improve address scan and gap handling
+* Fix updating top address index
+
+3.0.0-next.7
+
+* Improve the HDWallet address scanning logic
+
+3.0.0-next.6
+
+* Add BaseWallet.hasAddress() utility
+* HDWallet's watchBalance and watchTokenBalance are now debounced to prevent too frequent updates
+* Fix IndexedDbCache not respecting the store name
+
+3.0.0-next.5
+
+* Fix walletCache not preserving bin arrays
+
+3.0.0-next.4
+
+* Add HDWallet history tracking and querying
+* Add waiting and watching methods to HDWallet
+* Rework watching and waiting methods, make more oop code reuse
+
+3.0.0-next.3
+
+* Remove `getAddressUtxos` method, use `wallet.provider.getUtxos(address)` instead
+* `getUtxos` now respects `slpAware`
+* Returned balances now include sats from all outputs
+    - dust outputs
+    - sats on cashtokens outputs
+* Rework `provider.getBlockHeight` to use subscription to headers to spare extra network calls
+
+3.0.0-next.2
+
+* Rework cashtokens interfaces to be (more) compatible with bchn, cashscript and libauth:
+    - tokenId -> category
+    - { ..., capability?, commitment? } -> { ..., nft?: { capability, commitment } }
+
+
+3.0.0-next.1
+
+* Make satoshi values bigint
+* Remove support for `UnitEnum` and currency denominations.
+* Users are responsible to convert units and currencies, see `toBch`, `toSat`, `toCurrency` and more general `convert` functions
+* Remove `watchBalanceUsd`
+* JS: Remove `BalanceResponse` type, balances are now bigints
+* WebHooks: balance hook response object is reduced to { sat: "1000" }
+* REST: `BalanceResponse` object is reduced to { sat: "1000" }, applicable to `wallet/balance` and `wallet/max_amount_to_send`
+* REST: `util/convert` response type is now { value: 1000 }
+* REST: new `util/exchange_rate` endpoint, request type { symbol: "usd" } response type { value: 1000 }
+* Export `ExchageRatePromise` which could be used to warm up the currency exchange rate cache
+
+3.0.0-next.0
+
+* This is a next major version prerelease
+
+* Add support for HD Wallets
+* Rework wallet class hierarchy for better code reuse
+* Rework wallet initializations, add Wallet.fromPubkey initializer
+* Breaking: remove `contracts` sub-package
+* Make signing functions sync
 
 2.7.33
 

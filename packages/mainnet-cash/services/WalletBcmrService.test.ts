@@ -64,13 +64,13 @@ describe("Test Wallet BCMR Endpoints", () => {
   test("Add metadata registry and get token info", async () => {
     expect(
       (await request(app).post("/wallet/bcmr/get_token_info").send({
-      tokenId: "0000000000000000000000000000000000000000000000000000000000000000"
+      category: "0000000000000000000000000000000000000000000000000000000000000000"
     })).body.tokenInfo
     ).toBe(undefined);
 
     await request(app).post("/wallet/bcmr/add_registry").send(registry);
     const tokenInfo = (await request(app).post("/wallet/bcmr/get_token_info").send({
-      tokenId: "0000000000000000000000000000000000000000000000000000000000000000"
+      category: "0000000000000000000000000000000000000000000000000000000000000000"
     })).body.tokenInfo;
     expect(tokenInfo?.token?.symbol).toBe("TOK");
     expect(tokenInfo?.token?.decimals).toBe(8);
@@ -91,14 +91,14 @@ describe("Test Wallet BCMR Endpoints", () => {
 
     expect(
       (await request(app).post("/wallet/bcmr/get_token_info").send({
-      tokenId: "0000000000000000000000000000000000000000000000000000000000000000"
+      category: "0000000000000000000000000000000000000000000000000000000000000000"
     })).body.tokenInfo
     ).toBe(undefined);
     await request(app).post("/wallet/bcmr/add_registry_from_uri").send({uri:
       "https://mainnet.cash/.well-known/bitcoin-cash-metadata-registry.json"
     });
     const tokenInfo = (await request(app).post("/wallet/bcmr/get_token_info").send({
-      tokenId: "0000000000000000000000000000000000000000000000000000000000000000"
+      category: "0000000000000000000000000000000000000000000000000000000000000000"
     })).body.tokenInfo;
     expect(tokenInfo?.token?.symbol).toBe("TOK");
     expect(tokenInfo?.token?.decimals).toBe(8);
@@ -142,7 +142,6 @@ describe("Test Wallet BCMR Endpoints", () => {
       {
         cashaddr: bobCashaddr,
         value: 10000,
-        unit: "sat",
       }, {
         dataBuffer: binToBase64(opreturnData.buffer)
       }
@@ -155,7 +154,7 @@ describe("Test Wallet BCMR Endpoints", () => {
 
     expect(
       (await request(app).post("/wallet/bcmr/get_token_info").send({
-      tokenId: "0000000000000000000000000000000000000000000000000000000000000000"
+      category: "0000000000000000000000000000000000000000000000000000000000000000"
     })).body.tokenInfo
     ).toBe(undefined);
     const chain = (await request(app).post("/wallet/bcmr/add_registry_authchain").send({
@@ -172,7 +171,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     );
 
     const tokenInfo = (await request(app).post("/wallet/bcmr/get_token_info").send({
-      tokenId: "0000000000000000000000000000000000000000000000000000000000000000"
+      category: "0000000000000000000000000000000000000000000000000000000000000000"
     })).body.tokenInfo
     expect(tokenInfo?.token?.symbol).toBe("TOK");
     expect(tokenInfo?.token?.decimals).toBe(8);
@@ -222,7 +221,6 @@ describe("Test Wallet BCMR Endpoints", () => {
       {
         cashaddr: bobCashaddr,
         value: 10000,
-        unit: "sat",
       }, {
         dataBuffer: binToBase64(opreturnData.buffer)
       }
@@ -250,7 +248,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const response2 = (await request(app).post("/wallet/send").send({
       walletId: bobId,
       to: [
-      { cashaddr: bobCashaddr, value: 9500, unit: "sat" },
+      { cashaddr: bobCashaddr, value: 9500 },
       { dataBuffer: binToBase64(opreturnData2.buffer) },
     ]})).body;
 
@@ -282,7 +280,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const response3 = (await request(app).post("/wallet/send").send({
       walletId: bobId,
       to: [
-      { cashaddr: bobCashaddr, value: 9000, unit: "sat" },
+      { cashaddr: bobCashaddr, value: 9000 },
       { dataBuffer: binToBase64(opreturnData3.buffer) },
     ]})).body;
 
@@ -303,7 +301,7 @@ describe("Test Wallet BCMR Endpoints", () => {
     const response4 = (await request(app).post("/wallet/send").send({
       walletId: bobId,
       to: [
-      { cashaddr: bobCashaddr, value: 8500, unit: "sat" },
+      { cashaddr: bobCashaddr, value: 8500 },
       { dataBuffer: binToBase64(opreturnData4.buffer) },
     ]})).body;
 
@@ -401,27 +399,29 @@ describe("Test Wallet BCMR Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const genesisResponse = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      capability: NFTCapability.mutable,
-      commitment: "abcd",
+      nft: {
+        capability: NFTCapability.mutable,
+        commitment: "abcd",
+      },
       sendRequests: {
         dataBuffer: binToBase64(opreturnData.buffer)
       }
     })).body;
 
-    const tokenId = genesisResponse.tokenIds![0];
+    const category = genesisResponse.categories![0];
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(tokenBalance).toBe("0");
     const nftTokenBalance = (await request(app).post("/wallet/get_nft_token_balance").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body.balance;
     expect(nftTokenBalance).toBe(1);
     const tokenUtxos = (await request(app).post("/wallet/get_token_utxos").send({
       walletId: aliceId,
-      tokenId: tokenId,
+      category: category,
     })).body;
     expect(tokenUtxos.length).toBe(1);
 
@@ -431,7 +431,7 @@ describe("Test Wallet BCMR Endpoints", () => {
       verbose: true,
     })).body;
 
-    expect(rawTx.vout[0].tokenData?.category).toBe(tokenId);
+    expect(rawTx.vout[0].tokenData?.category).toBe(category);
     expect(rawTx!.vout[1].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx!.vout[1].scriptPubKey.hex).toContain(
       binToHex(utf8ToBin("BCMR"))

@@ -3,7 +3,6 @@ import {
   SendRequest,
   TokenSendRequest,
 } from "../wallet/model.js";
-import { amountInSatoshi } from "./amountInSatoshi.js";
 
 // This function sums a list of send request objects
 export async function sumSendRequestAmounts(
@@ -13,10 +12,10 @@ export async function sumSendRequestAmounts(
     const balanceArray: (BigInt | Error)[] = await Promise.all(
       requests.map(async (r: SendRequest | TokenSendRequest | OpReturnData) => {
         if (r instanceof SendRequest) {
-          return BigInt(await amountInSatoshi(r.value, r.unit));
+          return r.value;
         } else if (r instanceof TokenSendRequest) {
-          return BigInt(r.value || 1000);
-        } else return BigInt(0);
+          return r.value || 1000n;
+        } else return 0n;
       })
     );
     const balance = balanceArray.reduce(sumBalance, BigInt(0));

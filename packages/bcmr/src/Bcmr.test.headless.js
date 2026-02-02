@@ -157,8 +157,7 @@ describe(`Wallet should function in the browser`, () => {
         const response = await alice.send([
           new SendRequest({
             cashaddr: bob.cashaddr,
-            value: 10000,
-            unit: "sat",
+            value: 10000n,
           }),
           opreturnData,
         ]);
@@ -232,8 +231,7 @@ describe(`Wallet should function in the browser`, () => {
         const response = await alice.send([
           new SendRequest({
             cashaddr: bob.cashaddr,
-            value: 10000,
-            unit: "sat",
+            value: 10000n,
           }),
           opreturnData,
         ]);
@@ -256,7 +254,7 @@ describe(`Wallet should function in the browser`, () => {
         ];
         const opreturnData2 = OpReturnData.fromArray(chunks);
         const response2 = await bob.send([
-          new SendRequest({ cashaddr: bob.cashaddr, value: 9500, unit: "sat" }),
+          new SendRequest({ cashaddr: bob.cashaddr, value: 9500n }),
           opreturnData2,
         ]);
 
@@ -281,7 +279,7 @@ describe(`Wallet should function in the browser`, () => {
         ];
         const opreturnData3 = OpReturnData.fromArray(chunks);
         const response3 = await bob.send([
-          new SendRequest({ cashaddr: bob.cashaddr, value: 9000, unit: "sat" }),
+          new SendRequest({ cashaddr: bob.cashaddr, value: 9000n }),
           opreturnData3,
         ]);
 
@@ -301,7 +299,7 @@ describe(`Wallet should function in the browser`, () => {
         ];
         const opreturnData4 = OpReturnData.fromArray(chunks);
         const response4 = await bob.send([
-          new SendRequest({ cashaddr: bob.cashaddr, value: 8500, unit: "sat" }),
+          new SendRequest({ cashaddr: bob.cashaddr, value: 8500n }),
           opreturnData4,
         ]);
 
@@ -406,7 +404,7 @@ describe(`Wallet should function in the browser`, () => {
         const opreturnData = OpReturnData.fromArray(chunks);
 
         const response = await alice.send([
-          new SendRequest({ cashaddr: bob.cashaddr, value: 1000, unit: "sat" }),
+          new SendRequest({ cashaddr: bob.cashaddr, value: 1000n }),
           opreturnData,
         ]);
         const chain = await BCMR.buildAuthChain({
@@ -443,7 +441,7 @@ describe(`Wallet should function in the browser`, () => {
         ];
         const opreturnData = OpReturnData.fromArray(chunks);
         const response = await alice.send([
-          new SendRequest({ cashaddr: bob.cashaddr, value: 1000, unit: "sat" }),
+          new SendRequest({ cashaddr: bob.cashaddr, value: 1000n }),
           opreturnData,
         ]);
         const chain = await BCMR.buildAuthChain({

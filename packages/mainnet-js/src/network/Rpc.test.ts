@@ -1,8 +1,8 @@
 import { disconnectProviders, initProviders } from "./Connection";
 import { RegTestWallet } from "../wallet/Wif";
 import { getNetworkProvider } from "../network/default";
-import { Network } from "cashscript";
 import { mine } from "../mine";
+import { Network } from "../interface";
 
 const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
 
@@ -73,7 +73,7 @@ describe("Rpc tests", () => {
 
     let result = false;
     aliceWallet.watchBalance((balance) => {
-      expect(balance.bch).toBeGreaterThan(0);
+      expect(balance).toBeGreaterThan(0);
       result = true;
       // stop watching
       return true;
@@ -105,8 +105,7 @@ describe("Rpc tests", () => {
     await aliceWallet.send([
       {
         cashaddr: bobWallet.cashaddr!,
-        value: 1000,
-        unit: "satoshis",
+        value: 1000n,
       },
     ]);
 

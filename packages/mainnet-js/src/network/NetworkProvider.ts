@@ -1,4 +1,4 @@
-import { TxI, UtxoI, Network, HexHeaderI, HeaderI } from "../interface.js";
+import { TxI, Utxo, Network, HexHeaderI, HeaderI } from "../interface.js";
 import { CancelFn } from "../wallet/interface.js";
 
 export default interface NetworkProvider {
@@ -12,14 +12,14 @@ export default interface NetworkProvider {
    * @param cashaddr The CashAddress for which we wish to retrieve UTXOs.
    * @returns List of UTXOs spendable by the provided address.
    */
-  getUtxos(cashaddr: string): Promise<UtxoI[]>;
+  getUtxos(cashaddr: string): Promise<Utxo[]>;
 
   /**
    * Retrieve all balance of an address in satoshi
    * @param cashaddr The CashAddress for which we wish to retrieve UTXOs.
    * @returns the balance.
    */
-  getBalance(cashaddr: string): Promise<number>;
+  getBalance(cashaddr: string): Promise<bigint>;
 
   /**
    * @returns The block header fetched at blockheight @param height.
@@ -45,6 +45,20 @@ export default interface NetworkProvider {
    * @returns The full hex transaction for the provided transaction ID.
    */
   getRawTransaction(txHash: string): Promise<string>;
+
+  /**
+   * Batch retrieve raw transactions by their hashes.
+   * @param hashes Array of transaction hashes.
+   * @returns Map from hash to hex transaction string.
+   */
+  getRawTransactions(hashes: string[]): Promise<Map<string, string>>;
+
+  /**
+   * Batch retrieve block headers by their heights.
+   * @param heights Array of block heights.
+   * @returns Map from height to decoded header.
+   */
+  getHeaders(heights: number[]): Promise<Map<number, HeaderI>>;
 
   /**
    * Retrieve a verbose coin-specific response transaction details for a given transaction ID.

@@ -1,6 +1,5 @@
 import {
   walletTemplateP2pkhNonHd,
-  walletTemplateToCompilerBCH,
   cashAddressToLockingBytecode,
   Compiler,
   encodeTransaction,
@@ -8,14 +7,15 @@ import {
   importWalletTemplate,
   AnyCompilerConfiguration,
   AuthenticationProgramStateCommon,
-  CompilationContextBCH,
   Output,
   hexToBin,
   verifyTransactionTokens,
   decodeTransaction,
   TransactionTemplateFixed,
+  CompilationContextBch,
+  walletTemplateToCompilerBch,
 } from "@bitauth/libauth";
-import { NFTCapability, TokenI, UtxoI } from "../interface.js";
+import { NFTCapability, TokenI, Utxo } from "../interface.js";
 import { allocateFee } from "./allocateFee.js";
 
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
@@ -26,30 +26,34 @@ import {
   SourceOutput,
   TokenSendRequest,
 } from "../wallet/model.js";
-import { amountInSatoshi } from "../util/amountInSatoshi.js";
 import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
 import { FeePaidByEnum } from "../wallet/enum.js";
+import { WalletCache } from "../cache/walletCache.js";
+
+export const placeholderPrivateKey =
+  "0000000000000000000000000000000000000000000000000000000000000001";
+export const placeholderPrivateKeyBin = hexToBin(placeholderPrivateKey);
 
 // Build a transaction for a p2pkh transaction for a non HD wallet
 export async function buildP2pkhNonHdTransaction({
   inputs,
   outputs,
   signingKey,
-  sourceAddress,
-  fee = 0,
+  fee = 0n,
   discardChange = false,
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
+  walletCache,
 }: {
-  inputs: UtxoI[];
+  inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
-  signingKey: Uint8Array;
-  sourceAddress: string;
-  fee?: number;
+  signingKey?: Uint8Array;
+  fee?: bigint;
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
+  walletCache?: WalletCache;
 }) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -60,8 +64,8 @@ export async function buildP2pkhNonHdTransaction({
     throw new Error("Transaction template error");
   }
 
-  const compiler = await walletTemplateToCompilerBCH(template);
-  const inputAmount = await sumUtxoValue(inputs);
+  const compiler = walletTemplateToCompilerBch(template);
+  const inputAmount = sumUtxoValue(inputs);
 
   const sendAmount = await sumSendRequestAmounts(outputs);
 
@@ -72,7 +76,7 @@ export async function buildP2pkhNonHdTransaction({
   const lockedOutputs = await prepareOutputs(outputs);
 
   if (!changeAddress) {
-    changeAddress = sourceAddress;
+    changeAddress = inputs[0].address;
   }
 
   if (discardChange !== true) {
@@ -92,7 +96,7 @@ export async function buildP2pkhNonHdTransaction({
     inputs,
     compiler,
     signingKey,
-    sourceAddress,
+    walletCache,
   });
   const result = generateTransaction({
     inputs: preparedInputs,
@@ -121,16 +125,16 @@ export function prepareInputs({
   inputs,
   compiler,
   signingKey,
-  sourceAddress,
+  walletCache,
 }: {
-  inputs: UtxoI[];
+  inputs: Utxo[];
   compiler: Compiler<
-    CompilationContextBCH,
-    AnyCompilerConfiguration<CompilationContextBCH>,
+    CompilationContextBch,
+    AnyCompilerConfiguration<CompilationContextBch>,
     AuthenticationProgramStateCommon
   >;
   signingKey: Uint8Array;
-  sourceAddress: string;
+  walletCache?: WalletCache;
 }) {
   const preparedInputs: any[] = [];
   const sourceOutputs: any[] = [];
@@ -149,18 +153,21 @@ export function prepareInputs({
 
     const libAuthToken = i.token && {
       amount: BigInt(i.token.amount),
-      category: hexToBin(i.token.tokenId),
+      category: hexToBin(i.token.category),
       nft:
-        i.token.capability !== undefined || i.token.commitment !== undefined
+        i.token.nft?.capability !== undefined ||
+        i.token.nft?.commitment !== undefined
           ? {
-              capability: i.token.capability,
+              capability: i.token.nft?.capability,
               commitment:
-                i.token.commitment !== undefined &&
-                hexToBin(i.token.commitment!),
+                i.token.nft?.commitment !== undefined &&
+                hexToBin(i.token.nft?.commitment!),
             }
           : undefined,
     };
-    const key = signingKey?.length ? signingKey : Uint8Array.from(Array(32));
+    const key =
+      walletCache?.get(i.address)?.privateKey ??
+      (signingKey?.length ? signingKey : Uint8Array.from(Array(32)));
     const newInput = {
       outpointIndex: utxoIndex,
       outpointTransactionHash: utxoOutpointTransactionHash,
@@ -178,7 +185,7 @@ export function prepareInputs({
 
     preparedInputs.push(newInput);
 
-    const lockingBytecode = cashAddressToLockingBytecode(sourceAddress);
+    const lockingBytecode = cashAddressToLockingBytecode(i.address);
     if (typeof lockingBytecode === "string") {
       throw lockingBytecode;
     }
@@ -224,7 +231,7 @@ export async function prepareOutputs(
     if (typeof outputLockingBytecode === "string")
       throw new Error(outputLockingBytecode);
 
-    const sendAmount = await amountInSatoshi(output.value, output.unit);
+    const sendAmount = Number(output.value);
     if (sendAmount % 1 !== 0) {
       throw Error(
         `Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`
@@ -264,13 +271,14 @@ export function prepareTokenOutputs(request: TokenSendRequest): Output {
 
   const libAuthToken = {
     amount: BigInt(token.amount),
-    category: hexToBin(token.tokenId),
+    category: hexToBin(token.category),
     nft:
-      token.capability !== undefined || token.commitment !== undefined
+      token.nft?.capability !== undefined || token.nft?.commitment !== undefined
         ? {
-            capability: token.capability,
+            capability: token.nft?.capability,
             commitment:
-              token.commitment !== undefined && hexToBin(token.commitment!),
+              token.nft?.commitment !== undefined &&
+              hexToBin(token.nft?.commitment!),
           }
         : undefined,
   };
@@ -292,131 +300,181 @@ export function prepareTokenOutputs(request: TokenSendRequest): Output {
  * @returns A promise to a list of unspent outputs
  */
 export async function getSuitableUtxos(
-  inputs: UtxoI[],
+  inputs: Utxo[],
   amountRequired: bigint | undefined,
   bestHeight: number,
   feePaidBy: FeePaidByEnum,
   requests: SendRequestType[],
-  ensureUtxos: UtxoI[] = [],
+  ensureUtxos: Utxo[] = [],
   tokenOperation: "send" | "genesis" | "mint" | "burn" = "send"
-): Promise<UtxoI[]> {
-  const suitableUtxos: UtxoI[] = [...ensureUtxos];
-  let amountAvailable = BigInt(0);
+): Promise<Utxo[]> {
+  const utxoKey = (u: Utxo) => `${u.txid}:${u.vout}`;
+  const selectedSet = new Set<string>();
+  const suitableUtxos: Utxo[] = [];
+
+  for (const u of ensureUtxos) {
+    const key = utxoKey(u);
+    if (!selectedSet.has(key)) {
+      selectedSet.add(key);
+      suitableUtxos.push(u);
+    }
+  }
+
+  let amountAvailable = suitableUtxos.reduce(
+    (sum, u) => sum + BigInt(u.satoshis),
+    BigInt(0)
+  );
   const tokenRequests = requests.filter(
     (val) => val instanceof TokenSendRequest
   ) as TokenSendRequest[];
 
-  const availableInputs = inputs.slice();
-  const selectedInputs: UtxoI[] = [];
+  const usedIndices = new Set<number>();
+
+  // Track how many times each selected UTXO has been "claimed" by a request
+  const claimedUtxos = new Map<string, number>();
 
   // find matching utxos for token transfers
   if (tokenOperation === "send") {
     for (const request of tokenRequests) {
-      const tokenInputs = availableInputs.filter(
-        (val) => val.token?.tokenId === request.tokenId
-      );
-      const sameCommitmentTokens = [...suitableUtxos, ...tokenInputs]
-        .filter(
-          (val) =>
-            val.token?.capability === request.capability &&
-            val.token?.commitment === request.commitment
-        )
-        .filter(
-          (val) =>
-            selectedInputs.find(
-              (selected) =>
-                val.txid === selected.txid && val.vout === selected.vout
-            ) === undefined
-        );
-      if (sameCommitmentTokens.length) {
-        const input = sameCommitmentTokens[0];
-        const index = availableInputs.indexOf(input);
-        if (index !== -1) {
-          suitableUtxos.push(input);
-          selectedInputs.push(input);
-          availableInputs.splice(index, 1);
-          amountAvailable += BigInt(input.satoshis);
-        }
+      // Search suitableUtxos then inputs sequentially to find matching tokens
+      const matchCommitment = (val: Utxo) =>
+        val.token?.category === request.category &&
+        val.token?.nft?.capability === request.nft?.capability &&
+        val.token?.nft?.commitment === request.nft?.commitment;
 
-        continue;
+      // For NFTs (non-fungible), each request needs its own UTXO
+      // For FT-only requests, a single UTXO can satisfy multiple requests
+      const isFungibleOnly =
+        request.nft?.capability === undefined &&
+        request.nft?.commitment === undefined;
+
+      // Check already-selected suitable utxos first (no need to re-add)
+      let found = false;
+      if (isFungibleOnly) {
+        found = suitableUtxos.some(matchCommitment);
+      } else {
+        // For NFTs, find an unclaimed matching UTXO in suitableUtxos
+        for (const val of suitableUtxos) {
+          if (!matchCommitment(val)) continue;
+          const key = utxoKey(val);
+          const claims = claimedUtxos.get(key) || 0;
+          if (claims === 0) {
+            claimedUtxos.set(key, claims + 1);
+            found = true;
+            break;
+          }
+        }
       }
 
-      if (
-        request.capability === NFTCapability.minting ||
-        request.capability === NFTCapability.mutable
-      ) {
-        const changeCommitmentTokens = [
-          ...suitableUtxos,
-          ...tokenInputs,
-        ].filter((val) => val.token?.capability === request.capability);
-        if (changeCommitmentTokens.length) {
-          const input = changeCommitmentTokens[0];
-          const index = availableInputs.indexOf(input);
-          if (index !== -1) {
-            suitableUtxos.push(input);
-            availableInputs.splice(index, 1);
-            amountAvailable += BigInt(input.satoshis);
+      if (!found) {
+        // Search available inputs for same commitment match
+        for (let i = 0; i < inputs.length; i++) {
+          if (usedIndices.has(i)) continue;
+          const val = inputs[i];
+          if (val.token?.category !== request.category) continue;
+          if (!matchCommitment(val)) continue;
+          const key = utxoKey(val);
+          if (selectedSet.has(key)) continue;
+
+          selectedSet.add(key);
+          suitableUtxos.push(val);
+          usedIndices.add(i);
+          amountAvailable += BigInt(val.satoshis);
+          if (!isFungibleOnly) {
+            claimedUtxos.set(key, 1);
           }
-          continue;
+          found = true;
+          break;
         }
+      }
+
+      if (found) continue;
+
+      if (
+        request.nft?.capability === NFTCapability.minting ||
+        request.nft?.capability === NFTCapability.mutable
+      ) {
+        // Check already-selected suitable utxos first
+        const alreadyHas = suitableUtxos.some(
+          (val) =>
+            val.token?.category === request.category &&
+            val.token?.nft?.capability === request.nft?.capability
+        );
+        if (alreadyHas) continue;
+
+        let foundCapability = false;
+        for (let i = 0; i < inputs.length; i++) {
+          if (usedIndices.has(i)) continue;
+          const val = inputs[i];
+          if (
+            val.token?.category === request.category &&
+            val.token?.nft?.capability === request.nft?.capability
+          ) {
+            const key = utxoKey(val);
+            if (selectedSet.has(key)) continue;
+
+            selectedSet.add(key);
+            suitableUtxos.push(val);
+            usedIndices.add(i);
+            amountAvailable += BigInt(val.satoshis);
+            foundCapability = true;
+            break;
+          }
+        }
+        if (foundCapability) continue;
       }
 
       // handle splitting the hybrid (FT+NFT) token into its parts
       if (
-        request.capability === undefined &&
-        request.commitment === undefined &&
-        [...suitableUtxos, ...tokenInputs]
-          .map((val) => val.token?.tokenId)
-          .includes(request.tokenId)
+        request.nft?.capability === undefined &&
+        request.nft?.commitment === undefined
       ) {
-        continue;
+        const hasCategoryInSuitable = suitableUtxos.some(
+          (val) => val.token?.category === request.category
+        );
+        const hasCategoryInInputs =
+          !hasCategoryInSuitable &&
+          inputs.some(
+            (val, i) =>
+              !usedIndices.has(i) && val.token?.category === request.category
+          );
+        if (hasCategoryInSuitable || hasCategoryInInputs) {
+          continue;
+        }
       }
 
       throw Error(
-        `No suitable token utxos available to send token with id "${request.tokenId}", capability "${request.capability}", commitment "${request.commitment}"`
+        `No suitable token utxos available to send token with id "${request.category}", capability "${request.nft?.capability}", commitment "${request.nft?.commitment}"`
       );
     }
   }
 
   // find plain bch outputs
-  for (const u of availableInputs) {
-    if (u.token) {
-      continue;
-    }
-
-    if (u.coinbase && u.height && bestHeight) {
-      const age = bestHeight - u.height;
-      if (age > 100) {
-        suitableUtxos.push(u);
-        amountAvailable += BigInt(u.satoshis);
-      }
-    } else {
-      suitableUtxos.push(u);
-      amountAvailable += BigInt(u.satoshis);
-    }
-    // if amountRequired is not given, assume it is a max spend request, skip this condition
+  for (let i = 0; i < inputs.length; i++) {
+    // check early if we already have enough
     if (amountRequired && amountAvailable > amountRequired) {
       break;
     }
-  }
+    if (usedIndices.has(i)) continue;
+    const u = inputs[i];
+    if (u.token) continue;
 
-  const addEnsured = (suitableUtxos) => {
-    return [...ensureUtxos, ...suitableUtxos].filter(
-      (val, index, array) =>
-        array.findIndex(
-          (other) => other.txid === val.txid && other.vout === val.vout
-        ) === index
-    );
-  };
+    const key = utxoKey(u);
+    if (selectedSet.has(key)) continue;
+
+    selectedSet.add(key);
+    suitableUtxos.push(u);
+    amountAvailable += BigInt(u.satoshis);
+  }
 
   // if the fee is split with a feePaidBy option, skip checking change.
   if (feePaidBy && feePaidBy != FeePaidByEnum.change) {
-    return addEnsured(suitableUtxos);
+    return suitableUtxos;
   }
 
   // If the amount needed is met, or no amount is given, return
   if (typeof amountRequired === "undefined") {
-    return addEnsured(suitableUtxos);
+    return suitableUtxos;
   } else if (amountAvailable < amountRequired) {
     const e = Error(
       `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
@@ -427,7 +485,7 @@ export async function getSuitableUtxos(
     };
     throw e;
   } else {
-    return addEnsured(suitableUtxos);
+    return suitableUtxos;
   }
 }
 
@@ -438,14 +496,13 @@ export async function getFeeAmountSimple({
   relayFeePerByteInSatoshi,
   discardChange,
 }: {
-  utxos: UtxoI[];
+  utxos: Utxo[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
-  privateKey: Uint8Array;
   sourceAddress: string;
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
-}) {
+}): Promise<bigint> {
   const inputSizeP2pkh = 148;
   const outputSizeP2pkh = 34;
 
@@ -456,37 +513,37 @@ export async function getFeeAmountSimple({
         ? inputSizeP2pkh +
           1 +
           34 +
-          Math.round(1 + (curr.token.commitment?.length ?? 0) / 2) +
+          Math.round(1 + (curr.token.nft?.commitment?.length ?? 0) / 2) +
           (curr.token.amount ? 9 : 0)
         : inputSizeP2pkh),
     0
   );
 
-  const outputSize = (sendRequest) => {
-    if (sendRequest.hasOwnProperty("unit")) {
-      return outputSizeP2pkh;
-    } else if (sendRequest.hasOwnProperty("tokenId")) {
+  const outputSize = (sendRequest: SendRequestType) => {
+    if (sendRequest.hasOwnProperty("category")) {
       const tokenRequest = sendRequest as TokenSendRequest;
       return (
         outputSizeP2pkh +
         1 +
         34 +
-        Math.round(1 + (tokenRequest.commitment?.length ?? 0) / 2) +
+        Math.round(1 + (tokenRequest.nft?.commitment?.length ?? 0) / 2) +
         (tokenRequest.amount ? 9 : 0)
       );
     } else if (sendRequest.hasOwnProperty("buffer")) {
       return 9 + (sendRequest as OpReturnData).buffer.length;
+    } else {
+      return outputSizeP2pkh;
     }
-
-    return 0;
   };
 
   const outputTotalSize =
     sendRequests.reduce((prev, curr) => prev + outputSize(curr), 0) +
     (discardChange ? 0 : outputSizeP2pkh);
 
-  return Math.ceil(
-    (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi
+  return BigInt(
+    Math.ceil(
+      (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi
+    )
   );
 }
 
@@ -494,19 +551,19 @@ export async function getFeeAmountSimple({
 export async function getFeeAmount({
   utxos,
   sendRequests,
-  privateKey,
   sourceAddress,
   relayFeePerByteInSatoshi,
   feePaidBy,
   discardChange,
+  walletCache,
 }: {
-  utxos: UtxoI[];
+  utxos: Utxo[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
-  privateKey: Uint8Array;
   sourceAddress: string;
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
+  walletCache?: WalletCache;
 }) {
   // build transaction
   if (utxos) {
@@ -515,15 +572,17 @@ export async function getFeeAmount({
       await buildEncodedTransaction({
         inputs: utxos,
         outputs: sendRequests,
-        signingKey: privateKey,
-        sourceAddress,
-        fee: 0, //DUST_UTXO_THRESHOLD
+        signingKey: placeholderPrivateKeyBin,
+        fee: 0n, //DUST_UTXO_THRESHOLD
         discardChange: discardChange ?? false,
         feePaidBy,
         changeAddress: "",
+        walletCache,
       });
 
-    return Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1);
+    return BigInt(
+      Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1)
+    );
   } else {
     throw Error(
       "The available inputs in the wallet cannot satisfy this send request"
@@ -536,32 +595,32 @@ export async function buildEncodedTransaction({
   inputs,
   outputs,
   signingKey,
-  sourceAddress,
-  fee = 0,
+  fee = 0n,
   discardChange = false,
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
   buildUnsigned = false,
+  walletCache,
 }: {
-  inputs: UtxoI[];
+  inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
   signingKey: Uint8Array;
-  sourceAddress: string;
-  fee?: number;
+  fee?: bigint;
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
   buildUnsigned?: boolean;
+  walletCache?: WalletCache;
 }) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,
     outputs,
     signingKey,
-    sourceAddress,
     fee,
     discardChange,
     feePaidBy,
     changeAddress,
+    walletCache,
   });
 
   if (buildUnsigned === true) {
@@ -592,7 +651,7 @@ export async function signUnsignedTransaction(
     throw new Error("Transaction template error");
   }
 
-  const compiler = walletTemplateToCompilerBCH(template);
+  const compiler = walletTemplateToCompilerBch(template);
   const transactionTemplate: Readonly<
     TransactionTemplateFixed<typeof compiler>
   > = { ...decoded };

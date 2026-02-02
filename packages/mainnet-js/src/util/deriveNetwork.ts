@@ -10,7 +10,7 @@ export function derivedNetwork(addresses: string[]) {
   // Get a unique set of networks requested
   let networkSet = new Set(networks);
   if (networkSet.size > 1) {
-    throw Error("Contract addresses are not on the same network");
+    throw Error("Addresses are not on the same network");
   } else if (networkSet.size === 0) {
     throw Error("No address network was derived");
   } else {
