@@ -463,47 +463,34 @@ export class HDWallet extends BaseWallet {
    * @returns Cancel function to stop watching
    */
   public async watchStatus(
-    callback: (status: string | null, address: string) => void
+    callback: (status: string | null, address: string) => void,
+    debounce: number = 100
   ): Promise<CancelFn> {
     await this.watchPromise;
 
-    this.walletWatchCallbacks.push(callback);
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+    let pendingStatus: string | null = null;
+    let pendingAddress: string = "";
+
+    const debouncedCallback = (status: string | null, address: string) => {
+      pendingStatus = status;
+      pendingAddress = address;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        debounceTimer = undefined;
+        callback(pendingStatus, pendingAddress);
+      }, debounce);
+    };
+
+    this.walletWatchCallbacks.push(debouncedCallback);
 
     return async () => {
-      const index = this.walletWatchCallbacks.indexOf(callback);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      const index = this.walletWatchCallbacks.indexOf(debouncedCallback);
       if (index > -1) {
         this.walletWatchCallbacks.splice(index, 1);
       }
     };
-  }
-
-  public async watchBalance(
-    callback: (balance: bigint) => void
-  ): Promise<CancelFn> {
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined = undefined;
-    return this.watchStatus(async () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async () => {
-        debounceTimer = undefined;
-        const balance = await this.getBalance();
-        callback(balance);
-      }, 100);
-    });
-  }
-
-  public async watchTokenBalance(
-    category: string,
-    callback: (balance: bigint) => void
-  ): Promise<CancelFn> {
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined = undefined;
-    return await this.watchStatus(async () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async () => {
-        debounceTimer = undefined;
-        const balance = await this.getTokenBalance(category);
-        callback(balance);
-      }, 100);
-    });
   }
 
   /**
