@@ -377,9 +377,7 @@ describe(`Wallet should function in the browser`, () => {
       expect(txDecoded === null).toBe(false);
       const txHash = txDecoded.hash;
       expect(
-        localStorage.getItem(
-          `tx-${aliceWallet.provider.network}-${txHash}-${true}-${false}`
-        )
+        localStorage.getItem(`tx-${aliceWallet.provider.network}-${txHash}`)
       ).toBe(null);
       Config.UseLocalStorageCache = true;
       await aliceWallet.provider.getRawTransaction(txHash);
@@ -387,12 +385,12 @@ describe(`Wallet should function in the browser`, () => {
 
       expect(
         localStorage.getItem(
-          `tx-${aliceWallet.provider.network}-${txHash}-${false}-${false}`
+          `txraw-${aliceWallet.provider.network}-${txHash}`
         ) === null
       ).toBe(false);
       expect(
         typeof localStorage.getItem(
-          `tx-${aliceWallet.provider.network}-${txHash}-${false}-${false}`
+          `txraw-${aliceWallet.provider.network}-${txHash}`
         ) === "string"
       ).toBe(true);
       expect(
@@ -400,13 +398,12 @@ describe(`Wallet should function in the browser`, () => {
       ).toBe("string");
 
       expect(
-        localStorage.getItem(
-          `tx-${aliceWallet.provider.network}-${txHash}-${true}-${false}`
-        ) === null
+        localStorage.getItem(`tx-${aliceWallet.provider.network}-${txHash}`) ===
+          null
       ).toBe(false);
       expect(
         typeof localStorage.getItem(
-          `tx-${aliceWallet.provider.network}-${txHash}-${true}-${false}`
+          `tx-${aliceWallet.provider.network}-${txHash}`
         ) === "string"
       ).toBe(true);
       expect(

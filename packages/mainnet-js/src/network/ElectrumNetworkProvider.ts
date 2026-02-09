@@ -194,7 +194,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     if (heights.length === 0) return new Map();
 
     const results = new Map<number, HeaderI>();
-    const keys = heights.map((height) => `header-${this.network}-${height}-true`);
+    const keys = heights.map(
+      (height) => `header-${this.network}-${height}-true`
+    );
 
     // batch cache read
     let cached: Map<string, string | null> | undefined;
