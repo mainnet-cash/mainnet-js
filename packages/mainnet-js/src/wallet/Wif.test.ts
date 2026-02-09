@@ -995,9 +995,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       OpReturnData.from("MEMO\x10LÖL😅"),
       { cashaddr: wallet.cashaddr!, value: 546n },
     ]);
-    transaction = (await wallet.provider!.getRawTransactionObject(
-      result.txId!
-    )) as ElectrumRawTransaction;
+    transaction = await wallet.provider!.getRawTransactionObject(result.txId!);
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect(transaction.vout[0].scriptPubKey.hex.slice(4)).toBe(
       binToHex(utf8ToBin("MEMO\x10LÖL😅"))
@@ -1007,9 +1005,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       [wallet.cashaddr!, 546n],
       ["OP_RETURN", Uint8Array.from([0x00, 0x01, 0x02])],
     ]);
-    transaction = (await wallet.provider!.getRawTransactionObject(
-      result.txId!
-    )) as ElectrumRawTransaction;
+    transaction = await wallet.provider!.getRawTransactionObject(result.txId!);
     expect(transaction.vout[1].scriptPubKey.asm).toContain("OP_RETURN");
     expect([
       ...hexToBin(transaction.vout[1].scriptPubKey.hex.slice(4)),
@@ -1019,9 +1015,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       OpReturnData.from(""),
       OpReturnData.from(Uint8Array.from([])),
     ]);
-    transaction = (await wallet.provider!.getRawTransactionObject(
-      result.txId!
-    )) as ElectrumRawTransaction;
+    transaction = await wallet.provider!.getRawTransactionObject(result.txId!);
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect([...hexToBin(transaction.vout[0].scriptPubKey.hex)]).toStrictEqual([
       0x6a, 0x00,

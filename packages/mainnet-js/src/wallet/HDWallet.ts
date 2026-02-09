@@ -414,6 +414,12 @@ export class HDWallet extends BaseWallet {
                 if (newIndex > getCurrentIndex()) {
                   setCurrentIndex(newIndex);
                 }
+
+                // Maintain the gap: extend watched range if it shrank
+                const gap = statuses.length - getCurrentIndex();
+                if (gap < gapSize) {
+                  await this.watchAddressType(isChange, gapSize);
+                }
               }
 
               // Notify wallet watchers of the status change
@@ -491,6 +497,36 @@ export class HDWallet extends BaseWallet {
         this.walletWatchCallbacks.splice(index, 1);
       }
     };
+  }
+
+  /**
+   * Watch wallet for new transactions (HD wallet override)
+   *
+   * Uses unfiltered history so that seenTxHashes always covers all known
+   * transactions, including those from newly discovered addresses when
+   * depositIndex/changeIndex extends and widens getRawHistory's scope.
+   */
+  public override async watchTransactionHashes(
+    callback: (txHash: string) => void
+  ): Promise<CancelFn> {
+    const seenTxHashes = new Set<string>();
+
+    return this.watchStatus(async () => {
+      const history = await this.getRawHistory();
+
+      const newTxHashes: string[] = [];
+
+      for (const tx of history) {
+        if (!seenTxHashes.has(tx.tx_hash)) {
+          seenTxHashes.add(tx.tx_hash);
+          newTxHashes.push(tx.tx_hash);
+        }
+      }
+
+      if (newTxHashes.length > 0) {
+        newTxHashes.forEach((txHash) => callback(txHash));
+      }
+    });
   }
 
   /**

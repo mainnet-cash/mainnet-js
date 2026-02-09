@@ -1,4 +1,8 @@
 import { TxI, Utxo, Network, HexHeaderI, HeaderI } from "../interface.js";
+import {
+  ElectrumRawTransaction,
+  ElectrumRawTransactionWithInputValues,
+} from "./interface.js";
 import { CancelFn } from "../wallet/interface.js";
 
 export default interface NetworkProvider {
@@ -38,13 +42,35 @@ export default interface NetworkProvider {
   getRelayFee(): Promise<number>;
 
   /**
-   * Retrieve the Hex transaction details for a given transaction ID.
+   * Retrieve transaction details for a given transaction ID.
    * @param txHash Hex of transaction hash.
-   * @param verbose Whether a verbose coin-specific response is required.
+   * @param verbose When true, returns a decoded transaction object instead of hex.
+   * @param loadInputValues When true (requires verbose), each vin is enriched with value, address and tokenData from the parent output.
    * @throws {Error} If the transaction does not exist
-   * @returns The full hex transaction for the provided transaction ID.
+   * @returns The hex string (non-verbose) or decoded transaction object (verbose).
    */
-  getRawTransaction(txHash: string): Promise<string>;
+  getRawTransaction(
+    txHash: string,
+    verbose: true,
+    loadInputValues: true
+  ): Promise<ElectrumRawTransactionWithInputValues>;
+  getRawTransaction(
+    txHash: string,
+    verbose: true,
+    loadInputValues?: false
+  ): Promise<ElectrumRawTransaction>;
+  getRawTransaction(
+    txHash: string,
+    verbose?: false,
+    loadInputValues?: false
+  ): Promise<string>;
+  getRawTransaction(
+    txHash: string,
+    verbose?: boolean,
+    loadInputValues?: boolean
+  ): Promise<
+    string | ElectrumRawTransaction | ElectrumRawTransactionWithInputValues
+  >;
 
   /**
    * Batch retrieve raw transactions by their hashes.
@@ -63,10 +89,22 @@ export default interface NetworkProvider {
   /**
    * Retrieve a verbose coin-specific response transaction details for a given transaction ID.
    * @param txHash Hex of transaction hash.
+   * @param loadInputValues When true, each vin is enriched with value, address and tokenData from the parent output.
    * @throws {Error} If the transaction does not exist
-   * @returns The full hex transaction for the provided transaction ID.
+   * @returns The decoded transaction object.
    */
-  getRawTransactionObject(txHash: string): Promise<any>;
+  getRawTransactionObject(
+    txHash: string,
+    loadInputValues: true
+  ): Promise<ElectrumRawTransactionWithInputValues>;
+  getRawTransactionObject(
+    txHash: string,
+    loadInputValues?: false
+  ): Promise<ElectrumRawTransaction>;
+  getRawTransactionObject(
+    txHash: string,
+    loadInputValues?: boolean
+  ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues>;
 
   /**
    * Broadcast a raw hex transaction to the Bitcoin Cash network.

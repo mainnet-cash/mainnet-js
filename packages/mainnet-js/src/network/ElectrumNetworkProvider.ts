@@ -14,7 +14,12 @@ import {
   HeaderI,
 } from "../interface.js";
 import { Network } from "../interface.js";
-import { ElectrumRawTransaction, ElectrumUtxo } from "./interface.js";
+import {
+  ElectrumRawTransaction,
+  ElectrumRawTransactionVinWithValues,
+  ElectrumRawTransactionWithInputValues,
+  ElectrumUtxo,
+} from "./interface.js";
 
 import { CancelFn } from "../wallet/interface.js";
 import { getTransactionHash } from "../util/transaction.js";
@@ -253,9 +258,26 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async getRawTransaction(
     txHash: string,
+    verbose: true,
+    loadInputValues: true
+  ): Promise<ElectrumRawTransactionWithInputValues>;
+  async getRawTransaction(
+    txHash: string,
+    verbose: true,
+    loadInputValues?: false
+  ): Promise<ElectrumRawTransaction>;
+  async getRawTransaction(
+    txHash: string,
+    verbose?: false,
+    loadInputValues?: false
+  ): Promise<string>;
+  async getRawTransaction(
+    txHash: string,
     verbose: boolean = false,
     loadInputValues: boolean = false
-  ): Promise<string> {
+  ): Promise<
+    string | ElectrumRawTransaction | ElectrumRawTransactionWithInputValues
+  > {
     const key = `tx-${this.network}-${txHash}-${verbose}-${loadInputValues}`;
 
     if (this.cache) {
@@ -266,22 +288,27 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     try {
-      const transaction = (await this.performRequest(
+      const result = await this.performRequest(
         "blockchain.transaction.get",
         txHash,
         verbose
-      )) as ElectrumRawTransaction;
+      );
 
-      if (this.cache) {
-        await this.cache.setItem(
-          key,
-          verbose
-            ? JSON.stringify(transaction)
-            : (transaction as unknown as string)
-        );
+      if (!verbose) {
+        const hex = result as string;
+        if (this.cache) {
+          await this.cache.setItem(key, hex);
+        }
+        return hex;
       }
 
-      if (verbose && loadInputValues) {
+      const transaction = result as ElectrumRawTransaction;
+
+      if (this.cache) {
+        await this.cache.setItem(key, JSON.stringify(transaction));
+      }
+
+      if (loadInputValues) {
         // get unique transaction hashes
         const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
         const transactions = await Promise.all(
@@ -290,17 +317,18 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         const transactionMap = new Map<string, ElectrumRawTransaction>();
         transactions.forEach((val) => transactionMap.set(val.hash, val));
 
-        transaction.vin.forEach((input) => {
-          const output = transactionMap
-            .get(input.txid)!
-            .vout.find((val) => val.n === input.vout)!;
-          input.address = output.scriptPubKey.addresses[0];
-          input.value = output.value;
-          input.tokenData = output.tokenData;
-        });
+        const enrichedVin: ElectrumRawTransactionVinWithValues[] =
+          transaction.vin.map((input) => {
+            const output = transactionMap
+              .get(input.txid)!
+              .vout.find((val) => val.n === input.vout)!;
+            return { ...input, ...output };
+          });
+
+        return { ...transaction, vin: enrichedVin };
       }
 
-      return transaction as any;
+      return transaction;
     } catch (error: any) {
       if (
         (error.message as string).indexOf(
@@ -317,13 +345,20 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   // gets the decoded transaction in human readable form
   async getRawTransactionObject(
     txHash: string,
+    loadInputValues: true
+  ): Promise<ElectrumRawTransactionWithInputValues>;
+  async getRawTransactionObject(
+    txHash: string,
+    loadInputValues?: false
+  ): Promise<ElectrumRawTransaction>;
+  async getRawTransactionObject(
+    txHash: string,
     loadInputValues: boolean = false
-  ): Promise<ElectrumRawTransaction> {
-    return (await this.getRawTransaction(
-      txHash,
-      true,
-      loadInputValues
-    )) as unknown as ElectrumRawTransaction;
+  ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues> {
+    if (loadInputValues) {
+      return this.getRawTransaction(txHash, true, true);
+    }
+    return this.getRawTransaction(txHash, true);
   }
 
   async sendRawTransaction(
