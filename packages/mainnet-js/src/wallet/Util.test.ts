@@ -97,18 +97,14 @@ describe("Dynamic confirmations via fetchHeight", () => {
   test("confirmations is present on verbose server response", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const utxo = (await alice.getUtxos())[0];
-    const transaction = await alice.provider.getRawTransactionObject(
-      utxo.txid
-    );
+    const transaction = await alice.provider.getRawTransactionObject(utxo.txid);
     expect(transaction.confirmations).toBeGreaterThan(0);
   });
 
   test("fetchHeight is not exposed in returned transaction", async () => {
     const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const utxo = (await alice.getUtxos())[0];
-    const transaction = await alice.provider.getRawTransactionObject(
-      utxo.txid
-    );
+    const transaction = await alice.provider.getRawTransactionObject(utxo.txid);
     expect((transaction as any).fetchHeight).toBeUndefined();
   });
 
