@@ -30,6 +30,9 @@ import { IndexedDbCache } from "../cache/IndexedDbCache.js";
 import { WebStorageCache } from "../cache/WebStorageCache.js";
 import { MemoryCache } from "../cache/MemoryCache.js";
 
+/** Internal type for cached verbose transactions. fetchHeight is stripped before returning. */
+type CachedRawTransaction = ElectrumRawTransaction & { fetchHeight: number };
+
 export default class ElectrumNetworkProvider implements NetworkProvider {
   public electrum: ElectrumClient<ElectrumClientEvents>;
   public subscriptions: number = 0;
@@ -140,7 +143,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     if (hashes.length === 0) return new Map();
 
     const results = new Map<string, string>();
-    const keys = hashes.map((h) => `tx-${this.network}-${h}-false-false`);
+    const keys = hashes.map((hash) => `txraw-${this.network}-${hash}`);
 
     // batch cache read
     let cached: Map<string, string | null> | undefined;
@@ -173,7 +176,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // batch cache write
       if (this.cache) {
         const entries: [string, string][] = fetched.map(([hash, tx]) => [
-          `tx-${this.network}-${hash}-false-false`,
+          `txraw-${this.network}-${hash}`,
           tx,
         ]);
         await this.cache.setItems(entries);
@@ -191,7 +194,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     if (heights.length === 0) return new Map();
 
     const results = new Map<number, HeaderI>();
-    const keys = heights.map((h) => `header-${this.network}-${h}-true`);
+    const keys = heights.map(
+      (height) => `header-${this.network}-${height}-true`
+    );
 
     // batch cache read
     let cached: Map<string, string | null> | undefined;
@@ -278,12 +283,29 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<
     string | ElectrumRawTransaction | ElectrumRawTransactionWithInputValues
   > {
-    const key = `tx-${this.network}-${txHash}-${verbose}-${loadInputValues}`;
+    const nonVerboseKey = `txraw-${this.network}-${txHash}`;
+    const verboseKey = `tx-${this.network}-${txHash}`;
+    const key = verbose ? verboseKey : nonVerboseKey;
 
     if (this.cache) {
       const cached = await this.cache.getItem(key);
       if (cached) {
-        return verbose ? JSON.parse(cached) : cached;
+        if (!verbose) {
+          return cached;
+        }
+
+        const cachedTx = JSON.parse(cached) as CachedRawTransaction;
+        if (cachedTx.confirmations > 0) {
+          const currentHeight = await this.getBlockHeight();
+          cachedTx.confirmations += currentHeight - cachedTx.fetchHeight;
+        }
+        const { fetchHeight: _, ...transaction } = cachedTx;
+
+        if (loadInputValues) {
+          return this.enrichWithInputValues(transaction);
+        }
+
+        return transaction;
       }
     }
 
@@ -302,30 +324,18 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         return hex;
       }
 
-      const transaction = result as ElectrumRawTransaction;
+      const cachedTx = result as CachedRawTransaction;
+      cachedTx.confirmations ??= 0;
+      cachedTx.fetchHeight = await this.getBlockHeight();
 
       if (this.cache) {
-        await this.cache.setItem(key, JSON.stringify(transaction));
+        await this.cache.setItem(key, JSON.stringify(cachedTx));
       }
 
+      const { fetchHeight: _, ...transaction } = cachedTx;
+
       if (loadInputValues) {
-        // get unique transaction hashes
-        const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
-        const transactions = await Promise.all(
-          hashes.map((hash) => this.getRawTransactionObject(hash, false))
-        );
-        const transactionMap = new Map<string, ElectrumRawTransaction>();
-        transactions.forEach((val) => transactionMap.set(val.hash, val));
-
-        const enrichedVin: ElectrumRawTransactionVinWithValues[] =
-          transaction.vin.map((input) => {
-            const output = transactionMap
-              .get(input.txid)!
-              .vout.find((val) => val.n === input.vout)!;
-            return { ...input, ...output };
-          });
-
-        return { ...transaction, vin: enrichedVin };
+        return this.enrichWithInputValues(transaction);
       }
 
       return transaction;
@@ -340,6 +350,27 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         );
       else throw error;
     }
+  }
+
+  private async enrichWithInputValues(
+    transaction: ElectrumRawTransaction
+  ): Promise<ElectrumRawTransactionWithInputValues> {
+    const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
+    const transactions = await Promise.all(
+      hashes.map((hash) => this.getRawTransactionObject(hash, false))
+    );
+    const transactionMap = new Map<string, ElectrumRawTransaction>();
+    transactions.forEach((val) => transactionMap.set(val.hash, val));
+
+    const enrichedVin: ElectrumRawTransactionVinWithValues[] =
+      transaction.vin.map((input) => {
+        const output = transactionMap
+          .get(input.txid)!
+          .vout.find((val) => val.n === input.vout)!;
+        return { ...input, ...output };
+      });
+
+    return { ...transaction, vin: enrichedVin };
   }
 
   // gets the decoded transaction in human readable form
