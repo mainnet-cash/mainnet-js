@@ -15,9 +15,9 @@ import { getNetworkProvider } from "../network/default.js";
 import {
   ElectrumRawTransaction,
   ElectrumRawTransactionVin,
-  ElectrumRawTransactionVinScriptSig,
+  ElectrumRawTransactionVinWithValues,
   ElectrumRawTransactionVout,
-  ElectrumRawTransactionVoutScriptPubKey,
+  ElectrumRawTransactionWithInputValues,
 } from "../network/interface.js";
 import NetworkProvider from "../network/NetworkProvider.js";
 import { getTransactionHash } from "../util/transaction.js";
@@ -51,8 +51,16 @@ export class Util {
 
   public async decodeTransaction(
     transactionHashOrHex: string,
+    loadInputValues: true
+  ): Promise<ElectrumRawTransactionWithInputValues>;
+  public async decodeTransaction(
+    transactionHashOrHex: string,
+    loadInputValues?: false
+  ): Promise<ElectrumRawTransaction>;
+  public async decodeTransaction(
+    transactionHashOrHex: string,
     loadInputValues: boolean = false
-  ): Promise<ElectrumRawTransaction> {
+  ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues> {
     let transactionHex: string;
     let transactionBin: Uint8Array;
     let txHash: string;
@@ -89,14 +97,15 @@ export class Util {
       const transactionMap = new Map<string, ElectrumRawTransaction>();
       transactions.forEach((val) => transactionMap.set(val.hash, val));
 
-      transaction.vin.forEach((input) => {
-        const output = transactionMap
-          .get(input.txid)!
-          .vout.find((val) => val.n === input.vout)!;
-        input.address = output.scriptPubKey.addresses[0];
-        input.value = output.value;
-        input.tokenData = output.tokenData;
-      });
+      const enrichedVin: ElectrumRawTransactionVinWithValues[] =
+        transaction.vin.map((input) => {
+          const output = transactionMap
+            .get(input.txid)!
+            .vout.find((val) => val.n === input.vout)!;
+          return { ...input, ...output };
+        });
+
+      return { ...transaction, vin: enrichedVin };
     }
 
     return transaction;
@@ -107,22 +116,30 @@ export class Util {
     txHash: string,
     txHex: string
   ): ElectrumRawTransaction {
-    let result: ElectrumRawTransaction = {} as any;
-
-    result.vin = transaction.inputs.map((input): ElectrumRawTransactionVin => {
-      return {
-        scriptSig: {
-          hex: binToHex(input.unlockingBytecode),
-        } as ElectrumRawTransactionVinScriptSig,
-        sequence: input.sequenceNumber,
-        txid: binToHex(input.outpointTransactionHash),
-        vout: input.outpointIndex,
-      };
-    });
-
-    result.vout = transaction.outputs.map(
-      (output, index): ElectrumRawTransactionVout => {
-        return {
+    return {
+      blockhash: "",
+      blocktime: 0,
+      confirmations: 0,
+      time: 0,
+      hash: txHash,
+      hex: txHex,
+      txid: txHash,
+      locktime: transaction.locktime,
+      version: transaction.version,
+      size: txHex.length / 2,
+      vin: transaction.inputs.map(
+        (input): ElectrumRawTransactionVin => ({
+          scriptSig: {
+            asm: "",
+            hex: binToHex(input.unlockingBytecode),
+          },
+          sequence: input.sequenceNumber,
+          txid: binToHex(input.outpointTransactionHash),
+          vout: input.outpointIndex,
+        })
+      ),
+      vout: transaction.outputs.map(
+        (output, index): ElectrumRawTransactionVout => ({
           n: index,
           scriptPubKey: {
             addresses: [
@@ -132,7 +149,7 @@ export class Util {
                       output.lockingBytecode
                     ).payload,
                     prefix: prefixFromNetworkMap[this.network],
-                  })
+                  }).address
                 : assertSuccess(
                     lockingBytecodeToCashAddress({
                       bytecode: output.lockingBytecode,
@@ -140,31 +157,35 @@ export class Util {
                     })
                   ).address,
             ],
+            asm: "",
             hex: binToHex(output.lockingBytecode),
-          } as ElectrumRawTransactionVoutScriptPubKey,
+            reqSigs: 1,
+            type: "",
+          },
           value: Number(output.valueSatoshis) / Number(bchParam.subUnits),
-        };
-      }
-    );
-
-    result.locktime = transaction.locktime;
-    result.version = transaction.version;
-    result.hash = txHash;
-    result.hex = txHex;
-    result.txid = txHash;
-    result.size = txHex.length / 2;
-
-    return result;
+        })
+      ),
+    };
   }
 
   public static async decodeTransaction(
     transactionHashOrHex: string,
+    loadInputValues: true,
+    network?: NetworkType
+  ): Promise<ElectrumRawTransactionWithInputValues>;
+  public static async decodeTransaction(
+    transactionHashOrHex: string,
+    loadInputValues?: false,
+    network?: NetworkType
+  ): Promise<ElectrumRawTransaction>;
+  public static async decodeTransaction(
+    transactionHashOrHex: string,
     loadInputValues: boolean = false,
     network?: NetworkType
-  ): Promise<ElectrumRawTransaction> {
-    return new this(network).decodeTransaction(
-      transactionHashOrHex,
-      loadInputValues
-    );
+  ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues> {
+    if (loadInputValues) {
+      return new this(network).decodeTransaction(transactionHashOrHex, true);
+    }
+    return new this(network).decodeTransaction(transactionHashOrHex);
   }
 }

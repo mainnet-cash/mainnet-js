@@ -1,5 +1,4 @@
 import { initProviders, disconnectProviders } from "../network";
-import { ElectrumRawTransaction } from "../network/interface";
 import { RegTestWallet, Wallet } from "./Wif";
 
 beforeAll(async () => {
@@ -41,9 +40,9 @@ describe("Utility tests", () => {
   test("Should get raw transaction", async () => {
     let wallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const utxo = (await wallet.getUtxos())[0];
-    const transaction = (await wallet.provider!.getRawTransactionObject(
+    const transaction = await wallet.provider!.getRawTransactionObject(
       utxo.txid
-    )) as ElectrumRawTransaction;
+    );
     expect((await wallet.util.decodeTransaction(transaction.hash)).hash).toBe(
       utxo.txid
     );
@@ -67,15 +66,15 @@ describe("Utility tests", () => {
       "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"
     );
 
-    expect(decoded.vin[0].address).toBeUndefined();
-    expect(decoded.vin[0].value).toBeUndefined();
+    // non-enriched vin entries don't carry vout fields (enforced by types)
+    expect((decoded.vin[0] as any).address).toBeUndefined();
   });
 
   test("Should decode a transaction and fetch input values and addresses", async () => {
     const txHash =
       "dc8f059900807c36941313f10b43ec049e23dfede4e09f8fbccc3871ed359fbe";
     const decoded = await Wallet.util.decodeTransaction(txHash, true);
-    expect(decoded.vin[0].address).toBeDefined();
+    expect(decoded.vin[0].scriptPubKey.addresses[0]).toBeDefined();
     expect(decoded.vin[0].value).toBeDefined();
 
     //  uncomment next line

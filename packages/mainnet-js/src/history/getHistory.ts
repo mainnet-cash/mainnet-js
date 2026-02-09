@@ -181,7 +181,7 @@ export const getHistory = async ({
       tx.inputs.length === 1 &&
       tx.inputs[0].outpointTransactionHash.every((b) => b === 0);
 
-    result.inputs = tx.inputs.map((input) => {
+    result.inputs = tx.inputs.map((input): InOutput => {
       if (isCoinbase) {
         const halvings = Math.floor(tx.blockHeight / 210000);
         const subsidy = Math.floor(5000000000 / 2 ** halvings);
@@ -190,7 +190,7 @@ export const getHistory = async ({
         return {
           address: "coinbase",
           value: subsidy,
-        } as InOutput;
+        };
       }
 
       const prevoutTx =
@@ -227,18 +227,18 @@ export const getHistory = async ({
           ? {
               category: binToHex(prevoutOutput.token.category),
               amount: prevoutOutput.token.amount,
-              capability: prevoutOutput.token.nft?.capability
-                ? prevoutOutput.token.nft.capability
-                : undefined,
-              commitment: prevoutOutput.token.nft?.capability
-                ? binToHex(prevoutOutput.token.nft.commitment)
+              nft: prevoutOutput.token.nft
+                ? {
+                    capability: prevoutOutput.token.nft.capability,
+                    commitment: binToHex(prevoutOutput.token.nft.commitment),
+                  }
                 : undefined,
             }
           : undefined,
-      } as InOutput;
+      };
     });
 
-    result.outputs = tx.outputs.map((output) => {
+    result.outputs = tx.outputs.map((output): InOutput => {
       const cached = addressCache[output.lockingBytecode as any];
       let address: string;
       if (!cached) {
@@ -266,15 +266,15 @@ export const getHistory = async ({
           ? {
               category: binToHex(output.token.category),
               amount: output.token.amount,
-              capability: output.token.nft?.capability
-                ? output.token.nft.capability
-                : undefined,
-              commitment: output.token.nft?.capability
-                ? binToHex(output.token.nft.commitment)
+              nft: output.token.nft
+                ? {
+                    capability: output.token.nft.capability,
+                    commitment: binToHex(output.token.nft.commitment),
+                  }
                 : undefined,
             }
           : undefined,
-      } as InOutput;
+      };
     });
 
     result.blockHeight = tx.blockHeight;

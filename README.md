@@ -7,7 +7,6 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 - [mainnet-js](#mainnet-js)
 - [Contents](#contents)
 - [Before you begin](#before-you-begin)
-  - [Unstable](#unstable)
   - [What is exactly is this?](#what-is-exactly-is-this)
   - [How can I use it?](#how-can-i-use-it)
   - [Where can't mainnet-js be used? (for now)](#where-cant-mainnet-js-be-used-for-now)
@@ -21,12 +20,6 @@ A high-level developer friendly interface to interact with Bitcoin Cash (BCH) ne
 - [Contributing](#contributing)
 
 # Before you begin
-
-## Unstable
-
-| :warning: WARNING                                                               |
-| :------------------------------------------------------------------------------ |
-| This code is in a beta stage, so there is no backwards-compatibility guarantee. |
 
 ## What is exactly is this?
 

@@ -1,6 +1,13 @@
 Newest changes
 --------------
 
+3.1.0
+
+Add custom watchTransactionHashes for HDWallet to fix possibly too frequent notifications
+Handle HD gap shrinking, improve tests
+Fix getHistory output field population
+Minor breaking: rework getRawTransaction* objects return types with loaded inputs
+
 3.0.1
 
 * Better `HDWallet.watchStatus` behaviour with default debounce timeout of 100ms

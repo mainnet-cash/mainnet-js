@@ -571,10 +571,7 @@ export class BaseWallet implements WalletI {
   ): Promise<CancelFn> {
     return this.watchTransactions(
       async (transaction: ElectrumRawTransaction) => {
-        if (
-          transaction.vin.some((val) => val.tokenData) ||
-          transaction.vout.some((val) => val.tokenData)
-        ) {
+        if (transaction.vout.some((val) => val.tokenData)) {
           callback(transaction);
         }
       }
