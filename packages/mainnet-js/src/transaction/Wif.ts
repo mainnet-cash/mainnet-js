@@ -53,7 +53,7 @@ export async function buildP2pkhNonHdTransaction({
   discardChange?: boolean;
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
-  walletCache?: WalletCache;
+  walletCache: WalletCache;
 }) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -134,7 +134,7 @@ export function prepareInputs({
     AuthenticationProgramStateCommon
   >;
   signingKey: Uint8Array;
-  walletCache?: WalletCache;
+  walletCache: WalletCache;
 }) {
   const preparedInputs: any[] = [];
   const sourceOutputs: any[] = [];
@@ -166,7 +166,7 @@ export function prepareInputs({
           : undefined,
     };
     const key =
-      walletCache?.get(i.address)?.privateKey ??
+      walletCache.get(i.address)?.privateKey ??
       (signingKey?.length ? signingKey : Uint8Array.from(Array(32)));
     const newInput = {
       outpointIndex: utxoIndex,
@@ -563,7 +563,7 @@ export async function getFeeAmount({
   relayFeePerByteInSatoshi: number;
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
-  walletCache?: WalletCache;
+  walletCache: WalletCache;
 }) {
   // build transaction
   if (utxos) {
@@ -610,7 +610,7 @@ export async function buildEncodedTransaction({
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
   buildUnsigned?: boolean;
-  walletCache?: WalletCache;
+  walletCache: WalletCache;
 }) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,

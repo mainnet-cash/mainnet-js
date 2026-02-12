@@ -16,7 +16,7 @@ import {
   sha256,
   utf8ToBin,
 } from "@bitauth/libauth";
-import { WalletCache, WalletCacheI } from "../cache/index.js";
+import { PersistentWalletCache, WalletCacheI } from "../cache/index.js";
 import { Config } from "../config.js";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 import { getHistory } from "../history/getHistory.js";
@@ -240,7 +240,7 @@ export class HDWallet extends BaseWallet {
       )
     );
     // @ts-ignore
-    this.walletCache = new WalletCache(
+    this.walletCache = new PersistentWalletCache(
       this.walletId,
       this.xPrivNode ?? this.xPubNode,
       this.networkPrefix

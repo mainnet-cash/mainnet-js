@@ -70,7 +70,7 @@ export interface WalletCacheI extends WalletCache {
   ): void;
 }
 
-export class WalletCache implements WalletCacheI {
+export class PersistentWalletCache implements WalletCacheI {
   private _storage: CacheProvider | undefined;
   private walletCache: Record<string, WalletCacheEntry> = {};
   private indexCache: Record<
