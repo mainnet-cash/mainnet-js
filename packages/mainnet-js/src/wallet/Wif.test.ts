@@ -1187,5 +1187,3 @@ describe(`Wallet extrema behavior regression testing`, () => {
     ).resolves.not.toThrow();
   });
 });
-
-
