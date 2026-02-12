@@ -460,6 +460,18 @@ export class BaseWallet implements WalletI {
     return this.trackCancelFn(cancelFn);
   }
 
+  /**
+   * No-op for single-address wallets. HDWallet overrides this to wait for
+   * depositIndex/changeIndex advancement.
+   */
+  public async waitForUpdate(
+    _options: {
+      depositIndex?: number;
+      changeIndex?: number;
+      timeout?: number;
+    } = {}
+  ): Promise<void> {}
+
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
   public async watchBalance(

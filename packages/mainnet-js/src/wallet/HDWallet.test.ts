@@ -114,24 +114,21 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
     expect(hdWallet.depositIndex).toBe(1);
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(1),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 2)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 2 });
     expect(hdWallet.depositIndex).toBe(2);
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(4),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 5)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 5 });
     expect(hdWallet.depositIndex).toBe(5);
 
     // beyond gap size, should not update index
@@ -163,8 +160,7 @@ describe("HDWallet", () => {
       { cashaddr: addr20, value: 10000n },
     ]);
     // Wait for seedWallet to see both transactions via electrum
-    while (seedWallet.depositIndex < 21)
-      await new Promise((r) => setTimeout(r, 50));
+    await seedWallet.waitForUpdate({ depositIndex: 21 });
 
     // Restore wallet from same seed, starting from index 0
     const restoredWallet = await RegTestHDWallet.fromSeed(
@@ -191,8 +187,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
     expect(hdWallet.depositIndex).toBe(1);
     expect(hdWallet.changeIndex).toBe(0);
 
@@ -201,9 +196,7 @@ describe("HDWallet", () => {
       cashaddr: bob.getDepositAddress(),
       value: 50000n,
     });
-    while (hdWallet.changeIndex < 1) {
-      await new Promise((r) => setTimeout(r, 50));
-    }
+    await hdWallet.waitForUpdate({ changeIndex: 1 });
     expect(hdWallet.changeIndex).toBe(1);
 
     // fund and spend again, change goes to change address 1
@@ -211,15 +204,12 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 2)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 2 });
     await hdWallet.send({
       cashaddr: bob.getDepositAddress(),
       value: 50000n,
     });
-    while (hdWallet.changeIndex < 2) {
-      await new Promise((r) => setTimeout(r, 50));
-    }
+    await hdWallet.waitForUpdate({ changeIndex: 2 });
     expect(hdWallet.changeIndex).toBe(2);
 
     // Restore wallet from same seed and verify depositIndex is correct
@@ -261,8 +251,7 @@ describe("HDWallet", () => {
       cashaddr: depositAddress,
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     expect(await hdWallet.getBalance()).toBe(100000n);
 
@@ -274,8 +263,7 @@ describe("HDWallet", () => {
       cashaddr: depositAddress2,
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 2)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 2 });
 
     expect(await hdWallet.getBalance()).toBe(200000n);
 
@@ -307,8 +295,7 @@ describe("HDWallet", () => {
       cashaddr: bob.getDepositAddress(),
       value: 150000n,
     });
-    while (hdWallet.changeIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ changeIndex: 1 });
 
     expect(
       await (
@@ -367,8 +354,7 @@ describe("HDWallet", () => {
       cashaddr: depositAddress,
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     expect(await hdWallet.getBalance()).toBe(100000n);
 
@@ -462,8 +448,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     expect(
       hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
@@ -514,8 +499,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     // rawHistory should now have one entry
     expect(
@@ -557,15 +541,13 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(1),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 2)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 2 });
 
     // Check depositRawHistory arrays are populated
     expect(hdWallet.depositRawHistory[0].length).toBe(1);
@@ -591,8 +573,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     const history = await hdWallet.getHistory({ unit: "sat" });
     expect(history.length).toBe(1);
@@ -614,8 +595,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 50000n,
     });
-    while (hdWallet.depositIndex < 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     // Check rawHistory is populated
     const cacheEntry1 = hdWallet.walletCache.get(hdWallet.getDepositAddress(0));
@@ -670,6 +650,33 @@ describe("HDWallet", () => {
     expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
   });
 
+  it("waitForUpdate resolves via timeout when depositIndex target is not reached", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+    );
+    const hdWallet = await RegTestHDWallet.newRandom();
+    expect(hdWallet.depositIndex).toBe(0);
+
+    // No transaction sent — idle timer should resolve without hanging
+    await hdWallet.waitForUpdate({ depositIndex: 1 });
+
+    // depositIndex is still 0 because no funds arrived
+    expect(hdWallet.depositIndex).toBe(0);
+
+    // No leftover watchers
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
+
+    // Now send a real transaction — waitForUpdate should resolve once index advances
+    await fundingWallet.send({
+      cashaddr: hdWallet.getDepositAddress(0),
+      value: 100000n,
+    });
+    await hdWallet.waitForUpdate();
+
+    expect(hdWallet.depositIndex).toBe(1);
+    expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
+  });
+
   it("watchWallet supports multiple watchers", async () => {
     const hdWallet = await RegTestHDWallet.newRandom();
 
@@ -720,7 +727,7 @@ describe("HDWallet", () => {
       cashaddr: alice.getDepositAddress(),
       value: 1000000n,
     });
-    while (alice.depositIndex < 1) await new Promise((r) => setTimeout(r, 50));
+    await alice.waitForUpdate({ depositIndex: 1 });
 
     const genesisResponse = await alice.tokenGenesis({
       cashaddr: alice.getDepositAddress(1),
@@ -805,7 +812,7 @@ describe("HDWallet", () => {
       cashaddr: alice.getDepositAddress(),
       value: 1000000n,
     });
-    while (alice.depositIndex < 1) await new Promise((r) => setTimeout(r, 50));
+    await alice.waitForUpdate({ depositIndex: 1 });
 
     const genesisResponse = await alice.tokenGenesis({
       amount: 100n,
@@ -1043,8 +1050,7 @@ describe("HDWallet", () => {
     });
 
     // Wait for the subscription callback to fire and gap extension to complete
-    while (hdWallet.depositIndex < edgeIndex + 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: edgeIndex + 1 });
     await delay(1000);
 
     // depositIndex should have advanced
@@ -1066,8 +1072,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(newEdge),
       value: 10000n,
     });
-    while (hdWallet.depositIndex < newEdge + 1)
-      await new Promise((r) => setTimeout(r, 50));
+    await hdWallet.waitForUpdate({ depositIndex: newEdge + 1 });
     await delay(1000);
 
     expect(hdWallet.depositIndex).toBe(newEdge + 1);

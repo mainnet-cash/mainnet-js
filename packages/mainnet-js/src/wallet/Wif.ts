@@ -225,7 +225,10 @@ export class Wallet extends WatchWallet {
 
     if (this.privateKey) {
       // @ts-ignore
-      this.walletCache = new Map<string, { privateKey: Uint8Array }>().set(this.cashaddr, { privateKey: this.privateKey });
+      this.walletCache = new Map<string, { privateKey: Uint8Array }>().set(
+        this.cashaddr,
+        { privateKey: this.privateKey }
+      );
     }
 
     return this;
