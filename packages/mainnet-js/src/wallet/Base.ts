@@ -63,7 +63,7 @@ export const placeholderTokenAddr =
 export class BaseWallet implements WalletI {
   public static StorageProvider?: typeof StorageProvider;
 
-  readonly walletCache?: WalletCache;
+  readonly walletCache: WalletCache;
   readonly provider: ElectrumNetworkProvider;
   readonly network: NetworkType;
   readonly walletType: WalletTypeEnum;
@@ -181,6 +181,7 @@ export class BaseWallet implements WalletI {
     this.walletType = WalletTypeEnum.Watch;
     this.provider = this.getNetworkProvider(this.network);
     this.isTestnet = this.network === NetworkType.Mainnet ? false : true;
+    this.walletCache = new Map<string, { privateKey: Uint8Array }>();
   }
   //#endregion Constructors
 

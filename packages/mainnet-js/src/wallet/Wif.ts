@@ -215,13 +215,20 @@ export class Wallet extends WatchWallet {
     }
 
     // rest cases are for watch wallets
-    return super.initialize({
+    await super.initialize({
       name,
       publicKey,
       publicKeyCompressed,
       publicKeyHash,
       address,
     });
+
+    if (this.privateKey) {
+      // @ts-ignore
+      this.walletCache = new Map<string, { privateKey: Uint8Array }>().set(this.cashaddr, { privateKey: this.privateKey });
+    }
+
+    return this;
   }
   //#endregion Constructors and Statics
 
