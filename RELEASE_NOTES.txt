@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+3.1.6
+
+* Add Wallet.waitForUpdate utility to await for incoming payments
+
 3.1.5
 
 * Make walletCache always available in all wallet types

@@ -500,6 +500,73 @@ export class HDWallet extends BaseWallet {
   }
 
   /**
+   * Wait for the wallet to reach a target depositIndex and/or changeIndex,
+   * resolving once the condition is met or after an idle timeout with no
+   * status changes.
+   */
+  public async waitForUpdate(
+    options: {
+      depositIndex?: number;
+      changeIndex?: number;
+      timeout?: number;
+    } = {}
+  ): Promise<void> {
+    const timeout = options.timeout ?? 100;
+
+    const isSatisfied = () => {
+      if (
+        options.depositIndex !== undefined &&
+        this.depositIndex < options.depositIndex
+      )
+        return false;
+      if (
+        options.changeIndex !== undefined &&
+        this.changeIndex < options.changeIndex
+      )
+        return false;
+      return true;
+    };
+
+    if (isSatisfied()) return;
+
+    return new Promise(async (resolve) => {
+      let timer: ReturnType<typeof setTimeout>;
+      let resolved = false;
+      let watchCancel: CancelFn;
+
+      const done = async () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timer);
+        await watchCancel?.();
+        resolve();
+      };
+
+      const resetTimer = () => {
+        clearTimeout(timer);
+        timer = setTimeout(done, timeout);
+      };
+
+      // Uses default 100ms debounce — callback only fires after 100ms of
+      // quiet, meaning the cascade has settled before we check the condition.
+      watchCancel = await this.watchStatus(async () => {
+        if (isSatisfied()) {
+          await done();
+        } else {
+          resetTimer(); // cascade settled but target not met — wait for more activity
+        }
+      });
+
+      // Re-check + start initial idle timer after subscription
+      if (isSatisfied()) {
+        await done();
+      } else {
+        resetTimer();
+      }
+    });
+  }
+
+  /**
    * Watch wallet for new transactions (HD wallet override)
    *
    * Uses unfiltered history so that seenTxHashes always covers all known
