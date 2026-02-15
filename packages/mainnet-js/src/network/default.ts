@@ -102,7 +102,11 @@ function getElectrumClient(
     params.host,
     params.port,
     params.scheme === "wss",
-    timeout
+    timeout,
+    {
+      disableBrowserConnectivityHandling: true,
+      disableBrowserVisibilityHandling: true,
+    }
   );
   return new ElectrumClient(
     getUserAgent(),
