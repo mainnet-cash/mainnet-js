@@ -709,22 +709,22 @@
   dependencies:
     debug "^4.3.7"
 
-"@electrum-cash/network@^4.1.3":
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/@electrum-cash/network/-/network-4.1.3.tgz#195a96e8bb34493c622223992da0649c753aafff"
-  integrity sha512-amMvdcEfHhquoUkhN7x/H04KPYfqd5LilOGcg6O1OdUks1Mcrcah8WfHICHW/qyZ3Rgoos9o7Wx8gKz8qcSNzg==
+"@electrum-cash/network@^4.2.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/@electrum-cash/network/-/network-4.2.2.tgz#867b849938d196e887d56cf2cbecb8a1f2c9ea71"
+  integrity sha512-v2Wwt2o0VBBALPArx2dJEDvSqewKjiTW5KAd+jEXxxgdSxFygjJIrFcXryKOCv2CDbpE5+lXAogPAjx6FqW/nw==
   dependencies:
     "@electrum-cash/debug-logs" "^1.0.0"
-    "@electrum-cash/web-socket" "^1.0.0"
+    "@electrum-cash/web-socket" "^1.2.3"
     async-mutex "^0.5.0"
     debug "^4.3.2"
     eventemitter3 "^5.0.1"
     lossless-json "^4.0.1"
 
-"@electrum-cash/web-socket@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@electrum-cash/web-socket/-/web-socket-1.0.0.tgz#0ab57e46d41e941ffb57deff86afea3ae1379d5d"
-  integrity sha512-+VQ6aPE7nUysyDn9SB7/uqKuVJmjrhvr0LRK2ANTeR1DfmXBnv5z29e/0zK5A7ZoAz0gdZZuLDzN46r8S5Cxig==
+"@electrum-cash/web-socket@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@electrum-cash/web-socket/-/web-socket-1.2.3.tgz#473b6ddb4dba513e1c4e62b163da219205e7b31b"
+  integrity sha512-sFWujTt98mvsMvE6gWjG44evkF3PcZhG1JffkkEUAVan+c9X51wkiWr3hkjPeIW0WfNpMTrFkvpGqVYmRj1RCA==
   dependencies:
     "@electrum-cash/debug-logs" "^1.0.0"
     "@monsterbitar/isomorphic-ws" "^5.3.0"

@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+3.1.7
+
+* Update electrum-cash library, pass proper configuration to it
+
 3.1.6
 
 * Add Wallet.waitForUpdate utility to await for incoming payments
