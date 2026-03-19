@@ -1,4 +1,5 @@
-import { initProviders, disconnectProviders, Connection } from "./Connection";
+import { initProviders, disconnectProviders } from "./Connection";
+import { createProvider } from "./default";
 import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif";
 
 beforeAll(async () => {
@@ -41,11 +42,11 @@ test.skip("Should lower overhead in creating wallets", async () => {
   expect(height).toBeGreaterThan(114);
 });
 
-test("Should create a new Connection", async () => {
-  let conn = new Connection("mainnet", "wss://bch.imaginary.cash:50004");
-  await conn.ready();
-  expect(conn.networkProvider == globalThis.BCH).toBeFalsy();
-  let blockheight = await conn.networkProvider.getBlockHeight();
+test("Should create a provider with custom servers", async () => {
+  let provider = await createProvider("mainnet", "wss://fulcrum.pat.mn:50004");
+  await provider.connect();
+  expect(provider == globalThis.BCH).toBeFalsy();
+  let blockheight = await provider.getBlockHeight();
   expect(blockheight).toBeGreaterThan(10000);
-  expect(10001).toBeGreaterThan(10000);
+  await provider.disconnect();
 });

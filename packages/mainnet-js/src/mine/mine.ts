@@ -1,4 +1,7 @@
 import { binToBase64, utf8ToBin } from "@bitauth/libauth";
+import { http } from "@rpckit/http";
+import { fallback } from "@rpckit/fallback";
+import type { Transport } from "@rpckit/core";
 
 /**
  * Mine blocks to a regtest address
@@ -16,27 +19,22 @@ export const mine = async ({
   cashaddr: string;
   blocks: number;
 }): Promise<any> => {
-  const response = await fetch(`http://127.0.0.1:${process.env.RPC_PORT}/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization:
-        "Basic " +
-        binToBase64(
-          utf8ToBin(`${process.env.RPC_USER}:${process.env.RPC_PASS}`)
-        ),
-    },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: "0",
-      method: "generatetoaddress",
-      params: {
-        nblocks: blocks,
-        address: cashaddr,
-      },
-    }),
-  });
-  const json = await response.json();
+  const auth =
+    "Basic " +
+    binToBase64(
+      utf8ToBin(`${process.env.RPC_USER}:${process.env.RPC_PASS}`)
+    );
 
-  return json.result;
+  const transports = ["127.0.0.1", "host.docker.internal"].map((host) =>
+    http(`http://${host}:${process.env.RPC_PORT}/`, {
+      headers: { Authorization: auth },
+    })
+  ) as [Transport, Transport];
+
+  const transport = fallback(transports);
+  try {
+    return await transport.request("generatetoaddress", blocks, cashaddr);
+  } finally {
+    await transport.close();
+  }
 };

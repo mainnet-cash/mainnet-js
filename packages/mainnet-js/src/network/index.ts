@@ -1,6 +1,11 @@
-export { getNetworkProvider } from "./default.js";
 export {
-  Connection,
+  getNetworkProvider,
+  createProvider,
+  setGlobalProvider,
+  getGlobalProvider,
+  removeGlobalProvider,
+} from "./default.js";
+export {
   initProviders,
   initProvider,
   disconnectProviders,

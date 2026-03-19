@@ -31,6 +31,10 @@ module.exports = {
       },
     ],
   },
+  moduleNameMapper: {
+    "^@rpckit/websocket/electrum-cash$": "<rootDir>/node_modules/@rpckit/websocket/dist/electrum-cash/index.js",
+    "^@rpckit/fallback/electrum-cash$": "<rootDir>/node_modules/@rpckit/fallback/dist/electrum-cash/index.js",
+  },
   testEnvironment: "node",
   setupFiles: ["fake-indexeddb/auto", "node-localstorage/register"],
   globalSetup: "<rootDir>/jest/node.setup.cjs",

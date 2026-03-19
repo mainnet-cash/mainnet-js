@@ -28,7 +28,7 @@ describe("Webhook worker tests", () => {
   });
 
   beforeEach(async () => {
-    worker.deleteAllWebhooks();
+    await worker.deleteAllWebhooks();
   });
 
   afterEach(async () => {

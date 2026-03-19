@@ -5,13 +5,6 @@ export interface BlockHeader {
   hex: string;
 }
 
-export interface ElectrumHostParams {
-  host: string;
-  port: number;
-  timeout?: number;
-  scheme: "tcp" | "tcp_tls" | "ws" | "wss";
-}
-
 export interface ElectrumTokenData {
   amount: string;
   category: string;

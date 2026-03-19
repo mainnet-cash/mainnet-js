@@ -15,6 +15,7 @@ const baseConfig = {
     extensionAlias: {
       ".js": [".ts", ".js"],
     },
+    symlinks: true,
   },
   optimization: {
     minimize: false,

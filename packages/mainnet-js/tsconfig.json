@@ -25,7 +25,12 @@
     "sourceMap": true,
     "noEmit": false,
     "strictPropertyInitialization": false,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "paths": {
+      "@rpckit/core/electrum-cash": ["../../node_modules/@rpckit/core/dist/electrum-cash/index.d.ts"],
+      "@rpckit/websocket/electrum-cash": ["../../node_modules/@rpckit/websocket/dist/electrum-cash/index.d.ts"],
+      "@rpckit/fallback/electrum-cash": ["../../node_modules/@rpckit/fallback/dist/electrum-cash/index.d.ts"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**", "src/**/*test.ts"],

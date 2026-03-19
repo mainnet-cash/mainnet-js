@@ -1,10 +1,5 @@
-import {
-  ElectrumClient,
-  RequestResponse,
-  ElectrumClientEvents,
-  RPCNotification,
-  ConnectionStatus,
-} from "@electrum-cash/network";
+import type { Transport, Unsubscribe } from "@rpckit/core";
+import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   HexHeaderI,
@@ -34,9 +29,8 @@ import { MemoryCache } from "../cache/MemoryCache.js";
 type CachedRawTransaction = ElectrumRawTransaction & { fetchHeight: number };
 
 export default class ElectrumNetworkProvider implements NetworkProvider {
-  public electrum: ElectrumClient<ElectrumClientEvents>;
+  public transport: Transport<ElectrumCashSchema>;
   public subscriptions: number = 0;
-  private subscriptionMap: Record<string, number> = {};
   private currentHeight: number = 0;
   private headerCancelFn?: CancelFn;
 
@@ -74,14 +68,13 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   constructor(
-    electrum: ElectrumClient<ElectrumClientEvents>,
+    transport: Transport<ElectrumCashSchema>,
     public network: Network = Network.MAINNET,
-    private manualConnectionManagement?: boolean
   ) {
-    if (electrum) {
-      this.electrum = electrum;
+    if (transport) {
+      this.transport = transport;
     } else {
-      throw new Error(`A electrum-cash client is required.`);
+      throw new Error(`A transport is required.`);
     }
   }
 
@@ -162,6 +155,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     if (misses.length > 0) {
+      // rpckit automatically batches concurrent requests via BatchScheduler
       const fetched = await Promise.all(
         misses.map(async (hash) => {
           const tx = await this.performRequest<string>(
@@ -215,6 +209,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     if (misses.length > 0) {
+      // rpckit automatically batches concurrent requests via BatchScheduler
       const fetched = await Promise.all(
         misses.map(async (height) => {
           const result = await this.performRequest<HexHeaderI>(
@@ -342,7 +337,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     } catch (error: any) {
       if (
         (error.message as string).indexOf(
-          "No such mempool or blockchain transaction."
+          "No such mempool or blockchain transaction"
         ) > -1
       )
         throw Error(
@@ -490,8 +485,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   public async waitForBlock(height?: number): Promise<HexHeaderI> {
     return new Promise(async (resolve) => {
       let cancelWatch: CancelFn;
-      if (this.electrum.chainHeight && !height) {
-        height = this.electrum.chainHeight + 1;
+      if (this.currentHeight && !height) {
+        height = this.currentHeight + 1;
       }
 
       cancelWatch = await this.watchBlocks(async (header) => {
@@ -549,63 +544,38 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<T> {
     await this.ready();
 
-    const requestTimeout = new Promise(function (_resolve, reject) {
-      setTimeout(function () {
-        reject("electrum-cash request timed out, retrying");
-      }, 30000);
-    }).catch(function (e) {
-      throw e;
-    });
+    const TIMEOUT_MSG = "electrum-cash request timed out, retrying";
 
-    const request = this.electrum.request(name, ...parameters);
-
-    return await Promise.race([request, requestTimeout])
-      .then((value) => {
-        if (value instanceof Error) throw value;
-        let result = value as RequestResponse;
-        return result as T;
-      })
-      .catch(async () => {
-        return await Promise.race([request, requestTimeout])
-          .then((value) => {
-            if (value instanceof Error) throw value;
-            let result = value as RequestResponse;
-            return result as T;
-          })
-          .catch(function (e) {
-            throw e;
-          });
+    const makeTimeout = () =>
+      new Promise<never>(function (_resolve, reject) {
+        setTimeout(function () {
+          reject(TIMEOUT_MSG);
+        }, 30000);
       });
-  }
 
-  private async trackSubscription(
-    methodName: string,
-    ...parameters: (string | number | boolean)[]
-  ): Promise<void> {
-    const key = `${methodName}-${this.network}-${JSON.stringify(parameters)}`;
-    if (this.subscriptionMap[key]) {
-      this.subscriptionMap[key]++;
-    } else {
-      this.subscriptionMap[key] = 1;
-    }
+    const ensureError = (e: unknown): Error => {
+      if (e instanceof Error) return e;
+      if (typeof e === "object" && e !== null && "message" in e)
+        return Object.assign(new Error((e as any).message), e);
+      return new Error(typeof e === "string" ? e : String(e));
+    };
 
-    await this.electrum.subscribe(methodName, ...parameters);
-  }
+    const request = this.transport.request(name as any, ...(parameters as any));
 
-  private async untrackSubscription(
-    methodName: string,
-    ...parameters: (string | number | boolean)[]
-  ): Promise<void> {
-    const key = `${methodName}-${this.network}-${JSON.stringify(parameters)}`;
-    if (this.subscriptionMap[key]) {
-      this.subscriptionMap[key]--;
-      if (this.subscriptionMap[key] <= 0) {
-        // only really unsubscribe if there are no more subscriptions for this `key`
-        delete this.subscriptionMap[key];
-
-        try {
-          await this.electrum.unsubscribe(methodName, ...parameters);
-        } catch {}
+    try {
+      const value = await Promise.race([request, makeTimeout()]);
+      if (value instanceof Error) throw value;
+      return value as T;
+    } catch (e: unknown) {
+      const error = ensureError(e);
+      // Only retry on timeout, not on server errors
+      if (error.message !== TIMEOUT_MSG) throw error;
+      try {
+        const value = await Promise.race([request, makeTimeout()]);
+        if (value instanceof Error) throw value;
+        return value as T;
+      } catch (e2: unknown) {
+        throw ensureError(e2);
       }
     }
   }
@@ -617,19 +587,19 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<CancelFn> {
     await this.ready();
 
-    const handler = (data: RPCNotification) => {
-      if (data.method === methodName) {
-        callback(data.params);
-      }
-    };
-
-    this.electrum.on("notification", handler);
-    await this.trackSubscription(methodName, ...parameters);
+    const subscribeFn = this.transport.subscribe.bind(this.transport) as (
+      method: string,
+      ...args: unknown[]
+    ) => Promise<Unsubscribe>;
+    const unsubscribe: Unsubscribe = await subscribeFn(
+      methodName,
+      ...parameters,
+      (data: unknown) => { callback(data); }
+    );
     this.subscriptions++;
 
     return async () => {
-      this.electrum.off("notification", handler);
-      await this.untrackSubscription(methodName, ...parameters);
+      await unsubscribe();
       this.subscriptions--;
     };
   }
@@ -640,18 +610,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async connect(): Promise<void> {
     await this.cache?.init();
-    if (this.electrum.status !== ConnectionStatus.CONNECTED) {
-      await this.electrum.connect();
-    }
+    await this.transport.connect();
   }
 
   async disconnect(): Promise<boolean> {
-    if (this.subscriptions > 0) {
-      // console.warn(
-      //   `Trying to disconnect a network provider with ${this.subscriptions} active subscriptions. This is in most cases a bad idea.`
-      // );
-    }
     await this.headerCancelFn?.();
-    return this.electrum.disconnect(true, false);
+    await this.transport.close();
+    return true;
   }
 }

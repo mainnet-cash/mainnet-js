@@ -1,4 +1,5 @@
 import { Network } from "../interface";
+import { Wallet } from "../wallet/Wif";
 import * as config from "./configuration";
 import * as primary from "./constant";
 
@@ -15,11 +16,11 @@ test("Should get electrum settings from defaults", async () => {
 });
 
 test("Should get electrum settings from DefaultProvider", async () => {
-  config.DefaultProvider.servers.mainnet = ["wss://example.com:777"];
+  config.DefaultProvider.servers.mainnet = "wss://example.com:777";
 
-  expect(config.getDefaultServers(Network.MAINNET)).toStrictEqual([
-    "wss://example.com:777",
-  ]);
+  expect(config.getDefaultServers(Network.MAINNET)).toBe(
+    "wss://example.com:777"
+  );
   expect(config.getDefaultServers(Network.TESTNET)).toBe(
     primary.testnetServers
   );
@@ -27,33 +28,29 @@ test("Should get electrum settings from DefaultProvider", async () => {
     primary.regtestServers
   );
 
-  config.DefaultProvider.servers.mainnet = [];
+  config.DefaultProvider.servers.mainnet = "";
 });
 
 test("Should get electrum settings from env", async () => {
-  process.env.ELECTRUM = "https://example.com:1234";
+  process.env.ELECTRUM = "wss://example.com:1234";
   process.env.ELECTRUM_TESTNET =
-    "https://test.example.com:1234,https://test.example.dk:1234";
+    "fallback(wss://test.example.com:1234,wss://test.example.dk:1234)";
   process.env.ELECTRUM_REGTEST = "ws://reg.example.com:1234";
-  expect(config.getDefaultServers(Network.MAINNET)).toStrictEqual([
-    "https://example.com:1234",
-  ]);
-  expect(config.getDefaultServers(Network.TESTNET)).toStrictEqual([
-    "https://test.example.com:1234",
-    "https://test.example.dk:1234",
-  ]);
-  expect(config.getDefaultServers(Network.REGTEST)).toStrictEqual([
-    "ws://reg.example.com:1234",
-  ]);
+  expect(config.getDefaultServers(Network.MAINNET)).toBe(
+    "wss://example.com:1234"
+  );
+  expect(config.getDefaultServers(Network.TESTNET)).toBe(
+    "fallback(wss://test.example.com:1234,wss://test.example.dk:1234)"
+  );
+  expect(config.getDefaultServers(Network.REGTEST)).toBe(
+    "ws://reg.example.com:1234"
+  );
 });
 
-test("Should get electrum cluster confidence from defaults", async () => {
-  let c = config.getConfidence();
-  expect(c).toStrictEqual(1);
-});
+test("Should get electrum settings from env, comma separated", async () => {
+  process.env.ELECTRUM = "wss://bch.imaginary.cash:50004,wss://electrum.imaginary.cash:50004";
 
-test("Should get electrum cluster confidence from env", async () => {
-  process.env.ELECTRUM_CONFIDENCE = "2";
-  let c = config.getConfidence();
-  expect(c).toStrictEqual(2);
+  const wallet = await Wallet.newRandom();
+  expect(await wallet.getBalance()).toBe(0n);
+  await wallet.provider!.disconnect();
 });

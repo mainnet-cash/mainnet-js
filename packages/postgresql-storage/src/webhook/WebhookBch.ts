@@ -56,7 +56,6 @@ export class WebhookBch extends Webhook {
   }
 
   async handler(status: string): Promise<void> {
-    // console.debug("Dispatching action for a webhook", this);
     // get transactions
     const history: TxI[] = await this.wallet.provider!.getHistory(
       this.cashaddr

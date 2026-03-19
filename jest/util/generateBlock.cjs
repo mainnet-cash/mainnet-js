@@ -1,31 +1,28 @@
 const { spawnSync } = require("child_process");
-const electron = require("@electrum-cash/network");
-const websocket = require("@electrum-cash/web-socket");
 
 async function getRegtestUtxos(address) {
   try {
-    const webSocket = new websocket.ElectrumWebSocket(
-      "127.0.0.1",
-      60003,
-      false
+    const { webSocket } = await import("@rpckit/websocket/electrum-cash");
+    const { fallback } = await import("@rpckit/fallback");
+
+    // Try both localhost and host.docker.internal for Docker compatibility
+    const transports = ["127.0.0.1", "host.docker.internal"].map((host) =>
+      webSocket(`ws://${host}:60003`)
     );
-    const spv = new electron.ElectrumClient(
-      "Mainnet.Cash Regtest Client",
-      "1.5",
-      webSocket
-    );
+    const transport = fallback(transports);
+
     try {
-      await spv.connect();
+      await transport.connect();
     } catch (e) {
-      spv.disconnect();
+      await transport.close();
       //console.log(e);
       return 0;
     }
-    const response = await spv.request(
+    const response = await transport.request(
       "blockchain.address.listunspent",
       address
     );
-    spv.disconnect();
+    await transport.close();
     return response.length;
   } catch (e) {
     console.log("Error getting block height" + e);

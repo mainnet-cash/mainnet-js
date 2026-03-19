@@ -65,7 +65,7 @@ export interface WalletOptions {
  * Class to manage a bitcoin cash wallet.
  */
 export class Wallet extends WatchWallet {
-  declare readonly provider: ElectrumNetworkProvider;
+  declare provider: ElectrumNetworkProvider;
 
   readonly derivationPath: string = Config.DefaultParentDerivationPath + "/0/0";
   readonly parentDerivationPath: string = Config.DefaultParentDerivationPath;

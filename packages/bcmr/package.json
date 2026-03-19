@@ -14,7 +14,6 @@
   },
   "devDependencies": {},
   "scripts": {
-    "prebuild": "yarn install",
     "build": "yarn build:module && yarn build:browser",
     "build:main": "tsc",
     "build:module": "tsc -p tsconfig.browser.json",

@@ -171,6 +171,7 @@ describe(`Test BCMR support`, () => {
       BCMR.buildAuthChain({
         transactionHash:
           "0000000000000000000000000000000000000000000000000000000000000000",
+        network: Network.REGTEST,
       })
     ).rejects.toThrow("Could not decode transaction");
   });
