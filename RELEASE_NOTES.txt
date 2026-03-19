@@ -1,6 +1,12 @@
 Newest changes
 --------------
 
+4.0.0-next.0
+
+* Replace `electrum-cash` package with `rpckit`. See documentation: https://rpckit.dev
+* Use default request batching of 25 requests max, zero-delay
+* `env.ELECTRUM` in node and `DefaultProvider.servers.mainnet` in browsers now support syntax supported by rpckit's `parse` like `fallback(wss://test.example.com:1234,tcp+tls://test.example.dk:1234)`. See docs: https://rpckit.dev/docs/utilities/parse
+
 3.1.7
 
 * Update electrum-cash library, pass proper configuration to it
