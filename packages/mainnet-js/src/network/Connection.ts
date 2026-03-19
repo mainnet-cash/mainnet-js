@@ -19,7 +19,9 @@ export async function initProvider(network: Network) {
 
 export async function initProviders(networks?: Network[]) {
   networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
-  const results = await Promise.allSettled(networks.map((n) => initProvider(n)));
+  const results = await Promise.allSettled(
+    networks.map((n) => initProvider(n))
+  );
   for (let i = 0; i < results.length; i++) {
     if (results[i].status === "rejected") {
       const { reason } = results[i] as PromiseRejectedResult;

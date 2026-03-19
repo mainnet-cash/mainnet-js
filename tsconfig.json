@@ -48,9 +48,15 @@
     "noEmit": false,
     "skipLibCheck": true,
     "paths": {
-      "@rpckit/core/electrum-cash": ["./node_modules/@rpckit/core/dist/electrum-cash/index.d.ts"],
-      "@rpckit/websocket/electrum-cash": ["./node_modules/@rpckit/websocket/dist/electrum-cash/index.d.ts"],
-      "@rpckit/fallback/electrum-cash": ["./node_modules/@rpckit/fallback/dist/electrum-cash/index.d.ts"]
+      "@rpckit/core/electrum-cash": [
+        "./node_modules/@rpckit/core/dist/electrum-cash/index.d.ts"
+      ],
+      "@rpckit/websocket/electrum-cash": [
+        "./node_modules/@rpckit/websocket/dist/electrum-cash/index.d.ts"
+      ],
+      "@rpckit/fallback/electrum-cash": [
+        "./node_modules/@rpckit/fallback/dist/electrum-cash/index.d.ts"
+      ]
     }
   },
   "include": ["packages/*/src/**/*.ts"],

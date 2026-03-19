@@ -48,7 +48,8 @@ test("Should get electrum settings from env", async () => {
 });
 
 test("Should get electrum settings from env, comma separated", async () => {
-  process.env.ELECTRUM = "wss://bch.imaginary.cash:50004,wss://electrum.imaginary.cash:50004";
+  process.env.ELECTRUM =
+    "wss://bch.imaginary.cash:50004,wss://electrum.imaginary.cash:50004";
 
   const wallet = await Wallet.newRandom();
   expect(await wallet.getBalance()).toBe(0n);

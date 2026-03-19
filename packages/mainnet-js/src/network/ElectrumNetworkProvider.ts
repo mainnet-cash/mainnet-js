@@ -69,7 +69,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   constructor(
     transport: Transport<ElectrumCashSchema>,
-    public network: Network = Network.MAINNET,
+    public network: Network = Network.MAINNET
   ) {
     if (transport) {
       this.transport = transport;
@@ -594,7 +594,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     const unsubscribe: Unsubscribe = await subscribeFn(
       methodName,
       ...parameters,
-      (data: unknown) => { callback(data); }
+      (data: unknown) => {
+        callback(data);
+      }
     );
     this.subscriptions++;
 

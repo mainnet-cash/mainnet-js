@@ -4,7 +4,8 @@ export const networkTickerMap = {
   regtest: "rBCH",
 };
 
-const opts = "connectTimeout=5000&timeout=5000&keepAlive=60000&protocolVersion=1.6&batchSize=25";
+const opts =
+  "connectTimeout=5000&timeout=5000&keepAlive=60000&protocolVersion=1.6&batchSize=25";
 
 export function toParseNotation(urls: string[]): string {
   const withOpts = urls.map((u) => `${u}?${opts}`);
@@ -22,7 +23,7 @@ export const mainnetServers = toParseNotation([
 export const testnetServers = toParseNotation([
   "wss://chipnet.bch.ninja:50004",
   "wss://chipnet.imaginary.cash:50004",
-  "wss://chipnet.c3-soft.com:64004"
+  "wss://chipnet.c3-soft.com:64004",
 ]);
 
 export const regtestServers = toParseNotation([

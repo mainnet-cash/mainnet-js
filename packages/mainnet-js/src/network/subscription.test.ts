@@ -18,7 +18,8 @@ describe("Provider subscription: blockchain.transaction.subscribe", () => {
 
   test("Should receive initial confirmation count for confirmed transaction", async () => {
     // A well-known confirmed BCH transaction
-    const txHash = "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
+    const txHash =
+      "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
 
     const received: Array<[string, number | null]> = [];
     const cancel = await provider.subscribeToTransaction(txHash, (data) => {
@@ -38,7 +39,8 @@ describe("Provider subscription: blockchain.transaction.subscribe", () => {
 
   test("Should receive null for unconfirmed/unknown transaction", async () => {
     // A made-up transaction hash that doesn't exist
-    const fakeTxHash = "0000000000000000000000000000000000000000000000000000000000000000";
+    const fakeTxHash =
+      "0000000000000000000000000000000000000000000000000000000000000000";
 
     const received: Array<[string, number | null]> = [];
     const cancel = await provider.subscribeToTransaction(fakeTxHash, (data) => {
@@ -90,7 +92,8 @@ describe("Provider subscription: blockchain.address.subscribe", () => {
   test("Should receive null status for unused address", async () => {
     // A valid but never-used address (generated from random pubkey hash)
     // Using a standard P2PKH address with unlikely-to-be-used hash
-    const unusedAddress = "bitcoincash:qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy";
+    const unusedAddress =
+      "bitcoincash:qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy";
 
     const received: Array<[string, string | null]> = [];
     const cancel = await provider.subscribeToAddress(unusedAddress, (data) => {
@@ -150,7 +153,8 @@ describe("Raw transport subscription format", () => {
   });
 
   test("blockchain.transaction.subscribe returns [txHash, confirmations] format", async () => {
-    const txHash = "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
+    const txHash =
+      "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
 
     const received: unknown[] = [];
     const unsub: Unsubscribe = await transport.subscribe(
@@ -242,7 +246,8 @@ describe("Wallet waitForTransaction with specific txHash", () => {
 
   test("Should resolve immediately for confirmed transaction", async () => {
     // A well-known confirmed BCH transaction
-    const txHash = "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
+    const txHash =
+      "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
 
     // waitForTransaction with a specific txHash should resolve when confirmations > 0
     const result = await Promise.race([

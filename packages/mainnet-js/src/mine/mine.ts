@@ -21,9 +21,7 @@ export const mine = async ({
 }): Promise<any> => {
   const auth =
     "Basic " +
-    binToBase64(
-      utf8ToBin(`${process.env.RPC_USER}:${process.env.RPC_PASS}`)
-    );
+    binToBase64(utf8ToBin(`${process.env.RPC_USER}:${process.env.RPC_PASS}`));
 
   const transports = ["127.0.0.1", "host.docker.internal"].map((host) =>
     http(`http://${host}:${process.env.RPC_PORT}/`, {
