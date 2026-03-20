@@ -529,41 +529,25 @@ export class HDWallet extends BaseWallet {
 
     if (isSatisfied()) return;
 
-    return new Promise(async (resolve) => {
-      let timer: ReturnType<typeof setTimeout>;
-      let resolved = false;
-      let watchCancel: CancelFn;
-
-      const done = async () => {
-        if (resolved) return;
-        resolved = true;
-        clearTimeout(timer);
-        await watchCancel?.();
-        resolve();
-      };
-
-      const resetTimer = () => {
-        clearTimeout(timer);
-        timer = setTimeout(done, timeout);
-      };
-
-      // Uses default 100ms debounce — callback only fires after 100ms of
-      // quiet, meaning the cascade has settled before we check the condition.
-      watchCancel = await this.watchStatus(async () => {
-        if (isSatisfied()) {
-          await done();
-        } else {
-          resetTimer(); // cascade settled but target not met — wait for more activity
-        }
-      });
-
-      // Re-check + start initial idle timer after subscription
-      if (isSatisfied()) {
-        await done();
-      } else {
-        resetTimer();
-      }
+    // Single watcher that resolves a rotating promise on each status change
+    let statusResolve: () => void;
+    const cancel = await this.watchStatus(() => {
+      statusResolve?.();
     });
+
+    // Race status changes against idle timeout; reset timeout on each change
+    while (!isSatisfied()) {
+      const statusChange = new Promise<"status">((resolve) => {
+        statusResolve = () => resolve("status");
+      });
+      const idle = new Promise<"idle">((resolve) =>
+        setTimeout(resolve, timeout, "idle")
+      );
+
+      if ((await Promise.race([statusChange, idle])) === "idle") break;
+    }
+
+    await cancel();
   }
 
   /**

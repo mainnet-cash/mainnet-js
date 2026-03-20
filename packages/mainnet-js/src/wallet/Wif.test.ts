@@ -630,6 +630,7 @@ describe(`Wallet subscriptions`, () => {
       { awaitTransactionPropagation: true }
     );
 
+    await aliceWallet.waitForUpdate();
     newBalance = await aliceWallet.getBalance();
     expect(balance).toBeGreaterThan(newBalance);
   });

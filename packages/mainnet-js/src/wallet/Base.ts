@@ -486,6 +486,12 @@ export class BaseWallet implements WalletI {
   // waits for address balance to be greater than or equal to the target value
   // this call halts the execution
   public async waitForBalance(value: bigint): Promise<bigint> {
+    // Check if condition is already met before watching
+    const currentBalance = await this.getBalance();
+    if (currentBalance >= value) {
+      return currentBalance;
+    }
+
     return new Promise(async (resolve) => {
       let watchCancel: CancelFn;
       watchCancel = await this.watchBalance(async (balance: bigint) => {
@@ -515,6 +521,12 @@ export class BaseWallet implements WalletI {
     category: string,
     amount: bigint
   ): Promise<bigint> {
+    // Check if condition is already met before watching
+    const currentBalance = await this.getTokenBalance(category);
+    if (currentBalance >= amount) {
+      return currentBalance;
+    }
+
     return new Promise(async (resolve) => {
       let watchCancel: CancelFn;
       watchCancel = await this.watchTokenBalance(
@@ -1107,15 +1119,9 @@ export class BaseWallet implements WalletI {
 
       // waiting for any address transaction
       let watchCancel: CancelFn;
-      let initialResponseSeen = false;
       watchCancel = await this.watchStatus(async (_status) => {
-        if (initialResponseSeen) {
-          await watchCancel?.();
-          resolve(makeResponse());
-          return;
-        }
-
-        initialResponseSeen = true;
+        await watchCancel?.();
+        resolve(makeResponse());
       });
     });
   }

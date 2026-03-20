@@ -70,17 +70,18 @@ describe("Rpc tests", () => {
 
   test("Watch wallet balance", async () => {
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
+    const bobWallet = await RegTestWallet.newRandom();
 
     let result = false;
-    aliceWallet.watchBalance((balance) => {
+    const cancel = await aliceWallet.watchBalance((balance) => {
       expect(balance).toBeGreaterThan(0);
       result = true;
-      // stop watching
-      return true;
     });
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // we do not trigger the callback upon subscription anymore
+    // Trigger a real status change on Alice's address
+    await aliceWallet.send([{ cashaddr: bobWallet.cashaddr!, value: 1000n }]);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     expect(result).toBe(true);
+    await cancel();
   });
 
   test("Wait for block timeout", async () => {

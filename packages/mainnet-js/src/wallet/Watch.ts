@@ -19,12 +19,12 @@ import { WalletTypeEnum } from "./enum.js";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
 import { TxI, Utxo } from "../interface.js";
 import { derivePrefix } from "../util/derivePublicKeyHash.js";
-import { SignedMessage } from "../message/signed.js";
 import { VerifyMessageResponseI } from "../message/interface.js";
 import { TransactionHistoryItem } from "../history/interface.js";
 import { getHistory } from "../history/getHistory.js";
-import { WalletInfoI } from "./interface.js";
+import { CancelFn, WalletInfoI } from "./interface.js";
 import { toCashaddr, toTokenaddr } from "../util/deriveCashaddr.js";
+import { sumUtxoValue } from "../util/sumUtxoValue.js";
 
 export interface WatchWalletOptions {
   name?: string;
@@ -46,6 +46,18 @@ export class WatchWallet extends BaseWallet {
 
   static networkPrefix = CashAddressNetworkPrefix.mainnet;
   static walletType = WalletTypeEnum.Watch;
+
+  // Subscription-first infrastructure: single subscription shared by all watchers
+  private watchCallbacks: Array<
+    (status: string | null, address: string) => void
+  > = [];
+  private baseCancelFn?: CancelFn;
+  watchPromise?: Promise<void>;
+
+  // Prefetched data, updated on every status change
+  private utxos: Utxo[] = [];
+  private rawHistory: TxI[] = [];
+  private lastConfirmedHeight: number = 0;
 
   constructor(
     name = "",
@@ -141,7 +153,120 @@ export class WatchWallet extends BaseWallet {
 
     this.name = name;
 
+    // Start subscription immediately (subscription-first approach)
+    this.watchPromise = this.makeWatchPromise().catch(() => {});
+
     return this;
+  }
+
+  /// Subscribe to the single address for status change notifications
+  private async makeWatchPromise(): Promise<void> {
+    const addr = this.cashaddr;
+    let initialAck = false;
+
+    return new Promise<void>(async (resolve) => {
+      this.baseCancelFn = await this.provider.subscribeToAddress(
+        addr,
+        async (args: [address: string, status: string | null]) => {
+          const [address, status] = args;
+          if (address !== addr) return;
+
+          if (!initialAck) {
+            // First callback is the subscription acknowledgement
+            // Prefetch data with the initial state, then resolve
+            initialAck = true;
+            await this.prefetchData();
+            resolve();
+            return;
+          }
+
+          // Subsequent callbacks are real status changes
+          // Prefetch data before notifying watchers so callbacks see fresh data
+          await this.prefetchData();
+          this.notifyWatchCallbacks(status, addr);
+        }
+      );
+    });
+  }
+
+  private async prefetchData(): Promise<void> {
+    const addr = this.cashaddr;
+    const fromHeight = this.lastConfirmedHeight;
+    const currentHistory = this.rawHistory;
+
+    const [utxos, newHistory] = await Promise.all([
+      this.provider.getUtxos(addr),
+      this.provider.getHistory(addr, fromHeight),
+    ]);
+
+    // Merge: keep confirmed items below fromHeight, add new items
+    const confirmedFromHistory = currentHistory.filter(
+      (tx) => tx.height > 0 && tx.height < fromHeight
+    );
+    const seen = new Set(confirmedFromHistory.map((tx) => tx.tx_hash));
+    const merged = [...confirmedFromHistory];
+    for (const tx of newHistory) {
+      if (!seen.has(tx.tx_hash)) {
+        seen.add(tx.tx_hash);
+        merged.push(tx);
+      }
+    }
+
+    this.lastConfirmedHeight = merged.reduce(
+      (max, tx) => (tx.height > 0 ? Math.max(max, tx.height) : max),
+      fromHeight
+    );
+
+    this.utxos = utxos;
+    this.rawHistory = merged;
+  }
+
+  private notifyWatchCallbacks(status: string | null, address: string) {
+    for (const callback of this.watchCallbacks) {
+      try {
+        callback(status, address);
+      } catch (_e) {
+        // Ignore callback errors to not break other watchers
+      }
+    }
+  }
+
+  public override async watchStatus(
+    callback: (status: string | null, address: string) => void
+  ): Promise<CancelFn> {
+    await this.watchPromise;
+
+    this.watchCallbacks.push(callback);
+
+    return async () => {
+      const index = this.watchCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.watchCallbacks.splice(index, 1);
+      }
+    };
+  }
+
+  public override async waitForUpdate(
+    options: { timeout?: number } = {}
+  ): Promise<void> {
+    const timeout = options.timeout ?? 100;
+
+    let cancel: CancelFn;
+    const statusChange = new Promise<void>(async (resolve) => {
+      cancel = await this.watchStatus(() => resolve());
+    });
+
+    const timer = new Promise<void>((resolve) => setTimeout(resolve, timeout));
+
+    await Promise.race([statusChange, timer]);
+    await cancel!();
+  }
+
+  public override async stop() {
+    await super.stop();
+    await this.baseCancelFn?.();
+    this.baseCancelFn = undefined;
+    this.watchCallbacks = [];
   }
 
   /**
@@ -227,16 +352,17 @@ export class WatchWallet extends BaseWallet {
    *
    */
   public async getUtxos(): Promise<Utxo[]> {
-    const bchUtxos: Utxo[] = await this.provider.getUtxos(this.cashaddr);
+    await this.watchPromise;
     return this._slpSemiAware
-      ? bchUtxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
-      : bchUtxos;
+      ? this.utxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
+      : this.utxos;
   }
 
   // Gets balance by summing value in all utxos in sats
   // Balance includes DUST utxos which could be slp tokens and also cashtokens with BCH amounts
   public async getBalance(): Promise<bigint> {
-    return this.provider.getBalance(this.cashaddr);
+    await this.watchPromise;
+    return sumUtxoValue(this.utxos);
   }
 
   // gets transaction history of this wallet
@@ -244,7 +370,22 @@ export class WatchWallet extends BaseWallet {
     fromHeight: number = 0,
     toHeight: number = -1
   ): Promise<TxI[]> {
-    return await this.provider.getHistory(this.cashaddr, fromHeight, toHeight);
+    await this.watchPromise;
+
+    let history = this.rawHistory;
+
+    if (fromHeight > 0 || toHeight !== -1) {
+      history = history.filter((tx) => {
+        if (tx.height <= 0) {
+          return toHeight === -1;
+        }
+        const aboveFrom = tx.height >= fromHeight;
+        const belowTo = toHeight === -1 || tx.height <= toHeight;
+        return aboveFrom && belowTo;
+      });
+    }
+
+    return history;
   }
 
   /**
