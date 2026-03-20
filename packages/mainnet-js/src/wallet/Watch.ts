@@ -6,6 +6,8 @@ import {
   encodeCashAddress,
   assertSuccess,
   hash160,
+  sha256,
+  utf8ToBin,
   decodeCashAddressFormatWithoutPrefix,
 } from "@bitauth/libauth";
 import {
@@ -25,6 +27,11 @@ import { getHistory } from "../history/getHistory.js";
 import { CancelFn, WalletInfoI } from "./interface.js";
 import { toCashaddr, toTokenaddr } from "../util/deriveCashaddr.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
+import {
+  SingleAddressWalletCache,
+  WalletCacheEntry,
+  WalletCacheI,
+} from "../cache/walletCache.js";
 
 export interface WatchWalletOptions {
   name?: string;
@@ -38,6 +45,7 @@ export interface WatchWalletOptions {
  * Class to manage a mainnet watch wallet.
  */
 export class WatchWallet extends BaseWallet {
+  declare readonly walletCache: WalletCacheI;
   readonly publicKeyCompressed?: Uint8Array;
   readonly publicKey?: Uint8Array;
   readonly publicKeyHash!: Uint8Array;
@@ -53,11 +61,6 @@ export class WatchWallet extends BaseWallet {
   > = [];
   private baseCancelFn?: CancelFn;
   watchPromise?: Promise<void>;
-
-  // Prefetched data, updated on every status change
-  private utxos: Utxo[] = [];
-  private rawHistory: TxI[] = [];
-  private lastConfirmedHeight: number = 0;
 
   constructor(
     name = "",
@@ -153,10 +156,36 @@ export class WatchWallet extends BaseWallet {
 
     this.name = name;
 
+    // Initialize persistent cache before starting subscription
+    await this.initWalletCache();
+
     // Start subscription immediately (subscription-first approach)
     this.watchPromise = this.makeWatchPromise().catch(() => {});
 
     return this;
+  }
+
+  protected deriveWalletId(): string {
+    return binToHex(sha256.hash(utf8ToBin(`${this.cashaddr}-${this.network}`)));
+  }
+
+  protected async initWalletCache(): Promise<void> {
+    const cache = new SingleAddressWalletCache(
+      this.deriveWalletId(),
+      this.cashaddr,
+      this.tokenaddr
+    );
+    await cache.init();
+    const wallet = this as any;
+    if (wallet.privateKey) {
+      cache.get(this.cashaddr)!.privateKey = wallet.privateKey;
+    }
+    // @ts-ignore
+    this.walletCache = cache;
+  }
+
+  protected getCacheEntry(): WalletCacheEntry {
+    return this.walletCache.get(this.cashaddr)!;
   }
 
   /// Subscribe to the single address for status change notifications
@@ -172,27 +201,28 @@ export class WatchWallet extends BaseWallet {
           if (address !== addr) return;
 
           if (!initialAck) {
-            // First callback is the subscription acknowledgement
-            // Prefetch data with the initial state, then resolve
             initialAck = true;
-            await this.prefetchData();
+            // Skip fetch if cached status matches (nothing changed since last session)
+            if (status !== this.getCacheEntry().status) {
+              await this.fetchData(status);
+            }
             resolve();
             return;
           }
 
           // Subsequent callbacks are real status changes
-          // Prefetch data before notifying watchers so callbacks see fresh data
-          await this.prefetchData();
+          // Fetch data before notifying watchers so callbacks see fresh data
+          await this.fetchData(status);
           this.notifyWatchCallbacks(status, addr);
         }
       );
     });
   }
 
-  private async prefetchData(): Promise<void> {
+  private async fetchData(status: string | null): Promise<void> {
     const addr = this.cashaddr;
-    const fromHeight = this.lastConfirmedHeight;
-    const currentHistory = this.rawHistory;
+    const entry = this.getCacheEntry();
+    const fromHeight = entry.lastConfirmedHeight;
 
     const [utxos, newHistory] = await Promise.all([
       this.provider.getUtxos(addr),
@@ -200,7 +230,7 @@ export class WatchWallet extends BaseWallet {
     ]);
 
     // Merge: keep confirmed items below fromHeight, add new items
-    const confirmedFromHistory = currentHistory.filter(
+    const confirmedFromHistory = entry.rawHistory.filter(
       (tx) => tx.height > 0 && tx.height < fromHeight
     );
     const seen = new Set(confirmedFromHistory.map((tx) => tx.tx_hash));
@@ -212,13 +242,18 @@ export class WatchWallet extends BaseWallet {
       }
     }
 
-    this.lastConfirmedHeight = merged.reduce(
+    const lastConfirmedHeight = merged.reduce(
       (max, tx) => (tx.height > 0 ? Math.max(max, tx.height) : max),
       fromHeight
     );
 
-    this.utxos = utxos;
-    this.rawHistory = merged;
+    this.walletCache.setStatusAndUtxos(
+      addr,
+      status,
+      utxos,
+      merged,
+      lastConfirmedHeight
+    );
   }
 
   private notifyWatchCallbacks(status: string | null, address: string) {
@@ -353,16 +388,17 @@ export class WatchWallet extends BaseWallet {
    */
   public async getUtxos(): Promise<Utxo[]> {
     await this.watchPromise;
+    const { utxos } = this.getCacheEntry();
     return this._slpSemiAware
-      ? this.utxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
-      : this.utxos;
+      ? utxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
+      : utxos;
   }
 
   // Gets balance by summing value in all utxos in sats
   // Balance includes DUST utxos which could be slp tokens and also cashtokens with BCH amounts
   public async getBalance(): Promise<bigint> {
     await this.watchPromise;
-    return sumUtxoValue(this.utxos);
+    return sumUtxoValue(this.getCacheEntry().utxos);
   }
 
   // gets transaction history of this wallet
@@ -372,7 +408,7 @@ export class WatchWallet extends BaseWallet {
   ): Promise<TxI[]> {
     await this.watchPromise;
 
-    let history = this.rawHistory;
+    let history = this.getCacheEntry().rawHistory;
 
     if (fromHeight > 0 || toHeight !== -1) {
       history = history.filter((tx) => {

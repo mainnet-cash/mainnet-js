@@ -35,11 +35,15 @@ describe("Wallet cache initialization", () => {
     await wallet.stop();
   });
 
-  test("Watch wallet should have empty walletCache", async () => {
+  test("Watch wallet should have walletCache without private key", async () => {
     const wallet = await RegTestWatchWallet.watchOnly(
       "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
     );
     expect(wallet.walletCache).toBeDefined();
-    expect(wallet.walletCache!.get(wallet.cashaddr)).toBeUndefined();
+    expect(wallet.walletCache!.get(wallet.cashaddr)).toBeDefined();
+    expect(
+      wallet.walletCache!.get(wallet.cashaddr)!.privateKey
+    ).toBeUndefined();
+    await wallet.stop();
   });
 });

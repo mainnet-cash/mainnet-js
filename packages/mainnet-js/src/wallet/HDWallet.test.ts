@@ -389,7 +389,7 @@ describe("HDWallet", () => {
     hdWallet.getChangeAddress(100);
 
     // persist cache
-    await hdWallet.walletCache.persist();
+    await hdWallet.walletCache.persist(true);
 
     // check cache data is there in other instance
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
@@ -458,7 +458,7 @@ describe("HDWallet", () => {
     ).toBe(1);
 
     // persist cache
-    await hdWallet.walletCache.persist();
+    await hdWallet.walletCache.persist(true);
 
     // check cache data is there in other instance
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
@@ -507,7 +507,7 @@ describe("HDWallet", () => {
     ).toBe(1);
 
     // persist cache
-    await hdWallet.walletCache.persist();
+    await hdWallet.walletCache.persist(true);
 
     // check cache data is there in other instance
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
@@ -620,7 +620,7 @@ describe("HDWallet", () => {
     expect(rawHistory.length).toBe(2);
 
     // Persist and reload - cache should be preserved
-    await hdWallet.walletCache.persist();
+    await hdWallet.walletCache.persist(true);
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
     await otherWallet.watchPromise;
 

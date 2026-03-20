@@ -892,6 +892,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       cashaddr: charlieWallet.cashaddr!,
       value: DUST,
     });
+    await charlieWallet.waitForUpdate();
     expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
@@ -912,6 +913,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       cashaddr: charlieWallet.cashaddr!,
       value: DUST,
     });
+    await charlieWallet.waitForUpdate();
     expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
@@ -929,6 +931,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     ]);
 
     await bobWallet.send([{ cashaddr: charlieWallet.cashaddr!, value: DUST }]);
+    await charlieWallet.waitForUpdate();
     expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
@@ -946,6 +949,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     ]);
 
     await bobWallet.send([{ cashaddr: charlieWallet.cashaddr!, value: DUST }]);
+    await charlieWallet.waitForUpdate();
     expect(await charlieWallet.getBalance()).toBe(DUST);
   });
 
@@ -961,6 +965,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     ]);
 
     await bobWallet.send([{ cashaddr: charlieWallet.cashaddr!, value: DUST }]);
+    await charlieWallet.waitForUpdate();
     expect(await charlieWallet.getBalance()).toBe(DUST);
   });
   test(`Should throw error with dust amounts (${

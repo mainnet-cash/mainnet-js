@@ -58,7 +58,7 @@ export interface WalletCache {
 // Full interface for wallet cache management
 export interface WalletCacheI extends WalletCache {
   init(): Promise<void>;
-  persist(): Promise<void>;
+  persist(immediate?: boolean): Promise<void>;
   get(address: string): WalletCacheEntry | undefined;
   getByIndex(addressIndex: number, change: boolean): WalletCacheEntry;
   setStatusAndUtxos(
@@ -70,7 +70,104 @@ export interface WalletCacheI extends WalletCache {
   ): void;
 }
 
-export class PersistentWalletCache implements WalletCacheI {
+function getStorage(): CacheProvider | undefined {
+  if (Config.UseMemoryCache) return new MemoryCache();
+  if (Config.UseLocalStorageCache) return new WebStorageCache();
+  if (Config.UseIndexedDBCache) return new IndexedDbCache("WalletCache");
+  return undefined;
+}
+
+/// Cache for single-address wallets (WatchWallet, Wif)
+export class SingleAddressWalletCache implements WalletCacheI {
+  private entry: WalletCacheEntry;
+  private _storage: CacheProvider | undefined;
+  private debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+  constructor(
+    public walletId: string,
+    address: string,
+    tokenAddress: string,
+    public writeTimeout: number = 2000
+  ) {
+    this.entry = {
+      address,
+      tokenAddress,
+      privateKey: undefined,
+      publicKey: new Uint8Array(),
+      publicKeyHash: new Uint8Array(),
+      index: 0,
+      change: false,
+      status: null,
+      utxos: [],
+      rawHistory: [],
+      lastConfirmedHeight: 0,
+    };
+  }
+
+  public async init() {
+    this._storage = getStorage();
+    await this._storage?.init();
+    const data = await this._storage?.getItem(`walletCache-${this.walletId}`);
+    if (data) {
+      try {
+        const parsed = parse(data);
+        // Restore persisted fields, keep address identity from constructor
+        const addr = this.entry.address;
+        const tokenAddr = this.entry.tokenAddress;
+        Object.assign(this.entry, parsed, {
+          address: addr,
+          tokenAddress: tokenAddr,
+        });
+      } catch (_e) {
+        // ignore
+      }
+    }
+  }
+
+  public async persist(immediate = false) {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    if (immediate) {
+      this.debounceTimer = undefined;
+      await this._storage?.setItem(
+        `walletCache-${this.walletId}`,
+        stringify(this.entry)
+      );
+    } else {
+      this.debounceTimer = setTimeout(() => {
+        this.debounceTimer = undefined;
+        this._storage?.setItem(
+          `walletCache-${this.walletId}`,
+          stringify(this.entry)
+        );
+      }, this.writeTimeout);
+    }
+  }
+
+  public get(address: string) {
+    return address === this.entry.address ? this.entry : undefined;
+  }
+
+  public getByIndex(_index: number, _change: boolean) {
+    return this.entry;
+  }
+
+  public setStatusAndUtxos(
+    address: string,
+    status: string | null,
+    utxos: Utxo[],
+    rawHistory: TxI[],
+    lastConfirmedHeight: number
+  ) {
+    if (address !== this.entry.address) return;
+    this.entry.status = status;
+    this.entry.utxos = utxos;
+    this.entry.rawHistory = rawHistory;
+    this.entry.lastConfirmedHeight = lastConfirmedHeight;
+    this.persist();
+  }
+}
+
+export class HDWalletCache implements WalletCacheI {
   private _storage: CacheProvider | undefined;
   private walletCache: Record<string, WalletCacheEntry> = {};
   private indexCache: Record<
@@ -81,40 +178,6 @@ export class PersistentWalletCache implements WalletCacheI {
     }
   > = {};
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-  get storage(): CacheProvider | undefined {
-    if (
-      !Config.UseMemoryCache &&
-      !Config.UseLocalStorageCache &&
-      !Config.UseIndexedDBCache
-    ) {
-      this._storage = undefined;
-      return this._storage;
-    }
-
-    if (Config.UseMemoryCache && !(this._storage instanceof MemoryCache)) {
-      this._storage = new MemoryCache();
-      return this._storage;
-    }
-
-    if (
-      Config.UseLocalStorageCache &&
-      !(this._storage instanceof WebStorageCache)
-    ) {
-      this._storage = new WebStorageCache();
-      return this._storage;
-    }
-
-    if (
-      Config.UseIndexedDBCache &&
-      !(this._storage instanceof IndexedDbCache)
-    ) {
-      this._storage = new IndexedDbCache("WalletCache");
-      return this._storage;
-    }
-
-    return this._storage;
-  }
 
   constructor(
     public walletId: string,
@@ -128,8 +191,9 @@ export class PersistentWalletCache implements WalletCacheI {
   }
 
   public async init() {
-    await this.storage?.init();
-    const data = await this.storage?.getItem(`walletCache-${this.walletId}`);
+    this._storage = getStorage();
+    await this._storage?.init();
+    const data = await this._storage?.getItem(`walletCache-${this.walletId}`);
     if (data) {
       try {
         const parsed = parse(data);
@@ -141,24 +205,25 @@ export class PersistentWalletCache implements WalletCacheI {
     }
   }
 
-  private schedulePersist() {
+  public async persist(immediate = false) {
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => {
-      this.persist().catch(() => {});
-    }, this.writeTimeout);
-  }
-
-  public async persist() {
-    if (this.debounceTimer) clearTimeout(this.debounceTimer);
-    this.debounceTimer = undefined;
-
-    this.storage?.setItem(
-      `walletCache-${this.walletId}`,
-      stringify({
-        walletCache: this.walletCache,
-        indexCache: this.indexCache,
-      })
-    );
+    const write = () =>
+      this._storage?.setItem(
+        `walletCache-${this.walletId}`,
+        stringify({
+          walletCache: this.walletCache,
+          indexCache: this.indexCache,
+        })
+      );
+    if (immediate) {
+      this.debounceTimer = undefined;
+      await write();
+    } else {
+      this.debounceTimer = setTimeout(() => {
+        this.debounceTimer = undefined;
+        write();
+      }, this.writeTimeout);
+    }
   }
 
   public getByIndex(addressIndex: number, change: boolean) {
@@ -212,7 +277,7 @@ export class PersistentWalletCache implements WalletCacheI {
         change,
       };
 
-      this.schedulePersist();
+      this.persist();
     }
 
     return this.walletCache[id];
@@ -249,6 +314,6 @@ export class PersistentWalletCache implements WalletCacheI {
     this.walletCache[key].rawHistory = rawHistory;
     this.walletCache[key].lastConfirmedHeight = lastConfirmedHeight;
 
-    this.schedulePersist();
+    this.persist();
   }
 }

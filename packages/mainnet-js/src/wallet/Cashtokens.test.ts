@@ -1222,6 +1222,7 @@ describe(`Test cashtokens`, () => {
         sourceOutputs!
       );
       await aliceWallet.submitTransaction(signed);
+      await aliceWallet.waitForUpdate();
 
       category = categories![0];
 
