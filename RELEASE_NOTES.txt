@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+4.0.0-next.2
+
+* Rework single-address wallets to use subscriptions instead of requests for status, utxos and history
+* Use wallet cache for single-address wallets for warm startups
+
 4.0.0-next.0
 
 * Replace `electrum-cash` package with `rpckit`. See documentation: https://rpckit.dev
