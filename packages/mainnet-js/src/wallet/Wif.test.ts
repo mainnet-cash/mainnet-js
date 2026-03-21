@@ -630,7 +630,6 @@ describe(`Wallet subscriptions`, () => {
       { awaitTransactionPropagation: true }
     );
 
-    await aliceWallet.waitForUpdate();
     newBalance = await aliceWallet.getBalance();
     expect(balance).toBeGreaterThan(newBalance);
   });
@@ -1039,6 +1038,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       { cashaddr: bob.getDepositAddress(), value: 546n },
       { cashaddr: bob.getDepositAddress(), value: 1000n },
     ]);
+    await bob.waitForUpdate();
     expect(sumUtxoValue(await bob.getUtxos())).toBe(1546n);
     bob.slpSemiAware();
     expect(sumUtxoValue(await bob.getUtxos())).toBe(1000n);

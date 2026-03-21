@@ -934,6 +934,7 @@ describe(`Test cashtokens`, () => {
 
     // prepare inputs for two token geneses
     await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+    await bob.waitForUpdate();
 
     const genesisResponse = await bob.tokenGenesis({
       nft: {
@@ -1221,8 +1222,13 @@ describe(`Test cashtokens`, () => {
         unsignedTransaction!,
         sourceOutputs!
       );
+      const statusChanged = aliceWallet.waitForUpdate({ timeout: 10000 });
+      const watchStatusChanged = aliceWatchWallet.waitForUpdate({
+        timeout: 10000,
+      });
       await aliceWallet.submitTransaction(signed);
-      await aliceWallet.waitForUpdate();
+      await statusChanged;
+      await watchStatusChanged;
 
       category = categories![0];
 
@@ -1270,7 +1276,13 @@ describe(`Test cashtokens`, () => {
         unsignedTransaction!,
         sourceOutputs!
       );
+      const statusChanged2 = aliceWallet.waitForUpdate({ timeout: 10000 });
+      const watchStatusChanged2 = aliceWatchWallet.waitForUpdate({
+        timeout: 10000,
+      });
       await aliceWallet.submitTransaction(signed);
+      await statusChanged2;
+      await watchStatusChanged2;
 
       expect(await aliceWallet.getNftTokenBalance(category)).toBe(2);
       const tokenUtxos = await aliceWallet.getTokenUtxos(category);

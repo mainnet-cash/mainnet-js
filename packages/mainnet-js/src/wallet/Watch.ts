@@ -61,6 +61,13 @@ export class WatchWallet extends BaseWallet {
   > = [];
   private baseCancelFn?: CancelFn;
   watchPromise?: Promise<void>;
+  updatePromise?: Promise<void>;
+
+  // Live state — updated by subscription notifications
+  private status: string | null = null;
+  private utxos: Utxo[] = [];
+  private rawHistory: TxI[] = [];
+  private lastConfirmedHeight: number = 0;
 
   constructor(
     name = "",
@@ -156,8 +163,13 @@ export class WatchWallet extends BaseWallet {
 
     this.name = name;
 
-    // Initialize persistent cache before starting subscription
+    // Initialize persistent cache and load saved state
     await this.initWalletCache();
+    const cached = this.getCacheEntry();
+    this.status = cached.status;
+    this.utxos = cached.utxos;
+    this.rawHistory = cached.rawHistory;
+    this.lastConfirmedHeight = cached.lastConfirmedHeight;
 
     // Start subscription immediately (subscription-first approach)
     this.watchPromise = this.makeWatchPromise().catch(() => {});
@@ -191,7 +203,7 @@ export class WatchWallet extends BaseWallet {
   /// Subscribe to the single address for status change notifications
   private async makeWatchPromise(): Promise<void> {
     const addr = this.cashaddr;
-    let initialAck = false;
+    let resolved = false;
 
     return new Promise<void>(async (resolve) => {
       this.baseCancelFn = await this.provider.subscribeToAddress(
@@ -200,20 +212,16 @@ export class WatchWallet extends BaseWallet {
           const [address, status] = args;
           if (address !== addr) return;
 
-          if (!initialAck) {
-            initialAck = true;
-            // Skip fetch if cached status matches (nothing changed since last session)
-            if (status !== this.getCacheEntry().status) {
-              await this.fetchData(status);
-            }
-            resolve();
-            return;
+          if (status !== null && status !== this.status) {
+            this.updatePromise = this.fetchData(status);
           }
-
-          // Subsequent callbacks are real status changes
-          // Fetch data before notifying watchers so callbacks see fresh data
-          await this.fetchData(status);
+          this.status = status;
           this.notifyWatchCallbacks(status, addr);
+
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
         }
       );
     });
@@ -221,8 +229,7 @@ export class WatchWallet extends BaseWallet {
 
   private async fetchData(status: string | null): Promise<void> {
     const addr = this.cashaddr;
-    const entry = this.getCacheEntry();
-    const fromHeight = entry.lastConfirmedHeight;
+    const fromHeight = this.lastConfirmedHeight;
 
     const [utxos, newHistory] = await Promise.all([
       this.provider.getUtxos(addr),
@@ -230,7 +237,7 @@ export class WatchWallet extends BaseWallet {
     ]);
 
     // Merge: keep confirmed items below fromHeight, add new items
-    const confirmedFromHistory = entry.rawHistory.filter(
+    const confirmedFromHistory = this.rawHistory.filter(
       (tx) => tx.height > 0 && tx.height < fromHeight
     );
     const seen = new Set(confirmedFromHistory.map((tx) => tx.tx_hash));
@@ -242,17 +249,22 @@ export class WatchWallet extends BaseWallet {
       }
     }
 
-    const lastConfirmedHeight = merged.reduce(
+    this.lastConfirmedHeight = merged.reduce(
       (max, tx) => (tx.height > 0 ? Math.max(max, tx.height) : max),
       fromHeight
     );
 
+    // Update live state
+    this.utxos = utxos;
+    this.rawHistory = merged;
+
+    // Persist to cache
     this.walletCache.setStatusAndUtxos(
       addr,
       status,
       utxos,
       merged,
-      lastConfirmedHeight
+      this.lastConfirmedHeight
     );
   }
 
@@ -388,17 +400,19 @@ export class WatchWallet extends BaseWallet {
    */
   public async getUtxos(): Promise<Utxo[]> {
     await this.watchPromise;
-    const { utxos } = this.getCacheEntry();
+    await this.updatePromise;
+
     return this._slpSemiAware
-      ? utxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
-      : utxos;
+      ? this.utxos.filter((u) => u.satoshis > DUST_UTXO_THRESHOLD)
+      : this.utxos;
   }
 
   // Gets balance by summing value in all utxos in sats
   // Balance includes DUST utxos which could be slp tokens and also cashtokens with BCH amounts
   public async getBalance(): Promise<bigint> {
     await this.watchPromise;
-    return sumUtxoValue(this.getCacheEntry().utxos);
+    await this.updatePromise;
+    return sumUtxoValue(this.utxos);
   }
 
   // gets transaction history of this wallet
@@ -407,8 +421,9 @@ export class WatchWallet extends BaseWallet {
     toHeight: number = -1
   ): Promise<TxI[]> {
     await this.watchPromise;
+    await this.updatePromise;
 
-    let history = this.getCacheEntry().rawHistory;
+    let history = this.rawHistory;
 
     if (fromHeight > 0 || toHeight !== -1) {
       history = history.filter((tx) => {

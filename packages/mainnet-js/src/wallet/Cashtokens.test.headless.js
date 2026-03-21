@@ -601,6 +601,8 @@ describe(`Wallet should function in the browser`, () => {
           sourceOutputs
         );
         await aliceWallet.submitTransaction(signed);
+        await aliceWallet.waitForUpdate();
+        await aliceWatchWallet.waitForUpdate();
 
         category = categories[0];
 
@@ -653,6 +655,8 @@ describe(`Wallet should function in the browser`, () => {
           sourceOutputs
         );
         await aliceWallet.submitTransaction(signed);
+        await aliceWallet.waitForUpdate();
+        await aliceWatchWallet.waitForUpdate();
 
         expect(await aliceWallet.getNftTokenBalance(category)).toBe(2);
         const tokenUtxos = await aliceWallet.getTokenUtxos(category);
@@ -711,6 +715,8 @@ describe(`Wallet should function in the browser`, () => {
           sourceOutputs
         );
         await aliceWallet.submitTransaction(signed);
+        await aliceWallet.waitForUpdate();
+
         expect(await aliceWallet.getNftTokenBalance(category)).toBe(2);
         const tokenUtxos = await aliceWallet.getTokenUtxos(category);
         expect(tokenUtxos.length).toBe(2);

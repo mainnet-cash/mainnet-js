@@ -38,10 +38,10 @@
   },
   "dependencies": {
     "@bitauth/libauth": "^3.1.0-next.8",
-    "@rpckit/core": "^1.0.1",
-    "@rpckit/fallback": "^1.0.1",
-    "@rpckit/http": "^1.0.1",
-    "@rpckit/websocket": "^1.0.1"
+    "@rpckit/core": "^1.0.3",
+    "@rpckit/fallback": "^1.0.3",
+    "@rpckit/http": "^1.0.3",
+    "@rpckit/websocket": "^1.0.3"
   },
   "optionalDependencies": {
     "dotenv": "^10.0.0"

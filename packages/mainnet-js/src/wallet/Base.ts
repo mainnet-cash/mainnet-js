@@ -713,11 +713,19 @@ export class BaseWallet implements WalletI {
     resp.categories = categories;
 
     if (options?.buildUnsigned !== true) {
-      const txId = await this.submitTransaction(
-        encodedTransaction,
+      const awaitPropagation =
         options?.awaitTransactionPropagation === undefined ||
-          options?.awaitTransactionPropagation === true
-      );
+        options?.awaitTransactionPropagation === true;
+
+      let updatePromise: Promise<void>;
+      if (awaitPropagation) {
+        updatePromise = this.waitForUpdate({ timeout: 2500 });
+      }
+
+      const [_, txId] = await Promise.all([
+        updatePromise!,
+        this.submitTransaction(encodedTransaction, awaitPropagation),
+      ]);
 
       resp.txId = txId;
       resp.explorerUrl = this.explorerUrl(resp.txId);
@@ -790,11 +798,19 @@ export class BaseWallet implements WalletI {
     resp.categories = categories;
 
     if (options?.buildUnsigned !== true) {
-      const txId = await this.submitTransaction(
-        encodedTransaction,
+      const awaitPropagation =
         options?.awaitTransactionPropagation === undefined ||
-          options?.awaitTransactionPropagation === true
-      );
+        options?.awaitTransactionPropagation === true;
+
+      let updatePromise: Promise<void>;
+      if (awaitPropagation) {
+        updatePromise = this.waitForUpdate({ timeout: 2500 });
+      }
+
+      const [_, txId] = await Promise.all([
+        updatePromise!,
+        this.submitTransaction(encodedTransaction, awaitPropagation),
+      ]);
 
       resp.txId = txId;
       resp.explorerUrl = this.explorerUrl(resp.txId);
@@ -1422,7 +1438,7 @@ export class BaseWallet implements WalletI {
    */
   public async getTokenBalance(category: string): Promise<bigint> {
     const utxos = (await this.getTokenUtxos(category)).filter(
-      (val) => val.token?.amount
+      (val) => val.token?.amount && val.token?.category === category
     );
     return sumTokenAmounts(utxos, category);
   }

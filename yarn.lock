@@ -1038,31 +1038,31 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.20.tgz#111b5db0f501aa89b05076fa31f0ea0e0c292cd3"
   integrity sha512-88p7+M0QGxKpmnkfXjS4V26AnoC/eiqZutE8GLdaI5X12NY75bXSdTY9NkmYb2Xyk1O+MmkuO6Frmsj84V6I8Q==
 
-"@rpckit/core@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@rpckit/core/-/core-1.0.1.tgz#362319129e874a48ae5a184ab4656fb1f4ee4e5b"
-  integrity sha512-fVfBFgfwPyw++0rQZhbUekWRiPpBs5HEyPUdKgiRBKN7jGFQ7xuFdS3XlJpWlu3rPHOZjeVy+UsKoBCyznS5Fw==
+"@rpckit/core@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@rpckit/core/-/core-1.0.3.tgz#3cbc112a38868ac0532be407f4746b7cb2d4d058"
+  integrity sha512-xEXEc6qHKuNZXYM7OXdJht6hRnwdHys2AWg4JfoVQs+/y5o2lJB+4ymyRw74tayj+phAL/uqmw01M4TCUMQXKQ==
 
-"@rpckit/fallback@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@rpckit/fallback/-/fallback-1.0.1.tgz#ab2b1faac9f62b6461ebe886220b225022fc05f1"
-  integrity sha512-8ivcMB4SoKPSfhVTqIZdbnpF6JYHzEAjBqUM1ydAwXbMBflqUFjaCR7KY9j1dLbbSMBW1p3bM/6m6uzF4tX56A==
+"@rpckit/fallback@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@rpckit/fallback/-/fallback-1.0.3.tgz#0fe201b7d9b79394118325ba34b17ba0af5109e9"
+  integrity sha512-OZkEXaVfX3EKUpM4ScwSgoUF+I+EPwoxOfvG0AgaUpEokgy2Ao8MmWccETwGEp3pKb2YHbkZGfZbmMt9rRMzZA==
   dependencies:
-    "@rpckit/core" "^1.0.1"
+    "@rpckit/core" "^1.0.3"
 
-"@rpckit/http@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@rpckit/http/-/http-1.0.1.tgz#12b0a4e657e8db20a7e05e27c295b3b8e86346e9"
-  integrity sha512-5gn1dORPHZ4u2ahG4CUxchTwU9x7SWJhJoAh/tMPhMPODyxtv0xAPhFMf5wcjpRZ2OhMiUT9gnTv3L/4Wi7edA==
+"@rpckit/http@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@rpckit/http/-/http-1.0.3.tgz#5690f2cb1c3a6fd113444a47a2a73fcd6970728b"
+  integrity sha512-HZb7gRXbeGOr4bc2dzTk9BcaeDA0qre/NIHBJf+qc+tNIQQ7CxTJlD79ljSByLPjINRYT4JxvjcqUVXxzyYQOg==
   dependencies:
-    "@rpckit/core" "^1.0.1"
+    "@rpckit/core" "^1.0.3"
 
-"@rpckit/websocket@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@rpckit/websocket/-/websocket-1.0.1.tgz#9f1022be5da29a6589bc3ccc8aa8e511514b6fba"
-  integrity sha512-5SkkB+tnNXfIfx/weXioy+zBllz1NE2RHYu4eLF5h+LKu5W/Fvqd1crSkIsnwd9ytgGoSTW/ZYZ6hAM/GC3GWg==
+"@rpckit/websocket@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@rpckit/websocket/-/websocket-1.0.3.tgz#88b9824d7a7838323582a1f4e046ed411e959523"
+  integrity sha512-4+0PLGlF2NKRLlO2QCZRJTBU1iNcVK7hQXiUz6ROP4un3pn/Irn8jzBS8rqjM0IDIr/NevY6xM8SLPjxMQJS5w==
   dependencies:
-    "@rpckit/core" "^1.0.1"
+    "@rpckit/core" "^1.0.3"
     isows "^1.0.6"
 
 "@sideway/address@^4.1.0":

@@ -5,7 +5,7 @@ export const networkTickerMap = {
 };
 
 const opts =
-  "connectTimeout=5000&timeout=5000&keepAlive=60000&protocolVersion=1.6&batchSize=25";
+  "connectTimeout=5000&timeout=5000&keepAlive=60000&protocolVersion=1.6&batchSize=5";
 
 export function toParseNotation(urls: string[]): string {
   const withOpts = urls.map((u) => `${u}?${opts}`);
