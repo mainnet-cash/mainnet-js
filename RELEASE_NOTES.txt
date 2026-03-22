@@ -1,6 +1,11 @@
 Newest changes
 --------------
 
+4.0.0-next.3
+
+* Add support for DSProof notifications 
+* Add send option to skip transaction broadcast
+
 4.0.0-next.2
 
 * Rework single-address wallets to use subscriptions instead of requests for status, utxos and history
