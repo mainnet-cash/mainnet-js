@@ -298,6 +298,7 @@ export class SendResponse {
   balance?: bigint;
   explorerUrl?: string;
   categories?: string[];
+  transaction?: string; // transaction hex
   unsignedTransaction?: string; // unsigned transaction hex
   sourceOutputs?: SourceOutput[]; // source outputs for signing unsigned transactions
 

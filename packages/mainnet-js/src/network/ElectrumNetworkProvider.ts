@@ -2,6 +2,7 @@ import type { Transport, Unsubscribe } from "@rpckit/core";
 import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
+  DsproofData,
   HexHeaderI,
   TxI,
   Utxo,
@@ -394,12 +395,16 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return new Promise(async (resolve, reject) => {
       let txHash = await getTransactionHash(txHex);
       if (!awaitPropagation) {
-        this.performRequest("blockchain.transaction.broadcast", txHex);
+        this.performRequest("blockchain.transaction.broadcast", txHex).catch(
+          () => {}
+        );
         resolve(txHash);
       } else {
         let cancel: CancelFn;
 
-        const waitForTransactionCallback = async (data) => {
+        const waitForTransactionCallback = async (
+          data: [txHash: string, confirmations: number | null]
+        ) => {
           if (data && data[0] === txHash && data[1] !== null) {
             await cancel?.();
             resolve(txHash);
@@ -518,7 +523,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async subscribeToAddress(
     cashaddr: string,
-    callback: (data: any) => void
+    callback: (data: [address: string, status: string | null]) => void
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.address.subscribe",
@@ -529,10 +534,21 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   async subscribeToTransaction(
     txHash: string,
-    callback: (data: any) => void
+    callback: (data: [txHash: string, confirmations: number | null]) => void
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.transaction.subscribe",
+      callback,
+      txHash
+    );
+  }
+
+  async subscribeToDsproof(
+    txHash: string,
+    callback: (data: [txHash: string, dsproof: DsproofData | null]) => void
+  ): Promise<CancelFn> {
+    return this.subscribeRequest(
+      "blockchain.transaction.dsproof.subscribe",
       callback,
       txHash
     );

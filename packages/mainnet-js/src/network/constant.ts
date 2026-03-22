@@ -4,10 +4,13 @@ export const networkTickerMap = {
   regtest: "rBCH",
 };
 
-const opts =
-  "connectTimeout=5000&timeout=5000&keepAlive=60000&protocolVersion=1.6&batchSize=5";
+const baseOpts = "connectTimeout=5000&timeout=5000&keepAlive=60000&batchSize=5";
 
-export function toParseNotation(urls: string[]): string {
+export function toParseNotation(
+  urls: string[],
+  protocolVersion: string = "1.6"
+): string {
+  const opts = `${baseOpts}&protocolVersion=${protocolVersion}`;
   const withOpts = urls.map((u) => `${u}?${opts}`);
   if (withOpts.length === 1) return withOpts[0];
   return `fallback(${withOpts.join(",")})?eagerConnect=true&rank=true`;
@@ -20,11 +23,14 @@ export const mainnetServers = toParseNotation([
 ]);
 
 // chipnet
-export const testnetServers = toParseNotation([
-  "wss://chipnet.bch.ninja:50004",
-  "wss://chipnet.imaginary.cash:50004",
-  "wss://chipnet.c3-soft.com:64004",
-]);
+export const testnetServers = toParseNotation(
+  [
+    "wss://chipnet.bch.ninja:50004",
+    "wss://chipnet.imaginary.cash:50004",
+    "wss://chipnet.c3-soft.com:64004",
+  ],
+  "1.5"
+);
 
 export const regtestServers = toParseNotation([
   "ws://127.0.0.1:60003",

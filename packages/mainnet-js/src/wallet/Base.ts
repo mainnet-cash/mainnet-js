@@ -1,8 +1,15 @@
-import { binToHex, CashAddressNetworkPrefix } from "@bitauth/libauth";
+import { binToHex, CashAddressNetworkPrefix, sha256 } from "@bitauth/libauth";
 import { WalletCache } from "../cache/walletCache.js";
 import StorageProvider from "../db/StorageProvider.js";
 import { NetworkType, prefixFromNetworkMap } from "../enum.js";
-import { HexHeaderI, NFTCapability, TxI, Utxo, UtxoId } from "../interface.js";
+import {
+  DsproofData,
+  HexHeaderI,
+  NFTCapability,
+  TxI,
+  Utxo,
+  UtxoId,
+} from "../interface.js";
 import {
   SignedMessageResponseI,
   VerifyMessageResponseI,
@@ -603,6 +610,33 @@ export class BaseWallet implements WalletI {
     );
   }
 
+  /**
+   * Watch for double-spend proofs on incoming transactions.
+   * For each new unconfirmed transaction, subscribes to its dsproof
+   * for a short window. If a dsproof arrives, the callback is invoked.
+   *
+   * @param callback - Called with the dsproof data when a double-spend is detected
+   * @param window - How long (ms) to watch each transaction for dsproofs (default 5000)
+   * @returns Cancel function to stop watching
+   */
+  public async watchDoubleSpends(
+    callback: (dsproof: DsproofData) => void,
+    window: number = 5000
+  ): Promise<CancelFn> {
+    return this.watchTransactionHashes(async (txHash: string) => {
+      const cancel = await this.provider.subscribeToDsproof(
+        txHash,
+        ([proofTxHash, dsproof]) => {
+          if (txHash === proofTxHash && dsproof !== null) {
+            callback(dsproof);
+          }
+        }
+      );
+
+      setTimeout(() => cancel(), window);
+    });
+  }
+
   protected async _getMaxAmountToSend(
     params: {
       outputCount?: number;
@@ -712,7 +746,12 @@ export class BaseWallet implements WalletI {
     const resp = new SendResponse({});
     resp.categories = categories;
 
-    if (options?.buildUnsigned !== true) {
+    if (options?.broadcast === false) {
+      resp.transaction = binToHex(encodedTransaction);
+      resp.txId = binToHex(
+        sha256.hash(sha256.hash(encodedTransaction)).reverse()
+      );
+    } else if (options?.buildUnsigned !== true) {
       const awaitPropagation =
         options?.awaitTransactionPropagation === undefined ||
         options?.awaitTransactionPropagation === true;
@@ -797,7 +836,12 @@ export class BaseWallet implements WalletI {
     const resp = new SendResponse({});
     resp.categories = categories;
 
-    if (options?.buildUnsigned !== true) {
+    if (options?.broadcast === false) {
+      resp.transaction = binToHex(encodedTransaction);
+      resp.txId = binToHex(
+        sha256.hash(sha256.hash(encodedTransaction)).reverse()
+      );
+    } else if (options?.buildUnsigned !== true) {
       const awaitPropagation =
         options?.awaitTransactionPropagation === undefined ||
         options?.awaitTransactionPropagation === true;
@@ -1043,7 +1087,7 @@ export class BaseWallet implements WalletI {
     if (!this.provider) {
       throw Error("Wallet network provider was not initialized");
     }
-    let rawTransaction = binToHex(transaction);
+    const rawTransaction = binToHex(transaction);
     return await this.provider.sendRawTransaction(
       rawTransaction,
       awaitPropagation

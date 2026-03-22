@@ -53,6 +53,7 @@ export interface SendRequestOptionsI {
   tokenOperation?: "send" | "genesis" | "mint" | "burn"; // undefined. internal use only
   ensureUtxos?: Utxo[]; // ensure these inputs will be consumed in the transaction
   buildUnsigned?: boolean; // false
+  broadcast?: boolean; // true
 }
 
 export interface MnemonicI {

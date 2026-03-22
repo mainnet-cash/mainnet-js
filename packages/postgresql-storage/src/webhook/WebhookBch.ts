@@ -22,7 +22,7 @@ export class WebhookBch extends Webhook {
   }
 
   async start(): Promise<void> {
-    const webhookCallback = async (data: string | Array<string>) => {
+    const webhookCallback = async (data: any) => {
       let status: string = "";
       if (typeof data === "string") {
         // subscription acknowledgement notification with current status
