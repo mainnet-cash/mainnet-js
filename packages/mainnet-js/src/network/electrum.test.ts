@@ -9,7 +9,7 @@ test("Should get a transaction with bare rpckit transport", async () => {
     "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
   const transactionHex = await transport.request(
     "blockchain.transaction.get",
-    transactionID
+    [transactionID]
   );
   expect(typeof transactionHex).toBe("string");
   expect((transactionHex as string).length).toBeGreaterThan(0);
@@ -33,7 +33,7 @@ test("Should propagate electrum error for non-existent transaction", async () =>
   const transport = webSocket("wss://fulcrum.pat.mn:50004");
   await transport.connect();
   try {
-    await transport.request("blockchain.transaction.get", zeroTxId);
+    await transport.request("blockchain.transaction.get", [zeroTxId]);
     fail("Expected request to throw");
   } catch (error: any) {
     expect(error.message).toContain(

@@ -213,7 +213,7 @@ export class WatchWallet extends BaseWallet {
           if (address !== addr) return;
 
           if (status !== null && status !== this.status) {
-            this.updatePromise = this.fetchData(status);
+            this.updatePromise = this.fetchData(status).catch(() => {});
           }
           this.status = status;
           this.notifyWatchCallbacks(status, addr);

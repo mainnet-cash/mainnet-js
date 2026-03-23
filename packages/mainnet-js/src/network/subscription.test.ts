@@ -159,7 +159,7 @@ describe("Raw transport subscription format", () => {
     const received: unknown[] = [];
     const unsub: Unsubscribe = await transport.subscribe(
       "blockchain.transaction.subscribe",
-      txHash,
+      [txHash],
       (data) => {
         received.push(data);
       }
@@ -183,7 +183,7 @@ describe("Raw transport subscription format", () => {
     const received: unknown[] = [];
     const unsub: Unsubscribe = await transport.subscribe(
       "blockchain.address.subscribe",
-      address,
+      [address],
       (data) => {
         received.push(data);
       }
@@ -205,6 +205,7 @@ describe("Raw transport subscription format", () => {
     const received: unknown[] = [];
     const unsub: Unsubscribe = await transport.subscribe(
       "blockchain.headers.subscribe",
+      [],
       (data) => {
         received.push(data);
       }

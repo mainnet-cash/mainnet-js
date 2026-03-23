@@ -82,8 +82,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async getUtxos(cashaddr: string): Promise<Utxo[]> {
     const result = await this.performRequest<ElectrumUtxo[]>(
       "blockchain.address.listunspent",
-      cashaddr,
-      "include_tokens"
+      [cashaddr, "include_tokens"],
     );
     return result.map((utxo) => ({
       address: cashaddr,
@@ -103,7 +102,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async getBalance(cashaddr: string): Promise<bigint> {
     const result = await this.performRequest<ElectrumBalanceI>(
       "blockchain.address.get_balance",
-      cashaddr
+      [cashaddr],
     );
 
     return BigInt(result.confirmed) + BigInt(result.unconfirmed);
@@ -124,7 +123,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
     const result = await this.performRequest<HexHeaderI>(
       "blockchain.header.get",
-      height
+      [height],
     );
     if (this.cache) {
       await this.cache.setItem(key, JSON.stringify(result));
@@ -161,8 +160,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         misses.map(async (hash) => {
           const tx = await this.performRequest<string>(
             "blockchain.transaction.get",
-            hash,
-            false
+            [hash, false],
           );
           return [hash, tx] as [string, string];
         })
@@ -215,7 +213,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
         misses.map(async (height) => {
           const result = await this.performRequest<HexHeaderI>(
             "blockchain.header.get",
-            height
+            [height],
           );
           return [height, result] as [number, HexHeaderI];
         })
@@ -308,8 +306,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     try {
       const result = await this.performRequest(
         "blockchain.transaction.get",
-        txHash,
-        verbose
+        [txHash, verbose],
       );
 
       if (!verbose) {
@@ -395,7 +392,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return new Promise(async (resolve, reject) => {
       let txHash = await getTransactionHash(txHex);
       if (!awaitPropagation) {
-        this.performRequest("blockchain.transaction.broadcast", txHex).catch(
+        this.performRequest("blockchain.transaction.broadcast", [txHex]).catch(
           () => {}
         );
         resolve(txHash);
@@ -415,7 +412,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
           waitForTransactionCallback
         );
 
-        this.performRequest("blockchain.transaction.broadcast", txHex).catch(
+        this.performRequest("blockchain.transaction.broadcast", [txHex]).catch(
           async (error) => {
             await cancel?.();
             reject(error);
@@ -433,9 +430,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<TxI[]> {
     const result = await this.performRequest<TxI[]>(
       "blockchain.address.get_history",
-      cashaddr,
-      fromHeight,
-      toHeight
+      [cashaddr, fromHeight, toHeight],
     );
 
     return result;
@@ -515,6 +510,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.headers.subscribe",
+      [],
       (data: HexHeaderI | HexHeaderI[]) => {
         callback(data[0] ?? data);
       }
@@ -527,8 +523,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.address.subscribe",
+      [cashaddr],
       callback,
-      cashaddr
     );
   }
 
@@ -538,8 +534,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.transaction.subscribe",
+      [txHash],
       callback,
-      txHash
     );
   }
 
@@ -549,14 +545,25 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.transaction.dsproof.subscribe",
+      [txHash],
       callback,
-      txHash
     );
+  }
+
+  public async daemonPassthrough<T = unknown>(
+    method: string,
+    params: unknown[] | Record<string, unknown> = []
+  ): Promise<T> {
+    await this.ready();
+    return this.transport.request("daemon.passthrough", {
+      method,
+      params,
+    }) as Promise<T>;
   }
 
   private async performRequest<T>(
     name: string,
-    ...parameters: (string | number | boolean)[]
+    parameters: unknown[] | Record<string, unknown> = [],
   ): Promise<T> {
     await this.ready();
 
@@ -576,7 +583,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       return new Error(typeof e === "string" ? e : String(e));
     };
 
-    const request = this.transport.request(name as any, ...(parameters as any));
+    const request = this.transport.request(name as any, parameters as any);
 
     try {
       const value = await Promise.race([request, makeTimeout()]);
@@ -598,21 +605,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   public async subscribeRequest(
     methodName: string,
+    parameters: unknown[] | Record<string, unknown>,
     callback: (data) => void,
-    ...parameters: (string | number | boolean)[]
   ): Promise<CancelFn> {
     await this.ready();
 
-    const subscribeFn = this.transport.subscribe.bind(this.transport) as (
-      method: string,
-      ...args: unknown[]
-    ) => Promise<Unsubscribe>;
-    const unsubscribe: Unsubscribe = await subscribeFn(
-      methodName,
-      ...parameters,
-      (data: unknown) => {
-        callback(data);
-      }
+    const unsubscribe: Unsubscribe = await this.transport.subscribe(
+      methodName as any,
+      parameters as any,
+      callback as any,
     );
     this.subscriptions++;
 

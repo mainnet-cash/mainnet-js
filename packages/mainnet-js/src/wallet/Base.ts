@@ -1165,7 +1165,6 @@ export class BaseWallet implements WalletI {
           if (data && data[0] === options.txHash! && data[1] !== null) {
             txHashSeen = true;
             await cancel?.();
-
             resolve(makeResponse(options.txHash!));
           }
         };
