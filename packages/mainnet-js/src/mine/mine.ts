@@ -18,6 +18,8 @@ export const mine = async ({
   cashaddr: string;
   blocks: number;
 }): Promise<any> => {
-  const provider = getNetworkProvider(Network.REGTEST) as ElectrumNetworkProvider;
+  const provider = getNetworkProvider(
+    Network.REGTEST
+  ) as ElectrumNetworkProvider;
   return provider.daemonPassthrough("generatetoaddress", [blocks, cashaddr]);
 };

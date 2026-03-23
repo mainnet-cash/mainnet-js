@@ -7,10 +7,9 @@ test("Should get a transaction with bare rpckit transport", async () => {
   await transport.connect();
   const transactionID =
     "4db095f34d632a4daf942142c291f1f2abb5ba2e1ccac919d85bdc2f671fb251";
-  const transactionHex = await transport.request(
-    "blockchain.transaction.get",
-    [transactionID]
-  );
+  const transactionHex = await transport.request("blockchain.transaction.get", [
+    transactionID,
+  ]);
   expect(typeof transactionHex).toBe("string");
   expect((transactionHex as string).length).toBeGreaterThan(0);
   await transport.close();
