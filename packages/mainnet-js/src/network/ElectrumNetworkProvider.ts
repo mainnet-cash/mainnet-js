@@ -1,12 +1,21 @@
-import type { Transport, Unsubscribe } from "@rpckit/core";
+import type {
+  Transport,
+  Unsubscribe,
+  ExtractRequestMethod,
+  ExtractSubscriptionMethod,
+  ExtractParams,
+  ExtractReturn,
+} from "@rpckit/core";
 import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
+
+type RequestMethod = ExtractRequestMethod<ElectrumCashSchema>;
+type SubscriptionMethod = ExtractSubscriptionMethod<ElectrumCashSchema>;
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import {
   DsproofData,
   HexHeaderI,
   TxI,
   Utxo,
-  ElectrumBalanceI,
   HeaderI,
 } from "../interface.js";
 import { Network } from "../interface.js";
@@ -14,7 +23,6 @@ import {
   ElectrumRawTransaction,
   ElectrumRawTransactionVinWithValues,
   ElectrumRawTransactionWithInputValues,
-  ElectrumUtxo,
 } from "./interface.js";
 
 import { CancelFn } from "../wallet/interface.js";
@@ -80,7 +88,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getUtxos(cashaddr: string): Promise<Utxo[]> {
-    const result = await this.performRequest<ElectrumUtxo[]>(
+    const result = await this.performRequest(
       "blockchain.address.listunspent",
       [cashaddr, "include_tokens"],
     );
@@ -100,7 +108,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBalance(cashaddr: string): Promise<bigint> {
-    const result = await this.performRequest<ElectrumBalanceI>(
+    const result = await this.performRequest(
       "blockchain.address.get_balance",
       [cashaddr],
     );
@@ -121,7 +129,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       }
     }
 
-    const result = await this.performRequest<HexHeaderI>(
+    const result = await this.performRequest(
       "blockchain.header.get",
       [height],
     );
@@ -158,11 +166,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // rpckit automatically batches concurrent requests via BatchScheduler
       const fetched = await Promise.all(
         misses.map(async (hash) => {
-          const tx = await this.performRequest<string>(
+          const tx = await this.performRequest(
             "blockchain.transaction.get",
             [hash, false],
           );
-          return [hash, tx] as [string, string];
+          return [hash, tx as string] as [string, string];
         })
       );
 
@@ -211,7 +219,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // rpckit automatically batches concurrent requests via BatchScheduler
       const fetched = await Promise.all(
         misses.map(async (height) => {
-          const result = await this.performRequest<HexHeaderI>(
+          const result = await this.performRequest(
             "blockchain.header.get",
             [height],
           );
@@ -428,19 +436,15 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     fromHeight: number = 0,
     toHeight: number = -1
   ): Promise<TxI[]> {
-    const result = await this.performRequest<TxI[]>(
+    return this.performRequest(
       "blockchain.address.get_history",
       [cashaddr, fromHeight, toHeight],
     );
-
-    return result;
   }
 
   // Get the minimum fee a low-priority transaction must pay in order to be accepted to the daemon's memory pool.
   async getRelayFee(): Promise<number> {
-    const result = (await this.performRequest("blockchain.relayfee")) as number;
-
-    return result;
+    return this.performRequest("blockchain.relayfee");
   }
 
   public async watchAddressStatus(
@@ -511,8 +515,8 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.subscribeRequest(
       "blockchain.headers.subscribe",
       [],
-      (data: HexHeaderI | HexHeaderI[]) => {
-        callback(data[0] ?? data);
+      (data) => {
+        callback(data[0]);
       }
     );
   }
@@ -561,10 +565,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }) as Promise<T>;
   }
 
-  private async performRequest<T>(
-    name: string,
-    parameters: unknown[] | Record<string, unknown> = [],
-  ): Promise<T> {
+  public async performRequest<M extends RequestMethod>(
+    method: M,
+    parameters?: ExtractParams<ElectrumCashSchema, M>,
+  ): Promise<ExtractReturn<ElectrumCashSchema, M>> {
     await this.ready();
 
     const TIMEOUT_MSG = "electrum-cash request timed out, retrying";
@@ -583,12 +587,12 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       return new Error(typeof e === "string" ? e : String(e));
     };
 
-    const request = this.transport.request(name as any, parameters as any);
+    const request = this.transport.request(method, parameters!);
 
     try {
       const value = await Promise.race([request, makeTimeout()]);
       if (value instanceof Error) throw value;
-      return value as T;
+      return value;
     } catch (e: unknown) {
       const error = ensureError(e);
       // Only retry on timeout, not on server errors
@@ -596,24 +600,24 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       try {
         const value = await Promise.race([request, makeTimeout()]);
         if (value instanceof Error) throw value;
-        return value as T;
+        return value;
       } catch (e2: unknown) {
         throw ensureError(e2);
       }
     }
   }
 
-  public async subscribeRequest(
-    methodName: string,
-    parameters: unknown[] | Record<string, unknown>,
-    callback: (data) => void,
+  public async subscribeRequest<M extends SubscriptionMethod>(
+    method: M,
+    parameters: ExtractParams<ElectrumCashSchema, M>,
+    callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void,
   ): Promise<CancelFn> {
     await this.ready();
 
     const unsubscribe: Unsubscribe = await this.transport.subscribe(
-      methodName as any,
-      parameters as any,
-      callback as any,
+      method,
+      parameters,
+      callback,
     );
     this.subscriptions++;
 
