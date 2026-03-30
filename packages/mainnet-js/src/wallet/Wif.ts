@@ -43,7 +43,7 @@ import {
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
 import { checkWifNetwork } from "../util/checkWifNetwork.js";
-import { generateRandomBytes } from "../util/randomBytes.js";
+import { generateRandomBytes } from "@bitauth/libauth";
 
 import { Config } from "../config.js";
 import { WatchWallet } from "./Watch.js";

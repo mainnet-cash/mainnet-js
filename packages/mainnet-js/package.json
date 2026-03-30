@@ -1,6 +1,5 @@
 {
   "type": "module",
-  "test": "vitest",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/mainnet-cash/mainnet-js/"
@@ -12,23 +11,20 @@
   "version": "4.0.0-next.6",
   "homepage": "https://mainnet.cash",
   "module": "dist/module/index.js",
-  "browser": {
-    "http": false,
-    "https": false,
-    "fs": false,
-    "url": false
-  },
   "types": "dist/module/index.d.ts",
   "exports": {
     "import": "./dist/module/index.js"
   },
+  "files": [
+    "dist/module"
+  ],
   "scripts": {
     "clean": "rm -fr dist/*",
     "cli": "npx ts-node src/cli.ts",
     "lint": "eslint . --ext .ts",
     "build": "yarn clean && yarn build:module && yarn build:browser",
     "build:module": "tsc -p tsconfig.build.json",
-    "build:browser": "npx webpack",
+    "build:browser": "vite build && BUILD_TARGET=test vite build",
     "build:production": "yarn clean && yarn build:module && NODE_ENV=production yarn build:browser",
     "demo": "npx reload --dir=demo/",
     "publish:public": "yarn publish --access public",
@@ -41,12 +37,6 @@
     "@rpckit/fallback": "^2.0.0",
     "@rpckit/websocket": "^2.0.0"
   },
-  "optionalDependencies": {
-    "dotenv": "^10.0.0"
-  },
-  "testPathIgnorePatterns": [
-    "dist"
-  ],
   "sideEffects": [
     "src/rate/ExchangeRate.ts",
     "src/network/getRelayFeeCache.ts",

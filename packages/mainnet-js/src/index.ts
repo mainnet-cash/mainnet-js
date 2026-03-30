@@ -38,7 +38,7 @@ export { CONST };
 
 // interfaces
 export * from "./interface.js";
-export {
+export type {
   SignedMessageResponseI,
   VerifyMessageResponseI,
 } from "./message/interface.js";

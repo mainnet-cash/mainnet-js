@@ -70,6 +70,7 @@ jobs:
       with:
         node-version: "22.x"
     - run: yarn
+    - run: yarn build
     - run: yarn test:browser
   test_node:
     runs-on: ubuntu-latest
@@ -79,6 +80,7 @@ jobs:
       with:
         node-version: "22.x"
     - run: yarn
+    - run: yarn build
     - run: yarn test
   test_node_mock:
     runs-on: ubuntu-latest
@@ -88,6 +90,7 @@ jobs:
       with:
         node-version: "22.x"
     - run: yarn
+    - run: yarn build
     - run: yarn test:mock
   test_rest:
     runs-on: ubuntu-latest
@@ -97,6 +100,7 @@ jobs:
       with:
         node-version: "22.x"
     - run: yarn
+    - run: yarn build
     - run: yarn test:rest
   coverage:
     runs-on: ubuntu-latest
@@ -106,6 +110,7 @@ jobs:
       with:
         node-version: '22.x'
     - run: yarn
+    - run: yarn build
     - run: yarn coverage:mock
     - uses: actions/upload-artifact@v4
       with:

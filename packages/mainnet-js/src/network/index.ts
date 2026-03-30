@@ -11,8 +11,8 @@ export {
   disconnectProviders,
 } from "./Connection.js";
 export { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
-export { default as NetworkProvider } from "./NetworkProvider.js";
-export {
+export type { default as NetworkProvider } from "./NetworkProvider.js";
+export type {
   ElectrumRawTransaction,
   ElectrumRawTransactionWithInputValues,
   ElectrumRawTransactionVinWithValues,

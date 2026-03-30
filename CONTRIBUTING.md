@@ -137,8 +137,7 @@ Browsers do not have access to many standard node libraries by design. For this 
 
 All browser tests are denoted by `*.test.browser.ts`.
 
-The bundle is built with webpack and does **not** use browserify, rather it simply
-omits nodejs libraries. Browser tests are run against testnet, using secrets stored
+The browser bundle is built with Vite and omits nodejs libraries. Browser tests are run against testnet, using secrets stored
 in a `.env.testnet` file or the environment variables `ALICE_TESTNET_ADDRESS`
 and `ALICE_TESTNET_WALLET_ID`. These variables should be protected to the extent that
 getting more testnet coins is an annoyance.

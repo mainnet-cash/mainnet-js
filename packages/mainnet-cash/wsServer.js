@@ -1,9 +1,9 @@
-import ws from 'ws';
+import { WebSocketServer } from 'ws';
 
 import * as mainnet from "mainnet-js";
 
 const makeWsServer = (server) => {
-  const wsServer = new ws.Server({ noServer: true, path: '/wallet' });
+  const wsServer = new WebSocketServer({ noServer: true, path: '/wallet' });
   wsServer.on('connection', socket => {
     socket.unsubscribeFunctions = [];
 

@@ -6,8 +6,6 @@
 .env.mainnet
 node_modules
 *.log
-*.d.ts
-*.js.map
 coverage
 test/docker/data
 test/playwright
@@ -19,3 +17,4 @@ dist
 mainnet-js.tgz
 basecamp_archive
 tsconfig.tsbuildinfo
+test/playwright

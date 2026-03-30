@@ -1,5 +1,6 @@
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
 import { default as NetworkProvider } from "./NetworkProvider.js";
+import { MockNetworkProvider } from "./MockNetworkProvider.js";
 import { getDefaultServers } from "./configuration.js";
 import { Network } from "../interface.js";
 import { networkTickerMap } from "./constant.js";
@@ -42,12 +43,7 @@ export async function createProvider(
   return new ElectrumNetworkProvider(transport, network);
 }
 
-/**
- * Create a MockNetworkProvider via dynamic import.
- * Keeps @mem-cash/electrum out of the production bundle.
- */
 export async function createMockProvider(): Promise<NetworkProvider> {
-  const { MockNetworkProvider } = await import("./MockNetworkProvider.js");
   let verifier: import("@mem-cash/validation").TxVerifier | undefined;
   try {
     const { createTxVerifier } = await import("@mem-cash/validation");

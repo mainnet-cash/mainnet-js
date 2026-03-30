@@ -172,44 +172,25 @@ jobs:
           node-version: "22.x"
           registry-url: https://registry.npmjs.org/
 
+      # Prepare browser bundles for CDN (exclude module output, html, sourcemaps)
+      - name: Prepare CDN files
+        run: |
+          mkdir -p cdn
+          cp packages/mainnet-js/dist/mainnet-*.js cdn/
+          cp packages/indexeddb-storage/dist/indexeddb-storage-*.js cdn/indexeddb-storage
+          cp packages/bcmr/dist/BCMR-*.js cdn/bcmr
+
       # Actual job
       - if: env.HAS_CDN_FTP_UPLOAD == false
         run: echo "CDN_FTP_UPLOAD secret not set, skipping publishing"
       - if: env.HAS_CDN_FTP_UPLOAD
-        name: Publish mainnet-js to bunny cdn
+        name: Publish browser bundles to bunny cdn
         uses: sebastianpopp/ftp-action@releases/v2
         with:
           host: storage.bunnycdn.com
           user: mainnet-js
           password: ${{ secrets.CDN_FTP_UPLOAD }}
-          localDir: "packages/mainnet-js/dist"
-      - if: env.HAS_CDN_FTP_UPLOAD
-        name: Publish @mainnet-cash/idexeddb-storage to bunny cdn
-        uses: sebastianpopp/ftp-action@releases/v2
-        with:
-          host: storage.bunnycdn.com
-          user: mainnet-js
-          password: ${{ secrets.CDN_FTP_UPLOAD }}
-          localDir: "packages/indexeddb-storage/dist"
-          remoteDir: "indexeddb-storage"
-      - if: env.HAS_CDN_FTP_UPLOAD
-        name: Publish @mainnet-cash/postgresql-storage to bunny cdn
-        uses: sebastianpopp/ftp-action@releases/v2
-        with:
-          host: storage.bunnycdn.com
-          user: mainnet-js
-          password: ${{ secrets.CDN_FTP_UPLOAD }}
-          localDir: "packages/postgresql-storage/dist"
-          remoteDir: "postgresql-storage"
-      - if: env.HAS_CDN_FTP_UPLOAD
-        name: Publish @mainnet-cash/bcmr to bunny cdn
-        uses: sebastianpopp/ftp-action@releases/v2
-        with:
-          host: storage.bunnycdn.com
-          user: mainnet-js
-          password: ${{ secrets.CDN_FTP_UPLOAD }}
-          localDir: "packages/bcmr/dist"
-          remoteDir: "bcmr"
+          localDir: "cdn"
 
   # Build a matrix of API clients: php, python and go
   # After being built, the clients are commited to their repositories, new tag and github release are created for them

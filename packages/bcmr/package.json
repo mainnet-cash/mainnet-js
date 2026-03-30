@@ -7,6 +7,9 @@
   "exports": {
     "import": "./dist/module/index.js"
   },
+  "files": [
+    "dist/module"
+  ],
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
@@ -15,15 +18,11 @@
   "devDependencies": {},
   "scripts": {
     "build": "yarn build:module && yarn build:browser",
-    "build:main": "tsc",
-    "build:module": "tsc -p tsconfig.browser.json",
-    "build:browser": "npx webpack",
+    "build:module": "tsc -p tsconfig.build.json",
+    "build:browser": "vite build && BUILD_TARGET=test vite build",
     "build:production": "yarn build:module && NODE_ENV=production yarn build:browser",
     "test": "vitest run --config ../../test/vitest.config.ts",
     "test:mock": "USE_MOCK_PROVIDER=1 vitest run --config ../../test/vitest.config.ts",
     "publish:public": "yarn publish --access public"
-  },
-  "testPathIgnorePatterns": [
-    "dist"
-  ]
+  }
 }

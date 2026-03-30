@@ -31,7 +31,7 @@ It is an OpenAPI 3 specification (swagger), implemented as a library in typescri
 
 The rest service can be called as a REST api from any language that can POST and receive json. Additionally, client libraries can be generated automatically if preferred in [most common languages](https://openapi-generator.tech/docs/generators/). You don't need to write javascript or typescript to use mainnet.
 
-However, the typescript library is also compiled for use directly in nodejs, or as ECMA script for webapps, or as a webpack bundle for use from a single file.
+However, the typescript library is also compiled for use directly in nodejs, or as an ESM bundle for use in the browser from a single file.
 
 So it can be used in the browser, nodejs, electrum apps, WebWorkers and the like.
 
