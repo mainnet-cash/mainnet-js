@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "test": "jest",
+  "test": "vitest",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/mainnet-cash/mainnet-js/"
@@ -23,18 +23,17 @@
     "import": "./dist/module/index.js"
   },
   "scripts": {
-    "clean": "rm -fr dist/* && rm -fr jest/playwright/*",
+    "clean": "rm -fr dist/*",
     "cli": "npx ts-node src/cli.ts",
     "lint": "eslint . --ext .ts",
     "build": "yarn clean && yarn build:module && yarn build:browser",
-    "build:module": "tsc",
+    "build:module": "tsc -p tsconfig.build.json",
     "build:browser": "npx webpack",
     "build:production": "yarn clean && yarn build:module && NODE_ENV=production yarn build:browser",
     "demo": "npx reload --dir=demo/",
     "publish:public": "yarn publish --access public",
-    "test": "node --max-old-space-size=8000  --expose-gc --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand  --config ../../jest.config.cjs  --logHeapUsage  --forceExit",
-    "test:browser": "PW_EXPERIMENTAL_TS_ESM=1 NODE_OPTIONS=\"--experimental-vm-modules\" node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand --config jest.config.browser.cjs --detectOpenHandles",
-    "reload": "npx reload --dir=../../jest/playwright "
+    "test": "node --max-old-space-size=8000 --expose-gc ../../node_modules/vitest/vitest.mjs run --config ../../test/vitest.config.ts",
+    "test:browser": "npx vitest run --config ../../test/vitest.config.browser.ts"
   },
   "dependencies": {
     "@bitauth/libauth": "^3.1.0-next.8",

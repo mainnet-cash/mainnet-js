@@ -85,7 +85,7 @@ sudo docker run -d ....
 
 ## Database connectivity
 
-Postgresql is required if you plan to use named (persistent) wallets and webhooks. You can either use a postgres docker container or a system-wide postgres installation of your host OS. In mainnet.cash we use `postgres:12-alpine` image. You can refer to our docker configuration used for regression tests located in `jest/regtest-docker-compose.yml`. The configuration is governed by `DATABASE_URL` environment variable.
+Postgresql is required if you plan to use named (persistent) wallets and webhooks. You can either use a postgres docker container or a system-wide postgres installation of your host OS. In mainnet.cash we use `postgres:12-alpine` image. You can refer to our docker configuration used for regression tests located in `test/regtest-docker-compose.yml`. The configuration is governed by `DATABASE_URL` environment variable.
 
 Example would be:
 

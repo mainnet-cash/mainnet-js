@@ -299,6 +299,8 @@ describe(`Test Wallet library`, () => {
         type: WalletTypeEnum.Wif,
         network: "regtest",
       });
+      // Clear exchange rate cache to ensure consistent rates across conversions
+      globalThis.RATE = {};
       let usdRate = await ExchangeRate.get("usd");
       await alice.send([
         [bob.cashaddr!, BigInt(await convert(usdRate, "Usd", "Sat"))],

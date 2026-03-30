@@ -55,7 +55,7 @@ const browserConfig = {
             },
           },
         ],
-        exclude: [/node_modules/],
+        exclude: [/node_modules/, /\.test\./],
       },
     ],
   },
@@ -114,7 +114,7 @@ const webWorkerConfig = {
 const browserTestDiff = {
   output: {
     filename: `[name].js`,
-    path: __basedir + "/jest/playwright/",
+    path: __basedir + "/test/playwright/",
   },
 };
 

@@ -4,9 +4,20 @@ import { createWallet } from "../wallet/createWallet";
 import { mine } from "../mine";
 import { encodeCashAddress } from "@bitauth/libauth";
 import { toBch } from "../util";
+import { initProviders, disconnectProviders } from "../network/Connection";
+
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
 
 test("Should get miner history", async () => {
-  const alice = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+  const alice = await RegTestWallet.newRandom();
+  const minerWallet = await RegTestWallet.fromWIF(process.env.PRIVATE_WIF!);
+  await minerWallet.send({ cashaddr: alice.cashaddr!, value: 10000n });
+  await mine({ cashaddr: minerWallet.getDepositAddress(), blocks: 1 });
   const history = await alice.getHistory();
   expect(history.length).toBeGreaterThan(0);
 });

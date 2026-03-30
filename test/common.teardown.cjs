@@ -10,7 +10,7 @@ module.exports = async function (cwd) {
   }
 
   // Stop regtest server
-  child_process.spawnSync("./jest/docker/stop.sh", null, {
+  child_process.spawnSync("./test/docker/stop.sh", null, {
     shell: false,
     stdio: "inherit",
     cwd: cwd,

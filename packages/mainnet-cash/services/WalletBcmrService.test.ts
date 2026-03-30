@@ -1,9 +1,8 @@
-import server from "../index.js";
 import request from "supertest";
-import { setupFetchMock, removeFetchMock, binToHex } from "mainnet-js";
-import { sha256, binToBase64, utf8ToBin, OpReturnData, NFTCapability } from "mainnet-js";
+import { binToHex, sha256, binToBase64, utf8ToBin, OpReturnData, NFTCapability } from "mainnet-js";
+import { setupFetchMock, removeFetchMock } from "#test/fetch";
 
-var app;
+import app from "../test-setup.js";
 
 describe("Test Wallet BCMR Endpoints", () => {
   const registry = {
@@ -53,13 +52,6 @@ describe("Test Wallet BCMR Endpoints", () => {
     extensions: {}
   };
 
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   test("Add metadata registry and get token info", async () => {
     expect(

@@ -1,21 +1,13 @@
 import { binToBase64, binToHex, hexToBin, utf8ToBin } from "@bitauth/libauth";
 
 
-import server from "../index.js";
 import request from "supertest";
 import { toUtxoId, Utxo } from "mainnet-js";
 import { checkResponse } from "../utils/testUtils.js";
 
-var app;
+import app from "../test-setup.js";
 
 describe("Test Wallet Endpoints", () => {
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   /**
    * balance

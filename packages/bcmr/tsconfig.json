@@ -21,8 +21,8 @@
       "./src/types"
     ]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**", "src/**/*test.ts"],
+  "include": ["src/**/*.ts", "../../test/vitest-globals.d.ts"],
+  "exclude": ["node_modules/**"],
   "references": [
     {
       "path": "../mainnet-js/"

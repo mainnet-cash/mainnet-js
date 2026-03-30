@@ -1,24 +1,17 @@
 import * as mainnet from "mainnet-js";
 import { Webhook } from "@mainnet-cash/postgresql-storage";
-import server from "../";
 import request from "supertest";
 import { checkResponse } from "../utils/testUtils";
 
-var app;
+import app from "../test-setup.js";
 
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
-    app = await server.getServer().launch();
     Webhook.debug.setupAxiosMocks();
   });
 
   beforeEach(function () {
     Webhook.debug.reset();
-  });
-
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
   });
 
   /**

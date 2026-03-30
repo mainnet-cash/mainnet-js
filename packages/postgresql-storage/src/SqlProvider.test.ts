@@ -4,9 +4,6 @@ import { WalletDbEntryI } from "mainnet-js";
 
 BaseWallet.StorageProvider = SqlProvider;
 
-/**
- * @jest-environment jsdom
- */
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new SqlProvider(`regtest2 ${Math.random()}`);
   await db.init();

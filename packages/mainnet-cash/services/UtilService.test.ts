@@ -1,19 +1,11 @@
 import * as mainnet from "mainnet-js";
-import { setupFetchMock } from "mainnet-js";
-import server from "../";
+import { setupFetchMock } from "#test/fetch";
 import request from "supertest";
 import { checkResponse } from "../utils/testUtils";
-var app;
+
+import app from "../test-setup.js";
 
 describe("Test Util Endpoints", () => {
-
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   it("Should convert an amount from usd to bch", async () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", { data: { BCH: 1337.42 } });

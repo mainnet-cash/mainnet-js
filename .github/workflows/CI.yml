@@ -90,17 +90,15 @@ jobs:
     - run: yarn
     - run: yarn test:rest
   coverage:
-    if: false
-    name: coverage
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v3
       with:
         node-version: '22.x'
     - run: yarn
-    - run: yarn build
-    - uses: paambaati/codeclimate-action@v2.5.7
+    - run: yarn coverage
+    - uses: actions/upload-artifact@v4
       with:
-        coverageCommand: yarn coverage
-        debug: true
+        name: coverage-report
+        path: coverage/

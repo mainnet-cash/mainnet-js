@@ -1,4 +1,4 @@
-import { setupFetchMock } from "../test/fetch";
+import { setupFetchMock } from "#test/fetch";
 import { ExchangeRate } from "./ExchangeRate";
 import { initProviders, disconnectProviders } from "../network";
 import { Config } from "../config";
@@ -18,7 +18,7 @@ describe("Exchange rate tests", () => {
       },
     });
 
-    let rate = await ExchangeRate.get("usd");
+    let rate = await ExchangeRate.get("usd", false);
     expect(rate).toBe(1337.42);
   });
 

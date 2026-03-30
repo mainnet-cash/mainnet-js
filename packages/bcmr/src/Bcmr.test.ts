@@ -1,8 +1,6 @@
 import {
   initProviders,
   disconnectProviders,
-  setupFetchMock,
-  removeFetchMock,
   RegTestWallet,
   OpReturnData,
   SendRequest,
@@ -11,6 +9,7 @@ import {
   NFTCapability,
   ElectrumNetworkProvider,
 } from "mainnet-js";
+import { setupFetchMock, removeFetchMock } from "#test/fetch";
 import { AuthChain, BCMR } from "./Bcmr.js";
 import { Registry } from "./bcmr-v2.schema.js";
 import { binToHex, hexToBin, sha256, utf8ToBin } from "@bitauth/libauth";

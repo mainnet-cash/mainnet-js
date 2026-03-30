@@ -2,9 +2,6 @@ import { HDWallet } from "mainnet-js";
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
 import { BaseWallet, RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
 
-/**
- * @jest-environment jsdom
- */
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new IndexedDBProvider("regtest-db");
   await db.init();

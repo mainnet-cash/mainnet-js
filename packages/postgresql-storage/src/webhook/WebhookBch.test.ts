@@ -7,9 +7,6 @@ let worker: WebhookWorker;
 let alice;
 let aliceWif;
 
-/**
- * @jest-environment jsdom
- */
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {

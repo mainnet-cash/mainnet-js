@@ -1,21 +1,11 @@
-import server from "..";
-
 import request from "supertest";
 import * as mainnet from "mainnet-js";
 import config  from '../config';
 import { checkResponse } from "../utils/testUtils";
 
-var app;
+import app from "../test-setup.js";
 
 describe("Test faucet endpoints", () => {
-
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   /**
    * test bch faucet 

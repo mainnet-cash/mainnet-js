@@ -43,11 +43,11 @@
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
     "composite": true,
-    "types": ["node", "jest"],
     "allowJs": false,
     "noEmit": false,
     "skipLibCheck": true,
     "paths": {
+      "#test/*": ["./test/*"],
       "@rpckit/core/electrum-cash": [
         "./node_modules/@rpckit/core/dist/electrum-cash/index.d.ts"
       ],
@@ -59,7 +59,7 @@
       ]
     }
   },
-  "include": ["packages/*/src/**/*.ts"],
+  "include": ["packages/*/src/**/*.ts", "test/*.ts", "test/*.d.ts"],
   "exclude": ["node_modules/**", "dist"],
   "compileOnSave": false
 }

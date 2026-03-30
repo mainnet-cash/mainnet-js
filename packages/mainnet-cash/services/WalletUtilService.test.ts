@@ -1,16 +1,9 @@
 
-import server from "..";
 import request from "supertest";
-var app;
+
+import app from "../test-setup.js";
 
 describe("Test Wallet Util Endpoints", () => {
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   /**
    * utilDecodeTransaction

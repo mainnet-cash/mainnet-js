@@ -1,6 +1,11 @@
 import { convert } from "./convert";
 import { ExchangeRate } from "../rate/ExchangeRate";
 
+beforeAll(() => {
+  // Clear exchange rate cache to ensure consistent rates across conversions
+  globalThis.RATE = {};
+});
+
 test("Should get price sat in usd", async () => {
   let rate = await ExchangeRate.get("usd");
   let usd = await convert(100000000, "sat", "usd");

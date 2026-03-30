@@ -5,12 +5,12 @@ const InjectBodyPlugin = require("inject-body-webpack-plugin").default;
 const __basedir = require("path").resolve(__dirname, "../../");
 const fs = require("fs");
 
-fs.mkdirSync(__basedir + "/jest/playwright/bcmr", {
+fs.mkdirSync(__basedir + "/test/playwright/bcmr", {
   recursive: true,
 });
 fs.copyFileSync(
-  __basedir + "/jest/playwright/mainnet.js",
-  __basedir + "/jest/playwright/bcmr/mainnet.js"
+  __basedir + "/test/playwright/mainnet.js",
+  __basedir + "/test/playwright/bcmr/mainnet.js"
 );
 
 const baseConfig = {
@@ -90,7 +90,7 @@ const browserConfig = {
 const browserTestDiff = {
   output: {
     filename: "[name].js",
-    path: __basedir + "/jest/playwright/bcmr/",
+    path: __basedir + "/test/playwright/bcmr/",
   },
 };
 

@@ -5,7 +5,6 @@ compilation-stats.json
 coverage/
 demo/
 dist
-jest/playwright/
 packages/mainnet-cash/
 node_modules
 swagger/

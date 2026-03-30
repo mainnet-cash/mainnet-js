@@ -9,8 +9,12 @@ node_modules
 *.d.ts
 *.js.map
 coverage
-jest/playwright/*
-jest/docker/data
+test/docker/data
+test/playwright
+test/screenshots
+test/attachments
+__screenshots__
+.vitest-attachments
 dist
 mainnet-js.tgz
 basecamp_archive

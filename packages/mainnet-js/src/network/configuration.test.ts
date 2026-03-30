@@ -3,6 +3,14 @@ import { Wallet } from "../wallet/Wif";
 import * as config from "./configuration";
 import * as primary from "./constant";
 
+afterEach(() => {
+  // Restore env vars to prevent leaking fake servers to subsequent test files
+  delete process.env.ELECTRUM;
+  delete process.env.ELECTRUM_TESTNET;
+  delete process.env.ELECTRUM_REGTEST;
+  config.DefaultProvider.servers.mainnet = "";
+});
+
 test("Should get electrum settings from defaults", async () => {
   expect(config.getDefaultServers(Network.MAINNET)).toBe(
     primary.mainnetServers
@@ -27,8 +35,6 @@ test("Should get electrum settings from DefaultProvider", async () => {
   expect(config.getDefaultServers(Network.REGTEST)).toBe(
     primary.regtestServers
   );
-
-  config.DefaultProvider.servers.mainnet = "";
 });
 
 test("Should get electrum settings from env", async () => {

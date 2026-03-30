@@ -19,7 +19,7 @@
     "build:module": "tsc -p tsconfig.browser.json",
     "build:browser": "npx webpack",
     "build:production": "yarn build:module && NODE_ENV=production yarn build:browser",
-    "test": "jest",
+    "test": "vitest run --config ../../test/vitest.config.ts",
     "publish:public": "yarn publish --access public"
   },
   "testPathIgnorePatterns": [

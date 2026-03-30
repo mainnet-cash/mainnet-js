@@ -1,4 +1,4 @@
-// jest/node.setup.js
+// test/node.setup.js
 require("dotenv").config({ path: ".env.regtest" });
 require("dotenv").config({ path: ".env.testnet" });
 const inspect = require("util").inspect;
@@ -35,7 +35,7 @@ module.exports = async function (cwd) {
   }
 
   if (global.fulcrumRegtest === undefined) {
-    global.fulcrumRegtest = spawnSync(`./jest/docker/start.sh`, null, {
+    global.fulcrumRegtest = spawnSync(`./test/docker/start.sh`, null, {
       shell: false,
       stdio: "inherit",
       cwd: cwd,
@@ -53,7 +53,7 @@ module.exports = async function (cwd) {
 
   for (
     let i = 0;
-    (await getRegtestUtxos(process.env.ADDRESS)) < 210 && i < 45;
+    (await getRegtestUtxos(process.env.ADDRESS)) < 210 && i < 15;
     i++
   ) {
     console.log("Waiting for blocks to be mined");

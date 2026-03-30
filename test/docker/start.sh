@@ -1,0 +1,1 @@
+docker compose -f test/regtest-docker-compose.yml up -d

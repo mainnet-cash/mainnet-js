@@ -47,7 +47,7 @@ Implementing even the simplest feature is a multi-step process. It's fastest to 
 4. Rebuild the REST server from spec
 5. Add required endpoint services, adding new files to .openapi-generator-ignore as necessary.
 6. **Fully test** the rest endpoints
-7. Finally, it must work in the browser, so, **fully test** an integrated workflow with a `*.test.headless.js` file.
+7. Finally, it must work in the browser, so, **fully test** an integrated workflow with a `*.test.browser.ts` file.
 8. Update documentation
 
 ## 1. Specification
@@ -96,7 +96,7 @@ yarn regtest:down
 With regtest running, you may then run one-off tests like so:
 
 ```
-SKIP_REGTEST_INIT=1 npx jest packages/mainnet-js/src/rate/ExchangeRate.test.t
+SKIP_REGTEST_INIT=1 npx vitest run --config test/vitest.config.ts packages/mainnet-js/src/rate/ExchangeRate.test.ts
 ```
 
 or `yarn test:skip` run the suite of library tests.
@@ -135,7 +135,7 @@ Alternatively, this check is also performed as part of continuous integration.
 
 Browsers do not have access to many standard node libraries by design. For this reason, some libraries either don't work in the browser or don't work in nodejs.
 
-All browser tests are denoted by `*.test.headless.js`.
+All browser tests are denoted by `*.test.browser.ts`.
 
 The bundle is built with webpack and does **not** use browserify, rather it simply
 omits nodejs libraries. Browser tests are run against testnet, using secrets stored

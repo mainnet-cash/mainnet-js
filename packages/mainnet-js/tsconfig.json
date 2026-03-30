@@ -18,7 +18,6 @@
       "../../node_modules/@types",
       "./src/types"
     ],
-    "types": ["node", "jest"],
     "allowJs": false,
     "declaration": true,
     "declarationMap": true,
@@ -27,6 +26,7 @@
     "strictPropertyInitialization": false,
     "useDefineForClassFields": false,
     "paths": {
+      "#test/*": ["../../test/*"],
       "@rpckit/core/electrum-cash": [
         "../../node_modules/@rpckit/core/dist/electrum-cash/index.d.ts"
       ],
@@ -38,7 +38,7 @@
       ]
     }
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**", "src/**/*test.ts"],
+  "include": ["src/**/*.ts", "../../test/vitest-globals.d.ts"],
+  "exclude": ["node_modules/**"],
   "compileOnSave": false
 }

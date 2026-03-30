@@ -25,7 +25,7 @@
     "build:main": "tsc",
     "build:module": "tsc -p tsconfig.browser.json",
     "build:production": "NODE_ENV=production yarn build:module",
-    "test": "jest",
+    "test": "vitest run --config ../../test/vitest.config.ts",
     "publish:public": "yarn publish --access public"
   },
   "testPathIgnorePatterns": [

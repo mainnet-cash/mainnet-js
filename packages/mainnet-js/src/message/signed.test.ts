@@ -5,7 +5,7 @@ import { binToHex } from "@bitauth/libauth";
 import fs from "fs";
 
 async function loadLargeMessage() {
-  const data = await fs.promises.readFile("./jest/data/bitcoin.tex", "utf-8");
+  const data = await fs.promises.readFile("./test/data/bitcoin.tex", "utf-8");
   return data;
 }
 

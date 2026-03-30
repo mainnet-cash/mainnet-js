@@ -15,7 +15,7 @@ async function getRegtestUtxos(address) {
       await transport.connect();
     } catch (e) {
       await transport.close();
-      //console.log(e);
+      // console.log(e);
       return 0;
     }
     const response = await transport.request(

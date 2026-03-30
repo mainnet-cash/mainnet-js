@@ -1,17 +1,9 @@
-import server from "../index.js";
 import request from "supertest";
 import { binToHex, NFTCapability, utf8ToBin } from "mainnet-js";
 
-var app;
+import app from "../test-setup.js";
 
 describe("Test Wallet Endpoints", () => {
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   /**
    * balance

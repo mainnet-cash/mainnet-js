@@ -686,7 +686,7 @@ describe(`Test cashtokens`, () => {
     });
 
     const balance = await bob.waitForTokenBalance(category, 100n);
-    await delay(500);
+    await delay(2000);
     expect(balance).toBe(100n);
     expect(seenBalance).toBe(100n);
     expect(sendResponse.txId).toBe(bobTxId);

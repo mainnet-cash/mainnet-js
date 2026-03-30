@@ -1,17 +1,9 @@
-import server from "../index.js";
 import request from "supertest";
 import { checkResponse } from "../utils/testUtils.js";
 
-var app;
+import app from "../test-setup.js";
 
 describe("Post Endpoints", () => {
-  beforeAll(async function () {
-    app = await server.getServer().launch();
-  });
-  afterAll(async function () {
-    await server.killElectrum()
-    app.close();
-  });
 
   /**
    * ready

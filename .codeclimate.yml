@@ -1,10 +1,10 @@
 exclude_patterns:
   - "dist/"
   - "demo/"
-  - "jest/"
+  - "test/"
   - "**/node_modules/"
   - "**/*.test.ts"
-  - "**/*.test.headless.js"
+  - "**/*.test.browser.ts"
   - "**/*.d.ts"
   - "generated/"
   - "polyfill/"

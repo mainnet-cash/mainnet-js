@@ -11,13 +11,7 @@ import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
 type RequestMethod = ExtractRequestMethod<ElectrumCashSchema>;
 type SubscriptionMethod = ExtractSubscriptionMethod<ElectrumCashSchema>;
 import { default as NetworkProvider } from "./NetworkProvider.js";
-import {
-  DsproofData,
-  HexHeaderI,
-  TxI,
-  Utxo,
-  HeaderI,
-} from "../interface.js";
+import { DsproofData, HexHeaderI, TxI, Utxo, HeaderI } from "../interface.js";
 import { Network } from "../interface.js";
 import {
   ElectrumRawTransaction,
@@ -88,10 +82,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getUtxos(cashaddr: string): Promise<Utxo[]> {
-    const result = await this.performRequest(
-      "blockchain.address.listunspent",
-      [cashaddr, "include_tokens"],
-    );
+    const result = await this.performRequest("blockchain.address.listunspent", [
+      cashaddr,
+      "include_tokens",
+    ]);
     return result.map((utxo) => ({
       address: cashaddr,
       txid: utxo.tx_hash,
@@ -108,10 +102,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   async getBalance(cashaddr: string): Promise<bigint> {
-    const result = await this.performRequest(
-      "blockchain.address.get_balance",
-      [cashaddr],
-    );
+    const result = await this.performRequest("blockchain.address.get_balance", [
+      cashaddr,
+    ]);
 
     return BigInt(result.confirmed) + BigInt(result.unconfirmed);
   }
@@ -129,10 +122,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       }
     }
 
-    const result = await this.performRequest(
-      "blockchain.header.get",
-      [height],
-    );
+    const result = await this.performRequest("blockchain.header.get", [height]);
     if (this.cache) {
       await this.cache.setItem(key, JSON.stringify(result));
     }
@@ -166,10 +156,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // rpckit automatically batches concurrent requests via BatchScheduler
       const fetched = await Promise.all(
         misses.map(async (hash) => {
-          const tx = await this.performRequest(
-            "blockchain.transaction.get",
-            [hash, false],
-          );
+          const tx = await this.performRequest("blockchain.transaction.get", [
+            hash,
+            false,
+          ]);
           return [hash, tx as string] as [string, string];
         })
       );
@@ -219,10 +209,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       // rpckit automatically batches concurrent requests via BatchScheduler
       const fetched = await Promise.all(
         misses.map(async (height) => {
-          const result = await this.performRequest(
-            "blockchain.header.get",
-            [height],
-          );
+          const result = await this.performRequest("blockchain.header.get", [
+            height,
+          ]);
           return [height, result] as [number, HexHeaderI];
         })
       );
@@ -312,10 +301,10 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
 
     try {
-      const result = await this.performRequest(
-        "blockchain.transaction.get",
-        [txHash, verbose],
-      );
+      const result = await this.performRequest("blockchain.transaction.get", [
+        txHash,
+        verbose,
+      ]);
 
       if (!verbose) {
         const hex = result as string;
@@ -436,10 +425,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     fromHeight: number = 0,
     toHeight: number = -1
   ): Promise<TxI[]> {
-    return this.performRequest(
-      "blockchain.address.get_history",
-      [cashaddr, fromHeight, toHeight],
-    );
+    return this.performRequest("blockchain.address.get_history", [
+      cashaddr,
+      fromHeight,
+      toHeight,
+    ]);
   }
 
   // Get the minimum fee a low-priority transaction must pay in order to be accepted to the daemon's memory pool.
@@ -512,13 +502,9 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   async subscribeToHeaders(
     callback: (header: HexHeaderI) => void
   ): Promise<CancelFn> {
-    return this.subscribeRequest(
-      "blockchain.headers.subscribe",
-      [],
-      (data) => {
-        callback(data[0]);
-      }
-    );
+    return this.subscribeRequest("blockchain.headers.subscribe", [], (data) => {
+      callback(data[0]);
+    });
   }
 
   async subscribeToAddress(
@@ -528,7 +514,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.subscribeRequest(
       "blockchain.address.subscribe",
       [cashaddr],
-      callback,
+      callback
     );
   }
 
@@ -539,7 +525,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.subscribeRequest(
       "blockchain.transaction.subscribe",
       [txHash],
-      callback,
+      callback
     );
   }
 
@@ -550,7 +536,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     return this.subscribeRequest(
       "blockchain.transaction.dsproof.subscribe",
       [txHash],
-      callback,
+      callback
     );
   }
 
@@ -567,7 +553,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
 
   public async performRequest<M extends RequestMethod>(
     method: M,
-    parameters?: ExtractParams<ElectrumCashSchema, M>,
+    parameters?: ExtractParams<ElectrumCashSchema, M>
   ): Promise<ExtractReturn<ElectrumCashSchema, M>> {
     await this.ready();
 
@@ -610,14 +596,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   public async subscribeRequest<M extends SubscriptionMethod>(
     method: M,
     parameters: ExtractParams<ElectrumCashSchema, M>,
-    callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void,
+    callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void
   ): Promise<CancelFn> {
     await this.ready();
 
     const unsubscribe: Unsubscribe = await this.transport.subscribe(
       method,
       parameters,
-      callback,
+      callback
     );
     this.subscriptions++;
 

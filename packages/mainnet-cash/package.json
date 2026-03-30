@@ -6,7 +6,7 @@
   "module": "index.js",
   "scripts": {
     "start": "node cluster.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles --runInBand --forceExit",
+    "test": "npx vitest run --config vitest.config.ts",
     "publish:public": "echo 'noop'"
   },
   "keywords": [

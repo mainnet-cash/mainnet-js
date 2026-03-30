@@ -10,9 +10,6 @@ import { default as SqlProvider } from "./SqlProvider";
 
 BaseWallet.StorageProvider = SqlProvider;
 
-/**
- * @jest-environment jsdom
- */
 test("Store and retrieve a Regtest wallet", async () => {
   let w1 = await RegTestWallet.named("Basic Regtest");
   expect(w1.name).toBe("Basic Regtest");
