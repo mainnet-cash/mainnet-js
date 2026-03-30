@@ -110,8 +110,14 @@ describe("MockNetworkProvider", () => {
     await provider.ready();
     const address = "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0";
 
-    await provider.addUtxo(address, { ...randomUtxo({ satoshis: 50000n }), height: 100 });
-    await provider.addUtxo(address, { ...randomUtxo({ satoshis: 30000n }), height: 150 });
+    await provider.addUtxo(address, {
+      ...randomUtxo({ satoshis: 50000n }),
+      height: 100,
+    });
+    await provider.addUtxo(address, {
+      ...randomUtxo({ satoshis: 30000n }),
+      height: 150,
+    });
 
     const history = await provider.getHistory(address);
     expect(history.length).toBe(2);
@@ -268,9 +274,7 @@ describe("MockNetworkProvider", () => {
     const provider = new MockNetworkProvider();
     await provider.ready();
 
-    await expect(
-      provider.sendRawTransaction("deadbeef")
-    ).rejects.toThrow();
+    await expect(provider.sendRawTransaction("deadbeef")).rejects.toThrow();
   });
 
   test("should send fungible tokens", async () => {

@@ -173,14 +173,13 @@ describe("Double-spend proof tests", () => {
 
       // Subscribe to dsproof notifications
       const dsproofs: DsproofData[] = [];
-      const cancel = await (alice.provider as unknown as MockNetworkProvider).subscribeToDsproof(
-        txHash,
-        ([, dsproof]) => {
-          if (dsproof !== null) {
-            dsproofs.push(dsproof);
-          }
+      const cancel = await (
+        alice.provider as unknown as MockNetworkProvider
+      ).subscribeToDsproof(txHash, ([, dsproof]) => {
+        if (dsproof !== null) {
+          dsproofs.push(dsproof);
         }
-      );
+      });
 
       // Inject a dsproof via test.add_dsproof
       const mockDsproof: DsproofData = {
@@ -232,13 +231,16 @@ describe("Double-spend proof tests", () => {
 
       // Inject a dsproof for that transaction
       const mc = (alice.provider as unknown as MockNetworkProvider).mc;
-      await mc.request("test.add_dsproof", [txHash, {
-        dspid: "dsp456",
-        txid: txHash,
-        hex: "cafebabe",
-        outpoint: { txid: txHash, vout: 0 },
-        descendants: [],
-      }]);
+      await mc.request("test.add_dsproof", [
+        txHash,
+        {
+          dspid: "dsp456",
+          txid: txHash,
+          hex: "cafebabe",
+          outpoint: { txid: txHash, vout: 0 },
+          descendants: [],
+        },
+      ]);
 
       await delay(500);
       await cancelWatch();
@@ -257,17 +259,12 @@ describe("Double-spend proof tests", () => {
 
       // Start watching for double-spends on HD wallet
       const dsproofs: DsproofData[] = [];
-      const cancelWatch = await hdBob.watchDoubleSpends(
-        (dsproof) => {
-          dsproofs.push(dsproof);
-        },
-        60000
-      );
+      const cancelWatch = await hdBob.watchDoubleSpends((dsproof) => {
+        dsproofs.push(dsproof);
+      }, 60000);
 
       // Send a transaction to the HD wallet
-      const resp = await alice.send([
-        { cashaddr: bobAddr, value: 1000n },
-      ]);
+      const resp = await alice.send([{ cashaddr: bobAddr, value: 1000n }]);
       const txHash = resp.txId!;
 
       // Wait for watchTransactionHashes to set up the dsproof subscription
@@ -275,13 +272,16 @@ describe("Double-spend proof tests", () => {
 
       // Inject a dsproof
       const mc = (alice.provider as unknown as MockNetworkProvider).mc;
-      await mc.request("test.add_dsproof", [txHash, {
-        dspid: "hd-dsp-789",
-        txid: txHash,
-        hex: "feedface",
-        outpoint: { txid: txHash, vout: 0 },
-        descendants: [],
-      }]);
+      await mc.request("test.add_dsproof", [
+        txHash,
+        {
+          dspid: "hd-dsp-789",
+          txid: txHash,
+          hex: "feedface",
+          outpoint: { txid: txHash, vout: 0 },
+          descendants: [],
+        },
+      ]);
 
       await delay(500);
       await cancelWatch();

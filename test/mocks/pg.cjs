@@ -39,7 +39,9 @@ function coercePgValue(v) {
   if (v === undefined) return null;
   if (typeof v === "string" && ISO_DATE_RE.test(v)) return new Date(v);
   if (typeof v === "string" && (v.startsWith("[") || v.startsWith("{"))) {
-    try { return JSON.parse(v); } catch {}
+    try {
+      return JSON.parse(v);
+    } catch {}
   }
   return v;
 }
@@ -65,9 +67,7 @@ class MockPool {
       table.serial++;
 
       const colMatch = sql.match(/\(([^)]+)\)\s*VALUES/i);
-      const cols = colMatch
-        ? colMatch[1].split(",").map((c) => c.trim())
-        : [];
+      const cols = colMatch ? colMatch[1].split(",").map((c) => c.trim()) : [];
 
       const row = { id: table.serial };
       cols.forEach((col, i) => {
@@ -89,9 +89,7 @@ class MockPool {
         const col = whereMatch[1];
         const idx = parseInt(whereMatch[2]) - 1;
         const val = params[idx];
-        const rows = table.rows.filter(
-          (r) => String(r[col]) === String(val)
-        );
+        const rows = table.rows.filter((r) => String(r[col]) === String(val));
         return { rows: rows.map((r) => ({ ...r })), rowCount: rows.length };
       }
 
@@ -147,9 +145,7 @@ class MockPool {
         const idx = parseInt(whereMatch[2]) - 1;
         const val = params[idx];
         const before = table.rows.length;
-        table.rows = table.rows.filter(
-          (r) => String(r[col]) !== String(val)
-        );
+        table.rows = table.rows.filter((r) => String(r[col]) !== String(val));
         return { rows: [], rowCount: before - table.rows.length };
       }
 

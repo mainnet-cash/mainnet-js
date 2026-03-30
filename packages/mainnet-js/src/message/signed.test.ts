@@ -5,8 +5,12 @@ import { initProviders, disconnectProviders } from "../network/Connection.js";
 
 import fs from "fs";
 
-beforeAll(async () => { await initProviders(); });
-afterAll(async () => { await disconnectProviders(); });
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
 
 async function loadLargeMessage() {
   const data = await fs.promises.readFile("./test/data/bitcoin.tex", "utf-8");

@@ -13,7 +13,7 @@ export async function initProvider(network: Network) {
   if (!getGlobalProvider(network)) {
     if (process.env.USE_MOCK_PROVIDER) {
       if (network !== Network.REGTEST) return;
-      const provider = await createMockProvider() as MockNetworkProvider;
+      const provider = (await createMockProvider()) as MockNetworkProvider;
       await provider.ready();
       await provider.seedAlice();
       setGlobalProvider(network, provider);

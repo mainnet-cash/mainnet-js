@@ -1,4 +1,8 @@
-import type { ElectrumCashTestSchema, Indexer, IndexerConfig } from "@mem-cash/electrum";
+import type {
+  ElectrumCashTestSchema,
+  Indexer,
+  IndexerConfig,
+} from "@mem-cash/electrum";
 import { asTransport, createIndexer } from "@mem-cash/electrum";
 import ElectrumNetworkProvider from "./ElectrumNetworkProvider.js";
 import { Network, Utxo } from "../interface.js";
@@ -57,8 +61,9 @@ export class MockNetworkProvider extends ElectrumNetworkProvider<ElectrumCashTes
 
   override async mine(cashaddr: string, blocks: number): Promise<string[]> {
     await this.ready();
-    const result = await this.mc.request("test.mine", [cashaddr, blocks]) as {
-      height: number; coinbaseTxids: string[];
+    const result = (await this.mc.request("test.mine", [cashaddr, blocks])) as {
+      height: number;
+      coinbaseTxids: string[];
     };
     return result.coinbaseTxids;
   }
@@ -79,11 +84,14 @@ export class MockNetworkProvider extends ElectrumNetworkProvider<ElectrumCashTes
     if (!address) return;
     await this.ready();
     for (let i = 0; i < 110; i++) {
-      await this.mc.request("test.add_utxo", [address, {
-        vout: 0,
-        satoshis: 5_000_000_000,
-        height: i + 1,
-      }]);
+      await this.mc.request("test.add_utxo", [
+        address,
+        {
+          vout: 0,
+          satoshis: 5_000_000_000,
+          height: i + 1,
+        },
+      ]);
     }
   }
 }

@@ -491,24 +491,30 @@ describe(`Watch only Wallets`, () => {
     }
   });
 
-  (process.env.ALICE_TESTNET_WALLET_ID ? test : test.skip)("Should send to testnet coins to a random address", async () => {
-    let alice = await TestNetWallet.fromId(
-      process.env.ALICE_TESTNET_WALLET_ID!
-    );
-    expect(alice.getPublicKeyHash()!.length).toBe(20);
-    let aliceBalance = await alice.send([
-      { cashaddr: alice.cashaddr!, value: 720n },
-    ]);
-    expect(aliceBalance.balance).toBeGreaterThan(5000n);
-  });
+  (process.env.ALICE_TESTNET_WALLET_ID ? test : test.skip)(
+    "Should send to testnet coins to a random address",
+    async () => {
+      let alice = await TestNetWallet.fromId(
+        process.env.ALICE_TESTNET_WALLET_ID!
+      );
+      expect(alice.getPublicKeyHash()!.length).toBe(20);
+      let aliceBalance = await alice.send([
+        { cashaddr: alice.cashaddr!, value: 720n },
+      ]);
+      expect(aliceBalance.balance).toBeGreaterThan(5000n);
+    }
+  );
 
-  (process.env.ALICE_TESTNET_ADDRESS ? test : test.skip)("Should get the testnet wallet balance", async () => {
-    let alice = await TestNetWallet.watchOnly(
-      process.env.ALICE_TESTNET_ADDRESS!
-    );
-    const aliceBalance = await alice.getBalance();
-    expect(aliceBalance).toBeGreaterThan(2000n);
-  });
+  (process.env.ALICE_TESTNET_ADDRESS ? test : test.skip)(
+    "Should get the testnet wallet balance",
+    async () => {
+      let alice = await TestNetWallet.watchOnly(
+        process.env.ALICE_TESTNET_ADDRESS!
+      );
+      const aliceBalance = await alice.getBalance();
+      expect(aliceBalance).toBeGreaterThan(2000n);
+    }
+  );
 
   test("Should encode and submit a transaction", async () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;

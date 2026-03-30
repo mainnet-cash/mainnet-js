@@ -12,8 +12,12 @@ import { default as SqlProvider } from "./SqlProvider";
 
 BaseWallet.StorageProvider = SqlProvider;
 
-beforeAll(async () => { await initProviders(); });
-afterAll(async () => { await disconnectProviders(); });
+beforeAll(async () => {
+  await initProviders();
+});
+afterAll(async () => {
+  await disconnectProviders();
+});
 
 test("Store and retrieve a Regtest wallet", async () => {
   let w1 = await RegTestWallet.named("Basic Regtest");

@@ -30,8 +30,9 @@ import { MemoryCache } from "../cache/MemoryCache.js";
 type CachedRawTransaction = ElectrumRawTransaction & { fetchHeight: number };
 
 export default class ElectrumNetworkProvider<
-  S extends Schema = ElectrumCashSchema,
-> implements NetworkProvider {
+  S extends Schema = ElectrumCashSchema
+> implements NetworkProvider
+{
   public transport: Transport<S>;
   public subscriptions: number = 0;
   private currentHeight: number = 0;
@@ -555,7 +556,9 @@ export default class ElectrumNetworkProvider<
     return this.daemonPassthrough("generatetoaddress", [blocks, cashaddr]);
   }
 
-  public async performRequest<M extends ExtractRequestMethod<ElectrumCashSchema>>(
+  public async performRequest<
+    M extends ExtractRequestMethod<ElectrumCashSchema>
+  >(
     method: M,
     parameters?: ExtractParams<ElectrumCashSchema, M>
   ): Promise<ExtractReturn<ElectrumCashSchema, M>> {
@@ -577,7 +580,9 @@ export default class ElectrumNetworkProvider<
       return new Error(typeof e === "string" ? e : String(e));
     };
 
-    const request = (this.transport as unknown as Transport<ElectrumCashSchema>).request(method, parameters!);
+    const request = (
+      this.transport as unknown as Transport<ElectrumCashSchema>
+    ).request(method, parameters!);
 
     try {
       const value = await Promise.race([request, makeTimeout()]);
@@ -597,18 +602,18 @@ export default class ElectrumNetworkProvider<
     }
   }
 
-  public async subscribeRequest<M extends ExtractSubscriptionMethod<ElectrumCashSchema>>(
+  public async subscribeRequest<
+    M extends ExtractSubscriptionMethod<ElectrumCashSchema>
+  >(
     method: M,
     parameters: ExtractParams<ElectrumCashSchema, M>,
     callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void
   ): Promise<CancelFn> {
     await this.ready();
 
-    const unsubscribe: Unsubscribe = await (this.transport as unknown as Transport<ElectrumCashSchema>).subscribe(
-      method,
-      parameters,
-      callback
-    );
+    const unsubscribe: Unsubscribe = await (
+      this.transport as unknown as Transport<ElectrumCashSchema>
+    ).subscribe(method, parameters, callback);
     this.subscriptions++;
 
     return async () => {
