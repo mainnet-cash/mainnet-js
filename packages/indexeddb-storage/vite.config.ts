@@ -1,5 +1,5 @@
-import { resolve } from "path";
 import { createRequire } from "module";
+import { resolve } from "path";
 import { createBrowserBuildConfig } from "../../vite.browser.config.base.js";
 
 const require = createRequire(import.meta.url);

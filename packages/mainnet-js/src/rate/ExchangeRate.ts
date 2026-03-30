@@ -1,10 +1,10 @@
-import { EXCHANGE_RATE_TTL } from "../constant.js";
-import {
-  RuntimePlatform,
-  getRuntimePlatform,
-} from "../util/getRuntimePlatform.js";
-import ExchangeRateProvider from "../db/ExchangeRateProvider.js";
 import { Config } from "../config.js";
+import { EXCHANGE_RATE_TTL } from "../constant.js";
+import ExchangeRateProvider from "../db/ExchangeRateProvider.js";
+import {
+  getRuntimePlatform,
+  RuntimePlatform,
+} from "../util/getRuntimePlatform.js";
 
 export class ExchangeRate {
   symbol: string;
@@ -43,7 +43,7 @@ export class ExchangeRate {
 
   static async getRateFromLocalStorage(
     symbol: string,
-    useCache = true
+    useCache = true,
   ): Promise<number> {
     if (!useCache) {
       return await getRateFromExchange(symbol);
@@ -113,7 +113,7 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   if (symbol === "usd") {
     try {
       const response = await fetch(
-        "https://markets.api.bitcoin.com/live/bitcoin"
+        "https://markets.api.bitcoin.com/live/bitcoin",
       );
       const data = await response.json();
       return data["data"]["BCH"];
@@ -126,7 +126,7 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   };
   const rates = data.data.reduce(
     (acc, rate) => ({ ...acc, [rate.code.toLocaleLowerCase()]: rate.rate }),
-    {}
+    {},
   );
   if (symbol in rates) {
     return rates[symbol];

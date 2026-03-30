@@ -1,0 +1,37 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/.github/**",
+      "!**/.vscode/**",
+      "!**/.nyc_output/**",
+      "!**/coverage/**",
+      "!**/demo/**",
+      "!**/dist/**",
+      "!packages/mainnet-cash/**",
+      "!**/swagger/**",
+      "!**/test/playwright/**"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "all",
+      "quoteStyle": "double",
+      "semicolons": "always"
+    }
+  },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noUnusedImports": "warn"
+      }
+    }
+  }
+}

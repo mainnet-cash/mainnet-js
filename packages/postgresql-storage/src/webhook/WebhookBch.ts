@@ -1,7 +1,5 @@
+import { CancelFn, ElectrumRawTransaction, TxI, WatchWallet } from "mainnet-js";
 import SqlProvider from "../SqlProvider.js";
-import { CancelFn, TxI } from "mainnet-js";
-import { ElectrumRawTransaction } from "mainnet-js";
-import { WatchWallet } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
 import WebhookWorker from "./WebhookWorker.js";
 
@@ -51,14 +49,14 @@ export class WebhookBch extends Webhook {
     this.wallet = await WatchWallet.fromCashaddr(this.cashaddr);
     this.cancel = await this.wallet.provider!.subscribeToAddress(
       this.cashaddr,
-      webhookCallback
+      webhookCallback,
     );
   }
 
   async handler(status: string): Promise<void> {
     // get transactions
     const history: TxI[] = await this.wallet.provider!.getHistory(
-      this.cashaddr
+      this.cashaddr,
     );
 
     // figure out which transactions to send to the hook
@@ -74,7 +72,7 @@ export class WebhookBch extends Webhook {
       this.tx_seen = this.tx_seen.map((seenTx) => {
         if (seenTx.height <= 0) {
           const histTx = revHistory.find(
-            (val) => val.tx_hash === seenTx.tx_hash
+            (val) => val.tx_hash === seenTx.tx_hash,
           );
           if (histTx) {
             seenTx.height = histTx.height;
@@ -87,7 +85,7 @@ export class WebhookBch extends Webhook {
       txs = history.filter(
         (val) =>
           (val.height >= this.last_height || val.height <= 0) &&
-          !seenHashes.includes(val.tx_hash)
+          !seenHashes.includes(val.tx_hash),
       );
     }
 
@@ -102,21 +100,21 @@ export class WebhookBch extends Webhook {
         const rawTx: ElectrumRawTransaction =
           await this.wallet.provider!.getRawTransactionObject(tx.tx_hash);
         const nonCoinbaseVin = rawTx.vin.filter(
-          (t) => t.txid !== "0".repeat(64)
+          (t) => t.txid !== "0".repeat(64),
         );
         const parentTxs: ElectrumRawTransaction[] = await Promise.all(
           nonCoinbaseVin.map((t) =>
-            this.wallet.provider!.getRawTransactionObject(t.txid)
-          )
+            this.wallet.provider!.getRawTransactionObject(t.txid),
+          ),
         );
         // console.debug("Got raw tx", JSON.stringify(rawTx, null, 2));
         const haveAddressInOutputs: boolean = rawTx.vout.some((val) =>
-          val.scriptPubKey.addresses.includes(this.cashaddr)
+          val.scriptPubKey.addresses.includes(this.cashaddr),
         );
         const haveAddressInParentOutputs: boolean = parentTxs.some((parent) =>
           parent.vout.some((val) =>
-            val.scriptPubKey.addresses.includes(this.cashaddr)
-          )
+            val.scriptPubKey.addresses.includes(this.cashaddr),
+          ),
         );
 
         const wantsIn: boolean = this.type.indexOf("in") >= 0;
@@ -126,8 +124,8 @@ export class WebhookBch extends Webhook {
           haveAddressInParentOutputs && haveAddressInOutputs
             ? WebhookType.transactionInOut
             : haveAddressInParentOutputs
-            ? WebhookType.transactionOut
-            : WebhookType.transactionIn;
+              ? WebhookType.transactionOut
+              : WebhookType.transactionIn;
 
         if (wantsIn && haveAddressInOutputs) {
           result = await this.post({
@@ -146,7 +144,7 @@ export class WebhookBch extends Webhook {
       } else if (this.type === WebhookType.balance) {
         // watching address balance
         const balanceSat = await this.wallet.provider!.getBalance(
-          this.cashaddr
+          this.cashaddr,
         );
         result = await this.post({ sat: balanceSat.toString() });
       }
@@ -156,7 +154,7 @@ export class WebhookBch extends Webhook {
         await this.db.setWebhookSeenTxLastHeight(
           this.id!,
           this.tx_seen,
-          this.last_height
+          this.last_height,
         );
       } else {
         // console.debug("Failed to execute webhook", hook);
@@ -181,12 +179,12 @@ export class WebhookBch extends Webhook {
       if (maxHeight >= this.last_height) {
         this.last_height = maxHeight;
         this.tx_seen = this.tx_seen.filter(
-          (val) => val.height === maxHeight || val.height <= 0
+          (val) => val.height === maxHeight || val.height <= 0,
         );
         await this.db.setWebhookSeenTxLastHeight(
           this.id!,
           this.tx_seen,
-          this.last_height
+          this.last_height,
         );
       }
     }

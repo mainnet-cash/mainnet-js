@@ -12,16 +12,21 @@ import {
   encodePrivateKeyWif,
   generateBip39Mnemonic,
   generatePrivateKey,
+  generateRandomBytes,
   HdKeyNetwork,
   hexToBin,
   secp256k1,
 } from "@bitauth/libauth";
-
+import { Config } from "../config.js";
+import { DERIVATION_PATHS } from "../constant.js";
 import { NetworkType } from "../enum.js";
-
+import { SignedMessageResponseI } from "../message/index.js";
+import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
+import { signUnsignedTransaction } from "../transaction/Wif.js";
+import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
+import { checkWifNetwork } from "../util/checkWifNetwork.js";
 import { WalletTypeEnum } from "./enum.js";
 import { MnemonicI, SendRequestOptionsI, WalletInfoI } from "./interface.js";
-
 import {
   OpReturnData,
   SendRequest,
@@ -31,21 +36,6 @@ import {
   TokenSendRequest,
   XPubKey,
 } from "./model.js";
-
-import { signUnsignedTransaction } from "../transaction/Wif.js";
-
-import { DERIVATION_PATHS } from "../constant.js";
-import {
-  SignedMessage,
-  SignedMessageI,
-  SignedMessageResponseI,
-} from "../message/index.js";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
-import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
-import { checkWifNetwork } from "../util/checkWifNetwork.js";
-import { generateRandomBytes } from "@bitauth/libauth";
-
-import { Config } from "../config.js";
 import { WatchWallet } from "./Watch.js";
 //#endregion Imports
 
@@ -80,7 +70,7 @@ export class Wallet extends WatchWallet {
   constructor(
     name = "",
     network = NetworkType.Mainnet,
-    walletType = WalletTypeEnum.Seed
+    walletType = WalletTypeEnum.Seed,
   ) {
     super(name, network);
 
@@ -151,7 +141,7 @@ export class Wallet extends WatchWallet {
         encodeHdPublicKey({
           node: deriveHdPublicNode(parentNode),
           network: this.network === NetworkType.Mainnet ? "mainnet" : "testnet",
-        })
+        }),
       ).hdPublicKey;
 
       const childNode = deriveHdPath(rootNode, this.derivationPath);
@@ -162,7 +152,7 @@ export class Wallet extends WatchWallet {
     if (this.walletType === WalletTypeEnum.PrivateKey && !privateKey) {
       // @ts-ignore
       this.privateKey = generatePrivateKey(
-        () => generateRandomBytes(32) as Uint8Array
+        () => generateRandomBytes(32) as Uint8Array,
       );
     }
 
@@ -174,7 +164,7 @@ export class Wallet extends WatchWallet {
         privateKey,
         this.network === NetworkType.Regtest
           ? NetworkType.Testnet
-          : this.network
+          : this.network,
       );
     }
 
@@ -182,14 +172,14 @@ export class Wallet extends WatchWallet {
     if (this.walletType === WalletTypeEnum.Wif && !privateKeyWif) {
       // @ts-ignore
       this.privateKey = generatePrivateKey(
-        () => generateRandomBytes(32) as Uint8Array
+        () => generateRandomBytes(32) as Uint8Array,
       );
 
       privateKeyWif = encodePrivateKeyWif(
         this.privateKey,
         this.network === NetworkType.Regtest
           ? NetworkType.Testnet
-          : this.network
+          : this.network,
       );
     }
 
@@ -202,15 +192,15 @@ export class Wallet extends WatchWallet {
       if (!this.privateKey) {
         // @ts-ignore
         this.privateKey = assertSuccess(
-          decodePrivateKeyWif(privateKeyWif)
+          decodePrivateKeyWif(privateKeyWif),
         ).privateKey;
       }
 
       publicKey = assertSuccess(
-        secp256k1.derivePublicKeyUncompressed(this.privateKey)
+        secp256k1.derivePublicKeyUncompressed(this.privateKey),
       );
       publicKeyCompressed = assertSuccess(
-        secp256k1.compressPublicKey(publicKey!)
+        secp256k1.compressPublicKey(publicKey!),
       );
     }
 
@@ -283,7 +273,7 @@ export class Wallet extends WatchWallet {
     for (const path of hdPaths) {
       if (path === "m") {
         throw Error(
-          "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+          "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications",
         );
       }
       const childNode = deriveHdPath(hdNode, path);
@@ -301,7 +291,7 @@ export class Wallet extends WatchWallet {
         },
         {
           throwErrors: true,
-        }
+        },
       ).hdPublicKey;
       const key = new XPubKey({
         path: path,
@@ -339,7 +329,7 @@ export class Wallet extends WatchWallet {
    */
   public static async fromId<T extends typeof Wallet>(
     this: T,
-    walletId: string
+    walletId: string,
   ): Promise<InstanceType<T>> {
     return new this().fromId(walletId) as InstanceType<T>;
   }
@@ -353,7 +343,7 @@ export class Wallet extends WatchWallet {
    */
   public static async fromPrivateKey<T extends typeof Wallet>(
     this: T,
-    privateKey: string | Uint8Array
+    privateKey: string | Uint8Array,
   ): Promise<InstanceType<T>> {
     return new this().fromPrivateKey(privateKey) as InstanceType<T>;
   }
@@ -367,7 +357,7 @@ export class Wallet extends WatchWallet {
    */
   public static async fromWIF<T extends typeof Wallet>(
     this: T,
-    wif: string
+    wif: string,
   ): Promise<InstanceType<T>> {
     return new this().fromWIF(wif) as InstanceType<T>;
   }
@@ -385,7 +375,7 @@ export class Wallet extends WatchWallet {
   public static async fromSeed<T extends typeof Wallet>(
     this: T,
     mnemonic: string,
-    derivationPath?: string
+    derivationPath?: string,
   ): Promise<InstanceType<T>> {
     return new this().fromSeed(mnemonic, derivationPath) as InstanceType<T>;
   }
@@ -403,7 +393,7 @@ export class Wallet extends WatchWallet {
   public static async newRandom<T extends typeof Wallet>(
     this: T,
     name: string = "",
-    dbName?: string
+    dbName?: string,
   ): Promise<InstanceType<T>> {
     return new this().newRandom(name, dbName) as InstanceType<T>;
   }
@@ -459,7 +449,7 @@ export class Wallet extends WatchWallet {
   // Initialize wallet from a mnemonic phrase
   protected async fromSeed(
     mnemonic: string,
-    derivationPath?: string
+    derivationPath?: string,
   ): Promise<this> {
     if (!mnemonic.length) {
       throw Error("refusing to create wallet from empty mnemonic");
@@ -475,7 +465,7 @@ export class Wallet extends WatchWallet {
 
   // Initialize wallet from private key in hex or Uint8Array
   protected async fromPrivateKey(
-    privateKey: string | Uint8Array
+    privateKey: string | Uint8Array,
   ): Promise<this> {
     if (typeof privateKey === "string") {
       privateKey = hexToBin(privateKey);
@@ -567,7 +557,7 @@ export class Wallet extends WatchWallet {
    */
   public async sendMax(
     cashaddr: string,
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
     return this.sendMaxRaw(cashaddr, options, this.privateKey);
   }
@@ -587,7 +577,7 @@ export class Wallet extends WatchWallet {
       | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array
+    privateKey?: Uint8Array,
   ) {
     privateKey = privateKey ?? this.privateKey;
 
@@ -599,13 +589,13 @@ export class Wallet extends WatchWallet {
       requests,
       discardChange,
       options,
-      privateKey
+      privateKey,
     );
   }
 
   public async signUnsignedTransaction(
     transaction: Uint8Array | string,
-    sourceOutputs: SourceOutput[]
+    sourceOutputs: SourceOutput[],
   ): Promise<Uint8Array> {
     if (!this.privateKey) {
       throw Error("Can not sign a transaction with watch-only wallet.");
@@ -619,7 +609,7 @@ export class Wallet extends WatchWallet {
   // Convenience wrapper to sign interface
   public sign(
     message: string,
-    privateKey: Uint8Array | undefined = undefined
+    privateKey: Uint8Array | undefined = undefined,
   ): SignedMessageResponseI {
     return super.sign(message, privateKey ?? this.privateKey);
   }

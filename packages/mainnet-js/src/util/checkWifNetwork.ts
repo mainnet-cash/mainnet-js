@@ -2,7 +2,7 @@ import { NetworkType } from "../enum.js";
 
 export function checkWifNetwork(
   walletImportFormatString: string,
-  networkType: NetworkType
+  networkType: NetworkType,
 ) {
   if (
     !(
@@ -11,14 +11,14 @@ export function checkWifNetwork(
     networkType === NetworkType.Mainnet
   ) {
     throw Error(
-      `Mainnet type wif ${walletImportFormatString} passed, should start with L or K`
+      `Mainnet type wif ${walletImportFormatString} passed, should start with L or K`,
     );
   } else if (
     walletImportFormatString[0] !== "c" &&
     networkType === NetworkType.Testnet
   ) {
     throw Error(
-      `Testnet type wif ${walletImportFormatString} passed, should start with c`
+      `Testnet type wif ${walletImportFormatString} passed, should start with c`,
     );
   }
 }

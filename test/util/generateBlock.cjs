@@ -7,7 +7,7 @@ async function getRegtestUtxos(address) {
 
     // Try both localhost and host.docker.internal for Docker compatibility
     const transports = ["127.0.0.1", "host.docker.internal"].map((host) =>
-      webSocket(`ws://${host}:60003`)
+      webSocket(`ws://${host}:60003`),
     );
     const transport = fallback(transports);
 
@@ -20,7 +20,7 @@ async function getRegtestUtxos(address) {
     }
     const response = await transport.request(
       "blockchain.address.listunspent",
-      address
+      address,
     );
     await transport.close();
     return response.length;

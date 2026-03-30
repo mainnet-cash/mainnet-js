@@ -1,21 +1,21 @@
 import {
+  assertSuccess,
   binToHex,
+  CashAddressNetworkPrefix,
+  decodeCashAddress,
   decodeTransaction,
   hexToBin,
   lockingBytecodeToCashAddress,
-  CashAddressNetworkPrefix,
-  decodeCashAddress,
-  TransactionCommon,
-  assertSuccess,
   Opcodes,
+  TransactionCommon,
 } from "@bitauth/libauth";
+import { bchParam } from "../chain.js";
 import { UnitEnum } from "../enum.js";
-import NetworkProvider from "../network/NetworkProvider.js";
 import { TxI } from "../interface.js";
-import { TransactionHistoryItem, InOutput } from "./interface.js";
+import NetworkProvider from "../network/NetworkProvider.js";
 import { ExchangeRate } from "../rate/ExchangeRate.js";
 import { sanitizeUnit } from "../util/sanitizeUnit.js";
-import { bchParam } from "../chain.js";
+import { InOutput, TransactionHistoryItem } from "./interface.js";
 
 type Transaction = TransactionCommon & {
   size: number;
@@ -58,8 +58,8 @@ export const getHistory = async ({
     const allHistory = (
       await Promise.all(
         addresses.map(async (address) =>
-          provider.getHistory(address, fromHeight, toHeight)
-        )
+          provider.getHistory(address, fromHeight, toHeight),
+        ),
       )
     ).flat();
 
@@ -77,7 +77,7 @@ export const getHistory = async ({
       .sort((a, b) =>
         a.height <= 0 || b.height <= 0
           ? a.height - b.height
-          : b.height - a.height
+          : b.height - a.height,
       )
       .slice(start, start + count);
   }
@@ -211,7 +211,7 @@ export const getHistory = async ({
           lockingBytecodeToCashAddress({
             bytecode: prevoutOutput.lockingBytecode,
             prefix: prefix,
-          })
+          }),
         ).address;
         addressCache[prevoutOutput.lockingBytecode as any] = address;
       } else {
@@ -249,7 +249,7 @@ export const getHistory = async ({
             lockingBytecodeToCashAddress({
               bytecode: output.lockingBytecode,
               prefix: prefix,
-            })
+            }),
           ).address;
           addressCache[output.lockingBytecode as any] = address;
         }
@@ -336,12 +336,12 @@ export const getHistory = async ({
         category,
         amount,
         nftAmount: BigInt(0),
-      })
+      }),
     );
 
     for (const [category, nftAmount] of Object.entries(nftTokenBalances)) {
       const tokenChange = tx.tokenAmountChanges.find(
-        (tokenChange) => tokenChange.category === category
+        (tokenChange) => tokenChange.category === category,
       );
       if (tokenChange) {
         tokenChange.nftAmount = nftAmount;
@@ -360,7 +360,7 @@ export const getHistory = async ({
     (a, b) =>
       (a.blockHeight <= 0 || b.blockHeight <= 0
         ? a.blockHeight - b.blockHeight
-        : b.blockHeight - a.blockHeight) || a.valueChange - b.valueChange
+        : b.blockHeight - a.blockHeight) || a.valueChange - b.valueChange,
   );
 
   // backfill the balances

@@ -1,10 +1,10 @@
 import {
-  decodeHdPublicKey,
-  encodeCashAddress,
   binToHex,
   CashAddressNetworkPrefix,
   CashAddressType,
+  decodeHdPublicKey,
   deriveHdPathRelative,
+  encodeCashAddress,
 } from "@bitauth/libauth";
 
 import { hash160 } from "./hash160.js";
@@ -20,7 +20,7 @@ import { hash160 } from "./hash160.js";
 export function getAddrsByXpubKey(
   xpub: string,
   path: string,
-  count: number
+  count: number,
 ): Array<string> {
   const pathComponents = path.split("/");
   const result: Array<string> = [];

@@ -1,19 +1,19 @@
 export {
-  getNetworkProvider,
-  createProvider,
-  setGlobalProvider,
-  getGlobalProvider,
-  removeGlobalProvider,
-} from "./default.js";
-export {
-  initProviders,
-  initProvider,
   disconnectProviders,
+  initProvider,
+  initProviders,
 } from "./Connection.js";
+export {
+  createProvider,
+  getGlobalProvider,
+  getNetworkProvider,
+  removeGlobalProvider,
+  setGlobalProvider,
+} from "./default.js";
 export { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
-export type { default as NetworkProvider } from "./NetworkProvider.js";
 export type {
   ElectrumRawTransaction,
-  ElectrumRawTransactionWithInputValues,
   ElectrumRawTransactionVinWithValues,
+  ElectrumRawTransactionWithInputValues,
 } from "./interface.js";
+export type { default as NetworkProvider } from "./NetworkProvider.js";

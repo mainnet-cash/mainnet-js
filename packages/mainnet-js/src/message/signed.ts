@@ -64,18 +64,18 @@ export class SignedMessage implements SignedMessageI {
     const messageHash = hash_message(message);
     const rs = secp256k1.signMessageHashRecoverableCompact(
       privateKey,
-      messageHash
+      messageHash,
     );
     if (typeof rs === "string") {
       throw new Error(rs);
     }
     const sigDer = secp256k1.signMessageHashDER(
       privateKey,
-      messageHash
+      messageHash,
     ) as Uint8Array;
     const sigSchnorr = secp256k1.signMessageHashSchnorr(
       privateKey,
-      messageHash
+      messageHash,
     ) as Uint8Array;
     const electronEncoding = new Uint8Array([
       ...[31 + rs.recoveryId],
@@ -113,7 +113,7 @@ export class SignedMessage implements SignedMessageI {
     message: string,
     signature: string,
     cashaddr?: string,
-    publicKey?: Uint8Array
+    publicKey?: Uint8Array,
   ): VerifyMessageResponseI {
     // Check that the signature is valid for the given message.
     const messageHash = hash_message(message);
@@ -130,7 +130,7 @@ export class SignedMessage implements SignedMessageI {
       const recoveredPk = secp256k1.recoverPublicKeyCompressed(
         rawSig,
         recoveryId as RecoveryId,
-        messageHash
+        messageHash,
       );
       if (typeof recoveredPk === "string") {
         throw new Error(recoveredPk);
@@ -141,7 +141,7 @@ export class SignedMessage implements SignedMessageI {
       signatureValid = secp256k1.verifySignatureCompact(
         rawSig,
         recoveredPk,
-        messageHash
+        messageHash,
       );
       if (cashaddr) {
         // Validate that the signature actually matches the provided cashaddr
@@ -194,7 +194,7 @@ export class SignedMessage implements SignedMessageI {
     message: string,
     signature: string,
     cashaddr?: string,
-    publicKey?: Uint8Array
+    publicKey?: Uint8Array,
   ) {
     return new this().verify(message, signature, cashaddr, publicKey);
   }

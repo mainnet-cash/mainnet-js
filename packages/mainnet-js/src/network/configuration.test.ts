@@ -13,13 +13,13 @@ afterEach(() => {
 
 test("Should get electrum settings from defaults", async () => {
   expect(config.getDefaultServers(Network.MAINNET)).toBe(
-    primary.mainnetServers
+    primary.mainnetServers,
   );
   expect(config.getDefaultServers(Network.TESTNET)).toBe(
-    primary.testnetServers
+    primary.testnetServers,
   );
   expect(config.getDefaultServers(Network.REGTEST)).toBe(
-    primary.regtestServers
+    primary.regtestServers,
   );
 });
 
@@ -27,13 +27,13 @@ test("Should get electrum settings from DefaultProvider", async () => {
   config.DefaultProvider.servers.mainnet = "wss://example.com:777";
 
   expect(config.getDefaultServers(Network.MAINNET)).toBe(
-    "wss://example.com:777"
+    "wss://example.com:777",
   );
   expect(config.getDefaultServers(Network.TESTNET)).toBe(
-    primary.testnetServers
+    primary.testnetServers,
   );
   expect(config.getDefaultServers(Network.REGTEST)).toBe(
-    primary.regtestServers
+    primary.regtestServers,
   );
 });
 
@@ -43,13 +43,13 @@ test("Should get electrum settings from env", async () => {
     "fallback(wss://test.example.com:1234,wss://test.example.dk:1234)";
   process.env.ELECTRUM_REGTEST = "ws://reg.example.com:1234";
   expect(config.getDefaultServers(Network.MAINNET)).toBe(
-    "wss://example.com:1234"
+    "wss://example.com:1234",
   );
   expect(config.getDefaultServers(Network.TESTNET)).toBe(
-    "fallback(wss://test.example.com:1234,wss://test.example.dk:1234)"
+    "fallback(wss://test.example.com:1234,wss://test.example.dk:1234)",
   );
   expect(config.getDefaultServers(Network.REGTEST)).toBe(
-    "ws://reg.example.com:1234"
+    "ws://reg.example.com:1234",
   );
 });
 

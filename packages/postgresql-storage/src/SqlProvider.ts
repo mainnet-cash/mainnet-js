@@ -1,10 +1,10 @@
-import { StorageProvider, WalletDbEntryI, TxI } from "mainnet-js";
-import { RegisterWebhookParams } from "./webhook/interface.js";
-import { getSslConfig } from "./util.js";
+import { StorageProvider, TxI, WalletDbEntryI } from "mainnet-js";
 import parseDbUrl from "parse-database-url";
 import pg from "pg";
 import format from "pg-format";
+import { getSslConfig } from "./util.js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./webhook/index.js";
+import { RegisterWebhookParams } from "./webhook/interface.js";
 
 export default class SqlProvider implements StorageProvider {
   private db;
@@ -19,7 +19,7 @@ export default class SqlProvider implements StorageProvider {
     this.walletTable = walletTable ? walletTable : "wallet";
     if (!process.env.DATABASE_URL) {
       throw new Error(
-        "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set"
+        "Named wallets and webhooks require a postgres DATABASE_URL environment variable to be set",
       );
     }
     let dbConfig = parseDbUrl(process.env.DATABASE_URL);
@@ -46,7 +46,7 @@ export default class SqlProvider implements StorageProvider {
 
       let createWalletTable = this.formatter(
         "CREATE TABLE IF NOT EXISTS %I (id SERIAL, name TEXT PRIMARY KEY, wallet TEXT );",
-        this.walletTable
+        this.walletTable,
       );
       const resWallet = await this.db.query(createWalletTable);
 
@@ -62,7 +62,7 @@ export default class SqlProvider implements StorageProvider {
           "last_height INTEGER," +
           "expires_at TIMESTAMPTZ" +
           ");",
-        this.webhookTable
+        this.webhookTable,
       );
       const resWebhook = await this.db.query(createWebhookTable);
 
@@ -85,7 +85,7 @@ export default class SqlProvider implements StorageProvider {
   public async addWallet(name: string, walletId: string): Promise<boolean> {
     let text = this.formatter(
       "INSERT into %I (name,wallet) VALUES ($1, $2);",
-      this.walletTable
+      this.walletTable,
     );
     return await this.db.query(text, [name, walletId]);
   }
@@ -97,7 +97,7 @@ export default class SqlProvider implements StorageProvider {
       const WalletArray: WalletDbEntryI[] = await Promise.all(
         result.rows.map(async (obj: WalletDbEntryI) => {
           return obj;
-        })
+        }),
       );
       return WalletArray;
     } else {
@@ -108,7 +108,7 @@ export default class SqlProvider implements StorageProvider {
   public async getWallet(name: string): Promise<WalletDbEntryI | undefined> {
     let text = this.formatter(
       "SELECT * FROM %I WHERE name = $1;",
-      this.walletTable
+      this.walletTable,
     );
     let result = await this.db.query(text, [name]);
     let w = result.rows[0];
@@ -118,7 +118,7 @@ export default class SqlProvider implements StorageProvider {
   public async updateWallet(name: string, walletId: string): Promise<void> {
     let text = this.formatter(
       "UPDATE %I SET wallet = $1 WHERE name = $2;",
-      this.walletTable
+      this.walletTable,
     );
     await this.db.query(text, [walletId, name]);
   }
@@ -145,11 +145,11 @@ export default class SqlProvider implements StorageProvider {
       params.duration_sec > expireTimeout ? expireTimeout : params.duration_sec;
 
     const expires_at = new Date(
-      new Date().getTime() + params.duration_sec * 1000
+      new Date().getTime() + params.duration_sec * 1000,
     );
     let text = this.formatter(
       "INSERT into %I (cashaddr,type,recurrence,url,status,tx_seen,last_height,expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
-      this.webhookTable
+      this.webhookTable,
     );
 
     const result = await this.db.query(text, [
@@ -176,7 +176,7 @@ export default class SqlProvider implements StorageProvider {
           obj = await this.webhookFromDb(obj);
           obj.db = this;
           return obj;
-        })
+        }),
       );
       return WebhookArray;
     } else {
@@ -187,7 +187,7 @@ export default class SqlProvider implements StorageProvider {
   public async getWebhook(id: number): Promise<Webhook | undefined> {
     const text = this.formatter(
       "SELECT * FROM %I WHERE id = $1;",
-      this.webhookTable
+      this.webhookTable,
     );
     const result = await this.db.query(text, [id]);
     let hook = result.rows[0];
@@ -201,7 +201,7 @@ export default class SqlProvider implements StorageProvider {
   public async setWebhookStatus(id: number, status: string): Promise<void> {
     let text = this.formatter(
       "UPDATE %I SET status = $1 WHERE id = $2;",
-      this.webhookTable
+      this.webhookTable,
     );
     await this.db.query(text, [status, id]);
   }
@@ -209,11 +209,11 @@ export default class SqlProvider implements StorageProvider {
   public async setWebhookSeenTxLastHeight(
     id: number,
     tx_seen: Array<TxI>,
-    last_height: number
+    last_height: number,
   ): Promise<void> {
     let text = this.formatter(
       "UPDATE %I SET tx_seen = $1, last_height = $2 WHERE id = $3;",
-      this.webhookTable
+      this.webhookTable,
     );
     await this.db.query(text, [JSON.stringify(tx_seen), last_height, id]);
   }
@@ -221,7 +221,7 @@ export default class SqlProvider implements StorageProvider {
   public async deleteWebhook(id: number): Promise<void> {
     let text = this.formatter(
       "DELETE FROM %I WHERE id = $1;",
-      this.webhookTable
+      this.webhookTable,
     );
     await this.db.query(text, [id]);
   }

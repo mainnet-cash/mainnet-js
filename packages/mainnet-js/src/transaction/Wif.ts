@@ -1,24 +1,26 @@
 import {
-  walletTemplateP2pkhNonHd,
-  cashAddressToLockingBytecode,
-  Compiler,
-  encodeTransaction,
-  generateTransaction,
-  importWalletTemplate,
   AnyCompilerConfiguration,
   AuthenticationProgramStateCommon,
-  Output,
-  hexToBin,
-  verifyTransactionTokens,
-  decodeTransaction,
-  TransactionTemplateFixed,
   CompilationContextBch,
+  Compiler,
+  cashAddressToLockingBytecode,
+  decodeTransaction,
+  encodeTransaction,
+  generateTransaction,
+  hexToBin,
+  importWalletTemplate,
+  Output,
+  TransactionTemplateFixed,
+  verifyTransactionTokens,
+  walletTemplateP2pkhNonHd,
   walletTemplateToCompilerBch,
 } from "@bitauth/libauth";
-import { NFTCapability, TokenI, Utxo } from "../interface.js";
-import { allocateFee } from "./allocateFee.js";
-
+import { WalletCache } from "../cache/walletCache.js";
 import { DUST_UTXO_THRESHOLD } from "../constant.js";
+import { NFTCapability, TokenI, Utxo } from "../interface.js";
+import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
+import { sumUtxoValue } from "../util/sumUtxoValue.js";
+import { FeePaidByEnum } from "../wallet/enum.js";
 import {
   OpReturnData,
   SendRequest,
@@ -26,10 +28,7 @@ import {
   SourceOutput,
   TokenSendRequest,
 } from "../wallet/model.js";
-import { sumSendRequestAmounts } from "../util/sumSendRequestAmounts.js";
-import { sumUtxoValue } from "../util/sumUtxoValue.js";
-import { FeePaidByEnum } from "../wallet/enum.js";
-import { WalletCache } from "../cache/walletCache.js";
+import { allocateFee } from "./allocateFee.js";
 
 export const placeholderPrivateKey =
   "0000000000000000000000000000000000000000000000000000000000000001";
@@ -112,7 +111,7 @@ export async function buildP2pkhNonHdTransaction({
   const tokenValidationResult = verifyTransactionTokens(
     result.transaction,
     sourceOutputs,
-    { maximumTokenCommitmentLength: 40 }
+    { maximumTokenCommitmentLength: 40 },
   );
   if (tokenValidationResult !== true && fee > 0) {
     throw tokenValidationResult;
@@ -143,7 +142,7 @@ export function prepareInputs({
     const utxoIndex = i.vout;
     // slice will create a clone of the array
     const utxoOutpointTransactionHash = new Uint8Array(
-      i.txid.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+      i.txid.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
     );
     // reverse the cloned copy
     // utxoOutpointTransactionHash.reverse();
@@ -213,7 +212,7 @@ export function prepareInputs({
  * @returns A promise to a list of unspent outputs
  */
 export async function prepareOutputs(
-  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>
+  outputs: Array<SendRequest | TokenSendRequest | OpReturnData>,
 ) {
   const lockedOutputs: Output[] = [];
   for (const output of outputs) {
@@ -234,7 +233,7 @@ export async function prepareOutputs(
     const sendAmount = Number(output.value);
     if (sendAmount % 1 !== 0) {
       throw Error(
-        `Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`
+        `Cannot send ${sendAmount} satoshis, (fractional sats do not exist, yet), please use an integer number.`,
       );
     }
     const lockedOutput: Output = {
@@ -306,7 +305,7 @@ export async function getSuitableUtxos(
   feePaidBy: FeePaidByEnum,
   requests: SendRequestType[],
   ensureUtxos: Utxo[] = [],
-  tokenOperation: "send" | "genesis" | "mint" | "burn" = "send"
+  tokenOperation: "send" | "genesis" | "mint" | "burn" = "send",
 ): Promise<Utxo[]> {
   const utxoKey = (u: Utxo) => `${u.txid}:${u.vout}`;
   const selectedSet = new Set<string>();
@@ -322,10 +321,10 @@ export async function getSuitableUtxos(
 
   let amountAvailable = suitableUtxos.reduce(
     (sum, u) => sum + BigInt(u.satoshis),
-    BigInt(0)
+    BigInt(0),
   );
   const tokenRequests = requests.filter(
-    (val) => val instanceof TokenSendRequest
+    (val) => val instanceof TokenSendRequest,
   ) as TokenSendRequest[];
 
   const usedIndices = new Set<number>();
@@ -398,7 +397,7 @@ export async function getSuitableUtxos(
         const alreadyHas = suitableUtxos.some(
           (val) =>
             val.token?.category === request.category &&
-            val.token?.nft?.capability === request.nft?.capability
+            val.token?.nft?.capability === request.nft?.capability,
         );
         if (alreadyHas) continue;
 
@@ -430,13 +429,13 @@ export async function getSuitableUtxos(
         request.nft?.commitment === undefined
       ) {
         const hasCategoryInSuitable = suitableUtxos.some(
-          (val) => val.token?.category === request.category
+          (val) => val.token?.category === request.category,
         );
         const hasCategoryInInputs =
           !hasCategoryInSuitable &&
           inputs.some(
             (val, i) =>
-              !usedIndices.has(i) && val.token?.category === request.category
+              !usedIndices.has(i) && val.token?.category === request.category,
           );
         if (hasCategoryInSuitable || hasCategoryInInputs) {
           continue;
@@ -444,7 +443,7 @@ export async function getSuitableUtxos(
       }
 
       throw Error(
-        `No suitable token utxos available to send token with id "${request.category}", capability "${request.nft?.capability}", commitment "${request.nft?.commitment}"`
+        `No suitable token utxos available to send token with id "${request.category}", capability "${request.nft?.capability}", commitment "${request.nft?.commitment}"`,
       );
     }
   }
@@ -477,7 +476,7 @@ export async function getSuitableUtxos(
     return suitableUtxos;
   } else if (amountAvailable < amountRequired) {
     const e = Error(
-      `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`
+      `Amount required was not met, ${amountRequired} satoshis needed, ${amountAvailable} satoshis available`,
     );
     e["data"] = {
       required: amountRequired,
@@ -516,7 +515,7 @@ export async function getFeeAmountSimple({
           Math.round(1 + (curr.token.nft?.commitment?.length ?? 0) / 2) +
           (curr.token.amount ? 9 : 0)
         : inputSizeP2pkh),
-    0
+    0,
   );
 
   const outputSize = (sendRequest: SendRequestType) => {
@@ -542,8 +541,8 @@ export async function getFeeAmountSimple({
 
   return BigInt(
     Math.ceil(
-      (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi
-    )
+      (inputTotalSize + outputTotalSize + 16) * relayFeePerByteInSatoshi,
+    ),
   );
 }
 
@@ -581,11 +580,11 @@ export async function getFeeAmount({
       });
 
     return BigInt(
-      Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1)
+      Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1),
     );
   } else {
     throw Error(
-      "The available inputs in the wallet cannot satisfy this send request"
+      "The available inputs in the wallet cannot satisfy this send request",
     );
   }
 }
@@ -625,7 +624,7 @@ export async function buildEncodedTransaction({
 
   if (buildUnsigned === true) {
     transaction.inputs.forEach(
-      (input) => (input.unlockingBytecode = Uint8Array.from([]))
+      (input) => (input.unlockingBytecode = Uint8Array.from([])),
     );
   }
 
@@ -635,7 +634,7 @@ export async function buildEncodedTransaction({
 export async function signUnsignedTransaction(
   transaction: Uint8Array | string,
   sourceOutputs: SourceOutput[],
-  signingKey: Uint8Array
+  signingKey: Uint8Array,
 ): Promise<Uint8Array> {
   if (typeof transaction === "string") {
     transaction = hexToBin(transaction);

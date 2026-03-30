@@ -18,12 +18,15 @@ import {
 } from "@bitauth/libauth";
 import { HDWalletCache, WalletCacheI } from "../cache/index.js";
 import { Config } from "../config.js";
+import { DUST_UTXO_THRESHOLD } from "../constant.js";
 import { NetworkType, prefixFromNetworkMap, UnitEnum } from "../enum.js";
 import { getHistory } from "../history/getHistory.js";
 import { TransactionHistoryItem } from "../history/interface.js";
 import { TxI, Utxo } from "../interface.js";
 import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
-import { _checkContextSafety, BaseWallet } from "./Base.js";
+import { arrayRange, getNextUnusedIndex } from "../util/hd.js";
+import { sumUtxoValue } from "../util/sumUtxoValue.js";
+import { BaseWallet } from "./Base.js";
 import { WalletTypeEnum } from "./enum.js";
 import { CancelFn, SendRequestOptionsI, WalletInfoI } from "./interface.js";
 import {
@@ -32,9 +35,6 @@ import {
   SendRequestArray,
   TokenSendRequest,
 } from "./model.js";
-import { arrayRange, getNextUnusedIndex } from "../util/hd.js";
-import { DUST_UTXO_THRESHOLD } from "../constant.js";
-import { sumUtxoValue } from "../util/sumUtxoValue.js";
 
 export const GAP_SIZE = 20;
 
@@ -161,7 +161,7 @@ export class HDWallet extends BaseWallet {
           ...node,
           network: this.network === NetworkType.Mainnet ? "mainnet" : "testnet",
           node: node,
-        })
+        }),
       ).hdPrivateKey;
       // @ts-ignore
       this.xPrivNode = node;
@@ -173,7 +173,7 @@ export class HDWallet extends BaseWallet {
         encodeHdPublicKey({
           node: this.xPubNode,
           network: this.network === NetworkType.Mainnet ? "mainnet" : "testnet",
-        })
+        }),
       ).hdPublicKey;
     } else if (xPriv) {
       // @ts-ignore
@@ -187,7 +187,7 @@ export class HDWallet extends BaseWallet {
         throw new Error(
           `xPriv network (${decoded.network}) does not match wallet network (${
             this.network === NetworkType.Mainnet ? "mainnet" : "testnet"
-          })`
+          })`,
         );
       }
       // @ts-ignore
@@ -200,7 +200,7 @@ export class HDWallet extends BaseWallet {
         encodeHdPublicKey({
           node: this.xPubNode,
           network: this.network === NetworkType.Mainnet ? "mainnet" : "testnet",
-        })
+        }),
       ).hdPublicKey;
     } else if (xPub) {
       const decoded = assertSuccess(decodeHdPublicKey(xPub));
@@ -211,7 +211,7 @@ export class HDWallet extends BaseWallet {
         throw new Error(
           `xPriv network (${decoded.network}) does not match wallet network (${
             this.network === NetworkType.Mainnet ? "mainnet" : "testnet"
-          })`
+          })`,
         );
       }
 
@@ -221,7 +221,7 @@ export class HDWallet extends BaseWallet {
       this.xPub = xPub;
     } else {
       throw new Error(
-        "mnemonic, xPriv or xPub must be provided to create an HDWallet"
+        "mnemonic, xPriv or xPub must be provided to create an HDWallet",
       );
     }
 
@@ -235,15 +235,15 @@ export class HDWallet extends BaseWallet {
             (this.mnemonic ? this.mnemonic + this.derivation : undefined) ??
             this.xPriv ??
             this.xPub
-          }-${this.network}`
-        )
-      )
+          }-${this.network}`,
+        ),
+      ),
     );
     // @ts-ignore
     this.walletCache = new HDWalletCache(
       this.walletId,
       this.xPrivNode ?? this.xPubNode,
-      this.networkPrefix
+      this.networkPrefix,
     );
 
     // init wallet cache
@@ -295,7 +295,7 @@ export class HDWallet extends BaseWallet {
   /// Watch addresses of a specific type (deposit or change) for activity
   private async watchAddressType(
     isChange: boolean,
-    gapSize: number
+    gapSize: number,
   ): Promise<number> {
     // Select the appropriate arrays based on address type
     const statuses = isChange ? this.changeStatuses : this.depositStatuses;
@@ -320,7 +320,7 @@ export class HDWallet extends BaseWallet {
     const stopIndex = getCurrentIndex() + gapSize;
 
     const addresses = arrayRange(startIndex, stopIndex).map(
-      (i) => this.walletCache.getByIndex(i, isChange).address
+      (i) => this.walletCache.getByIndex(i, isChange).address,
     );
 
     await Promise.all(
@@ -348,7 +348,7 @@ export class HDWallet extends BaseWallet {
             let lastConfirmedHeight = prevLastConfirmedHeight;
 
             const callback = async (
-              args: [address: string, status: string | null]
+              args: [address: string, status: string | null],
             ) => {
               const [address, status] = args;
               if (address != addr) {
@@ -370,7 +370,7 @@ export class HDWallet extends BaseWallet {
                     utxos.map((utxo) => {
                       utxo.address = addr;
                       return utxo;
-                    })
+                    }),
                   ),
                   // Fetch only from last confirmed height to reduce server load
                   this.provider.getHistory(addr, fromHeight),
@@ -378,10 +378,10 @@ export class HDWallet extends BaseWallet {
 
                 // Merge: keep confirmed items from current history, add new items
                 const confirmedFromHistory = currentHistory.filter(
-                  (tx) => tx.height > 0 && tx.height < fromHeight
+                  (tx) => tx.height > 0 && tx.height < fromHeight,
                 );
                 const seen = new Set(
-                  confirmedFromHistory.map((tx) => tx.tx_hash)
+                  confirmedFromHistory.map((tx) => tx.tx_hash),
                 );
                 const merged = [...confirmedFromHistory];
                 for (const tx of newHistory) {
@@ -394,7 +394,7 @@ export class HDWallet extends BaseWallet {
                 // Update lastConfirmedHeight in closure
                 lastConfirmedHeight = merged.reduce(
                   (max, tx) => (tx.height > 0 ? Math.max(max, tx.height) : max),
-                  fromHeight
+                  fromHeight,
                 );
 
                 utxosArray[index] = utxos;
@@ -404,7 +404,7 @@ export class HDWallet extends BaseWallet {
                   status,
                   utxos,
                   merged,
-                  lastConfirmedHeight
+                  lastConfirmedHeight,
                 );
               }
               statuses[index] = status;
@@ -430,10 +430,10 @@ export class HDWallet extends BaseWallet {
 
             watchCancels[index] = await this.provider.subscribeToAddress(
               addr,
-              callback as any
+              callback as any,
             );
-          })
-      )
+          }),
+      ),
     );
 
     return addresses.length;
@@ -470,7 +470,7 @@ export class HDWallet extends BaseWallet {
    */
   public async watchStatus(
     callback: (status: string | null, address: string) => void,
-    debounce: number = 100
+    debounce: number = 100,
   ): Promise<CancelFn> {
     await this.watchPromise;
 
@@ -509,7 +509,7 @@ export class HDWallet extends BaseWallet {
       depositIndex?: number;
       changeIndex?: number;
       timeout?: number;
-    } = {}
+    } = {},
   ): Promise<void> {
     const timeout = options.timeout ?? 100;
 
@@ -541,7 +541,7 @@ export class HDWallet extends BaseWallet {
         statusResolve = () => resolve("status");
       });
       const idle = new Promise<"idle">((resolve) =>
-        setTimeout(resolve, timeout, "idle")
+        setTimeout(resolve, timeout, "idle"),
       );
 
       if ((await Promise.race([statusChange, idle])) === "idle") break;
@@ -558,7 +558,7 @@ export class HDWallet extends BaseWallet {
    * depositIndex/changeIndex extends and widens getRawHistory's scope.
    */
   public override async watchTransactionHashes(
-    callback: (txHash: string) => void
+    callback: (txHash: string) => void,
   ): Promise<CancelFn> {
     const seenTxHashes = new Set<string>();
 
@@ -650,7 +650,7 @@ export class HDWallet extends BaseWallet {
     seed: string,
     derivationPath?: string,
     depositIndex?: number,
-    changeIndex?: number
+    changeIndex?: number,
   ): Promise<InstanceType<T>> {
     return new this().initialize({
       mnemonic: seed,
@@ -673,7 +673,7 @@ export class HDWallet extends BaseWallet {
   public static async newRandom<T extends typeof HDWallet>(
     this: T,
     name: string = "",
-    dbName?: string
+    dbName?: string,
   ): Promise<InstanceType<T>> {
     dbName = dbName ? dbName : this.networkPrefix;
     if (name.length > 0) {
@@ -692,7 +692,7 @@ export class HDWallet extends BaseWallet {
    */
   public static async fromXPub<T extends typeof HDWallet>(
     this: T,
-    xPub: string
+    xPub: string,
   ): Promise<InstanceType<T>> {
     return new this().initialize({
       xPub: xPub,
@@ -708,7 +708,7 @@ export class HDWallet extends BaseWallet {
    */
   public static async fromXPriv<T extends typeof HDWallet>(
     this: T,
-    xPriv: string
+    xPriv: string,
   ): Promise<InstanceType<T>> {
     return new this().initialize({
       xPriv: xPriv,
@@ -724,7 +724,7 @@ export class HDWallet extends BaseWallet {
    */
   public static async fromId<T extends typeof HDWallet>(
     this: T,
-    walletId: string
+    walletId: string,
   ): Promise<InstanceType<T>> {
     return new this().fromId(walletId) as InstanceType<T>;
   }
@@ -750,7 +750,7 @@ export class HDWallet extends BaseWallet {
 
     if (walletType !== WalletTypeEnum.Hd) {
       throw Error(
-        `fromId called on a ${walletType} wallet, expected a ${WalletTypeEnum.Hd} wallet`
+        `fromId called on a ${walletType} wallet, expected a ${WalletTypeEnum.Hd} wallet`,
       );
     }
 
@@ -793,7 +793,7 @@ export class HDWallet extends BaseWallet {
       | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array
+    privateKey?: Uint8Array,
   ) {
     if (!this.xPriv && !privateKey && options?.buildUnsigned !== true) {
       throw new Error(`Missing private key`);
@@ -803,7 +803,7 @@ export class HDWallet extends BaseWallet {
       requests,
       discardChange,
       options,
-      privateKey
+      privateKey,
     );
   }
 
@@ -895,14 +895,14 @@ export class HDWallet extends BaseWallet {
         .map((status, i) =>
           status !== null && i < this.depositIndex
             ? this.walletCache.getByIndex(i, false).address
-            : undefined
+            : undefined,
         )
         .filter((address) => address !== undefined),
       ...this.changeStatuses
         .map((status, i) =>
           status !== null && i < this.changeIndex
             ? this.walletCache.getByIndex(i, true).address
-            : undefined
+            : undefined,
         )
         .filter((address) => address !== undefined),
     ];
@@ -911,7 +911,7 @@ export class HDWallet extends BaseWallet {
   // gets transaction history of this wallet
   public async getRawHistory(
     fromHeight: number = 0,
-    toHeight: number = -1
+    toHeight: number = -1,
   ): Promise<TxI[]> {
     await this.watchPromise;
 

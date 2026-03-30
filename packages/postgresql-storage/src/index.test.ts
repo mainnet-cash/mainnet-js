@@ -1,12 +1,12 @@
 import {
   BaseWallet,
   binToHex,
+  disconnectProviders,
+  initProviders,
   RegTestWallet,
   TestNetWallet,
   Wallet,
   WalletTypeEnum,
-  initProviders,
-  disconnectProviders,
 } from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider";
 
@@ -93,7 +93,7 @@ test("Expect Error passing mainnet wallet to error", async () => {
     await Wallet.named("Seed Wallet", "db-test");
   } catch (e: any) {
     expect(e.message).toBe(
-      'Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private'
+      'Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private',
     );
   }
 });

@@ -17,11 +17,11 @@ export default class ExchangeRateProvider {
   public async setRate(
     symbol: string,
     rate: number,
-    ttl: number
+    ttl: number,
   ): Promise<boolean> {
     localStorage.setItem(
       `rate-${symbol}`,
-      JSON.stringify({ symbol: symbol, rate: rate, ttl: ttl })
+      JSON.stringify({ symbol: symbol, rate: rate, ttl: ttl }),
     );
     return true;
   }

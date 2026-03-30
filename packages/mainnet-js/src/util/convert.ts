@@ -14,7 +14,7 @@ import { satoshiToAmount } from "./satoshiToAmount.js";
 export async function convert(
   value: number,
   from: any,
-  to: any
+  to: any,
 ): Promise<number> {
   let satoshi = await amountInSatoshi(value, from);
   return satoshiToAmount(satoshi, to);
@@ -44,7 +44,7 @@ export function toSat(bch: string | number): bigint {
 
 export async function toCurrency(
   sats: bigint,
-  currency: string
+  currency: string,
 ): Promise<number> {
   return convert(Number(sats), "sat", currency);
 }

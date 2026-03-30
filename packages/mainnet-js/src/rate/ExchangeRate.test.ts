@@ -1,7 +1,7 @@
 import { setupFetchMock } from "#test/fetch";
-import { ExchangeRate } from "./ExchangeRate";
-import { initProviders, disconnectProviders } from "../network";
 import { Config } from "../config";
+import { disconnectProviders, initProviders } from "../network";
+import { ExchangeRate } from "./ExchangeRate";
 
 beforeAll(async () => {
   await initProviders();
@@ -43,7 +43,7 @@ describe("Exchange rate tests", () => {
     expect(usdRate).toBe(5555.55);
 
     await expect(ExchangeRate.get("eur", false)).rejects.toThrow(
-      "Unsupported currency"
+      "Unsupported currency",
     );
 
     Config.GetExchangeRateFn = undefined;

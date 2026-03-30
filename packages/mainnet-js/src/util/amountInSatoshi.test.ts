@@ -1,6 +1,6 @@
-import { amountInSatoshi } from "./amountInSatoshi";
 import { bchParam } from "../chain";
 import { ExchangeRate } from "../rate/ExchangeRate";
+import { amountInSatoshi } from "./amountInSatoshi";
 
 test("Get price of Bch, BCH, bch in sat", async () => {
   let rate = await amountInSatoshi(1, "Bch");

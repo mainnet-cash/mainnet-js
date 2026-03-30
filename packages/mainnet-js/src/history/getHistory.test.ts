@@ -1,9 +1,9 @@
-import { RegTestWallet } from "../wallet/Wif";
-import { WalletTypeEnum } from "../wallet/enum";
-import { createWallet } from "../wallet/createWallet";
 import { mine } from "../mine";
+import { disconnectProviders, initProviders } from "../network/Connection";
 import { toBch } from "../util";
-import { initProviders, disconnectProviders } from "../network/Connection";
+import { createWallet } from "../wallet/createWallet";
+import { WalletTypeEnum } from "../wallet/enum";
+import { RegTestWallet } from "../wallet/Wif";
 
 beforeAll(async () => {
   await initProviders();
@@ -69,32 +69,32 @@ test("Should get an address history", async () => {
     expect(bobHistory[0].valueChange).toBe(-2320);
     expect(
       bobHistory[0].outputs.some(
-        (output) => output.address === alice.getDepositAddress()
-      )
+        (output) => output.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(
       bobHistory[0].inputs.some(
-        (input) => input.address === bob.getDepositAddress()
-      )
+        (input) => input.address === bob.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(bobHistory[1].valueChange).toBe(-2320);
     expect(
       bobHistory[1].inputs.some(
-        (input) => input.address === bob.getDepositAddress()
-      )
+        (input) => input.address === bob.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(
       bobHistory[1].outputs.some(
-        (output) => output.address === charlie.getDepositAddress()
-      )
+        (output) => output.address === charlie.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(bobHistory[2].valueChange).toBe(31000);
     expect(bobHistory[2].balance).toBe(31000);
     expect(bobHistory[2].fee).not.toBe(0);
     expect(
       bobHistory[2].inputs.some(
-        (input) => input.address === alice.getDepositAddress()
-      )
+        (input) => input.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
   }
 });
@@ -146,32 +146,32 @@ test("Should get a history with multi-party sends", async () => {
     expect(bobHistory[0].valueChange).toBe(-2320);
     expect(
       bobHistory[0].outputs.some(
-        (output) => output.address === alice.getDepositAddress()
-      )
+        (output) => output.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(
       bobHistory[0].inputs.some(
-        (input) => input.address === bob.getDepositAddress()
-      )
+        (input) => input.address === bob.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(bobHistory[1].valueChange).toBe(-2320);
     expect(
       bobHistory[1].outputs.some(
-        (output) => output.address === charlie.getDepositAddress()
-      )
+        (output) => output.address === charlie.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(
       bobHistory[1].inputs.some(
-        (input) => input.address === bob.getDepositAddress()
-      )
+        (input) => input.address === bob.getDepositAddress(),
+      ),
     ).toBe(true);
 
     expect(bobHistory[2].valueChange).toBe(31000);
     expect(bobHistory[2].fee).not.toBe(0);
     expect(
       bobHistory[2].inputs.some(
-        (input) => input.address === alice.getDepositAddress()
-      )
+        (input) => input.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
   }
 });
@@ -228,14 +228,14 @@ test("Should cut results with a longer history to given count", async () => {
     expect(bobHistory[0].valueChange).toBe(-6588);
     expect(
       bobHistory[0].outputs.some(
-        (output) => output.address === alice.getDepositAddress()
-      )
+        (output) => output.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(bobHistory[1].valueChange).toBe(31000);
     expect(
       bobHistory[1].outputs.some(
-        (output) => output.address === alice.getDepositAddress()
-      )
+        (output) => output.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
   }
 });
@@ -288,13 +288,13 @@ test("Should handle input and fee from many utxos", async () => {
     expect(bobHistory[0].valueChange).toBeLessThan(-1700);
     expect(
       bobHistory[0].outputs.some(
-        (output) => output.address === charlie.getDepositAddress()
-      )
+        (output) => output.address === charlie.getDepositAddress(),
+      ),
     ).toBe(true);
     expect(
       bobHistory[1].inputs.some(
-        (input) => input.address === alice.getDepositAddress()
-      )
+        (input) => input.address === alice.getDepositAddress(),
+      ),
     ).toBe(true);
   }
 });

@@ -1,6 +1,5 @@
-import { createWallet } from "../src/wallet/createWallet.js";
+import { createWallet, walletFromId } from "../src/wallet/createWallet.js";
 import { WalletTypeEnum } from "./wallet/enum.js";
-import { walletFromId } from "../src/wallet/createWallet.js";
 
 let args = process.argv.slice(); // remove ts-node
 args.shift(); // remove ts-node

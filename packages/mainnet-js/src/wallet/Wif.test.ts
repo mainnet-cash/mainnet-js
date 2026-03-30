@@ -1,23 +1,23 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
-import { bchParam } from "../chain";
-import { initProviders, disconnectProviders } from "../network/Connection";
-import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
-import { delay } from "../util/delay";
-import { OpReturnData, SendResponse, toUtxoId } from "./model";
-import { ElectrumRawTransaction } from "../network/interface";
 import {
-  binToHex,
   binsAreEqual,
+  binToHex,
   decodeTransaction,
   hexToBin,
   lockingBytecodeToCashAddress,
   utf8ToBin,
 } from "@bitauth/libauth";
-import { mine } from "../mine";
+import { bchParam } from "../chain";
 import { Config } from "../config";
-import { CancelFn } from "./interface";
+import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
+import { mine } from "../mine";
+import { disconnectProviders, initProviders } from "../network/Connection";
+import { ElectrumRawTransaction } from "../network/interface";
 import json from "../test/json.test";
 import { convert, sumUtxoValue, toBch, toCurrency, toSat } from "../util";
+import { delay } from "../util/delay";
+import { CancelFn } from "./interface";
+import { OpReturnData, SendResponse, toUtxoId } from "./model";
+import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
 
 beforeAll(async () => {
   await initProviders();
@@ -29,7 +29,7 @@ afterAll(async () => {
 describe(`Test creation of wallet from walletId`, () => {
   test("Get a regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
-      "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
+      "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH",
     );
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
     expect(w.publicKey!.length).toBe(65);
@@ -41,11 +41,11 @@ describe(`Test creation of wallet from walletId`, () => {
 
   test("hasAddress should recognize wallet address", async () => {
     let w = await RegTestWallet.fromId(
-      "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH"
+      "wif:regtest:cQAurrWpGpAtvKcGWvTYFpiTickpTUa3YzXkXpbqD342pscjbCxH",
     );
     expect(w.hasAddress(w.getDepositAddress())).toBe(true);
     expect(
-      w.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")
+      w.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4"),
     ).toBe(false);
   });
 
@@ -81,7 +81,7 @@ describe(`Test creation of wallet from walletId`, () => {
 
   test("Get a testnet wallet from string id", async () => {
     let w = await TestNetWallet.fromId(
-      "wif:testnet:cPS12C2bpGHtKjS5NXNyWyTGGRMPk7D7pjp5JfgxRKWyFnWoDyZg"
+      "wif:testnet:cPS12C2bpGHtKjS5NXNyWyTGGRMPk7D7pjp5JfgxRKWyFnWoDyZg",
     );
     expect(w.publicKey!.length).toBe(65);
     expect(w.publicKeyCompressed!.length).toBe(33);
@@ -92,7 +92,7 @@ describe(`Test creation of wallet from walletId`, () => {
 
   test("Get a mainnet wallet from string id", async () => {
     let w = await Wallet.fromId(
-      "wif:mainnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
+      "wif:mainnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa",
     );
     expect(w.publicKey!.length).toBe(65);
     expect(w.privateKey!.length).toBe(32);
@@ -105,11 +105,11 @@ describe(`Test creation of wallet from walletId`, () => {
       expect.assertions(1);
       try {
         await TestNetWallet.fromId(
-          "wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa"
+          "wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa",
         );
       } catch (e: any) {
         expect(e.message).toBe(
-          "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c"
+          "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c",
         );
       }
     });
@@ -118,11 +118,11 @@ describe(`Test creation of wallet from walletId`, () => {
       expect.assertions(1);
       try {
         await Wallet.fromId(
-          "wif:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          "wif:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
         );
       } catch (e: any) {
         expect(e.message).toBe(
-          "Mainnet type wif cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6 passed, should start with L or K"
+          "Mainnet type wif cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6 passed, should start with L or K",
         );
       }
     });
@@ -131,7 +131,7 @@ describe(`Test creation of wallet from walletId`, () => {
       expect.assertions(1);
       try {
         await Wallet.fromId(
-          "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          "hd:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
         );
       } catch (e: any) {
         expect(e.message).toBe("Unknown wallet type 'hd'");
@@ -142,7 +142,7 @@ describe(`Test creation of wallet from walletId`, () => {
       expect.assertions(1);
       try {
         await Wallet.fromId(
-          "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+          "q2k:mainnet:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
         );
       } catch (e: any) {
         expect(e.message).toBe("Unknown wallet type 'q2k'");
@@ -154,16 +154,16 @@ describe(`Test creation of wallet from walletId`, () => {
 describe(`Mnemonic wallet creation`, () => {
   test("Expect '11x abandon about' to have the correct key, seed and path", async () => {
     let w = await Wallet.fromId(
-      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     expect(w.cashaddr!).toBe(
-      "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59"
+      "bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59",
     );
     expect(w.privateKeyWif!).toBe(
-      "L4p2b9VAf8k5aUahF1JCJUzZkgNEAqLfq8DDdQiyAprQAKSbu8hf"
+      "L4p2b9VAf8k5aUahF1JCJUzZkgNEAqLfq8DDdQiyAprQAKSbu8hf",
     );
     expect(w.getSeed().seed).toBe(
-      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
     const info = {
@@ -195,32 +195,32 @@ describe(`Mnemonic wallet creation`, () => {
 
   test("Expect '11x abandon about' to have the correct key, seed and path when generated on 145' coin path", async () => {
     let w = await Wallet.fromId(
-      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/145'/0'/0/0"
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about:m/44'/145'/0'/0/0",
     );
     expect(w.cashaddr!).toBe(
-      "bitcoincash:qqyx49mu0kkn9ftfj6hje6g2wfer34yfnq5tahq3q6"
+      "bitcoincash:qqyx49mu0kkn9ftfj6hje6g2wfer34yfnq5tahq3q6",
     );
     expect(w.privateKeyWif!).toBe(
-      "KxbEv3FeYig2afQp7QEA9R3gwqdTBFwAJJ6Ma7j1SkmZoxC9bAXZ"
+      "KxbEv3FeYig2afQp7QEA9R3gwqdTBFwAJJ6Ma7j1SkmZoxC9bAXZ",
     );
     expect(w.getSeed().seed).toBe(
-      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     expect(w.getSeed().derivationPath).toBe("m/44'/145'/0'/0/0");
     expect(w.getSeed().parentDerivationPath).toBe("m/44'/145'/0'");
   });
   test("Expect '11x abandon about' to have the correct key, seed and path from regtest wallet", async () => {
     let w = await RegTestWallet.fromId(
-      "seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "seed:regtest:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     expect(w.cashaddr!).toBe(
-      "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
+      "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl",
     );
     expect(w.privateKeyWif!).toBe(
-      "cVB244V26CSLjv3xdR7KfoVdNufdqHSMuAMgjqBUfwWQR4WVFsky"
+      "cVB244V26CSLjv3xdR7KfoVdNufdqHSMuAMgjqBUfwWQR4WVFsky",
     );
     expect(w.getSeed().seed).toBe(
-      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     expect(w.getSeed().derivationPath).toBe("m/44'/0'/0'/0/0");
   });
@@ -229,7 +229,7 @@ describe(`Mnemonic wallet creation`, () => {
 describe(`XPubKey path derivation`, () => {
   test("Expect '11x abandon about' to have the correct xpubs for common derivation paths, seed and path", async () => {
     let w = await Wallet.fromId(
-      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     let commonPaths = await w.deriveHdPaths(DERIVATION_PATHS);
     expect(commonPaths).toStrictEqual([
@@ -299,19 +299,19 @@ describe(`XPubKey path derivation`, () => {
     expect.assertions(1);
     try {
       let w = await Wallet.fromId(
-        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
       );
       let commonPaths = await w.deriveHdPaths(["m"]);
     } catch (e: any) {
       expect(e.message).toBe(
-        "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+        "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications",
       );
     }
   });
 
   test("Expect '11x abandon about' to have the correct xpubs for common derivation paths, seed and path", async () => {
     let w = await Wallet.fromId(
-      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     let commonPaths = await w.getXPubKeys();
     expect(commonPaths).toStrictEqual([
@@ -381,12 +381,12 @@ describe(`XPubKey path derivation`, () => {
     expect.assertions(1);
     try {
       let w = await Wallet.fromId(
-        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
       );
       let commonPaths = await w.getXPubKeys(["m"]);
     } catch (e: any) {
       expect(e.message).toBe(
-        "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications"
+        "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications",
       );
     }
   });
@@ -395,12 +395,12 @@ describe(`XPubKey path derivation`, () => {
 describe(`Watch only Wallets`, () => {
   test("Create a watch only testnet wallet from string id", async () => {
     let w = await TestNetWallet.fromId(
-      "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
+      "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
     );
     expect(w.network).toBe("testnet");
     expect(w.networkPrefix).toBe("bchtest");
     expect(w.cashaddr).toBe(
-      "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
+      "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
     );
     expect(w.getInfo()).toStrictEqual({
       cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
@@ -425,7 +425,7 @@ describe(`Watch only Wallets`, () => {
 
   test("Create a watch only regtest wallet from string id", async () => {
     let w = await RegTestWallet.fromId(
-      "watch:regtest:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt"
+      "watch:regtest:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt",
     );
     if (!w) {
       throw Error("Could not derive wallet");
@@ -436,18 +436,18 @@ describe(`Watch only Wallets`, () => {
     expect(w.network).toBe("regtest");
     expect(w.networkPrefix).toBe("bchreg");
     expect(w.cashaddr).toBe(
-      "bchreg:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt"
+      "bchreg:qql8ypk6y9qksmjj2qp3r5fr3ne35ltkzss902evnt",
     );
   });
 
   test("Create a watch only mainnet wallet from string id", async () => {
     let w = await Wallet.fromId(
-      "watch:mainnet:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"
+      "watch:mainnet:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5",
     );
     expect(w.network).toBe("mainnet");
     expect(w.networkPrefix).toBe("bitcoincash");
     expect(w.cashaddr).toBe(
-      "bitcoincash:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5"
+      "bitcoincash:qp6e6enhpy0fwwu7nkvlr8rgl06ru0c9lywalz8st5",
     );
   });
 
@@ -462,7 +462,7 @@ describe(`Watch only Wallets`, () => {
       const aliceBalance = await alice.getBalance();
       expect(toBch(aliceBalance)).toBeGreaterThan(5000);
       expect(await alice.getBalance()).toBeGreaterThan(
-        5000n * bchParam.subUnits
+        5000n * bchParam.subUnits,
       );
     }
   });
@@ -479,13 +479,13 @@ describe(`Watch only Wallets`, () => {
       const aliceBalance = await alice.getBalance();
       expect(toBch(aliceBalance)).toBeGreaterThan(5000);
       expect(await toCurrency(await alice.getBalance(), "eur")).toBeGreaterThan(
-        0
+        0,
       );
       expect(
         await toCurrency(
           await (await RegTestWallet.newRandom()).getBalance(),
-          "eur"
-        )
+          "eur",
+        ),
       ).toBe(0);
       Config.DefaultCurrency = "usd";
     }
@@ -495,25 +495,25 @@ describe(`Watch only Wallets`, () => {
     "Should send to testnet coins to a random address",
     async () => {
       let alice = await TestNetWallet.fromId(
-        process.env.ALICE_TESTNET_WALLET_ID!
+        process.env.ALICE_TESTNET_WALLET_ID!,
       );
       expect(alice.getPublicKeyHash()!.length).toBe(20);
       let aliceBalance = await alice.send([
         { cashaddr: alice.cashaddr!, value: 720n },
       ]);
       expect(aliceBalance.balance).toBeGreaterThan(5000n);
-    }
+    },
   );
 
   (process.env.ALICE_TESTNET_ADDRESS ? test : test.skip)(
     "Should get the testnet wallet balance",
     async () => {
       let alice = await TestNetWallet.watchOnly(
-        process.env.ALICE_TESTNET_ADDRESS!
+        process.env.ALICE_TESTNET_ADDRESS!,
       );
       const aliceBalance = await alice.getBalance();
       expect(aliceBalance).toBeGreaterThan(2000n);
-    }
+    },
   );
 
   test("Should encode and submit a transaction", async () => {
@@ -566,7 +566,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      0
+      0,
     );
 
     const response = await bobWallet.waitForTransaction({
@@ -587,7 +587,7 @@ describe(`Wallet subscriptions`, () => {
     const balanceBefore = await aliceWallet.getBalance();
     const resp = await aliceWallet.send(
       [{ cashaddr: bobWallet.cashaddr!, value: 1000n }],
-      { awaitTransactionPropagation: true }
+      { awaitTransactionPropagation: true },
     );
     expect(resp.balance!).toBeLessThan(balanceBefore);
     expect(resp.balance!).toBe(await aliceWallet.getBalance());
@@ -596,7 +596,7 @@ describe(`Wallet subscriptions`, () => {
     // for the status notification round-trip; we only verify it succeeds.
     const resp2 = await aliceWallet.send(
       [{ cashaddr: bobWallet.cashaddr!, value: 1000n }],
-      { awaitTransactionPropagation: false }
+      { awaitTransactionPropagation: false },
     );
     expect(resp2.txId).toBeDefined();
   });
@@ -605,10 +605,10 @@ describe(`Wallet subscriptions`, () => {
     let balance1 = 999n;
     let balance2 = 666n;
     Wallet.newRandom().then((wallet) =>
-      wallet.getBalance().then((balance) => (balance1 = balance))
+      wallet.getBalance().then((balance) => (balance1 = balance)),
     );
     Wallet.newRandom().then((wallet) =>
-      wallet.getBalance().then((balance) => (balance2 = balance))
+      wallet.getBalance().then((balance) => (balance2 = balance)),
     );
     await delay(5000);
     expect(balance1).toBe(0n);
@@ -672,7 +672,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      600
+      600,
     );
 
     let bobBalance = await bob.waitForBalance(1000n).catch((e) => {
@@ -686,7 +686,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      600
+      600,
     );
     let charlieBalance = await charlie.waitForBalance(1000n);
     setTimeout(
@@ -697,7 +697,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      600
+      600,
     );
     let daveBalance = await dave.waitForBalance(1000n);
     expect(bobBalance).toBe(1000n);
@@ -711,7 +711,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      600
+      600,
     );
     let bobResponse = await bob.waitForTransaction();
     expect(bobResponse.transactionInfo!.version).toBe(2);
@@ -723,7 +723,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      600
+      600,
     );
     bobResponse = await bob.waitForTransaction();
     expect(bobResponse.transactionInfo!.version).toBe(2);
@@ -735,7 +735,7 @@ describe(`Wallet subscriptions`, () => {
             value: 1000n,
           },
         ]),
-      600
+      600,
     );
     bobResponse = await bob.waitForTransaction();
     expect(bobResponse.transactionInfo!.version).toBe(2);
@@ -954,7 +954,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       ]);
     } catch (e: any) {
       expect(e.message).toBe(
-        `the transaction was rejected by network rules.\n\ndust (code 64)\n`
+        `the transaction was rejected by network rules.\n\ndust (code 64)\n`,
       );
     }
   });
@@ -970,7 +970,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     transaction = await wallet.provider!.getRawTransactionObject(result.txId!);
     expect(transaction.vout[0].scriptPubKey.asm).toContain("OP_RETURN");
     expect(transaction.vout[0].scriptPubKey.hex.slice(4)).toBe(
-      binToHex(utf8ToBin("MEMO\x10LÖL😅"))
+      binToHex(utf8ToBin("MEMO\x10LÖL😅")),
     );
 
     result = await wallet.send([
@@ -1011,7 +1011,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     expect(sumUtxoValue(await bob.getUtxos())).toBe(1000n);
 
     expect(
-      await bob.getMaxAmountToSend({ options: { slpSemiAware: true } })
+      await bob.getMaxAmountToSend({ options: { slpSemiAware: true } }),
     ).toBe(768n);
     await bob.sendMax(alice.getDepositAddress());
     expect(await bob.getBalance()).toBe(0n + 546n);
@@ -1019,7 +1019,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     bob.slpSemiAware(false);
     expect(await bob.getBalance()).toBe(546n);
     expect(
-      await bob.getMaxAmountToSend({ options: { slpSemiAware: false } })
+      await bob.getMaxAmountToSend({ options: { slpSemiAware: false } }),
     ).toBeLessThanOrEqual(546n);
   });
 
@@ -1041,7 +1041,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
             },
           ],
           false,
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
@@ -1056,7 +1056,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       const toCashAddress = (bytecode) => {
         const cashaddr = lockingBytecodeToCashAddress({
@@ -1069,10 +1069,10 @@ describe(`Wallet extrema behavior regression testing`, () => {
         return cashaddr.address;
       };
       expect(toCashAddress(decoded.outputs[0].lockingBytecode)).toBe(
-        bobWallet.cashaddr
+        bobWallet.cashaddr,
       );
       expect(toCashAddress(decoded.outputs[1].lockingBytecode)).toBe(
-        aliceWallet.cashaddr
+        aliceWallet.cashaddr,
       );
       expect(sourceOutputs.length).toBe(decoded.inputs.length);
     }
@@ -1085,7 +1085,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
             value: 2000n,
           },
         ],
-        { buildUnsigned: true }
+        { buildUnsigned: true },
       );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
@@ -1099,7 +1099,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
     }
@@ -1107,7 +1107,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
     {
       const { unsignedTransaction, sourceOutputs } = await aliceWallet.sendMax(
         bobWallet.cashaddr!,
-        { buildUnsigned: true }
+        { buildUnsigned: true },
       );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
@@ -1121,7 +1121,7 @@ describe(`Wallet extrema behavior regression testing`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
     }
@@ -1140,8 +1140,8 @@ describe(`Wallet extrema behavior regression testing`, () => {
           cashaddr: bobWallet.cashaddr!,
           value: 1000n,
         },
-        { utxoIds: ["00ab:1", "00cd:2"] }
-      )
+        { utxoIds: ["00ab:1", "00cd:2"] },
+      ),
     ).rejects.toThrow("not found in wallet");
 
     await expect(
@@ -1155,8 +1155,8 @@ describe(`Wallet extrema behavior regression testing`, () => {
             toUtxoId(aliceUtxos[0]),
             `${aliceUtxos[1].txid}:${aliceUtxos[1].vout}`,
           ],
-        }
-      )
+        },
+      ),
     ).resolves.not.toThrow();
   });
 });

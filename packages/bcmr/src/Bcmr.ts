@@ -9,13 +9,13 @@ import {
   utf8ToBin,
 } from "@bitauth/libauth";
 import {
-  ElectrumRawTransaction,
-  OpReturnData,
   Config,
-  Network,
-  TxI,
   ElectrumNetworkProvider,
+  ElectrumRawTransaction,
   initProvider,
+  Network,
+  OpReturnData,
+  TxI,
 } from "mainnet-js";
 import { Registry } from "./bcmr-v2.schema";
 
@@ -53,7 +53,7 @@ export class BCMR {
    */
   public static async fetchMetadataRegistry(
     uri: string,
-    contentHash?: string
+    contentHash?: string,
   ): Promise<Registry> {
     if (uri.indexOf("https://") < 0) {
       uri = `https://${uri}`;
@@ -67,7 +67,7 @@ export class BCMR {
       const hash = binToHex(sha256.hash(utf8ToBin(data)));
       if (contentHash != hash) {
         throw new Error(
-          `Content hash mismatch for URI: ${uri}\nreceived: ${hash}\nrequired: ${contentHash}`
+          `Content hash mismatch for URI: ${uri}\nreceived: ${hash}\nrequired: ${contentHash}`,
         );
       }
 
@@ -89,7 +89,7 @@ export class BCMR {
   public static addMetadataRegistry(registry: Registry): void {
     if (
       this.metadataRegistries.some(
-        (val) => JSON.stringify(val) === JSON.stringify(registry)
+        (val) => JSON.stringify(val) === JSON.stringify(registry),
       )
     ) {
       return;
@@ -108,7 +108,7 @@ export class BCMR {
    */
   public static async addMetadataRegistryFromUri(
     uri: string,
-    contentHash?: string
+    contentHash?: string,
   ): Promise<void> {
     const registry = await this.fetchMetadataRegistry(uri, contentHash);
     this.addMetadataRegistry(registry);
@@ -118,7 +118,7 @@ export class BCMR {
   // returns resolved AuthChainElement
   public static makeAuthChainElement(
     rawTx: ElectrumRawTransaction | Transaction,
-    hash: string
+    hash: string,
   ): AuthChainElement {
     let opReturns: string[];
     let spends0thOutput = false;
@@ -134,13 +134,13 @@ export class BCMR {
         .map((val) => binToHex(val.lockingBytecode))
         .filter((val) => val.indexOf("6a") === 0);
       spends0thOutput = libauthTransaction.inputs.some(
-        (val) => val.outpointIndex === 0
+        (val) => val.outpointIndex === 0,
       );
     }
 
     if (!spends0thOutput) {
       throw new Error(
-        "Invalid authchain transaction (does not spend 0th output of previous transaction)"
+        "Invalid authchain transaction (does not spend 0th output of previous transaction)",
       );
     }
 
@@ -149,7 +149,7 @@ export class BCMR {
         val.indexOf("6a0442434d52") === 0 ||
         val.indexOf("6a4c0442434d52") === 0 ||
         val.indexOf("6a4d040042434d52") === 0 ||
-        val.indexOf("6a4e0400000042434d52") === 0
+        val.indexOf("6a4e0400000042434d52") === 0,
     );
 
     if (bcmrOpReturns.length === 0) {
@@ -254,12 +254,12 @@ export class BCMR {
     }
 
     const provider = (await initProvider(
-      options.network
+      options.network,
     )!) as ElectrumNetworkProvider;
 
     if (options.rawTx === undefined) {
       options.rawTx = await provider.getRawTransactionObject(
-        options.transactionHash
+        options.transactionHash,
       );
     }
 
@@ -268,23 +268,23 @@ export class BCMR {
       const history =
         options.historyCache ||
         (await provider.getHistory(
-          options.rawTx!.vout[0].scriptPubKey.addresses[0]
+          options.rawTx!.vout[0].scriptPubKey.addresses[0],
         ));
       const thisTx = history.find(
-        (val) => val.tx_hash === options.transactionHash
+        (val) => val.tx_hash === options.transactionHash,
       );
       let filteredHistory = history.filter((val) =>
         val.height > 0
           ? val.height >= thisTx!.height || val.height <= 0
-          : val.height <= 0 && val.tx_hash !== thisTx!.tx_hash
+          : val.height <= 0 && val.tx_hash !== thisTx!.tx_hash,
       );
 
       for (const historyTx of filteredHistory) {
         const historyRawTx = await provider.getRawTransactionObject(
-          historyTx.tx_hash
+          historyTx.tx_hash,
         );
         const authChainVin = historyRawTx.vin.find(
-          (val) => val.txid === options.transactionHash && val.vout === 0
+          (val) => val.txid === options.transactionHash && val.vout === 0,
         );
         // if we've found continuation of authchain, we shall recurse into it
         if (authChainVin) {
@@ -327,7 +327,7 @@ export class BCMR {
       // check for accelerated path if "authchain" extension is in registry
       const registry: Registry = await this.fetchMetadataRegistry(
         element.httpsUrl,
-        element.contentHash
+        element.contentHash,
       );
       if (
         registry.extensions &&
@@ -335,7 +335,7 @@ export class BCMR {
         Object.keys(registry.extensions["authchain"]).length
       ) {
         const chainTxArray = Object.values(
-          registry.extensions!["authchain"]
+          registry.extensions!["authchain"],
         ) as string[];
 
         chainBase = chainTxArray
@@ -344,11 +344,11 @@ export class BCMR {
             const decoded = decodeTransaction(transactionBin);
             if (typeof decoded === "string") {
               throw new Error(
-                `Error decoding transaction ${JSON.stringify(tx)}, ${decoded}`
+                `Error decoding transaction ${JSON.stringify(tx)}, ${decoded}`,
               );
             }
             const hash = binToHex(
-              sha256.hash(sha256.hash(transactionBin)).reverse()
+              sha256.hash(sha256.hash(transactionBin)).reverse(),
             );
             return { decoded, hash };
           })
@@ -388,7 +388,7 @@ export class BCMR {
 
         // combine the authchain element with the rest obtained
         return [...chainBase, element, ...chainHead].filter(
-          (val) => val.httpsUrl.length
+          (val) => val.httpsUrl.length,
         );
       }
     }
@@ -476,22 +476,22 @@ export class BCMR {
         continue;
       }
       transaction.inputs.forEach(
-        (input) => (input.outpointIndex = Number(input.outpoint_index))
+        (input) => (input.outpointIndex = Number(input.outpoint_index)),
       );
       transaction.outputs.forEach((output) => {
         output.outputIndex = Number(output.output_index);
         output.lockingBytecode = hexToBin(
-          output.locking_bytecode.replace("\\x", "")
+          output.locking_bytecode.replace("\\x", ""),
         );
       });
       const txHash = transaction.hash.replace("\\x", "");
       result.push(
-        BCMR.makeAuthChainElement(transaction as Transaction, txHash)
+        BCMR.makeAuthChainElement(transaction as Transaction, txHash),
       );
     }
 
     return result.filter(
-      (element) => element.contentHash.length && element.httpsUrl.length
+      (element) => element.contentHash.length && element.httpsUrl.length,
     );
   }
 
@@ -521,13 +521,13 @@ export class BCMR {
         `There were no BCMR entries in the resolved authchain ${JSON.stringify(
           authChain,
           null,
-          2
-        )}`
+          2,
+        )}`,
       );
     }
 
     const registry = await this.fetchMetadataRegistry(
-      authChain.reverse()[0].httpsUrl
+      authChain.reverse()[0].httpsUrl,
     );
 
     this.addMetadataRegistry(registry);

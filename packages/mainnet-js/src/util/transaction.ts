@@ -1,7 +1,7 @@
-import { hexToBin, sha256, binToHex } from "@bitauth/libauth";
+import { binToHex, hexToBin, sha256 } from "@bitauth/libauth";
 
 export async function getTransactionHash(
-  rawTransactionHex: string
+  rawTransactionHex: string,
 ): Promise<string> {
   const transactionBin = hexToBin(rawTransactionHex);
 

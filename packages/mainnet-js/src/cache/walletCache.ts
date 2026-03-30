@@ -5,9 +5,9 @@ import {
   CashAddressType,
   deriveHdPathRelative,
   encodeCashAddress,
-  hash160,
   HdPrivateNodeValid,
   HdPublicNodeValid,
+  hash160,
   hexToBin,
   secp256k1,
 } from "@bitauth/libauth";
@@ -66,7 +66,7 @@ export interface WalletCacheI extends WalletCache {
     status: string | null,
     utxos: Utxo[],
     rawHistory: TxI[],
-    lastConfirmedHeight: number
+    lastConfirmedHeight: number,
   ): void;
 }
 
@@ -87,7 +87,7 @@ export class SingleAddressWalletCache implements WalletCacheI {
     public walletId: string,
     address: string,
     tokenAddress: string,
-    public writeTimeout: number = 2000
+    public writeTimeout: number = 2000,
   ) {
     this.entry = {
       address,
@@ -130,14 +130,14 @@ export class SingleAddressWalletCache implements WalletCacheI {
       this.debounceTimer = undefined;
       await this._storage?.setItem(
         `walletCache-${this.walletId}`,
-        stringify(this.entry)
+        stringify(this.entry),
       );
     } else {
       this.debounceTimer = setTimeout(() => {
         this.debounceTimer = undefined;
         this._storage?.setItem(
           `walletCache-${this.walletId}`,
-          stringify(this.entry)
+          stringify(this.entry),
         );
       }, this.writeTimeout);
     }
@@ -156,7 +156,7 @@ export class SingleAddressWalletCache implements WalletCacheI {
     status: string | null,
     utxos: Utxo[],
     rawHistory: TxI[],
-    lastConfirmedHeight: number
+    lastConfirmedHeight: number,
   ) {
     if (address !== this.entry.address) return;
     this.entry.status = status;
@@ -183,7 +183,7 @@ export class HDWalletCache implements WalletCacheI {
     public walletId: string,
     public hdNode: HdPublicNodeValid | HdPrivateNodeValid,
     public networkPrefix: string,
-    public writeTimeout: number = 2000
+    public writeTimeout: number = 2000,
   ) {
     if (!this.hdNode) {
       throw new Error("HDNode is undefined");
@@ -213,7 +213,7 @@ export class HDWalletCache implements WalletCacheI {
         stringify({
           walletCache: this.walletCache,
           indexCache: this.indexCache,
-        })
+        }),
       );
     if (immediate) {
       this.debounceTimer = undefined;
@@ -231,7 +231,7 @@ export class HDWalletCache implements WalletCacheI {
     if (!this.walletCache[id]) {
       const node = deriveHdPathRelative(
         this.hdNode,
-        `${change ? 1 : 0}/${addressIndex}`
+        `${change ? 1 : 0}/${addressIndex}`,
       );
 
       const privateKey = "privateKey" in node ? node.privateKey : undefined;
@@ -240,7 +240,7 @@ export class HDWalletCache implements WalletCacheI {
           ? node.publicKey
           : assertSuccess(secp256k1.derivePublicKeyUncompressed(privateKey!));
       const publicKeyCompressed = assertSuccess(
-        secp256k1.compressPublicKey(publicKey)
+        secp256k1.compressPublicKey(publicKey),
       );
       const publicKeyHash = hash160(publicKeyCompressed);
 
@@ -296,7 +296,7 @@ export class HDWalletCache implements WalletCacheI {
     status: string | null,
     utxos: Utxo[],
     rawHistory: TxI[],
-    lastConfirmedHeight: number
+    lastConfirmedHeight: number,
   ) {
     const entry = this.get(address);
     if (!entry) {

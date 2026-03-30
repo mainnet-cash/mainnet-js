@@ -6,7 +6,7 @@ import {
 
 // This function sums a list of send request objects
 export async function sumSendRequestAmounts(
-  requests: Array<SendRequest | TokenSendRequest | OpReturnData>
+  requests: Array<SendRequest | TokenSendRequest | OpReturnData>,
 ) {
   if (requests) {
     const balanceArray: (BigInt | Error)[] = await Promise.all(
@@ -16,7 +16,7 @@ export async function sumSendRequestAmounts(
         } else if (r instanceof TokenSendRequest) {
           return r.value || 1000n;
         } else return 0n;
-      })
+      }),
     );
     const balance = balanceArray.reduce(sumBalance, BigInt(0));
     return balance;

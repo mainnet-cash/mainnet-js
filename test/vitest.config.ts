@@ -1,5 +1,5 @@
-import { defineConfig } from "vitest/config";
 import path from "path";
+import { defineConfig } from "vitest/config";
 
 const root = path.resolve(__dirname, "..");
 
@@ -8,31 +8,31 @@ export default defineConfig({
     alias: {
       "@rpckit/websocket/electrum-cash": path.resolve(
         root,
-        "node_modules/@rpckit/websocket/dist/electrum-cash/index.js"
+        "node_modules/@rpckit/websocket/dist/electrum-cash/index.js",
       ),
       "@rpckit/fallback/electrum-cash": path.resolve(
         root,
-        "node_modules/@rpckit/fallback/dist/electrum-cash/index.js"
+        "node_modules/@rpckit/fallback/dist/electrum-cash/index.js",
       ),
       "@mem-cash/electrum": path.resolve(
         root,
-        "node_modules/@mem-cash/electrum/dist/index.js"
+        "node_modules/@mem-cash/electrum/dist/index.js",
       ),
       "@mem-cash/core": path.resolve(
         root,
-        "node_modules/@mem-cash/core/dist/index.js"
+        "node_modules/@mem-cash/core/dist/index.js",
       ),
       "@mem-cash/storage": path.resolve(
         root,
-        "node_modules/@mem-cash/storage/dist/index.js"
+        "node_modules/@mem-cash/storage/dist/index.js",
       ),
       "@mem-cash/types": path.resolve(
         root,
-        "node_modules/@mem-cash/types/dist/index.js"
+        "node_modules/@mem-cash/types/dist/index.js",
       ),
       "@mem-cash/validation": path.resolve(
         root,
-        "node_modules/@mem-cash/validation/dist/index.js"
+        "node_modules/@mem-cash/validation/dist/index.js",
       ),
       ...(process.env.USE_MOCK_PROVIDER
         ? { pg: path.resolve(__dirname, "mocks/pg.cjs") }

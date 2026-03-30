@@ -1,36 +1,41 @@
 import type {
+  ExtractParams,
+  ExtractRequestMethod,
+  ExtractReturn,
+  ExtractSubscriptionMethod,
+  Schema,
   Transport,
   Unsubscribe,
-  Schema,
-  ExtractRequestMethod,
-  ExtractSubscriptionMethod,
-  ExtractParams,
-  ExtractReturn,
 } from "@rpckit/core";
 import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
-import { default as NetworkProvider } from "./NetworkProvider.js";
-import { DsproofData, HexHeaderI, TxI, Utxo, HeaderI } from "../interface.js";
-import { Network } from "../interface.js";
+import { IndexedDbCache } from "../cache/IndexedDbCache.js";
+import { CacheProvider } from "../cache/interface.js";
+import { MemoryCache } from "../cache/MemoryCache.js";
+import { WebStorageCache } from "../cache/WebStorageCache.js";
+import { Config } from "../config.js";
+import {
+  DsproofData,
+  HeaderI,
+  HexHeaderI,
+  Network,
+  TxI,
+  Utxo,
+} from "../interface.js";
+import { decodeHeader } from "../util/header.js";
+import { getTransactionHash } from "../util/transaction.js";
+import { CancelFn } from "../wallet/interface.js";
 import {
   ElectrumRawTransaction,
   ElectrumRawTransactionVinWithValues,
   ElectrumRawTransactionWithInputValues,
 } from "./interface.js";
-
-import { CancelFn } from "../wallet/interface.js";
-import { getTransactionHash } from "../util/transaction.js";
-import { Config } from "../config.js";
-import { decodeHeader } from "../util/header.js";
-import { CacheProvider } from "../cache/interface.js";
-import { IndexedDbCache } from "../cache/IndexedDbCache.js";
-import { WebStorageCache } from "../cache/WebStorageCache.js";
-import { MemoryCache } from "../cache/MemoryCache.js";
+import { default as NetworkProvider } from "./NetworkProvider.js";
 
 /** Internal type for cached verbose transactions. fetchHeight is stripped before returning. */
 type CachedRawTransaction = ElectrumRawTransaction & { fetchHeight: number };
 
 export default class ElectrumNetworkProvider<
-  S extends Schema = ElectrumCashSchema
+  S extends Schema = ElectrumCashSchema,
 > implements NetworkProvider
 {
   public transport: Transport<S>;
@@ -73,7 +78,7 @@ export default class ElectrumNetworkProvider<
 
   constructor(
     transport: Transport<S>,
-    public network: Network = Network.MAINNET
+    public network: Network = Network.MAINNET,
   ) {
     if (transport) {
       this.transport = transport;
@@ -112,7 +117,7 @@ export default class ElectrumNetworkProvider<
 
   async getHeader(
     height: number,
-    verbose: boolean = false
+    verbose: boolean = false,
   ): Promise<HeaderI | HexHeaderI> {
     const key = `header-${this.network}-${height}-${verbose}`;
 
@@ -162,7 +167,7 @@ export default class ElectrumNetworkProvider<
             false,
           ]);
           return [hash, tx as string] as [string, string];
-        })
+        }),
       );
 
       // batch cache write
@@ -187,7 +192,7 @@ export default class ElectrumNetworkProvider<
 
     const results = new Map<number, HeaderI>();
     const keys = heights.map(
-      (height) => `header-${this.network}-${height}-true`
+      (height) => `header-${this.network}-${height}-true`,
     );
 
     // batch cache read
@@ -214,7 +219,7 @@ export default class ElectrumNetworkProvider<
             height,
           ]);
           return [height, result] as [number, HexHeaderI];
-        })
+        }),
       );
 
       // batch cache write
@@ -241,13 +246,13 @@ export default class ElectrumNetworkProvider<
           if (header.height > this.currentHeight) {
             this.currentHeight = header.height;
           }
-        }
+        },
       );
     }
 
     if (!this.currentHeight) {
       throw new Error(
-        "Check failed for eventual inconsistency in subscription implementations."
+        "Check failed for eventual inconsistency in subscription implementations.",
       );
     }
     return this.currentHeight;
@@ -256,22 +261,22 @@ export default class ElectrumNetworkProvider<
   async getRawTransaction(
     txHash: string,
     verbose: true,
-    loadInputValues: true
+    loadInputValues: true,
   ): Promise<ElectrumRawTransactionWithInputValues>;
   async getRawTransaction(
     txHash: string,
     verbose: true,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<ElectrumRawTransaction>;
   async getRawTransaction(
     txHash: string,
     verbose?: false,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<string>;
   async getRawTransaction(
     txHash: string,
     verbose: boolean = false,
-    loadInputValues: boolean = false
+    loadInputValues: boolean = false,
   ): Promise<
     string | ElectrumRawTransaction | ElectrumRawTransactionWithInputValues
   > {
@@ -333,22 +338,22 @@ export default class ElectrumNetworkProvider<
     } catch (error: any) {
       if (
         (error.message as string).indexOf(
-          "No such mempool or blockchain transaction"
+          "No such mempool or blockchain transaction",
         ) > -1
       )
         throw Error(
-          `Could not decode transaction ${txHash}. It might not exist on the current blockchain (${this.network}).`
+          `Could not decode transaction ${txHash}. It might not exist on the current blockchain (${this.network}).`,
         );
       else throw error;
     }
   }
 
   private async enrichWithInputValues(
-    transaction: ElectrumRawTransaction
+    transaction: ElectrumRawTransaction,
   ): Promise<ElectrumRawTransactionWithInputValues> {
     const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
     const transactions = await Promise.all(
-      hashes.map((hash) => this.getRawTransactionObject(hash, false))
+      hashes.map((hash) => this.getRawTransactionObject(hash, false)),
     );
     const transactionMap = new Map<string, ElectrumRawTransaction>();
     transactions.forEach((val) => transactionMap.set(val.hash, val));
@@ -367,15 +372,15 @@ export default class ElectrumNetworkProvider<
   // gets the decoded transaction in human readable form
   async getRawTransactionObject(
     txHash: string,
-    loadInputValues: true
+    loadInputValues: true,
   ): Promise<ElectrumRawTransactionWithInputValues>;
   async getRawTransactionObject(
     txHash: string,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<ElectrumRawTransaction>;
   async getRawTransactionObject(
     txHash: string,
-    loadInputValues: boolean = false
+    loadInputValues: boolean = false,
   ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues> {
     if (loadInputValues) {
       return this.getRawTransaction(txHash, true, true);
@@ -385,20 +390,20 @@ export default class ElectrumNetworkProvider<
 
   async sendRawTransaction(
     txHex: string,
-    awaitPropagation: boolean = true
+    awaitPropagation: boolean = true,
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {
       let txHash = await getTransactionHash(txHex);
       if (!awaitPropagation) {
         this.performRequest("blockchain.transaction.broadcast", [txHex]).catch(
-          () => {}
+          () => {},
         );
         resolve(txHash);
       } else {
         let cancel: CancelFn;
 
         const waitForTransactionCallback = async (
-          data: [txHash: string, confirmations: number | null]
+          data: [txHash: string, confirmations: number | null],
         ) => {
           if (data && data[0] === txHash && data[1] !== null) {
             await cancel?.();
@@ -407,14 +412,14 @@ export default class ElectrumNetworkProvider<
         };
         cancel = await this.subscribeToTransaction(
           txHash,
-          waitForTransactionCallback
+          waitForTransactionCallback,
         );
 
         this.performRequest("blockchain.transaction.broadcast", [txHex]).catch(
           async (error) => {
             await cancel?.();
             reject(error);
-          }
+          },
         );
       }
     });
@@ -424,7 +429,7 @@ export default class ElectrumNetworkProvider<
   async getHistory(
     cashaddr: string,
     fromHeight: number = 0,
-    toHeight: number = -1
+    toHeight: number = -1,
   ): Promise<TxI[]> {
     return this.performRequest("blockchain.address.get_history", [
       cashaddr,
@@ -440,10 +445,10 @@ export default class ElectrumNetworkProvider<
 
   public async watchAddressStatus(
     cashaddr: string,
-    callback: (status: string | null) => void
+    callback: (status: string | null) => void,
   ): Promise<CancelFn> {
     const watchAddressStatusCallback = async (
-      data: [address: string, status: string | null]
+      data: [address: string, status: string | null],
     ) => {
       // subscription acknowledgement is the latest known status or null if no status is known
       // status is an array: [ cashaddr, statusHash ]
@@ -461,7 +466,7 @@ export default class ElectrumNetworkProvider<
   // watch for block headers and block height, if `skipCurrentHeight` is set, the notification about current block will not arrive
   public async watchBlocks(
     callback: (header: HexHeaderI) => void,
-    skipCurrentHeight: boolean = true
+    skipCurrentHeight: boolean = true,
   ): Promise<CancelFn> {
     let acknowledged = !skipCurrentHeight;
     const waitForBlockCallback = (_header: HexHeaderI | HexHeaderI[]) => {
@@ -501,7 +506,7 @@ export default class ElectrumNetworkProvider<
 
   // subscribe to notifications sent when new block is found, the block header is sent to callback
   async subscribeToHeaders(
-    callback: (header: HexHeaderI) => void
+    callback: (header: HexHeaderI) => void,
   ): Promise<CancelFn> {
     return this.subscribeRequest("blockchain.headers.subscribe", [], (data) => {
       callback(data[0]);
@@ -510,40 +515,40 @@ export default class ElectrumNetworkProvider<
 
   async subscribeToAddress(
     cashaddr: string,
-    callback: (data: [address: string, status: string | null]) => void
+    callback: (data: [address: string, status: string | null]) => void,
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.address.subscribe",
       [cashaddr],
-      callback
+      callback,
     );
   }
 
   async subscribeToTransaction(
     txHash: string,
-    callback: (data: [txHash: string, confirmations: number | null]) => void
+    callback: (data: [txHash: string, confirmations: number | null]) => void,
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.transaction.subscribe",
       [txHash],
-      callback
+      callback,
     );
   }
 
   async subscribeToDsproof(
     txHash: string,
-    callback: (data: [txHash: string, dsproof: DsproofData | null]) => void
+    callback: (data: [txHash: string, dsproof: DsproofData | null]) => void,
   ): Promise<CancelFn> {
     return this.subscribeRequest(
       "blockchain.transaction.dsproof.subscribe",
       [txHash],
-      callback
+      callback,
     );
   }
 
   public async daemonPassthrough<T = unknown>(
     method: string,
-    params: unknown[] | Record<string, unknown> = []
+    params: unknown[] | Record<string, unknown> = [],
   ): Promise<T> {
     await this.ready();
     return this.transport.request("daemon.passthrough", {
@@ -557,10 +562,10 @@ export default class ElectrumNetworkProvider<
   }
 
   public async performRequest<
-    M extends ExtractRequestMethod<ElectrumCashSchema>
+    M extends ExtractRequestMethod<ElectrumCashSchema>,
   >(
     method: M,
-    parameters?: ExtractParams<ElectrumCashSchema, M>
+    parameters?: ExtractParams<ElectrumCashSchema, M>,
   ): Promise<ExtractReturn<ElectrumCashSchema, M>> {
     await this.ready();
 
@@ -603,11 +608,11 @@ export default class ElectrumNetworkProvider<
   }
 
   public async subscribeRequest<
-    M extends ExtractSubscriptionMethod<ElectrumCashSchema>
+    M extends ExtractSubscriptionMethod<ElectrumCashSchema>,
   >(
     method: M,
     parameters: ExtractParams<ElectrumCashSchema, M>,
-    callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void
+    callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void,
   ): Promise<CancelFn> {
     await this.ready();
 

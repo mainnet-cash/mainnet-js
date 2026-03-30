@@ -13,7 +13,7 @@ export const Network = {
   TESTNET: literal("testnet"),
   REGTEST: literal("regtest"),
 };
-export type Network = typeof Network[keyof typeof Network];
+export type Network = (typeof Network)[keyof typeof Network];
 
 export interface Utxo {
   txid: string;
@@ -77,4 +77,4 @@ export const NFTCapability = {
   mutable: literal("mutable"),
   minting: literal("minting"),
 };
-export type NFTCapability = typeof NFTCapability[keyof typeof NFTCapability];
+export type NFTCapability = (typeof NFTCapability)[keyof typeof NFTCapability];

@@ -1,8 +1,8 @@
-import { disconnectProviders, initProviders } from "./Connection";
-import { RegTestWallet } from "../wallet/Wif";
-import { getNetworkProvider } from "../network/default";
-import { mine } from "../mine";
 import { Network } from "../interface";
+import { mine } from "../mine";
+import { getNetworkProvider } from "../network/default";
+import { RegTestWallet } from "../wallet/Wif";
+import { disconnectProviders, initProviders } from "./Connection";
 
 const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
 
@@ -19,8 +19,8 @@ describe("Rpc tests", () => {
     const provider = getNetworkProvider(Network.REGTEST);
     expect(
       await provider.getUtxos(
-        "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
-      )
+        "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
+      ),
     ).not.toHaveLength(0);
   });
 
@@ -31,7 +31,7 @@ describe("Rpc tests", () => {
         "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
         async (data) => {
           expect(data).not.toBe("");
-        }
+        },
       );
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -50,7 +50,7 @@ describe("Rpc tests", () => {
           // console.log("First", data);
           expect(data).not.toBe("");
           data;
-        }
+        },
       );
 
       await provider.subscribeToAddress(
@@ -59,7 +59,7 @@ describe("Rpc tests", () => {
           // console.log("Second", data);
           expect(data).not.toBe("");
           data;
-        }
+        },
       );
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -88,10 +88,10 @@ describe("Rpc tests", () => {
     const provider = getNetworkProvider(Network.REGTEST);
     let promiseResult;
     const timeout = new Promise((resolve) =>
-      setTimeout(resolve, 1000, "timeout")
+      setTimeout(resolve, 1000, "timeout"),
     );
     await Promise.race([provider.waitForBlock(), timeout]).then(
-      (result) => (promiseResult = result)
+      (result) => (promiseResult = result),
     );
     expect(promiseResult).toBe("timeout");
   });
@@ -114,7 +114,7 @@ describe("Rpc tests", () => {
 
     setTimeout(
       async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
-      2000
+      2000,
     );
 
     let header = await provider.waitForBlock();
@@ -122,7 +122,7 @@ describe("Rpc tests", () => {
 
     setTimeout(
       async () => await mine({ cashaddr: minerWallet.cashaddr!, blocks: 1 }),
-      2000
+      2000,
     );
 
     header = await provider.waitForBlock(height + 2);

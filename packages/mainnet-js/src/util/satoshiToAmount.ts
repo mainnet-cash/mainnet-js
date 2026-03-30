@@ -13,7 +13,7 @@ import { sanitizeUnit } from "../util/sanitizeUnit.js";
  */
 export async function satoshiToAmount(
   value: bigint,
-  rawUnit: any
+  rawUnit: any,
 ): Promise<number> {
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
@@ -26,7 +26,7 @@ export async function satoshiToAmount(
       // truncate currency amounts to fixed precision (2),
       // then return the fixed value string as a float.
       const currencyValue = Number(
-        Number(value) * (Currency_over_BCH / Number(bchParam.subUnits))
+        Number(value) * (Currency_over_BCH / Number(bchParam.subUnits)),
       ).toFixed(2);
       return Number.parseFloat(currencyValue);
   }

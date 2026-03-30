@@ -4,8 +4,8 @@ import type {
   IndexerConfig,
 } from "@mem-cash/electrum";
 import { asTransport, createIndexer } from "@mem-cash/electrum";
-import ElectrumNetworkProvider from "./ElectrumNetworkProvider.js";
 import { Network, Utxo } from "../interface.js";
+import ElectrumNetworkProvider from "./ElectrumNetworkProvider.js";
 
 export interface MockNetworkProviderOptions {
   /** Indexer config passed to createIndexer. */

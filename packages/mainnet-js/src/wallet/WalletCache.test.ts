@@ -1,7 +1,7 @@
-import { RegTestWallet, RegTestWifWallet } from "./Wif";
-import { RegTestWatchWallet } from "./Watch";
+import { disconnectProviders, initProviders } from "../network/Connection";
 import { RegTestHDWallet } from "./HDWallet";
-import { initProviders, disconnectProviders } from "../network/Connection";
+import { RegTestWatchWallet } from "./Watch";
+import { RegTestWallet, RegTestWifWallet } from "./Wif";
 
 beforeAll(async () => {
   await initProviders();
@@ -27,7 +27,7 @@ describe("Wallet cache initialization", () => {
 
   test("Wif wallet from ID should have walletCache with at least one entry", async () => {
     const wallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     expect(wallet.walletCache).toBeDefined();
     expect(wallet.walletCache!.get(wallet.cashaddr)).toBeDefined();
@@ -45,12 +45,12 @@ describe("Wallet cache initialization", () => {
 
   test("Watch wallet should have walletCache without private key", async () => {
     const wallet = await RegTestWatchWallet.watchOnly(
-      "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0"
+      "bchreg:qpttdv3qg2usm4nm7talhxhl05mlhms3ys43u76rn0",
     );
     expect(wallet.walletCache).toBeDefined();
     expect(wallet.walletCache!.get(wallet.cashaddr)).toBeDefined();
     expect(
-      wallet.walletCache!.get(wallet.cashaddr)!.privateKey
+      wallet.walletCache!.get(wallet.cashaddr)!.privateKey,
     ).toBeUndefined();
     await wallet.stop();
   });

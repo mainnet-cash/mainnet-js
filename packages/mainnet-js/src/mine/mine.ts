@@ -1,5 +1,5 @@
-import { getNetworkProvider } from "../network/default.js";
 import { Network } from "../interface.js";
+import { getNetworkProvider } from "../network/default.js";
 
 /**
  * Mine blocks to a regtest address.

@@ -1,19 +1,19 @@
-import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
-import { default as NetworkProvider } from "./NetworkProvider.js";
-import { MockNetworkProvider } from "./MockNetworkProvider.js";
-import { getDefaultServers } from "./configuration.js";
-import { Network } from "../interface.js";
-import { networkTickerMap } from "./constant.js";
-import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
 import { createParseSync } from "@rpckit/core";
-import { webSocket } from "@rpckit/websocket/electrum-cash";
+import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
 import { fallback } from "@rpckit/fallback/electrum-cash";
+import { webSocket } from "@rpckit/websocket/electrum-cash";
+import { Network } from "../interface.js";
+import { getDefaultServers } from "./configuration.js";
+import { networkTickerMap } from "./constant.js";
+import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
+import { MockNetworkProvider } from "./MockNetworkProvider.js";
+import { default as NetworkProvider } from "./NetworkProvider.js";
 
 const parseSync = createParseSync({ webSocket, fallback });
 
 export function setGlobalProvider(
   network: Network,
-  provider: NetworkProvider
+  provider: NetworkProvider,
 ): NetworkProvider {
   const accessor = networkTickerMap[network];
   globalThis[accessor] = provider;
@@ -21,7 +21,7 @@ export function setGlobalProvider(
 }
 
 export function getGlobalProvider(
-  network: Network
+  network: Network,
 ): NetworkProvider | undefined {
   const accessor = networkTickerMap[network];
   return globalThis[accessor];
@@ -36,7 +36,7 @@ export function removeGlobalProvider(network: Network): void {
 
 export async function createProvider(
   network: Network = Network.MAINNET,
-  servers?: string
+  servers?: string,
 ): Promise<ElectrumNetworkProvider> {
   const serverStr = servers ?? getDefaultServers(network);
   const transport = parseSync<ElectrumCashSchema>(serverStr);
@@ -53,7 +53,7 @@ export async function createMockProvider(): Promise<NetworkProvider> {
 }
 
 export function getNetworkProvider(
-  network: Network = Network.MAINNET
+  network: Network = Network.MAINNET,
 ): NetworkProvider {
   const globalProvider = getGlobalProvider(network);
   if (globalProvider) {

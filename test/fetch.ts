@@ -26,7 +26,7 @@ globalThis.fetch = (async (uri: any, ...rest: any) => {
           ? map[uri]
           : JSON.stringify(map[uri], null, 2);
       },
-    })
+    }),
   );
 }) as any;
 

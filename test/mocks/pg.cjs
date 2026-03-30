@@ -16,12 +16,12 @@ const tables = new Map();
 function parseTableName(sql) {
   // Try quoted identifier first (handles spaces, dots, etc.)
   const quoted = sql.match(
-    /(?:FROM|INTO|UPDATE|TABLE)\s+(?:IF\s+NOT\s+EXISTS\s+)?"([^"]+)"/i
+    /(?:FROM|INTO|UPDATE|TABLE)\s+(?:IF\s+NOT\s+EXISTS\s+)?"([^"]+)"/i,
   );
   if (quoted) return quoted[1];
   // Fallback to unquoted identifier
   const unquoted = sql.match(
-    /(?:FROM|INTO|UPDATE|TABLE)\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)/i
+    /(?:FROM|INTO|UPDATE|TABLE)\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)/i,
   );
   return unquoted ? unquoted[1] : null;
 }

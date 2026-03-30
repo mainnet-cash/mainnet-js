@@ -1,4 +1,5 @@
-import { btoa, atob } from "./base64";
+import { atob, btoa } from "./base64";
+
 test("atob should decode a browser encoded string in node", async () => {
   let encodedScript =
     "Y29udHJhY3QgVHJhbnNmZXJXaXRoVGltZW91dChieXRlczIwIHNlbmRlclBraCwgYnl0ZXMyMCByZWNpcGllbnRQa2gsIGludCB0aW1lb3V0KSB7CiAgICAgICAgZnVuY3Rpb24gdHJhbnNmZXIocHVia2V5IHNpZ25pbmdQaywgc2lnIHMpIHsKICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IHJlY2lwaWVudFBraCk7CiAgICAgICAgICByZXF1aXJlKGNoZWNrU2lnKHMsIHNpZ25pbmdQaykpOwogICAgICAgIH0KICAKICAgICAgICBmdW5jdGlvbiB0aW1lb3V0KHB1YmtleSBzaWduaW5nUGssIHNpZyBzKSB7CiAgICAgICAgICAgIHJlcXVpcmUoaGFzaDE2MChzaWduaW5nUGspID09IHNlbmRlclBraCk7CiAgICAgICAgICAgIHJlcXVpcmUoY2hlY2tTaWcocywgc2lnbmluZ1BrKSk7CiAgICAgICAgICAgIHJlcXVpcmUodHgudGltZSA+PSB0aW1lb3V0KTsKICAgICAgICB9CiAgICB9";

@@ -1,5 +1,5 @@
+import { disconnectProviders, initProviders } from "mainnet-js";
 import WebhookWorker from "../webhook/WebhookWorker";
-import { initProviders, disconnectProviders } from "mainnet-js";
 import { Webhook } from "./Webhook";
 
 let worker: WebhookWorker;
@@ -59,7 +59,7 @@ describe("Webhook worker tests", () => {
           expect(worker.activeHooks.size).toBe(0);
           expect(Webhook.debug.responses).toStrictEqual({});
           resolve(true);
-        }, 0)
+        }, 0),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);
@@ -76,7 +76,7 @@ describe("Webhook worker tests", () => {
         recurrence: "once",
         duration_sec: -1000,
       },
-      false
+      false,
     );
 
     await worker.init();

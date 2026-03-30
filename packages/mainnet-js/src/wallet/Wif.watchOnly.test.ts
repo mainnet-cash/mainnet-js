@@ -1,5 +1,5 @@
-import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
-import { initProviders, disconnectProviders } from "../network/Connection";
+import { disconnectProviders, initProviders } from "../network/Connection";
+import { RegTestWallet, Wallet } from "./Wif";
 
 beforeAll(async () => {
   await initProviders();
@@ -14,7 +14,7 @@ describe(`Test creation of wallet from walletId`, () => {
     const ADDRESS_TOKEN = "bchreg:zpttdv3qg2usm4nm7talhxhl05mlhms3ysjm0q59vu";
 
     let w = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     expect(w.cashaddr!.startsWith("bchreg:")).toBeTruthy();
@@ -38,7 +38,7 @@ describe(`Test creation of wallet from walletId`, () => {
       "bitcoincash:pvykylj7uk385669fjse37r2eknx35ngaalx805q2hul62lmx2fq2v5dx6g8w";
 
     let w = await Wallet.watchOnly(
-      "bitcoincash:pvykylj7uk385669fjse37r2eknx35ngaalx805q2hul62lmx2fq2v5dx6g8w"
+      "bitcoincash:pvykylj7uk385669fjse37r2eknx35ngaalx805q2hul62lmx2fq2v5dx6g8w",
     );
 
     expect(w.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();
@@ -49,7 +49,7 @@ describe(`Test creation of wallet from walletId`, () => {
     const ADDRESS = "bitcoincash:pzvts0uztwg32yvrx7xz9lp572dgnt20sy0dj993vx";
 
     let w = await Wallet.watchOnly(
-      "bitcoincash:pzvts0uztwg32yvrx7xz9lp572dgnt20sy0dj993vx"
+      "bitcoincash:pzvts0uztwg32yvrx7xz9lp572dgnt20sy0dj993vx",
     );
 
     expect(w.cashaddr!.startsWith("bitcoincash:")).toBeTruthy();

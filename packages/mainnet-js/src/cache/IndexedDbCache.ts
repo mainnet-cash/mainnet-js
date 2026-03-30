@@ -5,13 +5,13 @@ export class IndexedDbCache implements CacheProvider {
   private db: IDBDatabase | null = null;
 
   constructor(
-    private objectStoreName: string = "ElectrumNetworkProviderCache"
+    private objectStoreName: string = "ElectrumNetworkProviderCache",
   ) {
     this.objectStoreName = objectStoreName;
   }
 
   private getDatabaseObjectFromTarget(
-    target: EventTarget | null
+    target: EventTarget | null,
   ): IDBDatabase | null {
     if (!target) {
       return null;
@@ -24,13 +24,13 @@ export class IndexedDbCache implements CacheProvider {
 
   private throwDatabaseOpenError(
     reject: (reason: unknown) => void,
-    database: IDBDatabase | null
+    database: IDBDatabase | null,
   ) {
     if (!database) {
       reject(
         new Error(
-          "Something went wrong and the database transaction was not opened."
-        )
+          "Something went wrong and the database transaction was not opened.",
+        ),
       );
     }
   }

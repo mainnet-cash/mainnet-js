@@ -1,6 +1,6 @@
 import { webSocket } from "@rpckit/websocket/electrum-cash";
-import { getNetworkProvider, createProvider } from ".";
 import { Network } from "../interface";
+import { createProvider, getNetworkProvider } from ".";
 
 test("Should get a transaction with bare rpckit transport", async () => {
   const transport = webSocket("wss://fulcrum.pat.mn:50004");
@@ -36,7 +36,7 @@ test("Should propagate electrum error for non-existent transaction", async () =>
     throw new Error("Expected request to throw");
   } catch (error: any) {
     expect(error.message).toContain(
-      "No such mempool or blockchain transaction"
+      "No such mempool or blockchain transaction",
     );
   } finally {
     await transport.close();
@@ -48,7 +48,7 @@ test("Should throw user-friendly error for non-existent transaction via provider
     "0000000000000000000000000000000000000000000000000000000000000000";
   const provider = await createProvider(
     Network.MAINNET,
-    "wss://fulcrum.pat.mn:50004"
+    "wss://fulcrum.pat.mn:50004",
   );
   try {
     await provider.getRawTransaction(zeroTxId);

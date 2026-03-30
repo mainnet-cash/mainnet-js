@@ -1,16 +1,16 @@
 import {
-  hexToBin,
   binToHex,
+  hexToBin,
   instantiateRipemd160,
-  instantiateSha256,
   instantiateSecp256k1,
+  instantiateSha256,
 } from "@bitauth/libauth";
 import { Wallet } from "../wallet/Wif";
 import { derivePublicKeyHash } from "./derivePublicKeyHash";
 
 test("Should return the a public key hash", async () => {
   let pkh = derivePublicKeyHash(
-    "bchreg:pz0z7u9p96h2p6hfychxdrmwgdlzpk5luc22ykt2z6"
+    "bchreg:pz0z7u9p96h2p6hfychxdrmwgdlzpk5luc22ykt2z6",
   );
   let pkh2 = derivePublicKeyHash("pz0z7u9p96h2p6hfychxdrmwgdlzpk5luc22ykt2z6");
   expect(pkh.length).toBe(20);
@@ -24,9 +24,9 @@ test("Should calculate public key hash using via hash160", async () => {
   let pkh2 = ripemd160.hash(
     sha256.hash(
       hexToBin(
-        "02b4632d08485ff1df2db55b9dafd23347d1c47a457072a1e87be26896549a8737"
-      )
-    )
+        "02b4632d08485ff1df2db55b9dafd23347d1c47a457072a1e87be26896549a8737",
+      ),
+    ),
   );
   expect(pkh2.length).toBe(20);
   expect(binToHex(pkh2)).toEqual("93ce48570b55c42c2af816aeaba06cfee1224fae");
@@ -37,7 +37,7 @@ test("Should calculate public key hash consistent with hash160", async () => {
   const sha256 = await instantiateSha256();
   const secp256k1 = await instantiateSecp256k1();
   let w = await Wallet.fromId(
-    "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
   );
   // using cashaddr functoin
   let pkh = derivePublicKeyHash(w.getDepositAddress());

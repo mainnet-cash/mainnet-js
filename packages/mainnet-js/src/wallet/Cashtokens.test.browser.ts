@@ -1,8 +1,8 @@
-import { RegTestWallet } from "./Wif";
-import { TokenSendRequest, TokenMintRequest } from "./model";
 import { NFTCapability } from "../interface";
-import { binToHex, hexToBin, utf8ToBin, delay } from "../util";
 import * as libauth from "../libauth";
+import { binToHex, delay, hexToBin, utf8ToBin } from "../util";
+import { TokenMintRequest, TokenSendRequest } from "./model";
+import { RegTestWallet } from "./Wif";
 
 describe(`Cashtokens should function in the browser`, () => {
   test(`Test fungible cashtoken genesis and sending`, async () => {
@@ -97,7 +97,7 @@ describe(`Cashtokens should function in the browser`, () => {
             commitment: "abcd02",
           },
         }),
-      ])
+      ]),
     ).rejects.toThrow("No suitable token utxos available to send token");
   });
 
@@ -206,7 +206,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
       ],
-      true
+      true,
     );
     expect(await alice.getTokenBalance(category)).toBe(2n);
     const newTokenUtxos = await alice.getTokenUtxos(category);
@@ -232,7 +232,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
       ],
-      false
+      false,
     );
     expect(await alice.getTokenBalance(category)).toBe(2n);
     const ftTokenUtxos = await alice.getTokenUtxos(category);
@@ -266,7 +266,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
       ],
-      true
+      true,
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     const ft2TokenUtxos = await alice.getTokenUtxos(category);
@@ -293,14 +293,14 @@ describe(`Cashtokens should function in the browser`, () => {
         category: category,
         amount: 5n,
       },
-      "burn"
+      "burn",
     );
 
     const rawTx = await alice.provider!.getRawTransaction(response.txId!, true);
     expect(rawTx.vout.length).toEqual(3);
     expect(rawTx.vout[0].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx.vout[0].scriptPubKey.hex).toContain(
-      binToHex(utf8ToBin("burn"))
+      binToHex(utf8ToBin("burn")),
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     const newTokenUtxos = await alice.getTokenUtxos(category);
@@ -335,14 +335,14 @@ describe(`Cashtokens should function in the browser`, () => {
           commitment: "abcd",
         },
       },
-      "burn"
+      "burn",
     );
 
     const rawTx = await alice.provider!.getRawTransaction(response.txId!, true);
     expect(rawTx.vout.length).toEqual(3);
     expect(rawTx.vout[0].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx.vout[0].scriptPubKey.hex).toContain(
-      binToHex(utf8ToBin("burn"))
+      binToHex(utf8ToBin("burn")),
     );
     expect(await alice.getTokenBalance(category)).toBe(3n);
     expect((await alice.getAllTokenBalances())[category]).toBe(3n);
@@ -362,7 +362,7 @@ describe(`Cashtokens should function in the browser`, () => {
           commitment: "abcd",
         },
       },
-      "burn"
+      "burn",
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     const ftTokenUtxos = await alice.getTokenUtxos(category);
@@ -378,7 +378,7 @@ describe(`Cashtokens should function in the browser`, () => {
           commitment: "abcd",
         },
       },
-      "burn"
+      "burn",
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     expect((await alice.getAllTokenBalances())[category] || 0n).toBe(0n);
@@ -478,7 +478,7 @@ describe(`Cashtokens should function in the browser`, () => {
             },
           }),
         ]),
-      0
+      0,
     );
 
     const cancel = await bob.watchTokenBalance(category, (balance) => {
@@ -516,7 +516,7 @@ describe(`Cashtokens should function in the browser`, () => {
 
     const aliceWallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const aliceWatchWallet = await RegTestWallet.watchOnly(
-      aliceWallet.cashaddr!
+      aliceWallet.cashaddr!,
     );
 
     let category: string;
@@ -532,14 +532,14 @@ describe(`Cashtokens should function in the browser`, () => {
             },
           },
           undefined,
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
       expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getUtxos())
+        JSON.stringify(await aliceWallet.getUtxos()),
       );
 
       const decoded = libauth.decodeTransaction(encodedTransaction);
@@ -548,14 +548,14 @@ describe(`Cashtokens should function in the browser`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
       expect(binToHex(decoded.outputs[0].token?.nft?.commitment!)).toBe("00");
 
       const signed = await aliceWallet.signUnsignedTransaction(
         unsignedTransaction!,
-        sourceOutputs!
+        sourceOutputs!,
       );
       await aliceWallet.submitTransaction(signed);
       await aliceWallet.waitForUpdate();
@@ -582,14 +582,14 @@ describe(`Cashtokens should function in the browser`, () => {
             },
           },
           undefined,
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
       expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getUtxos())
+        JSON.stringify(await aliceWallet.getUtxos()),
       );
 
       const decoded = libauth.decodeTransaction(encodedTransaction);
@@ -598,7 +598,7 @@ describe(`Cashtokens should function in the browser`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
       expect(binToHex(sourceOutputs![0].token?.nft?.commitment!)).toBe("00");
@@ -607,7 +607,7 @@ describe(`Cashtokens should function in the browser`, () => {
 
       const signed = await aliceWallet.signUnsignedTransaction(
         unsignedTransaction!,
-        sourceOutputs!
+        sourceOutputs!,
       );
       await aliceWallet.submitTransaction(signed);
       await aliceWallet.waitForUpdate();
@@ -618,13 +618,13 @@ describe(`Cashtokens should function in the browser`, () => {
       expect(tokenUtxos.length).toBe(2);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.minting
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.minting,
+        ).length,
       ).toBe(1);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.none
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.none,
+        ).length,
       ).toBe(1);
     }
 
@@ -643,14 +643,14 @@ describe(`Cashtokens should function in the browser`, () => {
               cashaddr: aliceWallet.cashaddr!,
             }),
           ],
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
 
       // check transaction was not submitted
       expect(JSON.stringify(aliceUtxos)).toBe(
-        JSON.stringify(await aliceWallet.getUtxos())
+        JSON.stringify(await aliceWallet.getUtxos()),
       );
 
       const decoded = libauth.decodeTransaction(encodedTransaction);
@@ -659,7 +659,7 @@ describe(`Cashtokens should function in the browser`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
       expect(binToHex(sourceOutputs![0].token?.nft?.commitment!)).toBe("0a");
@@ -667,7 +667,7 @@ describe(`Cashtokens should function in the browser`, () => {
 
       const signed = await aliceWallet.signUnsignedTransaction(
         unsignedTransaction!,
-        sourceOutputs!
+        sourceOutputs!,
       );
       await aliceWallet.submitTransaction(signed);
       await aliceWallet.waitForUpdate();
@@ -677,13 +677,13 @@ describe(`Cashtokens should function in the browser`, () => {
       expect(tokenUtxos.length).toBe(2);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.minting
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.minting,
+        ).length,
       ).toBe(1);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.none
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.none,
+        ).length,
       ).toBe(1);
     }
   });

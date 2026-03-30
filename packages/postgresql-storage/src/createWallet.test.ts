@@ -1,12 +1,12 @@
 import {
   BaseWallet,
   createWallet,
+  initProviders,
   NetworkType,
+  WalletRequestI,
+  WalletTypeEnum,
   walletFromId,
 } from "mainnet-js";
-import { WalletRequestI } from "mainnet-js";
-import { initProviders, disconnectProviders } from "mainnet-js";
-import { WalletTypeEnum } from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider.js";
 
 BaseWallet.StorageProvider = SqlProvider;
@@ -65,7 +65,7 @@ describe(`Named Wallets`, () => {
 
   test("Watch wallet from Id", async () => {
     const w = await walletFromId(
-      "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22"
+      "watch:testnet:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",
     );
     expect(w.getInfo()).toStrictEqual({
       cashaddr: "bchtest:qppr9h7whx9pzucgqukhtlj8lvgvjlgr3g9ggtkq22",

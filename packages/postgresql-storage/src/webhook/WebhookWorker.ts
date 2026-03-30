@@ -31,10 +31,13 @@ export default class WebhookWorker {
     await this.evictOldHooks();
     await this.pickupHooks(true);
     if (!this.checkInterval) {
-      this.checkInterval = setInterval(async () => {
-        await this.evictOldHooks();
-        await this.pickupHooks(true);
-      }, 5 * 60 * 1000);
+      this.checkInterval = setInterval(
+        async () => {
+          await this.evictOldHooks();
+          await this.pickupHooks(true);
+        },
+        5 * 60 * 1000,
+      );
     }
   }
 
@@ -74,7 +77,7 @@ export default class WebhookWorker {
 
   async registerWebhook(
     params: RegisterWebhookParams,
-    start: boolean = true
+    start: boolean = true,
   ): Promise<number> {
     const webhook = await this.db.addWebhook(params);
     if (start) {

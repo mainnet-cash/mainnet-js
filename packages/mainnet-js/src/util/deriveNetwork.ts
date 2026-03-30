@@ -1,11 +1,11 @@
-import { derivePrefix } from "./derivePublicKeyHash.js";
 import { networkPrefixMap } from "../enum.js";
+import { derivePrefix } from "./derivePublicKeyHash.js";
 
 // This function if for assuring that a list of addresses are on the name network
 // for a single address use: networkPrefixMap[derivePrefix(address)]
 export function derivedNetwork(addresses: string[]) {
   let networks = addresses.map(
-    (address) => networkPrefixMap[derivePrefix(address)]
+    (address) => networkPrefixMap[derivePrefix(address)],
   );
   // Get a unique set of networks requested
   let networkSet = new Set(networks);

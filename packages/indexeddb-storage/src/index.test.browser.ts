@@ -24,7 +24,7 @@ describe("WalletDatabase should handle indexeddb", () => {
     expect(w1.cashaddr!.startsWith("bitcoincash:q")).toBeTruthy();
     expect(w1.network).toBe("mainnet");
     expect(
-      w1.privateKeyWif![0] == "K" || w1.privateKeyWif![0] == "L"
+      w1.privateKeyWif![0] == "K" || w1.privateKeyWif![0] == "L",
     ).toBeTruthy();
     expect(w1.name).toBe(w1Again.name);
     expect(w1.privateKeyWif).toBe(w1Again.privateKeyWif);

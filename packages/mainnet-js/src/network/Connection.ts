@@ -1,12 +1,12 @@
-import {
-  createProvider,
-  createMockProvider,
-  setGlobalProvider,
-  getGlobalProvider,
-  removeGlobalProvider,
-} from "./default.js";
 import { Network } from "../interface.js";
 import { networkTickerMap } from "./constant.js";
+import {
+  createMockProvider,
+  createProvider,
+  getGlobalProvider,
+  removeGlobalProvider,
+  setGlobalProvider,
+} from "./default.js";
 import type { MockNetworkProvider } from "./MockNetworkProvider.js";
 
 export async function initProvider(network: Network) {
@@ -30,14 +30,14 @@ export async function initProvider(network: Network) {
 export async function initProviders(networks?: Network[]) {
   networks = networks ? networks : (Object.keys(networkTickerMap) as Network[]);
   const results = await Promise.allSettled(
-    networks.map((n) => initProvider(n))
+    networks.map((n) => initProvider(n)),
   );
   for (let i = 0; i < results.length; i++) {
     if (results[i].status === "rejected") {
       const { reason } = results[i] as PromiseRejectedResult;
       const message = reason instanceof Error ? reason.message : reason;
       console.warn(
-        `Warning, couldn't establish a connection for ${networks[i]}: ${message}`
+        `Warning, couldn't establish a connection for ${networks[i]}: ${message}`,
       );
     }
   }

@@ -1,15 +1,15 @@
 import { assertSuccess, decodeTransaction, hexToBin } from "@bitauth/libauth";
-import { HDWallet, RegTestHDWallet, GAP_SIZE } from "./HDWallet";
-import { RegTestWallet, Wallet } from "./Wif";
-import { Config } from "../config";
-import { getNextUnusedIndex } from "../util/hd";
-import { NFTCapability } from "../interface";
-import { TokenMintRequest, TokenSendRequest } from "./model";
 import { stringify } from "../cache";
+import { Config } from "../config";
+import { NFTCapability } from "../interface";
 import { mine } from "../mine";
+import { disconnectProviders, initProviders } from "../network/Connection";
 import { delay } from "../util/delay";
+import { getNextUnusedIndex } from "../util/hd";
+import { GAP_SIZE, HDWallet, RegTestHDWallet } from "./HDWallet";
 import { CancelFn } from "./interface";
-import { initProviders, disconnectProviders } from "../network/Connection";
+import { TokenMintRequest, TokenSendRequest } from "./model";
+import { RegTestWallet, Wallet } from "./Wif";
 
 beforeAll(async () => {
   await initProviders();
@@ -26,10 +26,10 @@ const expectedXprv =
 describe("HDWallet", () => {
   it("should create a new HDWallet instance", async () => {
     const wallet = await Wallet.fromSeed(
-      "divide battle bulb improve hockey favorite charge save merit fatal frog cage"
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage",
     );
     const walletSeed = await HDWallet.fromSeed(
-      "divide battle bulb improve hockey favorite charge save merit fatal frog cage"
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage",
     );
     const walletPriv = await HDWallet.fromXPriv(expectedXprv);
     const walletPub = await HDWallet.fromXPub(expectedXpub);
@@ -50,34 +50,34 @@ describe("HDWallet", () => {
 
   it("should serialize", async () => {
     const wallet = await HDWallet.fromSeed(
-      "divide battle bulb improve hockey favorite charge save merit fatal frog cage"
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage",
     );
     expect(wallet.toString()).toBe(
-      "hd:mainnet:divide battle bulb improve hockey favorite charge save merit fatal frog cage:m/44'/0'/0':0:0"
+      "hd:mainnet:divide battle bulb improve hockey favorite charge save merit fatal frog cage:m/44'/0'/0':0:0",
     );
     expect(wallet.toDbString()).toBe(
-      "hd:mainnet:divide battle bulb improve hockey favorite charge save merit fatal frog cage:m/44'/0'/0':0:0"
+      "hd:mainnet:divide battle bulb improve hockey favorite charge save merit fatal frog cage:m/44'/0'/0':0:0",
     );
 
     wallet.name = "testWallet";
     expect(wallet.toString()).toBe("named:mainnet:testWallet");
     expect(wallet.toDbString()).toBe(
-      "hd:mainnet:divide battle bulb improve hockey favorite charge save merit fatal frog cage:m/44'/0'/0':0:0"
+      "hd:mainnet:divide battle bulb improve hockey favorite charge save merit fatal frog cage:m/44'/0'/0':0:0",
     );
 
     const xPrivWallet = await HDWallet.fromXPriv(expectedXprv);
     expect(xPrivWallet.toString()).toBe(
-      "hd:mainnet:xprv9yHV1hFYFTfNmUpXP2S3XbBTz61AeXKRLx7Eyp4r53DiwadSoMVMJfm5fvtxBc3NFKfozcH42LM66Kb5VaxdLvGk43JWahCegx6iaEJbkB2:0:0"
+      "hd:mainnet:xprv9yHV1hFYFTfNmUpXP2S3XbBTz61AeXKRLx7Eyp4r53DiwadSoMVMJfm5fvtxBc3NFKfozcH42LM66Kb5VaxdLvGk43JWahCegx6iaEJbkB2:0:0",
     );
 
     const xPubWallet = await HDWallet.fromXPub(expectedXpub);
     expect(xPubWallet.toString()).toBe(
-      "hd:mainnet:xpub6CGqRCnS5qDfyxtzV3y3tj8CY7qf3z3GiB2qnCUTdNkhpNxbLtobrU5ZXBVPG3rzPcBUpJAoj3K1u1jyDwKuduL71gLPm27Tckc85apgQRr:0:0"
+      "hd:mainnet:xpub6CGqRCnS5qDfyxtzV3y3tj8CY7qf3z3GiB2qnCUTdNkhpNxbLtobrU5ZXBVPG3rzPcBUpJAoj3K1u1jyDwKuduL71gLPm27Tckc85apgQRr:0:0",
     );
 
     const uninitializedWallet = new HDWallet();
     expect(() => uninitializedWallet.toDbString()).toThrowError(
-      "HDWallet has no mnemonic, xPriv or xPub to serialize"
+      "HDWallet has no mnemonic, xPriv or xPub to serialize",
     );
   });
 
@@ -98,7 +98,7 @@ describe("HDWallet", () => {
         null,
         null,
         null,
-      ])
+      ]),
     ).toBe(1);
   });
 
@@ -115,7 +115,7 @@ describe("HDWallet", () => {
     expect(hdWallet.depositIndex).toBe(0);
 
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     await fundingWallet.send({
@@ -152,7 +152,7 @@ describe("HDWallet", () => {
 
   it("should scan beyond gap to find real deposit index", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     // Create a wallet and fund addresses 0 and 20
@@ -173,7 +173,7 @@ describe("HDWallet", () => {
     // Restore wallet from same seed, starting from index 0
     const restoredWallet = await RegTestHDWallet.fromSeed(
       seedWallet.mnemonic!,
-      seedWallet.derivation
+      seedWallet.derivation,
     );
     await restoredWallet.watchPromise;
 
@@ -182,7 +182,7 @@ describe("HDWallet", () => {
 
   it("changeIndex updates when spending", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
     const bob = await RegTestWallet.newRandom();
@@ -223,7 +223,7 @@ describe("HDWallet", () => {
     // Restore wallet from same seed and verify depositIndex is correct
     const restoredWallet = await RegTestHDWallet.fromSeed(
       hdWallet.mnemonic!,
-      hdWallet.derivation
+      hdWallet.derivation,
     );
     await restoredWallet.watchPromise;
 
@@ -242,13 +242,13 @@ describe("HDWallet", () => {
     expect(hdWallet.hasAddress(deposit1)).toBe(true);
     expect(hdWallet.hasAddress(change0)).toBe(true);
     expect(
-      hdWallet.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4")
+      hdWallet.hasAddress("bchreg:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9d5dxv4"),
     ).toBe(false);
   });
 
   it("Should send funds from an HDWallet", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     const hdWallet = await RegTestHDWallet.newRandom();
@@ -278,23 +278,23 @@ describe("HDWallet", () => {
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(0))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(100000n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(1))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(100000n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(2))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(0n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getChangeAddress(0))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(0n);
 
     const bob = await RegTestWallet.newRandom();
@@ -308,23 +308,23 @@ describe("HDWallet", () => {
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(0))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(0n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(1))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(0n);
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getDepositAddress(2))
-      ).getBalance()
+      ).getBalance(),
     ).toBe(0n);
 
     expect(
       await (
         await RegTestWallet.watchOnly(hdWallet.getChangeAddress(0))
-      ).getBalance()
+      ).getBalance(),
     ).toBeGreaterThan(50000n - 1000n);
 
     expect(hdWallet.getChangeAddress()).not.toBe(hdWallet.getChangeAddress(0));
@@ -351,7 +351,7 @@ describe("HDWallet", () => {
 
   it("Should build unsigned transactions from an HDWallet", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     const hdWallet = await RegTestHDWallet.newRandom();
@@ -373,11 +373,11 @@ describe("HDWallet", () => {
       },
       {
         buildUnsigned: true,
-      }
+      },
     );
 
     const tx = assertSuccess(
-      decodeTransaction(hexToBin(unsignedTx.unsignedTransaction!))
+      decodeTransaction(hexToBin(unsignedTx.unsignedTransaction!)),
     );
     expect(tx.inputs.length).toBe(1);
     expect(tx.inputs[0].unlockingBytecode.length).toBe(0); // should be empty
@@ -403,35 +403,35 @@ describe("HDWallet", () => {
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
     expect(
       otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
-        ?.privateKey instanceof Uint8Array
+        ?.privateKey instanceof Uint8Array,
     ).toBe(true);
     expect(
       otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
-        ?.publicKey instanceof Uint8Array
+        ?.publicKey instanceof Uint8Array,
     ).toBe(true);
     expect(
       otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
-        ?.publicKeyHash instanceof Uint8Array
+        ?.publicKeyHash instanceof Uint8Array,
     ).toBe(true);
 
     expect(
-      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0)),
     ).toBeDefined();
     expect(
-      otherWallet.walletCache.get(hdWallet.getDepositAddress(99))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(99)),
     ).not.toBeDefined();
     expect(
-      otherWallet.walletCache.get(hdWallet.getDepositAddress(100))
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(100)),
     ).toBeDefined();
 
     expect(
-      otherWallet.walletCache.get(hdWallet.getChangeAddress(0))
+      otherWallet.walletCache.get(hdWallet.getChangeAddress(0)),
     ).toBeDefined();
     expect(
-      otherWallet.walletCache.get(hdWallet.getChangeAddress(99))
+      otherWallet.walletCache.get(hdWallet.getChangeAddress(99)),
     ).not.toBeDefined();
     expect(
-      otherWallet.walletCache.get(hdWallet.getChangeAddress(100))
+      otherWallet.walletCache.get(hdWallet.getChangeAddress(100)),
     ).toBeDefined();
 
     Config.UseMemoryCache = memoryCacheValue;
@@ -446,11 +446,11 @@ describe("HDWallet", () => {
     // get some addresses to populate cache
     hdWallet.getDepositAddress(0);
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status,
     ).toBeNull();
 
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(0),
@@ -459,10 +459,10 @@ describe("HDWallet", () => {
     await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status,
     ).not.toBeNull();
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos.length
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos.length,
     ).toBe(1);
 
     // persist cache
@@ -472,17 +472,17 @@ describe("HDWallet", () => {
     const otherWallet = await RegTestHDWallet.fromId(hdWallet.toDbString());
     await otherWallet.watchPromise; // ensure any async init is done
     expect(
-      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status
+      otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.status,
     ).not.toBeNull();
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos.length
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos.length,
     ).toBe(1);
     expect(
-      stringify(hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos)
+      stringify(hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos),
     ).toBe(
       stringify(
-        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos
-      )
+        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.utxos,
+      ),
     );
 
     Config.UseMemoryCache = memoryCacheValue;
@@ -497,11 +497,11 @@ describe("HDWallet", () => {
     // get deposit address to populate cache
     hdWallet.getDepositAddress(0);
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory,
     ).toEqual([]);
 
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(0),
@@ -511,7 +511,8 @@ describe("HDWallet", () => {
 
     // rawHistory should now have one entry
     expect(
-      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory.length
+      hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
+        .length,
     ).toBe(1);
 
     // persist cache
@@ -522,16 +523,16 @@ describe("HDWallet", () => {
     await otherWallet.watchPromise;
     expect(
       otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
-        .length
+        .length,
     ).toBe(1);
     expect(
       stringify(
-        hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
-      )
+        hdWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory,
+      ),
     ).toBe(
       stringify(
-        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory
-      )
+        otherWallet.walletCache.get(hdWallet.getDepositAddress(0))?.rawHistory,
+      ),
     );
 
     Config.UseMemoryCache = memoryCacheValue;
@@ -541,7 +542,7 @@ describe("HDWallet", () => {
     const hdWallet = await RegTestHDWallet.newRandom();
 
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     // Send to multiple deposit addresses
@@ -574,7 +575,7 @@ describe("HDWallet", () => {
     const hdWallet = await RegTestHDWallet.newRandom();
 
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     await fundingWallet.send({
@@ -595,7 +596,7 @@ describe("HDWallet", () => {
     const hdWallet = await RegTestHDWallet.newRandom();
 
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
 
     // First transaction
@@ -633,10 +634,10 @@ describe("HDWallet", () => {
     await otherWallet.watchPromise;
 
     const reloadedEntry = otherWallet.walletCache.get(
-      hdWallet.getDepositAddress(0)
+      hdWallet.getDepositAddress(0),
     );
     expect(reloadedEntry?.lastConfirmedHeight).toBe(
-      cacheEntry2?.lastConfirmedHeight
+      cacheEntry2?.lastConfirmedHeight,
     );
     expect(reloadedEntry?.rawHistory.length).toBe(2);
 
@@ -660,7 +661,7 @@ describe("HDWallet", () => {
 
   it("waitForUpdate resolves via timeout when depositIndex target is not reached", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
     expect(hdWallet.depositIndex).toBe(0);
@@ -728,7 +729,7 @@ describe("HDWallet", () => {
 
   it("Cashtokens integration test", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const alice = await RegTestHDWallet.newRandom();
     await fundingWallet.send({
@@ -813,7 +814,7 @@ describe("HDWallet", () => {
 
   test("Test enforcing token addresses", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const alice = await RegTestHDWallet.newRandom();
     await fundingWallet.send({
@@ -847,8 +848,8 @@ describe("HDWallet", () => {
           cashaddr: alice.getDepositAddress(),
           category: category,
           amount: 1n,
-        })
-      )
+        }),
+      ),
     ).resolves.not.toThrow();
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -859,8 +860,8 @@ describe("HDWallet", () => {
           cashaddr: alice.getTokenDepositAddress(),
           category: category,
           amount: 2n,
-        })
-      )
+        }),
+      ),
     ).resolves.not.toThrow();
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -876,8 +877,8 @@ describe("HDWallet", () => {
             cashaddr: alice.getDepositAddress(),
             category: category,
             amount: 1n,
-          })
-        ))()
+          }),
+        ))(),
     ).rejects.toThrow();
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -888,8 +889,8 @@ describe("HDWallet", () => {
           cashaddr: alice.getTokenDepositAddress(),
           category: category,
           amount: 2n,
-        })
-      )
+        }),
+      ),
     ).resolves.not.toThrow();
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -899,7 +900,7 @@ describe("HDWallet", () => {
 
   it("watchTransactionHashes reports new transactions on HD wallet", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
 
@@ -937,7 +938,7 @@ describe("HDWallet", () => {
 
   it("watchTransactionHashes does not re-report old transactions", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
 
@@ -985,7 +986,7 @@ describe("HDWallet", () => {
 
   it("watchTransactionHashes handles transactions across multiple deposit addresses", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
 
@@ -1040,7 +1041,7 @@ describe("HDWallet", () => {
 
   it("gap is maintained when addresses near the edge are used", async () => {
     const fundingWallet = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
     await hdWallet.watchPromise;
@@ -1088,7 +1089,7 @@ describe("HDWallet", () => {
     // Gap should still be maintained after the second extension
     const finalWatched = (hdWallet as any).depositStatuses.length;
     expect(finalWatched).toBeGreaterThanOrEqual(
-      hdWallet.depositIndex + GAP_SIZE
+      hdWallet.depositIndex + GAP_SIZE,
     );
   });
 });

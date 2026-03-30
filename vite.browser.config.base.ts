@@ -1,5 +1,5 @@
-import { resolve, dirname } from "path";
-import { mkdirSync, copyFileSync } from "fs";
+import { copyFileSync, mkdirSync } from "fs";
+import { dirname } from "path";
 
 export interface BrowserBuildOptions {
   /** Absolute path to entry file */

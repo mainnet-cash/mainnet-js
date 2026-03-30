@@ -1,6 +1,10 @@
+import {
+  disconnectProviders,
+  initProviders,
+  mine,
+  RegTestWallet,
+} from "mainnet-js";
 import WebhookWorker from "../webhook/WebhookWorker";
-import { RegTestWallet, initProviders, disconnectProviders } from "mainnet-js";
-import { mine } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
 
 let worker: WebhookWorker;
@@ -66,12 +70,12 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            Webhook.debug.responses["http://example.com/success"].length
+            Webhook.debug.responses["http://example.com/success"].length,
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);
-        }, 3000)
+        }, 3000),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);
@@ -103,14 +107,14 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            Webhook.debug.responses["http://example.com/fail"].length
+            Webhook.debug.responses["http://example.com/fail"].length,
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           // return funds
           // let sendResponse2 = await bobWallet.sendMax(aliceWallet.cashaddr!);
           resolve(true);
-        }, 3000)
+        }, 3000),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);
@@ -145,12 +149,12 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
-            1
+            1,
           );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
-        }, 3000)
+        }, 3000),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);
@@ -188,12 +192,12 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
-            1
+            1,
           );
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
-        }, 3000)
+        }, 3000),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);
@@ -260,11 +264,11 @@ describe("Webhook worker tests", () => {
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(1);
           expect(Webhook.debug.responses["http://example.com/bob"].length).toBe(
-            3
+            3,
           );
 
           resolve(true);
-        }, 10000)
+        }, 10000),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);
@@ -299,12 +303,12 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(
-            Webhook.debug.responses["http://example.com/watchBalance"].length
+            Webhook.debug.responses["http://example.com/watchBalance"].length,
           ).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);
-        }, 3000)
+        }, 3000),
       );
     } catch (e: any) {
       console.log(e, e.stack, e.message);

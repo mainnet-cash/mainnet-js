@@ -52,10 +52,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "22.x"
-      - name: Format
-        run: |
-          yarn
-          yarn format
+      - run: yarn
+      - name: Format and lint
+        run: yarn lint:fix
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

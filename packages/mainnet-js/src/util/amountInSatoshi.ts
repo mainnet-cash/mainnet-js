@@ -14,7 +14,7 @@ import { sanitizeUnit } from "../util/sanitizeUnit.js";
 
 export async function amountInSatoshi(
   value: number,
-  rawUnit: any
+  rawUnit: any,
 ): Promise<bigint> {
   const unit = sanitizeUnit(rawUnit);
   switch (unit) {
@@ -27,7 +27,7 @@ export async function amountInSatoshi(
       const SAT_over_BCH = bchParam.subUnits;
 
       return BigInt(
-        Math.round(Number(value * (Number(SAT_over_BCH) / Currency_over_BCH)))
+        Math.round(Number(value * (Number(SAT_over_BCH) / Currency_over_BCH))),
       );
   }
 }

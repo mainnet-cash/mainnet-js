@@ -14,6 +14,7 @@ import {
   SignedMessageResponseI,
   VerifyMessageResponseI,
 } from "../message/interface.js";
+import { SignedMessage } from "../message/signed.js";
 import { getNetworkProvider } from "../network/default.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
@@ -56,7 +57,6 @@ import {
   TokenSendRequest,
 } from "./model.js";
 import { Util } from "./Util.js";
-import { SignedMessage } from "../message/signed.js";
 
 export const placeholderCashAddr =
   "bitcoincash:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqfnhks603";
@@ -114,7 +114,7 @@ export class BaseWallet implements WalletI {
   //#region Accessors
   protected getNetworkProvider(
     // @ts-ignore
-    network: NetworkType = NetworkType.Mainnet
+    network: NetworkType = NetworkType.Mainnet,
   ): any {
     return getNetworkProvider(network);
   }
@@ -206,7 +206,7 @@ export class BaseWallet implements WalletI {
   protected async named(
     name: string,
     dbName?: string,
-    forceNew: boolean = false
+    forceNew: boolean = false,
   ): Promise<this> {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
@@ -224,7 +224,7 @@ export class BaseWallet implements WalletI {
         await db.close();
         if (forceNew) {
           throw Error(
-            `A wallet with the name ${name} already exists in ${dbName}`
+            `A wallet with the name ${name} already exists in ${dbName}`,
           );
         }
         const recoveredWallet = await this.fromId(savedWalletRecord.wallet);
@@ -239,7 +239,7 @@ export class BaseWallet implements WalletI {
       }
     } else {
       throw Error(
-        "No database was available or configured to store the named wallet."
+        "No database was available or configured to store the named wallet.",
       );
     }
   }
@@ -259,7 +259,7 @@ export class BaseWallet implements WalletI {
   protected async replaceNamed(
     name: string,
     walletId: string,
-    dbName?: string
+    dbName?: string,
   ): Promise<this> {
     if (name.length === 0) {
       throw Error("Named wallets must have a non-empty name");
@@ -283,7 +283,7 @@ export class BaseWallet implements WalletI {
       return this;
     } else {
       throw Error(
-        "No database was available or configured to store the named wallet."
+        "No database was available or configured to store the named wallet.",
       );
     }
   }
@@ -311,7 +311,7 @@ export class BaseWallet implements WalletI {
       return savedWalletRecord !== undefined;
     } else {
       throw Error(
-        "No database was available or configured to store the named wallet."
+        "No database was available or configured to store the named wallet.",
       );
     }
   }
@@ -368,7 +368,7 @@ export class BaseWallet implements WalletI {
     this: T,
     name: string,
     dbName?: string,
-    force?: boolean
+    force?: boolean,
   ): Promise<InstanceType<T>> {
     return new this().named(name, dbName, force) as InstanceType<T>;
   }
@@ -389,7 +389,7 @@ export class BaseWallet implements WalletI {
     this: T,
     name: string,
     walletId: string,
-    dbName?: string
+    dbName?: string,
   ): Promise<InstanceType<T>> {
     return new this().replaceNamed(name, walletId, dbName) as InstanceType<T>;
   }
@@ -404,7 +404,7 @@ export class BaseWallet implements WalletI {
    */
   public static async namedExists(
     name: string,
-    dbName?: string
+    dbName?: string,
   ): Promise<boolean> {
     return new this().namedExists(name, dbName);
   }
@@ -458,11 +458,11 @@ export class BaseWallet implements WalletI {
    * @returns Cancel function to stop watching
    */
   public async watchStatus(
-    callback: (status: string | null, address: string) => void
+    callback: (status: string | null, address: string) => void,
   ): Promise<CancelFn> {
     const cancelFn = await this.provider.watchAddressStatus(
       this.getDepositAddress(),
-      (status) => callback(status, this.getDepositAddress())
+      (status) => callback(status, this.getDepositAddress()),
     );
     return this.trackCancelFn(cancelFn);
   }
@@ -476,13 +476,13 @@ export class BaseWallet implements WalletI {
       depositIndex?: number;
       changeIndex?: number;
       timeout?: number;
-    } = {}
+    } = {},
   ): Promise<void> {}
 
   // sets up a callback to be called upon wallet's balance change
   // can be cancelled by calling the function returned from this one
   public async watchBalance(
-    callback: (balance: bigint) => void
+    callback: (balance: bigint) => void,
   ): Promise<CancelFn> {
     return this.watchStatus(async () => {
       const balance = await this.getBalance();
@@ -514,7 +514,7 @@ export class BaseWallet implements WalletI {
   // can be cancelled by calling the function returned from this one
   public async watchTokenBalance(
     category: string,
-    callback: (balance: bigint) => void
+    callback: (balance: bigint) => void,
   ): Promise<CancelFn> {
     return await this.watchStatus(async () => {
       const balance = await this.getTokenBalance(category);
@@ -526,7 +526,7 @@ export class BaseWallet implements WalletI {
   // this call halts the execution
   public async waitForTokenBalance(
     category: string,
-    amount: bigint
+    amount: bigint,
   ): Promise<bigint> {
     // Check if condition is already met before watching
     const currentBalance = await this.getTokenBalance(category);
@@ -543,7 +543,7 @@ export class BaseWallet implements WalletI {
             await watchCancel?.();
             resolve(balance);
           }
-        }
+        },
       );
     });
   }
@@ -554,7 +554,7 @@ export class BaseWallet implements WalletI {
    * @returns Cancel function to stop watching
    */
   public async watchTransactionHashes(
-    callback: (txHash: string) => void
+    callback: (txHash: string) => void,
   ): Promise<CancelFn> {
     const seenTxHashes = new Set<string>();
 
@@ -562,7 +562,7 @@ export class BaseWallet implements WalletI {
 
     return this.watchStatus(async () => {
       const history = (await this.getRawHistory(topHeight)).sort((a, b) =>
-        a.height <= 0 || b.height <= 0 ? -1 : b.height - a.height
+        a.height <= 0 || b.height <= 0 ? -1 : b.height - a.height,
       );
 
       const newTxHashes: string[] = [];
@@ -590,7 +590,7 @@ export class BaseWallet implements WalletI {
    * @returns Cancel function to stop watching
    */
   public async watchTransactions(
-    callback: (transaction: ElectrumRawTransaction) => void
+    callback: (transaction: ElectrumRawTransaction) => void,
   ): Promise<CancelFn> {
     return this.watchTransactionHashes(async (txHash: string) => {
       const tx = await this.provider.getRawTransactionObject(txHash);
@@ -599,14 +599,14 @@ export class BaseWallet implements WalletI {
   }
 
   public async watchTokenTransactions(
-    callback: (tx: ElectrumRawTransaction) => void
+    callback: (tx: ElectrumRawTransaction) => void,
   ): Promise<CancelFn> {
     return this.watchTransactions(
       async (transaction: ElectrumRawTransaction) => {
         if (transaction.vout.some((val) => val.tokenData)) {
           callback(transaction);
         }
-      }
+      },
     );
   }
 
@@ -621,7 +621,7 @@ export class BaseWallet implements WalletI {
    */
   public async watchDoubleSpends(
     callback: (dsproof: DsproofData) => void,
-    window: number = 5000
+    window: number = 5000,
   ): Promise<CancelFn> {
     return this.watchTransactionHashes(async (txHash: string) => {
       const cancel = await this.provider.subscribeToDsproof(
@@ -630,7 +630,7 @@ export class BaseWallet implements WalletI {
           if (txHash === proofTxHash && dsproof !== null) {
             callback(dsproof);
           }
-        }
+        },
       );
 
       setTimeout(() => cancel(), window);
@@ -645,7 +645,7 @@ export class BaseWallet implements WalletI {
     } = {
       outputCount: 1,
       options: {},
-    }
+    },
   ): Promise<{ value: bigint; utxos: Utxo[] }> {
     if (params.options && params.options.slpSemiAware) {
       this._slpSemiAware = true;
@@ -664,9 +664,9 @@ export class BaseWallet implements WalletI {
     if (params.options && params.options.utxoIds) {
       utxos = checkUtxos(
         params.options.utxoIds.map((utxoId: Utxo | string) =>
-          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
+          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId,
         ),
-        allUtxos
+        allUtxos,
       );
     } else {
       utxos = allUtxos.filter((utxo) => !utxo.token);
@@ -689,7 +689,7 @@ export class BaseWallet implements WalletI {
       undefined,
       bestHeight,
       feePaidBy,
-      sendRequests
+      sendRequests,
     );
     const relayFeePerByteInSatoshi = await getRelayFeeCache(this.provider);
     const fee = await getFeeAmountSimple({
@@ -710,13 +710,10 @@ export class BaseWallet implements WalletI {
   }
 
   public async getMaxAmountToSend(
-    params: {
-      outputCount?: number;
-      options?: SendRequestOptionsI;
-    } = {
+    params: { outputCount?: number; options?: SendRequestOptionsI } = {
       outputCount: 1,
       options: {},
-    }
+    },
   ): Promise<bigint> {
     const { value: result } = await this._getMaxAmountToSend(params);
 
@@ -738,7 +735,7 @@ export class BaseWallet implements WalletI {
       | OpReturnData
       | Array<SendRequest | TokenSendRequest | OpReturnData>
       | SendRequestArray[],
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
     const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction(requests, undefined, options);
@@ -749,7 +746,7 @@ export class BaseWallet implements WalletI {
     if (options?.broadcast === false) {
       resp.transaction = binToHex(encodedTransaction);
       resp.txId = binToHex(
-        sha256.hash(sha256.hash(encodedTransaction)).reverse()
+        sha256.hash(sha256.hash(encodedTransaction)).reverse(),
       );
     } else if (options?.buildUnsigned !== true) {
       const awaitPropagation =
@@ -793,7 +790,7 @@ export class BaseWallet implements WalletI {
    */
   public async sendMax(
     cashaddr: string,
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
     return await this.sendMaxRaw(cashaddr, options);
   }
@@ -809,14 +806,14 @@ export class BaseWallet implements WalletI {
   protected async sendMaxRaw(
     cashaddr: string,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array
+    privateKey?: Uint8Array,
   ): Promise<SendResponse> {
     const { value: maxSpendableAmount, utxos } = await this._getMaxAmountToSend(
       {
         outputCount: 1,
         options: options,
         privateKey: privateKey,
-      }
+      },
     );
 
     if (!options) {
@@ -839,7 +836,7 @@ export class BaseWallet implements WalletI {
     if (options?.broadcast === false) {
       resp.transaction = binToHex(encodedTransaction);
       resp.txId = binToHex(
-        sha256.hash(sha256.hash(encodedTransaction)).reverse()
+        sha256.hash(sha256.hash(encodedTransaction)).reverse(),
       );
     } else if (options?.buildUnsigned !== true) {
       const awaitPropagation =
@@ -888,7 +885,7 @@ export class BaseWallet implements WalletI {
       | SendRequestArray[],
     discardChange: boolean = false,
     options?: SendRequestOptionsI,
-    privateKey?: Uint8Array
+    privateKey?: Uint8Array,
   ) {
     let sendRequests = asSendRequestObject(requests);
 
@@ -920,9 +917,9 @@ export class BaseWallet implements WalletI {
     if (options && options.utxoIds) {
       utxos = checkUtxos(
         options.utxoIds.map((utxoId: Utxo | string) =>
-          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
+          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId,
         ),
-        utxos
+        utxos,
       );
     }
 
@@ -936,7 +933,7 @@ export class BaseWallet implements WalletI {
 
     const addTokenChangeOutputs = (
       inputs: Utxo[],
-      outputs: SendRequestType[]
+      outputs: SendRequestType[],
     ) => {
       // Allow for implicit token burn if the total amount sent is less than user had
       // allow for token genesis, creating more tokens than we had before (0)
@@ -945,25 +942,25 @@ export class BaseWallet implements WalletI {
       }
       const allTokenInputs = inputs.filter((val) => val.token);
       const allTokenOutputs = outputs.filter(
-        (val) => val instanceof TokenSendRequest
+        (val) => val instanceof TokenSendRequest,
       ) as TokenSendRequest[];
       const categories = allTokenOutputs
         .map((val) => val.category)
         .filter((val, idx, arr) => arr.indexOf(val) === idx);
       for (let category of categories) {
         const tokenInputs = allTokenInputs.filter(
-          (val) => val.token?.category === category
+          (val) => val.token?.category === category,
         );
         const inputAmountSum = tokenInputs.reduce(
           (prev, cur) => prev + cur.token!.amount,
-          0n
+          0n,
         );
         const tokenOutputs = allTokenOutputs.filter(
-          (val) => val.category === category
+          (val) => val.category === category,
         );
         const outputAmountSum = tokenOutputs.reduce(
           (prev, cur) => prev + cur.amount,
-          0n
+          0n,
         );
 
         const diff = inputAmountSum - outputAmountSum;
@@ -992,8 +989,8 @@ export class BaseWallet implements WalletI {
             ].filter(
               (val, index, array) =>
                 array.findIndex(
-                  (other) => other.txid === val.txid && other.vout === val.vout
-                ) === index
+                  (other) => other.txid === val.txid && other.vout === val.vout,
+                ) === index,
             );
           }
           if (change > 0) {
@@ -1004,7 +1001,7 @@ export class BaseWallet implements WalletI {
                 category: category,
                 nft: tokenOutputs[0].nft,
                 value: tokenOutputs[0].value,
-              })
+              }),
             );
           }
         }
@@ -1038,11 +1035,11 @@ export class BaseWallet implements WalletI {
       feePaidBy,
       sendRequests,
       options?.ensureUtxos || [],
-      options?.tokenOperation
+      options?.tokenOperation,
     );
     if (fundingUtxos.length === 0) {
       throw Error(
-        "The available inputs couldn't satisfy the request with fees"
+        "The available inputs couldn't satisfy the request with fees",
       );
     }
     const fee = await getFeeAmount({
@@ -1064,7 +1061,7 @@ export class BaseWallet implements WalletI {
         changeAddress,
         buildUnsigned: options?.buildUnsigned === true,
         walletCache: this.walletCache,
-      }
+      },
     );
 
     const categories = [
@@ -1082,7 +1079,7 @@ export class BaseWallet implements WalletI {
   // Submit a raw transaction
   public async submitTransaction(
     transaction: Uint8Array,
-    awaitPropagation: boolean = true
+    awaitPropagation: boolean = true,
   ): Promise<string> {
     if (!this.provider) {
       throw Error("Wallet network provider was not initialized");
@@ -1090,21 +1087,21 @@ export class BaseWallet implements WalletI {
     const rawTransaction = binToHex(transaction);
     return await this.provider.sendRawTransaction(
       rawTransaction,
-      awaitPropagation
+      awaitPropagation,
     );
   }
 
   // gets transaction history of this wallet
   public async getRawHistory(
     fromHeight: number = 0,
-    toHeight: number = -1
+    toHeight: number = -1,
   ): Promise<TxI[]> {
     throw Error("getRawHistory not implemented in BaseWallet");
   }
 
   // gets last transaction of this wallet
   public async getLastTransaction(
-    confirmedOnly: boolean = false
+    confirmedOnly: boolean = false,
   ): Promise<ElectrumRawTransaction | null> {
     let history: TxI[] = await this.getRawHistory();
     if (confirmedOnly) {
@@ -1125,7 +1122,7 @@ export class BaseWallet implements WalletI {
       getTransactionInfo: true,
       getBalance: false,
       txHash: undefined,
-    }
+    },
   ): Promise<WaitForTransactionResponse> {
     if (options.getTransactionInfo === undefined) {
       options.getTransactionInfo = true;
@@ -1171,7 +1168,7 @@ export class BaseWallet implements WalletI {
 
         cancel = await this.provider.subscribeToTransaction(
           options.txHash,
-          waitForTransactionCallback
+          waitForTransactionCallback,
         );
         return;
       }
@@ -1195,7 +1192,7 @@ export class BaseWallet implements WalletI {
    */
   public async watchBlocks(
     callback: (header: HexHeaderI) => void,
-    skipCurrentHeight: boolean = true
+    skipCurrentHeight: boolean = true,
   ): Promise<CancelFn> {
     return this.provider.watchBlocks(callback, skipCurrentHeight);
   }
@@ -1227,7 +1224,7 @@ export class BaseWallet implements WalletI {
   public async tokenGenesis(
     genesisRequest: TokenGenesisRequest,
     sendRequests: SendRequestType | SendRequestType[] = [],
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
     if (!Array.isArray(sendRequests)) {
       sendRequests = [sendRequests];
@@ -1237,16 +1234,16 @@ export class BaseWallet implements WalletI {
     if (options?.utxoIds) {
       utxos = checkUtxos(
         options.utxoIds.map((utxoId: UtxoId | string) =>
-          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId
+          typeof utxoId === "string" ? fromUtxoId(utxoId) : utxoId,
         ),
-        utxos
+        utxos,
       );
     }
 
     const genesisInputs = utxos.filter((val) => val.vout === 0 && !val.token);
     if (genesisInputs.length === 0) {
       throw new Error(
-        "No suitable inputs with vout=0 available for new token genesis"
+        "No suitable inputs with vout=0 available for new token genesis",
       );
     }
 
@@ -1284,7 +1281,7 @@ export class BaseWallet implements WalletI {
     category: string,
     mintRequests: TokenMintRequest | Array<TokenMintRequest>,
     deductTokenAmount: boolean = false,
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
     if (category?.length !== 64) {
       throw Error(`Invalid category supplied: ${category}`);
@@ -1298,11 +1295,11 @@ export class BaseWallet implements WalletI {
     const nftUtxos = utxos.filter(
       (val) =>
         val.token?.category === category &&
-        val.token?.nft?.capability === NFTCapability.minting
+        val.token?.nft?.capability === NFTCapability.minting,
     );
     if (!nftUtxos.length) {
       throw new Error(
-        "You do not have any token UTXOs with minting capability for specified category"
+        "You do not have any token UTXOs with minting capability for specified category",
       );
     }
     const newAmount =
@@ -1328,7 +1325,7 @@ export class BaseWallet implements WalletI {
               category: category,
               value: val.value,
               nft: val.nft,
-            })
+            }),
         ),
       ],
       {
@@ -1337,7 +1334,7 @@ export class BaseWallet implements WalletI {
         checkTokenQuantities: false,
         queryBalance: false,
         tokenOperation: "mint",
-      }
+      },
     );
   }
 
@@ -1360,7 +1357,7 @@ export class BaseWallet implements WalletI {
   public async tokenBurn(
     burnRequest: TokenBurnRequest,
     message?: string,
-    options?: SendRequestOptionsI
+    options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
     if (burnRequest.category?.length !== 64) {
       throw Error(`Invalid category supplied: ${burnRequest.category}`);
@@ -1371,7 +1368,7 @@ export class BaseWallet implements WalletI {
       (val) =>
         val.token?.category === burnRequest.category &&
         val.token?.nft?.capability === burnRequest.nft?.capability &&
-        val.token?.nft?.commitment === burnRequest.nft?.commitment
+        val.token?.nft?.commitment === burnRequest.nft?.commitment,
     );
 
     if (!tokenUtxos.length) {
@@ -1380,7 +1377,7 @@ export class BaseWallet implements WalletI {
 
     const totalFungibleAmount = tokenUtxos.reduce(
       (prev, cur) => prev + (cur.token?.amount || 0n),
-      0n
+      0n,
     );
     let fungibleBurnAmount =
       burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
@@ -1469,7 +1466,7 @@ export class BaseWallet implements WalletI {
   public async getTokenUtxos(category?: string): Promise<Utxo[]> {
     const utxos = await this.getUtxos();
     return utxos.filter((val) =>
-      category ? val.token?.category === category : val.token
+      category ? val.token?.category === category : val.token,
     );
   }
 
@@ -1481,7 +1478,7 @@ export class BaseWallet implements WalletI {
    */
   public async getTokenBalance(category: string): Promise<bigint> {
     const utxos = (await this.getTokenUtxos(category)).filter(
-      (val) => val.token?.amount && val.token?.category === category
+      (val) => val.token?.amount && val.token?.category === category,
     );
     return sumTokenAmounts(utxos, category);
   }
@@ -1495,7 +1492,7 @@ export class BaseWallet implements WalletI {
    */
   public async getNftTokenBalance(category: string): Promise<number> {
     const utxos = (await this.getTokenUtxos(category)).filter(
-      (val) => val.token?.nft?.commitment !== undefined
+      (val) => val.token?.nft?.commitment !== undefined,
     );
     return utxos.length;
   }
@@ -1507,7 +1504,7 @@ export class BaseWallet implements WalletI {
   public async getAllTokenBalances(): Promise<{ [category: string]: bigint }> {
     const result = {};
     const utxos = (await this.getTokenUtxos()).filter(
-      (val) => val.token?.amount
+      (val) => val.token?.amount,
     );
     for (const utxo of utxos) {
       if (!result[utxo.token!.category]) {
@@ -1527,7 +1524,7 @@ export class BaseWallet implements WalletI {
   }> {
     const result = {};
     const utxos = (await this.getTokenUtxos()).filter(
-      (val) => val.token?.nft?.commitment !== undefined
+      (val) => val.token?.nft?.commitment !== undefined,
     );
     for (const utxo of utxos) {
       if (!result[utxo.token!.category]) {
@@ -1541,7 +1538,7 @@ export class BaseWallet implements WalletI {
 
   public sign(
     message: string,
-    privateKey: Uint8Array | undefined = undefined
+    privateKey: Uint8Array | undefined = undefined,
   ): SignedMessageResponseI {
     if (!privateKey) {
       throw new Error("Signing private key not provided");
@@ -1554,11 +1551,11 @@ export class BaseWallet implements WalletI {
     message: string,
     sig: string,
     address?: string,
-    publicKey?: Uint8Array
+    publicKey?: Uint8Array,
   ): VerifyMessageResponseI {
     if (!address && !publicKey) {
       throw new Error(
-        "Either address or publicKey must be provided for verification"
+        "Either address or publicKey must be provided for verification",
       );
     }
 
@@ -1576,7 +1573,7 @@ export const _checkContextSafety = function (wallet: BaseWallet) {
     if (process.env.ALLOW_MAINNET_USER_WALLETS === `false`) {
       if (wallet.network === NetworkType.Mainnet) {
         throw Error(
-          `Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private`
+          `Refusing to save wallet in an open public database, remove ALLOW_MAINNET_USER_WALLETS="false", if this service is secure and private`,
         );
       }
     }
@@ -1593,7 +1590,7 @@ export const _checkContextSafety = function (wallet: BaseWallet) {
  */
 export async function getNamedWalletId(
   name: string,
-  dbName?: string
+  dbName?: string,
 ): Promise<string | undefined> {
   if (name.length === 0) {
     throw Error("Named wallets must have a non-empty name");
@@ -1613,13 +1610,13 @@ export async function getNamedWalletId(
     }
   } else {
     throw Error(
-      "No database was available or configured to store the named wallet."
+      "No database was available or configured to store the named wallet.",
     );
   }
 }
 
 export function getStorageProvider(
-  dbName: string
+  dbName: string,
 ): StorageProvider | undefined {
   if (!BaseWallet.StorageProvider) {
     return undefined;

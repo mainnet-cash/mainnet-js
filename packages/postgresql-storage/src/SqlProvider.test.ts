@@ -1,13 +1,13 @@
-import { default as SqlProvider } from "./SqlProvider";
 import {
   BaseWallet,
+  disconnectProviders,
+  initProviders,
   RegTestWallet,
   TestNetWallet,
   Wallet,
-  initProviders,
-  disconnectProviders,
+  WalletDbEntryI,
 } from "mainnet-js";
-import { WalletDbEntryI } from "mainnet-js";
+import { default as SqlProvider } from "./SqlProvider";
 
 BaseWallet.StorageProvider = SqlProvider;
 
@@ -42,7 +42,7 @@ test("Store and replace a Regtest wallet", async () => {
 
   let seedId = (
     await RegTestWallet.fromSeed(
-      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     )
   ).toDbString();
   let w3 = await db.updateWallet("storereplace", seedId);
@@ -101,11 +101,11 @@ test("Should handle basic sql injection", async () => {
   await db.addWallet("; DELETE * FROM wallet limit 10;", dave.toString());
   await db.addWallet(
     "' or 1=1; DELETE * FROM wallet limit 10;",
-    dave.toString()
+    dave.toString(),
   );
   await db.addWallet(
     "; DELETE FROM wallet WHERE GUID ='' OR '' = '';",
-    dave.toString()
+    dave.toString(),
   );
   await db.addWallet("' or 1=1; TRUNCATE wallet;", dave.toString());
   await db.addWallet("' or 1=1; DROP table Wallet;", dave.toString());

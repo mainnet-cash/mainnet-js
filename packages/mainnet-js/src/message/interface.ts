@@ -4,7 +4,7 @@ export interface SignedMessageI {
     message: string,
     signature: string,
     cashaddr: string,
-    publicKey?: Uint8Array
+    publicKey?: Uint8Array,
   ): VerifyMessageResponseI;
 }
 

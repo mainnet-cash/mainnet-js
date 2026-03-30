@@ -1,17 +1,17 @@
 import {
   BaseWallet,
-  initProviders,
+  Config,
+  convert,
+  createWallet,
   disconnectProviders,
+  ExchangeRate,
+  initProviders,
   RegTestWallet,
   TestNetWallet,
-  Wallet,
-  createWallet,
-  WalletTypeEnum,
   toBch,
   toUtxoId,
-  ExchangeRate,
-  convert,
-  Config,
+  Wallet,
+  WalletTypeEnum,
 } from "mainnet-js";
 import { default as SqlProvider } from "./SqlProvider.js";
 
@@ -48,7 +48,7 @@ describe(`Test Wallet library`, () => {
 
   test("Should get a regtest wallet fromId", async () => {
     let alice = await RegTestWallet.fromId(
-      `wif:regtest:${process.env.PRIVATE_WIF}`
+      `wif:regtest:${process.env.PRIVATE_WIF}`,
     );
     expect(alice.cashaddr!.slice(0, 8)).toBe("bchreg:q");
     expect(alice.getDepositAddress()!.slice(0, 8)).toBe("bchreg:q");
@@ -56,7 +56,7 @@ describe(`Test Wallet library`, () => {
 
   test("Should get a testnet wallet fromId", async () => {
     let alice = await TestNetWallet.fromId(
-      `wif:testnet:${process.env.PRIVATE_WIF}`
+      `wif:testnet:${process.env.PRIVATE_WIF}`,
     );
     expect(alice.cashaddr!.slice(0, 9)).toBe("bchtest:q");
   });
@@ -72,11 +72,11 @@ describe(`Test Wallet library`, () => {
     expect.assertions(1);
     try {
       await TestNetWallet.fromId(
-        `wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`
+        `wif:testnet:KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa`,
       );
     } catch (e: any) {
       expect(e.message).toBe(
-        "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c"
+        "Testnet type wif KysvoRyDkxQycBGj49K8oC3minAfoXnVmkcgx6UsZx3g2VvyGCAa passed, should start with c",
       );
     }
   });
@@ -96,7 +96,7 @@ describe(`Test Wallet library`, () => {
       await TestNetWallet.fromId(`wif:regtest:${process.env.PRIVATE_WIF}`);
     } catch (e: any) {
       expect(e.message.slice(0, 97)).toBe(
-        "Network prefix regtest to a testnet wallet"
+        "Network prefix regtest to a testnet wallet",
       );
     }
   });
@@ -107,7 +107,7 @@ describe(`Test Wallet library`, () => {
       throw Error("Attempted to pass an empty WIF");
     } else {
       let alice = await RegTestWallet.fromId(
-        `wif:regtest:${process.env.PRIVATE_WIF}`
+        `wif:regtest:${process.env.PRIVATE_WIF}`,
       ); // insert WIF from #1
       expect(await alice.getBalance()).toBeGreaterThan(5000n * 100000000n);
     }
@@ -191,7 +191,7 @@ describe(`Test Wallet library`, () => {
             value: 1675n,
           },
         ],
-        { utxoIds: oddUtxoIds }
+        { utxoIds: oddUtxoIds },
       );
       expect(sendResponse2.balance!).toBe(19967n);
       expect(await charlie.getBalance()).toBe(1675n);
@@ -233,7 +233,7 @@ describe(`Test Wallet library`, () => {
         ],
         {
           changeAddress: charlie.cashaddr!,
-        }
+        },
       );
       expect(await bob.getBalance()).toBe(1000n);
       expect(await charlie.getBalance()).toBe(1780n);
@@ -309,7 +309,7 @@ describe(`Test Wallet library`, () => {
       const bobBalance = await bob.getBalance();
 
       expect(Math.floor(await convert(Number(bobBalance), "sat", "usd"))).toBe(
-        Math.floor(usdRate)
+        Math.floor(usdRate),
       );
     }
   });
@@ -487,7 +487,7 @@ describe(`Test Wallet library`, () => {
     };
 
     expect(binsAreEqual(wallet.privateKey!, otherWallet.privateKey!)).toBe(
-      false
+      false,
     );
 
     Config.DefaultParentDerivationPath = savedDerivationPath;
@@ -511,7 +511,7 @@ describe(`Tests named wallet creation`, () => {
       await RegTestWallet.named("duplicate_name", "dup_test", true);
     } catch (e: any) {
       expect(e.message).toBe(
-        "A wallet with the name duplicate_name already exists in dup_test"
+        "A wallet with the name duplicate_name already exists in dup_test",
       );
     }
   });
@@ -524,7 +524,7 @@ describe(`Tests named wallet creation`, () => {
 
     let seedId = (
       await RegTestWallet.fromSeed(
-        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
       )
     ).toDbString();
     let w3 = await RegTestWallet.replaceNamed(name, seedId);

@@ -11,12 +11,12 @@ export const decodeHeader = (hexHeader: HexHeaderI): HeaderI => {
 
   const header = hexToBin(hexHeader.hex);
   result.version = assertSuccess(
-    readUint32LE({ bin: header, index: 0 })
+    readUint32LE({ bin: header, index: 0 }),
   ).result;
   result.previousBlockHash = binToHex(header.slice(4, 36).reverse());
   result.merkleRoot = binToHex(header.slice(36, 68).reverse());
   result.timestamp = assertSuccess(
-    readUint32LE({ bin: header, index: 68 })
+    readUint32LE({ bin: header, index: 68 }),
   ).result;
   result.bits = assertSuccess(readUint32LE({ bin: header, index: 72 })).result;
   result.nonce = assertSuccess(readUint32LE({ bin: header, index: 76 })).result;

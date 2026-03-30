@@ -8,7 +8,7 @@ const baseOpts = "connectTimeout=5000&timeout=5000&keepAlive=60000&batchSize=5";
 
 export function toParseNotation(
   urls: string[],
-  protocolVersion: string = "1.6"
+  protocolVersion: string = "1.6",
 ): string {
   const opts = `${baseOpts}&protocolVersion=${protocolVersion}`;
   const withOpts = urls.map((u) => `${u}?${opts}`);
@@ -29,7 +29,7 @@ export const testnetServers = toParseNotation(
     "wss://chipnet.imaginary.cash:50004",
     "wss://chipnet.c3-soft.com:64004",
   ],
-  "1.5"
+  "1.5",
 );
 
 export const regtestServers = toParseNotation([

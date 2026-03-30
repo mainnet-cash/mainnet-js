@@ -1,7 +1,7 @@
-import { WalletTypeEnum, FeePaidByEnum } from "./enum.js";
 import { NetworkEnum } from "../enum.js";
-import { ElectrumRawTransaction } from "../network/interface.js";
 import { Utxo } from "../interface.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 
 export interface WalletRequestI {
   name?: string;

@@ -1,6 +1,7 @@
 import { prefixFromNetworkMap } from "../enum.js";
 import { getNamedWalletId } from "./Base.js";
 import { HDWallet, RegTestHDWallet, TestNetHDWallet } from "./HDWallet.js";
+import { WalletRequestI, WalletResponseI } from "./interface.js";
 import {
   RegTestWatchWallet,
   TestNetWatchWallet,
@@ -14,7 +15,6 @@ import {
   Wallet,
   WifWallet,
 } from "./Wif.js";
-import { WalletRequestI, WalletResponseI } from "./interface.js";
 
 // Convenience map to access classes by types and network
 export const walletClassMap = {
@@ -70,12 +70,12 @@ export const walletClassMap = {
 function checkWalletTypeAndNetwork(wallet: Wallet, walletType, networkType) {
   if (wallet.network != networkType) {
     throw Error(
-      `A wallet already exists with name ${wallet.name}, but with network ${wallet.network} not ${networkType}, per request`
+      `A wallet already exists with name ${wallet.name}, but with network ${wallet.network} not ${networkType}, per request`,
     );
   }
   if (wallet.walletType != walletType) {
     throw Error(
-      `A wallet already exists with name ${wallet.name}, but with type ${wallet.walletType} not ${walletType}, per request`
+      `A wallet already exists with name ${wallet.name}, but with type ${wallet.walletType} not ${walletType}, per request`,
     );
   }
 }
@@ -103,7 +103,7 @@ export async function namedWalletExists(body): Promise<boolean> {
 export async function namedWallet(
   name,
   walletType,
-  networkType
+  networkType,
 ): Promise<Wallet> {
   // Named wallets are saved in the database
   if (!name) {
@@ -122,7 +122,7 @@ export async function namedWallet(
       wallet.name = name;
     } else {
       throw Error(
-        "A named wallet, without wallet type, was passed but there was no corresponding record for the named wallet in the database."
+        "A named wallet, without wallet type, was passed but there was no corresponding record for the named wallet in the database.",
       );
     }
   }
@@ -147,10 +147,9 @@ export async function replaceNamedWallet(body): Promise<Wallet> {
     throw Error(`Wallet name and walletId are required for this operation`);
   }
 
-  wallet = await walletClassMap[walletType][networkType]().replaceNamed(
-    name,
-    walletId
-  );
+  wallet = await walletClassMap[walletType]
+    [networkType]()
+    .replaceNamed(name, walletId);
   return wallet;
 }
 
@@ -183,7 +182,7 @@ export async function createWallet(body: WalletRequestI): Promise<Wallet> {
  * @returns A new wallet object
  */
 export async function createWalletResponse(
-  walletRequest: WalletRequestI
+  walletRequest: WalletRequestI,
 ): Promise<WalletResponseI> {
   const wallet = await createWallet(walletRequest);
   if (wallet) {

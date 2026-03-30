@@ -31,4 +31,4 @@ export const UnitEnum = {
   USD: literal("usd"),
   SAT: literal("sat"),
 };
-export type UnitEnum = typeof UnitEnum[keyof typeof UnitEnum];
+export type UnitEnum = (typeof UnitEnum)[keyof typeof UnitEnum];

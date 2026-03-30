@@ -1,14 +1,14 @@
-import { NFTCapability, UtxoId } from "../interface.js";
-import { DELIMITER } from "../constant.js";
 import {
-  Input,
-  Output,
   binToNumberUint16LE,
   binToUtf8,
   hexToBin,
+  Input,
+  Output,
   utf8ToBin,
 } from "@bitauth/libauth";
 import { Config } from "../config.js";
+import { DELIMITER } from "../constant.js";
+import { NFTCapability, UtxoId } from "../interface.js";
 import { checkTokenaddr } from "../util/deriveCashaddr.js";
 
 // These are the minimal models used to provide types for the express server
@@ -262,7 +262,7 @@ export class OpReturnData {
         position += 2;
       } else if (opReturn[position] === 0x4d) {
         length = binToNumberUint16LE(
-          opReturn.slice(position + 1, position + 3)
+          opReturn.slice(position + 1, position + 3),
         );
         position += 3;
       } else {

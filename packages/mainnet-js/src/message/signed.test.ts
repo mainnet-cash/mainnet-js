@@ -1,9 +1,8 @@
-import { SignedMessage, hash_message } from "./signed.js";
-import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif.js";
 import { binToHex } from "@bitauth/libauth";
-import { initProviders, disconnectProviders } from "../network/Connection.js";
-
 import fs from "fs";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { RegTestWallet, TestNetWallet, Wallet } from "../wallet/Wif.js";
+import { hash_message, SignedMessage } from "./signed.js";
 
 beforeAll(async () => {
   await initProviders();
@@ -24,23 +23,23 @@ describe("Test message Signing and Verification", () => {
     // b'\x18Bitcoin Signed Message:\n' + b'{message.length}' + b'{message}'
     let test_hash = hash_message("test");
     expect(binToHex(test_hash)).toBe(
-      "9ce428d58e8e4caf619dc6fc7b2c2c28f0561654d1f80f322c038ad5e67ff8a6"
+      "9ce428d58e8e4caf619dc6fc7b2c2c28f0561654d1f80f322c038ad5e67ff8a6",
     );
 
     // b'\xe6\xb5\x8b\xe8\xaf\x95' in binary python
     let 测试_hash = hash_message("测试");
     expect(binToHex(测试_hash)).toBe(
-      "8d8405050b7a763ccd5683f8470ea7dcbd10a87da2b7fe07eb2679ba71229688"
+      "8d8405050b7a763ccd5683f8470ea7dcbd10a87da2b7fe07eb2679ba71229688",
     );
   });
 
   test("Test testnet signature from electron cash", async () => {
     let msg1 = "Chancellor on brink of second bailout for banks";
     let w1 = await Wallet.fromId(
-      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`,
     );
     expect(w1.cashaddr!).toBe(
-      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw",
     );
     let sig = SignedMessage.sign(msg1, w1.privateKey!);
 
@@ -50,7 +49,7 @@ describe("Test message Signing and Verification", () => {
     let result = SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
     expect(result.valid).toBe(true);
     expect(result.details!.messageHash).toBe(
-      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
+      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU=",
     );
     expect(result.details!.publicKeyHashMatch).toBe(true);
     expect(result.details!.publicKeyMatch).toBe(false);
@@ -61,7 +60,7 @@ describe("Test message Signing and Verification", () => {
     result = SignedMessage.verify(msg2, sig.signature, w1.cashaddr!);
     expect(result.valid).toBe(false);
     expect(result.details!.messageHash).toBe(
-      "070kQIcYPSHApGdOGH0O81N1AkMbNKwCTM3IX2Svd3I="
+      "070kQIcYPSHApGdOGH0O81N1AkMbNKwCTM3IX2Svd3I=",
     );
     expect(result.details!.publicKeyHashMatch).toBe(false);
     expect(result.details!.publicKeyMatch).toBe(false);
@@ -75,10 +74,10 @@ describe("Test message Signing and Verification", () => {
 
   test("Test testnet signature from electron cash", async () => {
     let w = await TestNetWallet.fromId(
-      "wif:testnet:cTHMu3b13uh4i4GANQKm1XeziZhph18fwZgdaVftxh4FSuqj2AGM"
+      "wif:testnet:cTHMu3b13uh4i4GANQKm1XeziZhph18fwZgdaVftxh4FSuqj2AGM",
     );
     expect(w.cashaddr!).toBe(
-      "bchtest:qqf25s9nm4uq982t94vq75v78n4j0e4r4vdf9j48wn"
+      "bchtest:qqf25s9nm4uq982t94vq75v78n4j0e4r4vdf9j48wn",
     );
     let msg = "test";
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -91,7 +90,7 @@ describe("Test message Signing and Verification", () => {
 
   test("Test signing and verifying regtest signature using Alice's wallet", async () => {
     let w = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     let msg = "test";
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -105,7 +104,7 @@ describe("Test message Signing and Verification", () => {
 
   test("Test signing and verifying regtest signature using Alice's wallet", async () => {
     let w = await RegTestWallet.fromId(
-      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6"
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     let msg = "测试";
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -118,7 +117,7 @@ describe("Test message Signing and Verification", () => {
 
   test("Test signing and verifying a schnorr signature", async () => {
     let w = await Wallet.fromId(
-      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN",
     );
     let msg = "test";
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -126,7 +125,7 @@ describe("Test message Signing and Verification", () => {
       msg,
       sig.raw!.schnorr,
       undefined,
-      w.publicKey!
+      w.publicKey!,
     );
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("schnorr");
@@ -137,14 +136,14 @@ describe("Test message Signing and Verification", () => {
       msg2,
       sig.raw!.schnorr,
       undefined,
-      w.publicKey!
+      w.publicKey!,
     );
     expect(invalid.valid).toBe(false);
   });
 
   test("Test signing and verifying a der signature", async () => {
     let w = await Wallet.fromId(
-      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN",
     );
     let msg = "test";
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -152,7 +151,7 @@ describe("Test message Signing and Verification", () => {
       msg,
       sig.raw!.der,
       undefined,
-      w.publicKey!
+      w.publicKey!,
     );
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("der");
@@ -160,7 +159,7 @@ describe("Test message Signing and Verification", () => {
 
   test("Test signing and verifying a ecdsa signature", async () => {
     let w = await Wallet.fromId(
-      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN",
     );
     let msg = "test";
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -168,7 +167,7 @@ describe("Test message Signing and Verification", () => {
       msg,
       sig.raw!.ecdsa,
       undefined,
-      w.publicKey!
+      w.publicKey!,
     );
     expect(result.valid).toBe(true);
     expect(result.details!.signatureType).toBe("ecdsa");
@@ -179,14 +178,14 @@ describe("Test message Signing and Verification", () => {
       msg2,
       sig.raw!.ecdsa,
       undefined,
-      w.publicKey!
+      w.publicKey!,
     );
     expect(invalid.valid).toBe(false);
   });
 
   test("Test signing and verifying a long message", async () => {
     let w = await Wallet.fromId(
-      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN"
+      "wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN",
     );
     let msg = await loadLargeMessage();
     let sig = SignedMessage.sign(msg, w.privateKey!);
@@ -197,10 +196,10 @@ describe("Test message Signing and Verification", () => {
   test("Test electron-cash example from static wallet methods", async () => {
     let msg1 = "Chancellor on brink of second bailout for banks";
     let w1 = await Wallet.fromId(
-      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`,
     );
     expect(w1.cashaddr!).toBe(
-      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw",
     );
     let sig = SignedMessage.sign(msg1, w1.privateKey!);
     let result = SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
@@ -216,10 +215,10 @@ describe("Test message Signing and Verification", () => {
     let msg1 = "Chancellor on brink of second bailout for banks";
 
     let w1 = await Wallet.fromId(
-      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`,
     );
     expect(w1.cashaddr!).toBe(
-      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw",
     );
     let sig = w1.sign(msg1);
     let result = w1.verify(msg1, sig.signature);
@@ -239,10 +238,10 @@ describe("Test message Signing and Verification", () => {
     let falseMessage = "Employer provided healthcare is a benefit.";
 
     let w1 = await Wallet.fromId(
-      `watch:mainnet:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe`
+      `watch:mainnet:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe`,
     );
     expect(w1.cashaddr!).toBe(
-      "bitcoincash:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe"
+      "bitcoincash:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe",
     );
     let result = w1.verify(beak, beakSig);
     expect(result.valid).toBe(true);
@@ -284,10 +283,10 @@ describe("Test message Signing and Verification", () => {
   test("Test signature verification with cashaddr and tokenaddr is equivalent", async () => {
     let msg1 = "Chancellor on brink of second bailout for banks";
     let w1 = await Wallet.fromId(
-      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`
+      `wif:mainnet:L1TnU2zbNaAqMoVh65Cyvmcjzbrj41Gs9iTLcWbpJCMynXuap6UN`,
     );
     expect(w1.cashaddr!).toBe(
-      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw"
+      "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw",
     );
     let sig = SignedMessage.sign(msg1, w1.privateKey!);
 
@@ -297,7 +296,7 @@ describe("Test message Signing and Verification", () => {
     let result = SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
     expect(result.valid).toBe(true);
     expect(result.details!.messageHash).toBe(
-      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
+      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU=",
     );
     expect(result.details!.publicKeyHashMatch).toBe(true);
     expect(result.details!.publicKeyMatch).toBe(false);
@@ -307,7 +306,7 @@ describe("Test message Signing and Verification", () => {
     let result2 = SignedMessage.verify(msg1, sig.signature, w1.tokenaddr!);
     expect(result2.valid).toBe(true);
     expect(result2.details!.messageHash).toBe(
-      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU="
+      "gE9BDBFAOqW+yoOzABjnM+LQRWHd4dvUVrsTR+sIWsU=",
     );
     expect(result2.details!.publicKeyHashMatch).toBe(true);
     expect(result2.details!.publicKeyMatch).toBe(false);

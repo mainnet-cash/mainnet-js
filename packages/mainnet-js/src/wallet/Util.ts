@@ -1,10 +1,10 @@
 import {
-  Transaction as LibAuthTransaction,
   assertSuccess,
   binToHex,
   decodeTransaction as decodeTransactionLibAuth,
   hexToBin,
   isPayToPublicKey,
+  Transaction as LibAuthTransaction,
   lockingBytecodeToAddressContents,
   lockingBytecodeToCashAddress,
   publicKeyToP2pkhCashAddress,
@@ -44,22 +44,22 @@ export class Util {
   }
 
   public static async getTransactionHash(
-    rawTransactionHex: string
+    rawTransactionHex: string,
   ): Promise<string> {
     return getTransactionHash(rawTransactionHex);
   }
 
   public async decodeTransaction(
     transactionHashOrHex: string,
-    loadInputValues: true
+    loadInputValues: true,
   ): Promise<ElectrumRawTransactionWithInputValues>;
   public async decodeTransaction(
     transactionHashOrHex: string,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<ElectrumRawTransaction>;
   public async decodeTransaction(
     transactionHashOrHex: string,
-    loadInputValues: boolean = false
+    loadInputValues: boolean = false,
   ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues> {
     let transactionHex: string;
     let transactionBin: Uint8Array;
@@ -85,14 +85,14 @@ export class Util {
     const transaction = this.mapToElectrumRawTransaction(
       result,
       txHash,
-      transactionHex
+      transactionHex,
     );
 
     if (loadInputValues) {
       // get unique transaction hashes
       const hashes = [...new Set(transaction.vin.map((val) => val.txid))];
       const transactions = await Promise.all(
-        hashes.map((hash) => this.decodeTransaction(hash, false))
+        hashes.map((hash) => this.decodeTransaction(hash, false)),
       );
       const transactionMap = new Map<string, ElectrumRawTransaction>();
       transactions.forEach((val) => transactionMap.set(val.hash, val));
@@ -114,7 +114,7 @@ export class Util {
   public mapToElectrumRawTransaction(
     transaction: LibAuthTransaction,
     txHash: string,
-    txHex: string
+    txHex: string,
   ): ElectrumRawTransaction {
     return {
       blockhash: "",
@@ -136,7 +136,7 @@ export class Util {
           sequence: input.sequenceNumber,
           txid: binToHex(input.outpointTransactionHash),
           vout: input.outpointIndex,
-        })
+        }),
       ),
       vout: transaction.outputs.map(
         (output, index): ElectrumRawTransactionVout => ({
@@ -146,7 +146,7 @@ export class Util {
               isPayToPublicKey(output.lockingBytecode)
                 ? publicKeyToP2pkhCashAddress({
                     publicKey: lockingBytecodeToAddressContents(
-                      output.lockingBytecode
+                      output.lockingBytecode,
                     ).payload,
                     prefix: prefixFromNetworkMap[this.network],
                   }).address
@@ -154,7 +154,7 @@ export class Util {
                     lockingBytecodeToCashAddress({
                       bytecode: output.lockingBytecode,
                       prefix: prefixFromNetworkMap[this.network],
-                    })
+                    }),
                   ).address,
             ],
             asm: "",
@@ -163,7 +163,7 @@ export class Util {
             type: "",
           },
           value: Number(output.valueSatoshis) / Number(bchParam.subUnits),
-        })
+        }),
       ),
     };
   }
@@ -171,17 +171,17 @@ export class Util {
   public static async decodeTransaction(
     transactionHashOrHex: string,
     loadInputValues: true,
-    network?: NetworkType
+    network?: NetworkType,
   ): Promise<ElectrumRawTransactionWithInputValues>;
   public static async decodeTransaction(
     transactionHashOrHex: string,
     loadInputValues?: false,
-    network?: NetworkType
+    network?: NetworkType,
   ): Promise<ElectrumRawTransaction>;
   public static async decodeTransaction(
     transactionHashOrHex: string,
     loadInputValues: boolean = false,
-    network?: NetworkType
+    network?: NetworkType,
   ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues> {
     if (loadInputValues) {
       return new this(network).decodeTransaction(transactionHashOrHex, true);

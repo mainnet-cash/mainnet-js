@@ -1,13 +1,13 @@
-import { HDWallet } from "mainnet-js";
-import { default as IndexedDBProvider } from "./IndexedDBProvider";
 import {
   BaseWallet,
+  disconnectProviders,
+  HDWallet,
+  initProviders,
   RegTestWallet,
   TestNetWallet,
   Wallet,
-  initProviders,
-  disconnectProviders,
 } from "mainnet-js";
+import { default as IndexedDBProvider } from "./IndexedDBProvider";
 
 beforeAll(async () => {
   await initProviders();
@@ -41,7 +41,7 @@ test("Store and replace a Regtest wallet", async () => {
 
   let seedId = (
     await RegTestWallet.fromSeed(
-      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     )
   ).toDbString();
   let w3 = await db.updateWallet("storereplace", seedId);

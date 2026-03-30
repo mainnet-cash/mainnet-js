@@ -1,8 +1,8 @@
 import {
   CashAddressNetworkPrefix,
   CashAddressType,
-  decodeCashAddress,
   DecodedCashAddress,
+  decodeCashAddress,
   encodeCashAddress,
   secp256k1,
 } from "@bitauth/libauth";
@@ -21,7 +21,7 @@ export function isValidAddress(cashaddr: string): boolean {
 
 export function deriveCashaddr(
   privateKey: Uint8Array,
-  networkPrefix: CashAddressNetworkPrefix
+  networkPrefix: CashAddressNetworkPrefix,
 ): string {
   let publicKey = secp256k1.derivePublicKeyCompressed(privateKey);
   if (typeof publicKey === "string") {
@@ -37,7 +37,7 @@ export function deriveCashaddr(
 
 export function deriveTokenaddr(
   key: Uint8Array,
-  networkPrefix: CashAddressNetworkPrefix
+  networkPrefix: CashAddressNetworkPrefix,
 ): string {
   let publicKeyHash: Uint8Array;
   // private key
@@ -121,7 +121,7 @@ export function isTokenaddr(address: string): boolean {
 export function convertAddress(
   address: string,
   network: Network = "mainnet",
-  withTokens: boolean | undefined = undefined
+  withTokens: boolean | undefined = undefined,
 ): string {
   const result = decodeAddress(address);
 

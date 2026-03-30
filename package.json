@@ -42,8 +42,10 @@
     "regtest:down": "./test/docker/stop.sh",
     "regtest:sbch:up": "./test/docker/start-sbch-lite.sh",
     "regtest:sbch:down": "./test/docker/stop-sbch-lite.sh",
-    "format": "prettier --write .",
-    "lint": "eslint . --ext .ts",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "lint:fix": "biome check --write --unsafe .",
     "nuke": "rm -fr node_modules && yarn remove:packages",
     "remove:packages": "rm -fr packages/*/node_modules && rm -fr packages/*/dist",
     "build": "yarn build:mainnet-js && yarn build:indexeddb-storage && yarn build:postgresql-storage && yarn build:bcmr",
@@ -58,21 +60,22 @@
     "postinstall": "yarn link:all"
   },
   "devDependencies": {
-    "@types/node": "^18.11.9",
+    "@biomejs/biome": "^2.4.10",
+    "@types/node": "^22.0.0",
     "@vitest/browser": "^4.1.2",
     "@vitest/browser-playwright": "^4.1.2",
     "@vitest/coverage-v8": "^4.1.2",
     "dotenv": "^10.0.0",
     "node-localstorage": "^3.0.5",
     "playwright": "^1.49.1",
-    "prettier": "^2.3.1",
     "semver": "^7.5.4",
     "supertest": "^6.1.3",
     "ts-node": "^10.0.0",
     "typescript": "^5.6.2",
     "vite": "^8.0.3",
     "vitest": "^4.1.2",
-    "winston": "3.3.3"
+    "winston": "3.3.3",
+    "yaml": "^2.4.2"
   },
   "optionalDependencies": {},
   "keywords": [

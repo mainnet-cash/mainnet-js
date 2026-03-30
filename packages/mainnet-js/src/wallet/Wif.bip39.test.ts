@@ -1,6 +1,6 @@
 import { deriveSeedFromBip39Mnemonic, hexToBin } from "@bitauth/libauth";
+import { disconnectProviders, initProviders } from "../network/Connection";
 import { RegTestWallet } from "./Wif";
-import { initProviders, disconnectProviders } from "../network/Connection";
 
 beforeAll(async () => {
   await initProviders();
@@ -23,7 +23,7 @@ describe(`Test bip39 edge cases`, () => {
       let w = RegTestWallet.fromSeed("");
       let cashaddr = (await w).cashaddr;
       expect(cashaddr).toContain(
-        "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
+        "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl",
       );
     } catch (e: any) {
       expect(e.message).toBe(`refusing to create wallet from empty mnemonic`);
@@ -33,11 +33,11 @@ describe(`Test bip39 edge cases`, () => {
   test("Should catch an invalid seed", async () => {
     try {
       let w = RegTestWallet.fromSeed(
-        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon"
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon",
       );
       let cashaddr = (await w).cashaddr;
       expect(cashaddr).toContain(
-        "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
+        "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl",
       );
     } catch (e: any) {
       expect(e.message).toBe(`Invalid mnemonic, must be 12 or 24 words`);
@@ -46,11 +46,11 @@ describe(`Test bip39 edge cases`, () => {
 
   test("Should match the blank seed", async () => {
     let w = RegTestWallet.fromSeed(
-      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
     let cashaddr = (await w).cashaddr;
     expect(cashaddr).toContain(
-      "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl"
+      "bchreg:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4g974kwcsl",
     );
   });
 });

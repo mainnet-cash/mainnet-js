@@ -1,9 +1,9 @@
-import { TxI, Utxo, Network, HexHeaderI, HeaderI } from "../interface.js";
+import { HeaderI, HexHeaderI, Network, TxI, Utxo } from "../interface.js";
+import { CancelFn } from "../wallet/interface.js";
 import {
   ElectrumRawTransaction,
   ElectrumRawTransactionWithInputValues,
 } from "./interface.js";
-import { CancelFn } from "../wallet/interface.js";
 
 export default interface NetworkProvider {
   /**
@@ -52,22 +52,22 @@ export default interface NetworkProvider {
   getRawTransaction(
     txHash: string,
     verbose: true,
-    loadInputValues: true
+    loadInputValues: true,
   ): Promise<ElectrumRawTransactionWithInputValues>;
   getRawTransaction(
     txHash: string,
     verbose: true,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<ElectrumRawTransaction>;
   getRawTransaction(
     txHash: string,
     verbose?: false,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<string>;
   getRawTransaction(
     txHash: string,
     verbose?: boolean,
-    loadInputValues?: boolean
+    loadInputValues?: boolean,
   ): Promise<
     string | ElectrumRawTransaction | ElectrumRawTransactionWithInputValues
   >;
@@ -95,15 +95,15 @@ export default interface NetworkProvider {
    */
   getRawTransactionObject(
     txHash: string,
-    loadInputValues: true
+    loadInputValues: true,
   ): Promise<ElectrumRawTransactionWithInputValues>;
   getRawTransactionObject(
     txHash: string,
-    loadInputValues?: false
+    loadInputValues?: false,
   ): Promise<ElectrumRawTransaction>;
   getRawTransactionObject(
     txHash: string,
-    loadInputValues?: boolean
+    loadInputValues?: boolean,
   ): Promise<ElectrumRawTransaction | ElectrumRawTransactionWithInputValues>;
 
   /**
@@ -115,7 +115,7 @@ export default interface NetworkProvider {
    */
   sendRawTransaction(
     txHex: string,
-    awaitPropagation?: boolean
+    awaitPropagation?: boolean,
   ): Promise<string>;
 
   /**
@@ -127,7 +127,7 @@ export default interface NetworkProvider {
   getHistory(
     cashaddr: string,
     fromHeight?: number,
-    toHeight?: number
+    toHeight?: number,
   ): Promise<TxI[]>;
 
   /**
@@ -145,7 +145,7 @@ export default interface NetworkProvider {
    */
   subscribeToAddress(
     cashaddr: string,
-    callback: (data: any) => void
+    callback: (data: any) => void,
   ): Promise<CancelFn>;
 
   /**
@@ -156,7 +156,7 @@ export default interface NetworkProvider {
    */
   subscribeToTransaction(
     txHash: string,
-    callback: (data: any) => void
+    callback: (data: any) => void,
   ): Promise<CancelFn>;
 
   /**

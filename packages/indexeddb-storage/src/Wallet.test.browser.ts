@@ -1,14 +1,14 @@
 import {
   BaseWallet,
-  TestNetWallet,
-  Wallet,
-  RegTestWallet,
   Config,
-  Mainnet,
   createWallet,
   createWalletResponse,
-  walletFromId,
+  Mainnet,
+  RegTestWallet,
+  TestNetWallet,
+  Wallet,
   WalletTypeEnum,
+  walletFromId,
 } from "mainnet-js";
 import { IndexedDBProvider } from "./index";
 
@@ -84,7 +84,7 @@ describe("Wallet should function in the browser", () => {
   test("Should return watch testnet balance", async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const alice = await TestNetWallet.watchOnly(
-        process.env.ALICE_TESTNET_ADDRESS
+        process.env.ALICE_TESTNET_ADDRESS,
       );
       const result = await alice.getBalance();
       expect(result).toBeGreaterThan(0n);
@@ -108,7 +108,7 @@ describe("Wallet should function in the browser", () => {
   test("Should return testnet balance in usd", async () => {
     if (process.env.ALICE_TESTNET_ADDRESS) {
       const alice = await TestNetWallet.watchOnly(
-        process.env.ALICE_TESTNET_ADDRESS
+        process.env.ALICE_TESTNET_ADDRESS,
       );
       const result = await alice.getBalance();
       expect(result).toBeGreaterThan(0);
@@ -125,7 +125,7 @@ describe("Wallet should function in the browser", () => {
     const result = await alice.sign("test");
     const verifyResult = await alice.verify("test", result.signature);
     expect(result.signature).toBe(
-      "IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U="
+      "IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U=",
     );
     expect(verifyResult.valid).toBe(true);
   });
@@ -151,7 +151,7 @@ describe("Wallet should function in the browser", () => {
 
     const seedId = (
       await RegTestWallet.fromSeed(
-        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
       )
     ).toDbString();
     const w3 = await RegTestWallet.replaceNamed(name, seedId);
@@ -196,7 +196,7 @@ describe("Wallet should function in the browser", () => {
         expect(balance).toBeGreaterThanOrEqual(100000n);
         await bobBalanceWatchCancel();
         bobBalanceWatchResult = true;
-      }
+      },
     );
 
     await alice.send({
@@ -216,7 +216,7 @@ describe("Wallet should function in the browser", () => {
     expect(txDecoded === null).toBe(false);
     const txHash = txDecoded!.hash;
     expect(
-      localStorage.getItem(`tx-${aliceWallet.provider!.network}-${txHash}`)
+      localStorage.getItem(`tx-${aliceWallet.provider!.network}-${txHash}`),
     ).toBe(null);
     Config.UseLocalStorageCache = true;
     await aliceWallet.provider!.getRawTransaction(txHash);
@@ -224,24 +224,24 @@ describe("Wallet should function in the browser", () => {
 
     expect(
       localStorage.getItem(
-        `txraw-${aliceWallet.provider!.network}-${txHash}`
-      ) === null
+        `txraw-${aliceWallet.provider!.network}-${txHash}`,
+      ) === null,
     ).toBe(false);
     expect(
       typeof localStorage.getItem(
-        `txraw-${aliceWallet.provider!.network}-${txHash}`
-      ) === "string"
+        `txraw-${aliceWallet.provider!.network}-${txHash}`,
+      ) === "string",
     ).toBe(true);
     expect(typeof (await aliceWallet.provider!.getRawTransaction(txHash))).toBe(
-      "string"
+      "string",
     );
 
     expect(
       localStorage.getItem(`tx-${aliceWallet.provider!.network}-${txHash}`) ===
-        null
+        null,
     ).toBe(false);
     expect(
-      typeof (await aliceWallet.provider!.getRawTransaction(txHash, true))
+      typeof (await aliceWallet.provider!.getRawTransaction(txHash, true)),
     ).toBe("object");
 
     Config.UseLocalStorageCache = false;
@@ -253,8 +253,8 @@ describe("Wallet should function in the browser", () => {
     await aliceWallet.provider!.getHeader(854724);
     expect(
       localStorage.getItem(
-        `header-${aliceWallet.provider!.network}-${height}-${false}`
-      )
+        `header-${aliceWallet.provider!.network}-${height}-${false}`,
+      ),
     ).toBe(null);
     Config.UseLocalStorageCache = true;
     await aliceWallet.provider!.getHeader(854724);
@@ -262,11 +262,11 @@ describe("Wallet should function in the browser", () => {
 
     expect(
       localStorage.getItem(
-        `header-${aliceWallet.provider!.network}-${height}-${false}`
-      ) === null
+        `header-${aliceWallet.provider!.network}-${height}-${false}`,
+      ) === null,
     ).toBe(false);
     expect(typeof (await aliceWallet.provider!.getHeader(854724))).toBe(
-      "object"
+      "object",
     );
 
     Config.UseLocalStorageCache = false;

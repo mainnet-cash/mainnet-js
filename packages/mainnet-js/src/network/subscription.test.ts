@@ -1,9 +1,9 @@
-import { webSocket } from "@rpckit/websocket/electrum-cash";
-import { createProvider, setGlobalProvider, removeGlobalProvider } from ".";
-import { Network } from "../interface";
 import type { Transport, Unsubscribe } from "@rpckit/core";
 import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
+import { webSocket } from "@rpckit/websocket/electrum-cash";
+import { Network } from "../interface";
 import { Wallet } from "../wallet/Wif";
+import { createProvider, removeGlobalProvider, setGlobalProvider } from ".";
 
 describe("Provider subscription: blockchain.transaction.subscribe", () => {
   let provider: Awaited<ReturnType<typeof createProvider>>;
@@ -162,7 +162,7 @@ describe("Raw transport subscription format", () => {
       [txHash],
       (data) => {
         received.push(data);
-      }
+      },
     );
 
     await new Promise((r) => setTimeout(r, 100));
@@ -186,7 +186,7 @@ describe("Raw transport subscription format", () => {
       [address],
       (data) => {
         received.push(data);
-      }
+      },
     );
 
     await new Promise((r) => setTimeout(r, 100));
@@ -208,7 +208,7 @@ describe("Raw transport subscription format", () => {
       [],
       (data) => {
         received.push(data);
-      }
+      },
     );
 
     await new Promise((r) => setTimeout(r, 100));
@@ -236,7 +236,7 @@ describe("Wallet waitForTransaction with specific txHash", () => {
 
     // Create a mainnet wallet using the global provider
     wallet = await Wallet.watchOnly(
-      "bitcoincash:qp3wjpa3tjlj042z2wv7hahsldgwhwy0rq9sywjpyy"
+      "bitcoincash:qp3wjpa3tjlj042z2wv7hahsldgwhwy0rq9sywjpyy",
     );
   });
 
@@ -258,7 +258,7 @@ describe("Wallet waitForTransaction with specific txHash", () => {
         getBalance: false,
       }),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 5000)
+        setTimeout(() => reject(new Error("Timeout")), 5000),
       ),
     ]);
 

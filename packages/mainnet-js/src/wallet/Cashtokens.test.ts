@@ -1,22 +1,22 @@
-import { RegTestWallet, TestNetWallet } from "./Wif";
-import { initProviders, disconnectProviders } from "../network/Connection";
+import {
+  binsAreEqual,
+  binToHex,
+  decodeTransaction,
+  hexToBin,
+  utf8ToBin,
+} from "@bitauth/libauth";
+import { Config } from "../config";
+import { NFTCapability } from "../interface";
+import { disconnectProviders, initProviders } from "../network/Connection";
+import json from "../test/json.test";
+import { convert, delay } from "../util";
 import {
   SendRequest,
   SendResponse,
   TokenMintRequest,
   TokenSendRequest,
 } from "./model";
-import { NFTCapability } from "../interface";
-import {
-  binToHex,
-  binsAreEqual,
-  decodeTransaction,
-  hexToBin,
-  utf8ToBin,
-} from "@bitauth/libauth";
-import { convert, delay } from "../util";
-import { Config } from "../config";
-import json from "../test/json.test";
+import { RegTestWallet, TestNetWallet } from "./Wif";
 
 beforeAll(async () => {
   await initProviders();
@@ -28,7 +28,7 @@ afterAll(async () => {
 describe(`Test cashtokens`, () => {
   test("Test chipnet request", async () => {
     const wallet = await TestNetWallet.watchOnly(
-      "bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4"
+      "bchtest:pzszr88euuuy87uarx9krcuh5psy4zzghsm2033xk4",
     );
     const utxos = await wallet.getTokenUtxos();
     expect(utxos[0].token?.category).toBeDefined();
@@ -79,7 +79,7 @@ describe(`Test cashtokens`, () => {
       new SendRequest({
         cashaddr: alice.cashaddr!,
         value: 1000n,
-      })
+      }),
     );
     expect(await bob.getTokenBalance(category)).toBe(25n);
     expect(await bob.getBalance()).toBe(3780n + 1000n);
@@ -232,7 +232,7 @@ describe(`Test cashtokens`, () => {
             commitment: "abcd02",
           },
         }),
-      ])
+      ]),
     ).rejects.toThrow("No suitable token utxos available to send token");
   });
 
@@ -400,7 +400,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
       ],
-      true
+      true,
     );
     expect(await alice.getTokenBalance(category)).toBe(2n);
     const newTokenUtxos = await alice.getTokenUtxos(category);
@@ -426,7 +426,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
       ],
-      false
+      false,
     );
     expect(await alice.getTokenBalance(category)).toBe(2n);
     const ftTokenUtxos = await alice.getTokenUtxos(category);
@@ -460,7 +460,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
       ],
-      true
+      true,
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     const ft2TokenUtxos = await alice.getTokenUtxos(category);
@@ -487,14 +487,14 @@ describe(`Test cashtokens`, () => {
         category: category,
         amount: 5n,
       },
-      "burn"
+      "burn",
     );
 
     const rawTx = await alice.provider!.getRawTransactionObject(response.txId!);
     expect(rawTx!.vout.length).toEqual(3);
     expect(rawTx!.vout[0].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx!.vout[0].scriptPubKey.hex).toContain(
-      binToHex(utf8ToBin("burn"))
+      binToHex(utf8ToBin("burn")),
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     const newTokenUtxos = await alice.getTokenUtxos(category);
@@ -529,14 +529,14 @@ describe(`Test cashtokens`, () => {
           commitment: "abcd",
         },
       },
-      "burn"
+      "burn",
     );
 
     const rawTx = await alice.provider!.getRawTransactionObject(response.txId!);
     expect(rawTx!.vout.length).toEqual(3);
     expect(rawTx!.vout[0].scriptPubKey.type).toEqual("nulldata");
     expect(rawTx!.vout[0].scriptPubKey.hex).toContain(
-      binToHex(utf8ToBin("burn"))
+      binToHex(utf8ToBin("burn")),
     );
     expect(await alice.getTokenBalance(category)).toBe(3n);
     expect((await alice.getAllTokenBalances())[category]).toBe(3n);
@@ -556,7 +556,7 @@ describe(`Test cashtokens`, () => {
           commitment: "abcd",
         },
       },
-      "burn"
+      "burn",
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     const ftTokenUtxos = await alice.getTokenUtxos(category);
@@ -572,7 +572,7 @@ describe(`Test cashtokens`, () => {
           commitment: "abcd",
         },
       },
-      "burn"
+      "burn",
     );
     expect(await alice.getTokenBalance(category)).toBe(0n);
     expect((await alice.getAllTokenBalances())[category] || 0n).toBe(0n);
@@ -673,7 +673,7 @@ describe(`Test cashtokens`, () => {
             },
           }),
         ])),
-      0
+      0,
     );
 
     const cancel = await bob.watchTokenBalance(category, (balance) => {
@@ -916,7 +916,7 @@ describe(`Test cashtokens`, () => {
           commitment: "0a",
         },
         cashaddr: charlie.cashaddr!,
-      })
+      }),
     );
     expect(await bob.getTokenBalance(category)).toBe(0n);
     expect(await bob.getNftTokenBalance(category)).toBe(1);
@@ -991,7 +991,7 @@ describe(`Test cashtokens`, () => {
           commitment: "0a",
         },
         cashaddr: charlie.cashaddr!,
-      })
+      }),
     );
     expect(await bob.getTokenBalance(category)).toBe(0n);
     expect(await bob.getNftTokenBalance(category)).toBe(1);
@@ -1009,7 +1009,7 @@ describe(`Test cashtokens`, () => {
           commitment: "0b",
         },
         cashaddr: charlie.cashaddr!,
-      })
+      }),
     );
     expect(await bob.getTokenBalance(category)).toBe(0n);
     expect(await bob.getNftTokenBalance(category)).toBe(0);
@@ -1084,10 +1084,10 @@ describe(`Test cashtokens`, () => {
             commitment: "",
           },
           cashaddr: charlie.cashaddr!,
-        })
-      )
+        }),
+      ),
     ).rejects.toThrow(
-      "No suitable token utxos available to send token with id"
+      "No suitable token utxos available to send token with id",
     );
   });
 
@@ -1183,7 +1183,7 @@ describe(`Test cashtokens`, () => {
     const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
     const aliceWallet = await RegTestWallet.fromId(aliceWif);
     const aliceWatchWallet = await RegTestWallet.watchOnly(
-      aliceWallet.cashaddr!
+      aliceWallet.cashaddr!,
     );
 
     let category;
@@ -1199,7 +1199,7 @@ describe(`Test cashtokens`, () => {
             },
           },
           undefined,
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
@@ -1213,14 +1213,14 @@ describe(`Test cashtokens`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
       expect(binToHex(decoded.outputs[0].token?.nft?.commitment!)).toBe("00");
 
       const signed = await aliceWallet.signUnsignedTransaction(
         unsignedTransaction!,
-        sourceOutputs!
+        sourceOutputs!,
       );
       const statusChanged = aliceWallet.waitForUpdate({ timeout: 10000 });
       const watchStatusChanged = aliceWatchWallet.waitForUpdate({
@@ -1251,7 +1251,7 @@ describe(`Test cashtokens`, () => {
             },
           },
           undefined,
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
@@ -1265,7 +1265,7 @@ describe(`Test cashtokens`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
       expect(binToHex(sourceOutputs![0].token?.nft?.commitment!)).toBe("00");
@@ -1274,7 +1274,7 @@ describe(`Test cashtokens`, () => {
 
       const signed = await aliceWallet.signUnsignedTransaction(
         unsignedTransaction!,
-        sourceOutputs!
+        sourceOutputs!,
       );
       const statusChanged2 = aliceWallet.waitForUpdate({ timeout: 10000 });
       const watchStatusChanged2 = aliceWatchWallet.waitForUpdate({
@@ -1289,13 +1289,13 @@ describe(`Test cashtokens`, () => {
       expect(tokenUtxos.length).toBe(2);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.minting
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.minting,
+        ).length,
       ).toBe(1);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.none
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.none,
+        ).length,
       ).toBe(1);
     }
 
@@ -1314,7 +1314,7 @@ describe(`Test cashtokens`, () => {
               cashaddr: aliceWallet.cashaddr!,
             }),
           ],
-          { buildUnsigned: true }
+          { buildUnsigned: true },
         );
       const encodedTransaction = hexToBin(unsignedTransaction!);
       expect(encodedTransaction.length).toBeGreaterThan(0);
@@ -1328,7 +1328,7 @@ describe(`Test cashtokens`, () => {
       }
 
       expect(
-        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([]))
+        binsAreEqual(decoded.inputs[0].unlockingBytecode, Uint8Array.from([])),
       ).toBe(true);
       expect(sourceOutputs!.length).toBe(decoded.inputs.length);
       expect(binToHex(sourceOutputs![0].token?.nft?.commitment!)).toBe("0a");
@@ -1336,7 +1336,7 @@ describe(`Test cashtokens`, () => {
 
       const signed = await aliceWallet.signUnsignedTransaction(
         unsignedTransaction!,
-        sourceOutputs!
+        sourceOutputs!,
       );
       await aliceWallet.submitTransaction(signed);
       expect(await aliceWallet.getNftTokenBalance(category)).toBe(2);
@@ -1344,13 +1344,13 @@ describe(`Test cashtokens`, () => {
       expect(tokenUtxos.length).toBe(2);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.minting
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.minting,
+        ).length,
       ).toBe(1);
       expect(
         tokenUtxos.filter(
-          (val) => val.token?.nft?.capability === NFTCapability.none
-        ).length
+          (val) => val.token?.nft?.capability === NFTCapability.none,
+        ).length,
       ).toBe(1);
     }
   });
@@ -1380,8 +1380,8 @@ describe(`Test cashtokens`, () => {
           cashaddr: alice.cashaddr!,
           category: category,
           amount: 1n,
-        })
-      )
+        }),
+      ),
     ).resolves.not.toThrow();
 
     await expect(
@@ -1390,8 +1390,8 @@ describe(`Test cashtokens`, () => {
           cashaddr: alice.tokenaddr!,
           category: category,
           amount: 2n,
-        })
-      )
+        }),
+      ),
     ).resolves.not.toThrow();
 
     Config.EnforceCashTokenReceiptAddresses = true;
@@ -1405,8 +1405,8 @@ describe(`Test cashtokens`, () => {
             cashaddr: alice.cashaddr!,
             category: category,
             amount: 1n,
-          })
-        ))()
+          }),
+        ))(),
     ).rejects.toThrow();
 
     await expect(
@@ -1415,8 +1415,8 @@ describe(`Test cashtokens`, () => {
           cashaddr: alice.tokenaddr!,
           category: category,
           amount: 2n,
-        })
-      )
+        }),
+      ),
     ).resolves.not.toThrow();
 
     Config.EnforceCashTokenReceiptAddresses = previousValue;

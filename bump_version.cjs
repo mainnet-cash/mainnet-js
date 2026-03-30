@@ -80,7 +80,7 @@ swag.forEach((val) => {
     val,
     fs
       .readFileSync(val, "utf8")
-      .replace(/  version: \d+\.\d+\.\d+.*/g, `  version: ${newVersion}`)
+      .replace(/  version: \d+\.\d+\.\d+.*/g, `  version: ${newVersion}`),
   );
   console.log(`Updated ${val} to ${newVersion}`);
 });

@@ -1,7 +1,7 @@
-import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
-import path from "path";
 import dotenv from "dotenv";
+import path from "path";
+import { defineConfig } from "vitest/config";
 
 const root = path.resolve(__dirname, "..");
 
@@ -16,16 +16,16 @@ export default defineConfig({
     alias: {
       "@rpckit/websocket/electrum-cash": path.resolve(
         root,
-        "node_modules/@rpckit/websocket/dist/electrum-cash/index.js"
+        "node_modules/@rpckit/websocket/dist/electrum-cash/index.js",
       ),
       "@rpckit/fallback/electrum-cash": path.resolve(
         root,
-        "node_modules/@rpckit/fallback/dist/electrum-cash/index.js"
+        "node_modules/@rpckit/fallback/dist/electrum-cash/index.js",
       ),
       "#test": path.resolve(__dirname),
       "mainnet-js": path.resolve(
         root,
-        "packages/mainnet-js/dist/module/index.js"
+        "packages/mainnet-js/dist/module/index.js",
       ),
     },
   },
@@ -33,13 +33,13 @@ export default defineConfig({
     "process.env.PRIVATE_WIF": JSON.stringify(process.env.PRIVATE_WIF || ""),
     "process.env.ALICE_ID": JSON.stringify(process.env.ALICE_ID || ""),
     "process.env.ALICE_TESTNET_ADDRESS": JSON.stringify(
-      process.env.ALICE_TESTNET_ADDRESS || ""
+      process.env.ALICE_TESTNET_ADDRESS || "",
     ),
     "process.env.ALICE_TESTNET_WALLET_ID": JSON.stringify(
-      process.env.ALICE_TESTNET_WALLET_ID || ""
+      process.env.ALICE_TESTNET_WALLET_ID || "",
     ),
     "process.env.ELECTRUM_REGTEST": JSON.stringify(
-      process.env.ELECTRUM_REGTEST || ""
+      process.env.ELECTRUM_REGTEST || "",
     ),
   },
   test: {

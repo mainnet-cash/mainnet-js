@@ -3,7 +3,7 @@ export const arrayRange = (start: number, stop: number) =>
 
 export const getNextUnusedIndex = (
   index: number,
-  statuses: Array<string | null>
+  statuses: Array<string | null>,
 ): number => {
   if (index === -1) {
     index = statuses.findIndex((status) => status === null);

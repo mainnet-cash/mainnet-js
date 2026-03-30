@@ -1,7 +1,6 @@
-import SqlProvider from "../SqlProvider.js";
-import { TxI } from "mainnet-js";
-
 import axios from "axios";
+import { TxI } from "mainnet-js";
+import SqlProvider from "../SqlProvider.js";
 
 export enum WebhookType {
   transactionIn = "transaction:in",

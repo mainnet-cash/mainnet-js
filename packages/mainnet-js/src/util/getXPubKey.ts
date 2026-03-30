@@ -1,6 +1,6 @@
 import {
-  deriveHdPrivateNodeFromSeed,
   deriveHdPath,
+  deriveHdPrivateNodeFromSeed,
   deriveHdPublicNode,
   encodeHdPublicKey,
   HdKeyNetwork,
@@ -10,7 +10,7 @@ import {
 export function getXPubKey(
   seed: Uint8Array | string,
   derivationPath: string,
-  network: string
+  network: string,
 ) {
   if (typeof seed === "string") {
     seed = hexToBin(seed);
@@ -33,7 +33,7 @@ export function getXPubKey(
     },
     {
       throwErrors: true,
-    }
+    },
   ).hdPublicKey;
   return xPubKey;
 }

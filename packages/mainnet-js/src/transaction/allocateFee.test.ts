@@ -1,8 +1,8 @@
-import { allocateFee, sortSendRequests } from "./allocateFee";
-import { FeePaidByEnum } from "../wallet/enum";
+import { disconnectProviders, initProviders, SendRequest } from "..";
 import { asSendRequestObject } from "../util/asSendRequestObject";
-import { SendRequest, disconnectProviders, initProviders } from "..";
+import { FeePaidByEnum } from "../wallet/enum";
 import { RegTestWallet } from "../wallet/Wif";
+import { allocateFee, sortSendRequests } from "./allocateFee";
 
 beforeAll(async () => {
   await initProviders();
@@ -19,7 +19,7 @@ describe("Fee tests", () => {
       throw Error("Attempted to pass an empty address");
     } else {
       const funder = await RegTestWallet.fromId(
-        `wif:regtest:${process.env.PRIVATE_WIF!}`
+        `wif:regtest:${process.env.PRIVATE_WIF!}`,
       );
       const alice = await RegTestWallet.newRandom();
       const bob = await RegTestWallet.newRandom();
@@ -51,7 +51,7 @@ describe("Fee tests", () => {
             value: 2552n,
           },
         ],
-        { feePaidBy: FeePaidByEnum.changeThenAny }
+        { feePaidBy: FeePaidByEnum.changeThenAny },
       );
       expect(await alice.getBalance()).toBe(0n);
       expect(await bob.getBalance()).toBe(0n);
@@ -72,7 +72,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.first,
-      BigInt(0)
+      BigInt(0),
     );
     expect(allocatedInputs[0].value).toBeLessThan(2000n);
     expect(allocatedInputs[1].value).toBe(2000n);
@@ -89,7 +89,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.last,
-      BigInt(0)
+      BigInt(0),
     );
 
     expect(allocatedInputs[0].value).toBe(2000n);
@@ -109,7 +109,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.any,
-      BigInt(0)
+      BigInt(0),
     );
 
     expect(allocatedInputs[0].value).toBe(1999n);
@@ -130,7 +130,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.any,
-      BigInt(0)
+      BigInt(0),
     );
 
     expect(allocatedInputs[0].value).toBe(2000n);
@@ -151,7 +151,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.any,
-      BigInt(0)
+      BigInt(0),
     );
 
     expect(allocatedInputs[0].value).toBe(1950n);
@@ -172,7 +172,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.any,
-      BigInt(0)
+      BigInt(0),
     );
 
     expect(allocatedInputs[0].value).toBe(1899n);
@@ -189,7 +189,7 @@ describe("Fee tests", () => {
     let fee = 7000n;
     let requests = asSendRequestObject(to) as SendRequest[];
     expect(() =>
-      allocateFee(requests, fee, FeePaidByEnum.changeThenAny, BigInt(999))
+      allocateFee(requests, fee, FeePaidByEnum.changeThenAny, BigInt(999)),
     ).toThrow("Insufficient funds for transaction given fee");
   });
 
@@ -202,7 +202,7 @@ describe("Fee tests", () => {
     let fee = 1500n;
     let requests = asSendRequestObject(to) as SendRequest[];
     expect(() =>
-      allocateFee(requests, fee, FeePaidByEnum.first, BigInt(0))
+      allocateFee(requests, fee, FeePaidByEnum.first, BigInt(0)),
     ).toThrow("Fee strategy would result in dust output");
   });
 
@@ -246,7 +246,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.changeThenAny,
-      BigInt(1362)
+      BigInt(1362),
     );
     expect(result[0].value).toBe(1000n);
     expect(result[1].value).toBe(1000n);
@@ -265,7 +265,7 @@ describe("Fee tests", () => {
       requests,
       fee,
       FeePaidByEnum.changeThenAny,
-      BigInt(1362)
+      BigInt(1362),
     );
     expect(result[0].value).toBe(546n);
     expect(result[1].value).toBe(546n);

@@ -1,4 +1,4 @@
-export { default as WebhookWorker } from "./WebhookWorker.js";
+export * from "./interface.js";
 export * from "./Webhook.js";
 export * from "./WebhookBch.js";
-export * from "./interface.js";
+export { default as WebhookWorker } from "./WebhookWorker.js";

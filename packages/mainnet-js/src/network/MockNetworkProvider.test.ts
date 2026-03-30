@@ -1,16 +1,16 @@
-import { MockNetworkProvider } from "./MockNetworkProvider";
-import { randomUtxo, randomToken, randomNFT } from "@mem-cash/electrum";
-import { RegTestWallet } from "../wallet/Wif";
-import { setGlobalProvider, removeGlobalProvider } from ".";
+import { randomNFT, randomToken, randomUtxo } from "@mem-cash/electrum";
 import { Network } from "../interface";
 import { SendRequest, TokenSendRequest } from "../wallet/model";
+import { RegTestWallet } from "../wallet/Wif";
+import { removeGlobalProvider, setGlobalProvider } from ".";
+import { MockNetworkProvider } from "./MockNetworkProvider";
 
 /** Fund a wallet with a UTXO in the mock provider. */
 async function fundWallet(
   provider: MockNetworkProvider,
   address: string,
   satoshis: bigint,
-  options?: { vout?: number; height?: number; token?: any }
+  options?: { vout?: number; height?: number; token?: any },
 ) {
   await provider.addUtxo(address, {
     ...randomUtxo({
@@ -56,11 +56,11 @@ describe("MockNetworkProvider", () => {
 
     await provider.addUtxo(
       address,
-      randomUtxo({ satoshis: 1000n, token: randomToken({ amount: 500n }) })
+      randomUtxo({ satoshis: 1000n, token: randomToken({ amount: 500n }) }),
     );
     await provider.addUtxo(
       address,
-      randomUtxo({ satoshis: 1000n, token: randomNFT() })
+      randomUtxo({ satoshis: 1000n, token: randomNFT() }),
     );
 
     const utxos = await provider.getUtxos(address);
