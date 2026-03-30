@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+4.0.0-next.6
+
+* Use MockNetworkProvider backed by mem-cash
+
 4.0.0-next.5
 
 * Replace Jest with Vitest 4, modernize browser tests, reenable CI coverage
