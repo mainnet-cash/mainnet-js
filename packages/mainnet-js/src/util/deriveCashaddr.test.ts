@@ -8,6 +8,10 @@ import {
   toCashaddr,
   toTokenaddr,
 } from "./deriveCashaddr";
+import { initProviders, disconnectProviders } from "../network/Connection";
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 const p2pkhAddress = "bitcoincash:qpttdv3qg2usm4nm7talhxhl05mlhms3ystlwcm8h4";
 const p2pkhTokenAddress =

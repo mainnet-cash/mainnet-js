@@ -1,8 +1,12 @@
 import { SignedMessage, hash_message } from "./signed.js";
 import { Wallet, RegTestWallet, TestNetWallet } from "../wallet/Wif.js";
 import { binToHex } from "@bitauth/libauth";
+import { initProviders, disconnectProviders } from "../network/Connection.js";
 
 import fs from "fs";
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 async function loadLargeMessage() {
   const data = await fs.promises.readFile("./test/data/bitcoin.tex", "utf-8");

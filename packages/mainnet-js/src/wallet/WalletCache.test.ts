@@ -1,6 +1,10 @@
 import { RegTestWallet, RegTestWifWallet } from "./Wif";
 import { RegTestWatchWallet } from "./Watch";
 import { RegTestHDWallet } from "./HDWallet";
+import { initProviders, disconnectProviders } from "../network/Connection";
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 describe("Wallet cache initialization", () => {
   test("Seed wallet should have walletCache with at least one entry", async () => {

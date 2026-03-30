@@ -1,5 +1,5 @@
 import WebhookWorker from "../webhook/WebhookWorker";
-import { RegTestWallet } from "mainnet-js";
+import { RegTestWallet, initProviders, disconnectProviders } from "mainnet-js";
 import { mine } from "mainnet-js";
 import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
 
@@ -10,6 +10,7 @@ let aliceWif;
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
+      await initProviders();
       if (process.env.PRIVATE_WIF) {
         alice = process.env.ADDRESS!;
         aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
@@ -35,6 +36,7 @@ describe("Webhook worker tests", () => {
   afterAll(async () => {
     await worker.destroy();
     await worker.db.close();
+    await disconnectProviders();
   });
 
   test("Test non-recurrent hook to be deleted after successful call", async () => {

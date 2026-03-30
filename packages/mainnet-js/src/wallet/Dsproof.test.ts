@@ -1,13 +1,17 @@
-import { TestNetWallet } from "./Wif";
+import { RegTestWallet } from "./Wif";
 import { initProviders, disconnectProviders } from "../network/Connection";
 import { createProvider } from "../network/default";
 import { toParseNotation } from "../network/constant";
 import { delay } from "../util/delay";
 import { hexToBin } from "@bitauth/libauth";
-import { CancelFn } from "./interface";
 import { DsproofData } from "../interface";
 import { SendRequest, toUtxoId } from "./model";
+import { TestNetWallet } from "./Wif";
 import { TestNetHDWallet } from "./HDWallet";
+import { RegTestHDWallet } from "./HDWallet";
+import { MockNetworkProvider } from "../network/MockNetworkProvider";
+
+const isMock = !!process.env.USE_MOCK_PROVIDER;
 
 const CHIPNET_SERVER_1 = toParseNotation(
   ["wss://chipnet.bch.ninja:50004"],
@@ -28,7 +32,7 @@ afterAll(async () => {
 });
 
 describe("Double-spend proof tests", () => {
-  (aliceId ? test : test.skip)(
+  (!isMock && aliceId ? test : test.skip)(
     "Provider dsproof subscription receives proof data on double-spend",
     async () => {
       const alice = await TestNetWallet.fromId(aliceId!);
@@ -98,7 +102,7 @@ describe("Double-spend proof tests", () => {
     }
   );
 
-  (aliceId ? test : test.skip)(
+  (!isMock && aliceId ? test : test.skip)(
     "watchDoubleSpends detects double-spend on single-address wallet",
     async () => {
       const alice = await TestNetWallet.fromId(aliceId!);
@@ -152,6 +156,138 @@ describe("Double-spend proof tests", () => {
       expect(dsproofs.length).toBe(2);
       expect(dsproofs[0].txid).toBeDefined();
       expect(dsproofs[0].outpoint).toBeDefined();
+    }
+  );
+
+  (isMock ? test : test.skip)(
+    "Mock: subscribeToDsproof receives injected dsproof",
+    async () => {
+      const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+      const bob = await RegTestWallet.newRandom();
+
+      // Send a transaction so we have a txHash to subscribe to
+      const resp = await alice.send([
+        { cashaddr: bob.cashaddr!, value: 1000n },
+      ]);
+      const txHash = resp.txId!;
+
+      // Subscribe to dsproof notifications
+      const dsproofs: DsproofData[] = [];
+      const cancel = await (alice.provider as unknown as MockNetworkProvider).subscribeToDsproof(
+        txHash,
+        ([, dsproof]) => {
+          if (dsproof !== null) {
+            dsproofs.push(dsproof);
+          }
+        }
+      );
+
+      // Inject a dsproof via test.add_dsproof
+      const mockDsproof: DsproofData = {
+        dspid: "abc123",
+        txid: txHash,
+        hex: "deadbeef",
+        outpoint: { txid: txHash, vout: 0 },
+        descendants: [txHash],
+      };
+      const mc = (alice.provider as unknown as MockNetworkProvider).mc;
+      await mc.request("test.add_dsproof", [txHash, mockDsproof]);
+
+      await delay(200);
+      await cancel();
+
+      expect(dsproofs.length).toBe(1);
+      expect(dsproofs[0].dspid).toBe("abc123");
+      expect(dsproofs[0].txid).toBe(txHash);
+      expect(dsproofs[0].outpoint.txid).toBe(txHash);
+      expect(dsproofs[0].outpoint.vout).toBe(0);
+      expect(dsproofs[0].descendants).toEqual([txHash]);
+    }
+  );
+
+  (isMock ? test : test.skip)(
+    "Mock: watchDoubleSpends detects injected dsproof",
+    async () => {
+      const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+      const bob = await RegTestWallet.newRandom();
+
+      // Start watching for double-spends on bob
+      const dsproofs: DsproofData[] = [];
+      const cancelWatch = await bob.watchDoubleSpends(
+        (dsproof) => {
+          dsproofs.push(dsproof);
+        },
+        60000 // long window so it doesn't expire during test
+      );
+
+      // Send a transaction to bob
+      const resp = await alice.send([
+        { cashaddr: bob.cashaddr!, value: 1000n },
+      ]);
+      const txHash = resp.txId!;
+
+      // Wait for the watchTransactionHashes callback to fire and set up
+      // the dsproof subscription
+      await delay(500);
+
+      // Inject a dsproof for that transaction
+      const mc = (alice.provider as unknown as MockNetworkProvider).mc;
+      await mc.request("test.add_dsproof", [txHash, {
+        dspid: "dsp456",
+        txid: txHash,
+        hex: "cafebabe",
+        outpoint: { txid: txHash, vout: 0 },
+        descendants: [],
+      }]);
+
+      await delay(500);
+      await cancelWatch();
+
+      expect(dsproofs.length).toBe(1);
+      expect(dsproofs[0].dspid).toBe("dsp456");
+    }
+  );
+
+  (isMock ? test : test.skip)(
+    "Mock: watchDoubleSpends on HD wallet detects injected dsproof",
+    async () => {
+      const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+      const hdBob = await RegTestHDWallet.newRandom();
+      const bobAddr = hdBob.getDepositAddress();
+
+      // Start watching for double-spends on HD wallet
+      const dsproofs: DsproofData[] = [];
+      const cancelWatch = await hdBob.watchDoubleSpends(
+        (dsproof) => {
+          dsproofs.push(dsproof);
+        },
+        60000
+      );
+
+      // Send a transaction to the HD wallet
+      const resp = await alice.send([
+        { cashaddr: bobAddr, value: 1000n },
+      ]);
+      const txHash = resp.txId!;
+
+      // Wait for watchTransactionHashes to set up the dsproof subscription
+      await delay(2000);
+
+      // Inject a dsproof
+      const mc = (alice.provider as unknown as MockNetworkProvider).mc;
+      await mc.request("test.add_dsproof", [txHash, {
+        dspid: "hd-dsp-789",
+        txid: txHash,
+        hex: "feedface",
+        outpoint: { txid: txHash, vout: 0 },
+        descendants: [],
+      }]);
+
+      await delay(500);
+      await cancelWatch();
+
+      expect(dsproofs.length).toBe(1);
+      expect(dsproofs[0].dspid).toBe("hd-dsp-789");
     }
   );
 });

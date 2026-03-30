@@ -14,6 +14,29 @@ export default defineConfig({
         root,
         "node_modules/@rpckit/fallback/dist/electrum-cash/index.js"
       ),
+      "@mem-cash/electrum": path.resolve(
+        root,
+        "node_modules/@mem-cash/electrum/dist/index.js"
+      ),
+      "@mem-cash/core": path.resolve(
+        root,
+        "node_modules/@mem-cash/core/dist/index.js"
+      ),
+      "@mem-cash/storage": path.resolve(
+        root,
+        "node_modules/@mem-cash/storage/dist/index.js"
+      ),
+      "@mem-cash/types": path.resolve(
+        root,
+        "node_modules/@mem-cash/types/dist/index.js"
+      ),
+      "@mem-cash/validation": path.resolve(
+        root,
+        "node_modules/@mem-cash/validation/dist/index.js"
+      ),
+      ...(process.env.USE_MOCK_PROVIDER
+        ? { pg: path.resolve(__dirname, "mocks/pg.cjs") }
+        : {}),
       "#test": path.resolve(__dirname),
     },
   },
@@ -33,11 +56,15 @@ export default defineConfig({
       "**/*.test.browser.ts",
       "**/packages/mainnet-cash/**",
     ],
-    setupFiles: ["fake-indexeddb/auto", "node-localstorage/register"],
+    setupFiles: [
+      "fake-indexeddb/auto",
+      "node-localstorage/register",
+      path.resolve(__dirname, "mock.setup.cjs"),
+    ],
     globalSetup: [path.resolve(__dirname, "vitest.global-setup.cjs")],
     attachmentsDir: path.resolve(__dirname, "attachments"),
     testTimeout: 125000,
-    fileParallelism: false,
+    fileParallelism: !!process.env.USE_MOCK_PROVIDER,
     coverage: {
       enabled: process.env.COVERAGE === "true",
       provider: "v8",

@@ -9,6 +9,10 @@ import { stringify } from "../cache";
 import { mine } from "../mine";
 import { delay } from "../util/delay";
 import { CancelFn } from "./interface";
+import { initProviders, disconnectProviders } from "../network/Connection";
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 const expectedXpub =
   "xpub6CGqRCnS5qDfyxtzV3y3tj8CY7qf3z3GiB2qnCUTdNkhpNxbLtobrU5ZXBVPG3rzPcBUpJAoj3K1u1jyDwKuduL71gLPm27Tckc85apgQRr";

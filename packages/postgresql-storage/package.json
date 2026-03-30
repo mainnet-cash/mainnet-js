@@ -26,6 +26,7 @@
     "build:module": "tsc -p tsconfig.browser.json",
     "build:production": "NODE_ENV=production yarn build:module",
     "test": "vitest run --config ../../test/vitest.config.ts",
+    "test:mock": "USE_MOCK_PROVIDER=1 vitest run --config ../../test/vitest.config.ts",
     "publish:public": "yarn publish --access public"
   },
   "testPathIgnorePatterns": [

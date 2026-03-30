@@ -42,6 +42,20 @@ export async function createProvider(
   return new ElectrumNetworkProvider(transport, network);
 }
 
+/**
+ * Create a MockNetworkProvider via dynamic import.
+ * Keeps @mem-cash/electrum out of the production bundle.
+ */
+export async function createMockProvider(): Promise<NetworkProvider> {
+  const { MockNetworkProvider } = await import("./MockNetworkProvider.js");
+  let verifier: import("@mem-cash/validation").TxVerifier | undefined;
+  try {
+    const { createTxVerifier } = await import("@mem-cash/validation");
+    verifier = await createTxVerifier();
+  } catch {}
+  return new MockNetworkProvider({ indexerConfig: { verifier } });
+}
+
 export function getNetworkProvider(
   network: Network = Network.MAINNET
 ): NetworkProvider {

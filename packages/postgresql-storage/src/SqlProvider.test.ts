@@ -1,8 +1,11 @@
 import { default as SqlProvider } from "./SqlProvider";
-import { BaseWallet, RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
+import { BaseWallet, RegTestWallet, TestNetWallet, Wallet, initProviders, disconnectProviders } from "mainnet-js";
 import { WalletDbEntryI } from "mainnet-js";
 
 BaseWallet.StorageProvider = SqlProvider;
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new SqlProvider(`regtest2 ${Math.random()}`);

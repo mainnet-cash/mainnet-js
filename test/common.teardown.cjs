@@ -5,7 +5,7 @@ module.exports = async function (cwd) {
     cwd = ".";
   }
 
-  if (process.env.SKIP_REGTEST_INIT) {
+  if (process.env.SKIP_REGTEST_INIT || process.env.USE_MOCK_PROVIDER) {
     return;
   }
 

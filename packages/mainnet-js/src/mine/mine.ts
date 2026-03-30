@@ -1,15 +1,9 @@
 import { getNetworkProvider } from "../network/default.js";
 import { Network } from "../interface.js";
-import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 
 /**
- * Mine blocks to a regtest address
- *
- * @param cashaddr - the address to mine to
- * @param blocks - the number of blocks to mine
- *
- * @remarks
- * Uses the Electrum provider's daemon.passthrough to call generatetoaddress on the regtest node
+ * Mine blocks to a regtest address.
+ * Delegates to the network provider's mine() implementation.
  */
 export const mine = async ({
   cashaddr,
@@ -18,8 +12,6 @@ export const mine = async ({
   cashaddr: string;
   blocks: number;
 }): Promise<any> => {
-  const provider = getNetworkProvider(
-    Network.REGTEST
-  ) as ElectrumNetworkProvider;
-  return provider.daemonPassthrough("generatetoaddress", [blocks, cashaddr]);
+  const provider = getNetworkProvider(Network.REGTEST);
+  return provider.mine(cashaddr, blocks);
 };

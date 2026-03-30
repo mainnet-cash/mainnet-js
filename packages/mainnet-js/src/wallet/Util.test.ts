@@ -4,6 +4,8 @@ import { mine } from "../mine";
 import { Config } from "../config";
 import { delay } from "../util/delay";
 
+const isMock = !!process.env.USE_MOCK_PROVIDER;
+
 beforeAll(async () => {
   await initProviders();
 });
@@ -59,7 +61,7 @@ describe("Utility tests", () => {
     ).toBe(utxo.txid);
   });
 
-  test("Should decode a transaction from fist block", async () => {
+  (isMock ? test.skip : test)("Should decode a transaction from fist block", async () => {
     let wallet = await Wallet.newRandom();
     const decoded = await wallet.util.decodeTransaction(
       "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"
@@ -73,7 +75,7 @@ describe("Utility tests", () => {
     expect((decoded.vin[0] as any).address).toBeUndefined();
   });
 
-  test("Should decode a transaction and fetch input values and addresses", async () => {
+  (isMock ? test.skip : test)("Should decode a transaction and fetch input values and addresses", async () => {
     const txHash =
       "dc8f059900807c36941313f10b43ec049e23dfede4e09f8fbccc3871ed359fbe";
     const decoded = await Wallet.util.decodeTransaction(txHash, true);

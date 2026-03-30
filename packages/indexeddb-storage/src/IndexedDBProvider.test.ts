@@ -1,6 +1,9 @@
 import { HDWallet } from "mainnet-js";
 import { default as IndexedDBProvider } from "./IndexedDBProvider";
-import { BaseWallet, RegTestWallet, TestNetWallet, Wallet } from "mainnet-js";
+import { BaseWallet, RegTestWallet, TestNetWallet, Wallet, initProviders, disconnectProviders } from "mainnet-js";
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 test("Store and retrieve a Regtest wallet", async () => {
   let db = new IndexedDBProvider("regtest-db");

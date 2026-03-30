@@ -1,15 +1,13 @@
 import type {
   Transport,
   Unsubscribe,
+  Schema,
   ExtractRequestMethod,
   ExtractSubscriptionMethod,
   ExtractParams,
   ExtractReturn,
 } from "@rpckit/core";
 import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
-
-type RequestMethod = ExtractRequestMethod<ElectrumCashSchema>;
-type SubscriptionMethod = ExtractSubscriptionMethod<ElectrumCashSchema>;
 import { default as NetworkProvider } from "./NetworkProvider.js";
 import { DsproofData, HexHeaderI, TxI, Utxo, HeaderI } from "../interface.js";
 import { Network } from "../interface.js";
@@ -31,8 +29,10 @@ import { MemoryCache } from "../cache/MemoryCache.js";
 /** Internal type for cached verbose transactions. fetchHeight is stripped before returning. */
 type CachedRawTransaction = ElectrumRawTransaction & { fetchHeight: number };
 
-export default class ElectrumNetworkProvider implements NetworkProvider {
-  public transport: Transport<ElectrumCashSchema>;
+export default class ElectrumNetworkProvider<
+  S extends Schema = ElectrumCashSchema,
+> implements NetworkProvider {
+  public transport: Transport<S>;
   public subscriptions: number = 0;
   private currentHeight: number = 0;
   private headerCancelFn?: CancelFn;
@@ -71,7 +71,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
   }
 
   constructor(
-    transport: Transport<ElectrumCashSchema>,
+    transport: Transport<S>,
     public network: Network = Network.MAINNET
   ) {
     if (transport) {
@@ -551,7 +551,11 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }) as Promise<T>;
   }
 
-  public async performRequest<M extends RequestMethod>(
+  async mine(cashaddr: string, blocks: number): Promise<any> {
+    return this.daemonPassthrough("generatetoaddress", [blocks, cashaddr]);
+  }
+
+  public async performRequest<M extends ExtractRequestMethod<ElectrumCashSchema>>(
     method: M,
     parameters?: ExtractParams<ElectrumCashSchema, M>
   ): Promise<ExtractReturn<ElectrumCashSchema, M>> {
@@ -573,7 +577,7 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
       return new Error(typeof e === "string" ? e : String(e));
     };
 
-    const request = this.transport.request(method, parameters!);
+    const request = (this.transport as unknown as Transport<ElectrumCashSchema>).request(method, parameters!);
 
     try {
       const value = await Promise.race([request, makeTimeout()]);
@@ -593,14 +597,14 @@ export default class ElectrumNetworkProvider implements NetworkProvider {
     }
   }
 
-  public async subscribeRequest<M extends SubscriptionMethod>(
+  public async subscribeRequest<M extends ExtractSubscriptionMethod<ElectrumCashSchema>>(
     method: M,
     parameters: ExtractParams<ElectrumCashSchema, M>,
     callback: (data: ExtractReturn<ElectrumCashSchema, M>) => void
   ): Promise<CancelFn> {
     await this.ready();
 
-    const unsubscribe: Unsubscribe = await this.transport.subscribe(
+    const unsubscribe: Unsubscribe = await (this.transport as unknown as Transport<ElectrumCashSchema>).subscribe(
       method,
       parameters,
       callback

@@ -1,4 +1,5 @@
 import WebhookWorker from "../webhook/WebhookWorker";
+import { initProviders, disconnectProviders } from "mainnet-js";
 import { Webhook } from "./Webhook";
 
 let worker: WebhookWorker;
@@ -8,6 +9,7 @@ let aliceWif = "";
 describe("Webhook worker tests", () => {
   beforeAll(async () => {
     try {
+      await initProviders();
       if (process.env.PRIVATE_WIF) {
         alice = process.env.ADDRESS!;
         aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
@@ -33,6 +35,7 @@ describe("Webhook worker tests", () => {
   afterAll(async () => {
     await worker.destroy();
     await worker.db.close();
+    await disconnectProviders();
   });
 
   test("Test posting hook", async () => {

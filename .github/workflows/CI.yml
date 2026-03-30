@@ -80,6 +80,15 @@ jobs:
         node-version: "22.x"
     - run: yarn
     - run: yarn test
+  test_node_mock:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "22.x"
+    - run: yarn
+    - run: yarn test:mock
   test_rest:
     runs-on: ubuntu-latest
     steps:
@@ -97,7 +106,7 @@ jobs:
       with:
         node-version: '22.x'
     - run: yarn
-    - run: yarn coverage
+    - run: yarn coverage:mock
     - uses: actions/upload-artifact@v4
       with:
         name: coverage-report

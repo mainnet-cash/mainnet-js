@@ -1,8 +1,7 @@
-import { RegTestWallet, Wallet } from "../wallet/Wif";
+import { RegTestWallet } from "../wallet/Wif";
 import { WalletTypeEnum } from "../wallet/enum";
 import { createWallet } from "../wallet/createWallet";
 import { mine } from "../mine";
-import { encodeCashAddress } from "@bitauth/libauth";
 import { toBch } from "../util";
 import { initProviders, disconnectProviders } from "../network/Connection";
 

@@ -1,5 +1,9 @@
 import { deriveSeedFromBip39Mnemonic, hexToBin } from "@bitauth/libauth";
 import { RegTestWallet } from "./Wif";
+import { initProviders, disconnectProviders } from "../network/Connection";
+
+beforeAll(async () => { await initProviders(); });
+afterAll(async () => { await disconnectProviders(); });
 
 describe(`Test bip39 edge cases`, () => {
   test("Should match match the abandon seed", async () => {

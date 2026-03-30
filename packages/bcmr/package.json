@@ -20,6 +20,7 @@
     "build:browser": "npx webpack",
     "build:production": "yarn build:module && NODE_ENV=production yarn build:browser",
     "test": "vitest run --config ../../test/vitest.config.ts",
+    "test:mock": "USE_MOCK_PROVIDER=1 vitest run --config ../../test/vitest.config.ts",
     "publish:public": "yarn publish --access public"
   },
   "testPathIgnorePatterns": [

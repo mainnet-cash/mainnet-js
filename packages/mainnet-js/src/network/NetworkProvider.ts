@@ -160,6 +160,14 @@ export default interface NetworkProvider {
   ): Promise<CancelFn>;
 
   /**
+   * Mine blocks to a regtest address.
+   * @param cashaddr The address to mine to (receives coinbase rewards).
+   * @param blocks The number of blocks to mine.
+   * @returns Array of block hashes or implementation-specific result.
+   */
+  mine(cashaddr: string, blocks: number): Promise<any>;
+
+  /**
    * Function to wait for connection to be ready
    * @param timeout number of milliseconds to wait before throwing error
    * @returns true when ready, or an error

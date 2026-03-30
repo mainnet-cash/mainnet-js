@@ -59,6 +59,8 @@
   ],
   "author": "readcash",
   "devDependencies": {
+    "@mem-cash/electrum": "^0.0.2",
+    "@mem-cash/validation": "^0.0.2",
     "dotenv": "^10.0.0"
   }
 }

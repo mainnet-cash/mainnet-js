@@ -18,7 +18,7 @@ module.exports = async function (cwd) {
   if (cwd instanceof Object || cwd === undefined) {
     cwd = ".";
   }
-  if (process.env.SKIP_REGTEST_INIT) {
+  if (process.env.SKIP_REGTEST_INIT || process.env.USE_MOCK_PROVIDER) {
     return;
   }
 
