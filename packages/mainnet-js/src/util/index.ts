@@ -1,10 +1,4 @@
-export {
-  binToBase64,
-  binToHex,
-  hexToBin,
-  sha256,
-  utf8ToBin,
-} from "@bitauth/libauth";
+export { binToHex, hexToBin } from "@bitauth/libauth";
 export { ExchangeRate, getExchangeRatePromise } from "../rate/ExchangeRate.js";
 export {
   getAddrsByXpubKey,
