@@ -65,6 +65,16 @@ export * from "./wallet/interface.js";
 export { getHistory } from "./history/getHistory.js";
 export * from "./history/interface.js";
 
+// xpub utilities
+export {
+  getAddrsByXpubKey,
+  getAddrsByXpubKeyObject,
+  getXpubKeyInfo,
+  getXpubKeyInfoObject,
+  derivePublicNodeCashaddr,
+} from "./util/getAddrsByXpubKey.js";
+export { getXPubKey } from "./util/getXPubKey.js";
+
 // utils
 export * from "./util/index.js";
 

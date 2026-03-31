@@ -1,12 +1,5 @@
 export { binToHex, hexToBin } from "@bitauth/libauth";
 export { ExchangeRate, getExchangeRatePromise } from "../rate/ExchangeRate.js";
-export {
-  getAddrsByXpubKey,
-  getAddrsByXpubKeyObject,
-  getXpubKeyInfo,
-  getXpubKeyInfoObject,
-} from "../util/getAddrsByXpubKey.js";
-export { getXPubKey } from "../util/getXPubKey.js";
 export { amountInSatoshi } from "./amountInSatoshi.js";
 export { asSendRequestObject } from "./asSendRequestObject.js";
 export { atob, btoa } from "./base64.js";
