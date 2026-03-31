@@ -1,35 +1,77 @@
 // config
 export { Config } from "./config.js";
-export * from "./db/index.js";
+
 // Enum
 export { NetworkType, UnitEnum } from "./enum.js";
+export { FeePaidByEnum, WalletTypeEnum } from "./wallet/enum.js";
+
+// message
 export { SignedMessage } from "./message/signed.js";
-export * from "./mine/index.js";
+
 // provider
 export { DefaultProvider } from "./network/configuration.js";
-export * from "./network/index.js";
-export * from "./wallet/Base.js";
+
+// network
+export {
+  createProvider,
+  getGlobalProvider,
+  getNetworkProvider,
+  removeGlobalProvider,
+  setGlobalProvider,
+} from "./network/default.js";
+export {
+  disconnectProviders,
+  initProvider,
+  initProviders,
+} from "./network/Connection.js";
+export { default as ElectrumNetworkProvider } from "./network/ElectrumNetworkProvider.js";
+export type { default as NetworkProvider } from "./network/NetworkProvider.js";
+export type {
+  ElectrumRawTransaction,
+  ElectrumRawTransactionVinWithValues,
+  ElectrumRawTransactionWithInputValues,
+} from "./network/interface.js";
+
+// db
+export { default as StorageProvider } from "./db/StorageProvider.js";
+export type { WalletDbEntryI } from "./db/interface.js";
+
+// mine
+export { mine } from "./mine/mine.js";
+
+// wallets — explicit exports for tree-shaking
+export { BaseWallet } from "./wallet/Base.js";
+export { WatchWallet, TestNetWatchWallet, RegTestWatchWallet } from "./wallet/Watch.js";
+export {
+  Wallet,
+  TestNetWallet,
+  RegTestWallet,
+  WifWallet,
+  TestNetWifWallet,
+  RegTestWifWallet,
+} from "./wallet/Wif.js";
+export {
+  HDWallet,
+  TestNetHDWallet,
+  RegTestHDWallet,
+} from "./wallet/HDWallet.js";
+
+// wallet utilities, models, interfaces — barrel re-export is fine (small items)
 export * from "./wallet/createWallet.js";
-export { FeePaidByEnum, WalletTypeEnum } from "./wallet/enum.js";
-export * from "./wallet/HDWallet.js";
-// models
 export * from "./wallet/model.js";
-export * from "./wallet/Watch.js";
-export * from "./wallet/Wif.js";
+export * from "./wallet/interface.js";
+
+// history
+export { getHistory } from "./history/getHistory.js";
+export * from "./history/interface.js";
 
 // utils
-import * as Mainnet from "./util/index.js";
-
-export { getHistory } from "./history/getHistory.js";
-// libauth
-export * as libauth from "./libauth.js";
 export * from "./util/index.js";
+
+// namespace re-exports (backward compatibility)
+import * as Mainnet from "./util/index.js";
 export { Mainnet };
-
-// constants
-import * as CONST from "./constant.js";
-
-export * from "./history/interface.js";
+export * as libauth from "./libauth.js";
 
 // interfaces
 export * from "./interface.js";
@@ -37,5 +79,3 @@ export type {
   SignedMessageResponseI,
   VerifyMessageResponseI,
 } from "./message/interface.js";
-export * from "./wallet/interface.js";
-export { CONST };

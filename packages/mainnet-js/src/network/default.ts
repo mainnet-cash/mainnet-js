@@ -6,7 +6,6 @@ import { Network } from "../interface.js";
 import { getDefaultServers } from "./configuration.js";
 import { networkTickerMap } from "./constant.js";
 import { default as ElectrumNetworkProvider } from "./ElectrumNetworkProvider.js";
-import { MockNetworkProvider } from "./MockNetworkProvider.js";
 import { default as NetworkProvider } from "./NetworkProvider.js";
 
 const parseSync = createParseSync({ webSocket, fallback });
@@ -44,6 +43,7 @@ export async function createProvider(
 }
 
 export async function createMockProvider(): Promise<NetworkProvider> {
+  const { MockNetworkProvider } = await import("./MockNetworkProvider.js");
   let verifier: import("@mem-cash/validation").TxVerifier | undefined;
   try {
     const { createTxVerifier } = await import("@mem-cash/validation");

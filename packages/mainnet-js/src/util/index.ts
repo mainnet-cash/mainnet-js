@@ -5,7 +5,7 @@ export {
   sha256,
   utf8ToBin,
 } from "@bitauth/libauth";
-export { ExchageRatePromise, ExchangeRate } from "../rate/ExchangeRate.js";
+export { ExchangeRate, getExchangeRatePromise } from "../rate/ExchangeRate.js";
 export {
   getAddrsByXpubKey,
   getAddrsByXpubKeyObject,

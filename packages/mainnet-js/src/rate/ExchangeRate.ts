@@ -135,8 +135,14 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   throw Error(`Currency '${symbol}' is not supported.`);
 }
 
-// do not await and do not throw in case we are offline
-// this promise can be used to warm up the cache
-export const ExchageRatePromise = ExchangeRate.get(Config.DefaultCurrency)
-  .then((result) => result)
-  .catch((error: Error) => error);
+// Lazy cache warm-up — call this explicitly if you want to pre-fetch rates.
+// Does not throw if offline.
+let _exchangeRatePromise: Promise<number | Error> | undefined;
+export function getExchangeRatePromise(): Promise<number | Error> {
+  if (!_exchangeRatePromise) {
+    _exchangeRatePromise = ExchangeRate.get(Config.DefaultCurrency)
+      .then((result) => result)
+      .catch((error: Error) => error);
+  }
+  return _exchangeRatePromise;
+}

@@ -37,11 +37,7 @@
     "@rpckit/fallback": "^2.0.0",
     "@rpckit/websocket": "^2.0.0"
   },
-  "sideEffects": [
-    "src/rate/ExchangeRate.ts",
-    "src/network/getRelayFeeCache.ts",
-    "src/network/default.ts"
-  ],
+  "sideEffects": false,
   "keywords": [
     "bch",
     "bitcoin cash",
