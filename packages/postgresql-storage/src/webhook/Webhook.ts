@@ -1,5 +1,3 @@
-import axiosModule from "axios";
-const axios = axiosModule.default ?? axiosModule;
 import { TxI } from "mainnet-js";
 import SqlProvider from "../SqlProvider.js";
 
@@ -46,54 +44,16 @@ export class Webhook {
 
   async post(data: any): Promise<boolean> {
     try {
-      await axios.post(this.url, data);
-      // console.debug("Posted webhook", this.url, data);
+      const res = await fetch(this.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) return false;
       return true;
-    } catch (e: any) {
-      if (e.message && e.message.status === 200) {
-        return true;
-      }
-
-      // console.debug("Failed to post webhook", this.url, e);
+    } catch {
       return false;
     }
   }
 
-  //#region debug
-  public static debug = class {
-    static setupAxiosMocks() {
-      axios.interceptors.request.use((config) => {
-        const url = config.url!;
-        if (!url.startsWith("http://example.com")) {
-          return config;
-        }
-
-        let response;
-        if (url === "http://example.com/fail") {
-          response = { status: 503 };
-        } else {
-          response = { status: 200 };
-        }
-
-        if (url in this.responses) {
-          this.responses[url].push(response);
-        } else {
-          this.responses[url] = [response];
-        }
-
-        // cancel actual http request
-        return {
-          ...config,
-          cancelToken: new axios.CancelToken((cancel) => cancel(response)),
-        };
-      });
-    }
-
-    static reset() {
-      this.responses = {};
-    }
-
-    static responses: any = {};
-  };
-  //#endregion
 }

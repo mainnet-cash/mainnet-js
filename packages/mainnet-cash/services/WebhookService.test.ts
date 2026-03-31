@@ -1,17 +1,21 @@
 import * as mainnet from "mainnet-js";
-import { Webhook } from "@mainnet-cash/postgresql-storage";
 import request from "supertest";
 import { checkResponse } from "../utils/testUtils";
+import {
+  responses,
+  resetWebhookMock,
+  setupWebhookMock,
+} from "@mainnet-cash/postgresql-storage/test";
 
 import app from "../test-setup.js";
 
 describe("Test Webhook Endpoints", () => {
   beforeAll(async function () {
-    Webhook.debug.setupAxiosMocks();
+    setupWebhookMock();
   });
 
   beforeEach(function () {
-    Webhook.debug.reset();
+    resetWebhookMock();
   });
 
   /**
@@ -24,8 +28,8 @@ describe("Test Webhook Endpoints", () => {
       .post("/webhook/watch_address")
       .send({
         cashaddr: bobWallet.cashaddr,
-        url: 'http://example.com/balance',
-        type: 'balance'
+        url: "http://example.com/balance",
+        type: "balance",
       });
     if (resp.error) {
       console.log(resp.error.text);
@@ -47,7 +51,7 @@ describe("Test Webhook Endpoints", () => {
       });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(Webhook.debug.responses["http://example.com/balance"].length).toBe(1);
+    expect(responses["http://example.com/balance"].length).toBe(1);
   });
 
   it("Should register a transaction watch webhook", async () => {
@@ -57,8 +61,8 @@ describe("Test Webhook Endpoints", () => {
       .post("/webhook/watch_address")
       .send({
         cashaddr: bobWallet.cashaddr,
-        url: 'http://example.com/transaction',
-        type: 'transaction:in'
+        url: "http://example.com/transaction",
+        type: "transaction:in",
       });
     if (resp.error) {
       console.log(resp.error.text);
@@ -79,7 +83,7 @@ describe("Test Webhook Endpoints", () => {
       });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(Webhook.debug.responses["http://example.com/transaction"].length).toBe(1);
+    expect(responses["http://example.com/transaction"].length).toBe(1);
   });
 
   it("Should fail register a webhook of unknown type", async () => {
@@ -89,8 +93,8 @@ describe("Test Webhook Endpoints", () => {
       .post("/webhook/watch_address")
       .send({
         cashaddr: bobWallet.cashaddr,
-        url: 'http://example.com/',
-        type: 'test'
+        url: "http://example.com/",
+        type: "test",
       });
     expect(resp.statusCode).not.toEqual(200);
   });

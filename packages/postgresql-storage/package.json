@@ -5,8 +5,14 @@
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
-    "types": "./dist/module/index.d.ts",
-    "import": "./dist/module/index.js"
+    ".": {
+      "types": "./dist/module/index.d.ts",
+      "import": "./dist/module/index.js"
+    },
+    "./test": {
+      "types": "./dist/module/webhook/WebhookMock.d.ts",
+      "import": "./dist/module/webhook/WebhookMock.js"
+    }
   },
   "files": [
     "dist/module"
@@ -14,7 +20,6 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "axios": "^0.21.1",
     "mainnet-js": "4.0.0-next.7",
     "parse-database-url": "^0.3.0",
     "pg": "^8.11.3",
