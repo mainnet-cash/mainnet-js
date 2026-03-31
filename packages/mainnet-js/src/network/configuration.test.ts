@@ -1,7 +1,7 @@
-import { Network } from "../interface";
-import { Wallet } from "../wallet/Wif";
-import * as config from "./configuration";
-import * as primary from "./constant";
+import { Network } from "../interface.js";
+import { Wallet } from "../wallet/Wif.js";
+import * as config from "./configuration.js";
+import * as primary from "./constant.js";
 
 afterEach(() => {
   // Restore env vars to prevent leaking fake servers to subsequent test files

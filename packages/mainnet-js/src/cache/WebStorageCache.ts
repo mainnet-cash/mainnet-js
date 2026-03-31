@@ -1,4 +1,4 @@
-import { CacheProvider } from "./interface";
+import { CacheProvider } from "./interface.js";
 
 // super thin wrapper around localStorage
 export class WebStorageCache implements CacheProvider {

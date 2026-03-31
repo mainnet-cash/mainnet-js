@@ -1,5 +1,5 @@
 import { hexToBin } from "@bitauth/libauth";
-import { hash160 } from "./hash160";
+import { hash160 } from "./hash160.js";
 
 test("Should calculate the correct hash from a publicKey", async () => {
   let pk = "02d531ce83a065cdc342b1e709106741bb070ea7aaec29d012f2dba956b9027675";

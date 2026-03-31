@@ -5,18 +5,18 @@ import {
   hexToBin,
   utf8ToBin,
 } from "@bitauth/libauth";
-import { Config } from "../config";
-import { NFTCapability } from "../interface";
-import { disconnectProviders, initProviders } from "../network/Connection";
-import json from "../test/json.test";
-import { convert, delay } from "../util";
+import { Config } from "../config.js";
+import { NFTCapability } from "../interface.js";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import json from "../test/json.test.js";
+import { convert, delay } from "../util/index.js";
 import {
   SendRequest,
   SendResponse,
   TokenMintRequest,
   TokenSendRequest,
-} from "./model";
-import { RegTestWallet, TestNetWallet } from "./Wif";
+} from "./model.js";
+import { RegTestWallet, TestNetWallet } from "./Wif.js";
 
 beforeAll(async () => {
   await initProviders();

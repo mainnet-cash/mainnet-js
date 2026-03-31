@@ -1,8 +1,8 @@
-import { Config } from "../config";
-import { mine } from "../mine";
-import { disconnectProviders, initProviders } from "../network";
-import { delay } from "../util/delay";
-import { RegTestWallet, Wallet } from "./Wif";
+import { Config } from "../config.js";
+import { mine } from "../mine/index.js";
+import { disconnectProviders, initProviders } from "../network/index.js";
+import { delay } from "../util/delay.js";
+import { RegTestWallet, Wallet } from "./Wif.js";
 
 const isMock = !!process.env.USE_MOCK_PROVIDER;
 

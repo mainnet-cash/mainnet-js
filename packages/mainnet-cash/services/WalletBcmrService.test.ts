@@ -1,6 +1,6 @@
 import request from "supertest";
 import { binToHex, sha256, binToBase64, utf8ToBin, OpReturnData, NFTCapability } from "mainnet-js";
-import { setupFetchMock, removeFetchMock } from "#test/fetch";
+import { setupFetchMock, removeFetchMock } from "#test/fetch.js";
 
 import app from "../test-setup.js";
 

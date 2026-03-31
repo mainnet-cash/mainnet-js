@@ -1,7 +1,7 @@
 import { sha256, utf8ToBin } from "@bitauth/libauth";
 import { Network, OpReturnData, RegTestWallet, SendRequest } from "mainnet-js";
-import { removeFetchMock, setupFetchMock } from "#test/fetch";
-import { BCMR } from "./Bcmr";
+import { removeFetchMock, setupFetchMock } from "#test/fetch.js";
+import { BCMR } from "./Bcmr.js";
 
 describe(`BCMR should function in the browser`, () => {
   const registry = {

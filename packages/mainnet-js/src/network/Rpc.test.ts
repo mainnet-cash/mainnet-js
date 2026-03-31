@@ -1,8 +1,8 @@
-import { Network } from "../interface";
-import { mine } from "../mine";
-import { getNetworkProvider } from "../network/default";
-import { RegTestWallet } from "../wallet/Wif";
-import { disconnectProviders, initProviders } from "./Connection";
+import { Network } from "../interface.js";
+import { mine } from "../mine/index.js";
+import { getNetworkProvider } from "../network/default.js";
+import { RegTestWallet } from "../wallet/Wif.js";
+import { disconnectProviders, initProviders } from "./Connection.js";
 
 const aliceWif = `wif:regtest:${process.env.PRIVATE_WIF!}`;
 

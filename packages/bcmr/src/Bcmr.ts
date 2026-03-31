@@ -17,7 +17,7 @@ import {
   OpReturnData,
   TxI,
 } from "mainnet-js";
-import { Registry } from "./bcmr-v2.schema";
+import { Registry } from "./bcmr-v2.schema.js";
 
 export interface AuthChainElement {
   txHash: string;

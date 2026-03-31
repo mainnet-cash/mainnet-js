@@ -1,4 +1,4 @@
-import { Webhook } from "./Webhook";
+import { Webhook } from "./Webhook.js";
 
 describe("Webhook worker tests", () => {
   test("Test creating hook", async () => {

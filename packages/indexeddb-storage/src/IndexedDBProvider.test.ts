@@ -7,7 +7,7 @@ import {
   TestNetWallet,
   Wallet,
 } from "mainnet-js";
-import { default as IndexedDBProvider } from "./IndexedDBProvider";
+import { default as IndexedDBProvider } from "./IndexedDBProvider.js";
 
 beforeAll(async () => {
   await initProviders();

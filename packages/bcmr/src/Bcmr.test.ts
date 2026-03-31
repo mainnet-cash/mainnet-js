@@ -10,7 +10,7 @@ import {
   RegTestWallet,
   SendRequest,
 } from "mainnet-js";
-import { removeFetchMock, setupFetchMock } from "#test/fetch";
+import { removeFetchMock, setupFetchMock } from "#test/fetch.js";
 import { AuthChain, BCMR } from "./Bcmr.js";
 import { Registry } from "./bcmr-v2.schema.js";
 

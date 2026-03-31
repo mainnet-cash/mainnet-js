@@ -1,13 +1,13 @@
 import { hexToBin } from "@bitauth/libauth";
-import { DsproofData } from "../interface";
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { toParseNotation } from "../network/constant";
-import { createProvider } from "../network/default";
-import { MockNetworkProvider } from "../network/MockNetworkProvider";
-import { delay } from "../util/delay";
-import { RegTestHDWallet, TestNetHDWallet } from "./HDWallet";
-import { SendRequest, toUtxoId } from "./model";
-import { RegTestWallet, TestNetWallet } from "./Wif";
+import { DsproofData } from "../interface.js";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { toParseNotation } from "../network/constant.js";
+import { createProvider } from "../network/default.js";
+import { MockNetworkProvider } from "../network/MockNetworkProvider.js";
+import { delay } from "../util/delay.js";
+import { RegTestHDWallet, TestNetHDWallet } from "./HDWallet.js";
+import { SendRequest, toUtxoId } from "./model.js";
+import { RegTestWallet, TestNetWallet } from "./Wif.js";
 
 const isMock = !!process.env.USE_MOCK_PROVIDER;
 

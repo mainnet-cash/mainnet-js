@@ -1,4 +1,5 @@
-import axios from "axios";
+import axiosModule from "axios";
+const axios = axiosModule.default ?? axiosModule;
 import { TxI } from "mainnet-js";
 import SqlProvider from "../SqlProvider.js";
 

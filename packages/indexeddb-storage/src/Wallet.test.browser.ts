@@ -10,7 +10,7 @@ import {
   WalletTypeEnum,
   walletFromId,
 } from "mainnet-js";
-import { IndexedDBProvider } from "./index";
+import { IndexedDBProvider } from "./index.js";
 
 describe("Wallet should function in the browser", () => {
   beforeAll(() => {

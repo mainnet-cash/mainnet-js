@@ -1,4 +1,4 @@
-import { satoshiToAmount } from "./satoshiToAmount";
+import { satoshiToAmount } from "./satoshiToAmount.js";
 
 test("get a zero satoshis", async () => {
   let zero = await satoshiToAmount(0n, "sat");

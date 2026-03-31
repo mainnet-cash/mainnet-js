@@ -2,29 +2,14 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "src",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "downlevelIteration": true,
-    "composite": true,
-    "target": "esnext",
-    "module": "esnext",
     "outDir": "./dist/module",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
+    "declarationMap": true,
+    "strictPropertyInitialization": false,
     "typeRoots": [
       "node_modules/@types",
       "../../node_modules/@types",
       "./src/types"
     ],
-    "allowJs": false,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noEmit": false,
-    "strictPropertyInitialization": false,
-    "useDefineForClassFields": false,
     "paths": {
       "#test/*": ["../../test/*"],
       "@rpckit/core/electrum-cash": [
@@ -39,6 +24,5 @@
     }
   },
   "include": ["src/**/*.ts", "../../test/vitest-globals.d.ts"],
-  "exclude": ["node_modules/**"],
-  "compileOnSave": false
+  "exclude": ["node_modules/**"]
 }

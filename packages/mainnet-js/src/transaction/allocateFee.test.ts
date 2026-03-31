@@ -1,8 +1,8 @@
-import { disconnectProviders, initProviders, SendRequest } from "..";
-import { asSendRequestObject } from "../util/asSendRequestObject";
-import { FeePaidByEnum } from "../wallet/enum";
-import { RegTestWallet } from "../wallet/Wif";
-import { allocateFee, sortSendRequests } from "./allocateFee";
+import { disconnectProviders, initProviders, SendRequest } from "../index.js";
+import { asSendRequestObject } from "../util/asSendRequestObject.js";
+import { FeePaidByEnum } from "../wallet/enum.js";
+import { RegTestWallet } from "../wallet/Wif.js";
+import { allocateFee, sortSendRequests } from "./allocateFee.js";
 
 beforeAll(async () => {
   await initProviders();

@@ -8,7 +8,7 @@ import {
   Wallet,
   WalletTypeEnum,
 } from "mainnet-js";
-import { default as SqlProvider } from "./SqlProvider";
+import { default as SqlProvider } from "./SqlProvider.js";
 
 BaseWallet.StorageProvider = SqlProvider;
 

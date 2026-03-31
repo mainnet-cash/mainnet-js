@@ -1,9 +1,10 @@
-import { createRequire } from "module";
+import { readFileSync } from "fs";
 import { resolve } from "path";
 import { createBrowserBuildConfig } from "../../vite.browser.config.base.js";
 
-const require = createRequire(import.meta.url);
-const pkg = require("./package.json");
+const pkg = JSON.parse(
+  readFileSync(resolve(import.meta.dirname, "package.json"), "utf-8"),
+);
 const rootDir = resolve(import.meta.dirname, "../..");
 const isTest = process.env.BUILD_TARGET === "test";
 

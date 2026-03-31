@@ -2,19 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "src",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "downlevelIteration": true,
-    "composite": true,
-    "module": "esnext",
-    "target": "esnext",
     "outDir": "./dist/module",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "lib": ["es2020", "es2020.bigint", "dom"],
+    "lib": ["es2022", "dom"],
     "typeRoots": [
       "node_modules/@types",
       "../../node_modules/@types",
@@ -23,10 +12,5 @@
   },
   "include": ["src/**/*.ts", "../../test/vitest-globals.d.ts"],
   "exclude": ["node_modules/**"],
-  "references": [
-    {
-      "path": "../mainnet-js/"
-    }
-  ],
-  "compileOnSave": false
+  "references": [{ "path": "../mainnet-js/" }]
 }

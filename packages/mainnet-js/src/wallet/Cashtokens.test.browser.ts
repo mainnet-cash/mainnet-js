@@ -1,8 +1,8 @@
-import { NFTCapability } from "../interface";
-import * as libauth from "../libauth";
-import { binToHex, delay, hexToBin, utf8ToBin } from "../util";
-import { TokenMintRequest, TokenSendRequest } from "./model";
-import { RegTestWallet } from "./Wif";
+import { NFTCapability } from "../interface.js";
+import * as libauth from "../libauth.js";
+import { binToHex, delay, hexToBin, utf8ToBin } from "../util/index.js";
+import { TokenMintRequest, TokenSendRequest } from "./model.js";
+import { RegTestWallet } from "./Wif.js";
 
 describe(`Cashtokens should function in the browser`, () => {
   test(`Test fungible cashtoken genesis and sending`, async () => {

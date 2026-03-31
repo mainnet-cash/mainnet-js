@@ -1,6 +1,6 @@
 import { disconnectProviders, initProviders } from "mainnet-js";
-import WebhookWorker from "../webhook/WebhookWorker";
-import { Webhook } from "./Webhook";
+import WebhookWorker from "../webhook/WebhookWorker.js";
+import { Webhook } from "./Webhook.js";
 
 let worker: WebhookWorker;
 let alice = "";

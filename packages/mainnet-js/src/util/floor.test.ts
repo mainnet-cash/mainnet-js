@@ -1,4 +1,4 @@
-import { floor } from "./floor";
+import { floor } from "./floor.js";
 
 test("Should return a number floored to 2 precision", async () => {
   let result = floor(5.019, 2).toString();

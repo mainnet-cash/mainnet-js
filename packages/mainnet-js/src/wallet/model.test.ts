@@ -1,5 +1,5 @@
-import { UtxoId } from "../interface";
-import { fromUtxoId, toUtxoId } from "./model";
+import { UtxoId } from "../interface.js";
+import { fromUtxoId, toUtxoId } from "./model.js";
 
 test("Should serialize utxo", () => {
   const utxo = toUtxoId({

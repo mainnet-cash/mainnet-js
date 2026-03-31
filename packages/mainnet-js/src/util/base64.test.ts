@@ -1,4 +1,4 @@
-import { atob, btoa } from "./base64";
+import { atob, btoa } from "./base64.js";
 
 test("atob should decode a browser encoded string in node", async () => {
   let encodedScript =

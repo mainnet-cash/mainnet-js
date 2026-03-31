@@ -6,18 +6,18 @@ import {
   lockingBytecodeToCashAddress,
   utf8ToBin,
 } from "@bitauth/libauth";
-import { bchParam } from "../chain";
-import { Config } from "../config";
-import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant";
-import { mine } from "../mine";
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { ElectrumRawTransaction } from "../network/interface";
-import json from "../test/json.test";
-import { convert, sumUtxoValue, toBch, toCurrency, toSat } from "../util";
-import { delay } from "../util/delay";
-import { CancelFn } from "./interface";
-import { OpReturnData, SendResponse, toUtxoId } from "./model";
-import { RegTestWallet, TestNetWallet, Wallet } from "./Wif";
+import { bchParam } from "../chain.js";
+import { Config } from "../config.js";
+import { DERIVATION_PATHS, DUST_UTXO_THRESHOLD as DUST } from "../constant.js";
+import { mine } from "../mine/index.js";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { ElectrumRawTransaction } from "../network/interface.js";
+import json from "../test/json.test.js";
+import { convert, sumUtxoValue, toBch, toCurrency, toSat } from "../util/index.js";
+import { delay } from "../util/delay.js";
+import { CancelFn } from "./interface.js";
+import { OpReturnData, SendResponse, toUtxoId } from "./model.js";
+import { RegTestWallet, TestNetWallet, Wallet } from "./Wif.js";
 
 beforeAll(async () => {
   await initProviders();

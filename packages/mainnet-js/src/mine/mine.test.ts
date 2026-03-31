@@ -1,6 +1,6 @@
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { RegTestWallet } from "../wallet/Wif";
-import { mine } from "./mine";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { RegTestWallet } from "../wallet/Wif.js";
+import { mine } from "./mine.js";
 
 beforeAll(async () => {
   await initProviders();

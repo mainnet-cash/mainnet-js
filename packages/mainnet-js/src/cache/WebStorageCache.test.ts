@@ -1,4 +1,4 @@
-import { WebStorageCache } from "./WebStorageCache";
+import { WebStorageCache } from "./WebStorageCache.js";
 
 describe("WebStorageCache Tests", () => {
   test("test", async () => {

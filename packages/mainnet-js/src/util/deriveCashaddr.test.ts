@@ -1,5 +1,5 @@
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { RegTestWallet, Wallet } from "../wallet/Wif";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { RegTestWallet, Wallet } from "../wallet/Wif.js";
 import {
   convertAddress,
   deriveCashaddr,
@@ -8,7 +8,7 @@ import {
   isValidAddress,
   toCashaddr,
   toTokenaddr,
-} from "./deriveCashaddr";
+} from "./deriveCashaddr.js";
 
 beforeAll(async () => {
   await initProviders();

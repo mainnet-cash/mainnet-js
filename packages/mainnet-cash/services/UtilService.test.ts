@@ -1,5 +1,5 @@
 import * as mainnet from "mainnet-js";
-import { setupFetchMock } from "#test/fetch";
+import { setupFetchMock } from "#test/fetch.js";
 import request from "supertest";
 import { checkResponse } from "../utils/testUtils";
 

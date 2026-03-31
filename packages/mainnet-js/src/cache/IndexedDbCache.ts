@@ -1,4 +1,4 @@
-import { CacheProvider } from "./interface";
+import { CacheProvider } from "./interface.js";
 
 // super thin wrapper around indexedDB, compatible with localStorage API
 export class IndexedDbCache implements CacheProvider {

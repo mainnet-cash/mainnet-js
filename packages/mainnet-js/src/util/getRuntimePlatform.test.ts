@@ -1,4 +1,4 @@
-import { getRuntimePlatform } from "./getRuntimePlatform";
+import { getRuntimePlatform } from "./getRuntimePlatform.js";
 
 test("Should return the prefix", async () => {
   expect(getRuntimePlatform()).toBe("node");

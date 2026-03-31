@@ -1,6 +1,6 @@
-import { HeaderI, HexHeaderI } from "../interface";
-import { disconnectProviders, initProviders } from "../network";
-import { Wallet } from "../wallet/Wif";
+import { HeaderI, HexHeaderI } from "../interface.js";
+import { disconnectProviders, initProviders } from "../network/index.js";
+import { Wallet } from "../wallet/Wif.js";
 
 const isMock = !!process.env.USE_MOCK_PROVIDER;
 

@@ -1,4 +1,4 @@
-import { CacheProvider } from "./interface";
+import { CacheProvider } from "./interface.js";
 
 let cache: Record<string, string> = {};
 export class MemoryCache implements CacheProvider {

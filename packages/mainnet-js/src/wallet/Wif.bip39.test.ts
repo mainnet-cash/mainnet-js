@@ -1,6 +1,6 @@
 import { deriveSeedFromBip39Mnemonic, hexToBin } from "@bitauth/libauth";
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { RegTestWallet } from "./Wif";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { RegTestWallet } from "./Wif.js";
 
 beforeAll(async () => {
   await initProviders();

@@ -1,7 +1,7 @@
-import { setupFetchMock } from "#test/fetch";
-import { Config } from "../config";
-import { disconnectProviders, initProviders } from "../network";
-import { ExchangeRate } from "./ExchangeRate";
+import { setupFetchMock } from "#test/fetch.js";
+import { Config } from "../config.js";
+import { disconnectProviders, initProviders } from "../network/index.js";
+import { ExchangeRate } from "./ExchangeRate.js";
 
 beforeAll(async () => {
   await initProviders();

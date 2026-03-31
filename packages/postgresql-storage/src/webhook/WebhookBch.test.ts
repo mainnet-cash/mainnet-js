@@ -4,8 +4,8 @@ import {
   mine,
   RegTestWallet,
 } from "mainnet-js";
-import WebhookWorker from "../webhook/WebhookWorker";
-import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook";
+import WebhookWorker from "../webhook/WebhookWorker.js";
+import { Webhook, WebhookRecurrence, WebhookType } from "./Webhook.js";
 
 let worker: WebhookWorker;
 let alice;

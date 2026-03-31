@@ -1,7 +1,7 @@
 import SqlProvider from "../SqlProvider.js";
 import { RegisterWebhookParams } from "./interface.js";
 
-import { Webhook } from "./Webhook";
+import { Webhook } from "./Webhook.js";
 
 export default class WebhookWorker {
   activeHooks: Map<number, Webhook> = new Map();

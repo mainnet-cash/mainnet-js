@@ -2,7 +2,7 @@ import {
   derivePublicNodeCashaddr,
   getAddrsByXpubKey,
   getXpubKeyInfo,
-} from "./getAddrsByXpubKey";
+} from "./getAddrsByXpubKey.js";
 
 test("Should decode xpubInfo", async () => {
   let xpub =

@@ -1,5 +1,5 @@
-import { ExchangeRate } from "../rate/ExchangeRate";
-import { convert } from "./convert";
+import { ExchangeRate } from "../rate/ExchangeRate.js";
+import { convert } from "./convert.js";
 
 beforeAll(() => {
   // Clear exchange rate cache to ensure consistent rates across conversions

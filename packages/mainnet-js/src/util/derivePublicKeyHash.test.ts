@@ -5,8 +5,8 @@ import {
   instantiateSecp256k1,
   instantiateSha256,
 } from "@bitauth/libauth";
-import { Wallet } from "../wallet/Wif";
-import { derivePublicKeyHash } from "./derivePublicKeyHash";
+import { Wallet } from "../wallet/Wif.js";
+import { derivePublicKeyHash } from "./derivePublicKeyHash.js";
 
 test("Should return the a public key hash", async () => {
   let pkh = derivePublicKeyHash(

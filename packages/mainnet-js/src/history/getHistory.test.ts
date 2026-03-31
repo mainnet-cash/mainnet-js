@@ -1,9 +1,9 @@
-import { mine } from "../mine";
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { toBch } from "../util";
-import { createWallet } from "../wallet/createWallet";
-import { WalletTypeEnum } from "../wallet/enum";
-import { RegTestWallet } from "../wallet/Wif";
+import { mine } from "../mine/index.js";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { toBch } from "../util/index.js";
+import { createWallet } from "../wallet/createWallet.js";
+import { WalletTypeEnum } from "../wallet/enum.js";
+import { RegTestWallet } from "../wallet/Wif.js";
 
 beforeAll(async () => {
   await initProviders();

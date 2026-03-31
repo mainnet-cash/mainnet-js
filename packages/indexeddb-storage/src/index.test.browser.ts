@@ -1,5 +1,5 @@
 import { BaseWallet, TestNetWallet, Wallet } from "mainnet-js";
-import { IndexedDBProvider } from "./index";
+import { IndexedDBProvider } from "./index.js";
 
 describe("WalletDatabase should handle indexeddb", () => {
   beforeAll(() => {

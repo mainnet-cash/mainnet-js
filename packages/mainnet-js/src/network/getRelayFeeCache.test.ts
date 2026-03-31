@@ -1,5 +1,5 @@
-import { getNetworkProvider } from "./default";
-import { getRelayFeeCache } from "./getRelayFeeCache";
+import { getNetworkProvider } from "./default.js";
+import { getRelayFeeCache } from "./getRelayFeeCache.js";
 
 test("Should return  ", async () => {
   let provider = getNetworkProvider();

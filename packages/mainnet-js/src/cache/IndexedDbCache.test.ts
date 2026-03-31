@@ -1,4 +1,4 @@
-import { IndexedDbCache } from "./IndexedDbCache";
+import { IndexedDbCache } from "./IndexedDbCache.js";
 
 describe("IndexedDbCache Tests", () => {
   test("test", async () => {

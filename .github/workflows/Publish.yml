@@ -11,8 +11,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22.x"
       - run: yarn
@@ -61,14 +61,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Build project
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Setup environment
       - name: Set TAG_NAME env
         run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - name: Login to docker hub
-        uses: docker/login-action@v1.6.0
+        uses: docker/login-action@v3
         with:
           username: mainnet
           password: ${{secrets.DOCKERHUB_PASSWORD}}
@@ -119,8 +119,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Build project
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22.x"
       - run: yarn
@@ -132,7 +132,7 @@ jobs:
             if [ -n $NPM_TOKEN ]; then HAS_NPM_TOKEN='true' ; fi
             echo "HAS_NPM_TOKEN=${HAS_NPM_TOKEN}" >> $GITHUB_ENV
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: "22.x"
           registry-url: https://registry.npmjs.org/
@@ -154,8 +154,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Build project
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22.x"
       - run: yarn
@@ -167,7 +167,7 @@ jobs:
             if [ -n $CDN_FTP_UPLOAD ]; then HAS_CDN_FTP_UPLOAD='true' ; fi
             echo "HAS_CDN_FTP_UPLOAD=${HAS_CDN_FTP_UPLOAD}" >> $GITHUB_ENV
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: "22.x"
           registry-url: https://registry.npmjs.org/
@@ -205,7 +205,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Setup environment
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set REPO_USER env
         run: echo "REPO_USER=$(echo $GITHUB_REPOSITORY | cut -d / -f1)" >> $GITHUB_ENV
       - name: Set REPO_NAME env
@@ -268,12 +268,12 @@ jobs:
 
       # Actual job
       - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
       - name: Checkout python repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: '${{ env.REPO_USER }}/${{ env.REPO_NAME }}'
 

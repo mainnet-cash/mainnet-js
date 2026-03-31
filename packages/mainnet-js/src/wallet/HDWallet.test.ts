@@ -1,15 +1,15 @@
 import { assertSuccess, decodeTransaction, hexToBin } from "@bitauth/libauth";
-import { stringify } from "../cache";
-import { Config } from "../config";
-import { NFTCapability } from "../interface";
-import { mine } from "../mine";
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { delay } from "../util/delay";
-import { getNextUnusedIndex } from "../util/hd";
-import { GAP_SIZE, HDWallet, RegTestHDWallet } from "./HDWallet";
-import { CancelFn } from "./interface";
-import { TokenMintRequest, TokenSendRequest } from "./model";
-import { RegTestWallet, Wallet } from "./Wif";
+import { stringify } from "../cache/index.js";
+import { Config } from "../config.js";
+import { NFTCapability } from "../interface.js";
+import { mine } from "../mine/index.js";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { delay } from "../util/delay.js";
+import { getNextUnusedIndex } from "../util/hd.js";
+import { GAP_SIZE, HDWallet, RegTestHDWallet } from "./HDWallet.js";
+import { CancelFn } from "./interface.js";
+import { TokenMintRequest, TokenSendRequest } from "./model.js";
+import { RegTestWallet, Wallet } from "./Wif.js";
 
 beforeAll(async () => {
   await initProviders();

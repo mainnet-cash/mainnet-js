@@ -13,6 +13,7 @@
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
+    "types": "./dist/module/index.d.ts",
     "import": "./dist/module/index.js"
   },
   "files": [
@@ -20,8 +21,7 @@
   ],
   "scripts": {
     "clean": "rm -fr dist/*",
-    "cli": "npx ts-node src/cli.ts",
-    "lint": "eslint . --ext .ts",
+    "cli": "npx tsx src/cli.ts",
     "build": "yarn clean && yarn build:module && yarn build:browser",
     "build:module": "tsc -p tsconfig.build.json",
     "build:browser": "vite build && BUILD_TARGET=test vite build",

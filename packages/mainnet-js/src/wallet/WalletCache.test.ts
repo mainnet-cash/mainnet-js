@@ -1,7 +1,7 @@
-import { disconnectProviders, initProviders } from "../network/Connection";
-import { RegTestHDWallet } from "./HDWallet";
-import { RegTestWatchWallet } from "./Watch";
-import { RegTestWallet, RegTestWifWallet } from "./Wif";
+import { disconnectProviders, initProviders } from "../network/Connection.js";
+import { RegTestHDWallet } from "./HDWallet.js";
+import { RegTestWatchWallet } from "./Watch.js";
+import { RegTestWallet, RegTestWifWallet } from "./Wif.js";
 
 beforeAll(async () => {
   await initProviders();

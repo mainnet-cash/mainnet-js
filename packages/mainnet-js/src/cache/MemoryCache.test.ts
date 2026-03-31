@@ -1,4 +1,4 @@
-import { MemoryCache } from "./MemoryCache";
+import { MemoryCache } from "./MemoryCache.js";
 
 describe("MemoryCache Tests", () => {
   test("test", async () => {

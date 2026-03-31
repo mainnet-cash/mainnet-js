@@ -1,4 +1,4 @@
-import { ExchangeRate } from "./ExchangeRate";
+import { ExchangeRate } from "./ExchangeRate.js";
 
 describe("ExchangeRate in browser", () => {
   test("Should get exchange rate in usd", async () => {
