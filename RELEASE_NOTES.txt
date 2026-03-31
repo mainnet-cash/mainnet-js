@@ -1,6 +1,15 @@
 Newest changes
 --------------
 
+4.0.0-next.8
+
+* Replace prettier with biome for formatting and linting
+* Modernize tsconfig
+* Remove axios, replace with native fetch
+* Use `generateRandomBytes` directly from libauth
+* Reworked npm publishing, stripped garbage
+* Reworked bundling to pure ESM imports in browser
+
 4.0.0-next.7
 
 * Move from webpack to vite
