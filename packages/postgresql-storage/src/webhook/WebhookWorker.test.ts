@@ -2,8 +2,8 @@ import { disconnectProviders, initProviders } from "mainnet-js";
 import WebhookWorker from "../webhook/WebhookWorker.js";
 import { Webhook } from "./Webhook.js";
 import {
-  responses,
   resetWebhookMock,
+  responses,
   setupWebhookMock,
   teardownWebhookMock,
 } from "./WebhookMock.js";
