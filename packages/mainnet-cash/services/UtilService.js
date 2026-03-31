@@ -11,7 +11,7 @@ import * as mainnet from "mainnet-js";
 const convert = ({ convertRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.Mainnet.convertObject(convertRequest)
+      let resp = await mainnet.convertObject(convertRequest)
       resolve(Service.successResponse({ value: resp }));
     } catch (e) {
       reject(
@@ -37,7 +37,7 @@ const exchangeRate = ({ exchangeRateRequest }) => new Promise(
 const getAddrsByXpubKey = ({getAddrsByXpubKeyRequest})=> new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.Mainnet.getAddrsByXpubKeyObject(getAddrsByXpubKeyRequest)
+      let resp = await mainnet.getAddrsByXpubKeyObject(getAddrsByXpubKeyRequest)
       resolve(Service.successResponse(resp));
     } catch (e) {
       reject(
@@ -50,7 +50,7 @@ const getAddrsByXpubKey = ({getAddrsByXpubKeyRequest})=> new Promise(
 const getXpubKeyInfo = ({getXpubKeyInfoRequest})=> new Promise(
   async (resolve, reject) => {
     try {
-      let resp = await mainnet.Mainnet.getXpubKeyInfoObject(getXpubKeyInfoRequest)
+      let resp = await mainnet.getXpubKeyInfoObject(getXpubKeyInfoRequest)
       resolve(Service.successResponse(resp));
     } catch (e) {
       reject(

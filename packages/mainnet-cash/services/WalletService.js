@@ -257,7 +257,7 @@ const encodeTransaction = ( { encodeTransactionRequest } ) => new Promise(
       }
 
       const { encodedTransaction } = await wallet.encodeTransaction(encodeTransactionRequest.to, encodeTransactionRequest.discardChange, encodeTransactionRequest.options);
-      const txHex = mainnet.Mainnet.binToHex(encodedTransaction)
+      const txHex = mainnet.binToHex(encodedTransaction)
       resolve(Service.successResponse({ transactionHex: txHex }));
     } catch (e) {
       reject(
@@ -277,7 +277,7 @@ const submitTransaction = ({ submitTransactionRequest }) => new Promise(
     try {
       const wallet = await mainnet.walletFromId(submitTransactionRequest.walletId);
 
-      const encodedTransaction = mainnet.Mainnet.hexToBin(submitTransactionRequest.transactionHex)
+      const encodedTransaction = mainnet.hexToBin(submitTransactionRequest.transactionHex)
       const txId = await wallet.submitTransaction(encodedTransaction, submitTransactionRequest.awaitPropagation);
       resolve(Service.successResponse({ txId: txId }));
     } catch (e) {

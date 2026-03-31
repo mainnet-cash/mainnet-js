@@ -10,7 +10,7 @@ describe("Test Util Endpoints", () => {
   it("Should convert an amount from usd to bch", async () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", { data: { BCH: 1337.42 } });
 
-    const rate = await mainnet.Mainnet.getUsdRate();
+    const rate = await mainnet.getUsdRate();
     const convertResp = await request(app).post("/util/convert").send({
       value: 1,
       from: "bch",
@@ -23,7 +23,7 @@ describe("Test Util Endpoints", () => {
   it("Should get an exchange rate", async () => {
     setupFetchMock("https://markets.api.bitcoin.com/live/bitcoin", { data: { BCH: 1337.42 } });
 
-    const rate = await mainnet.Mainnet.getUsdRate();
+    const rate = await mainnet.getUsdRate();
     const exchangeRateResp = await request(app).post("/util/exchange_rate").send({
       symbol: "usd"
     });

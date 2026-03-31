@@ -3,7 +3,7 @@ import {
   Config,
   createWallet,
   createWalletResponse,
-  Mainnet,
+  convert,
   RegTestWallet,
   TestNetWallet,
   Wallet,
@@ -116,7 +116,7 @@ describe("Wallet should function in the browser", () => {
   });
 
   test("Should convert bch to sat", async () => {
-    const result = await Mainnet.convert(1, "bch", "sat");
+    const result = await convert(1, "bch", "sat");
     expect(result).toBe(100000000);
   });
 

@@ -68,9 +68,7 @@ export * from "./history/interface.js";
 // utils
 export * from "./util/index.js";
 
-// namespace re-exports (backward compatibility)
-import * as Mainnet from "./util/index.js";
-export { Mainnet };
+// libauth re-export (backward compatibility)
 export * as libauth from "./libauth.js";
 
 // interfaces
