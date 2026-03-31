@@ -55,5 +55,4 @@ export class Webhook {
       return false;
     }
   }
-
 }

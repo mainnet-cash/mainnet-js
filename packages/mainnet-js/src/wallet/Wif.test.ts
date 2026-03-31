@@ -13,7 +13,13 @@ import { mine } from "../mine/index.js";
 import { disconnectProviders, initProviders } from "../network/Connection.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
 import json from "../test/json.test.js";
-import { convert, sumUtxoValue, toBch, toCurrency, toSat } from "../util/index.js";
+import {
+  convert,
+  sumUtxoValue,
+  toBch,
+  toCurrency,
+  toSat,
+} from "../util/index.js";
 import { delay } from "../util/delay.js";
 import { CancelFn } from "./interface.js";
 import { OpReturnData, SendResponse, toUtxoId } from "./model.js";

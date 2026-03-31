@@ -76,9 +76,7 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            responses["http://example.com/success"].length,
-          ).toBe(1);
+          expect(responses["http://example.com/success"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);
@@ -113,9 +111,7 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            responses["http://example.com/fail"].length,
-          ).toBe(1);
+          expect(responses["http://example.com/fail"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           // return funds
@@ -155,9 +151,7 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/bob"].length).toBe(
-            1,
-          );
+          expect(responses["http://example.com/bob"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -198,9 +192,7 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(responses["http://example.com/bob"].length).toBe(
-            1,
-          );
+          expect(responses["http://example.com/bob"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(1);
 
           resolve(true);
@@ -270,9 +262,7 @@ describe("Webhook worker tests", () => {
       await new Promise((resolve) =>
         setTimeout(async () => {
           expect(worker.activeHooks.size).toBe(1);
-          expect(responses["http://example.com/bob"].length).toBe(
-            3,
-          );
+          expect(responses["http://example.com/bob"].length).toBe(3);
 
           resolve(true);
         }, 10000),
@@ -309,9 +299,7 @@ describe("Webhook worker tests", () => {
 
       await new Promise((resolve) =>
         setTimeout(async () => {
-          expect(
-            responses["http://example.com/watchBalance"].length,
-          ).toBe(1);
+          expect(responses["http://example.com/watchBalance"].length).toBe(1);
           expect(worker.activeHooks.size).toBe(0);
 
           resolve(true);

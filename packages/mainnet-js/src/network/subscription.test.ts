@@ -3,7 +3,11 @@ import type { ElectrumCashSchema } from "@rpckit/core/electrum-cash";
 import { webSocket } from "@rpckit/websocket/electrum-cash";
 import { Network } from "../interface.js";
 import { Wallet } from "../wallet/Wif.js";
-import { createProvider, removeGlobalProvider, setGlobalProvider } from "./index.js";
+import {
+  createProvider,
+  removeGlobalProvider,
+  setGlobalProvider,
+} from "./index.js";
 
 describe("Provider subscription: blockchain.transaction.subscribe", () => {
   let provider: Awaited<ReturnType<typeof createProvider>>;
