@@ -1,6 +1,6 @@
 Newest changes
 --------------
-4.0.0-next.9
+4.0.0-next.10
 
 * Improve project tree-shakeability
 * Removed Mainnet and CONST namespace re-exports
