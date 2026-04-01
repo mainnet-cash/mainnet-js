@@ -4,7 +4,7 @@ import { mine } from "../mine/index.js";
 import { disconnectProviders, initProviders } from "../network/index.js";
 import { delay } from "../util/delay.js";
 import { decodeTransaction, getTransactionHash } from "./Util.js";
-import { RegTestWallet, Wallet } from "./Wif.js";
+import { RegTestWallet } from "./Wif.js";
 
 const isMock = !!process.env.USE_MOCK_PROVIDER;
 

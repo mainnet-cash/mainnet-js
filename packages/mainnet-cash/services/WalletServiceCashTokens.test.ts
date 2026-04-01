@@ -1,5 +1,6 @@
 import request from "supertest";
-import { binToHex, NFTCapability, utf8ToBin } from "mainnet-js";
+import { utf8ToBin } from "@bitauth/libauth";
+import { binToHex, NFTCapability } from "mainnet-js";
 
 import app from "../test-setup.js";
 

@@ -19,7 +19,6 @@ import {
   ElectrumRawTransactionVout,
   ElectrumRawTransactionWithInputValues,
 } from "../network/interface.js";
-import NetworkProvider from "../network/NetworkProvider.js";
 import { getTransactionHash } from "../util/transaction.js";
 
 export { getTransactionHash };

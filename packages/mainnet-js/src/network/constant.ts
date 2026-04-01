@@ -4,7 +4,7 @@ export const networkTickerMap = {
   regtest: "rBCH",
 };
 
-const baseOpts = "connectTimeout=5000&timeout=5000&keepAlive=60000&batchSize=5";
+const baseOpts = "connectTimeout=5000&timeout=5000&keepAlive=60000&batchSize=3";
 
 export function toParseNotation(
   urls: string[],

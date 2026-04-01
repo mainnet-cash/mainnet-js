@@ -1,6 +1,7 @@
+import { utf8ToBin } from "@bitauth/libauth";
 import { NFTCapability } from "../interface.js";
 import * as libauth from "../libauth.js";
-import { binToHex, delay, hexToBin, utf8ToBin } from "../util/index.js";
+import { binToHex, delay, hexToBin } from "../util/index.js";
 import { TokenMintRequest, TokenSendRequest } from "./model.js";
 import { RegTestWallet } from "./Wif.js";
 

@@ -7,8 +7,8 @@ import {
   HdKeyNetwork,
 } from "@bitauth/libauth";
 import { DERIVATION_PATHS } from "../constant.js";
-import { checkForEmptySeed } from "./checkForEmptySeed.js";
 import { XPubKey } from "../wallet/model.js";
+import { checkForEmptySeed } from "./checkForEmptySeed.js";
 
 export const arrayRange = (start: number, stop: number) =>
   Array.from({ length: stop - start }, (_, index) => start + index);

@@ -327,7 +327,7 @@ const xpubkeys = ({ xPubKeyRequest }) => new Promise(
       if (!wallet.mnemonic) throw Error("xpubkeys can only be derived from seed type wallets.");
       let resp = await mainnet.getXPubKeys(wallet.mnemonic, wallet.network, xPubKeyRequest.paths);
 
-      resolve(Service.successResponse({ xpubkeys: resp }));
+      resolve(Service.successResponse({ xpubkeys: xPubKeyRequest.paths ? [resp] : resp }));
     } catch (e) {
       reject(
         Service.rejectResponse(e, e.status || 500)

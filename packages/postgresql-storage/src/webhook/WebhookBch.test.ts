@@ -7,8 +7,8 @@ import {
 import WebhookWorker from "../webhook/WebhookWorker.js";
 import { WebhookRecurrence, WebhookType } from "./Webhook.js";
 import {
-  responses,
   resetWebhookMock,
+  responses,
   setupWebhookMock,
   teardownWebhookMock,
 } from "./WebhookMock.js";

@@ -13,7 +13,6 @@ import {
   generateBip39Mnemonic,
   generatePrivateKey,
   generateRandomBytes,
-  HdKeyNetwork,
   hexToBin,
   secp256k1,
 } from "@bitauth/libauth";

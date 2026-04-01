@@ -46,11 +46,11 @@ import {
   SendRequestArray,
   SendRequestType,
   SendResponse,
+  SourceOutput,
   TokenBurnRequest,
   TokenGenesisRequest,
   TokenMintRequest,
   TokenSendRequest,
-  SourceOutput,
 } from "./model.js";
 
 export const placeholderCashAddr =

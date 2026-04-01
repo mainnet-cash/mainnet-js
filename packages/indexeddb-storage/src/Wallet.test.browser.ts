@@ -1,15 +1,15 @@
 import {
   BaseWallet,
   Config,
+  convert,
   createWallet,
   createWalletResponse,
-  convert,
   RegTestWallet,
+  SignedMessage,
   TestNetWallet,
   Wallet,
   WalletTypeEnum,
   walletFromId,
-  SignedMessage,
 } from "mainnet-js";
 import { IndexedDBProvider } from "./index.js";
 
