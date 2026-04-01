@@ -1,5 +1,12 @@
 Newest changes
 --------------
+4.0.0-next.9
+
+* Improve project tree-shakeability
+* Removed Mainnet and CONST namespace re-exports
+* Removed unnecessary libauth re-exports (binToBase64, sha256, utf8ToBin), leave only binToHex and hexToBin
+* Reworked `xpub` and `wallet.util` utils to make them standalone and separated from wallet classes
+* Decoupled message signing from wallet classes
 
 4.0.0-next.8
 
