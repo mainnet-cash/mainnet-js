@@ -238,7 +238,11 @@ describe(`XPubKey path derivation`, () => {
     let w = await Wallet.fromId(
       "seed:mainnet:abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     );
-    let commonPaths = await deriveHdPaths(w.mnemonic!, w.network, DERIVATION_PATHS);
+    let commonPaths = await deriveHdPaths(
+      w.mnemonic!,
+      w.network,
+      DERIVATION_PATHS,
+    );
     expect(commonPaths).toStrictEqual([
       {
         path: "m/0",

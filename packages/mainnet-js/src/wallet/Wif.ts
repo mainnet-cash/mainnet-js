@@ -541,7 +541,6 @@ export class Wallet extends WatchWallet {
     return signUnsignedTransaction(transaction, sourceOutputs, this.privateKey);
   }
   //#endregion Funds
-
 }
 
 /**

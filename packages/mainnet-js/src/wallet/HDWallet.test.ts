@@ -666,7 +666,7 @@ describe("HDWallet", () => {
     const hdWallet = await RegTestHDWallet.newRandom();
     expect(hdWallet.depositIndex).toBe(0);
 
-    // No transaction sent — idle timer should resolve without hanging
+    // No transaction sent - idle timer should resolve without hanging
     await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     // depositIndex is still 0 because no funds arrived
@@ -675,7 +675,7 @@ describe("HDWallet", () => {
     // No leftover watchers
     expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
 
-    // Now send a real transaction — waitForUpdate should resolve once index advances
+    // Now send a real transaction - waitForUpdate should resolve once index advances
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(0),
       value: 100000n,

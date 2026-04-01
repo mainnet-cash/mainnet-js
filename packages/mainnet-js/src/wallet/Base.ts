@@ -716,12 +716,7 @@ export class BaseWallet implements WalletI {
   ): Promise<SendResponse> {
     const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction(requests, undefined, options);
-    return this._send(
-      encodedTransaction,
-      categories,
-      sourceOutputs,
-      options,
-    );
+    return this._send(encodedTransaction, categories, sourceOutputs, options);
   }
 
   /**
@@ -773,12 +768,7 @@ export class BaseWallet implements WalletI {
 
     const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction([sendRequest], true, options, privateKey);
-    return this._send(
-      encodedTransaction,
-      categories,
-      sourceOutputs,
-      options,
-    );
+    return this._send(encodedTransaction, categories, sourceOutputs, options);
   }
 
   protected async _send(
@@ -1492,7 +1482,6 @@ export class BaseWallet implements WalletI {
     return result;
   }
   //#endregion Cashtokens
-
 }
 
 /**

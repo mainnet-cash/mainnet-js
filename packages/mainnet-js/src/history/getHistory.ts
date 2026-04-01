@@ -375,7 +375,7 @@ export const getHistory = async ({
     prevValueChange = tx.valueChange;
   });
 
-  // convert units if needed — fetch exchange rate once
+  // convert units if needed - fetch exchange rate once
   if (!(unit as string).includes("sat")) {
     const sanitizedUnit = sanitizeUnit(unit);
     let rate: number = 0;

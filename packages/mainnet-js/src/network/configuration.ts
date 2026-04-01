@@ -13,7 +13,7 @@ export class DefaultProvider {
 // Detect plain comma-separated URLs (not already in parse notation like "fallback(...)") and convert
 function normalizeServers(value: string): string {
   if (!value) return value;
-  // Already parse notation (contains parens) or a single URL — pass through
+  // Already parse notation (contains parens) or a single URL - pass through
   if (value.includes("(") || !value.includes(",")) return value;
   // Plain comma-separated URLs: convert to parse notation with fallback
   return primary.toParseNotation(value.split(",").map((s) => s.trim()));

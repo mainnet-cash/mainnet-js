@@ -286,7 +286,7 @@ describe("MockNetworkProvider", () => {
       const alice = await RegTestWallet.newRandom();
       const bob = await RegTestWallet.newRandom();
 
-      // Fund alice — need vout=0 for token genesis
+      // Fund alice - need vout=0 for token genesis
       await fundWallet(provider, alice.cashaddr!, 100_000n);
 
       // Genesis: create 1000 fungible tokens

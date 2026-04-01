@@ -39,9 +39,13 @@ export type { WalletDbEntryI } from "./db/interface.js";
 // mine
 export { mine } from "./mine/mine.js";
 
-// wallets — explicit exports for tree-shaking
+// wallets - explicit exports for tree-shaking
 export { BaseWallet } from "./wallet/Base.js";
-export { WatchWallet, TestNetWatchWallet, RegTestWatchWallet } from "./wallet/Watch.js";
+export {
+  WatchWallet,
+  TestNetWatchWallet,
+  RegTestWatchWallet,
+} from "./wallet/Watch.js";
 export {
   Wallet,
   TestNetWallet,
@@ -59,7 +63,7 @@ export {
 // transaction utilities
 export { decodeTransaction, getTransactionHash } from "./wallet/Util.js";
 
-// wallet utilities, models, interfaces — barrel re-export is fine (small items)
+// wallet utilities, models, interfaces - barrel re-export is fine (small items)
 export * from "./wallet/createWallet.js";
 export * from "./wallet/model.js";
 export * from "./wallet/interface.js";

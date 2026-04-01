@@ -135,7 +135,7 @@ export async function getRateFromExchange(symbol: string): Promise<number> {
   throw Error(`Currency '${symbol}' is not supported.`);
 }
 
-// Lazy cache warm-up — call this explicitly if you want to pre-fetch rates.
+// Lazy cache warm-up - call this explicitly if you want to pre-fetch rates.
 // Does not throw if offline.
 let _exchangeRatePromise: Promise<number | Error> | undefined;
 export function getExchangeRatePromise(): Promise<number | Error> {

@@ -62,7 +62,7 @@ export class WatchWallet extends BaseWallet {
   watchPromise?: Promise<void>;
   updatePromise?: Promise<void>;
 
-  // Live state — updated by subscription notifications
+  // Live state - updated by subscription notifications
   private status: string | null = null;
   private utxos: Utxo[] = [];
   private rawHistory: TxI[] = [];
@@ -593,7 +593,6 @@ export class WatchWallet extends BaseWallet {
       publicKeyCompressed: publicKey.length === 33 ? publicKey : undefined,
     }) as InstanceType<T>;
   }
-
 }
 
 /**
