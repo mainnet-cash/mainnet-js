@@ -55,6 +55,7 @@ import {
   TokenGenesisRequest,
   TokenMintRequest,
   TokenSendRequest,
+  SourceOutput,
 } from "./model.js";
 
 export const placeholderCashAddr =
@@ -720,45 +721,12 @@ export class BaseWallet implements WalletI {
   ): Promise<SendResponse> {
     const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction(requests, undefined, options);
-
-    const resp = new SendResponse({});
-    resp.categories = categories;
-
-    if (options?.broadcast === false) {
-      resp.transaction = binToHex(encodedTransaction);
-      resp.txId = binToHex(
-        sha256.hash(sha256.hash(encodedTransaction)).reverse(),
-      );
-    } else if (options?.buildUnsigned !== true) {
-      const awaitPropagation =
-        options?.awaitTransactionPropagation === undefined ||
-        options?.awaitTransactionPropagation === true;
-
-      let updatePromise: Promise<void>;
-      if (awaitPropagation) {
-        updatePromise = this.waitForUpdate({ timeout: 2500 });
-      }
-
-      const [_, txId] = await Promise.all([
-        updatePromise!,
-        this.submitTransaction(encodedTransaction, awaitPropagation),
-      ]);
-
-      resp.txId = txId;
-      resp.explorerUrl = this.explorerUrl(resp.txId);
-
-      if (
-        options?.queryBalance === undefined ||
-        options?.queryBalance === true
-      ) {
-        resp.balance = await this.getBalance();
-      }
-    } else {
-      resp.unsignedTransaction = binToHex(encodedTransaction);
-      resp.sourceOutputs = sourceOutputs;
-    }
-
-    return resp;
+    return this._send(
+      encodedTransaction,
+      categories,
+      sourceOutputs,
+      options,
+    );
   }
 
   /**
@@ -810,7 +778,20 @@ export class BaseWallet implements WalletI {
 
     const { encodedTransaction, categories, sourceOutputs } =
       await this.encodeTransaction([sendRequest], true, options, privateKey);
+    return this._send(
+      encodedTransaction,
+      categories,
+      sourceOutputs,
+      options,
+    );
+  }
 
+  protected async _send(
+    encodedTransaction: Uint8Array,
+    categories: string[],
+    sourceOutputs: SourceOutput[] | undefined,
+    options?: SendRequestOptionsI,
+  ): Promise<SendResponse> {
     const resp = new SendResponse({});
     resp.categories = categories;
 
