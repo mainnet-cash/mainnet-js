@@ -74,6 +74,7 @@ export {
   derivePublicNodeCashaddr,
 } from "./util/getAddrsByXpubKey.js";
 export { getXPubKey } from "./util/getXPubKey.js";
+export { deriveHdPaths, getXPubKeys } from "./util/hd.js";
 
 // utils
 export * from "./util/index.js";

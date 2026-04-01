@@ -18,7 +18,6 @@ import {
   secp256k1,
 } from "@bitauth/libauth";
 import { Config } from "../config.js";
-import { DERIVATION_PATHS } from "../constant.js";
 import { NetworkType } from "../enum.js";
 import { SignedMessageResponseI } from "../message/index.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
@@ -34,7 +33,6 @@ import {
   SendResponse,
   SourceOutput,
   TokenSendRequest,
-  XPubKey,
 } from "./model.js";
 import { WatchWallet } from "./Watch.js";
 //#endregion Imports
@@ -257,66 +255,6 @@ export class Wallet extends WatchWallet {
     };
   }
 
-  // Get common xpub paths from zerothChild privateKey
-  public async deriveHdPaths(hdPaths: string[]): Promise<any[]> {
-    if (!this.mnemonic)
-      throw Error("refusing to create wallet from empty mnemonic");
-    const seed = deriveSeedFromBip39Mnemonic(this.mnemonic);
-    checkForEmptySeed(seed);
-    const hdNode = deriveHdPrivateNodeFromSeed(seed, {
-      assumeValidity: true, // TODO: we should switch to libauth's BIP39 implementation and set this to false
-      throwErrors: true,
-    });
-
-    const result: any[] = [];
-
-    for (const path of hdPaths) {
-      if (path === "m") {
-        throw Error(
-          "Storing or sharing of parent public key may lead to loss of funds. Storing or sharing *root* parent public keys is strongly discouraged, although all parent keys have risk. See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#implications",
-        );
-      }
-      const childNode = deriveHdPath(hdNode, path);
-      if (typeof childNode === "string") {
-        throw Error(childNode);
-      }
-      const node = deriveHdPublicNode(childNode);
-      if (typeof node === "string") {
-        throw Error(node);
-      }
-      const xPubKey = encodeHdPublicKey(
-        {
-          network: this.network as HdKeyNetwork,
-          node: node,
-        },
-        {
-          throwErrors: true,
-        },
-      ).hdPublicKey;
-      const key = new XPubKey({
-        path: path,
-        xPubKey: xPubKey,
-      });
-
-      result.push(await key.ready());
-    }
-    return await Promise.all(result).then((result) => {
-      return result;
-    });
-  }
-
-  public async getXPubKeys(paths?: string[]) {
-    if (this.mnemonic) {
-      if (paths) {
-        let xPubKeys = await this.deriveHdPaths(paths);
-        return [xPubKeys];
-      } else {
-        return await this.deriveHdPaths(DERIVATION_PATHS);
-      }
-    } else {
-      throw Error("xpubkeys can only be derived from seed type wallets.");
-    }
-  }
   //#endregion
 
   //#region Statics
