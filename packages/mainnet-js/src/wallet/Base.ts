@@ -10,11 +10,6 @@ import {
   Utxo,
   UtxoId,
 } from "../interface.js";
-import {
-  SignedMessageResponseI,
-  VerifyMessageResponseI,
-} from "../message/interface.js";
-import { SignedMessage } from "../message/signed.js";
 import { getNetworkProvider } from "../network/default.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { getRelayFeeCache } from "../network/getRelayFeeCache.js";
@@ -1498,31 +1493,6 @@ export class BaseWallet implements WalletI {
   }
   //#endregion Cashtokens
 
-  public sign(
-    message: string,
-    privateKey: Uint8Array | undefined = undefined,
-  ): SignedMessageResponseI {
-    if (!privateKey) {
-      throw new Error("Signing private key not provided");
-    }
-    return new SignedMessage().sign(message, privateKey);
-  }
-
-  // Convenience wrapper to verify interface
-  public verify(
-    message: string,
-    sig: string,
-    address?: string,
-    publicKey?: Uint8Array,
-  ): VerifyMessageResponseI {
-    if (!address && !publicKey) {
-      throw new Error(
-        "Either address or publicKey must be provided for verification",
-      );
-    }
-
-    return new SignedMessage().verify(message, sig, address, publicKey);
-  }
 }
 
 /**

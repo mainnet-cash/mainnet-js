@@ -9,6 +9,7 @@ import {
   Wallet,
   WalletTypeEnum,
   walletFromId,
+  SignedMessage,
 } from "mainnet-js";
 import { IndexedDBProvider } from "./index.js";
 
@@ -122,8 +123,12 @@ describe("Wallet should function in the browser", () => {
 
   test("Should sign a message and verify it", async () => {
     const alice = await walletFromId(`wif:regtest:${process.env.PRIVATE_WIF}`);
-    const result = await alice.sign("test");
-    const verifyResult = await alice.verify("test", result.signature);
+    const result = SignedMessage.sign("test", alice.privateKey!);
+    const verifyResult = SignedMessage.verify(
+      "test",
+      result.signature,
+      alice.cashaddr!,
+    );
     expect(result.signature).toBe(
       "IOEEiqRXRVK9gPUNpXuBjJUK47Y8XpseZejgwu59CoNSVv+3K1NkHdT64RXHP7cw4PZ6usRQ4ULrP/p5CJnrg9U=",
     );

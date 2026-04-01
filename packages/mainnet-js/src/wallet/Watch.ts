@@ -25,7 +25,6 @@ import {
 import { getHistory } from "../history/getHistory.js";
 import { TransactionHistoryItem } from "../history/interface.js";
 import { TxI, Utxo } from "../interface.js";
-import { VerifyMessageResponseI } from "../message/interface.js";
 import { toCashaddr, toTokenaddr } from "../util/deriveCashaddr.js";
 import { derivePrefix } from "../util/derivePublicKeyHash.js";
 import { sumUtxoValue } from "../util/sumUtxoValue.js";
@@ -595,19 +594,6 @@ export class WatchWallet extends BaseWallet {
     }) as InstanceType<T>;
   }
 
-  // Convenience wrapper to verify interface
-  public verify(
-    message: string,
-    sig: string,
-    address?: string,
-    publicKey?: Uint8Array,
-  ): VerifyMessageResponseI {
-    if (!address) {
-      address = this.cashaddr;
-    }
-
-    return super.verify(message, sig, address, publicKey);
-  }
 }
 
 /**

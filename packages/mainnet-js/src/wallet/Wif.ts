@@ -19,7 +19,6 @@ import {
 } from "@bitauth/libauth";
 import { Config } from "../config.js";
 import { NetworkType } from "../enum.js";
-import { SignedMessageResponseI } from "../message/index.js";
 import ElectrumNetworkProvider from "../network/ElectrumNetworkProvider.js";
 import { signUnsignedTransaction } from "../transaction/Wif.js";
 import { checkForEmptySeed } from "../util/checkForEmptySeed.js";
@@ -543,14 +542,6 @@ export class Wallet extends WatchWallet {
   }
   //#endregion Funds
 
-  //#region Signing
-  // Convenience wrapper to sign interface
-  public sign(
-    message: string,
-    privateKey: Uint8Array | undefined = undefined,
-  ): SignedMessageResponseI {
-    return super.sign(message, privateKey ?? this.privateKey);
-  }
 }
 
 /**

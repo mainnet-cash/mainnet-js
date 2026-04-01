@@ -220,13 +220,13 @@ describe("Test message Signing and Verification", () => {
     expect(w1.cashaddr!).toBe(
       "bitcoincash:qqehccy89v7ftlfgr9v0zvhjzyy7eatdkqt05lt3nw",
     );
-    let sig = w1.sign(msg1);
-    let result = w1.verify(msg1, sig.signature);
+    let sig = SignedMessage.sign(msg1, w1.privateKey!);
+    let result = SignedMessage.verify(msg1, sig.signature, w1.cashaddr!);
     expect(result.valid).toBe(true);
 
     let msg2 =
       "Biggest Selloff in 25 Years Hits Japan Bonds as BOJ Loosens Grip";
-    let invalid = w1.verify(msg2, sig.signature);
+    let invalid = SignedMessage.verify(msg2, sig.signature, w1.cashaddr!);
     expect(invalid.valid).toBe(false);
   });
 
@@ -237,23 +237,24 @@ describe("Test message Signing and Verification", () => {
 
     let falseMessage = "Employer provided healthcare is a benefit.";
 
-    let w1 = await Wallet.fromId(
-      `watch:mainnet:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe`,
-    );
-    expect(w1.cashaddr!).toBe(
+    let result = SignedMessage.verify(
+      beak,
+      beakSig,
       "bitcoincash:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe",
     );
-    let result = w1.verify(beak, beakSig);
     expect(result.valid).toBe(true);
     expect(result.details?.publicKeyHashMatch).toBe(true);
     expect(result.details?.publicKeyMatch).toBe(false);
     expect(result.details?.signatureValid).toBe(true);
     expect(result.details?.signatureType).toBe("recoverable");
 
-    let badResult = w1.verify(falseMessage, beakSig);
+    let badResult = SignedMessage.verify(
+      falseMessage,
+      beakSig,
+      "bitcoincash:qqad5sy4jml3f6vcp246dulsex04xp48wq23d35rqe",
+    );
     expect(badResult.valid).toBe(false);
 
-    // While the recoverable sig is valid, it doesn't match the message.
     expect(badResult.details?.signatureValid).toBe(true);
     expect(badResult.details?.publicKeyHashMatch).toBe(false);
     expect(badResult.details?.publicKeyMatch).toBe(false);
