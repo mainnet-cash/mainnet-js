@@ -56,6 +56,9 @@ export {
   RegTestHDWallet,
 } from "./wallet/HDWallet.js";
 
+// transaction utilities
+export { decodeTransaction, getTransactionHash } from "./wallet/Util.js";
+
 // wallet utilities, models, interfaces — barrel re-export is fine (small items)
 export * from "./wallet/createWallet.js";
 export * from "./wallet/model.js";

@@ -16,8 +16,7 @@ BigInt.prototype.toJSON = function () {
 const utilDecodeTransaction = ({ utilDecodeTransactionRequest }) => new Promise(
   async (resolve, reject) => {
     try {
-      const wallet = await mainnet.createWallet({ network: utilDecodeTransactionRequest.network });
-      const resp = await wallet.util.decodeTransaction(utilDecodeTransactionRequest.transactionHashOrHex, utilDecodeTransactionRequest.loadInputValues);
+      const resp = await mainnet.decodeTransaction(utilDecodeTransactionRequest.transactionHashOrHex, utilDecodeTransactionRequest.loadInputValues, utilDecodeTransactionRequest.network);
       resolve(Service.successResponse({ ...resp }));
     } catch (e) {
       reject(Service.rejectResponse(

@@ -56,7 +56,6 @@ import {
   TokenMintRequest,
   TokenSendRequest,
 } from "./model.js";
-import { Util } from "./Util.js";
 
 export const placeholderCashAddr =
   "bitcoincash:qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqfnhks603";
@@ -75,30 +74,12 @@ export class BaseWallet implements WalletI {
   readonly network: NetworkType;
   readonly walletType: WalletTypeEnum;
   _slpSemiAware: boolean = false; // a flag which requires an utxo to have more than 546 sats to be spendable and counted in the balance
-  // readonly publicKeyHash!: Uint8Array;
-  // readonly cashaddr!: string;
-  // readonly tokenaddr!: string;
   readonly isTestnet: boolean;
   name: string = "";
-  _util?: Util;
   protected cancelFns: CancelFn[] = [];
 
   public get networkPrefix(): CashAddressNetworkPrefix {
     return prefixFromNetworkMap[this.network];
-  }
-
-  // interface to util functions. see Util.ts
-  public get util() {
-    if (!this._util) {
-      this._util = new Util(this.network);
-    }
-
-    return this._util;
-  }
-
-  // interface to util util. see Util.Util
-  public static get util() {
-    return new this().util;
   }
 
   // Return wallet info
