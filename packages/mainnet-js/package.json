@@ -33,9 +33,9 @@
   },
   "dependencies": {
     "@bitauth/libauth": "^3.1.0-next.8",
-    "@rpckit/core": "^2.0.0",
-    "@rpckit/fallback": "^2.0.0",
-    "@rpckit/websocket": "^2.0.0"
+    "@rpckit/core": "^2.2.0",
+    "@rpckit/fallback": "^2.2.0",
+    "@rpckit/websocket": "^2.2.0"
   },
   "sideEffects": false,
   "keywords": [

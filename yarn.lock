@@ -408,24 +408,24 @@
   resolved "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.12.tgz#74163aec62fa51cee18d62709483963dceb3f6dc"
   integrity sha512-HHMwmarRKvoFsJorqYlFeFRzXZqCt2ETQlEDOb9aqssrnVBB1/+xgTGtuTrIk5vzLNX1MjMtTf7W9z3tsSbrxw==
 
-"@rpckit/core@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@rpckit/core/-/core-2.0.0.tgz#f9d0838fbb6f30e6d23992c13fd45d58eaad253d"
-  integrity sha512-Hpcw9tsT6DvFJYXjeXE0bXYUo0I2xlYDRD8krqqLiNsvdfbdlJiMiXON1i9MsUA0FQcWbl2qMmSFxTyGr6yJ9A==
+"@rpckit/core@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@rpckit/core/-/core-2.2.0.tgz#9c0bd8e5cbc90fe8e1f2cde995ec88d91aaf365c"
+  integrity sha512-CvPzjH0dG26zIldubGv9omRaibf9qLNadDRcxQthLlhUmTgKmI5eyKrGou52RN1/tBKCd4Ybwz2l5U5WQwb4aA==
 
-"@rpckit/fallback@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@rpckit/fallback/-/fallback-2.0.0.tgz#061e484a93a70384c743df24a2587c0d4274551f"
-  integrity sha512-xTDwomA0DP63AKAJ+v4DLplDuUq/0Wf1j9adqW7kC8wZZIlGkgwouJOemq7BHbdQW6ioj+7oM1z8WKw5mZBxTQ==
+"@rpckit/fallback@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@rpckit/fallback/-/fallback-2.2.0.tgz#e332b6ae8f5aa9030a1027fd74c042c87f53cb2f"
+  integrity sha512-X878VeShennvdtk8fGbPM0GTyrpDlKJx7YxjmMLz0ZhKXxFbz+hgGEqg3csvUDJOOPSvkZas+H4mJiIvpXYNOQ==
   dependencies:
-    "@rpckit/core" "^2.0.0"
+    "@rpckit/core" "^2.2.0"
 
-"@rpckit/websocket@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@rpckit/websocket/-/websocket-2.0.0.tgz#fc956a914151de042e5f1e3d72da9d08d7d98dbe"
-  integrity sha512-ih6SON+RBTLGiZUZPXlVIIu/ZrILVramflxFYUQQN1EWzRLZWfMprqGUohFJ1R+I/0XVDg7S79q4juIkxi6rPw==
+"@rpckit/websocket@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@rpckit/websocket/-/websocket-2.2.0.tgz#72d699e076bbcc062c013f034f9f6c9c2bbc60eb"
+  integrity sha512-Ha+rXyX2NMalmDs3jVaP+5M0rzTGKl4EStDxB7RuxdATRiQwQDmFofbkKwTzYQU/DuiGrvTYMu8VyivwHoAYbQ==
   dependencies:
-    "@rpckit/core" "^2.0.0"
+    "@rpckit/core" "^2.2.0"
     isows "^1.0.6"
 
 "@standard-schema/spec@^1.1.0":
@@ -707,13 +707,6 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
-
-axios@^0.21.1:
-  version "0.21.4"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
-  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
-  dependencies:
-    follow-redirects "^1.14.0"
 
 balanced-match@^1.0.0:
   version "1.0.2"
@@ -1344,11 +1337,6 @@ fn.name@1.x.x:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/fn.name/-/fn.name-1.1.0.tgz#26cad8017967aea8731bc42961d04a3d5988accc"
   integrity sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==
-
-follow-redirects@^1.14.0:
-  version "1.14.4"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.4.tgz#838fdf48a8bbdd79e52ee51fb1c94e3ed98b9379"
-  integrity sha512-zwGkiSXC1MUJG/qmeIFH2HBJx9u0V46QGUe3YR1fXG8bXQxq7fLj0RjLZQ5nubr9qNJUZrH+xUcwXEoXNpfS+g==
 
 foreach@^2.0.4:
   version "2.0.5"
