@@ -1,5 +1,10 @@
 Newest changes
 --------------
+
+4.0.0-next.11
+
+* Breaking: generalize token genesis, mint and burn for many categories
+
 4.0.0-next.10
 
 * Improve project tree-shakeability
