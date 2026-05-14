@@ -20,7 +20,7 @@ describe("Test Wallet Endpoints", () => {
 
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      amount: 100,
+      requests: [{ amount: 100 }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -73,11 +73,13 @@ describe("Test Wallet Endpoints", () => {
 
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      nft: {
-        capability: NFTCapability.mutable,
-        commitment: "abcd",
-      },
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "abcd",
+        },
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -138,11 +140,13 @@ describe("Test Wallet Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      nft: {
-        capability: NFTCapability.none,
-        commitment: "abcd",
-      },
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        nft: {
+          capability: NFTCapability.none,
+          commitment: "abcd",
+        },
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -173,11 +177,13 @@ describe("Test Wallet Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      nft: {
-        capability: NFTCapability.mutable,
-        commitment: "abcd",
-      },
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "abcd",
+        },
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -218,11 +224,13 @@ describe("Test Wallet Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      nft: {
-      capability: NFTCapability.minting,
-        commitment: "abcd",
-      },
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -237,14 +245,15 @@ describe("Test Wallet Endpoints", () => {
     expect(tokenUtxos.length).toBe(1);
     const response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      category: category,
       requests: [{
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
           commitment: "test",
         },
       }, {
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
@@ -268,12 +277,14 @@ describe("Test Wallet Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      amount: 4,
-      nft: {
-      capability: NFTCapability.minting,
-        commitment: "abcd",
-      },
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        amount: 4,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -290,14 +301,15 @@ describe("Test Wallet Endpoints", () => {
     // mint 2 NFTs, amount reducing
     const response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      category: category,
       requests: [{
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
           commitment: "0a",
         },
       }, {
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
@@ -321,14 +333,15 @@ describe("Test Wallet Endpoints", () => {
     // mint 2 more NFTs without amount reducing
     const ftResponse = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      category: category,
       requests: [{
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
           commitment: "0c",
         },
       }, {
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
@@ -352,20 +365,22 @@ describe("Test Wallet Endpoints", () => {
     // check that it will stop at 0
     const ft2Response = (await request(app).post("/wallet/token_mint").send({
       walletId: aliceId,
-      category: category,
       requests: [{
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
           commitment: "0a",
         },
       }, {
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
           commitment: "0a",
         },
       }, {
+        category: category,
         cashaddr: process.env.ADDRESS!,
         nft: {
           capability: NFTCapability.none,
@@ -390,8 +405,10 @@ describe("Test Wallet Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      amount: 4n,
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        amount: 4n,
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -408,8 +425,10 @@ describe("Test Wallet Endpoints", () => {
     // burn 5 FT
     const response = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      category: category,
-      amount: 5n,
+      requests: [{
+        category: category,
+        amount: 5n,
+      }],
       message: "burn"
     })).body;
 
@@ -440,12 +459,14 @@ describe("Test Wallet Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      cashaddr: process.env.ADDRESS!,
-      amount: 4n,
-      nft: {
-        capability: NFTCapability.minting,
-        commitment: "abcd",
-      },
+      requests: [{
+        cashaddr: process.env.ADDRESS!,
+        amount: 4n,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({
@@ -462,12 +483,14 @@ describe("Test Wallet Endpoints", () => {
     // burn 1 FT
     const response = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      category: category,
-      amount: 1n,
-      nft: {
-        capability: NFTCapability.minting,
-        commitment: "abcd",
-      },
+      requests: [{
+        category: category,
+        amount: 1n,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
+      }],
       message: "burn",
     })).body;
 
@@ -505,12 +528,14 @@ describe("Test Wallet Endpoints", () => {
     // burn the rest FTs
     const ftResponse = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      category: category,
-      amount: 5n,
-      nft: {
-        capability: NFTCapability.minting,
-        commitment: "abcd",
-      },
+      requests: [{
+        category: category,
+        amount: 5n,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
+      }],
       message: "burn",
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
@@ -527,11 +552,13 @@ describe("Test Wallet Endpoints", () => {
     // burn the NFT too
     const nftResponse = (await request(app).post("/wallet/token_burn").send({
       walletId: aliceId,
-      category: category,
-      nft: {
-        capability: NFTCapability.minting,
-        commitment: "abcd",
-      },
+      requests: [{
+        category: category,
+        nft: {
+          capability: NFTCapability.minting,
+          commitment: "abcd",
+        },
+      }],
       message: "burn",
     })).body;
     expect((await request(app).post("/wallet/get_token_balance").send({
@@ -567,9 +594,11 @@ describe("Test Wallet Endpoints", () => {
 
     const category = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      amount: 100,
-      value: 7000,
-      cashaddr: bobCashaddr,
+      requests: [{
+        amount: 100,
+        value: 7000,
+        cashaddr: bobCashaddr,
+      }],
     })).body.categories![0];
 
     const tokenBalance = (await request(app).post("/wallet/get_token_balance").send({

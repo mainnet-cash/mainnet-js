@@ -345,7 +345,7 @@ const tokenBurn = ({ tokenBurnRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(tokenBurnRequest.walletId);
-      const resp = await wallet.tokenBurn(tokenBurnRequest, tokenBurnRequest.message);
+      const resp = await wallet.tokenBurn(tokenBurnRequest.requests, tokenBurnRequest.message);
 
       resolve(Service.successResponse(resp));
     } catch (e) {
@@ -366,7 +366,7 @@ const tokenGenesis = ({ tokenGenesisRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(tokenGenesisRequest.walletId);
-      const resp = await wallet.tokenGenesis(tokenGenesisRequest, tokenGenesisRequest.sendRequests);
+      const resp = await wallet.tokenGenesis(tokenGenesisRequest.requests, tokenGenesisRequest.sendRequests);
 
       resolve(Service.successResponse(resp));
     } catch (e) {
@@ -387,7 +387,7 @@ const tokenMint = ({ tokenMintRequest }) => new Promise(
   async (resolve, reject) => {
     try {
       const wallet = await mainnet.walletFromId(tokenMintRequest.walletId);
-      const resp = await wallet.tokenMint(tokenMintRequest.category, tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
+      const resp = await wallet.tokenMint(tokenMintRequest.requests, tokenMintRequest.deductTokenAmount);
 
       resolve(Service.successResponse(resp));
     } catch (e) {

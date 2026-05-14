@@ -747,13 +747,14 @@ describe("HDWallet", () => {
       amount: 1000n,
     });
 
-    const tokenId = genesisResponse.categories![0];
+    const category = genesisResponse.categories![0];
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // mint 2 NFTs, amount reducing
-    const response = await alice.tokenMint(tokenId, [
+    const response = await alice.tokenMint([
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.getDepositAddress(2),
         nft: {
           capability: NFTCapability.none,
@@ -761,6 +762,7 @@ describe("HDWallet", () => {
         },
       }),
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.getDepositAddress(3),
         nft: {
           capability: NFTCapability.mutable,
@@ -771,15 +773,15 @@ describe("HDWallet", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const newTokenUtxos = await alice.getTokenUtxos(tokenId);
+    const newTokenUtxos = await alice.getTokenUtxos(category);
     expect(newTokenUtxos.length).toBe(3);
-    expect(tokenId).toEqual(response.categories![0]);
+    expect(category).toEqual(response.categories![0]);
 
     const bob = await RegTestWallet.newRandom();
     await alice.send([
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
-        category: tokenId,
+        category: category,
         nft: {
           capability: NFTCapability.minting,
           commitment: "abcd",
@@ -788,7 +790,7 @@ describe("HDWallet", () => {
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
-        category: tokenId,
+        category: category,
         nft: {
           capability: NFTCapability.none,
           commitment: "",
@@ -796,7 +798,7 @@ describe("HDWallet", () => {
       }),
       new TokenSendRequest({
         cashaddr: bob.cashaddr!,
-        category: tokenId,
+        category: category,
         nft: {
           capability: NFTCapability.mutable,
           commitment: "00",
@@ -806,10 +808,10 @@ describe("HDWallet", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    expect((await alice.getTokenUtxos(tokenId)).length).toBe(0);
-    const bobTokenUtxos = await bob.getTokenUtxos(tokenId);
+    expect((await alice.getTokenUtxos(category)).length).toBe(0);
+    const bobTokenUtxos = await bob.getTokenUtxos(category);
     expect(bobTokenUtxos.length).toBe(3);
-    expect(tokenId).toEqual(response.categories![0]);
+    expect(category).toEqual(response.categories![0]);
   });
 
   test("Test enforcing token addresses", async () => {

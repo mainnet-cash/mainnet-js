@@ -1,6 +1,11 @@
 import { randomNFT, randomToken, randomUtxo } from "@mem-cash/electrum";
 import { Network } from "../interface.js";
-import { SendRequest, TokenSendRequest } from "../wallet/model.js";
+import {
+  SendRequest,
+  TokenBurnRequest,
+  TokenMintRequest,
+  TokenSendRequest,
+} from "../wallet/model.js";
 import { RegTestWallet } from "../wallet/Wif.js";
 import { removeGlobalProvider, setGlobalProvider } from "./index.js";
 import { MockNetworkProvider } from "./MockNetworkProvider.js";

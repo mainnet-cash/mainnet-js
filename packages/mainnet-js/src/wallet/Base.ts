@@ -1158,21 +1158,30 @@ export class BaseWallet implements WalletI {
 
   //#region Cashtokens
   /**
-   * Create new cashtoken, both funglible and/or non-fungible (NFT)
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {number} genesisRequest.amount amount of *fungible* tokens to create
-   * @param  {NFTCapability?} genesisRequest.capability capability of new NFT
-   * @param  {string?} genesisRequest.commitment NFT commitment message
-   * @param  {string?} genesisRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} genesisRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
+   * Create one or more new cashtokens, fungible and/or non-fungible (NFT), in a single transaction.
+   * Each genesis request consumes a distinct unspent output with vout=0; the spent prevout's txid
+   * becomes the new token category.
+   * Refer to spec https://github.com/cashtokens/cashtokens
+   * @param  {TokenGenesisRequest | TokenGenesisRequest[]} genesisRequests one or more genesis requests.
+   *   For each request:
+   *   @param  {bigint?} amount amount of *fungible* tokens to create
+   *   @param  {object?} nft NFT capability and commitment
+   *   @param  {string?} cashaddr destination address; defaults to wallet's token deposit address
+   *   @param  {bigint?} value satoshi value to send alongside tokens; defaults to 1000
    * @param  {SendRequestType | SendRequestType[]} sendRequests single or an array of extra send requests (OP_RETURN, value transfer, etc.) to include in genesis transaction
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenGenesis(
-    genesisRequest: TokenGenesisRequest,
+    genesisRequests: TokenGenesisRequest | TokenGenesisRequest[],
     sendRequests: SendRequestType | SendRequestType[] = [],
     options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
+    if (!Array.isArray(genesisRequests)) {
+      genesisRequests = [genesisRequests];
+    }
+    if (genesisRequests.length === 0) {
+      throw new Error("tokenGenesis requires at least one request");
+    }
     if (!Array.isArray(sendRequests)) {
       sendRequests = [sendRequests];
     }
@@ -1188,24 +1197,28 @@ export class BaseWallet implements WalletI {
     }
 
     const genesisInputs = utxos.filter((val) => val.vout === 0 && !val.token);
-    if (genesisInputs.length === 0) {
+    if (genesisInputs.length < genesisRequests.length) {
       throw new Error(
-        "No suitable inputs with vout=0 available for new token genesis",
+        `Not enough vout=0 inputs available for new token genesis: need ${genesisRequests.length}, have ${genesisInputs.length}`,
       );
     }
 
-    const genesisSendRequest = new TokenSendRequest({
-      cashaddr: genesisRequest.cashaddr || this.getTokenDepositAddress(),
-      amount: genesisRequest.amount,
-      value: genesisRequest.value || 1000n,
-      nft: genesisRequest.nft,
-      category: genesisInputs[0].txid,
-    });
+    const pinnedInputs = genesisInputs.slice(0, genesisRequests.length);
+    const genesisSendRequests = genesisRequests.map(
+      (request, i) =>
+        new TokenSendRequest({
+          cashaddr: request.cashaddr || this.getTokenDepositAddress(),
+          amount: request.amount,
+          value: request.value || 1000n,
+          nft: request.nft,
+          category: pinnedInputs[i].txid,
+        }),
+    );
 
-    return this.send([genesisSendRequest, ...(sendRequests as any)], {
+    return this.send([...genesisSendRequests, ...(sendRequests as any)], {
       ...options,
       utxoIds: utxos,
-      ensureUtxos: [genesisInputs[0]],
+      ensureUtxos: pinnedInputs,
       checkTokenQuantities: false,
       queryBalance: false,
       tokenOperation: "genesis",
@@ -1213,184 +1226,208 @@ export class BaseWallet implements WalletI {
   }
 
   /**
-   * Mint new NFT cashtokens using an existing minting token
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} category category of an NFT to mint
+   * Mint new NFT cashtokens using existing minting tokens. Supports minting across
+   * multiple categories in a single transaction; each request specifies its own category.
+   * Refer to spec https://github.com/cashtokens/cashtokens
    * @param  {TokenMintRequest | TokenMintRequest[]} mintRequests mint requests with new token properties and recipients
-   * @param  {NFTCapability?} mintRequest.capability capability of new NFT
-   * @param  {string?} mintRequest.commitment NFT commitment message
-   * @param  {string?} mintRequest.cashaddr cash address to send the created token UTXO to; if undefined will default to your address
-   * @param  {number?} mintRequest.value satoshi value to send alongside with tokens; if undefined will default to 1000 satoshi
-   * @param  {boolean?} deductTokenAmount if minting token contains fungible amount, deduct from it by amount of minted tokens
+   *   For each request:
+   *   @param  {string} category category of the minting NFT to spend; required
+   *   @param  {object?} nft NFT capability and commitment of the new token
+   *   @param  {string?} cashaddr destination address; defaults to wallet's token deposit address
+   *   @param  {bigint?} value satoshi value to send alongside tokens; defaults to 1000
+   * @param  {boolean?} deductTokenAmount if a minting NFT contains a fungible amount, deduct from it by the number of mints in that category
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenMint(
-    category: string,
     mintRequests: TokenMintRequest | Array<TokenMintRequest>,
     deductTokenAmount: boolean = false,
     options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
-    if (category?.length !== 64) {
-      throw Error(`Invalid category supplied: ${category}`);
-    }
-
     if (!Array.isArray(mintRequests)) {
       mintRequests = [mintRequests];
     }
+    if (mintRequests.length === 0) {
+      throw new Error("tokenMint requires at least one request");
+    }
+
+    const requestsByCategory = new Map<string, TokenMintRequest[]>();
+    for (const request of mintRequests) {
+      if (request.category?.length !== 64) {
+        throw Error(`Invalid category supplied: ${request.category}`);
+      }
+      const bucket = requestsByCategory.get(request.category) ?? [];
+      bucket.push(request);
+      requestsByCategory.set(request.category, bucket);
+    }
 
     const utxos = await this.getUtxos();
-    const nftUtxos = utxos.filter(
-      (val) =>
-        val.token?.category === category &&
-        val.token?.nft?.capability === NFTCapability.minting,
-    );
-    if (!nftUtxos.length) {
-      throw new Error(
-        "You do not have any token UTXOs with minting capability for specified category",
+    const ensureUtxos: Utxo[] = [];
+    const outputs: TokenSendRequest[] = [];
+
+    for (const [category, requests] of requestsByCategory) {
+      const nftUtxos = utxos.filter(
+        (val) =>
+          val.token?.category === category &&
+          val.token?.nft?.capability === NFTCapability.minting,
       );
+      if (!nftUtxos.length) {
+        throw new Error(
+          `You do not have any token UTXOs with minting capability for category ${category}`,
+        );
+      }
+
+      const mintingUtxo = nftUtxos[0];
+      const newAmount =
+        deductTokenAmount && mintingUtxo.token!.amount > 0
+          ? mintingUtxo.token!.amount - BigInt(requests.length)
+          : mintingUtxo.token!.amount;
+      const safeNewAmount = newAmount < 0n ? 0n : newAmount;
+
+      ensureUtxos.push(mintingUtxo);
+      outputs.push(
+        new TokenSendRequest({
+          cashaddr: toTokenaddr(mintingUtxo.address),
+          category: category,
+          nft: mintingUtxo.token?.nft,
+          amount: safeNewAmount,
+          value: mintingUtxo.satoshis,
+        }),
+      );
+
+      for (const request of requests) {
+        outputs.push(
+          new TokenSendRequest({
+            cashaddr: request.cashaddr || this.getTokenDepositAddress(),
+            amount: 0n,
+            category: category,
+            value: request.value,
+            nft: request.nft,
+          }),
+        );
+      }
     }
-    const newAmount =
-      deductTokenAmount && nftUtxos[0].token!.amount > 0
-        ? nftUtxos[0].token!.amount - BigInt(mintRequests.length)
-        : nftUtxos[0].token!.amount;
-    const safeNewAmount = newAmount < 0n ? 0n : newAmount;
-    const mintingInput = new TokenSendRequest({
-      cashaddr: toTokenaddr(nftUtxos[0].address),
-      category: category,
-      nft: nftUtxos[0].token?.nft,
-      amount: safeNewAmount,
-      value: nftUtxos[0].satoshis,
+
+    return this.send(outputs, {
+      ...options,
+      ensureUtxos,
+      checkTokenQuantities: false,
+      queryBalance: false,
+      tokenOperation: "mint",
     });
-    return this.send(
-      [
-        mintingInput,
-        ...mintRequests.map(
-          (val) =>
-            new TokenSendRequest({
-              cashaddr: val.cashaddr || this.getTokenDepositAddress(),
-              amount: 0n,
-              category: category,
-              value: val.value,
-              nft: val.nft,
-            }),
-        ),
-      ],
-      {
-        ...options,
-        ensureUtxos: [nftUtxos[0]],
-        checkTokenQuantities: false,
-        queryBalance: false,
-        tokenOperation: "mint",
-      },
-    );
   }
 
   /**
-   * Perform an explicit token burning by spending a token utxo to an OP_RETURN
+   * Perform an explicit token burning by spending one or more token utxos alongside an OP_RETURN.
+   * Multiple burn requests across distinct categories can be bundled into a single transaction.
    *
    * Behaves differently for fungible and non-fungible tokens:
    *  * NFTs are always "destroyed"
-   *  * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
+   *  * FTs' amount is reduced by the amount specified; if 0 FT amount is left and no NFT present, the token is "destroyed"
    *
-   * Refer to spec https://github.com/bitjson/cashtokens
-   * @param  {string} burnRequest.category category of a token to burn
-   * @param  {NFTCapability} burnRequest.capability capability of the NFT token to select, optional
-   * @param  {string?} burnRequest.commitment commitment of the NFT token to select, optional
-   * @param  {number?} burnRequest.amount amount of fungible tokens to burn, optional
-   * @param  {string?} burnRequest.cashaddr address to return token and satoshi change to
+   * Refer to spec https://github.com/cashtokens/cashtokens
+   * @param  {TokenBurnRequest | TokenBurnRequest[]} burnRequests one or more burn requests.
+   *   For each request:
+   *   @param  {string} category category of a token to burn
+   *   @param  {object?} nft NFT capability and commitment to match, optional
+   *   @param  {bigint?} amount amount of fungible tokens to burn, optional
+   *   @param  {string?} cashaddr address to return token and satoshi change to
    * @param  {string?} message optional message to include in OP_RETURN
    * @param  {SendRequestOptionsI} options Options of the send requests
    */
   public async tokenBurn(
-    burnRequest: TokenBurnRequest,
+    burnRequests: TokenBurnRequest | TokenBurnRequest[],
     message?: string,
     options?: SendRequestOptionsI,
   ): Promise<SendResponse> {
-    if (burnRequest.category?.length !== 64) {
-      throw Error(`Invalid category supplied: ${burnRequest.category}`);
+    if (!Array.isArray(burnRequests)) {
+      burnRequests = [burnRequests];
+    }
+    if (burnRequests.length === 0) {
+      throw new Error("tokenBurn requires at least one request");
     }
 
     const utxos = await this.getUtxos();
-    const tokenUtxos = utxos.filter(
-      (val) =>
-        val.token?.category === burnRequest.category &&
-        val.token?.nft?.capability === burnRequest.nft?.capability &&
-        val.token?.nft?.commitment === burnRequest.nft?.commitment,
-    );
+    const ensureUtxos: Utxo[] = [];
+    const changeSendRequests: TokenSendRequest[] = [];
 
-    if (!tokenUtxos.length) {
-      throw new Error("You do not have suitable token UTXOs to perform burn");
-    }
-
-    const totalFungibleAmount = tokenUtxos.reduce(
-      (prev, cur) => prev + (cur.token?.amount || 0n),
-      0n,
-    );
-    let fungibleBurnAmount =
-      burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
-    fungibleBurnAmount = BigInt(fungibleBurnAmount);
-    const hasNFT = burnRequest.nft !== undefined;
-
-    let utxoIds: Utxo[] = [];
-    let changeSendRequests: TokenSendRequest[];
-    if (hasNFT) {
-      // does not have FT tokens, let us destroy the token completely
-      if (totalFungibleAmount === 0n) {
-        changeSendRequests = [];
-        utxoIds.push(tokenUtxos[0]);
-      } else {
-        // add utxos to spend from
-        let available = 0n;
-        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
-          utxoIds.push(token);
-          available += token.token!.amount;
-          if (available >= fungibleBurnAmount) {
-            break;
-          }
-        }
-
-        // if there are FT, reduce their amount
-        const newAmount = totalFungibleAmount - fungibleBurnAmount;
-        const safeNewAmount = newAmount < 0n ? 0n : newAmount;
-        changeSendRequests = [
-          new TokenSendRequest({
-            cashaddr:
-              burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
-            category: burnRequest.category,
-            nft: burnRequest.nft,
-            amount: safeNewAmount,
-            value: tokenUtxos[0].satoshis,
-          }),
-        ];
+    for (const burnRequest of burnRequests) {
+      if (burnRequest.category?.length !== 64) {
+        throw Error(`Invalid category supplied: ${burnRequest.category}`);
       }
-    } else {
-      // if we are burning last fungible tokens, let us destroy the token completely
-      if (totalFungibleAmount === fungibleBurnAmount) {
-        changeSendRequests = [];
-        utxoIds.push(...tokenUtxos);
-      } else {
-        // add utxos to spend from
-        let available = 0n;
-        for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
-          utxoIds.push(token);
-          available += token.token!.amount;
-          if (available >= fungibleBurnAmount) {
-            break;
-          }
-        }
 
-        // reduce the FT amount
-        const newAmount = available - fungibleBurnAmount;
-        const safeNewAmount = newAmount < 0n ? 0n : newAmount;
-        changeSendRequests = [
-          new TokenSendRequest({
-            cashaddr:
-              burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
-            category: burnRequest.category,
-            amount: safeNewAmount,
-            value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0n),
-          }),
-        ];
+      const tokenUtxos = utxos.filter(
+        (val) =>
+          val.token?.category === burnRequest.category &&
+          val.token?.nft?.capability === burnRequest.nft?.capability &&
+          val.token?.nft?.commitment === burnRequest.nft?.commitment,
+      );
+
+      if (!tokenUtxos.length) {
+        throw new Error(
+          `You do not have suitable token UTXOs to perform burn for category ${burnRequest.category}`,
+        );
+      }
+
+      const totalFungibleAmount = tokenUtxos.reduce(
+        (prev, cur) => prev + (cur.token?.amount || 0n),
+        0n,
+      );
+      let fungibleBurnAmount =
+        burnRequest.amount && burnRequest.amount > 0 ? burnRequest.amount! : 0n;
+      fungibleBurnAmount = BigInt(fungibleBurnAmount);
+      const hasNFT = burnRequest.nft !== undefined;
+
+      if (hasNFT) {
+        if (totalFungibleAmount === 0n) {
+          ensureUtxos.push(tokenUtxos[0]);
+        } else {
+          let available = 0n;
+          for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
+            ensureUtxos.push(token);
+            available += token.token!.amount;
+            if (available >= fungibleBurnAmount) {
+              break;
+            }
+          }
+
+          const newAmount = totalFungibleAmount - fungibleBurnAmount;
+          const safeNewAmount = newAmount < 0n ? 0n : newAmount;
+          changeSendRequests.push(
+            new TokenSendRequest({
+              cashaddr:
+                burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
+              category: burnRequest.category,
+              nft: burnRequest.nft,
+              amount: safeNewAmount,
+              value: tokenUtxos[0].satoshis,
+            }),
+          );
+        }
+      } else {
+        if (totalFungibleAmount === fungibleBurnAmount) {
+          ensureUtxos.push(...tokenUtxos);
+        } else {
+          let available = 0n;
+          for (const token of tokenUtxos.filter((val) => val.token?.amount)) {
+            ensureUtxos.push(token);
+            available += token.token!.amount;
+            if (available >= fungibleBurnAmount) {
+              break;
+            }
+          }
+
+          const newAmount = available - fungibleBurnAmount;
+          const safeNewAmount = newAmount < 0n ? 0n : newAmount;
+          changeSendRequests.push(
+            new TokenSendRequest({
+              cashaddr:
+                burnRequest.cashaddr || toTokenaddr(this.getChangeAddress()),
+              category: burnRequest.category,
+              amount: safeNewAmount,
+              value: tokenUtxos.reduce((a, c) => a + c.satoshis, 0n),
+            }),
+          );
+        }
       }
     }
 
@@ -1399,7 +1436,7 @@ export class BaseWallet implements WalletI {
       ...options,
       checkTokenQuantities: false,
       queryBalance: false,
-      ensureUtxos: utxoIds.length > 0 ? utxoIds : undefined,
+      ensureUtxos: ensureUtxos.length > 0 ? ensureUtxos : undefined,
       tokenOperation: "burn",
     });
   }

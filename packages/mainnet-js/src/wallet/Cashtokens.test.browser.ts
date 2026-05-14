@@ -149,8 +149,9 @@ describe(`Cashtokens should function in the browser`, () => {
     expect(tokenBalance).toBe(0n);
     const tokenUtxos = await alice.getTokenUtxos(category);
     expect(tokenUtxos.length).toBe(1);
-    const response = await alice.tokenMint(category, [
+    const response = await alice.tokenMint([
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.cashaddr!,
         nft: {
           capability: NFTCapability.none,
@@ -158,6 +159,7 @@ describe(`Cashtokens should function in the browser`, () => {
         },
       }),
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.cashaddr!,
         nft: {
           capability: NFTCapability.none,
@@ -190,9 +192,9 @@ describe(`Cashtokens should function in the browser`, () => {
 
     // mint 2 NFTs, defaults to amount reducing
     const response = await alice.tokenMint(
-      category,
       [
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -200,6 +202,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -216,9 +219,9 @@ describe(`Cashtokens should function in the browser`, () => {
 
     // mint 2 more NFTs without amount reducing
     const ftResponse = await alice.tokenMint(
-      category,
       [
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -226,6 +229,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -243,9 +247,9 @@ describe(`Cashtokens should function in the browser`, () => {
     // we are going to hit amount -1, when minting 3 more NFTs
     // check that it will stop at 0
     const ft2Response = await alice.tokenMint(
-      category,
       [
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -253,6 +257,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -260,6 +265,7 @@ describe(`Cashtokens should function in the browser`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -575,8 +581,8 @@ describe(`Cashtokens should function in the browser`, () => {
 
       const { unsignedTransaction, sourceOutputs } =
         await aliceWatchWallet.tokenMint(
-          category,
           {
+            category: category,
             nft: {
               capability: "none",
               commitment: "0a",

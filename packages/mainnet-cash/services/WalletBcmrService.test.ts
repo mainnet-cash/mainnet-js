@@ -392,10 +392,12 @@ describe("Test Wallet BCMR Endpoints", () => {
     const aliceId = process.env.ALICE_ID!;
     const genesisResponse = (await request(app).post("/wallet/token_genesis").send({
       walletId: aliceId,
-      nft: {
-        capability: NFTCapability.mutable,
-        commitment: "abcd",
-      },
+      requests: [{
+        nft: {
+          capability: NFTCapability.mutable,
+          commitment: "abcd",
+        },
+      }],
       sendRequests: {
         dataBuffer: binToBase64(opreturnData.buffer)
       }

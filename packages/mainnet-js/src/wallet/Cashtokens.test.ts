@@ -13,6 +13,7 @@ import { convert, delay } from "../util/index.js";
 import {
   SendRequest,
   SendResponse,
+  TokenBurnRequest,
   TokenMintRequest,
   TokenSendRequest,
 } from "./model.js";
@@ -283,8 +284,9 @@ describe(`Test cashtokens`, () => {
     expect(tokenBalance).toBe(0n);
     const tokenUtxos = await alice.getTokenUtxos(category);
     expect(tokenUtxos.length).toBe(1);
-    const response = await alice.tokenMint(category, [
+    const response = await alice.tokenMint([
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.cashaddr!,
         nft: {
           commitment: "test",
@@ -292,6 +294,7 @@ describe(`Test cashtokens`, () => {
         },
       }),
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.cashaddr!,
         nft: {
           commitment: "test2",
@@ -318,8 +321,9 @@ describe(`Test cashtokens`, () => {
     const category = genesisResponse.categories![0];
 
     // mint 2 NFTs, amount reducing
-    const response = await alice.tokenMint(category, [
+    const response = await alice.tokenMint([
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.cashaddr!,
         nft: {
           capability: NFTCapability.none,
@@ -327,6 +331,7 @@ describe(`Test cashtokens`, () => {
         },
       }),
       new TokenMintRequest({
+        category: category,
         cashaddr: alice.cashaddr!,
         nft: {
           capability: NFTCapability.none,
@@ -383,9 +388,9 @@ describe(`Test cashtokens`, () => {
 
     // mint 2 NFTs, amount reducing
     const response = await alice.tokenMint(
-      category,
       [
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -393,6 +398,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -409,9 +415,9 @@ describe(`Test cashtokens`, () => {
 
     // mint 2 more NFTs without amount reducing
     const ftResponse = await alice.tokenMint(
-      category,
       [
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -419,6 +425,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -436,9 +443,9 @@ describe(`Test cashtokens`, () => {
     // we are going to hit amount -1, when minting 3 more NFTs
     // check that it will stop at 0
     const ft2Response = await alice.tokenMint(
-      category,
       [
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -446,6 +453,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -453,6 +461,7 @@ describe(`Test cashtokens`, () => {
           },
         }),
         new TokenMintRequest({
+          category: category,
           cashaddr: alice.cashaddr!,
           nft: {
             capability: NFTCapability.none,
@@ -897,7 +906,8 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(category)).toBe(1);
     expect((await bob.getTokenUtxos(category)).length).toBe(1);
 
-    await bob.tokenMint(category, {
+    await bob.tokenMint({
+      category: category,
       nft: {
         capability: "none",
         commitment: "0a",
@@ -949,7 +959,8 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(category)).toBe(1);
     expect((await bob.getTokenUtxos(category)).length).toBe(1);
 
-    await bob.tokenMint(category, {
+    await bob.tokenMint({
+      category: category,
       nft: {
         capability: "none",
         commitment: "0a",
@@ -960,7 +971,8 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(category)).toBe(2);
     expect((await bob.getTokenUtxos(category)).length).toBe(2);
 
-    await bob.tokenMint(category, {
+    await bob.tokenMint({
+      category: category,
       nft: {
         capability: "none",
         commitment: "0b",
@@ -1041,7 +1053,8 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(category)).toBe(1);
     expect((await bob.getTokenUtxos(category)).length).toBe(1);
 
-    await bob.tokenMint(category, {
+    await bob.tokenMint({
+      category: category,
       nft: {
         capability: "none",
         commitment: "0a",
@@ -1052,7 +1065,8 @@ describe(`Test cashtokens`, () => {
     expect(await bob.getNftTokenBalance(category)).toBe(2);
     expect((await bob.getTokenUtxos(category)).length).toBe(2);
 
-    await bob.tokenMint(category, {
+    await bob.tokenMint({
+      category: category,
       nft: {
         capability: "none",
         commitment: "0b",
@@ -1243,8 +1257,8 @@ describe(`Test cashtokens`, () => {
 
       const { unsignedTransaction, sourceOutputs } =
         await aliceWatchWallet.tokenMint(
-          category,
           {
+            category: category,
             nft: {
               capability: "none",
               commitment: "0a",
@@ -1420,5 +1434,113 @@ describe(`Test cashtokens`, () => {
     ).resolves.not.toThrow();
 
     Config.EnforceCashTokenReceiptAddresses = previousValue;
+  });
+
+  test("Test genesis of multiple categories in a single transaction", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    // prepare two vout=0 inputs for two-category genesis
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+
+    const genesisResponse = await bob.tokenGenesis([
+      { amount: 1000n },
+      {
+        amount: 0n,
+        nft: { capability: NFTCapability.minting, commitment: "babe" },
+      },
+    ]);
+
+    expect(genesisResponse.txId).toBeDefined();
+    expect(genesisResponse.categories!.length).toBe(2);
+
+    const [ftCategory, nftCategory] = genesisResponse.categories!;
+    expect(ftCategory).not.toBe(nftCategory);
+    expect(await bob.getTokenBalance(ftCategory)).toBe(1000n);
+    expect(await bob.getNftTokenBalance(nftCategory)).toBe(1);
+  });
+
+  test("Test genesis throws if fewer vout=0 inputs than requests", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    // only one funding tx -> only one vout=0 input
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+
+    await expect(
+      bob.tokenGenesis([{ amount: 1n }, { amount: 2n }]),
+    ).rejects.toThrow(/Not enough vout=0 inputs/);
+  });
+
+  test("Test minting NFTs across two categories in a single transaction", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+
+    const genesisResponse = await bob.tokenGenesis([
+      {
+        amount: 10n,
+        nft: { capability: NFTCapability.minting, commitment: "a1" },
+      },
+      {
+        amount: 5n,
+        nft: { capability: NFTCapability.minting, commitment: "b1" },
+      },
+    ]);
+    const [catA, catB] = genesisResponse.categories!;
+
+    const mintResponse = await bob.tokenMint(
+      [
+        new TokenMintRequest({
+          category: catA,
+          nft: { capability: NFTCapability.none, commitment: "a2" },
+        }),
+        new TokenMintRequest({
+          category: catA,
+          nft: { capability: NFTCapability.none, commitment: "a3" },
+        }),
+        new TokenMintRequest({
+          category: catB,
+          nft: { capability: NFTCapability.none, commitment: "b2" },
+        }),
+      ],
+      true,
+    );
+
+    expect(mintResponse.txId).toBeDefined();
+    // FT amounts deducted per category: catA had 10, minted 2 -> 8; catB had 5, minted 1 -> 4
+    expect(await bob.getTokenBalance(catA)).toBe(8n);
+    expect(await bob.getTokenBalance(catB)).toBe(4n);
+    expect(await bob.getNftTokenBalance(catA)).toBe(3);
+    expect(await bob.getNftTokenBalance(catB)).toBe(2);
+  });
+
+  test("Test burning multiple categories in a single transaction", async () => {
+    const alice = await RegTestWallet.fromId(process.env.ALICE_ID!);
+    const bob = await RegTestWallet.newRandom();
+
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+    await alice.send({ cashaddr: bob.cashaddr!, value: 10000n });
+
+    const genesisResponse = await bob.tokenGenesis([
+      { amount: 100n },
+      { amount: 200n },
+    ]);
+    const [catA, catB] = genesisResponse.categories!;
+
+    const burnResponse = await bob.tokenBurn(
+      [
+        new TokenBurnRequest({ category: catA, amount: 30n }),
+        new TokenBurnRequest({ category: catB, amount: 200n }),
+      ],
+      "multi-burn",
+    );
+
+    expect(burnResponse.txId).toBeDefined();
+    expect(await bob.getTokenBalance(catA)).toBe(70n);
+    expect(await bob.getTokenBalance(catB)).toBe(0n);
   });
 });

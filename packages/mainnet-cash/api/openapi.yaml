@@ -603,9 +603,10 @@ paths:
             schema:
               $ref: '#/components/schemas/TokenGenesisRequest'
         description: |
-          Create new cashtoken, both funglible and/or non-fungible (NFT)
-          Refer to spec https://github.com/bitjson/cashtokens
-          Newly created token identifier can be found in `categories` field.
+          Create one or more new cashtokens, fungible and/or non-fungible (NFT), in a single transaction.
+          Each genesis request consumes a distinct vout=0 input; the spent prevout's txid becomes the new category.
+          Refer to spec https://github.com/cashtokens/cashtokens
+          Newly created token category identifiers can be found in the `categories` field of the response.
         required: true
       responses:
         "200":
@@ -627,9 +628,9 @@ paths:
             schema:
               $ref: '#/components/schemas/TokenMintRequest'
         description: |
-          Mint new NFT cashtokens using an existing minting token
-          Refer to spec https://github.com/bitjson/cashtokens
-          Newly minted tokens will retain the parent's category.
+          Mint new NFT cashtokens using existing minting tokens. Supports minting across multiple categories in a single transaction.
+          Refer to spec https://github.com/cashtokens/cashtokens
+          Newly minted tokens retain their respective parent category.
         required: true
       responses:
         "200":
@@ -651,11 +652,12 @@ paths:
             schema:
               $ref: '#/components/schemas/TokenBurnRequest'
         description: |
-          Perform an explicit token burning by spending a token utxo to an OP_RETURN
+          Perform an explicit token burning by spending one or more token utxos alongside an OP_RETURN.
+          Multiple burn requests across distinct categories can be bundled into a single transaction.
           Behaves differently for fungible and non-fungible tokens:
            * NFTs are always "destroyed"
            * FTs' amount is reduced by the amount specified, if 0 FT amount is left and no NFT present, the token is "destroyed"
-          Refer to spec https://github.com/bitjson/cashtokens
+          Refer to spec https://github.com/cashtokens/cashtokens
         required: true
       responses:
         "200":
@@ -1344,20 +1346,15 @@ components:
       - cashaddr
       - category
       type: object
-    TokenGenesisRequest:
+    TokenGenesisItem:
       example:
-        walletId: walletId
         cashaddr: cashaddr
         amount: 0.8008281904610115
-        sendRequests: null
         nft:
           capability: none
           commitment: commitment
         value: 6.027456183070403
       properties:
-        walletId:
-          description: The walletId to make a request to.
-          type: string
         amount:
           description: amount of *fungible* tokens to create
           type: number
@@ -1370,10 +1367,66 @@ components:
           default: 1000
           description: Satoshi value to send alongside with tokens
           type: number
+      type: object
+    TokenGenesisRequest:
+      example:
+        walletId: walletId
+        sendRequests: null
+        requests:
+        - cashaddr: cashaddr
+          amount: 0.8008281904610115
+          nft:
+            capability: none
+            commitment: commitment
+          value: 6.027456183070403
+        - cashaddr: cashaddr
+          amount: 0.8008281904610115
+          nft:
+            capability: none
+            commitment: commitment
+          value: 6.027456183070403
+      properties:
+        walletId:
+          description: The walletId to make a request to.
+          type: string
+        requests:
+          description: One or more genesis requests. Each consumes a distinct vout=0
+            input and creates a new token category in the same transaction.
+          items:
+            $ref: '#/components/schemas/TokenGenesisItem'
+          minItems: 1
+          type: array
         sendRequests:
           $ref: '#/components/schemas/TokenGenesisRequest_sendRequests'
       required:
+      - requests
       - walletId
+      type: object
+    TokenMintItem:
+      example:
+        cashaddr: cashaddr
+        category: category
+        nft:
+          capability: none
+          commitment: commitment
+        value: 0.8008281904610115
+      properties:
+        category:
+          description: "Token unique hexadecimal identifier, also the id of the token\
+            \ creation transaction. The minting NFT spent for this mint must be of\
+            \ this category."
+          type: string
+        nft:
+          $ref: '#/components/schemas/Token_nft'
+        cashaddr:
+          description: Cashaddress to send tokens to
+          type: string
+        value:
+          default: 1000
+          description: Satoshi value to send alongside with tokens
+          type: number
+      required:
+      - category
       type: object
     TokenMintRequest:
       example:
@@ -1381,51 +1434,47 @@ components:
         deductTokenAmount: false
         requests:
         - cashaddr: cashaddr
+          category: category
           nft:
             capability: none
             commitment: commitment
           value: 0.8008281904610115
         - cashaddr: cashaddr
+          category: category
           nft:
             capability: none
             commitment: commitment
           value: 0.8008281904610115
-        category: category
       properties:
         walletId:
           description: The walletId to make a request to.
           type: string
-        category:
-          description: "Token unique hexadecimal identifier, also the id of the token\
-            \ creation transaction"
-          type: string
         requests:
+          description: One or more mint requests. Requests can span multiple categories;
+            minting NFTs of each category are spent and recreated within the same
+            transaction.
           items:
-            $ref: '#/components/schemas/TokenMintRequest_requests_inner'
+            $ref: '#/components/schemas/TokenMintItem'
+          minItems: 1
           type: array
         deductTokenAmount:
           default: false
-          description: "if minting token contains fungible amount, deduct from it\
-            \ by amount of minted tokens"
+          description: "If the minting NFT for a category contains a fungible amount,\
+            \ deduct from it by the number of mints requested for that category."
           type: boolean
       required:
-      - category
+      - requests
       - walletId
       type: object
-    TokenBurnRequest:
+    TokenBurnItem:
       example:
-        walletId: walletId
         cashaddr: cashaddr
         amount: 0.8008281904610115
         category: category
-        message: message
         nft:
           capability: none
           commitment: commitment
       properties:
-        walletId:
-          description: The walletId to make a request to.
-          type: string
         category:
           description: "Token unique hexadecimal identifier, also the id of the token\
             \ creation transaction"
@@ -1439,11 +1488,42 @@ components:
           description: "address to return token and satoshi change to, default to\
             \ the sender's cashaddr"
           type: string
+      required:
+      - category
+      type: object
+    TokenBurnRequest:
+      example:
+        walletId: walletId
+        requests:
+        - cashaddr: cashaddr
+          amount: 0.8008281904610115
+          category: category
+          nft:
+            capability: none
+            commitment: commitment
+        - cashaddr: cashaddr
+          amount: 0.8008281904610115
+          category: category
+          nft:
+            capability: none
+            commitment: commitment
+        message: message
+      properties:
+        walletId:
+          description: The walletId to make a request to.
+          type: string
+        requests:
+          description: "One or more burn requests. Requests can span multiple categories,\
+            \ all burned in a single transaction sharing one OP_RETURN."
+          items:
+            $ref: '#/components/schemas/TokenBurnItem'
+          minItems: 1
+          type: array
         message:
           description: optional message to include in OP_RETURN
           type: string
       required:
-      - category
+      - requests
       - walletId
       type: object
     OpReturnData:
@@ -2620,24 +2700,6 @@ components:
       - $ref: '#/components/schemas/OpReturnData'
       description: "Single or an array of extra send requests (OP_RETURN, value transfer,\
         \ etc.) to include in genesis transaction."
-    TokenMintRequest_requests_inner:
-      example:
-        cashaddr: cashaddr
-        nft:
-          capability: none
-          commitment: commitment
-        value: 0.8008281904610115
-      properties:
-        nft:
-          $ref: '#/components/schemas/Token_nft'
-        cashaddr:
-          description: Cashaddress to send tokens to
-          type: string
-        value:
-          default: 1000
-          description: Satoshi value to send alongside with tokens
-          type: number
-      type: object
     SendRequestArray_inner:
       anyOf:
       - $ref: '#/components/schemas/SendRequestItem'

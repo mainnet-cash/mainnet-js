@@ -130,6 +130,7 @@ export class TokenSendRequest {
 }
 
 export class TokenMintRequest {
+  category: string;
   nft?: {
     capability: NFTCapability;
     commitment: string;
@@ -138,10 +139,12 @@ export class TokenMintRequest {
   value?: bigint;
 
   constructor({
+    category,
     nft,
     cashaddr,
     value,
   }: {
+    category: string;
     nft?: {
       capability: NFTCapability;
       commitment: string;
@@ -149,6 +152,7 @@ export class TokenMintRequest {
     cashaddr?: string;
     value?: bigint;
   }) {
+    this.category = category;
     this.nft = nft;
     this.cashaddr = cashaddr;
     this.value = value;
