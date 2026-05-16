@@ -595,7 +595,7 @@ describe(`Wallet subscriptions`, () => {
     const aliceWallet = await RegTestWallet.fromId(process.env.ALICE_ID!);
     const bobWallet = await RegTestWallet.newRandom();
 
-    // awaitTransactionPropagation: true → response includes updated balance
+    // awaitTransactionPropagation: true -> response includes updated balance
     const balanceBefore = await aliceWallet.getBalance();
     const resp = await aliceWallet.send(
       [{ cashaddr: bobWallet.cashaddr!, value: 1000n }],
@@ -604,7 +604,7 @@ describe(`Wallet subscriptions`, () => {
     expect(resp.balance!).toBeLessThan(balanceBefore);
     expect(resp.balance!).toBe(await aliceWallet.getBalance());
 
-    // awaitTransactionPropagation: false → send completes without waiting
+    // awaitTransactionPropagation: false -> send completes without waiting
     // for the status notification round-trip; we only verify it succeeds.
     const resp2 = await aliceWallet.send(
       [{ cashaddr: bobWallet.cashaddr!, value: 1000n }],

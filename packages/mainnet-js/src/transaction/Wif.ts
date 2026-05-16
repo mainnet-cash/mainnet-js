@@ -29,6 +29,11 @@ import {
   TokenSendRequest,
 } from "../wallet/model.js";
 import { allocateFee } from "./allocateFee.js";
+import type {
+  CoinSelectionFn,
+  FeeFn,
+  OutputOrderingFn,
+} from "./coin-control/types.js";
 
 export const placeholderPrivateKey =
   "0000000000000000000000000000000000000000000000000000000000000001";
@@ -44,6 +49,7 @@ export async function buildP2pkhNonHdTransaction({
   feePaidBy = FeePaidByEnum.change,
   changeAddress = "",
   walletCache,
+  outputOrdering,
 }: {
   inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
@@ -53,6 +59,7 @@ export async function buildP2pkhNonHdTransaction({
   feePaidBy?: FeePaidByEnum;
   changeAddress?: string;
   walletCache: WalletCache;
+  outputOrdering?: OutputOrderingFn;
 }) {
   if (!signingKey) {
     throw new Error("Missing signing key when building transaction");
@@ -72,24 +79,26 @@ export async function buildP2pkhNonHdTransaction({
 
   outputs = allocateFee(outputs, fee, feePaidBy, changeAmount);
 
-  const lockedOutputs = await prepareOutputs(outputs);
-
-  if (!changeAddress) {
-    changeAddress = inputs[0].address;
-  }
-
-  if (discardChange !== true) {
-    if (changeAmount > DUST_UTXO_THRESHOLD) {
-      const changeLockingBytecode = cashAddressToLockingBytecode(changeAddress);
-      if (typeof changeLockingBytecode === "string") {
-        throw Error(changeLockingBytecode);
-      }
-      lockedOutputs.push({
-        lockingBytecode: changeLockingBytecode.bytecode,
-        valueSatoshis: BigInt(changeAmount),
-      });
+  // Append change as a SendRequest so user-supplied output ordering can act on
+  // the complete output list. Skipped when discardChange is set or the change
+  // would be below the dust threshold.
+  let changeOutputIndex: number | undefined;
+  if (discardChange !== true && changeAmount > DUST_UTXO_THRESHOLD) {
+    if (!changeAddress) {
+      changeAddress = inputs[0].address;
     }
+    outputs = [
+      ...outputs,
+      new SendRequest({ cashaddr: changeAddress, value: BigInt(changeAmount) }),
+    ];
+    changeOutputIndex = outputs.length - 1;
   }
+
+  if (outputOrdering) {
+    outputs = outputOrdering({ outputs, changeOutputIndex });
+  }
+
+  const lockedOutputs = await prepareOutputs(outputs);
 
   const { preparedInputs, sourceOutputs } = prepareInputs({
     inputs,
@@ -306,6 +315,10 @@ export async function getSuitableUtxos(
   requests: SendRequestType[],
   ensureUtxos: Utxo[] = [],
   tokenOperation: "send" | "genesis" | "mint" | "burn" = "send",
+  coinControl: {
+    coinSelection?: CoinSelectionFn;
+    feePerByte?: number;
+  } = {},
 ): Promise<Utxo[]> {
   const utxoKey = (u: Utxo) => `${u.txid}:${u.vout}`;
   const selectedSet = new Set<string>();
@@ -448,22 +461,54 @@ export async function getSuitableUtxos(
     }
   }
 
-  // find plain bch outputs
-  for (let i = 0; i < inputs.length; i++) {
-    // check early if we already have enough
-    if (amountRequired && amountAvailable > amountRequired) {
-      break;
+  // Find plain BCH outputs to top up the transaction. When the caller
+  // supplied a coin-selection strategy we delegate to it; otherwise we run
+  // the historical natural-order accumulation inline so the coin-control
+  // module isn't pulled into the bundle of consumers that never opt in.
+  const alreadyEnough =
+    amountRequired !== undefined && amountAvailable >= amountRequired;
+  if (!alreadyEnough) {
+    if (coinControl.coinSelection) {
+      const available: Utxo[] = [];
+      for (let i = 0; i < inputs.length; i++) {
+        if (usedIndices.has(i)) continue;
+        const u = inputs[i];
+        if (u.token) continue;
+        const key = utxoKey(u);
+        if (selectedSet.has(key)) continue;
+        available.push(u);
+      }
+      const stillNeeded =
+        amountRequired === undefined
+          ? BigInt(Number.MAX_SAFE_INTEGER)
+          : amountRequired - amountAvailable;
+      const picked = coinControl.coinSelection({
+        available,
+        pinned: [...suitableUtxos],
+        amountRequired: stillNeeded,
+        feePerByte: coinControl.feePerByte ?? 1,
+        bestHeight,
+      });
+      for (const u of picked) {
+        const key = utxoKey(u);
+        if (selectedSet.has(key)) continue;
+        selectedSet.add(key);
+        suitableUtxos.push(u);
+        amountAvailable += BigInt(u.satoshis);
+      }
+    } else {
+      for (let i = 0; i < inputs.length; i++) {
+        if (amountRequired && amountAvailable > amountRequired) break;
+        if (usedIndices.has(i)) continue;
+        const u = inputs[i];
+        if (u.token) continue;
+        const key = utxoKey(u);
+        if (selectedSet.has(key)) continue;
+        selectedSet.add(key);
+        suitableUtxos.push(u);
+        amountAvailable += BigInt(u.satoshis);
+      }
     }
-    if (usedIndices.has(i)) continue;
-    const u = inputs[i];
-    if (u.token) continue;
-
-    const key = utxoKey(u);
-    if (selectedSet.has(key)) continue;
-
-    selectedSet.add(key);
-    suitableUtxos.push(u);
-    amountAvailable += BigInt(u.satoshis);
   }
 
   // if the fee is split with a feePaidBy option, skip checking change.
@@ -555,6 +600,7 @@ export async function getFeeAmount({
   feePaidBy,
   discardChange,
   walletCache,
+  fee: feeStrategy,
 }: {
   utxos: Utxo[];
   sendRequests: Array<SendRequest | TokenSendRequest | OpReturnData>;
@@ -563,6 +609,7 @@ export async function getFeeAmount({
   feePaidBy: FeePaidByEnum;
   discardChange?: boolean;
   walletCache: WalletCache;
+  fee?: FeeFn;
 }) {
   // build transaction
   if (utxos) {
@@ -579,6 +626,12 @@ export async function getFeeAmount({
         walletCache,
       });
 
+    if (feeStrategy) {
+      return feeStrategy({
+        txSizeBytes: draftTransaction.length,
+        relayFeePerByte: relayFeePerByteInSatoshi,
+      });
+    }
     return BigInt(
       Math.ceil(draftTransaction.length * relayFeePerByteInSatoshi + 1),
     );
@@ -600,6 +653,7 @@ export async function buildEncodedTransaction({
   changeAddress = "",
   buildUnsigned = false,
   walletCache,
+  outputOrdering,
 }: {
   inputs: Utxo[];
   outputs: Array<SendRequest | TokenSendRequest | OpReturnData>;
@@ -610,6 +664,7 @@ export async function buildEncodedTransaction({
   changeAddress?: string;
   buildUnsigned?: boolean;
   walletCache: WalletCache;
+  outputOrdering?: OutputOrderingFn;
 }) {
   const { transaction, sourceOutputs } = await buildP2pkhNonHdTransaction({
     inputs,
@@ -620,6 +675,7 @@ export async function buildEncodedTransaction({
     feePaidBy,
     changeAddress,
     walletCache,
+    outputOrdering,
   });
 
   if (buildUnsigned === true) {

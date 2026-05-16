@@ -20,6 +20,10 @@
     "./encrypted-storage": {
       "types": "./dist/module/db/EncryptedStorageProvider.d.ts",
       "import": "./dist/module/db/EncryptedStorageProvider.js"
+    },
+    "./coin-control": {
+      "types": "./dist/module/transaction/coin-control/index.d.ts",
+      "import": "./dist/module/transaction/coin-control/index.js"
     }
   },
   "files": [

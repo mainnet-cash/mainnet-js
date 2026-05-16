@@ -8,7 +8,7 @@ import StorageProvider from "./StorageProvider.js";
 class MemoryProvider implements StorageProvider {
   // Instances constructed with the same dbName share their backing rows, so
   // re-attaching to the same logical store reads back what an earlier handle
-  // wrote — mirroring IndexedDB/Postgres behaviour. Instances built with no
+  // wrote -- mirroring IndexedDB/Postgres behaviour. Instances built with no
   // dbName are independent.
   private static registry = new Map<string, Map<string, WalletDbEntryI>>();
   static resetAll() {
@@ -399,7 +399,7 @@ describe("EncryptedStorageProvider", () => {
       const raw = (await wrapped.getWallet(name))!.wallet;
       expect(raw).toMatch(/^enc:v1:/);
     }
-    // …and still decrypt correctly.
+    // ...and still decrypt correctly.
     expect((await enc.getWallet("legacy-a"))?.wallet).toBe(SAMPLE_ID);
     expect((await enc.getWallet("legacy-b"))?.wallet).toBe(SAMPLE_ID + "+b");
     expect((await enc.getWallet("fresh"))?.wallet).toBe(SAMPLE_ID + "+fresh");
@@ -544,7 +544,7 @@ describe("EncryptedStorageProvider", () => {
       await db1.close();
 
       // Inspect the shared wrapped store via a fresh MemoryProvider on the same
-      // dbName — constructor shares rows with all earlier handles.
+      // dbName -- constructor shares rows with all earlier handles.
       const wrapped = new MemoryProvider("regtest");
       expect((await wrapped.getWallet("alice"))?.wallet).toMatch(/^enc:v1:/);
 

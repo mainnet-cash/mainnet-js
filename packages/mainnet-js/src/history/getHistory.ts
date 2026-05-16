@@ -63,7 +63,7 @@ export const getHistory = async ({
       )
     ).flat();
 
-    // Dedup using Set instead of O(N²) findIndex
+    // Dedup using Set instead of O(N^2) findIndex
     const seen = new Set<string>();
     const deduped: TxI[] = [];
     for (const item of allHistory) {

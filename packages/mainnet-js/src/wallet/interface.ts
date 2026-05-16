@@ -1,6 +1,12 @@
 import { NetworkEnum } from "../enum.js";
 import { Utxo } from "../interface.js";
 import { ElectrumRawTransaction } from "../network/interface.js";
+import type {
+  CoinSelectionFn,
+  FeeFn,
+  InputOrderingFn,
+  OutputOrderingFn,
+} from "../transaction/coin-control/types.js";
 import { FeePaidByEnum, WalletTypeEnum } from "./enum.js";
 
 export interface WalletRequestI {
@@ -54,6 +60,20 @@ export interface SendRequestOptionsI {
   ensureUtxos?: Utxo[]; // ensure these inputs will be consumed in the transaction
   buildUnsigned?: boolean; // false
   broadcast?: boolean; // true
+
+  // ----- Coin control hooks ---------------------------------------------
+  // Import named strategies from `mainnet-js/coin-control`, or pass any
+  // function matching the signature. When omitted, the historical
+  // behaviour is preserved.
+
+  /** Choose BCH UTXOs to top up the transaction. */
+  coinSelection?: CoinSelectionFn;
+  /** Reorder selected inputs before signing. */
+  inputOrdering?: InputOrderingFn;
+  /** Reorder outputs (including the change output) before signing. */
+  outputOrdering?: OutputOrderingFn;
+  /** Compute the absolute fee for the encoded transaction size. */
+  fee?: FeeFn;
 }
 
 export interface MnemonicI {

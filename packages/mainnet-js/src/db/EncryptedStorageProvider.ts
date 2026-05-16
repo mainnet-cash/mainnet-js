@@ -35,7 +35,7 @@ interface DerivedKeys {
 }
 
 /**
- * Thrown by EncryptedStorageProvider when decryption fails — either because
+ * Thrown by EncryptedStorageProvider when decryption fails -- either because
  * the supplied passphrase is wrong, the ciphertext was tampered with, or the
  * row was rebound to a different name (AAD mismatch).
  */
@@ -156,7 +156,7 @@ async function decryptString(
  * provider are returned as-is on read; subsequent writes are always encrypted.
  *
  * AAD binding: each row's ciphertext is authenticated against the row name,
- * so renaming a wallet is not supported in-place — the caller must read the
+ * so renaming a wallet is not supported in-place -- the caller must read the
  * plaintext, write under the new name, and remove the old row.
  */
 export class EncryptedStorageProvider implements StorageProvider {
@@ -242,7 +242,7 @@ export class EncryptedStorageProvider implements StorageProvider {
       return keys;
     })();
     return this.keysPromise.catch((err) => {
-      // Don't cache the rejection — a follow-up call with a corrected
+      // Don't cache the rejection -- a follow-up call with a corrected
       // passphrase (or a stale-state retry) should be allowed to re-derive.
       this.keysPromise = null;
       throw err;
@@ -377,7 +377,7 @@ export class EncryptedStorageProvider implements StorageProvider {
    * When `options.iterations` is provided the new key is derived with that
    * iteration count; otherwise the wrapper's current iteration count is reused.
    *
-   * @returns `rotated` — names of rows that were re-encrypted; `skipped` —
+   * @returns `rotated` -- names of rows that were re-encrypted; `skipped` --
    *   names that were left alone (plaintext, failed to decrypt, or filtered
    *   out by `options.names`).
    */
@@ -441,7 +441,7 @@ export class EncryptedStorageProvider implements StorageProvider {
   /**
    * Encrypt every plaintext row in the store under the current passphrase.
    * Used to migrate legacy (or back-compat-read) entries into the encrypted
-   * format — for example, when a consumer enables encryption on a store that
+   * format -- for example, when a consumer enables encryption on a store that
    * previously held plaintext wallets.
    *
    * Already-encrypted rows are left alone. With `options.names`, only the
@@ -493,8 +493,8 @@ export class EncryptedStorageProvider implements StorageProvider {
    * different passphrase) are left in place and reported as skipped.
    * Plaintext rows are also reported as skipped.
    *
-   * @returns `decrypted` — names of rows that were turned back into plaintext;
-   *   `skipped` — names that were left alone (plaintext, or failed to decrypt).
+   * @returns `decrypted` -- names of rows that were turned back into plaintext;
+   *   `skipped` -- names that were left alone (plaintext, or failed to decrypt).
    */
   async removeEncryption(): Promise<{
     decrypted: string[];

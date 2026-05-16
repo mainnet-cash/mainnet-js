@@ -975,7 +975,7 @@ export class BaseWallet implements WalletI {
       feePaidBy: feePaidBy,
     });
 
-    const fundingUtxos = await getSuitableUtxos(
+    const selectedUtxos = await getSuitableUtxos(
       utxos,
       spendAmount + feeEstimate,
       bestHeight,
@@ -983,12 +983,19 @@ export class BaseWallet implements WalletI {
       sendRequests,
       options?.ensureUtxos || [],
       options?.tokenOperation,
+      {
+        coinSelection: options?.coinSelection,
+        feePerByte: relayFeePerByteInSatoshi,
+      },
     );
-    if (fundingUtxos.length === 0) {
+    if (selectedUtxos.length === 0) {
       throw Error(
         "The available inputs couldn't satisfy the request with fees",
       );
     }
+    const fundingUtxos = options?.inputOrdering
+      ? options.inputOrdering({ inputs: selectedUtxos })
+      : selectedUtxos;
     const fee = await getFeeAmount({
       utxos: fundingUtxos,
       sendRequests: sendRequests,
@@ -996,6 +1003,7 @@ export class BaseWallet implements WalletI {
       relayFeePerByteInSatoshi: relayFeePerByteInSatoshi,
       feePaidBy: feePaidBy,
       walletCache: this.walletCache,
+      fee: options?.fee,
     });
     const { encodedTransaction, sourceOutputs } = await buildEncodedTransaction(
       {
@@ -1008,6 +1016,7 @@ export class BaseWallet implements WalletI {
         changeAddress,
         buildUnsigned: options?.buildUnsigned === true,
         walletCache: this.walletCache,
+        outputOrdering: options?.outputOrdering,
       },
     );
 

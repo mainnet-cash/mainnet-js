@@ -248,14 +248,14 @@ describe("MockNetworkProvider", () => {
 
       await fundWallet(provider, alice.cashaddr!, 100_000n);
 
-      // First send: alice → bob
+      // First send: alice -> bob
       await alice.send([
         new SendRequest({ cashaddr: bob.cashaddr!, value: 80_000n }),
       ]);
 
       expect(await bob.getBalance()).toBeGreaterThanOrEqual(80_000n);
 
-      // Second send: bob → alice (using the output from first send)
+      // Second send: bob -> alice (using the output from first send)
       await bob.send([
         new SendRequest({ cashaddr: alice.cashaddr!, value: 40_000n }),
       ]);
