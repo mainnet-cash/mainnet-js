@@ -1,6 +1,25 @@
 Newest changes
 --------------
 
+4.0.0-next.12
+
+* Breaking (interface): `StorageProvider.deleteWallet(name)` is now part of
+  the abstract interface. Custom StorageProvider implementations must add
+  this method. IndexedDBProvider and SqlProvider implement it natively.
+
+* Add EncryptedStorageProvider for wallet ID encryption
+  - AES-256-GCM with PBKDF2-HMAC-SHA512 (600k iterations) for key derivation
+  - reads pre-existing plaintext entries unchanged; new writes are encrypted
+  - `import { EncryptedStorageProvider } from "mainnet-js/encrypted-storage";`
+  - for application-wide usage of encrypted storage provider use:
+```ts
+BaseWallet.StorageProvider = EncryptedStorageProvider.withInner(
+  IndexedDBProvider,
+  userPassphrase,
+  options,
+);
+```
+
 4.0.0-next.11
 
 * Breaking: generalize token genesis, mint and burn for many categories

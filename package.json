@@ -16,7 +16,7 @@
       "**/demo/**"
     ]
   },
-  "version": "4.0.0-next.11",
+  "version": "4.0.0-next.12",
   "homepage": "https://mainnet.cash",
   "scripts": {
     "api:validate": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v6.2.1 validate -i /local/swagger/v1/api.yml",
