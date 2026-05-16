@@ -274,3 +274,18 @@ test("Should not have ssl property when unconfigured", async () => {
   let c = provider.getConfig();
   expect(c.ssl).toBe(undefined);
 });
+
+test("deleteWallet removes a row and is a no-op when absent", async () => {
+  const db = new SqlProvider(`delete ${Math.random()}`);
+  await db.init();
+  await db.addWallet("alice", "wid-alice");
+  expect(await db.walletExists("alice")).toBe(true);
+
+  await db.deleteWallet("alice");
+  expect(await db.walletExists("alice")).toBe(false);
+  expect(await db.getWallet("alice")).toBeUndefined();
+
+  // Missing names should not throw.
+  await expect(db.deleteWallet("never-existed")).resolves.toBeUndefined();
+  await db.close();
+});

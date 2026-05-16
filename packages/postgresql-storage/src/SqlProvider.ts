@@ -127,6 +127,14 @@ export default class SqlProvider implements StorageProvider {
     return (await this.getWallet(name)) !== undefined;
   }
 
+  public async deleteWallet(name: string): Promise<void> {
+    let text = this.formatter(
+      "DELETE FROM %I WHERE name = $1;",
+      this.walletTable,
+    );
+    await this.db.query(text, [name]);
+  }
+
   public async webhookFromDb(hook: Webhook) {
     const { WebhookBch } = await import("./webhook/WebhookBch.js");
     return new WebhookBch(hook);

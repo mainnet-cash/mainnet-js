@@ -61,4 +61,11 @@ export default abstract class StorageProvider {
    * @param name A user defined name for the wallet, and the walletId.
    */
   abstract walletExists(name: string): Promise<boolean>;
+
+  /**
+   * Delete a named wallet from the database. No-op if the row does not exist.
+   * @param name The user-defined name of the wallet to remove.
+   * @throws {Error} If the deletion fails for reasons other than absence.
+   */
+  abstract deleteWallet(name: string): Promise<void>;
 }

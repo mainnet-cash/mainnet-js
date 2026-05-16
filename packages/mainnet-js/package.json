@@ -13,8 +13,14 @@
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
-    "types": "./dist/module/index.d.ts",
-    "import": "./dist/module/index.js"
+    ".": {
+      "types": "./dist/module/index.d.ts",
+      "import": "./dist/module/index.js"
+    },
+    "./encrypted-storage": {
+      "types": "./dist/module/db/EncryptedStorageProvider.d.ts",
+      "import": "./dist/module/db/EncryptedStorageProvider.js"
+    }
   },
   "files": [
     "dist/module"

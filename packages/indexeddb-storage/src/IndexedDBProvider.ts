@@ -108,4 +108,15 @@ export default class IndexedDBProvider implements StorageProvider {
   public async walletExists(name: string): Promise<boolean> {
     return (await this.getWallet(name)) !== undefined;
   }
+
+  public async deleteWallet(name: string): Promise<void> {
+    const db = await this.openDB();
+    return new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(this.storeName, "readwrite");
+      const store = tx.objectStore(this.storeName);
+      const req = store.delete(name);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
 }

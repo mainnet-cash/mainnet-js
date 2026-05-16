@@ -98,3 +98,18 @@ test("Store and retrieve a Mainnet hd wallet", async () => {
   const w2 = await HDWallet.named("test");
   expect(w1.mnemonic).toBe(w2.mnemonic);
 });
+
+test("deleteWallet removes a row and is a no-op when absent", async () => {
+  const db = new IndexedDBProvider(`delete-${Math.random()}`);
+  await db.init();
+  await db.addWallet("alice", "wid-alice");
+  expect(await db.walletExists("alice")).toBe(true);
+
+  await db.deleteWallet("alice");
+  expect(await db.walletExists("alice")).toBe(false);
+  expect(await db.getWallet("alice")).toBeUndefined();
+
+  // Missing names should not throw.
+  await expect(db.deleteWallet("never-existed")).resolves.toBeUndefined();
+  await db.close();
+});

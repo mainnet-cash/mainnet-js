@@ -42,7 +42,7 @@
     "regtest:down": "./test/docker/stop.sh",
     "regtest:sbch:up": "./test/docker/start-sbch-lite.sh",
     "regtest:sbch:down": "./test/docker/stop-sbch-lite.sh",
-    "format": "biome format --write .",
+    "format": "yarn lint:fix",
     "format:check": "biome format .",
     "lint": "biome lint .",
     "lint:fix": "biome check --write --unsafe .",
