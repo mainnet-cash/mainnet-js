@@ -1,6 +1,16 @@
 Newest changes
 --------------
 
+4.0.0-next.13
+
+* Add extensible coin control on `send()` and related calls.
+  - Four optional hooks on `SendRequestOptionsI`: `coinSelection`,
+    `inputOrdering`, `outputOrdering`, `fee`. Each accepts a named
+    strategy or any user-written function matching its signature.
+  - Defaults preserve the existing pipeline behaviour 1:1, so callers
+    that don't pass any of the new options see no change.
+  - `import { selectLargestFirst, outputOrderBip69 } from "mainnet-js/coin-control";`
+
 4.0.0-next.12
 
 * Breaking (interface): `StorageProvider.deleteWallet(name)` is now part of
