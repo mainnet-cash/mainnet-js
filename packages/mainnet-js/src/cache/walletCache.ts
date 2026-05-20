@@ -20,13 +20,18 @@ import { WebStorageCache } from "./WebStorageCache.js";
 
 export const stringify = (_: any) =>
   JSON.stringify(_, (key, value) => {
-    if (key.includes("Key")) return binToHex(value);
+    if (key.includes("Key")) {
+      // Watching-only entries have `privateKey === undefined`; preserve that
+      // by emitting null rather than calling binToHex on undefined.
+      return value === undefined ? null : binToHex(value);
+    }
     return typeof value === "bigint" ? value.toString() + "n" : value;
   });
 export const parse = (data: string) =>
   JSON.parse(data, (key, value) => {
-    if (key.includes("Key") && typeof value === "string") {
-      return hexToBin(value);
+    if (key.includes("Key")) {
+      if (value === null) return undefined;
+      if (typeof value === "string") return hexToBin(value);
     }
 
     if (typeof value === "string" && /^\d+n$/.test(value)) {
@@ -41,8 +46,6 @@ export interface WalletCacheEntry {
   privateKey: Uint8Array | undefined;
   publicKey: Uint8Array;
   publicKeyHash: Uint8Array;
-  index: number;
-  change: boolean;
   status: string | null;
   utxos: Utxo[];
   rawHistory: TxI[];
@@ -60,7 +63,18 @@ export interface WalletCacheI extends WalletCache {
   init(): Promise<void>;
   persist(immediate?: boolean): Promise<void>;
   get(address: string): WalletCacheEntry | undefined;
-  getByIndex(addressIndex: number, change: boolean): WalletCacheEntry;
+  /**
+   * Conventional (branch × addressIndex) lookup using the standard
+   * `${branch}/${index}` derivation path.
+   */
+  getByIndex(addressIndex: number, branch: number): WalletCacheEntry;
+  /**
+   * Derive (or fetch from cache) the address at the given relative derivation
+   * path. The cache is policy-free -- the caller decides what path to ask
+   * for (e.g. a depth-4 wallet with a bare-index chain, or arbitrary integer
+   * branches).
+   */
+  getByPath(relativePath: string): WalletCacheEntry;
   setStatusAndUtxos(
     address: string,
     status: string | null,
@@ -95,8 +109,6 @@ export class SingleAddressWalletCache implements WalletCacheI {
       privateKey: undefined,
       publicKey: new Uint8Array(),
       publicKeyHash: new Uint8Array(),
-      index: 0,
-      change: false,
       status: null,
       utxos: [],
       rawHistory: [],
@@ -147,7 +159,11 @@ export class SingleAddressWalletCache implements WalletCacheI {
     return address === this.entry.address ? this.entry : undefined;
   }
 
-  public getByIndex(_index: number, _change: boolean) {
+  public getByIndex(_index: number, _branch: number) {
+    return this.entry;
+  }
+
+  public getByPath(_path: string) {
     return this.entry;
   }
 
@@ -170,13 +186,9 @@ export class SingleAddressWalletCache implements WalletCacheI {
 export class HDWalletCache implements WalletCacheI {
   private _storage: CacheProvider | undefined;
   private walletCache: Record<string, WalletCacheEntry> = {};
-  private indexCache: Record<
-    string,
-    {
-      index: number;
-      change: boolean;
-    }
-  > = {};
+  // Address -> relative derivation path. Used to find the cache key for a
+  // given address; independent of any branch / change-axis semantics.
+  private pathCache: Record<string, string> = {};
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
@@ -198,7 +210,7 @@ export class HDWalletCache implements WalletCacheI {
       try {
         const parsed = parse(data);
         this.walletCache = parsed.walletCache || {};
-        this.indexCache = parsed.indexCache || {};
+        this.pathCache = parsed.pathCache || {};
       } catch (e) {
         // ignore
       }
@@ -212,7 +224,7 @@ export class HDWalletCache implements WalletCacheI {
         `walletCache-${this.walletId}`,
         stringify({
           walletCache: this.walletCache,
-          indexCache: this.indexCache,
+          pathCache: this.pathCache,
         }),
       );
     if (immediate) {
@@ -226,13 +238,16 @@ export class HDWalletCache implements WalletCacheI {
     }
   }
 
-  public getByIndex(addressIndex: number, change: boolean) {
-    const id = `${this.walletId}-${addressIndex}-${change}`;
+  /**
+   * Derive (or fetch from cache) the address at the given relative derivation
+   * path. The cache is policy-free -- the caller decides what path to ask
+   * for (e.g. a depth-4 wallet with a bare-index chain, or arbitrary integer
+   * branches).
+   */
+  public getByPath(relativePath: string): WalletCacheEntry {
+    const id = `${this.walletId}-${relativePath}`;
     if (!this.walletCache[id]) {
-      const node = deriveHdPathRelative(
-        this.hdNode,
-        `${change ? 1 : 0}/${addressIndex}`,
-      );
+      const node = deriveHdPathRelative(this.hdNode, relativePath);
 
       const privateKey = "privateKey" in node ? node.privateKey : undefined;
       const publicKey =
@@ -264,18 +279,13 @@ export class HDWalletCache implements WalletCacheI {
         privateKey: privateKey,
         publicKey,
         publicKeyHash,
-        index: addressIndex,
-        change,
         status: null,
         utxos: [],
         rawHistory: [],
         lastConfirmedHeight: 0,
       };
 
-      this.indexCache[address] = {
-        index: addressIndex,
-        change,
-      };
+      this.pathCache[address] = relativePath;
 
       this.persist();
     }
@@ -283,12 +293,18 @@ export class HDWalletCache implements WalletCacheI {
     return this.walletCache[id];
   }
 
+  /**
+   * Conventional (branch × addressIndex) lookup. Thin wrapper around
+   * {@link getByPath} that uses the standard `${branch}/${index}` convention.
+   */
+  public getByIndex(addressIndex: number, branch: number): WalletCacheEntry {
+    return this.getByPath(`${branch}/${addressIndex}`);
+  }
+
   public get(address: string) {
-    const { index, change } = this.indexCache[address] || {};
-    if (index === undefined || change === undefined) {
-      return undefined;
-    }
-    return this.getByIndex(index, change);
+    const path = this.pathCache[address];
+    if (path === undefined) return undefined;
+    return this.walletCache[`${this.walletId}-${path}`];
   }
 
   public setStatusAndUtxos(
@@ -298,17 +314,14 @@ export class HDWalletCache implements WalletCacheI {
     rawHistory: TxI[],
     lastConfirmedHeight: number,
   ) {
-    const entry = this.get(address);
-    if (!entry) {
+    const path = this.pathCache[address];
+    if (path === undefined) {
       return;
     }
-
-    const { index, change } = this.indexCache[address] || {};
-    if (index === undefined || change === undefined) {
+    const key = `${this.walletId}-${path}`;
+    if (!this.walletCache[key]) {
       return;
     }
-
-    const key = `${this.walletId}-${index}-${change}`;
     this.walletCache[key].status = status;
     this.walletCache[key].utxos = utxos;
     this.walletCache[key].rawHistory = rawHistory;

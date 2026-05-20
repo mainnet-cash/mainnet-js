@@ -48,6 +48,220 @@ describe("HDWallet", () => {
     expect(walletSeed.getChangeAddress()).toBe(walletPub.getChangeAddress());
   });
 
+  it("should derive matching addresses from a depth-4 (change-level) wallet", async () => {
+    // A wallet rooted at the change branch (depth 4) reaches the same N-th
+    // address as the account wallet's deposit branch -- just by appending the
+    // index (no branch component).
+    const mnemonic =
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage";
+
+    const accountWallet = await HDWallet.fromSeed(mnemonic);
+    expect(accountWallet.singleBranch).toBe(false);
+    expect([...accountWallet.branches]).toEqual([0, 1]);
+
+    const singleBranchWallet = await HDWallet.fromSeed(
+      mnemonic,
+      "m/44'/0'/0'/0",
+    );
+    expect(singleBranchWallet.singleBranch).toBe(true);
+    expect([...singleBranchWallet.branches]).toEqual([0]);
+
+    for (const i of [0, 1, 2, 3, 4, 5]) {
+      expect(singleBranchWallet.getDepositAddress(i)).toBe(
+        accountWallet.getDepositAddress(i),
+      );
+      expect(singleBranchWallet.getTokenDepositAddress(i)).toBe(
+        accountWallet.getTokenDepositAddress(i),
+      );
+    }
+
+    // Change branch is unreachable from a depth-4 root; the wallet collapses
+    // change requests to the deposit branch.
+    expect(singleBranchWallet.getChangeAddress(0)).toBe(
+      singleBranchWallet.getDepositAddress(0),
+    );
+  });
+
+  it("should track arbitrary integer branches via the `branches` option", async () => {
+    const mnemonic =
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage";
+    const wallet = await Wallet.fromSeed(mnemonic);
+
+    // The static helpers don't expose `branches`; reach into initialize().
+    const w = new HDWallet();
+    await (w as any).initialize({
+      mnemonic,
+      branches: [0, 1, 7],
+    });
+
+    expect([...w.branches]).toEqual([0, 1, 7]);
+    // Branch 7 derives at m/44'/0'/0'/7/N -- distinct from branches 0/1.
+    const b0 = w.getAddressByBranch(0, 0);
+    const b1 = w.getAddressByBranch(1, 0);
+    const b7 = w.getAddressByBranch(7, 0);
+    expect(b0).not.toBe(b1);
+    expect(b0).not.toBe(b7);
+    expect(b1).not.toBe(b7);
+
+    // Deposit/change conveniences map to branches 0 and 1.
+    expect(w.getDepositAddress(0)).toBe(b0);
+    expect(w.getChangeAddress(0)).toBe(b1);
+
+    // Asking for an untracked branch throws.
+    expect(() => w.getAddressByBranch(99, 0)).toThrow(/not tracked/);
+
+    // The branch-0 address matches the standard single-key wallet derivation.
+    expect(w.getDepositAddress(0)).toBe(wallet.cashaddr);
+  });
+
+  it("rejects an empty branches list", async () => {
+    const w = new HDWallet();
+    await expect((w as any).initialize({ branches: [] })).rejects.toThrow(
+      /at least one/i,
+    );
+  });
+
+  it("rejects construction from a depth-5 (address-level) node", async () => {
+    // m/44'/0'/0'/0/0 is depth 5; the node can't derive further children.
+    await expect(
+      HDWallet.fromSeed(
+        "divide battle bulb improve hockey favorite charge save merit fatal frog cage",
+        "m/44'/0'/0'/0/0",
+      ),
+    ).rejects.toThrow(/too deep/i);
+  });
+
+  it("getChangeAddress falls back to deposit when branch 1 is not tracked", async () => {
+    const mnemonic =
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage";
+    const w = new HDWallet();
+    await (w as any).initialize({ mnemonic, branches: [0, 7] });
+
+    expect(w.getChangeAddress(0)).toBe(w.getDepositAddress(0));
+    expect(w.getChangeTokenAddress(0)).toBe(w.getTokenDepositAddress(0));
+  });
+
+  it("seeds per-branch indices from the `indices` constructor option", async () => {
+    const mnemonic =
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage";
+    const w = new HDWallet();
+    await (w as any).initialize({
+      mnemonic,
+      branches: [0, 1, 7],
+      indices: { 0: 5, 7: 3 },
+    });
+
+    expect(w.indices.get(0)).toBe(5);
+    expect(w.indices.get(1)).toBe(0); // not specified -- defaults to 0
+    expect(w.indices.get(7)).toBe(3);
+  });
+
+  it("getTokenAddressByBranch yields token-prefixed addresses for arbitrary branches", async () => {
+    const mnemonic =
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage";
+    const w = new HDWallet();
+    await (w as any).initialize({ mnemonic, branches: [0, 1, 7] });
+
+    const plain = w.getAddressByBranch(7, 0);
+    const token = w.getTokenAddressByBranch(7, 0);
+    expect(token).not.toBe(plain);
+    // P2PKH uses the 'q' prefix; the token-aware variant uses 'z'.
+    expect(plain.startsWith("bitcoincash:q")).toBe(true);
+    expect(token.startsWith("bitcoincash:z")).toBe(true);
+    // Untracked branch also throws on the token-address variant.
+    expect(() => w.getTokenAddressByBranch(99, 0)).toThrow(/not tracked/);
+  });
+
+  it("toDbString for a depth-4 wallet round-trips into a single-branch wallet", async () => {
+    const mnemonic =
+      "divide battle bulb improve hockey favorite charge save merit fatal frog cage";
+    const original = await HDWallet.fromSeed(mnemonic, "m/44'/0'/0'/0");
+    expect(original.singleBranch).toBe(true);
+
+    const dbString = original.toDbString();
+    // hd:mainnet:<mnemonic>:<derivation>:<depositIdx>:<changeIdx>
+    const parts = dbString.split(":");
+    expect(parts[3]).toBe("m/44'/0'/0'/0");
+
+    const restored = await HDWallet.fromId(dbString);
+    expect(restored.singleBranch).toBe(true);
+    expect([...restored.branches]).toEqual([0]);
+    expect(restored.getDepositAddress(0)).toBe(original.getDepositAddress(0));
+  });
+
+  it("end-to-end: tracks a [0, 1, 7] wallet and filters utxos by branch", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
+    );
+
+    const w = new RegTestHDWallet();
+    await (w as any).initialize({ branches: [0, 1, 7] });
+
+    expect([...w.branches]).toEqual([0, 1, 7]);
+    expect(w.indices.get(7)).toBe(0);
+
+    // Fund the branch-7 address at index 0.
+    await fundingWallet.send({
+      cashaddr: w.getAddressByBranch(7, 0),
+      value: 50_000n,
+    });
+    await w.waitForUpdate({ indices: { 7: 1 } });
+    expect(w.indices.get(7)).toBe(1);
+
+    // Default getUtxos returns funds from every tracked branch.
+    const all = await w.getUtxos();
+    expect(all.some((u) => u.satoshis === 50_000n)).toBe(true);
+
+    // Filter to branch 7 only.
+    const justSeven = await w.getUtxos({ branches: [7] });
+    expect(justSeven.length).toBe(1);
+    expect(justSeven[0].satoshis).toBe(50_000n);
+
+    // Branches 0 and 1 are empty.
+    expect((await w.getUtxos({ branches: [0] })).length).toBe(0);
+    expect((await w.getUtxos({ branches: [1] })).length).toBe(0);
+
+    // Balance filtering matches.
+    expect(await w.getBalance({ branches: [7] })).toBe(50_000n);
+    expect(await w.getBalance({ branches: [0, 1] })).toBe(0n);
+
+    // Empty filter throws.
+    await expect(w.getUtxos({ branches: [] })).rejects.toThrow(/empty/i);
+
+    // Untracked branch throws.
+    await expect(w.getUtxos({ branches: [99] })).rejects.toThrow(
+      /not tracked/i,
+    );
+  });
+
+  it("end-to-end: a depth-4 wallet advances its single branch on receipt", async () => {
+    const fundingWallet = await RegTestWallet.fromId(
+      "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
+    );
+
+    const seedWallet = await RegTestHDWallet.newRandom();
+    const w = await RegTestHDWallet.fromSeed(
+      seedWallet.mnemonic!,
+      "m/44'/0'/0'/0",
+    );
+    expect(w.singleBranch).toBe(true);
+    expect([...w.branches]).toEqual([0]);
+
+    await fundingWallet.send({
+      cashaddr: w.getDepositAddress(0),
+      value: 30_000n,
+    });
+    await w.waitForUpdate({ depositIndex: 1 });
+
+    expect(w.indices.get(0)).toBe(1);
+    expect(await w.getBalance()).toBe(30_000n);
+
+    // Branch 1 isn't tracked on a depth-4 wallet; filtering rejects it.
+    await expect(w.getBalance({ branches: [1] })).rejects.toThrow(
+      /not tracked/i,
+    );
+  });
+
   it("should serialize", async () => {
     const wallet = await HDWallet.fromSeed(
       "divide battle bulb improve hockey favorite charge save merit fatal frog cage",
@@ -112,7 +326,7 @@ describe("HDWallet", () => {
 
   it("deposit indexes", async () => {
     const hdWallet = await RegTestHDWallet.newRandom();
-    expect(hdWallet.depositIndex).toBe(0);
+    expect(hdWallet.indices.get(0)!).toBe(0);
 
     const fundingWallet = await RegTestWallet.fromId(
       "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
@@ -123,31 +337,31 @@ describe("HDWallet", () => {
       value: 100000n,
     });
     await hdWallet.waitForUpdate({ depositIndex: 1 });
-    expect(hdWallet.depositIndex).toBe(1);
+    expect(hdWallet.indices.get(0)!).toBe(1);
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(1),
       value: 100000n,
     });
     await hdWallet.waitForUpdate({ depositIndex: 2 });
-    expect(hdWallet.depositIndex).toBe(2);
+    expect(hdWallet.indices.get(0)!).toBe(2);
 
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(4),
       value: 100000n,
     });
     await hdWallet.waitForUpdate({ depositIndex: 5 });
-    expect(hdWallet.depositIndex).toBe(5);
+    expect(hdWallet.indices.get(0)!).toBe(5);
 
     // beyond gap size, should not update index
     await fundingWallet.send({
       cashaddr: hdWallet.getDepositAddress(30),
       value: 100000n,
     });
-    expect(hdWallet.depositIndex).toBe(5);
+    expect(hdWallet.indices.get(0)!).toBe(5);
 
     await hdWallet.scanMoreAddresses(30);
-    expect(hdWallet.depositIndex).toBe(31);
+    expect(hdWallet.indices.get(0)!).toBe(31);
   });
 
   it("should scan beyond gap to find real deposit index", async () => {
@@ -177,7 +391,7 @@ describe("HDWallet", () => {
     );
     await restoredWallet.watchPromise;
 
-    expect(restoredWallet.depositIndex).toBe(21);
+    expect(restoredWallet.indices.get(0)!).toBe(21);
   });
 
   it("changeIndex updates when spending", async () => {
@@ -187,8 +401,8 @@ describe("HDWallet", () => {
     const hdWallet = await RegTestHDWallet.newRandom();
     const bob = await RegTestWallet.newRandom();
 
-    expect(hdWallet.depositIndex).toBe(0);
-    expect(hdWallet.changeIndex).toBe(0);
+    expect(hdWallet.indices.get(0)!).toBe(0);
+    expect(hdWallet.indices.get(1)!).toBe(0);
 
     // fund deposit address 0
     await fundingWallet.send({
@@ -196,8 +410,8 @@ describe("HDWallet", () => {
       value: 100000n,
     });
     await hdWallet.waitForUpdate({ depositIndex: 1 });
-    expect(hdWallet.depositIndex).toBe(1);
-    expect(hdWallet.changeIndex).toBe(0);
+    expect(hdWallet.indices.get(0)!).toBe(1);
+    expect(hdWallet.indices.get(1)!).toBe(0);
 
     // spend, which creates change on change address 0
     await hdWallet.send({
@@ -205,7 +419,7 @@ describe("HDWallet", () => {
       value: 50000n,
     });
     await hdWallet.waitForUpdate({ changeIndex: 1 });
-    expect(hdWallet.changeIndex).toBe(1);
+    expect(hdWallet.indices.get(1)!).toBe(1);
 
     // fund and spend again, change goes to change address 1
     await fundingWallet.send({
@@ -218,7 +432,7 @@ describe("HDWallet", () => {
       value: 50000n,
     });
     await hdWallet.waitForUpdate({ changeIndex: 2 });
-    expect(hdWallet.changeIndex).toBe(2);
+    expect(hdWallet.indices.get(1)!).toBe(2);
 
     // Restore wallet from same seed and verify depositIndex is correct
     const restoredWallet = await RegTestHDWallet.fromSeed(
@@ -227,8 +441,8 @@ describe("HDWallet", () => {
     );
     await restoredWallet.watchPromise;
 
-    expect(restoredWallet.depositIndex).toBe(hdWallet.depositIndex);
-    expect(restoredWallet.changeIndex).toBe(hdWallet.changeIndex);
+    expect(restoredWallet.indices.get(0)!).toBe(hdWallet.indices.get(0)!);
+    expect(restoredWallet.indices.get(1)!).toBe(hdWallet.indices.get(1)!);
   });
 
   it("hasAddress should recognize wallet addresses", async () => {
@@ -330,8 +544,8 @@ describe("HDWallet", () => {
     expect(hdWallet.getChangeAddress()).not.toBe(hdWallet.getChangeAddress(0));
     expect(hdWallet.getChangeAddress()).toBe(hdWallet.getChangeAddress(1));
 
-    expect(hdWallet.depositIndex).toBe(2);
-    expect(hdWallet.changeIndex).toBe(1);
+    expect(hdWallet.indices.get(0)!).toBe(2);
+    expect(hdWallet.indices.get(1)!).toBe(1);
 
     expect(await bob.getBalance()).toBe(150000n);
 
@@ -558,9 +772,9 @@ describe("HDWallet", () => {
     });
     await hdWallet.waitForUpdate({ depositIndex: 2 });
 
-    // Check depositRawHistory arrays are populated
-    expect(hdWallet.depositRawHistory[0].length).toBe(1);
-    expect(hdWallet.depositRawHistory[1].length).toBe(1);
+    // Check branch-0 per-address raw-history arrays are populated.
+    expect(hdWallet.rawHistory.get(0)![0].length).toBe(1);
+    expect(hdWallet.rawHistory.get(0)![1].length).toBe(1);
 
     // getRawHistory should return deduplicated history from cache
     const rawHistory = await hdWallet.getRawHistory();
@@ -617,7 +831,7 @@ describe("HDWallet", () => {
       cashaddr: hdWallet.getDepositAddress(0),
       value: 60000n,
     });
-    while (hdWallet.depositRawHistory[0].length < 2)
+    while (hdWallet.rawHistory.get(0)![0].length < 2)
       await new Promise((r) => setTimeout(r, 50));
 
     // Check history accumulated correctly
@@ -664,13 +878,13 @@ describe("HDWallet", () => {
       "wif:regtest:cNfsPtqN2bMRS7vH5qd8tR8GMvgXyL5BjnGAKgZ8DYEiCrCCQcP6",
     );
     const hdWallet = await RegTestHDWallet.newRandom();
-    expect(hdWallet.depositIndex).toBe(0);
+    expect(hdWallet.indices.get(0)!).toBe(0);
 
     // No transaction sent - idle timer should resolve without hanging
     await hdWallet.waitForUpdate({ depositIndex: 1 });
 
     // depositIndex is still 0 because no funds arrived
-    expect(hdWallet.depositIndex).toBe(0);
+    expect(hdWallet.indices.get(0)!).toBe(0);
 
     // No leftover watchers
     expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
@@ -682,7 +896,7 @@ describe("HDWallet", () => {
     });
     await hdWallet.waitForUpdate();
 
-    expect(hdWallet.depositIndex).toBe(1);
+    expect(hdWallet.indices.get(0)!).toBe(1);
     expect((hdWallet as any).walletWatchCallbacks.length).toBe(0);
   });
 
@@ -1009,7 +1223,7 @@ describe("HDWallet", () => {
     await delay(1000);
 
     // depositIndex should be 2
-    expect(hdWallet.depositIndex).toBe(2);
+    expect(hdWallet.indices.get(0)!).toBe(2);
 
     // Set up watchTransactionHashes, collect all reported hashes
     const reportedHashes: string[] = [];
@@ -1049,8 +1263,8 @@ describe("HDWallet", () => {
     await hdWallet.watchPromise;
 
     // Initially: depositIndex=0, watched addresses 0..(GAP_SIZE-1)
-    expect(hdWallet.depositIndex).toBe(0);
-    const initialWatched = (hdWallet as any).depositStatuses.length;
+    expect(hdWallet.indices.get(0)!).toBe(0);
+    const initialWatched = (hdWallet as any).statuses.get(0)!.length;
     expect(initialWatched).toBe(GAP_SIZE);
 
     // Fund an address near the edge of the gap
@@ -1065,14 +1279,14 @@ describe("HDWallet", () => {
     await delay(1000);
 
     // depositIndex should have advanced
-    expect(hdWallet.depositIndex).toBe(edgeIndex + 1);
+    expect(hdWallet.indices.get(0)!).toBe(edgeIndex + 1);
 
     // The watched range should have extended to maintain the gap
-    const newWatched = (hdWallet as any).depositStatuses.length;
-    expect(newWatched).toBeGreaterThanOrEqual(hdWallet.depositIndex + GAP_SIZE);
+    const newWatched = (hdWallet as any).statuses.get(0)!.length;
+    expect(newWatched).toBeGreaterThanOrEqual(hdWallet.indices.get(0)! + GAP_SIZE);
 
     // Verify the new addresses are actually subscribed (watchCancels populated)
-    const watchCancels = (hdWallet as any).depositWatchCancels;
+    const watchCancels = (hdWallet as any).watchCancels.get(0)!;
     for (let i = initialWatched; i < newWatched; i++) {
       expect(watchCancels[i]).toBeDefined();
     }
@@ -1086,12 +1300,12 @@ describe("HDWallet", () => {
     await hdWallet.waitForUpdate({ depositIndex: newEdge + 1 });
     await delay(1000);
 
-    expect(hdWallet.depositIndex).toBe(newEdge + 1);
+    expect(hdWallet.indices.get(0)!).toBe(newEdge + 1);
 
     // Gap should still be maintained after the second extension
-    const finalWatched = (hdWallet as any).depositStatuses.length;
+    const finalWatched = (hdWallet as any).statuses.get(0)!.length;
     expect(finalWatched).toBeGreaterThanOrEqual(
-      hdWallet.depositIndex + GAP_SIZE,
+      hdWallet.indices.get(0)! + GAP_SIZE,
     );
   });
 });
