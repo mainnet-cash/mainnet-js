@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@mainnet-cash/indexeddb-storage",
-  "version": "4.0.0-next.13",
+  "version": "4.0.0-next.14",
   "module": "dist/module/index.js",
   "types": "dist/module/index.d.ts",
   "exports": {
@@ -14,7 +14,7 @@
   "license": "MIT",
   "author": "readcash",
   "dependencies": {
-    "mainnet-js": "4.0.0-next.13"
+    "mainnet-js": "4.0.0-next.14"
   },
   "devDependencies": {
     "fake-indexeddb": "^3.1.2"

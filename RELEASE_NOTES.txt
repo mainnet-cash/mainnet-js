@@ -1,6 +1,40 @@
 Newest changes
 --------------
 
+4.0.0-next.14
+
+* Generalise HDWallet to track an arbitrary list of integer branches.
+  - New `HDWalletOptions.branches?: number[]` (default `[0, 1]`, error
+    on empty list). A wallet with `branches: [0, 1, 7]` derives, watches
+    and reports UTXOs across three branches at `${branch}/${index}`.
+  - New `HDWallet.getAddressByBranch(branch, index)` /
+    `getTokenAddressByBranch(branch, index)`. `getDepositAddress` and
+    `getChangeAddress` are kept as branch-0 / branch-1 aliases; if the
+    wallet does not track branch 1, change accessors fall back to deposit.
+  - `getUtxos(opts?)`, `getBalance(opts?)` and `getRawHistory(from, to, opts?)`
+    accept an optional `{ branches?: number[] }` filter. Default = every
+    tracked branch. Empty array or untracked branches throw.
+  - `waitForUpdate` accepts a generalised `indices: Record<number, number>`
+    targets map alongside the back-compat `depositIndex` / `changeIndex`.
+
+* Breaking: `HDWallet` per-branch state moved from named properties to
+  maps. `depositIndex` / `changeIndex` -> `indices: Map<number, number>`;
+  same shape for `statuses`, `utxos`, `rawHistory`, `watchCancels`. Read
+  branch N's state with `wallet.indices.get(N)` etc.
+
+* Support single-branch HDWallets rooted at a BIP-44 change-level node
+  (depth 4, e.g. `m/44'/0'/0'/0`). Fixes derivation when `fromXPub` /
+  `fromSeed` is given a depth-4 node.
+  - `HDWallet.singleBranch` flags the condition. The wallet derives by
+    bare index, skips change-branch watching, and collapses
+    `getChangeAddress` to the deposit branch.
+  - Construction throws for nodes deeper than depth 4 (an address-level
+    node cannot derive further children).
+
+* Breaking (interface): `WalletCacheI.getByPath(relativePath)` is now part
+  of the abstract interface and is the primary derivation method. Custom
+  cache implementations must add `getByPath`.
+
 4.0.0-next.13
 
 * Add extensible coin control on `send()` and related calls.
