@@ -126,11 +126,7 @@ describe("HDWalletCache", () => {
       const a7 = writer.getByPath("7/5").address;
       await writer.persist(true);
 
-      const reader = new HDWalletCache(
-        "wallet-persist",
-        node,
-        "bitcoincash",
-      );
+      const reader = new HDWalletCache("wallet-persist", node, "bitcoincash");
       await reader.init();
 
       // Reverse-lookup works for every path that was previously written.

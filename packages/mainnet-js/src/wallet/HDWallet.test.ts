@@ -1283,7 +1283,9 @@ describe("HDWallet", () => {
 
     // The watched range should have extended to maintain the gap
     const newWatched = (hdWallet as any).statuses.get(0)!.length;
-    expect(newWatched).toBeGreaterThanOrEqual(hdWallet.indices.get(0)! + GAP_SIZE);
+    expect(newWatched).toBeGreaterThanOrEqual(
+      hdWallet.indices.get(0)! + GAP_SIZE,
+    );
 
     // Verify the new addresses are actually subscribed (watchCancels populated)
     const watchCancels = (hdWallet as any).watchCancels.get(0)!;

@@ -350,10 +350,7 @@ export class HDWallet extends BaseWallet {
   }
 
   /// Watch addresses of a specific branch for activity
-  private async watchBranch(
-    branch: number,
-    gapSize: number,
-  ): Promise<number> {
+  private async watchBranch(branch: number, gapSize: number): Promise<number> {
     const statuses = this.statuses.get(branch)!;
     const utxosArray = this.utxos.get(branch)!;
     const historyArray = this.rawHistory.get(branch)!;
