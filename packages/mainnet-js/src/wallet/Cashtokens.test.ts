@@ -174,7 +174,8 @@ describe(`Test cashtokens`, () => {
       cashaddr: alice.cashaddr!,
       nft: {
         capability: NFTCapability.mutable,
-        commitment: "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd",
+        commitment:
+          "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd",
       },
     });
 
