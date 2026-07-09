@@ -1,6 +1,10 @@
 Newest changes
 --------------
 
+3.1.9 
+
+* No change. Re-deployment of previous release.
+
 3.1.8 
 
 * Allow longer NFT commitment length
