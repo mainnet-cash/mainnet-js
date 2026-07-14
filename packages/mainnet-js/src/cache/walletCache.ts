@@ -164,9 +164,13 @@ export class PersistentWalletCache implements WalletCacheI {
   public getByIndex(addressIndex: number, change: boolean) {
     const id = `${this.walletId}-${addressIndex}-${change}`;
     if (!this.walletCache[id]) {
+      let relativePath = `${change ? 1 : 0}/${addressIndex}`
+      if (this.hdNode.depth === 4) {
+        relativePath = `${addressIndex}`
+      }
       const node = deriveHdPathRelative(
         this.hdNode,
-        `${change ? 1 : 0}/${addressIndex}`
+        relativePath
       );
 
       const privateKey = "privateKey" in node ? node.privateKey : undefined;
